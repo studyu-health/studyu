@@ -1,0 +1,39 @@
+{
+  "id": "TASK-020",
+  "title": "PrimaryButton base widget ElevatedButton -> FilledButton",
+  "scope": "designer",
+  "kind": "component",
+  "status": "pending",
+  "priority": 4,
+  "depends_on": [
+    "TASK-001"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/common_views/primary_button.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/common_views/secondary_button.dart",
+    "app/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Base widget is `FilledButton`; public API (text, icon, loading, disabled tooltip) unchanged",
+    "Spinner color comes from theme (`colorScheme.onPrimary`), not `Colors.white`",
+    "All existing callers compile unchanged"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + tests pass + auth screen smoke note (primary CTA appearance)",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/buttons.md",
+    ".agents/skills/studyu-material3/references/flutter/material-mapping.md",
+    ".agents/skills/studyu-material3/references/studyu/existing-patterns.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 5, D3. One file, broad inherited effect \u2014 verify a form screen and a dialog visually.",
+  "blocked_reason": null
+}

@@ -1,0 +1,37 @@
+{
+  "id": "TASK-063",
+  "title": "designer_v2 TextTheme: migrate to M3 2021 term set",
+  "scope": "designer",
+  "kind": "theme",
+  "status": "pending",
+  "priority": 13,
+  "depends_on": [
+    "TASK-030"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/theme.dart"
+  ],
+  "do_not_touch": [
+    "app/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "TODO at theme.dart:337 resolved: textTheme uses M3 type scale roles/sizes/weights",
+    "Downstream visual regressions surveyed on auth + dashboard + one form; intentional size overrides documented in DECISIONS.md"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + tests pass + multi-screen smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/typography.md",
+    ".agents/skills/studyu-material3/references/material/tokens.md",
+    ".agents/skills/studyu-material3/references/flutter/theming.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 4, D10. Own PR; do not bundle screen fixes.",
+  "blocked_reason": null
+}

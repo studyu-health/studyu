@@ -1,0 +1,37 @@
+{
+  "id": "TASK-048",
+  "title": "Screen migration: designer interventions + schedule forms",
+  "scope": "designer",
+  "kind": "component",
+  "status": "pending",
+  "priority": 10,
+  "depends_on": [
+    "TASK-046"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/design/interventions/intervention_form_view.dart",
+    "designer_v2/lib/features/design/interventions/intervention_task_form_view.dart",
+    "designer_v2/lib/features/design/interventions/interventions_form_view.dart",
+    "designer_v2/lib/features/design/interventions/study_schedule_form_view.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/common_views/form_table_layout.dart"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed (non-Table drift only)"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/input.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "",
+  "blocked_reason": null
+}

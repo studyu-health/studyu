@@ -1,0 +1,35 @@
+{
+  "id": "TASK-001",
+  "title": "Verify migration toolchain prerequisites",
+  "scope": "shared",
+  "kind": "lint",
+  "status": "pending",
+  "priority": 1,
+  "depends_on": [],
+  "files_to_touch": [
+    "spec/m3/**"
+  ],
+  "do_not_touch": [
+    "app/lib/**",
+    "designer_v2/lib/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "`command -v rtk` result recorded in ACTIVITY.md",
+    "`fvm dart --version` works from repo root",
+    "`fvm exec melos --version` works",
+    "scripts/pre-commit-check passes on a clean tree (baseline)"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "command -v rtk",
+    "fvm dart --version",
+    "fvm exec melos --version"
+  ],
+  "evidence_required": "ACTIVITY.md entry with toolchain versions and baseline check result",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md"
+  ],
+  "notes": "Gate task: confirms the runner commands work before any UI change. No code change.",
+  "blocked_reason": null
+}

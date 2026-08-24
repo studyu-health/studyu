@@ -1,0 +1,38 @@
+{
+  "id": "TASK-042",
+  "title": "Screen migration: app dashboard + tasks",
+  "scope": "app",
+  "kind": "component",
+  "status": "pending",
+  "priority": 10,
+  "depends_on": [
+    "TASK-041"
+  ],
+  "files_to_touch": [
+    "app/lib/screens/study/dashboard/dashboard.dart",
+    "app/lib/screens/study/dashboard/contact_tab/contact_screen.dart",
+    "app/lib/screens/study/tasks/task_screen.dart",
+    "app/lib/screens/study/tasks/intervention/checkmark_task_widget.dart",
+    "app/lib/screens/study/tasks/intervention/video_task.dart",
+    "app/lib/screens/study/tasks/observation/questionnaire_task_widget.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed; CupertinoAlertDialog notification usage in util/notifications.dart flagged but NOT changed (separate decision)"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze app",
+    "cd app && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + per-screen smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/navigation.md",
+    ".agents/skills/studyu-material3/references/material/layout.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "video_task.dart ElevatedButton audited in TASK-034 \u2014 here only residual drift.",
+  "blocked_reason": null
+}

@@ -1,0 +1,35 @@
+{
+  "id": "TASK-031",
+  "title": "designer_v2: navigation theme legacy -> NavigationBar",
+  "scope": "designer",
+  "kind": "navigation",
+  "status": "pending",
+  "priority": 7,
+  "depends_on": [
+    "TASK-030"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/theme.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "`bottomNavigationBarTheme` (theme.dart:258-267) replaced by `NavigationBarThemeData` with equivalent colors/elevation",
+    "Empty `NavigationRailThemeData()` gets deliberate values or a documented const",
+    "No widget call sites exist \u2014 theme-only change (verified in CATALOG.md)"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + tests pass",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/navigation.md",
+    ".agents/skills/studyu-material3/references/flutter/material-mapping.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 6, D9.",
+  "blocked_reason": null
+}

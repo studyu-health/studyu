@@ -1,0 +1,40 @@
+{
+  "id": "TASK-023",
+  "title": "Auth form spacing on tokens/8dp grid",
+  "scope": "designer",
+  "kind": "spacing",
+  "status": "pending",
+  "priority": 5,
+  "depends_on": [
+    "TASK-002"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/auth/login_form_view.dart",
+    "designer_v2/lib/features/auth/signup_form_view.dart",
+    "designer_v2/lib/features/auth/password_forgot_form_view.dart",
+    "designer_v2/lib/features/auth/password_recovery_form_view.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/theme.dart"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "No `SizedBox(height: 4.0)` between fields; inter-field gaps >= 8 on the 4/8 grid",
+    "Spacing uses the constants from TASK-002 \u2014 no new magic literals",
+    "Existing 24/12 rhythm preserved where it matches the established auth layout"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2"
+  ],
+  "evidence_required": "analyzer clean + 4-screen smoke note",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/foundations.md",
+    ".agents/skills/studyu-material3/references/material/layout.md",
+    ".agents/skills/studyu-material3/references/flutter/layout-mapping.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 1 (auth subset only \u2014 rest of app handled in Phase 4).",
+  "blocked_reason": null
+}

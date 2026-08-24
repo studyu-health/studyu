@@ -1,0 +1,38 @@
+{
+  "id": "TASK-070",
+  "title": "studyu_lints warning-level plugin: no_raw_colors + no_inline_text_style",
+  "scope": "shared",
+  "kind": "lint",
+  "status": "pending",
+  "priority": 5,
+  "depends_on": [
+    "TASK-001"
+  ],
+  "files_to_touch": [
+    "designer_v2/studyu_lints/**",
+    "app/pubspec.yaml",
+    "app/analysis_options.yaml",
+    "designer_v2/pubspec.yaml",
+    "designer_v2/analysis_options.yaml"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Plugin compiles and emits warnings (not errors) for raw Colors.* and inline fontSize outside theme files",
+    "scripts/pre-commit-check still passes with warnings present",
+    "Rules match references/studyu/lints.md spec"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "fvm dart analyze app"
+  ],
+  "evidence_required": "analyze shows warnings only; pre-commit passes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/studyu/lints.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Guardrail track; runs parallel to Phases 1-2. Keep warning-level per D8.",
+  "blocked_reason": null
+}

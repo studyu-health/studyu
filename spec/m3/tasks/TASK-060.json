@@ -1,0 +1,40 @@
+{
+  "id": "TASK-060",
+  "title": "FormTableLayout -> labeled Column: auth + settings screens",
+  "scope": "designer",
+  "kind": "a11y",
+  "status": "pending",
+  "priority": 12,
+  "depends_on": [
+    "TASK-050"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/common_views/form_table_layout.dart",
+    "designer_v2/lib/features/auth/login_form_view.dart",
+    "designer_v2/lib/features/auth/signup_form_view.dart",
+    "designer_v2/lib/features/auth/password_forgot_form_view.dart",
+    "designer_v2/lib/features/auth/password_recovery_form_view.dart",
+    "designer_v2/lib/features/study/settings/study_settings_dialog.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Listed screens render forms as labeled columns (or a new shared non-Table layout) \u2014 no `Table` semantics",
+    "Field labels hit-test to their fields; a11y verified",
+    "form_table_layout.dart kept (other consumers remain) but deprecated with a doc comment"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + tests pass + per-screen smoke notes incl. screen reader/focus note",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/input.md",
+    ".agents/skills/studyu-material3/references/flutter/accessibility-mapping.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 11, D7, first slice (5 of 27 consumers). A11y is the driver \u2014 verify focus order.",
+  "blocked_reason": null
+}

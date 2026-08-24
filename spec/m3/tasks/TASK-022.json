@@ -1,0 +1,37 @@
+{
+  "id": "TASK-022",
+  "title": "Auth divider: remove per-instance Divider(height: 1)",
+  "scope": "designer",
+  "kind": "component",
+  "status": "pending",
+  "priority": 5,
+  "depends_on": [
+    "TASK-001"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/auth/login_form_view.dart",
+    "designer_v2/lib/features/auth/signup_form_view.dart",
+    "designer_v2/lib/features/auth/password_forgot_form_view.dart",
+    "designer_v2/lib/features/auth/password_recovery_form_view.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/theme.dart"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "No `Divider(height: 1)` remains in the four auth forms; dividers use theme defaults",
+    "Auth form visual structure from existing-patterns.md (field/CTA/divider/switch) preserved"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2"
+  ],
+  "evidence_required": "analyzer clean + 4-screen smoke note",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/containment.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 7. If theme divider padding looks wrong, that is a separate theme task \u2014 do not bundle.",
+  "blocked_reason": null
+}

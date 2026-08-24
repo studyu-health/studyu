@@ -1,0 +1,34 @@
+{
+  "id": "TASK-062",
+  "title": "FormTableLayout migration: remaining consumers + widget removal",
+  "scope": "designer",
+  "kind": "a11y",
+  "status": "pending",
+  "priority": 13,
+  "depends_on": [
+    "TASK-061"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/common_views/form_table_layout.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "All 27 original consumers migrated (list from CATALOG.md re-verified with `rg -l FormTableLayout`)",
+    "form_table_layout.dart deleted once consumer count is 0",
+    "No analyzer references remain"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test",
+    "rg -l FormTableLayout designer_v2 app"
+  ],
+  "evidence_required": "rg returns 0 consumers; analyzer clean; tests pass",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Final slice; re-run inventory first and extend files_to_touch as needed (allowed exception).",
+  "blocked_reason": null
+}

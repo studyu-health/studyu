@@ -1,0 +1,37 @@
+{
+  "id": "TASK-011",
+  "title": "Distinct labels for forgot-send vs recovery-submit",
+  "scope": "designer",
+  "kind": "wording",
+  "status": "pending",
+  "priority": 3,
+  "depends_on": [
+    "TASK-010"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/localization/app_localizations_en.dart",
+    "designer_v2/lib/localization/app_localizations_de.dart",
+    "designer_v2/lib/features/auth/password_forgot_form_view.dart",
+    "designer_v2/lib/features/auth/password_recovery_form_view.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Forgot flow submit uses a distinct label (e.g. 'Send reset link') per D2",
+    "Recovery flow submit keeps 'Reset password'",
+    "Both locales updated; no other flows change"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean; smoke note of both screens' primary CTA labels",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/buttons.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 12 label collision. Depends on TASK-010 to avoid l10n merge churn.",
+  "blocked_reason": null
+}

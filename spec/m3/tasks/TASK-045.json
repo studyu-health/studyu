@@ -1,0 +1,37 @@
+{
+  "id": "TASK-045",
+  "title": "Screen migration: app onboarding leftovers + debug screen",
+  "scope": "app",
+  "kind": "component",
+  "status": "pending",
+  "priority": 11,
+  "depends_on": [
+    "TASK-044"
+  ],
+  "files_to_touch": [
+    "app/lib/screens/app_onboarding/loading_screen.dart",
+    "app/lib/screens/app_onboarding/app_outdated_screen.dart",
+    "app/lib/screens/app_onboarding/study_unavailable_screen.dart",
+    "app/lib/screens/app_onboarding/study_switch_dialogs.dart",
+    "app/lib/util/debug_screen.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed (debug screen best-effort, noted)"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze app",
+    "cd app && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/layout.md",
+    ".agents/skills/studyu-material3/references/material/color.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "",
+  "blocked_reason": null
+}

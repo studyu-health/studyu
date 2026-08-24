@@ -1,0 +1,42 @@
+{
+  "id": "TASK-044",
+  "title": "Screen migration: app questionnaire widgets",
+  "scope": "app",
+  "kind": "component",
+  "status": "pending",
+  "priority": 10,
+  "depends_on": [
+    "TASK-043"
+  ],
+  "files_to_touch": [
+    "app/lib/widgets/questionnaire/custom_slider.dart",
+    "app/lib/widgets/questionnaire/questions/scale_question_widget.dart",
+    "app/lib/widgets/questionnaire/questions/choice_question_widget.dart",
+    "app/lib/widgets/questionnaire/questions/free_text_question_widget.dart",
+    "app/lib/widgets/questionnaire/questions/pain_question_widget.dart",
+    "app/lib/widgets/questionnaire/audio_recording_question_widget.dart",
+    "app/lib/widgets/questionnaire/image_capturing_question_widget.dart",
+    "app/lib/widgets/questionnaire/pain_selection/body_part_selector.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed; SliderTheme raw alpha colors mapped to colorScheme roles",
+    "Touch targets for selectable/body-part tap areas verified >= 44-48dp or flagged"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze app",
+    "cd app && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + questionnaire flow smoke note",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/input.md",
+    ".agents/skills/studyu-material3/references/material/accessibility.md",
+    ".agents/skills/studyu-material3/references/flutter/accessibility-mapping.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Highest a11y-risk app task \u2014 check semantics carefully.",
+  "blocked_reason": null
+}

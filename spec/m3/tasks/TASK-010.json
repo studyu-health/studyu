@@ -1,0 +1,39 @@
+{
+  "id": "TASK-010",
+  "title": "Unify auth account-switch wording (en+de)",
+  "scope": "designer",
+  "kind": "wording",
+  "status": "pending",
+  "priority": 3,
+  "depends_on": [
+    "TASK-001"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/localization/app_localizations_en.dart",
+    "designer_v2/lib/localization/app_localizations_de.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/features/auth/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Login switch: description + `link_signup` read consistently per D2",
+    "Signup switch: `link_login` = 'Sign in' per D2",
+    "Forgot/recovery switch lines use 'Back to sign in' phrasing",
+    "Noun settled to 'account' in auth copy (D1), en + de both",
+    "No code files touched \u2014 l10n values only"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + tests pass; smoke note listing the 4 auth screens' switch-line strings",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/interaction.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 12, zero code risk. If l10n files are generated, regenerate per repo workflow and include generated files.",
+  "blocked_reason": null
+}

@@ -1,0 +1,45 @@
+{
+  "id": "TASK-040",
+  "title": "Screen migration: app onboarding group",
+  "scope": "app",
+  "kind": "component",
+  "status": "pending",
+  "priority": 9,
+  "depends_on": [
+    "TASK-033",
+    "TASK-034"
+  ],
+  "files_to_touch": [
+    "app/lib/screens/app_onboarding/welcome.dart",
+    "app/lib/screens/app_onboarding/terms.dart",
+    "app/lib/screens/app_onboarding/about.dart",
+    "app/lib/screens/app_onboarding/onboarding_screen.dart",
+    "app/lib/screens/app_onboarding/preview.dart"
+  ],
+  "do_not_touch": [
+    "app/lib/screens/app_onboarding/study_switch_dialogs.dart",
+    "app/lib/screens/app_onboarding/loading_screen.dart"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed for every screen in the group: no raw colors, no inline fontSize, spacing on tokens, labeled tappables >=48dp",
+    "Strings via tr.*; visual structure unchanged unless M3-required"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze app",
+    "cd app && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + per-screen smoke notes (or screenshots)",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/layout.md",
+    ".agents/skills/studyu-material3/references/material/color.md",
+    ".agents/skills/studyu-material3/references/material/typography.md",
+    ".agents/skills/studyu-material3/references/flutter/theming.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md",
+    ".agents/skills/studyu-material3/references/studyu/existing-patterns.md"
+  ],
+  "notes": "Use the skill review checklist verbatim; fix drift only inside the listed files.",
+  "blocked_reason": null
+}

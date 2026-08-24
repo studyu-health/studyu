@@ -1,0 +1,39 @@
+{
+  "id": "TASK-032",
+  "title": "app theme: migrate to ColorScheme.fromSeed",
+  "scope": "app",
+  "kind": "theme",
+  "status": "pending",
+  "priority": 7,
+  "depends_on": [
+    "TASK-001"
+  ],
+  "files_to_touch": [
+    "app/lib/theme.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "`ThemeData(brightness:, primaryColor: Colors.blue, \u2026)` replaced by seed-based `ColorScheme.fromSeed` (light + dark)",
+    "A TextTheme is defined (no reliance on raw defaults) \u2014 do NOT copy designer_v2 sizes",
+    "Existing slider theme helper preserved",
+    "ElevatedButton white-foreground hack replaced by theme role styles"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze app",
+    "cd app && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + app tests pass + onboarding/dashboard smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/color.md",
+    ".agents/skills/studyu-material3/references/material/typography.md",
+    ".agents/skills/studyu-material3/references/flutter/theming.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 13, D6. Keep brand seed color choice documented in DECISIONS.md if it changes.",
+  "blocked_reason": null
+}

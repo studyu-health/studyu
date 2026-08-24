@@ -1,0 +1,36 @@
+{
+  "id": "TASK-024",
+  "title": "AuthScaffold raw colors -> colorScheme roles",
+  "scope": "designer",
+  "kind": "color",
+  "status": "pending",
+  "priority": 6,
+  "depends_on": [
+    "TASK-001"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/auth/auth_scaffold.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/theme.dart"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "No `Colors.white`/`Colors.*` literals remain in auth_scaffold.dart",
+    "Left panel uses `colorScheme.surface`, right panel keeps the established primary treatment",
+    "Text styles reuse `textTheme` styles instead of rebuilt `TextStyle(fontSize: \u2026)` at line ~259"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2"
+  ],
+  "evidence_required": "analyzer clean + compact+wide smoke note (1000px breakpoint)",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/color.md",
+    ".agents/skills/studyu-material3/references/flutter/theming.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviations 2+3 auth-shell subset.",
+  "blocked_reason": null
+}

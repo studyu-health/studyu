@@ -1,0 +1,36 @@
+{
+  "id": "TASK-049",
+  "title": "Screen migration: designer enrollment + consent + screener forms",
+  "scope": "designer",
+  "kind": "component",
+  "status": "pending",
+  "priority": 10,
+  "depends_on": [
+    "TASK-046"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/design/enrollment/enrollment_form_view.dart",
+    "designer_v2/lib/features/design/enrollment/consent_item_form_view.dart",
+    "designer_v2/lib/features/design/enrollment/screener_question_logic_form_view.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/common_views/form_table_layout.dart"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed (non-Table drift only)"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/input.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "",
+  "blocked_reason": null
+}

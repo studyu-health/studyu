@@ -1,0 +1,35 @@
+{
+  "id": "TASK-021",
+  "title": "Password visibility toggle: InkWell -> IconButton",
+  "scope": "designer",
+  "kind": "a11y",
+  "status": "pending",
+  "priority": 4,
+  "depends_on": [
+    "TASK-001"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/auth/auth_form_fields.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "`InkWell`+`Icon` replaced by `IconButton` with `tooltip` and semantic label",
+    "No `FocusNode(skipTraversal: true)` created in build; toggle is keyboard-focusable",
+    "Obscure-text behavior unchanged across login/signup/recovery"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + tests pass + keyboard-focus smoke note on login form",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/input.md",
+    ".agents/skills/studyu-material3/references/flutter/accessibility-mapping.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 10. Touch target must be >=48x48dp",
+  "blocked_reason": null
+}

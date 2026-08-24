@@ -1,0 +1,34 @@
+{
+  "id": "TASK-012",
+  "title": "Fitbit form links use Hyperlink",
+  "scope": "designer",
+  "kind": "color",
+  "status": "pending",
+  "priority": 4,
+  "depends_on": [
+    "TASK-003"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/design/fitbit/fitbit_credentials_form_view.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Inline `Theme.of(context).primaryColor` + underline link styling replaced by shared `Hyperlink`",
+    "Link behavior (URL/onClick) unchanged",
+    "No raw color literals remain in the file's link code"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2"
+  ],
+  "evidence_required": "analyzer clean + screen smoke note",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/color.md",
+    ".agents/skills/studyu-material3/references/studyu/existing-patterns.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 14. Depends on TASK-003 so Hyperlink colors are already correct.",
+  "blocked_reason": null
+}

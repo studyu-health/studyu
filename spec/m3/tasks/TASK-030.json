@@ -1,0 +1,38 @@
+{
+  "id": "TASK-030",
+  "title": "designer_v2 theme: remove raw white surfaces",
+  "scope": "designer",
+  "kind": "theme",
+  "status": "pending",
+  "priority": 6,
+  "depends_on": [
+    "TASK-024"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/theme.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/features/**",
+    "app/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "`Colors.white` removed from AppBarTheme backgroundColor/surfaceTintColor, inputDecorationTheme fill, and theme.dart:221-224 area",
+    "Roles mapped to `colorScheme.surface`/`surfaceContainer*` per M3",
+    "Light theme scaffold/background behavior unchanged visually"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + tests pass + dashboard + auth smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/color.md",
+    ".agents/skills/studyu-material3/references/flutter/theming.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Deviation 2 theme-level subset. Surface tint replaced by roles, not removed blindly.",
+  "blocked_reason": null
+}

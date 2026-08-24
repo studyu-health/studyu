@@ -1,0 +1,38 @@
+{
+  "id": "TASK-003",
+  "title": "Link color single-source in theme",
+  "scope": "designer",
+  "kind": "color",
+  "status": "pending",
+  "priority": 2,
+  "depends_on": [
+    "TASK-001"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/theme.dart",
+    "designer_v2/lib/common_views/text_hyperlink.dart"
+  ],
+  "do_not_touch": [
+    "app/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "`Hyperlink` default `linkColor`/`visitedColor` derive from the theme's link color mechanism (single source of truth)",
+    "Raw browser hex `0xFF0000EE`/`0xFF551A8B` defaults removed from text_hyperlink.dart:11-13",
+    "No visual change beyond link color harmonization"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + existing tests pass",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/color.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md",
+    ".agents/skills/studyu-material3/references/studyu/existing-patterns.md"
+  ],
+  "notes": "Implements D4 + deviation 9. Check theme.dart:569 third link color; keep brand linkColor mechanism intact.",
+  "blocked_reason": null
+}

@@ -1,0 +1,37 @@
+{
+  "id": "TASK-046",
+  "title": "Screen migration: designer shell (scaffold, navbar, dashboard, drawer)",
+  "scope": "designer",
+  "kind": "component",
+  "status": "pending",
+  "priority": 9,
+  "depends_on": [
+    "TASK-030"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/study/study_scaffold.dart",
+    "designer_v2/lib/features/study/study_navbar.dart",
+    "designer_v2/lib/features/dashboard/dashboard_page.dart",
+    "designer_v2/lib/app_drawer.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed; navigation emphasis matches NavigationBar/Rail theming from TASK-031"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + compact+wide smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/navigation.md",
+    ".agents/skills/studyu-material3/references/flutter/adaptive-mapping.md",
+    ".agents/skills/studyu-material3/references/studyu/existing-patterns.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "TwoColumnLayout + 1000px breakpoint preserved (intentional).",
+  "blocked_reason": null
+}

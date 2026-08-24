@@ -1,0 +1,44 @@
+{
+  "id": "TASK-034",
+  "title": "app: audit + replace raw ElevatedButton primaries",
+  "scope": "app",
+  "kind": "component",
+  "status": "pending",
+  "priority": 8,
+  "depends_on": [
+    "TASK-032"
+  ],
+  "files_to_touch": [
+    "app/lib/widgets/bottom_onboarding_navigation.dart",
+    "app/lib/widgets/selectable_button.dart",
+    "app/lib/screens/study/onboarding/kickoff.dart",
+    "app/lib/screens/study/onboarding/study_selection.dart",
+    "app/lib/screens/study/onboarding/eligibility_screen.dart",
+    "app/lib/screens/app_onboarding/app_error_screen.dart",
+    "app/lib/screens/app_onboarding/study_switch_dialogs.dart",
+    "app/lib/screens/study/dashboard/dashboard.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Primary CTAs use `FilledButton` (or a small app-local PrimaryButton-style wrapper if a loading state pattern is needed \u2014 document choice in DECISIONS.md)",
+    "Secondary actions use OutlinedButton/TextButton per emphasis",
+    "No behavior change; all 20-ish call sites audited, outliers listed in ACTIVITY.md"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze app",
+    "cd app && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + tests pass + onboarding flow smoke note",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/buttons.md",
+    ".agents/skills/studyu-material3/references/flutter/material-mapping.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "App-side counterpart of deviation 5; audit first, migrate only true primaries.",
+  "blocked_reason": null
+}

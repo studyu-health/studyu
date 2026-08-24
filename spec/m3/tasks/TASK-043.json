@@ -1,0 +1,40 @@
+{
+  "id": "TASK-043",
+  "title": "Screen migration: app report screens",
+  "scope": "app",
+  "kind": "component",
+  "status": "pending",
+  "priority": 10,
+  "depends_on": [
+    "TASK-041"
+  ],
+  "files_to_touch": [
+    "app/lib/screens/study/report/report_details.dart",
+    "app/lib/screens/study/report/report_history.dart",
+    "app/lib/screens/study/report/report_section_container.dart",
+    "app/lib/screens/study/report/generic_section.dart",
+    "app/lib/screens/study/report/sections/report_section_widgets.dart",
+    "app/lib/screens/study/report/disclaimer_section.dart"
+  ],
+  "do_not_touch": [
+    "app/lib/screens/study/report/util/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed; chart/plot colors explicitly out of scope (flagged in ACTIVITY.md)"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze app",
+    "cd app && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + per-screen smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/color.md",
+    ".agents/skills/studyu-material3/references/material/typography.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Charts keep semantic data colors; migrate chrome only.",
+  "blocked_reason": null
+}

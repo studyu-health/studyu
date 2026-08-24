@@ -1,0 +1,34 @@
+{
+  "id": "TASK-033",
+  "title": "app: spacing tokens file",
+  "scope": "app",
+  "kind": "spacing",
+  "status": "pending",
+  "priority": 7,
+  "depends_on": [
+    "TASK-032"
+  ],
+  "files_to_touch": [
+    "app/lib/widgets/spacing.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/**"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Named spacing constants (4/8/12/16/24/32) exist for the app package per D5",
+    "No call sites migrated yet"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze app"
+  ],
+  "evidence_required": "analyzer clean",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/foundations.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Mirrors TASK-002 for the app package.",
+  "blocked_reason": null
+}

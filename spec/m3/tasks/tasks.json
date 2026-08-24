@@ -1,0 +1,391 @@
+{
+  "project": "studyu-m3-migration",
+  "updated": "2026-08-24",
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Verify migration toolchain prerequisites",
+      "scope": "shared",
+      "kind": "lint",
+      "status": "pending",
+      "priority": 1,
+      "depends_on": [],
+      "spec": "spec/m3/tasks/TASK-001.json"
+    },
+    {
+      "id": "TASK-002",
+      "title": "Design token scaffolding: spacing constants",
+      "scope": "designer",
+      "kind": "spacing",
+      "status": "pending",
+      "priority": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-002.json"
+    },
+    {
+      "id": "TASK-003",
+      "title": "Link color single-source in theme",
+      "scope": "designer",
+      "kind": "color",
+      "status": "pending",
+      "priority": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-003.json"
+    },
+    {
+      "id": "TASK-010",
+      "title": "Unify auth account-switch wording (en+de)",
+      "scope": "designer",
+      "kind": "wording",
+      "status": "pending",
+      "priority": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-010.json"
+    },
+    {
+      "id": "TASK-011",
+      "title": "Distinct labels for forgot-send vs recovery-submit",
+      "scope": "designer",
+      "kind": "wording",
+      "status": "pending",
+      "priority": 3,
+      "depends_on": [
+        "TASK-010"
+      ],
+      "spec": "spec/m3/tasks/TASK-011.json"
+    },
+    {
+      "id": "TASK-012",
+      "title": "Fitbit form links use Hyperlink",
+      "scope": "designer",
+      "kind": "color",
+      "status": "pending",
+      "priority": 4,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "spec": "spec/m3/tasks/TASK-012.json"
+    },
+    {
+      "id": "TASK-020",
+      "title": "PrimaryButton base widget ElevatedButton -> FilledButton",
+      "scope": "designer",
+      "kind": "component",
+      "status": "pending",
+      "priority": 4,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-020.json"
+    },
+    {
+      "id": "TASK-021",
+      "title": "Password visibility toggle: InkWell -> IconButton",
+      "scope": "designer",
+      "kind": "a11y",
+      "status": "pending",
+      "priority": 4,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-021.json"
+    },
+    {
+      "id": "TASK-022",
+      "title": "Auth divider: remove per-instance Divider(height: 1)",
+      "scope": "designer",
+      "kind": "component",
+      "status": "pending",
+      "priority": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-022.json"
+    },
+    {
+      "id": "TASK-023",
+      "title": "Auth form spacing on tokens/8dp grid",
+      "scope": "designer",
+      "kind": "spacing",
+      "status": "pending",
+      "priority": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "spec": "spec/m3/tasks/TASK-023.json"
+    },
+    {
+      "id": "TASK-024",
+      "title": "AuthScaffold raw colors -> colorScheme roles",
+      "scope": "designer",
+      "kind": "color",
+      "status": "pending",
+      "priority": 6,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-024.json"
+    },
+    {
+      "id": "TASK-030",
+      "title": "designer_v2 theme: remove raw white surfaces",
+      "scope": "designer",
+      "kind": "theme",
+      "status": "pending",
+      "priority": 6,
+      "depends_on": [
+        "TASK-024"
+      ],
+      "spec": "spec/m3/tasks/TASK-030.json"
+    },
+    {
+      "id": "TASK-031",
+      "title": "designer_v2: navigation theme legacy -> NavigationBar",
+      "scope": "designer",
+      "kind": "navigation",
+      "status": "pending",
+      "priority": 7,
+      "depends_on": [
+        "TASK-030"
+      ],
+      "spec": "spec/m3/tasks/TASK-031.json"
+    },
+    {
+      "id": "TASK-032",
+      "title": "app theme: migrate to ColorScheme.fromSeed",
+      "scope": "app",
+      "kind": "theme",
+      "status": "pending",
+      "priority": 7,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-032.json"
+    },
+    {
+      "id": "TASK-033",
+      "title": "app: spacing tokens file",
+      "scope": "app",
+      "kind": "spacing",
+      "status": "pending",
+      "priority": 7,
+      "depends_on": [
+        "TASK-032"
+      ],
+      "spec": "spec/m3/tasks/TASK-033.json"
+    },
+    {
+      "id": "TASK-034",
+      "title": "app: audit + replace raw ElevatedButton primaries",
+      "scope": "app",
+      "kind": "component",
+      "status": "pending",
+      "priority": 8,
+      "depends_on": [
+        "TASK-032"
+      ],
+      "spec": "spec/m3/tasks/TASK-034.json"
+    },
+    {
+      "id": "TASK-040",
+      "title": "Screen migration: app onboarding group",
+      "scope": "app",
+      "kind": "component",
+      "status": "pending",
+      "priority": 9,
+      "depends_on": [
+        "TASK-033",
+        "TASK-034"
+      ],
+      "spec": "spec/m3/tasks/TASK-040.json"
+    },
+    {
+      "id": "TASK-041",
+      "title": "Screen migration: app study onboarding group",
+      "scope": "app",
+      "kind": "component",
+      "status": "pending",
+      "priority": 9,
+      "depends_on": [
+        "TASK-040"
+      ],
+      "spec": "spec/m3/tasks/TASK-041.json"
+    },
+    {
+      "id": "TASK-042",
+      "title": "Screen migration: app dashboard + tasks",
+      "scope": "app",
+      "kind": "component",
+      "status": "pending",
+      "priority": 10,
+      "depends_on": [
+        "TASK-041"
+      ],
+      "spec": "spec/m3/tasks/TASK-042.json"
+    },
+    {
+      "id": "TASK-043",
+      "title": "Screen migration: app report screens",
+      "scope": "app",
+      "kind": "component",
+      "status": "pending",
+      "priority": 10,
+      "depends_on": [
+        "TASK-041"
+      ],
+      "spec": "spec/m3/tasks/TASK-043.json"
+    },
+    {
+      "id": "TASK-044",
+      "title": "Screen migration: app questionnaire widgets",
+      "scope": "app",
+      "kind": "component",
+      "status": "pending",
+      "priority": 10,
+      "depends_on": [
+        "TASK-043"
+      ],
+      "spec": "spec/m3/tasks/TASK-044.json"
+    },
+    {
+      "id": "TASK-045",
+      "title": "Screen migration: app onboarding leftovers + debug screen",
+      "scope": "app",
+      "kind": "component",
+      "status": "pending",
+      "priority": 11,
+      "depends_on": [
+        "TASK-044"
+      ],
+      "spec": "spec/m3/tasks/TASK-045.json"
+    },
+    {
+      "id": "TASK-046",
+      "title": "Screen migration: designer shell (scaffold, navbar, dashboard, drawer)",
+      "scope": "designer",
+      "kind": "component",
+      "status": "pending",
+      "priority": 9,
+      "depends_on": [
+        "TASK-030"
+      ],
+      "spec": "spec/m3/tasks/TASK-046.json"
+    },
+    {
+      "id": "TASK-047",
+      "title": "Screen migration: designer design/info + settings forms",
+      "scope": "designer",
+      "kind": "component",
+      "status": "pending",
+      "priority": 10,
+      "depends_on": [
+        "TASK-046"
+      ],
+      "spec": "spec/m3/tasks/TASK-047.json"
+    },
+    {
+      "id": "TASK-048",
+      "title": "Screen migration: designer interventions + schedule forms",
+      "scope": "designer",
+      "kind": "component",
+      "status": "pending",
+      "priority": 10,
+      "depends_on": [
+        "TASK-046"
+      ],
+      "spec": "spec/m3/tasks/TASK-048.json"
+    },
+    {
+      "id": "TASK-049",
+      "title": "Screen migration: designer enrollment + consent + screener forms",
+      "scope": "designer",
+      "kind": "component",
+      "status": "pending",
+      "priority": 10,
+      "depends_on": [
+        "TASK-046"
+      ],
+      "spec": "spec/m3/tasks/TASK-049.json"
+    },
+    {
+      "id": "TASK-050",
+      "title": "Screen migration: designer measurements/questionnaire/reports/monitor/analyze/recruit + dialogs",
+      "scope": "designer",
+      "kind": "component",
+      "status": "pending",
+      "priority": 11,
+      "depends_on": [
+        "TASK-047",
+        "TASK-048",
+        "TASK-049"
+      ],
+      "spec": "spec/m3/tasks/TASK-050.json"
+    },
+    {
+      "id": "TASK-060",
+      "title": "FormTableLayout -> labeled Column: auth + settings screens",
+      "scope": "designer",
+      "kind": "a11y",
+      "status": "pending",
+      "priority": 12,
+      "depends_on": [
+        "TASK-050"
+      ],
+      "spec": "spec/m3/tasks/TASK-060.json"
+    },
+    {
+      "id": "TASK-061",
+      "title": "FormTableLayout migration: design forms slice 1 (info/interventions/schedule)",
+      "scope": "designer",
+      "kind": "a11y",
+      "status": "pending",
+      "priority": 12,
+      "depends_on": [
+        "TASK-060"
+      ],
+      "spec": "spec/m3/tasks/TASK-061.json"
+    },
+    {
+      "id": "TASK-062",
+      "title": "FormTableLayout migration: remaining consumers + widget removal",
+      "scope": "designer",
+      "kind": "a11y",
+      "status": "pending",
+      "priority": 13,
+      "depends_on": [
+        "TASK-061"
+      ],
+      "spec": "spec/m3/tasks/TASK-062.json"
+    },
+    {
+      "id": "TASK-063",
+      "title": "designer_v2 TextTheme: migrate to M3 2021 term set",
+      "scope": "designer",
+      "kind": "theme",
+      "status": "pending",
+      "priority": 13,
+      "depends_on": [
+        "TASK-030"
+      ],
+      "spec": "spec/m3/tasks/TASK-063.json"
+    },
+    {
+      "id": "TASK-070",
+      "title": "studyu_lints warning-level plugin: no_raw_colors + no_inline_text_style",
+      "scope": "shared",
+      "kind": "lint",
+      "status": "pending",
+      "priority": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "spec": "spec/m3/tasks/TASK-070.json"
+    }
+  ]
+}

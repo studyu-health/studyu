@@ -1,0 +1,36 @@
+{
+  "id": "TASK-061",
+  "title": "FormTableLayout migration: design forms slice 1 (info/interventions/schedule)",
+  "scope": "designer",
+  "kind": "a11y",
+  "status": "pending",
+  "priority": 12,
+  "depends_on": [
+    "TASK-060"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/design/info/study_info_form_view.dart",
+    "designer_v2/lib/features/design/interventions/intervention_form_view.dart",
+    "designer_v2/lib/features/design/interventions/intervention_task_form_view.dart",
+    "designer_v2/lib/features/design/interventions/interventions_form_view.dart",
+    "designer_v2/lib/features/design/interventions/study_schedule_form_view.dart"
+  ],
+  "do_not_touch": [],
+  "test_target": null,
+  "acceptance_criteria": [
+    "Same acceptance pattern as TASK-060 for the listed files"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/input.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "",
+  "blocked_reason": null
+}

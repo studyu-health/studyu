@@ -1,0 +1,54 @@
+{
+  "id": "TASK-050",
+  "title": "Screen migration: designer measurements/questionnaire/reports/monitor/analyze/recruit + dialogs",
+  "scope": "designer",
+  "kind": "component",
+  "status": "pending",
+  "priority": 11,
+  "depends_on": [
+    "TASK-047",
+    "TASK-048",
+    "TASK-049"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/design/measurements/survey/survey_form_view.dart",
+    "designer_v2/lib/features/design/measurements/measurements_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/choice_question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/free_text_question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/date_question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/scale_question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/bool_question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/audio_recording_question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/image_capturing_question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/fitbit_question_form_view.dart",
+    "designer_v2/lib/features/design/shared/questionnaire/question/types/pain_question_form_view.dart",
+    "designer_v2/lib/features/design/reports/reports_form_view.dart",
+    "designer_v2/lib/features/design/reports/section/report_item_form_view.dart",
+    "designer_v2/lib/features/monitor/study_monitor_page.dart",
+    "designer_v2/lib/features/analyze/study_analyze_page.dart",
+    "designer_v2/lib/features/recruit/study_recruit_page.dart",
+    "designer_v2/lib/features/recruit/invite_code_form_view.dart",
+    "designer_v2/lib/features/dialogs/study_dialogs.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/common_views/form_table_layout.dart"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed (non-Table drift only); oversized groups split into follow-up tasks if a single invocation cannot finish \u2014 remaining files recorded as blocked with reason"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/input.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Largest Phase 4 task; if it cannot complete in one sitting, mark blocked and split \u2014 do not half-migrate files.",
+  "blocked_reason": null
+}

@@ -1,0 +1,36 @@
+{
+  "id": "TASK-047",
+  "title": "Screen migration: designer design/info + settings forms",
+  "scope": "designer",
+  "kind": "component",
+  "status": "pending",
+  "priority": 10,
+  "depends_on": [
+    "TASK-046"
+  ],
+  "files_to_touch": [
+    "designer_v2/lib/features/design/info/study_info_form_view.dart",
+    "designer_v2/lib/features/study/settings/study_settings_dialog.dart"
+  ],
+  "do_not_touch": [
+    "designer_v2/lib/common_views/form_table_layout.dart"
+  ],
+  "test_target": null,
+  "acceptance_criteria": [
+    "M3 checklist passed; FormTableLayout drift flagged in file notes, not migrated here"
+  ],
+  "verification": [
+    "scripts/pre-commit-check",
+    "fvm dart analyze designer_v2",
+    "cd designer_v2 && fvm flutter test"
+  ],
+  "evidence_required": "analyzer clean + smoke notes",
+  "skill_refs": [
+    ".agents/skills/studyu-material3/SKILL.md",
+    ".agents/skills/studyu-material3/references/material/components/input.md",
+    ".agents/skills/studyu-material3/references/material/layout.md",
+    ".agents/skills/studyu-material3/references/studyu/deviations.md"
+  ],
+  "notes": "Form bodies migrate in Phase 5 (TASK-060+); here only non-Table drift.",
+  "blocked_reason": null
+}
