@@ -20,8 +20,20 @@ tools:
   github:
     toolsets: [context, repos, issues, pull_requests]
   bash:
-    - "gh pr diff"
-    - "gh pr view"
+    - "cat"
+    - "date"
+    - "echo"
+    - "github:*"
+    - "grep"
+    - "ls"
+    - "printf"
+    - "safeoutputs:*"
+    - "sort"
+    - "uniq"
+    - "wc"
+    - "yq"
+  # Pull request evidence comes from the authenticated GitHub MCP server above.
+  # Do not grant shell access to gh PR commands or expose GH_TOKEN to the agent.
 mcp-servers:
   atlassian:
     container: "ghcr.io/sooperset/mcp-atlassian:0.23.1"
@@ -80,16 +92,26 @@ Then, for the PR itself:
 ## Writing discipline (STE)
 
 Apply the repository writing discipline from `AGENTS.md` (Writing Discipline section) and the full rules in `.agents/skills/asd-ste100/SKILL.md` to all prose in the comment: the Summary, Setup items, test item titles, Steps, and Expected lines. Preserve code spans, file paths, identifiers, and the marker exactly. Do not flatten intentional technical precision (a test name like `minimizeComment` must stay exact).
+## Investigation limits
+
+1. The limit is 25 model invocations. Complete evidence gathering within 18 invocations. Use the remaining invocations to compose and submit the comment. These are model invocations, not individual shell commands.
+2. Analyze the current PR diff and directly affected behavior. Do not search file-creation history, earlier PRs, unrelated workflows, or unrelated package constraints.
+3. After a permission denial, do not repeat or rephrase the command. Do not add pipes, redirection, or command substitution to retry it. Record the unavailable evidence and continue with the checklist.
+4. Read the PR metadata, full diff, and changed-file inventory before selecting the short or full report. For bounded changes, inspect only changed files and directly relevant configuration or tests. Do not perform Flutter analysis for unchanged application surfaces.
+5. Use Jira only to resolve a ticket key or link found in the PR metadata or commits. If metadata has no ticket reference, inspect PR commit messages once. If there is still no reference, state that no linked ticket was found. If Jira access fails, state that limitation and continue.
 
 ## Task
 
-Follow the project skill `.agents/skills/manual-testing/SKILL.md`. Read its `Step 3b — Bounded-change short form` first; if the change is bounded (workflow-only, docs-only, generated-only, internal-only), use the short form instead of the full P1/P2/P3 template. When in doubt, use the full template.
+Follow the project skill `.agents/skills/manual-testing/SKILL.md`. Read its `Step 3b — Bounded-change short form` first. Apply every relevant analysis step. Mark unrelated steps not applicable internally and do not perform repository-wide investigation for them. Preserve automated-test mapping for affected source behavior. Do not execute application tests as part of generating a QA checklist.
 
 In CI / headless mode:
 
 - No files, no clipboard — your final add-comment body IS the deliverable.
-- The change diff comes from `gh pr diff <number>`. The PR base is `dev` and the head is the feature branch; that is the exact scope to analyze. Get PR metadata with `gh pr view <number>`.
-- Work through every step of the skill: Jira lookup via the `atlassian` MCP (`jira_get_issue`, `jira_search`; skip gracefully when the tools are unavailable), Flutter-lens analysis, automated-test mapping, and the checklist structure.
+- Override the skill's local CLI instructions. Read PR evidence through the authenticated GitHub MCP `pull_request_read` tool. Use `owner`, `repo`, and numeric `pullNumber` from the triggering event. Read `method=get` once for metadata, `method=get_diff` once for the diff, and `method=get_files` for the complete changed-file inventory. Follow pagination when necessary.
+- The MCP CLI mode uses this bridge command: `github pull_request_read --method get --owner studyu-health --repo studyu --pullNumber 996`. The number `996` is an example, not a fixed target. Substitute `get_diff` or `get_files` for the other reads. This CLI is the MCP bridge, not `gh`.
+- Consume complete payloads. Do not pipe responses through `head`, `tail`, or regex extraction that discards fields. Reuse successful responses instead of fetching metadata again.
+- If a required PR read fails, do not attempt alternate authentication or credentials. Use other successfully read PR evidence and name the missing evidence in Summary. If no diff or changed-file evidence is available, report that limitation rather than inventing tests.
+- The run guard above remains authoritative. Preserve the draft and non-`dev` no-comment guard.
 - The skill's scope gate (Step 3) works differently here: you cannot ask the user. If the change's intent is unclear, state that in the Summary, list the exact questions QA must answer before testing, and still produce the best checklist derivable from the diff.
 - Do NOT generate items about exercising the local `manual-testing` skill, validating the compiled lock file as the runtime artifact, or confirming no Flutter behavior is expected. These are dev tasks visible in the diff, not QA behavior tests. Skip them.
 - Do NOT include items that just restate Setup (secret config, branch state, test PR preparation) as test items. The Setup section holds them. Do not duplicate them in P1.
@@ -102,10 +124,13 @@ Bounded-change detection (apply the short form when ALL are true):
 
 Short-form hard limits: max 4 P1 items, no P2, no P3, no Functional/UI/UX sub-buckets, no Regression watch section (risks named in Summary instead), no Automated coverage table (flat list of run commands instead).
 
+Do not fetch prior PR comments to manage duplicates. `hide-older-comments: true` already performs that operation.
+
+
 ## Comment format
 
 Request exactly one add-comment whose body is:
 
 1. First line: the marker `<!-- manual-qa-bot -->`
-2. A blank line, then the full checklist following the skill's report template (Summary, Prerequisites, P1/P2/P3 with nested Steps/Expected/Coverage items, Automated coverage, Regression watch, Out of scope).
-Do not add any other commentary before or after the checklist.
+2. A blank line, then the report form selected from the existing skill and workflow scope rules. A bounded change must keep the existing maximum of four P1 items, no P2/P3, no Regression watch, and a flat Automated checks list. A non-bounded change retains the full report.
+Do not add any other commentary before or after the report.
