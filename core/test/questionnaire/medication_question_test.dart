@@ -65,6 +65,9 @@ void main() {
     expect(restored.id, question.id);
     expect(restored.prompt, question.prompt);
     expect(restored.rationale, question.rationale);
+    final parsed = Question.fromJson(question.toJson());
+    expect(parsed, isA<MedicationQuestion>());
+    expect(parsed.id, question.id);
   });
 
   test('MedicationAnswer round-trips the complete snapshot and quantity', () {

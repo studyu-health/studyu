@@ -71,5 +71,15 @@ void main() {
       expect(SurveyQuestionType.medication.string, isNotEmpty);
       expect(SurveyQuestionType.medication.icon, Icons.medication_rounded);
     });
+
+    test('rejects constructing an answer because it has no options', () {
+      final formData = MedicationQuestionFormData(
+        questionId: 'medication-question',
+        questionText: 'Medication',
+        questionType: SurveyQuestionType.medication,
+      );
+
+      expect(() => formData.constructAnswerFor(null), throwsUnimplementedError);
+    });
   });
 }

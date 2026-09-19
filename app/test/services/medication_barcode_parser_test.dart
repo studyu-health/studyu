@@ -108,4 +108,37 @@ void main() {
     expect(() => gtinCheckDigit('123'), throwsArgumentError);
     expect(isValidPzn('00000001'), isFalse);
   });
+
+  test('covers vision bytes and symbology prefixes', () {
+    const gtinData = '0415003752864';
+    final gtin = '$gtinData${gtinCheckDigit(gtinData)}';
+
+    final visionBarcode = Barcode(
+      format: BarcodeFormat.dataMatrix,
+      rawDecodedBytes: DecodedVisionBarcodeBytes(
+        bytes: Uint8List.fromList('01$gtin'.codeUnits),
+        rawBytes: Uint8List.fromList('vision-payload'.codeUnits),
+      ),
+      rawValue: 'not-used',
+    );
+    expect(pznFromBarcode(visionBarcode), '03752864');
+
+    expect(parseGs1Payload(']d2(01)$gtin'), '03752864');
+    expect(parseGs1Payload(']d2(10)batch(01)$gtin'), '03752864');
+    expect(parseGs1Payload(']d2(17)251231(01)$gtin'), '03752864');
+    expect(parseGs1Payload(']d2(21)serial(01)$gtin'), '03752864');
+    expect(parseGs1Payload('01$gtin'), '03752864');
+    expect(parseGs1Payload('10batch01$gtin'), '03752864');
+    expect(parseGs1Payload('1725123101$gtin'), '03752864');
+    expect(parseGs1Payload('21serial01$gtin'), '03752864');
+  });
+
+  test('handles raw GS1 separators and AI boundaries', () {
+    const gtinData = '0415003752864';
+    final gtin = '$gtinData${gtinCheckDigit(gtinData)}';
+
+    expect(parseGs1Payload('10batch\u001d01$gtin'), '03752864');
+    expect(parseGs1Payload('10batch01$gtin'), '03752864');
+    expect(parseGs1Payload('10batch\u001d'), isNull);
+  });
 }
