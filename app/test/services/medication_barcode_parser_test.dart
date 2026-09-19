@@ -57,9 +57,55 @@ void main() {
     final gtin = '$gtinData${gtinCheckDigit(gtinData)}';
     expect(parseGs1Payload('(01)$gtin'), pzn);
 
-    final ppid = '00$pzn';
+    const ppid = '00$pzn';
     final ascField = '9N$ppid${ppnCheck(ppid)}';
     final ascPayload = '[)>\u001e06\u001d$ascField\u001e\u0004';
     expect(parseAscPayload(ascPayload), pzn);
+  });
+
+  test('rejects empty, malformed, and ambiguous barcode payloads', () {
+    expect(pznFromManualInput(''), isNull);
+    expect(pznFromManualInput('0375286'), isNull);
+    expect(pznFromBarcode(const Barcode(format: BarcodeFormat.code39)), isNull);
+    expect(
+      pznFromBarcode(
+        const Barcode(format: BarcodeFormat.dataMatrix, rawValue: 'not-a-gs1'),
+      ),
+      isNull,
+    );
+    expect(parseCode39Payload('03752864'), isNull);
+    expect(parseAscPayload(''), isNull);
+    expect(
+      parseAscPayload('[)>\u001e06\u001d9N000375286400\u001e\u0004'),
+      isNull,
+    );
+  });
+
+  test('handles symbology identifiers and raw GS1 fields', () {
+    const pzn = '03752864';
+    const gtinData = '0415003752864';
+    final gtin = '$gtinData${gtinCheckDigit(gtinData)}';
+
+    expect(parseGs1Payload(']d2(01)$gtin'), pzn);
+    expect(parseGs1Payload('01${gtin}10batch'), pzn);
+    expect(parseGs1Payload('(10)batch(01)$gtin'), pzn);
+    expect(parseGs1Payload('(01)$gtin(01)$gtin'), isNull);
+  });
+
+  test('rejects invalid GS1 and PPN checksums', () {
+    const pzn = '03752864';
+    const gtinData = '0415003752864';
+    final gtin = '$gtinData${gtinCheckDigit(gtinData)}';
+
+    expect(parseGs1Payload('(01)${gtin.substring(0, 13)}0'), isNull);
+    expect(parseGs1Payload('01${gtin.substring(0, 13)}0'), isNull);
+    expect(
+      parseAscPayload(
+        '[)>\u001e06\u001d9N00$pzn${ppnCheck('10$pzn')}\u001e\u0004',
+      ),
+      isNull,
+    );
+    expect(() => gtinCheckDigit('123'), throwsArgumentError);
+    expect(isValidPzn('00000001'), isFalse);
   });
 }
