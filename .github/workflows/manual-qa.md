@@ -32,8 +32,6 @@ tools:
     - "uniq"
     - "wc"
     - "yq"
-  # Pull request evidence comes from the authenticated GitHub MCP server above.
-  # Do not grant shell access to gh PR commands or expose GH_TOKEN to the agent.
 mcp-servers:
   atlassian:
     container: "ghcr.io/sooperset/mcp-atlassian:0.23.1"
