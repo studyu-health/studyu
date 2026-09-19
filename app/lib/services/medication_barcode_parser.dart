@@ -164,9 +164,9 @@ String? _stripSymbologyIdentifier(String payload) {
 
   final identifierAndValue = payload.substring(1);
   for (
-    var length = 3;
-    length >= 1 && length <= identifierAndValue.length;
-    length--
+    var length = 1;
+    length <= 3 && length <= identifierAndValue.length;
+    length++
   ) {
     final identifier = identifierAndValue.substring(0, length);
     final value = identifierAndValue.substring(length);
