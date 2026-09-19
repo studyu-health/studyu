@@ -138,6 +138,7 @@ void main() {
     await tester.tap(find.text('Choose another medication'));
     await tester.pump();
     expect(find.byKey(const ValueKey('medication_quantity')), findsNothing);
+    expect(find.text('Use this medication'), findsNothing);
     expect(find.text('Second Medication'), findsNothing);
   });
 

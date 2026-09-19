@@ -63,6 +63,9 @@ void main() {
     expect(parseAscPayload(ascPayload), pzn);
   });
 
+  test('parses raw GS1 payload after the symbology identifier', () {
+    expect(parseGs1Payload(']d20104150037528643'), '03752864');
+  });
   test('rejects empty, malformed, and ambiguous barcode payloads', () {
     expect(pznFromManualInput(''), isNull);
     expect(pznFromManualInput('0375286'), isNull);

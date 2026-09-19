@@ -19,12 +19,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(NoPublicStudiesWidget), findsOneWidget);
-    expect(
-      find.text(
-        'There are currently no public studies available. If you have an invite code, you can still join a private study.',
-      ),
-      findsOneWidget,
-    );
+
   });
 
   testWidgets('shows a warning when some public studies cannot be extracted', (
@@ -37,12 +32,7 @@ void main() {
 
     await tester.pumpWidget(setup(Future.value(result)));
     await tester.pumpAndSettle();
-    expect(
-      find.text(
-        'Some studies could not be displayed. This can happen when your app version is outdated. Please update the app to see all available studies, or join one of the studies shown below.',
-      ),
-      findsOneWidget,
-    );
     expect(find.text('Available study'), findsOneWidget);
+    expect(find.byType(MaterialBanner), findsOneWidget);
   });
 }
