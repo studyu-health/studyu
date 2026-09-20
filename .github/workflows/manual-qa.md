@@ -18,6 +18,7 @@ permissions:
   copilot-requests: write
 tools:
   github:
+    mode: local
     toolsets: [context, repos, issues, pull_requests]
   bash: []
   cli-proxy: false
