@@ -19,19 +19,8 @@ permissions:
 tools:
   github:
     toolsets: [context, repos, issues, pull_requests]
-  bash:
-    - "cat"
-    - "date"
-    - "echo"
-    - "github:*"
-    - "grep"
-    - "ls"
-    - "printf"
-    - "safeoutputs:*"
-    - "sort"
-    - "uniq"
-    - "wc"
-    - "yq"
+  bash: []
+  cli-proxy: false
 mcp-servers:
   atlassian:
     container: "ghcr.io/sooperset/mcp-atlassian:0.23.1"
@@ -42,7 +31,6 @@ mcp-servers:
       READ_ONLY_MODE: "true"
     allowed:
       - jira_get_issue
-      - jira_search
 network:
   allowed:
     - defaults
@@ -106,9 +94,10 @@ In CI / headless mode:
 
 - No files, no clipboard — your final add-comment body IS the deliverable.
 - Override the skill's local CLI instructions. Read PR evidence through the authenticated GitHub MCP `pull_request_read` tool. Use `owner`, `repo`, and numeric `pullNumber` from the triggering event. Read `method=get` once for metadata, `method=get_diff` once for the diff, and `method=get_files` for the complete changed-file inventory. Follow pagination when necessary.
-- The MCP CLI mode uses this bridge command: `github pull_request_read --method get --owner studyu-health --repo studyu --pullNumber 996`. The number `996` is an example, not a fixed target. Substitute `get_diff` or `get_files` for the other reads. This CLI is the MCP bridge, not `gh`.
+- Inspect the `get_diff` response for `payloadPath`. When `payloadPath` is returned, use the native file-reading tool to read the complete payload before analyzing the diff. A preview is not the complete diff. If the path is unavailable, or the full diff cannot fit in context, report incomplete diff evidence in Summary. Describe only changes supported by the evidence you read. Do not infer omitted changes. Apply the same rule when any diff output is truncated.
 - Consume complete payloads. Do not pipe responses through `head`, `tail`, or regex extraction that discards fields. Reuse successful responses instead of fetching metadata again.
 - If a required PR read fails, do not attempt alternate authentication or credentials. Use other successfully read PR evidence and name the missing evidence in Summary. If no diff or changed-file evidence is available, report that limitation rather than inventing tests.
+- Scan the PR title, body, and branch name for a Jira ticket key matching `[A-Z][A-Z0-9]+-[0-9]+`. If a key is found, fetch the ticket via the `atlassian` MCP (`jira_get_issue`) and use its summary, description, acceptance criteria, and recent comments to inform the checklist. If no key is found or the fetch fails, state that in the Summary and continue from the diff and PR description only.
 - The run guard above remains authoritative. Preserve the draft and non-`dev` no-comment guard.
 - The skill's scope gate (Step 3) works differently here: you cannot ask the user. If the change's intent is unclear, state that in the Summary, list the exact questions QA must answer before testing, and still produce the best checklist derivable from the diff.
 - Do NOT generate items about exercising the local `manual-testing` skill, validating the compiled lock file as the runtime artifact, or confirming no Flutter behavior is expected. These are dev tasks visible in the diff, not QA behavior tests. Skip them.
