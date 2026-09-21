@@ -5,6 +5,7 @@ import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
 import 'package:studyu_designer_v2/domain/study_monitoring.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/localization/locale_providers.dart';
+import 'package:studyu_designer_v2/repositories/user_repository.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
@@ -104,7 +105,8 @@ class const StudyMonitorTable({
     int rowIdx,
     Set<WidgetState> states,
   ) {
-    final languageCode = ref.watch(localeProvider).languageCode;
+    final locale = ref.watch(localeProvider).toLanguageTag();
+    final preferences = ref.watch(userStateProvider).value?.preferences;
     final theme = Theme.of(context);
     return [
       Tooltip(
@@ -120,13 +122,18 @@ class const StudyMonitorTable({
         ),
       Tooltip(
         message: item.startedAt.toLocalizedString(
-          locale: languageCode,
+          locale: locale,
           showTime: false,
+          datePreference: preferences?.dateFormat,
         ),
         child: Text(item.startedAt.toTimeAgoString()),
       ),
       Tooltip(
-        message: item.lastActivityAt.toLocalizedString(locale: languageCode),
+        message: item.lastActivityAt.toLocalizedString(
+          locale: locale,
+          datePreference: preferences?.dateFormat,
+          timePreference: preferences?.timeFormat,
+        ),
         child: Row(
           children: [
             Flexible(child: Text(item.lastActivityAt.toTimeAgoString())),

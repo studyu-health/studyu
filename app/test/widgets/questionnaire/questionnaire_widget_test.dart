@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/widgets/questionnaire/image_capturing_question_widget.dart';
 import 'package:studyu_app/widgets/questionnaire/question_container.dart';
@@ -7,6 +8,7 @@ import 'package:studyu_app/widgets/questionnaire/questionnaire_widget.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/date_question_widget.dart';
 import 'package:studyu_app/widgets/selectable_button.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 /// Snapshot of answer responses at callback time.
 /// Using a Map copy avoids holding a reference to the mutable QuestionnaireState.
@@ -1943,6 +1945,31 @@ void main() {
     expect(completion!['dq'], isA<DateTime>());
   });
 
+  testWidgets('formats date question time range using the system time format', (
+    tester,
+  ) async {
+    final dateQ = DateQuestion.withId()
+      ..id = 'dq'
+      ..prompt = 'Pick time'
+      ..minTime = '14:30'
+      ..maxTime = '16:45';
+
+    await tester.pumpWidget(
+      setup(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: DateQuestionWidget(question: dateQ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Select a time between 2:30 PM and 4:45 PM'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('clearing a date answer invalidates questionnaire completion', (
     tester,
   ) async {
@@ -2076,7 +2103,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DateQuestionWidget), findsOneWidget);
-      expect(find.textContaining('2025-06-15'), findsOneWidget);
+      expect(
+        find.text(
+          DateFormat(
+            DateTimeFormat.defaultDateFormat(const Locale('en')).pattern,
+          ).format(DateTime(2025, 6, 15)),
+        ),
+        findsOneWidget,
+      );
     },
   );
 

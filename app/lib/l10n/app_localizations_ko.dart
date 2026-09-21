@@ -1919,4 +1919,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get invite_landing_copy_code => '초대 코드 복사';
+
+  @override
+  String get date_format => '날짜 형식';
+
+  @override
+  String get date_format_european => '유럽식 (31/12/2024)';
+
+  @override
+  String get date_format_german => '독일식 (31.12.2024)';
+
+  @override
+  String get date_format_iso => 'ISO (2024-12-31)';
+
+  @override
+  String get date_format_us => '미국식 (12/31/2024)';
+
+  @override
+  String get system => '시스템';
+
+  @override
+  String get time_format => '시간 형식';
+
+  @override
+  String get time_format_12_hour => '12시간제 (오후 2:30)';
+
+  @override
+  String get time_format_24_hour => '24시간제 (14:30)';
 }

@@ -3666,6 +3666,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy invite code'**
   String get invite_landing_copy_code;
+
+  /// No description provided for @date_format.
+  ///
+  /// In en, this message translates to:
+  /// **'Date format'**
+  String get date_format;
+
+  /// No description provided for @date_format_european.
+  ///
+  /// In en, this message translates to:
+  /// **'European (31/12/2024)'**
+  String get date_format_european;
+
+  /// No description provided for @date_format_german.
+  ///
+  /// In en, this message translates to:
+  /// **'German (31.12.2024)'**
+  String get date_format_german;
+
+  /// No description provided for @date_format_iso.
+  ///
+  /// In en, this message translates to:
+  /// **'ISO (2024-12-31)'**
+  String get date_format_iso;
+
+  /// No description provided for @date_format_us.
+  ///
+  /// In en, this message translates to:
+  /// **'US (12/31/2024)'**
+  String get date_format_us;
+
+  /// No description provided for @system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get system;
+
+  /// No description provided for @time_format.
+  ///
+  /// In en, this message translates to:
+  /// **'Time format'**
+  String get time_format;
+
+  /// No description provided for @time_format_12_hour.
+  ///
+  /// In en, this message translates to:
+  /// **'12-hour (2:30 PM)'**
+  String get time_format_12_hour;
+
+  /// No description provided for @time_format_24_hour.
+  ///
+  /// In en, this message translates to:
+  /// **'24-hour (14:30)'**
+  String get time_format_24_hour;
 }
 
 class _AppLocalizationsDelegate

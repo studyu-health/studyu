@@ -73,8 +73,6 @@
   "date_diff_months": "{count,plural, =1{1개월 전} other{{count}개월 전}}",
   "date_diff_seconds": "{count,plural, =1{1초 전} other{{count}초 전}}",
   "date_diff_years": "{count,plural, =1{1년 전} other{{count}년 전}}",
-  "date_format_preset_label": "날짜 형식 사전 설정",
-  "date_format_preset_label_helper": "참가자에게 날짜를 표시하는 방법 선택",
   "date_input_type_date": "날짜만",
   "date_input_type_datetime": "날짜와 시간",
   "date_input_type_label": "입력 유형",
@@ -819,8 +817,6 @@
   "sync_initial": "저장할 변경 사항이 없습니다",
   "sync_last_saved": "마지막 저장",
   "sync_saving": "변경 사항 저장 중...",
-  "time_format_preset_label": "시간 형식",
-  "time_format_preset_label_helper": "시간 표시 방식을 선택하세요",
   "time_picker_button_label": "시간을 선택하세요",
   "time_picker_button_label_datetime": "시간 선택",
   "time_picker_hint": "시간 선택",
@@ -908,5 +904,14 @@
   "invitation_message_alternative": "또는 StudyU Health 앱을 열고 다음 초대 코드를 입력하세요:",
   "form_field_report_improvementDirection_hint": "개선 방향을 선택하세요",
   "form_field_report_data_source_hint": "데이터 소스를 선택하세요",
-  "form_field_report_data_source_empty": "척도 설문 문항이 정의되지 않았습니다"
+  "form_field_report_data_source_empty": "척도 설문 문항이 정의되지 않았습니다",
+  "date_format": "날짜 형식",
+  "date_format_european": "유럽식 (31/12/2024)",
+  "date_format_german": "독일식 (31.12.2024)",
+  "date_format_iso": "ISO (2024-12-31)",
+  "date_format_us": "미국식 (12/31/2024)",
+  "system": "시스템",
+  "time_format": "시간 형식",
+  "time_format_12_hour": "12시간제 (오후 2:30)",
+  "time_format_24_hour": "24시간제 (14:30)"
 }

@@ -2016,4 +2016,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get invite_landing_copy_code => 'Einladungscode kopieren';
+
+  @override
+  String get date_format => 'Datumsformat';
+
+  @override
+  String get date_format_european => 'Europäisch (31/12/2024)';
+
+  @override
+  String get date_format_german => 'Deutsch (31.12.2024)';
+
+  @override
+  String get date_format_iso => 'ISO (2024-12-31)';
+
+  @override
+  String get date_format_us => 'US (12/31/2024)';
+
+  @override
+  String get system => 'System';
+
+  @override
+  String get time_format => 'Zeitformat';
+
+  @override
+  String get time_format_12_hour => '12-Stunden (2:30 PM)';
+
+  @override
+  String get time_format_24_hour => '24-Stunden (14:30)';
 }

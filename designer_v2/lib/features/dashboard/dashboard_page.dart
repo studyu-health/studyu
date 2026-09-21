@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/common_views/async_value_widget.dart';
 import 'package:studyu_designer_v2/common_views/empty_body.dart';
@@ -17,8 +16,10 @@ import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_type
 import 'package:studyu_designer_v2/features/dashboard/studies_table.dart';
 import 'package:studyu_designer_v2/localization/app_localizations.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
+import 'package:studyu_designer_v2/repositories/user_repository.dart';
 import 'package:studyu_designer_v2/utils/comparator_utils.dart';
 import 'package:studyu_designer_v2/utils/performance.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 class const DashboardScreen({required final StudiesFilter? filter, super.key})
     extends ConsumerStatefulWidget {
@@ -205,7 +206,15 @@ class _DashboardScreenState() extends ConsumerState<DashboardScreen> {
           date = DateTime.tryParse(condition.value as String);
         }
         if (date != null) {
-          valueLabel = DateFormat.yMMMd().format(date);
+          valueLabel = DateTimeFormat.formatDate(
+            context,
+            date,
+            preference: ref
+                .watch(userStateProvider)
+                .value
+                ?.preferences
+                .dateFormat,
+          );
         }
       default:
         break;

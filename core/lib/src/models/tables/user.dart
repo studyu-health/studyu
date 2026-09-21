@@ -4,6 +4,24 @@ import 'package:studyu_core/core.dart';
 
 part 'user.g.dart';
 
+enum DateFormatPreference(final String pattern) {
+  @JsonValue('iso')
+  iso('yyyy-MM-dd'),
+  @JsonValue('european')
+  european('dd/MM/yyyy'),
+  @JsonValue('us')
+  us('MM/dd/yyyy'),
+  @JsonValue('german')
+  german('dd.MM.yyyy'),
+}
+
+enum TimeFormatPreference(final String pattern) {
+  @JsonValue('h24')
+  h24('HH:mm'),
+  @JsonValue('h12')
+  h12('h:mm a'),
+}
+
 @JsonSerializable()
 class StudyUUser({
   @JsonKey(name: 'id') required var String id,
@@ -27,6 +45,8 @@ class StudyUUser({
 @JsonSerializable()
 class Preferences({
   @JsonKey(name: 'lang') var String language = '',
+  @JsonKey(name: 'date_format') var DateFormatPreference? dateFormat,
+  @JsonKey(name: 'time_format') var TimeFormatPreference? timeFormat,
   @JsonKey(name: 'pinned_studies') var Set<String> pinnedStudies = const {},
   @JsonKey(name: 'study_filtering')
   var Map<String, dynamic> studyFiltering = const {},

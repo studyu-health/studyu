@@ -194,6 +194,33 @@ class AppLocalizationsKo extends AppLocalizations {
   String get navlink_logout => '로그아웃';
 
   @override
+  String get date_format => '날짜 형식';
+
+  @override
+  String get time_format => '시간 형식';
+
+  @override
+  String get system => '시스템';
+
+  @override
+  String get date_format_iso => 'ISO (2024-12-31)';
+
+  @override
+  String get date_format_european => '유럽식 (31/12/2024)';
+
+  @override
+  String get date_format_us => '미국식 (12/31/2024)';
+
+  @override
+  String get date_format_german => '독일식 (31.12.2024)';
+
+  @override
+  String get time_format_12_hour => '12시간제 (오후 2:30)';
+
+  @override
+  String get time_format_24_hour => '24시간제 (14:30)';
+
+  @override
   String get study_status_draft => '초안';
 
   @override
@@ -922,12 +949,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get date_max_date_label_helper => '참가자가 선택할 수 있는 가장 늦은 날짜';
 
   @override
-  String get date_format_preset_label => '날짜 형식 사전 설정';
-
-  @override
-  String get date_format_preset_label_helper => '참가자에게 날짜를 표시하는 방법 선택';
-
-  @override
   String get date_picker_hint => '날짜를 선택하세요';
 
   @override
@@ -947,12 +968,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get date_input_type_datetime => '날짜와 시간';
-
-  @override
-  String get time_format_preset_label => '시간 형식';
-
-  @override
-  String get time_format_preset_label_helper => '시간 표시 방식을 선택하세요';
 
   @override
   String get date_default_option_label => '기본값';

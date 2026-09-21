@@ -203,6 +203,33 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navlink_logout => 'Abmelden';
 
   @override
+  String get date_format => 'Datumsformat';
+
+  @override
+  String get time_format => 'Zeitformat';
+
+  @override
+  String get system => 'System';
+
+  @override
+  String get date_format_iso => 'ISO (2024-12-31)';
+
+  @override
+  String get date_format_european => 'Europäisch (31/12/2024)';
+
+  @override
+  String get date_format_us => 'US (12/31/2024)';
+
+  @override
+  String get date_format_german => 'Deutsch (31.12.2024)';
+
+  @override
+  String get time_format_12_hour => '12-Stunden (2:30 PM)';
+
+  @override
+  String get time_format_24_hour => '24-Stunden (14:30)';
+
+  @override
   String get study_status_draft => 'Entwurf';
 
   @override
@@ -960,13 +987,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das späteste Datum, das Teilnehmer auswählen können';
 
   @override
-  String get date_format_preset_label => 'Datumsformat-Voreinstellung';
-
-  @override
-  String get date_format_preset_label_helper =>
-      'Wähle aus, wie Datumswerte den Teilnehmern angezeigt werden';
-
-  @override
   String get date_picker_hint => 'Datum auswählen';
 
   @override
@@ -987,13 +1007,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get date_input_type_datetime => 'Datum und Zeit';
-
-  @override
-  String get time_format_preset_label => 'Zeitformat';
-
-  @override
-  String get time_format_preset_label_helper =>
-      'Wähle aus, wie die Zeit angezeigt wird';
 
   @override
   String get date_default_option_label => 'Standardwert';

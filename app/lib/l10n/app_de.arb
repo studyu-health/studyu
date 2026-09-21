@@ -739,5 +739,14 @@
   "invite_landing_enter_code_title": "Einladungscode eingeben",
   "invite_landing_scan_qr_title": "QR-Code scannen",
   "invite_landing_copied": "Kopiert",
-  "invite_landing_copy_code": "Einladungscode kopieren"
+  "invite_landing_copy_code": "Einladungscode kopieren",
+  "date_format": "Datumsformat",
+  "date_format_european": "Europäisch (31/12/2024)",
+  "date_format_german": "Deutsch (31.12.2024)",
+  "date_format_iso": "ISO (2024-12-31)",
+  "date_format_us": "US (12/31/2024)",
+  "system": "System",
+  "time_format": "Zeitformat",
+  "time_format_12_hour": "12-Stunden (2:30 PM)",
+  "time_format_24_hour": "24-Stunden (14:30)"
 }

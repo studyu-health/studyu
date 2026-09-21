@@ -593,5 +593,14 @@
   "invite_landing_enter_code_title": "초대 코드 입력",
   "invite_landing_scan_qr_title": "QR 코드 스캔",
   "invite_landing_copied": "복사됨",
-  "invite_landing_copy_code": "초대 코드 복사"
+  "invite_landing_copy_code": "초대 코드 복사",
+  "date_format": "날짜 형식",
+  "date_format_european": "유럽식 (31/12/2024)",
+  "date_format_german": "독일식 (31.12.2024)",
+  "date_format_iso": "ISO (2024-12-31)",
+  "date_format_us": "미국식 (12/31/2024)",
+  "system": "시스템",
+  "time_format": "시간 형식",
+  "time_format_12_hour": "12시간제 (오후 2:30)",
+  "time_format_24_hour": "24시간제 (14:30)"
 }

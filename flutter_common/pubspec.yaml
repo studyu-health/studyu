@@ -15,6 +15,7 @@ dependencies:
   flutter_dotenv: ^6.0.1
   flutter_material_design_icons: ^3.1.0
   flutter_secure_storage: ^10.3.1
+  intl: ^0.20.2
   lint: ^2.14.0
   shared_preferences: ^2.5.5
   studyu_core: ^4.10.0

@@ -255,10 +255,6 @@ class QuestionFormViewModel({
       );
   final FormControl<String?> dateMinTimeControl = FormControl<String?>();
   final FormControl<String?> dateMaxTimeControl = FormControl<String?>();
-  final FormControl<DateFormatPreset> dateFormatPresetControl =
-      FormControl<DateFormatPreset>(value: DateFormatPreset.iso);
-  final FormControl<TimeFormatPreset> timeFormatPresetControl =
-      FormControl<TimeFormatPreset>(value: TimeFormatPreset.h24);
   final FormControl<DefaultDateOption> dateDefaultOptionControl =
       FormControl<DefaultDateOption>(value: DefaultDateOption.none);
   late final FormControl<DateTime?> dateDefaultSpecificDateControl =
@@ -275,8 +271,6 @@ class QuestionFormViewModel({
     dateMaxControl,
     dateMinTimeControl,
     dateMaxTimeControl,
-    dateFormatPresetControl,
-    timeFormatPresetControl,
     dateDefaultOptionControl,
     dateDefaultSpecificDateControl,
     dateDefaultSpecificTimeControl,
@@ -591,8 +585,6 @@ class QuestionFormViewModel({
       'dateMax': dateMaxControl,
       'dateMinTime': dateMinTimeControl,
       'dateMaxTime': dateMaxTimeControl,
-      'dateFormatPreset': dateFormatPresetControl,
-      'timeFormatPreset': timeFormatPresetControl,
       'dateDefaultOption': dateDefaultOptionControl,
       'dateDefaultSpecificDate': dateDefaultSpecificDateControl,
       'dateDefaultSpecificTime': dateDefaultSpecificTimeControl,
@@ -1000,8 +992,6 @@ class QuestionFormViewModel({
         dateMaxControl.value = data.maxDate;
         dateMinTimeControl.value = data.minTime;
         dateMaxTimeControl.value = data.maxTime;
-        dateFormatPresetControl.value = data.dateFormatPreset;
-        timeFormatPresetControl.value = data.timeFormatPreset;
         dateDefaultOptionControl.value = data.defaultOption;
         dateDefaultSpecificDateControl.value = data.defaultSpecificDate;
         dateDefaultSpecificTimeControl.value = data.defaultSpecificTime;
@@ -1123,10 +1113,6 @@ class QuestionFormViewModel({
           maxDate: dateMaxControl.value,
           minTime: dateMinTimeControl.value,
           maxTime: dateMaxTimeControl.value,
-          dateFormatPreset:
-              dateFormatPresetControl.value ?? DateFormatPreset.iso,
-          timeFormatPreset:
-              timeFormatPresetControl.value ?? TimeFormatPreset.h24,
           defaultOption:
               dateDefaultOptionControl.value ?? DefaultDateOption.none,
           defaultSpecificDate: dateDefaultSpecificDateControl.value,
