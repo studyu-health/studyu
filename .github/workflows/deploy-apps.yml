@@ -65,7 +65,7 @@ jobs:
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3 # do not use head
+          ruby-version: 3.4 # do not use head
           bundler-cache: true
 
       - name: Set up java env
@@ -139,7 +139,7 @@ jobs:
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3 # do not use head
+          ruby-version: 3.4 # do not use head
           # todo
           bundler-cache: false
 
