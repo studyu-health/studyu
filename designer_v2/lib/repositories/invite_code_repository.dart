@@ -4,6 +4,8 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_core/env.dart' as env;
 import 'package:studyu_designer_v2/common_views/qr_code_preview_dialog.dart';
 import 'package:studyu_designer_v2/domain/study.dart';
+import 'package:studyu_designer_v2/domain/study_invite.dart';
+import 'package:studyu_designer_v2/features/recruit/invite_code_form_repository.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/repositories/api_client.dart';
 import 'package:studyu_designer_v2/repositories/auth_repository.dart';
@@ -20,36 +22,55 @@ import 'package:studyu_designer_v2/utils/optimistic_update.dart';
 
 part 'invite_code_repository.g.dart';
 
-abstract class IInviteCodeRepository implements ModelRepository<StudyInvite> {
+const int defaultInviteCodePageSize = 15;
+const _copyInviteLinkActionValue = 'copy_link';
+const _showQrCodeActionValue = 'qr_code';
+const _rowMenuItemHorizontalPadding = 8.0;
+const _rowMenuItemHorizontalTitleGap = 4.0;
+const _rowMenuIconFallbackSize = 14.0;
+const _shareMenuElevation = 5.0;
+
+abstract class IInviteCodeRepository() implements ModelRepository<StudyInvite> {
   Future<bool> isCodeAlreadyUsed(String code);
+
+  Future<List<StudyInvite>> fetchPage({
+    required int offset,
+    required int limit,
+    String? query,
+    InviteCodesSortColumn sortBy = InviteCodesSortColumn.code,
+    bool ascending = true,
+  });
+
+  Future<int> count({String? query});
 }
 
-class InviteCodeRepository extends ModelRepository<StudyInvite>
-    implements IInviteCodeRepository {
-  InviteCodeRepository({
-    required this.studyId,
-    required this.apiClient,
-    required this.authRepository,
-    required this.studyRepository,
-    required this.ref,
-  }) : super(
-         InviteCodeRepositoryDelegate(
-           study: studyRepository.get(studyId)!.model,
-           apiClient: apiClient,
-           studyRepository: studyRepository,
-         ),
-       );
-
+class InviteCodeRepository({
   /// The [Study] this repository operates on
-  final StudyID studyId;
-  Study get study => studyRepository.get(studyId)!.model;
+  required final StudyID studyId,
+  required final StudyUApi apiClient,
+  required final IAuthRepository authRepository,
+  required final IStudyRepository studyRepository,
 
   /// Reference to Riverpod's context to resolve dependencies in callbacks
-  final Ref ref;
+  required final Ref ref,
+}) extends ModelRepository<StudyInvite>
+    implements IInviteCodeRepository, InviteCodeFormRepository {
+  this
+    : super(
+        InviteCodeRepositoryDelegate(
+          study: studyRepository.get(studyId)!.model,
+          apiClient: apiClient,
+          studyRepository: studyRepository,
+        ),
+      );
 
-  final StudyUApi apiClient;
-  final IAuthRepository authRepository;
-  final IStudyRepository studyRepository;
+  Study get study => studyRepository.get(studyId)!.model;
+
+  final Map<ModelID, WrappedModel<StudyInvite>> _pageCache = {};
+  int _pageFetchToken = 0;
+
+  @override
+  Map<ModelID, WrappedModel<StudyInvite>> get modelCache => _pageCache;
 
   @override
   ModelID getKey(StudyInvite model) {
@@ -70,7 +91,49 @@ class InviteCodeRepository extends ModelRepository<StudyInvite>
 
   /// Generate the deep link URL for an invite code
   String generateInviteDeepLink(String code) {
-    return env.generateAppDeepLink('invite/$code');
+    return env.generateAppDeepLink('invite/${Uri.encodeComponent(code)}');
+  }
+
+  @override
+  Future<List<StudyInvite>> fetchPage({
+    required int offset,
+    required int limit,
+    String? query,
+    InviteCodesSortColumn sortBy = InviteCodesSortColumn.code,
+    bool ascending = true,
+  }) async {
+    final fetchToken = ++_pageFetchToken;
+    final invites = await apiClient.fetchStudyInvitesPage(
+      studyId,
+      offset: offset,
+      limit: limit,
+      query: query,
+      sortBy: sortBy,
+      ascending: ascending,
+    );
+    if (fetchToken != _pageFetchToken) {
+      return invites;
+    }
+
+    final pageIds = invites.map(getKey).toSet();
+    modelCache.removeWhere(
+      (modelId, wrappedModel) =>
+          !pageIds.contains(modelId) &&
+          !modelStreamControllers.containsKey(modelId) &&
+          !wrappedModel.isDirty &&
+          !wrappedModel.isLocalOnly,
+    );
+    for (final invite in invites) {
+      final wrappedInvite = upsertLocally(invite);
+      wrappedInvite.markAsFetched();
+    }
+    emitUpdate();
+    return invites;
+  }
+
+  @override
+  Future<int> count({String? query}) {
+    return apiClient.countStudyInvites(studyId, query: query);
   }
 
   @override
@@ -100,22 +163,23 @@ class InviteCodeRepository extends ModelRepository<StudyInvite>
         label: ModelActionType.qrCodeShow.string,
         onExecute: () {},
         onExecuteWithContext: (context) {
-          _showQrCode(context, deepLink, model.code);
+          _showQrCode(context, deepLink, model.code, inviteCode: model.code);
         },
       ),
     ];
 
     if (study.isOwner(authRepository.currentUser)) {
-      actions.addAll([
-        ModelAction.addSeparator(),
+      actions.add(
         ModelAction(
           type: ModelActionType.delete,
-          label: tr.action_delete_invite_code,
-          confirmation: ModelActionConfirmations.delete(
-            subject: tr.dialog_subject_invite_code,
+          label: tr.action_delete_code,
+          confirmation: ModelActionConfirmation(
+            title: tr.dialog_delete_invite_code_title,
+            message: tr.dialog_delete_invite_code_message(model.code),
+            confirmLabel: tr.action_delete_code,
           ),
           onExecute: () async {
-            await delete(getKey(model));
+            await delete(getKey(model), runOptimistically: false);
             ref
                 .read(routerProvider)
                 .dispatch(RoutingIntents.studyRecruit(model.studyId));
@@ -128,7 +192,7 @@ class InviteCodeRepository extends ModelRepository<StudyInvite>
           },
           isDestructive: true,
         ),
-      ]);
+      );
     }
 
     return actions;
@@ -165,29 +229,33 @@ class InviteCodeRepository extends ModelRepository<StudyInvite>
     showMenu<String>(
       context: context,
       position: position,
-      elevation: 5,
+      elevation: _shareMenuElevation,
       items: [
         PopupMenuItem<String>(
-          value: 'copy_link',
+          value: _copyInviteLinkActionValue,
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-            horizontalTitleGap: 4.0,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: _rowMenuItemHorizontalPadding,
+            ),
+            horizontalTitleGap: _rowMenuItemHorizontalTitleGap,
             leading: Icon(
               Icons.link_rounded,
-              size: theme.iconTheme.size ?? 14.0,
+              size: theme.iconTheme.size ?? _rowMenuIconFallbackSize,
               color: iconColorDefault,
             ),
             title: Text(tr.action_copy_invite_link, style: textTheme),
           ),
         ),
         PopupMenuItem<String>(
-          value: 'qr_code',
+          value: _showQrCodeActionValue,
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-            horizontalTitleGap: 4.0,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: _rowMenuItemHorizontalPadding,
+            ),
+            horizontalTitleGap: _rowMenuItemHorizontalTitleGap,
             leading: Icon(
               Icons.qr_code_rounded,
-              size: theme.iconTheme.size ?? 14.0,
+              size: theme.iconTheme.size ?? _rowMenuIconFallbackSize,
               color: iconColorDefault,
             ),
             title: Text(ModelActionType.qrCodeShow.string, style: textTheme),
@@ -195,65 +263,55 @@ class InviteCodeRepository extends ModelRepository<StudyInvite>
         ),
       ],
     ).then((value) {
-      if (value == 'copy_link') {
+      if (value == _copyInviteLinkActionValue) {
         _copy(deepLink, Notifications.inviteLinkCopied);
-      } else if (value == 'qr_code' && effectiveContext.mounted) {
-        _showQrCode(effectiveContext, deepLink, filename);
+      } else if (value == _showQrCodeActionValue && effectiveContext.mounted) {
+        _showQrCode(effectiveContext, deepLink, filename, inviteCode: filename);
       }
     });
   }
 
-  void _showQrCode(BuildContext context, String deepLink, String filename) {
+  void _showQrCode(
+    BuildContext context,
+    String deepLink,
+    String filename, {
+    String? inviteCode,
+  }) {
     showDialog(
       context: context,
-      builder: (ctx) => QrCodePreviewDialog(data: deepLink, filename: filename),
+      builder: (ctx) => QrCodePreviewDialog(
+        data: deepLink,
+        filename: filename,
+        inviteCode: inviteCode,
+      ),
     );
   }
 }
 
-class InviteCodeRepositoryDelegate
-    extends IModelRepositoryDelegate<StudyInvite> {
-  InviteCodeRepositoryDelegate({
-    required this.study,
-    required this.apiClient,
-    required this.studyRepository,
-  });
-
-  final Study study;
-  final StudyUApi apiClient;
-  final IStudyRepository studyRepository;
-
+class InviteCodeRepositoryDelegate({
+  required final Study study,
+  required final StudyUApi apiClient,
+  required final IStudyRepository studyRepository,
+}) extends IModelRepositoryDelegate<StudyInvite> {
   @override
   Future<StudyInvite> fetch(ModelID modelId) {
-    // Read directly from the study instead of fetching from the network
-    return Future.value(study.getInvite(modelId));
+    return apiClient.fetchStudyInvite(modelId);
   }
 
   @override
   Future<List<StudyInvite>> fetchAll() {
-    // Read directly from the study instead of fetching from the network
-    return Future.value(study.invites ?? []);
+    return apiClient.fetchStudyInvitesPage(
+      study.id,
+      offset: 0,
+      limit: defaultInviteCodePageSize,
+    );
   }
 
   @override
   Future<StudyInvite> save(StudyInvite model) {
-    study.invites ??= [];
-    final prevInvites = [...study.invites!];
-
+    final prevInvites = [...?study.invites];
     final saveOperation = OptimisticUpdate(
-      applyOptimistic: () {
-        final inviteIdx = study.invites!.indexWhere(
-          (i) => i.code == model.code,
-        );
-        if (inviteIdx == -1) {
-          // add new code
-          study.invites!.add(model);
-        } else {
-          // replace existing code
-          study.invites![inviteIdx] = model;
-        }
-        studyRepository.upsertLocally(study);
-      },
+      applyOptimistic: () {},
       apply: () async {
         await studyRepository.ensurePersisted(model.studyId);
         await apiClient.saveStudyInvite(model);
@@ -264,6 +322,7 @@ class InviteCodeRepositoryDelegate
       },
       onUpdate: studyRepository.emitUpdate,
       rethrowErrors: true,
+      completeFutureOptimistically: false,
     );
 
     return saveOperation.execute().then((_) => model);
@@ -271,26 +330,7 @@ class InviteCodeRepositoryDelegate
 
   @override
   Future<void> delete(StudyInvite model) {
-    assert(study.invites != null);
-    assert(study.invites!.isNotEmpty);
-
-    final prevInvites = [...study.invites!];
-    final deleteOperation = OptimisticUpdate(
-      applyOptimistic: () {
-        study.invites!.remove(model);
-        /*study.invites!.removeWhere((i) => i.code == model.code);*/
-        studyRepository.upsertLocally(study);
-      },
-      apply: () => apiClient.deleteStudyInvite(model),
-      rollback: () {
-        study.invites = prevInvites;
-        studyRepository.upsertLocally(study);
-      },
-      onUpdate: studyRepository.emitUpdate,
-      rethrowErrors: true,
-    );
-
-    return deleteOperation.execute();
+    return apiClient.deleteStudyInvite(model);
   }
 
   @override
@@ -311,7 +351,6 @@ class InviteCodeRepositoryDelegate
 
 @riverpod
 InviteCodeRepository inviteCodeRepository(Ref ref, StudyID studyId) {
-  print("inviteCodeRepositoryProvider($studyId");
   // Initialize repository for a given study
   final repository = InviteCodeRepository(
     studyId: studyId,
@@ -322,7 +361,6 @@ InviteCodeRepository inviteCodeRepository(Ref ref, StudyID studyId) {
   );
   // Bind lifecycle to Riverpod
   ref.onDispose(() {
-    print("inviteCodeRepositoryProvider($studyId.DISPOSE");
     repository.dispose();
   });
   return repository;

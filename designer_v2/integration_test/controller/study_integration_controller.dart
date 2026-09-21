@@ -5,7 +5,7 @@ import '../mockup/mockup_studies.dart';
 import 'robots/robots.dart';
 import 'study_validator.dart';
 
-abstract class StudyIntegrationActions {
+abstract class StudyIntegrationActions() {
   Future<void> fillTitle();
   Future<void> fillInfoPage();
   Future<void> fillInterventions(
@@ -18,17 +18,14 @@ abstract class StudyIntegrationActions {
   );
 }
 
-class StudyIntegrationController extends StudyRobots
+class StudyIntegrationController(super.$, final Study Function() _mockStudyRef)
+    extends StudyRobots
     implements StudyIntegrationActions {
-  final Study Function() _mockStudyRef;
-
   // Only available after login
   late final String userID;
   late final MockupLoader mockupLoader;
   late final Study _intermediateMockStudy;
   late final Study mockStudy;
-
-  StudyIntegrationController(super.$, this._mockStudyRef);
 
   Future<void> init(String userID_) async {
     userID = userID_;

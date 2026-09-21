@@ -8,61 +8,40 @@ import 'package:studyu_designer_v2/common_views/standard_table.dart';
 import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
 
 typedef FormArrayTableRowLabelProvider<T> = String Function(T item);
-typedef WidgetBuilderAt<T> =
-    Widget Function(BuildContext context, T item, int rowIdx);
+typedef WidgetBuilderAt<T> = Widget Function(
+  BuildContext context,
+  T item,
+  int rowIdx,
+);
 
-class FormArrayTable<T> extends StatelessWidget {
-  const FormArrayTable({
-    required this.control,
-    required this.items,
-    required this.onSelectItem,
-    required this.getActionsAt,
-    this.onNewItem,
-    required this.onNewItemLabel,
-    required this.rowTitle,
-    this.rowPrefix,
-    this.rowSuffix,
-    this.leadingWidget,
-    this.sectionTitle,
-    this.sectionTitleDivider = true,
-    this.sectionDescription,
-    this.emptyIcon,
-    this.emptyTitle,
-    this.emptyDescription,
-    this.itemsSectionPadding = const EdgeInsets.symmetric(vertical: 8.0),
-    this.hideLeadingTrailingWhenEmpty = false,
-    super.key,
-  }) : assert(
-         sectionTitle == null || leadingWidget == null,
-         "Cannot specify both sectionTitle and leadingWidget",
-       );
-
-  final AbstractControl control;
-
-  final List<T> items;
-  final OnSelectHandler<T> onSelectItem;
-  final ActionsProviderAt<T> getActionsAt;
-  final VoidCallback? onNewItem;
-  final FormArrayTableRowLabelProvider<T> rowTitle;
-
-  final String onNewItemLabel;
-  final String? sectionTitle;
-  final String? sectionDescription;
-
-  final IconData? emptyIcon;
-  final String? emptyTitle;
-  final String? emptyDescription;
-
-  final bool? sectionTitleDivider;
-
-  final WidgetBuilderAt<T>? rowPrefix;
-  final WidgetBuilderAt<T>? rowSuffix;
-
-  final Widget? leadingWidget;
-
-  final EdgeInsets? itemsSectionPadding;
-
-  final bool hideLeadingTrailingWhenEmpty;
+class const FormArrayTable<T>({
+  required final AbstractControl control,
+  required final List<T> items,
+  required final OnSelectHandler<T> onSelectItem,
+  required final ActionsProviderAt<T> getActionsAt,
+  final VoidCallback? onNewItem,
+  required final String onNewItemLabel,
+  required final FormArrayTableRowLabelProvider<T> rowTitle,
+  final WidgetBuilderAt<T>? rowPrefix,
+  final WidgetBuilderAt<T>? rowSuffix,
+  final Widget? leadingWidget,
+  final String? sectionTitle,
+  final bool? sectionTitleDivider = true,
+  final String? sectionDescription,
+  final IconData? emptyIcon,
+  final String? emptyTitle,
+  final String? emptyDescription,
+  final EdgeInsets? itemsSectionPadding = const EdgeInsets.symmetric(
+    vertical: 8.0,
+  ),
+  final bool hideLeadingTrailingWhenEmpty = false,
+  super.key,
+}) extends StatelessWidget {
+  this
+    : assert(
+        sectionTitle == null || leadingWidget == null,
+        "Cannot specify both sectionTitle and leadingWidget",
+      );
 
   static final List<StandardTableColumn> columns = [
     StandardTableColumn(

@@ -5,70 +5,45 @@ import 'package:studyu_designer_v2/routing/router.dart';
 import 'package:studyu_designer_v2/routing/router_intent.dart';
 import 'package:studyu_designer_v2/utils/performance.dart';
 
-class NavbarTab {
-  NavbarTab({
-    required this.title,
-    required this.index,
-    this.intent,
-    this.enabled = true,
-  });
-
+class NavbarTab({
   /// The text displayed as the tab's title
-  final String title;
+  required final String title,
+  required final int index,
 
   /// The route to navigate to when switching to the tab
-  final RoutingIntent? intent;
+  final RoutingIntent? intent,
+  final bool enabled = true,
+});
 
-  final int index;
+typedef OnTabSelectCallback<T extends NavbarTab> = void Function(
+  int tabIdx,
+  T tab,
+);
 
-  final bool enabled;
-}
-
-typedef OnTabSelectCallback<T extends NavbarTab> =
-    void Function(int tabIdx, T tab);
-
-class TabbedNavbar<T extends NavbarTab> extends ConsumerStatefulWidget {
-  const TabbedNavbar({
-    required this.tabs,
-    this.selectedTab,
-    this.indicator,
-    this.height,
-    this.disabledBackgroundColor,
-    this.disabledTooltipText,
-    this.onSelect,
-    this.labelPadding = const EdgeInsets.symmetric(horizontal: 20.0),
-    this.labelSpacing = 0,
-    this.indicatorSize,
-    this.isScrollable = false,
-    this.backgroundColor,
-    this.overlayColor,
-    this.labelColorHover,
-    this.unselectedLabelColorHover,
-    super.key,
-  });
-
-  final List<T> tabs;
-  final T? selectedTab;
-  final BoxDecoration? indicator;
-  final double? height;
-  final Color? disabledBackgroundColor;
-  final String? disabledTooltipText;
-  final OnTabSelectCallback<T>? onSelect;
-  final EdgeInsets? labelPadding;
-  final double? labelSpacing;
-  final TabBarIndicatorSize? indicatorSize;
-  final bool isScrollable;
-  final Color? backgroundColor;
-  final WidgetStateProperty<Color>? overlayColor;
-  final Color? labelColorHover;
-  final Color? unselectedLabelColorHover;
-
+class const TabbedNavbar<T extends NavbarTab>({
+  required final List<T> tabs,
+  final T? selectedTab,
+  final BoxDecoration? indicator,
+  final double? height,
+  final Color? disabledBackgroundColor,
+  final String? disabledTooltipText,
+  final OnTabSelectCallback<T>? onSelect,
+  final EdgeInsets? labelPadding = const EdgeInsets.symmetric(horizontal: 20.0),
+  final double? labelSpacing = 0,
+  final TabBarIndicatorSize? indicatorSize,
+  final bool isScrollable = false,
+  final Color? backgroundColor,
+  final WidgetStateProperty<Color>? overlayColor,
+  final Color? labelColorHover,
+  final Color? unselectedLabelColorHover,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _TabbedNavbarState<T>();
 }
 
-class _TabbedNavbarState<T extends NavbarTab>
+class _TabbedNavbarState<T extends NavbarTab>()
     extends ConsumerState<TabbedNavbar>
     with TickerProviderStateMixin
     implements Listenable {

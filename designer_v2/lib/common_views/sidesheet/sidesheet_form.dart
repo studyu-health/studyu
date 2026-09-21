@@ -9,34 +9,26 @@ import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 import 'package:studyu_designer_v2/features/forms/unsaved_changes_dialog.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class FormSideSheetTab<T extends FormViewModel> extends NavbarTab {
-  FormSideSheetTab({
-    required super.title,
-    required super.index,
-    required this.formViewBuilder,
-    super.enabled,
-  });
+class FormSideSheetTab<T extends FormViewModel>({
+  required super.title,
+  required super.index,
 
   /// The widget to be rendered as the sidesheet content with a [FormViewModel]
   /// of type [T] when the tab is selected
-  FormViewBuilder<T> formViewBuilder;
-}
+  required var FormViewBuilder<T> formViewBuilder,
+  super.enabled,
+}) extends NavbarTab;
 
-class _FormSidesheetPopEntry<T extends FormViewModel> extends StatefulWidget {
-  const _FormSidesheetPopEntry({
-    required this.formViewModel,
-    required this.child,
-  });
-
-  final T formViewModel;
-  final Widget child;
-
+class const _FormSidesheetPopEntry<T extends FormViewModel>({
+  required final T formViewModel,
+  required final Widget child,
+}) extends StatefulWidget {
   @override
   State<_FormSidesheetPopEntry<T>> createState() =>
       _FormSidesheetPopEntryState<T>();
 }
 
-class _FormSidesheetPopEntryState<T extends FormViewModel>
+class _FormSidesheetPopEntryState<T extends FormViewModel>()
     extends State<_FormSidesheetPopEntry<T>>
     implements PopEntry {
   ModalRoute<dynamic>? _route;
@@ -82,18 +74,12 @@ class _FormSidesheetPopEntryState<T extends FormViewModel>
     debugPrint(
       '[PopEntry] _handleDismiss isDirty=${widget.formViewModel.isDirty}',
     );
+    _canPopNotifier.value = false;
 
     if (!widget.formViewModel.isDirty) {
       await widget.formViewModel.cancel();
       if (mounted) {
-        _canPopNotifier.value = true;
-
-        // CHANGE HERE: Wait for the frame to finish so Navigator is unlocked
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            Navigator.of(context, rootNavigator: true).pop();
-          }
-        });
+        _schedulePop();
       }
       return;
     }
@@ -107,17 +93,27 @@ class _FormSidesheetPopEntryState<T extends FormViewModel>
 
     if (shouldDiscard == true && mounted) {
       await widget.formViewModel.cancel();
-      if (mounted && Navigator.of(context).canPop()) {
-        _canPopNotifier.value = true;
-
-        // CHANGE HERE: Wait for the frame to finish
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            Navigator.of(context, rootNavigator: true).pop();
-          }
-        });
+      if (mounted) {
+        _schedulePop();
       }
     }
+  }
+
+  void _schedulePop() {
+    _canPopNotifier.value = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _popCurrentRoute();
+      }
+    });
+  }
+
+  void _popCurrentRoute() {
+    final navigator = _route?.navigator;
+    if (navigator == null || !navigator.canPop()) {
+      return;
+    }
+    navigator.pop();
   }
 
   @override

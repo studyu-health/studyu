@@ -19,7 +19,7 @@ jobs:
   add-labels:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/labeler@v6
+      - uses: actions/labeler@v7
         with:
           sync-labels: true # allow removing labels when changes are reverted
           dot: true # have ** include hidden files as well
@@ -28,4 +28,4 @@ jobs:
     if: github.event.action == 'opened' || github.event.action == 'reopened'
     runs-on: ubuntu-latest
     steps:
-      - uses: toshimaru/auto-author-assign@v3.0.2
+      - uses: toshimaru/auto-author-assign@v3.1.0

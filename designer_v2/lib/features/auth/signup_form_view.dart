@@ -7,6 +7,7 @@ import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/common_views/text_hyperlink.dart';
 import 'package:studyu_designer_v2/features/auth/auth_form_controller.dart';
 import 'package:studyu_designer_v2/features/auth/auth_form_fields.dart';
+import 'package:studyu_designer_v2/features/auth/auth_inline_prompt_action.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/localization/locale_providers.dart';
 import 'package:studyu_designer_v2/repositories/app_repository.dart';
@@ -14,9 +15,7 @@ import 'package:studyu_designer_v2/routing/router.dart';
 import 'package:studyu_designer_v2/routing/router_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SignupForm extends FormConsumerRefWidget {
-  const SignupForm({super.key});
-
+class const SignupForm({super.key}) extends FormConsumerRefWidget {
   @override
   Widget build(BuildContext context, FormGroup form, WidgetRef ref) {
     const formKey = AuthFormKey.signup;
@@ -100,7 +99,8 @@ class SignupForm extends FormConsumerRefWidget {
         const SizedBox(height: 24.0),
         ReactiveFormConsumer(
           builder: (context, form, child) {
-            return Center(
+            return SizedBox(
+              width: double.infinity,
               child: PrimaryButton(
                 key: const ValueKey('signup_button'),
                 text: tr.action_button_signup,
@@ -121,18 +121,12 @@ class SignupForm extends FormConsumerRefWidget {
         const SizedBox(height: 24.0),
         const Divider(height: 1),
         const SizedBox(height: 12.0),
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(tr.link_login_description),
-            const SizedBox(width: 4.0),
-            Hyperlink(
-              key: const ValueKey('login_link'),
-              text: tr.link_login,
-              onClick: () =>
-                  ref.read(routerProvider).dispatch(RoutingIntents.login),
-            ),
-          ],
+        AuthInlinePromptAction(
+          key: const ValueKey('login_link'),
+          promptText: tr.link_login_description,
+          actionText: tr.link_login,
+          onPressed: () =>
+              ref.read(routerProvider).dispatch(RoutingIntents.login),
         ),
       ],
     );

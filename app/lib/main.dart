@@ -20,14 +20,12 @@ import 'package:timezone/timezone.dart' as tz;
 
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse notificationResponse) {
-  // ignore: avoid_print
   print(
     'notification(${notificationResponse.id}) action tapped: '
     '${notificationResponse.actionId} with'
     ' payload: ${notificationResponse.payload}',
   );
   if (notificationResponse.input?.isNotEmpty ?? false) {
-    // ignore: avoid_print
     print(
       'notification action tapped with input: ${notificationResponse.input}',
     );
@@ -63,11 +61,15 @@ Future<void> main() async {
     debugPrint('Error loading env: $error');
   }
   await _configureLocalTimeZone();
+  await _storeE2eParticipantCredentials();
   final queryParameters = Uri.base.queryParameters;
   // Turn off the # in the URLs on the web
   usePathUrlStrategy();
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   AppConfig? appConfig;
-  String initialRoute = '/${RouteNames.loading}';
+  final platformInitialRoute =
+      WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+  String initialRoute = initialRouteFromPlatformRoute(platformInitialRoute);
   try {
     appConfig = await AppConfig.getAppConfig();
   } on PostgrestException catch (e) {
@@ -85,6 +87,8 @@ Future<void> main() async {
     initialRoute = '/${RouteNames.appOutdated}';
   }
 
+  // This application uses Provider rather than Riverpod, so it does not need a ProviderScope.
+  // ignore: riverpod_lint/missing_provider_scope
   runApp(MyApp(queryParameters, appConfig, initialRoute: initialRoute));
 
   AppLifecycleListener(
@@ -132,6 +136,17 @@ Future<bool> isAppOutdated(AppConfig appConfig) async {
 }
 
 /// This is needed for flutter_local_notifications
+/// Stores local-only fixture credentials before production startup for a
+/// browser E2E run. LoadingScreen then signs in through signInParticipant.
+Future<void> _storeE2eParticipantCredentials() async {
+  const email = String.fromEnvironment('STUDYU_E2E_PARTICIPANT_EMAIL');
+  const password = String.fromEnvironment('STUDYU_E2E_PARTICIPANT_PASSWORD');
+
+  if (!kDebugMode || email.isEmpty || password.isEmpty) return;
+
+  await storeFakeUserEmailAndPassword(email, password);
+}
+
 Future<void> _configureLocalTimeZone() async {
   if (kIsWeb || Platform.isLinux) {
     return;

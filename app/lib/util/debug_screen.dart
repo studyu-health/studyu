@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -6,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/util/notifications.dart';
@@ -14,7 +16,7 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DebugScreen {
+class DebugScreen() {
   static Future<void> showDebugScreen(BuildContext context) async {
     final studyNotifications = context.read<AppState>().studyNotifications;
 
@@ -48,9 +50,9 @@ class DebugScreen {
     if (studyNotifications == null) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Notifications are not initialized yet. Please start a study and open this through the about section.',
+            AppLocalizations.of(context)!.debug_notifications_not_initialized,
           ),
         ),
       );
@@ -58,8 +60,8 @@ class DebugScreen {
     }
     await studyNotifications.flutterLocalNotificationsPlugin.show(
       id: 99,
-      title: 'StudyU Test Notification',
-      body: 'This notification confirms that you receive StudyU notifications',
+      title: AppLocalizations.of(context)!.debug_test_notification_title,
+      body: AppLocalizations.of(context)!.debug_test_notification_body,
       notificationDetails: notificationDetails,
     );
   }
@@ -91,8 +93,8 @@ class DebugScreen {
         context.pop();
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('App reset successfully! Please restart the app.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.debug_reset_success),
           ),
         );
         await Future.delayed(const Duration(seconds: 1));
@@ -103,8 +105,8 @@ class DebugScreen {
       if (context.mounted) {
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error while resetting the app. Please try again.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.debug_reset_error),
           ),
         );
       }
@@ -112,24 +114,18 @@ class DebugScreen {
   }
 }
 
-class _DebugDialog extends StatefulWidget {
-  const _DebugDialog({
-    required this.studyNotifications,
-    required this.pendingNotifications,
-    required this.pendingNotificationsPlugin,
-    required this.versionString,
-  });
-
-  final StudyNotifications? studyNotifications;
-  final Future<List> pendingNotifications;
-  final Future<List<PendingNotificationRequest>> pendingNotificationsPlugin;
-  final String versionString;
-
+class const _DebugDialog({
+  required final StudyNotifications? studyNotifications,
+  required final Future<List> pendingNotifications,
+  required final Future<List<PendingNotificationRequest>>
+  pendingNotificationsPlugin,
+  required final String versionString,
+}) extends StatefulWidget {
   @override
   State<_DebugDialog> createState() => __DebugDialogState();
 }
 
-class __DebugDialogState extends State<_DebugDialog> {
+class __DebugDialogState() extends State<_DebugDialog> {
   bool? ignoreBatteryOptimizations;
   int? pendingNotificationCount;
   int? pendingNotificationsPluginCount;
@@ -137,7 +133,7 @@ class __DebugDialogState extends State<_DebugDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const SelectableText('Debug Screen'),
+      title: SelectableText(AppLocalizations.of(context)!.debug_screen_title),
       content: Column(
         children: [
           _buildVersionInfo(),
@@ -147,6 +143,10 @@ class __DebugDialogState extends State<_DebugDialog> {
           _buildTestNotificationButton(),
           const SizedBox(height: 8),
           _buildResetAppButton(),
+          if (kDebugMode) ...[
+            const SizedBox(height: 8),
+            _buildShowOnboardingButton(),
+          ],
           const SizedBox(height: 16),
           _buildPreviewModeSwitch(),
           const SizedBox(height: 16),
@@ -175,7 +175,9 @@ class __DebugDialogState extends State<_DebugDialog> {
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      child: const Text('Send debug information via email'),
+      child: Text(
+        AppLocalizations.of(context)!.debug_send_information_via_email,
+      ),
     );
   }
 
@@ -189,7 +191,9 @@ class __DebugDialogState extends State<_DebugDialog> {
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.secondary,
       ),
-      child: const Text('Receive test notification'),
+      child: Text(
+        AppLocalizations.of(context)!.debug_receive_test_notification,
+      ),
     );
   }
 
@@ -199,7 +203,17 @@ class __DebugDialogState extends State<_DebugDialog> {
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.error,
       ),
-      child: const Text('Reset App'),
+      child: Text(AppLocalizations.of(context)!.reset_app),
+    );
+  }
+
+  Widget _buildShowOnboardingButton() {
+    return TextButton.icon(
+      key: const ValueKey('debug_show_onboarding'),
+      style: TextButton.styleFrom(foregroundColor: Colors.orange),
+      icon: const Icon(Icons.bug_report),
+      onPressed: () => context.go('/${RouteNames.onboarding}'),
+      label: Text(AppLocalizations.of(context)!.debug_show_onboarding),
     );
   }
 

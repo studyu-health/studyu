@@ -7,28 +7,27 @@ import 'package:studyu_app/screens/study/report/util/plot_utilities.dart';
 import 'package:studyu_app/util/data_processing.dart';
 import 'package:studyu_core/core.dart';
 
-class AverageSectionWidget extends ReportSectionWidget {
-  final AverageSection section;
-
-  const AverageSectionWidget(super.subject, this.section, {super.key});
-
+class const AverageSectionWidget(
+  super.subject,
+  final AverageSection section, {
+  super.key,
+}) extends ReportSectionWidget {
   @override
   Widget build(BuildContext context) {
     return _AverageSectionStatefulWidget(subject, section);
   }
 }
 
-class _AverageSectionStatefulWidget extends StatefulWidget {
-  final StudySubject subject;
-  final AverageSection section;
-
-  const _AverageSectionStatefulWidget(this.subject, this.section);
-
+class const _AverageSectionStatefulWidget(
+  final StudySubject subject,
+  final AverageSection section,
+) extends StatefulWidget {
   @override
   _AverageSectionWidgetState createState() => _AverageSectionWidgetState();
 }
 
-class _AverageSectionWidgetState extends State<_AverageSectionStatefulWidget> {
+class _AverageSectionWidgetState()
+    extends State<_AverageSectionStatefulWidget> {
   bool showColorlessGauges = false;
   @override
   Widget build(BuildContext context) {
@@ -104,9 +103,9 @@ class _AverageSectionWidgetState extends State<_AverageSectionStatefulWidget> {
   List<int> get phasePos {
     final numberOfPhases = widget.subject.interventionOrder.length;
     final phaseDuration = widget.subject.study.schedule.phaseDuration;
-    return Iterable<int>.generate(
-      numberOfPhases,
-    ).map((i) => (i + 1) * phaseDuration).toList();
+    return Iterable<int>.generate(numberOfPhases)
+        .map((i) => (i + 1) * phaseDuration)
+        .toList();
   }
 
   Widget getLegend(BuildContext context, List<DiagramDatum> data) {
@@ -559,11 +558,9 @@ class _AverageSectionWidgetState extends State<_AverageSectionStatefulWidget> {
   }
 }
 
-class DiagramDatum {
-  final num x;
-  final num value;
-  final DateTime? timestamp;
-  final String intervention;
-
-  DiagramDatum(this.x, this.value, this.timestamp, this.intervention);
-}
+class DiagramDatum(
+  final num x,
+  final num value,
+  final DateTime? timestamp,
+  final String intervention,
+);

@@ -11,14 +11,15 @@ class ChoiceQuestion extends Question<List<String>> {
   static const String questionType = 'choice';
 
   bool multiple = false;
+  @JsonKey(defaultValue: false)
+  bool selectionRequired = false;
   List<Choice> choices = [];
 
-  ChoiceQuestion() : super(questionType);
+  new() : super(questionType);
 
-  ChoiceQuestion.withId() : super.withId(questionType);
+  new withId() : super.withId(questionType);
 
-  factory ChoiceQuestion.fromJson(Map<String, dynamic> json) =>
-      _$ChoiceQuestionFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$ChoiceQuestionFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$ChoiceQuestionToJson(this);
@@ -32,14 +33,13 @@ class Choice {
   String id;
   String text = '';
 
-  Choice(this.id);
+  new(this.id);
 
-  Choice.withText({String? id, required this.text})
-    : id = id ?? const Uuid().v4();
+  new withText({String? id, required this.text}) : id = id ?? const Uuid().v4();
 
-  Choice.withId() : id = const Uuid().v4();
+  new withId() : id = const Uuid().v4();
 
-  factory Choice.fromJson(Map<String, dynamic> json) => _$ChoiceFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$ChoiceFromJson(json);
 
   Map<String, dynamic> toJson() => _$ChoiceToJson(this);
 

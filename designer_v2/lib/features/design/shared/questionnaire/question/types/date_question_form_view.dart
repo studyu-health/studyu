@@ -8,11 +8,10 @@ import 'package:studyu_designer_v2/common_views/form_table_layout.dart';
 import 'package:studyu_designer_v2/features/design/shared/questionnaire/question/question_form_controller.dart';
 import 'package:studyu_designer_v2/localization/app_localizations.dart';
 
-class DateQuestionFormView extends ConsumerWidget {
-  const DateQuestionFormView({required this.formViewModel, super.key});
-
-  final QuestionFormViewModel formViewModel;
-
+class const DateQuestionFormView({
+  required final QuestionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerWidget {
   String _formatDate(DateTime date, DateFormatPreset preset) {
     try {
       final format = DateFormat(preset.pattern);
@@ -82,9 +81,8 @@ class DateQuestionFormView extends ConsumerWidget {
                   formControl: formViewModel.timeFormatPresetControl,
                   items: TimeFormatPreset.values.map((preset) {
                     final exampleTime = DateTime(2000, 1, 1, 14, 30);
-                    final example = DateFormat(
-                      preset.pattern,
-                    ).format(exampleTime);
+                    final example = DateFormat(preset.pattern)
+                        .format(exampleTime);
                     return DropdownMenuItem(
                       value: preset,
                       child: Text(example),
@@ -294,20 +292,13 @@ class DateQuestionFormView extends ConsumerWidget {
 }
 
 /// Custom reactive date picker field
-class ReactiveDatePickerField extends StatelessWidget {
-  const ReactiveDatePickerField({
-    required this.formControl,
-    required this.firstDate,
-    required this.lastDate,
-    this.placeholder,
-    super.key,
-  });
-
-  final FormControl<DateTime?> formControl;
-  final DateTime firstDate;
-  final DateTime lastDate;
-  final String? placeholder;
-
+class const ReactiveDatePickerField({
+  required final FormControl<DateTime?> formControl,
+  required final DateTime firstDate,
+  required final DateTime lastDate,
+  final String? placeholder,
+  super.key,
+}) extends StatelessWidget {
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
     final initialDate = formControl.value ?? now;
@@ -366,16 +357,11 @@ class ReactiveDatePickerField extends StatelessWidget {
 }
 
 /// Custom reactive time picker field
-class ReactiveTimePickerField extends StatelessWidget {
-  const ReactiveTimePickerField({
-    required this.formControl,
-    this.placeholder,
-    super.key,
-  });
-
-  final FormControl<String?> formControl;
-  final String? placeholder;
-
+class const ReactiveTimePickerField({
+  required final FormControl<String?> formControl,
+  final String? placeholder,
+  super.key,
+}) extends StatelessWidget {
   Future<void> _pickTime(BuildContext context) async {
     final now = TimeOfDay.now();
     final initialTime = formControl.value != null

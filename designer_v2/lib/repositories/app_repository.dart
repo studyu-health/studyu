@@ -4,16 +4,12 @@ import 'package:studyu_designer_v2/repositories/api_client.dart';
 
 part 'app_repository.g.dart';
 
-abstract class IAppRepository {
+abstract class IAppRepository() {
   Future<AppConfig> fetchAppConfig();
   void dispose();
 }
 
-class AppRepository implements IAppRepository {
-  AppRepository(this.apiClient);
-
-  final StudyUApi apiClient;
-
+class AppRepository(final StudyUApi apiClient) implements IAppRepository {
   @override
   Future<AppConfig> fetchAppConfig() async {
     final appConfig = await apiClient.fetchAppConfig();

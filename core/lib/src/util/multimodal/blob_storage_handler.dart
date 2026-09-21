@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:studyu_core/env.dart' as env;
 import 'package:supabase/supabase.dart';
 
-class BlobStorageHandler {
+class BlobStorageHandler() {
   static const String _observationsBucketName = 'observations';
 
   Future<void> uploadObservation(String blobPath, File file) async {

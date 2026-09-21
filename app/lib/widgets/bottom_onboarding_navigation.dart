@@ -2,36 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 
-class BottomOnboardingNavigation extends StatelessWidget {
-  final VoidCallback? onBack;
-  final VoidCallback? onNext;
-  final String? backLabel;
-  final String? nextLabel;
-  final bool hideNext;
-  final bool hideBack;
-  final bool backEnabled;
-  final Icon? nextIcon;
-  final Icon? backIcon;
-  final Widget? progress;
-  final Key? backButtonKey;
-  final Key? nextButtonKey;
-
-  const BottomOnboardingNavigation({
-    super.key,
-    this.onNext,
-    this.onBack,
-    this.backLabel,
-    this.nextLabel,
-    this.hideNext = false,
-    this.hideBack = false,
-    this.backEnabled = true,
-    this.nextIcon,
-    this.backIcon,
-    this.progress,
-    this.backButtonKey,
-    this.nextButtonKey,
-  });
-
+class const BottomOnboardingNavigation({
+  super.key,
+  final VoidCallback? onNext,
+  final VoidCallback? onBack,
+  final String? backLabel,
+  final String? nextLabel,
+  final bool hideNext = false,
+  final bool hideBack = false,
+  final bool backEnabled = true,
+  final bool showNextIcon = true,
+  final bool showBackIcon = true,
+  final bool primaryNext = false,
+  final Icon? nextIcon,
+  final Icon? backIcon,
+  final Widget? progress,
+  final Key? backButtonKey,
+  final Key? nextButtonKey,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // A custom onBack handler may perform its own navigation regardless of
@@ -49,6 +37,13 @@ class BottomOnboardingNavigation extends StatelessWidget {
       context.pop();
     }
 
+    final nextButtonChild = Row(
+      children: [
+        Text(nextLabel ?? AppLocalizations.of(context)!.next),
+        if (showNextIcon) nextIcon ?? const Icon(Icons.navigate_next),
+      ],
+    );
+
     return BottomAppBar(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -64,7 +59,8 @@ class BottomOnboardingNavigation extends StatelessWidget {
                 onPressed: canNavigateBack ? handleBack : null,
                 child: Row(
                   children: [
-                    backIcon ?? const Icon(Icons.navigate_before),
+                    if (showBackIcon)
+                      backIcon ?? const Icon(Icons.navigate_before),
                     Text(backLabel ?? AppLocalizations.of(context)!.back),
                   ],
                 ),
@@ -81,16 +77,17 @@ class BottomOnboardingNavigation extends StatelessWidget {
               maintainSize: true,
               maintainAnimation: true,
               maintainState: true,
-              child: TextButton(
-                key: nextButtonKey,
-                onPressed: onNext,
-                child: Row(
-                  children: [
-                    Text(nextLabel ?? AppLocalizations.of(context)!.next),
-                    nextIcon ?? const Icon(Icons.navigate_next),
-                  ],
-                ),
-              ),
+              child: primaryNext
+                  ? FilledButton(
+                      key: nextButtonKey,
+                      onPressed: onNext,
+                      child: nextButtonChild,
+                    )
+                  : TextButton(
+                      key: nextButtonKey,
+                      onPressed: onNext,
+                      child: nextButtonChild,
+                    ),
             ),
           ],
         ),

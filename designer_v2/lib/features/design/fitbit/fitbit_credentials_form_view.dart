@@ -7,11 +7,10 @@ import 'package:studyu_designer_v2/features/design/fitbit/fitbit_credentials_for
 import 'package:studyu_designer_v2/localization/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class FitbitCredentialsSection extends StatelessWidget {
-  const FitbitCredentialsSection({required this.formViewModel, super.key});
-
-  final FitbitCredentialsFormViewModel formViewModel;
-
+class const FitbitCredentialsSection({
+  required final FitbitCredentialsFormViewModel formViewModel,
+  super.key,
+}) extends StatelessWidget {
   Future<void> _launchURL(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -47,9 +46,8 @@ class FitbitCredentialsSection extends StatelessWidget {
             FormTableRow(
               control: formViewModel.clientSecretControl,
               label: AppLocalizations.of(context)!.client_secret,
-              labelHelpText: AppLocalizations.of(
-                context,
-              )!.client_secret_label_help,
+              labelHelpText: AppLocalizations.of(context)!
+                  .client_secret_label_help,
               input: ReactiveTextField<String>(
                 formControl: formViewModel.clientSecretControl,
                 decoration: InputDecoration(
@@ -65,11 +63,10 @@ class FitbitCredentialsSection extends StatelessWidget {
   }
 }
 
-class FitbitCredentialsHelpContent extends StatelessWidget {
-  const FitbitCredentialsHelpContent({required this.onLaunchUrl, super.key});
-
-  final Future<void> Function(String url) onLaunchUrl;
-
+class const FitbitCredentialsHelpContent({
+  required final Future<void> Function(String url) onLaunchUrl,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -136,9 +133,8 @@ class FitbitCredentialsHelpContent extends StatelessWidget {
   }
 }
 
-class FitbitSingleParticipantInstructions extends StatelessWidget {
-  const FitbitSingleParticipantInstructions({super.key});
-
+class const FitbitSingleParticipantInstructions({super.key})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -187,15 +183,14 @@ class FitbitSingleParticipantInstructions extends StatelessWidget {
   }
 }
 
-class FitbitCredentialsScreenshotsSection extends StatefulWidget {
-  const FitbitCredentialsScreenshotsSection({super.key});
-
+class const FitbitCredentialsScreenshotsSection({super.key})
+    extends StatefulWidget {
   @override
   State<FitbitCredentialsScreenshotsSection> createState() =>
       _FitbitCredentialsScreenshotsSectionState();
 }
 
-class _FitbitCredentialsScreenshotsSectionState
+class _FitbitCredentialsScreenshotsSectionState()
     extends State<FitbitCredentialsScreenshotsSection> {
   late final ScrollController scrollController = ScrollController();
 
@@ -235,51 +230,44 @@ class _FitbitCredentialsScreenshotsSectionState
                   _buildScreenshot(
                     context,
                     'assets/images/step1.png',
-                    AppLocalizations.of(
-                      context,
-                    )!.fitbit_credentials_screenshot_step1,
+                    AppLocalizations.of(context)!
+                        .fitbit_credentials_screenshot_step1,
                   ),
                   _buildScreenshot(
                     context,
                     'assets/images/step2.png',
-                    AppLocalizations.of(
-                      context,
-                    )!.fitbit_credentials_screenshot_step2,
+                    AppLocalizations.of(context)!
+                        .fitbit_credentials_screenshot_step2,
                   ),
                   _buildScreenshot(
                     context,
                     'assets/images/step3.png',
-                    AppLocalizations.of(
-                      context,
-                    )!.fitbit_credentials_screenshot_step3,
+                    AppLocalizations.of(context)!
+                        .fitbit_credentials_screenshot_step3,
                   ),
                   _buildScreenshot(
                     context,
                     'assets/images/step4.png',
-                    AppLocalizations.of(
-                      context,
-                    )!.fitbit_credentials_screenshot_step4,
+                    AppLocalizations.of(context)!
+                        .fitbit_credentials_screenshot_step4,
                   ),
                   _buildScreenshot(
                     context,
                     'assets/images/step5.png',
-                    AppLocalizations.of(
-                      context,
-                    )!.fitbit_credentials_screenshot_step5,
+                    AppLocalizations.of(context)!
+                        .fitbit_credentials_screenshot_step5,
                   ),
                   _buildScreenshot(
                     context,
                     'assets/images/step6.png',
-                    AppLocalizations.of(
-                      context,
-                    )!.fitbit_credentials_screenshot_step6,
+                    AppLocalizations.of(context)!
+                        .fitbit_credentials_screenshot_step6,
                   ),
                   _buildScreenshot(
                     context,
                     'assets/images/step7.png',
-                    AppLocalizations.of(
-                      context,
-                    )!.fitbit_credentials_screenshot_step7,
+                    AppLocalizations.of(context)!
+                        .fitbit_credentials_screenshot_step7,
                   ),
                 ],
               ),

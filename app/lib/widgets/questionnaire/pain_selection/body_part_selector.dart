@@ -20,34 +20,20 @@ typedef PainEditResult = ({
 
 /// A widget that allows for selecting body parts and displays their pain level.
 /// When a body part is tapped, a dialog is shown to select the pain level, type, and specific location.
-class BodyPartSelector extends StatelessWidget {
-  const BodyPartSelector({
-    required this.body,
-    required this.side,
-    this.onPainChanged,
-    this.scale = PainScale.english,
-    this.unselectedColor,
-    this.unselectedOutlineColor,
-    super.key,
-  });
-
-  final Body body;
-
-  final BodySide side;
-
+class const BodyPartSelector({
+  required final Body body,
+  required final BodySide side,
   final void Function(
     String parentPartId,
     String childPartId,
     BodyPain newPain,
   )?
-  onPainChanged;
-
-  final PainScale scale;
-
-  final Color? unselectedColor;
-
-  final Color? unselectedOutlineColor;
-
+  onPainChanged,
+  final PainScale scale = PainScale.english,
+  final Color? unselectedColor,
+  final Color? unselectedOutlineColor,
+  super.key,
+}) extends StatelessWidget {
   Future<void> _showPainSelectorDialog(
     BuildContext context,
     String partId,
@@ -127,28 +113,16 @@ class BodyPartSelector extends StatelessWidget {
   }
 }
 
-class _BodyPainter extends CustomPainter {
-  _BodyPainter({
-    required this.pictureInfo,
-    required this.bodyPartPaths,
-    required this.body,
-    required this.onTap,
-    required this.context,
-    required this.scale,
-    required this.unselectedColor,
-    required this.unselectedOutlineColor,
-  });
-
-  final PictureInfo pictureInfo;
-
-  final Map<String, ui.Path> bodyPartPaths;
-  final BuildContext context;
-  final void Function(String) onTap;
-  final Body body;
-  final PainScale scale;
-  final Color unselectedColor;
-  final Color unselectedOutlineColor;
-
+class _BodyPainter({
+  required final PictureInfo pictureInfo,
+  required final Map<String, ui.Path> bodyPartPaths,
+  required final Body body,
+  required final void Function(String) onTap,
+  required final BuildContext context,
+  required final PainScale scale,
+  required final Color unselectedColor,
+  required final Color unselectedOutlineColor,
+}) extends CustomPainter {
   int getPainLevel(String key) => body.allPartsById[key]?.pain.painLevel ?? 0;
 
   ({Color fill, Color stroke}) _getPainColors(int painLevel) {
@@ -250,21 +224,16 @@ class _BodyPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
 
-class PainEditDialog extends StatefulWidget {
-  const PainEditDialog({
-    required this.tappedPart,
-    required this.scale,
-    super.key,
-  });
-
-  final BodyPart tappedPart;
-  final PainScale scale;
-
+class const PainEditDialog({
+  required final BodyPart tappedPart,
+  required final PainScale scale,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<PainEditDialog> createState() => _PainEditDialogState();
 }
 
-class _PainEditDialogState extends State<PainEditDialog> {
+class _PainEditDialogState() extends State<PainEditDialog> {
   late int _currentPain;
   PainType? _selectedPainType;
   late String _selectedPartId;
@@ -599,32 +568,19 @@ class _PainEditDialogState extends State<PainEditDialog> {
 }
 
 @immutable
-class PainLevelStyle {
-  const PainLevelStyle({
-    required this.face,
-    required this.description,
-    required this.color,
-    this.textColor = Colors.white,
-  });
-
-  final String face;
-  final String description;
-  final Color color;
-  final Color textColor;
-}
+class const PainLevelStyle({
+  required final String face,
+  required final String description,
+  required final Color color,
+  final Color textColor = Colors.white,
+});
 
 @immutable
-class PainScale {
-  const PainScale({
-    required this.dialogTitle,
-    required this.painIndicatorText,
-    required this.levels,
-  });
-
-  final String dialogTitle;
-  final String painIndicatorText;
-  final Map<int, PainLevelStyle> levels;
-
+class const PainScale({
+  required final String dialogTitle,
+  required final String painIndicatorText,
+  required final Map<int, PainLevelStyle> levels,
+}) {
   static const PainScale english = PainScale(
     dialogTitle: 'Select Pain Details',
     painIndicatorText: 'Pain',

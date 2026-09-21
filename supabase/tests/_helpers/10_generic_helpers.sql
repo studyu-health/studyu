@@ -21,7 +21,7 @@ BEGIN
         END IF;
     END LOOP;
 
-    output := ok(result, description);
+    output := extensions.ok(result, description);
 
     -- Build the result details only if there are false results
     IF NOT result THEN
@@ -30,7 +30,7 @@ BEGIN
         END LOOP;
     END IF;
 
-    RETURN output || CASE result WHEN TRUE THEN '' ELSE E'\n' || diag(result_details) END;
+    RETURN output || CASE result WHEN TRUE THEN '' ELSE E'\n' || extensions.diag(result_details) END;
 END;
 $$ LANGUAGE plpgsql;
 

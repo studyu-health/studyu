@@ -1,11 +1,8 @@
-enum DateFormatPreset {
+enum DateFormatPreset(final String pattern) {
   iso('yyyy-MM-dd'),
   european('dd/MM/yyyy'),
   us('MM/dd/yyyy'),
   german('dd.MM.yyyy');
-
-  final String pattern;
-  const DateFormatPreset(this.pattern);
 
   String toJson() => name;
   static DateFormatPreset fromJson(String json) {
@@ -28,12 +25,9 @@ enum DateFormatPreset {
   }
 }
 
-enum TimeFormatPreset {
+enum TimeFormatPreset(final String pattern) {
   h24('HH:mm'),
   h12('hh:mm a');
-
-  final String pattern;
-  const TimeFormatPreset(this.pattern);
 
   bool get is24Hour => this == TimeFormatPreset.h24;
 

@@ -4,11 +4,7 @@ import 'package:studyu_app/screens/study/report/util/plot_utilities.dart';
 import 'package:studyu_app/util/data_processing.dart';
 import 'package:studyu_core/core.dart';
 
-class ReportUtilities {
-  final StudySubject subject;
-
-  ReportUtilities(this.subject);
-
+class ReportUtilities(final StudySubject subject) {
   Iterable<DiagramDatum> convertToDiagramData(Map<DateTime, num> values) {
     final data = values.entries.map((entry) {
       return DiagramDatum(

@@ -20,18 +20,19 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 import 'package:web/web.dart' as web;
 
-class PreviewFrame extends ConsumerStatefulWidget {
-  const PreviewFrame(this.studyId, {this.routeArgs, this.route, super.key})
+class const PreviewFrame(
+  final StudyID studyId, {
+  final StudyFormRouteArgs? routeArgs,
+  final String? route,
+  super.key,
+}) extends ConsumerStatefulWidget {
+  this
     : assert(
         (routeArgs != null && route == null) ||
             (routeArgs == null && route != null) ||
             (routeArgs == null && route == null),
         "Must not specify both routeArgs and route",
       );
-
-  final StudyID studyId;
-  final StudyFormRouteArgs? routeArgs;
-  final String? route;
 
   @override
   ConsumerState<PreviewFrame> createState() => _PreviewFrameState();
@@ -54,7 +55,7 @@ class PreviewFrame extends ConsumerStatefulWidget {
   };
 }
 
-class _PreviewFrameState extends ConsumerState<PreviewFrame> {
+class _PreviewFrameState() extends ConsumerState<PreviewFrame> {
   static const Duration _healthCheckTimeout = Duration(seconds: 5);
   PlatformController? frameController;
   PlatformController? _activeFrameController;
@@ -379,9 +380,11 @@ class _PreviewFrameState extends ConsumerState<PreviewFrame> {
                                     ),
                                   );
                                 },
-                                onOpenNewTab: () =>
-                                    frameController!.openNewPage(),
+                                onOpenNewTab:
+                                    _activeFrameController?.openNewPage,
                                 enabled: state.canTest,
+                                openNewTabEnabled:
+                                    state.canTest && _frameActivated,
                               ),
                             ],
                           ),

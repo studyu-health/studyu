@@ -1,27 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/common_views/constrained_flexible.dart';
 
-class TwoColumnLayout extends StatefulWidget {
-  const TwoColumnLayout({
-    required this.leftWidget,
-    required this.rightWidget,
-    this.headerWidget,
-    this.dividerWidget = defaultDivider,
-    this.flexLeft,
-    this.flexRight =
-        1, // expand right column to fill available space by default
-    this.constraintsLeft,
-    this.constraintsRight,
-    this.scrollLeft = true,
-    this.scrollRight = true,
-    this.paddingLeft = defaultContentPadding,
-    this.paddingRight = defaultContentPadding,
-    this.backgroundColorLeft,
-    this.backgroundColorRight,
-    this.stretchHeight = false,
-    super.key,
-  });
-
+class const TwoColumnLayout({
+  required final Widget leftWidget,
+  required final Widget rightWidget,
+  final Widget? headerWidget,
+  final Widget? dividerWidget = defaultDivider,
+  final int? flexLeft,
+  final int? flexRight =
+      1, // expand right column to fill available space by default
+  final BoxConstraints? constraintsLeft,
+  final BoxConstraints? constraintsRight,
+  final bool scrollLeft = true,
+  final bool scrollRight = true,
+  final EdgeInsets? paddingLeft = defaultContentPadding,
+  final EdgeInsets? paddingRight = defaultContentPadding,
+  final Color? backgroundColorLeft,
+  final Color? backgroundColorRight,
+  final bool stretchHeight = false,
+  super.key,
+}) extends StatefulWidget {
   static const VerticalDivider defaultDivider = VerticalDivider(
     width: 1,
     thickness: 1,
@@ -35,32 +33,10 @@ class TwoColumnLayout extends StatefulWidget {
     vertical: 32.0,
   );
 
-  final Widget leftWidget;
-  final Widget rightWidget;
-  final Widget? dividerWidget;
-  final Widget? headerWidget;
-
-  final int? flexLeft;
-  final int? flexRight;
-
-  final BoxConstraints? constraintsLeft;
-  final BoxConstraints? constraintsRight;
-
-  final bool scrollLeft;
-  final bool scrollRight;
-
-  final EdgeInsets? paddingLeft;
-  final EdgeInsets? paddingRight;
-
-  final Color? backgroundColorLeft;
-  final Color? backgroundColorRight;
-
-  final bool stretchHeight;
-
   @override
   State<TwoColumnLayout> createState() => _TwoColumnLayoutState();
 
-  factory TwoColumnLayout.split({
+  factory split({
     required Widget leftWidget,
     required Widget rightWidget,
     Widget? dividerWidget,
@@ -89,7 +65,7 @@ class TwoColumnLayout extends StatefulWidget {
   }
 }
 
-class _TwoColumnLayoutState extends State<TwoColumnLayout> {
+class _TwoColumnLayoutState() extends State<TwoColumnLayout> {
   final ScrollController _scrollControllerLeft = ScrollController();
   final ScrollController _scrollControllerRight = ScrollController();
 

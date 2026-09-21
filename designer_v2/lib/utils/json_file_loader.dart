@@ -3,12 +3,10 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:studyu_designer_v2/utils/typings.dart';
 
-abstract class JsonFileLoader {
+abstract class JsonFileLoader(
   /// Path to the directory containing the JSON files to be loaded
-  final String jsonAssetsPath;
-
-  JsonFileLoader(this.jsonAssetsPath);
-
+  final String jsonAssetsPath,
+) {
   Future<String> loadJson(String filename) async {
     return await rootBundle.loadString(jsonAssetsPath + filename);
   }

@@ -43,7 +43,7 @@ class DateQuestion extends Question<DateTime> {
   @JsonKey(name: 'defaultSpecificTime')
   String? defaultSpecificTime;
 
-  DateQuestion({
+  new({
     this.inputType = DateInputType.date,
     this.minDate,
     this.maxDate,
@@ -56,7 +56,7 @@ class DateQuestion extends Question<DateTime> {
     this.defaultSpecificTime,
   }) : super(questionType);
 
-  DateQuestion.withId({
+  new withId({
     this.inputType = DateInputType.date,
     this.minDate,
     this.maxDate,
@@ -69,7 +69,7 @@ class DateQuestion extends Question<DateTime> {
     this.defaultSpecificTime,
   }) : super.withId(questionType);
 
-  factory DateQuestion.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     // Handle migration from old format presets
     final dateFormatPresetValue = json['dateFormatPreset'] as String?;
     if (dateFormatPresetValue != null) {

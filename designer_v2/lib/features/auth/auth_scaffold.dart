@@ -17,29 +17,24 @@ import 'package:studyu_designer_v2/routing/router_config.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AuthScaffold extends ConsumerStatefulWidget {
-  const AuthScaffold({
-    required this.body,
-    required this.formKey,
-    this.leftContentMinWidth = 424.0,
-    this.leftPanelMinWidth = 500.0,
-    this.leftPanelPadding = const EdgeInsets.fromLTRB(88.0, 54.0, 88.0, 40.0),
-    super.key,
-  });
-
-  final Widget body;
-  final AuthFormKey formKey;
-
-  final double leftContentMinWidth;
-  final double leftPanelMinWidth;
-
-  final EdgeInsets leftPanelPadding;
-
+class const AuthScaffold({
+  required final Widget body,
+  required final AuthFormKey formKey,
+  final double leftContentMinWidth = 424.0,
+  final double leftPanelMinWidth = 500.0,
+  final EdgeInsets leftPanelPadding = const EdgeInsets.fromLTRB(
+    88.0,
+    54.0,
+    88.0,
+    40.0,
+  ),
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<AuthScaffold> createState() => _AuthScaffoldState();
 }
 
-class _AuthScaffoldState extends ConsumerState<AuthScaffold> {
+class _AuthScaffoldState() extends ConsumerState<AuthScaffold> {
   AuthFormKey get formKey => widget.formKey;
   static const double _compactBreakpoint = 1000.0;
 
@@ -115,50 +110,45 @@ class _AuthScaffoldState extends ConsumerState<AuthScaffold> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              constraints: const BoxConstraints(maxHeight: 88.0),
-              child: const StudyULogo(),
-            ),
-            const SizedBox(height: 32.0),
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 12.0),
+            Expanded(
+              child: Align(
+                alignment: Alignment.topCenter,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: widget.leftContentMinWidth - 24.0,
+                    maxWidth: widget.leftContentMinWidth,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SelectableText(
-                        formKey.title,
-                        style: theme.textTheme.displaySmall,
-                      ),
-                      const SizedBox(height: 8.0),
-                      if (formKey.description != null)
-                        TextParagraph(
-                          text: formKey.description,
-                          style: ThemeConfig.bodyTextMuted(theme),
-                        )
-                      else
-                        const SizedBox.shrink(),
-                      const SizedBox(height: 24.0),
-                      Flexible(
-                        child: SingleChildScrollView(
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 24.0),
-                            child: widget.body,
-                          ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          constraints: const BoxConstraints(maxHeight: 88.0),
+                          child: const StudyULogo(),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 20.0),
+                        SelectableText(
+                          formKey.title,
+                          style: theme.textTheme.displaySmall,
+                        ),
+                        const SizedBox(height: 8.0),
+                        if (formKey.description != null)
+                          TextParagraph(
+                            text: formKey.description,
+                            style: ThemeConfig.bodyTextMuted(theme),
+                          )
+                        else
+                          const SizedBox.shrink(),
+                        const SizedBox(height: 24.0),
+                        widget.body,
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 24.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: widget.leftContentMinWidth,
@@ -201,7 +191,7 @@ class _AuthScaffoldState extends ConsumerState<AuthScaffold> {
                       const Center(
                         child: SizedBox(height: 72.0, child: StudyULogo()),
                       ),
-                      const SizedBox(height: 32.0),
+                      const SizedBox(height: 20.0),
                       SelectableText(
                         formKey.title,
                         style: theme.textTheme.displaySmall,

@@ -4,11 +4,8 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/routing/router.dart';
 import 'package:studyu_designer_v2/routing/router_intent.dart';
 
-class ErrorPage extends ConsumerWidget {
-  final Exception? error;
-
-  const ErrorPage({required this.error, super.key});
-
+class const ErrorPage({required final Exception? error, super.key})
+    extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Center(

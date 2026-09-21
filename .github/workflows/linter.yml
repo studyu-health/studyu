@@ -4,34 +4,34 @@ on:
   push:
 
 jobs:
-    linter:
-      runs-on: ubuntu-latest
-      permissions:
-        contents: write
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v5
-          with:
-            fetch-depth: 0
-            token: ${{ secrets.READY_TO_MERGE_TOKEN }}
+  linter:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.READY_TO_MERGE_TOKEN }}
 
-        - name: Check final newline
-          uses: johannesvedder/check-final-newline@main
-          with:
-            fail_on_missing_newline: 'false'
+      - name: Check final newline
+        uses: johannesvedder/check-final-newline@main
+        with:
+          fail_on_missing_newline: 'false'
 
-        - name: Restore ignored files
-          shell: bash
-          run: |
-            shopt -s globstar nullglob
-            git checkout .fvmrc 2>/dev/null || true
-            git checkout .vscode/settings.json 2>/dev/null || true
-            git checkout l10n-missing.txt 2>/dev/null || true
-            for f in **/l10n-missing.txt; do
-              git checkout "$f" 2>/dev/null || true
-            done
+      - name: Restore ignored files
+        shell: bash
+        run: |
+          shopt -s globstar nullglob
+          git checkout .fvmrc 2>/dev/null || true
+          git checkout .vscode/settings.json 2>/dev/null || true
+          git checkout l10n-missing.txt 2>/dev/null || true
+          for f in **/l10n-missing.txt; do
+            git checkout "$f" 2>/dev/null || true
+          done
 
-        - name: Commit changes if any
-          uses: stefanzweifel/git-auto-commit-action@v7
-          with:
-            commit_message: 'lint: Apply final newline changes'
+      - name: Commit changes if any
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 'lint: Apply final newline changes'

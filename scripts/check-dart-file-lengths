@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  printf 'Usage: %s BASE_REF\n' "$0" >&2
+  exit 2
+fi
+
+base_ref=$1
+base_commit=$(git rev-parse --verify "$base_ref^{commit}")
+merge_base=$(git merge-base "$base_commit" HEAD)
+
+status_file=$(mktemp "${TMPDIR:-/tmp}/check-dart-file-lengths.XXXXXX")
+trap 'rm -f "$status_file"' EXIT
+
+git diff --name-status -z --find-renames --diff-filter=AMR "$merge_base" HEAD -- '*.dart' > "$status_file"
+
+escape_message() {
+  local value=$1
+  value=${value//%/%25}
+  value=${value//$'\r'/%0D}
+  value=${value//$'\n'/%0A}
+  printf '%s' "$value"
+}
+
+escape_property() {
+  local value
+  value=$(escape_message "$1")
+  value=${value//:/%3A}
+  value=${value//,/%2C}
+  printf '%s' "$value"
+}
+
+count_lines() {
+  awk 'END { print NR }' < "$1"
+}
+
+count_base_lines() {
+  git show "$merge_base:$1" | awk 'END { print NR }'
+}
+
+is_excluded() {
+  case $1 in
+    *.g.dart|*.freezed.dart|\
+    app/lib/l10n/app_localizations.dart|app/lib/l10n/app_localizations_*.dart|\
+    designer_v2/lib/localization/app_localizations.dart|designer_v2/lib/localization/app_localizations_*.dart)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+clean=0
+warnings=0
+errors=0
+skipped=0
+checked=0
+
+while IFS= read -r -d '' status; do
+  IFS= read -r -d '' base_path
+  current_path=$base_path
+  case $status in
+    R*)
+      IFS= read -r -d '' current_path
+      ;;
+  esac
+
+  if is_excluded "$current_path"; then
+    skipped=$((skipped + 1))
+    continue
+  fi
+
+  checked=$((checked + 1))
+  current_lines=$(count_lines "$current_path")
+  base_lines=''
+  if [[ $status != A* ]] && git cat-file -e "$merge_base:$base_path" 2>/dev/null; then
+    base_lines=$(count_base_lines "$base_path")
+  fi
+
+  current_escaped=$(escape_message "$current_path")
+  current_property=$(escape_property "$current_path")
+  if (( current_lines <= 300 )); then
+    clean=$((clean + 1))
+  elif (( current_lines <= 500 )); then
+    warnings=$((warnings + 1))
+    printf '::warning file=%s,line=1,title=Dart file length::%s has %s lines; soft limit is 300 and hard limit is 500.\n' \
+      "$current_property" "$current_escaped" "$current_lines"
+  elif [[ -z $base_lines ]] || (( base_lines <= 500 )); then
+    errors=$((errors + 1))
+    printf '::error file=%s,line=1,title=Dart file too long::%s has %s lines; new and previously compliant files must stay at or below 500.\n' \
+      "$current_property" "$current_escaped" "$current_lines"
+  elif (( current_lines > base_lines )); then
+    errors=$((errors + 1))
+    printf '::error file=%s,line=1,title=Oversized Dart file grew::%s grew from %s to %s lines; files already over 500 lines may not grow.\n' \
+      "$current_property" "$current_escaped" "$base_lines" "$current_lines"
+  else
+    warnings=$((warnings + 1))
+    printf '::warning file=%s,line=1,title=Grandfathered Dart file::%s is %s lines, down from %s; continue reducing it toward 500.\n' \
+      "$current_property" "$current_escaped" "$current_lines" "$base_lines"
+  fi
+
+done < "$status_file"
+
+printf 'Checked %s Dart files: %s clean, %s warning, %s error, %s generated files skipped.\n' \
+  "$checked" "$clean" "$warnings" "$errors" "$skipped"
+
+if (( errors > 0 )); then
+  exit 1
+fi

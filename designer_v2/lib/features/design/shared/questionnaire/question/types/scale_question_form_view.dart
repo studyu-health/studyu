@@ -15,21 +15,21 @@ import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/color.dart';
 import 'package:studyu_designer_v2/utils/input_formatter.dart';
 
-abstract class IScaleQuestionFormViewModel {
+abstract class IScaleQuestionFormViewModel() {
   bool get isMidValuesClearedInfoVisible;
 }
 
-class ScaleQuestionFormView extends ConsumerStatefulWidget {
-  const ScaleQuestionFormView({required this.formViewModel, super.key});
-
-  final QuestionFormViewModel formViewModel;
-
+class const ScaleQuestionFormView({
+  required final QuestionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<ScaleQuestionFormView> createState() =>
       _ScaleQuestionFormViewState();
 }
 
-class _ScaleQuestionFormViewState extends ConsumerState<ScaleQuestionFormView> {
+class _ScaleQuestionFormViewState()
+    extends ConsumerState<ScaleQuestionFormView> {
   QuestionFormViewModel get formViewModel => widget.formViewModel;
 
   late bool isMinMaxColorsVisible =
@@ -73,19 +73,19 @@ class _ScaleQuestionFormViewState extends ConsumerState<ScaleQuestionFormView> {
               _buildMinMaxColorPickers(context),
             ],
           )
+        else if (!formViewModel.isReadonly)
+          Opacity(
+            opacity: ThemeConfig.kMuteFadeFactor,
+            child: Hyperlink(
+              text: "+ ${tr.form_field_response_scale_colors_add}",
+              onClick: () => setState(() {
+                isMinMaxColorsVisible = true;
+              }),
+              visitedColor: null,
+            ),
+          )
         else
-          (!formViewModel.isReadonly)
-              ? Opacity(
-                  opacity: ThemeConfig.kMuteFadeFactor,
-                  child: Hyperlink(
-                    text: "+ ${tr.form_field_response_scale_colors_add}",
-                    onClick: () => setState(() {
-                      isMinMaxColorsVisible = true;
-                    }),
-                    visitedColor: null,
-                  ),
-                )
-              : const SizedBox.shrink(),
+          const SizedBox.shrink(),
       ],
     );
   }

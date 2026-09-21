@@ -1,10 +1,7 @@
-enum DateInputType {
+enum DateInputType(final String value) {
   date('date'),
   time('time'),
   dateTime('dateTime');
-
-  final String value;
-  const DateInputType(this.value);
 
   bool get isDate =>
       this == DateInputType.date || this == DateInputType.dateTime;

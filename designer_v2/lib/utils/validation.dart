@@ -7,13 +7,11 @@ typedef CountWherePredicate<T> = bool Function(T? value);
 ///
 /// Validates that the number of times the given [predicate] evaluates to
 /// true is between [minCount] and [maxCount].
-class CountWhereValidator<T> extends Validator<T> {
-  CountWhereValidator(this.predicate, {this.minCount, this.maxCount});
-
-  final CountWherePredicate<T> predicate;
-  final int? minCount;
-  final int? maxCount;
-
+class CountWhereValidator<T>(
+  final CountWherePredicate<T> predicate, {
+  final int? minCount,
+  final int? maxCount,
+}) extends Validator<T> {
   static const kValidationMessageMinCount = 'countMin';
   static const kValidationMessageMaxCount = 'countMax';
 
@@ -54,7 +52,7 @@ class CountWhereValidator<T> extends Validator<T> {
   }
 }
 
-class Patterns {
+class Patterns() {
   /// Regex pattern for hh:mm time format (with or without leading zero)
   //static const timeFormatString = r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$';
   static const timeFormatString = r'^[ab]$';

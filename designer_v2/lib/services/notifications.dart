@@ -3,7 +3,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/services/notification_types.dart';
 
-class Notifications {
+class Notifications() {
   static final credentialsInvalid = SnackbarIntent(
     message: tr.notification_credentials_invalid,
   );
@@ -45,7 +45,7 @@ class Notifications {
   );
 }
 
-class NotificationDefaultActions {
+class NotificationDefaultActions() {
   static final cancel = NotificationAction(
     label: tr.dialog_cancel,
     onSelect: () => Future.value(),

@@ -4,13 +4,11 @@ import 'package:studyu_core/src/models/fitbit/fitbit_datas/fibit_data.dart';
 part 'fitbit_heart_data.g.dart';
 
 @JsonSerializable()
-class FitbitHeartData extends FitbitData {
+class FitbitHeartData(var double value, DateTime dateTime) extends FitbitData {
   static const String dataType = 'heartrate';
-  double value;
+  this : super(dataType, dateTime);
 
-  FitbitHeartData(this.value, DateTime dateTime) : super(dataType, dateTime);
-
-  factory FitbitHeartData.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$FitbitHeartDataFromJson(json);
 
   @override

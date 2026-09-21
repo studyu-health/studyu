@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -7,40 +6,84 @@ import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
+import 'package:studyu_app/services/pending_deep_link_service.dart';
+import 'package:studyu_app/services/study_start_service.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
+import 'package:studyu_app/widgets/loading_overlay.dart';
+import 'package:studyu_app/widgets/onboarding_shell.dart';
+import 'package:studyu_app/widgets/study_onboarding_description.dart';
+import 'package:studyu_app/widgets/title_description_layout.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
-class JourneyOverviewScreen extends StatefulWidget {
-  const JourneyOverviewScreen({super.key});
-
+class const JourneyOverviewScreen({super.key}) extends StatefulWidget {
   @override
   State<JourneyOverviewScreen> createState() => _JourneyOverviewScreen();
 }
 
-class _JourneyOverviewScreen extends State<JourneyOverviewScreen> {
+class _JourneyOverviewScreen() extends State<JourneyOverviewScreen> {
   StudySubject? subject;
+  bool _isStartingStudy = false;
+
+  // Creates the study subject on the backend and navigates to the next
+  // screen. Runs in-place on this screen (with a loading state) so no
+  // transient route flickers between the consent screen and the next step.
+  Future<void> _startStudy(BuildContext context) async {
+    setState(() => _isStartingStudy = true);
+    final started = await StudyStartService.startStudy(context, subject!);
+    if (started || !mounted) return;
+    setState(() => _isStartingStudy = false);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.error)),
+    );
+  }
+
+  void _goBack() {
+    final appState = context.read<AppState>();
+    if (!appState.isPreview) {
+      final study = subject!.study;
+      final needsInterventionSelection =
+          appState.preselectedInterventionIds == null &&
+          study.interventions.length > 2;
+      appState.activeSubject = null;
+      appState.onboardingPhase = needsInterventionSelection
+          ? StudyOnboardingPhase.interventionSelection
+          : study.hasEligibilityCheck
+          ? StudyOnboardingPhase.eligibility
+          : StudyOnboardingPhase.terms;
+    }
+    context.pop();
+  }
 
   Future<void> getConsentAndNavigateToDashboard(BuildContext context) async {
-    bool? consentGiven;
     if (subject!.study.hasConsentCheck) {
-      consentGiven = await context.push<bool>('/${RouteNames.consent}');
-    } else {
-      consentGiven = true;
-    }
-    if (!context.mounted) return;
-    if (consentGiven != null && consentGiven) {
-      context.push('/${RouteNames.kickoff}');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.user_did_not_give_consent,
+      // Accepting consent is handled inside the consent screen: it shows the
+      // loading state in place and navigates directly, avoiding a
+      // pop-then-push route animation. This await therefore only completes
+      // on decline or when the user leaves the consent screen.
+      context.read<AppState>().onboardingPhase = StudyOnboardingPhase.consent;
+      final consentGiven = await context.push<bool>('/${RouteNames.consent}');
+      if (!context.mounted) return;
+      final appState = context.read<AppState>();
+      appState.activeSubject = null;
+      appState.onboardingPhase = null;
+      if (consentGiven == false) {
+        context.go('/${RouteNames.welcome}');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.user_did_not_give_consent,
+            ),
           ),
-          duration: const Duration(seconds: 30),
-        ),
-      );
+        );
+        context.go('/${RouteNames.studySelection}');
+      }
+      await PendingDeepLinkService.clear(appState);
+    } else {
+      await _startStudy(context);
     }
   }
 
@@ -52,39 +95,59 @@ class _JourneyOverviewScreen extends State<JourneyOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: const ValueKey('journey_overview_screen'),
+    final nav = BottomOnboardingNavigation(
+      onBack: context.canPop() ? _goBack : null,
+      onNext: () => getConsentAndNavigateToDashboard(context),
+      progress: OnboardingProgress.forPage(
+        context.read<AppState>(),
+        OnboardingStep.journey,
+      ),
+    );
+
+    final navNotifier = OnboardingNavNotifier.maybeOf(context);
+    navNotifier?.register(
+      this,
+      '/${RouteNames.journey}',
+      OnboardingNavConfig.fromNav(
+        nav,
+        loadingMessage: _isStartingStudy
+            ? AppLocalizations.of(context)!.starting_study
+            : null,
+      ),
+    );
+
+    final scaffold = Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
         title: Text(AppLocalizations.of(context)!.your_journey),
-        leading: const Icon(MdiIcons.mapMarkerPath),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                //StudyTile.fromUserStudy(study: study),
-                Timeline(subject: subject),
-              ],
-            ),
-          ),
+      body: TitleDescriptionLayout(
+        descriptionWidget: StudyOnboardingDescription(
+          text: AppLocalizations.of(context)!.journey_overview_description,
         ),
+        descriptionBottomSpacing: 0,
+        child: Timeline(subject: subject),
       ),
-      bottomNavigationBar: BottomOnboardingNavigation(
-        nextButtonKey: const ValueKey('journey_overview_next'),
-        onNext: () => getConsentAndNavigateToDashboard(context),
-        progress: const OnboardingProgress(stage: 2, progress: 0.5),
-      ),
+      bottomNavigationBar: navNotifier != null ? null : nav,
+    );
+
+    // In shell mode the loading overlay is rendered by OnboardingShell so it
+    // covers the full screen including the persistent bottom nav.
+    if (navNotifier != null) return scaffold;
+
+    return Stack(
+      children: [
+        scaffold,
+        if (_isStartingStudy)
+          LoadingOverlay(message: AppLocalizations.of(context)!.starting_study),
+      ],
     );
   }
 }
 
-class Timeline extends StatelessWidget {
-  final StudySubject? subject;
-
-  const Timeline({required this.subject, super.key});
-
+class const Timeline({required final StudySubject? subject, super.key})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -123,24 +186,15 @@ class Timeline extends StatelessWidget {
   }
 }
 
-class InterventionTile extends StatelessWidget {
-  final String? title;
-  final String iconName;
-  final DateTime date;
-  final Color? color;
-  final bool isFirst;
-  final bool isLast;
-
-  const InterventionTile({
-    required this.title,
-    required this.iconName,
-    required this.date,
-    this.color,
-    this.isFirst = false,
-    this.isLast = false,
-    super.key,
-  });
-
+class const InterventionTile({
+  required final String? title,
+  required final String iconName,
+  required final DateTime date,
+  final Color? color,
+  final bool isFirst = false,
+  final bool isLast = false,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -175,12 +229,11 @@ class InterventionTile extends StatelessWidget {
   }
 }
 
-class IconIndicator extends StatelessWidget {
-  final String iconName;
-  final Color? color;
-
-  const IconIndicator({required this.iconName, this.color, super.key});
-
+class const IconIndicator({
+  required final String iconName,
+  final Color? color,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
@@ -195,16 +248,13 @@ class IconIndicator extends StatelessWidget {
   }
 }
 
-class TimelineChild extends StatelessWidget {
-  final Widget? child;
-
-  const TimelineChild({super.key, this.child});
-
+class const TimelineChild({super.key, final Widget? child})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(8),
-      constraints: const BoxConstraints(minHeight: 100),
+      constraints: const BoxConstraints(minHeight: 80),
       child: Center(child: child),
     );
   }

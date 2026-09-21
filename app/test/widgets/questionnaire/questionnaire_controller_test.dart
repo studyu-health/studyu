@@ -60,6 +60,44 @@ void main() {
       expect(controller.visibleQuestions.first.id, equals('q1'));
     });
 
+    test('empty optional choice answers drive choice visibility', () {
+      final q1 = ChoiceQuestion.withId()
+        ..id = 'q1'
+        ..prompt = 'Select any'
+        ..multiple = true
+        ..choices = [Choice.withText(id: 'a', text: 'A')];
+      final q2 = boolQuestion('q2', 'Shown when A is selected')
+        ..conditional = QuestionConditional<bool>.withCondition(
+          CompositeExpression(
+            logicType: LogicType.and,
+            expressions: [
+              ChoiceExpression()
+                ..target = q1.id
+                ..choices = {'a'},
+            ],
+          ),
+        );
+      final q3 = boolQuestion('q3', 'Shown when A is not selected')
+        ..conditional = QuestionConditional<bool>.withCondition(
+          CompositeExpression(
+            logicType: LogicType.and,
+            expressions: [
+              NotExpression()
+                ..expression = (ChoiceExpression()
+                  ..target = q1.id
+                  ..choices = {'a'}),
+            ],
+          ),
+        );
+      final controller = QuestionnaireController([q1, q2, q3]);
+
+      expect(controller.visibleQuestions.map((q) => q.id), ['q1']);
+
+      controller.submitAnswer(q1.constructAnswer([]));
+
+      expect(controller.visibleQuestions.map((q) => q.id), ['q1', 'q3']);
+    });
+
     // ── Test 2: hidden answers stored but excluded from payload ──
 
     test('hidden answers remain cached but excluded from payload', () {
@@ -424,33 +462,26 @@ void main() {
     // ── Test 11: progressiveVisibleQuestions ──
 
     group('progressiveVisibleQuestions', () {
-      test(
-        'reveals through already answered questions, excludes unanswered break point after first',
-        () {
-          final q1 = boolQuestion('q1', 'First');
-          final q2 = boolQuestion('q2', 'Second');
-          final q3 = boolQuestion('q3', 'Third');
-          final controller = QuestionnaireController([q1, q2, q3]);
+      test('reveals through already answered questions, excludes unanswered break point after first', () {
+        final q1 = boolQuestion('q1', 'First');
+        final q2 = boolQuestion('q2', 'Second');
+        final q3 = boolQuestion('q3', 'Third');
+        final controller = QuestionnaireController([q1, q2, q3]);
 
-          // First question always included even unanswered
-          expect(controller.progressiveVisibleQuestions.map((q) => q.id), [
-            'q1',
-          ]);
+        // First question always included even unanswered
+        expect(controller.progressiveVisibleQuestions.map((q) => q.id), ['q1']);
 
-          controller.submitAnswer(q1.constructAnswer(true));
-          // q1 answered, q2 unanswered → q2 excluded from progressive
-          expect(controller.progressiveVisibleQuestions.map((q) => q.id), [
-            'q1',
-          ]);
+        controller.submitAnswer(q1.constructAnswer(true));
+        // q1 answered, q2 unanswered → q2 excluded from progressive
+        expect(controller.progressiveVisibleQuestions.map((q) => q.id), ['q1']);
 
-          controller.submitAnswer(q2.constructAnswer(true));
-          // q1+q2 answered, q3 unanswered → q3 excluded
-          expect(controller.progressiveVisibleQuestions.map((q) => q.id), [
-            'q1',
-            'q2',
-          ]);
-        },
-      );
+        controller.submitAnswer(q2.constructAnswer(true));
+        // q1+q2 answered, q3 unanswered → q3 excluded
+        expect(controller.progressiveVisibleQuestions.map((q) => q.id), [
+          'q1',
+          'q2',
+        ]);
+      });
 
       test('skips hidden questions with conditionals', () {
         final q1 = boolQuestion('q1', 'Show q2?');
@@ -474,40 +505,35 @@ void main() {
         ]);
       });
 
-      test(
-        'hidden default drives progressive reveal of downstream question',
-        () {
-          final q1 = boolQuestion('q1', 'Hide default branch?');
-          final q2 = boolQuestion('q2', 'Hidden default source')
-            ..conditional = QuestionConditional<bool>.withCondition(
-              CompositeExpression(
-                logicType: LogicType.and,
-                expressions: [BooleanExpression()..target = 'q1'],
-              ),
-              defaultValue: true,
-            );
-          final q3 = boolQuestion('q3', 'Revealed by default')
-            ..conditional = QuestionConditional<bool>.withCondition(
-              CompositeExpression(
-                logicType: LogicType.and,
-                expressions: [BooleanExpression()..target = 'q2'],
-              ),
-            );
-          final controller = QuestionnaireController([q1, q2, q3]);
-
-          // Answer q1=false → q2 hidden (default=true applied), q3 visible
-          // but q3 is unanswered → excluded from progressive (not a break point)
-          controller.submitAnswer(q1.constructAnswer(false));
-          expect(controller.progressiveVisibleQuestions.map((q) => q.id), [
-            'q1',
-          ]);
-          // q2 default does not appear in progressive (it's hidden)
-          expect(
-            controller.progressiveVisibleQuestions.map((q) => q.id),
-            isNot(contains('q2')),
+      test('hidden default drives progressive reveal of downstream question', () {
+        final q1 = boolQuestion('q1', 'Hide default branch?');
+        final q2 = boolQuestion('q2', 'Hidden default source')
+          ..conditional = QuestionConditional<bool>.withCondition(
+            CompositeExpression(
+              logicType: LogicType.and,
+              expressions: [BooleanExpression()..target = 'q1'],
+            ),
+            defaultValue: true,
           );
-        },
-      );
+        final q3 = boolQuestion('q3', 'Revealed by default')
+          ..conditional = QuestionConditional<bool>.withCondition(
+            CompositeExpression(
+              logicType: LogicType.and,
+              expressions: [BooleanExpression()..target = 'q2'],
+            ),
+          );
+        final controller = QuestionnaireController([q1, q2, q3]);
+
+        // Answer q1=false → q2 hidden (default=true applied), q3 visible
+        // but q3 is unanswered → excluded from progressive (not a break point)
+        controller.submitAnswer(q1.constructAnswer(false));
+        expect(controller.progressiveVisibleQuestions.map((q) => q.id), ['q1']);
+        // q2 default does not appear in progressive (it's hidden)
+        expect(
+          controller.progressiveVisibleQuestions.map((q) => q.id),
+          isNot(contains('q2')),
+        );
+      });
     });
 
     // ── Test 12: removeAnswer ──
@@ -551,55 +577,52 @@ void main() {
 
     // ── Test 13: commitFreeTextDraftsFor applies hidden defaults ──
 
-    test(
-      'commitFreeTextDraftsFor applies hidden defaults for cascade visibility',
-      () {
-        // q1: free-text. Typing "show" makes q2 visible; anything else hides it.
-        final q1 = freeTextQuestion('q1', 'Type "show" to reveal q2');
-        // q2: hidden when q1 != "show". Has default=true applied when hidden.
-        final q2 = boolQuestion('q2', 'Hidden with default')
-          ..conditional = QuestionConditional<bool>.withCondition(
-            CompositeExpression(
-              logicType: LogicType.and,
-              expressions: [
-                TextExpression(comparator: TextComparator.equal, value: 'show')
-                  ..target = 'q1',
-              ],
-            ),
-            defaultValue: true,
-          );
-        // q3: visible only when q2 = true, i.e. from q2's hidden default.
-        final q3 = boolQuestion('q3', 'Revealed by hidden default cascade')
-          ..conditional = QuestionConditional<bool>.withCondition(
-            CompositeExpression(
-              logicType: LogicType.and,
-              expressions: [BooleanExpression()..target = 'q2'],
-            ),
-          );
-        final controller = QuestionnaireController([q1, q2, q3]);
+    test('commitFreeTextDraftsFor applies hidden defaults for cascade visibility', () {
+      // q1: free-text. Typing "show" makes q2 visible; anything else hides it.
+      final q1 = freeTextQuestion('q1', 'Type "show" to reveal q2');
+      // q2: hidden when q1 != "show". Has default=true applied when hidden.
+      final q2 = boolQuestion('q2', 'Hidden with default')
+        ..conditional = QuestionConditional<bool>.withCondition(
+          CompositeExpression(
+            logicType: LogicType.and,
+            expressions: [
+              TextExpression(comparator: TextComparator.equal, value: 'show')
+                ..target = 'q1',
+            ],
+          ),
+          defaultValue: true,
+        );
+      // q3: visible only when q2 = true, i.e. from q2's hidden default.
+      final q3 = boolQuestion('q3', 'Revealed by hidden default cascade')
+        ..conditional = QuestionConditional<bool>.withCondition(
+          CompositeExpression(
+            logicType: LogicType.and,
+            expressions: [BooleanExpression()..target = 'q2'],
+          ),
+        );
+      final controller = QuestionnaireController([q1, q2, q3]);
 
-        // Initially: only q1 visible (q2 hidden, q3 hidden)
-        expect(controller.visibleQuestions.length, equals(1));
-        expect(controller.visibleQuestions.first.id, equals('q1'));
+      // Initially: only q1 visible (q2 hidden, q3 hidden)
+      expect(controller.visibleQuestions.length, equals(1));
+      expect(controller.visibleQuestions.first.id, equals('q1'));
 
-        // Draft q1 with "hide" → will keep q2 hidden → q2 default should apply
-        controller.updateFreeTextDraft('q1', 'hide');
+      // Draft q1 with "hide" → will keep q2 hidden → q2 default should apply
+      controller.updateFreeTextDraft('q1', 'hide');
 
-        // Batch-commit the draft
-        final error = controller.commitFreeTextDraftsFor([q1]);
-        expect(error, isNull);
+      // Batch-commit the draft
+      final error = controller.commitFreeTextDraftsFor([q1]);
+      expect(error, isNull);
 
-        // q2 default (true) must be applied since q2 is hidden
-        final a2 = controller.answerFor('q2')! as Answer<bool>;
-        expect(a2.response, isTrue);
+      // q2 default (true) must be applied since q2 is hidden
+      final a2 = controller.answerFor('q2')! as Answer<bool>;
+      expect(a2.response, isTrue);
 
-        // q3 must become visible because q2 default (true) drives its condition
-        expect(controller.visibleQuestions.map((q) => q.id), contains('q3'));
+      // q3 must become visible because q2 default (true) drives its condition
+      expect(controller.visibleQuestions.map((q) => q.id), contains('q3'));
 
-        // Draft should be cleared after commit
-        expect(controller.draftFor('q1'), isEmpty);
-      },
-    );
+      // Draft should be cleared after commit
+      expect(controller.draftFor('q1'), isEmpty);
+    });
 
     test('batch free-text commit invalidates dependents and notifies once', () {
       final q1 = freeTextQuestion('q1', 'Earlier answer');

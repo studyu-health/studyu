@@ -7,14 +7,12 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ContactScreen extends StatefulWidget {
-  const ContactScreen({super.key});
-
+class const ContactScreen({super.key}) extends StatefulWidget {
   @override
   State<ContactScreen> createState() => _ContactScreenState();
 }
 
-class _ContactScreenState extends State<ContactScreen> {
+class _ContactScreenState() extends State<ContactScreen> {
   Contact? studyContact;
 
   @override
@@ -61,20 +59,13 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 }
 
-class ContactWidget extends StatelessWidget {
-  final Contact? contact;
-  final String title;
-  final String? subtitle;
-  final Color color;
-
-  const ContactWidget({
-    required this.contact,
-    required this.title,
-    required this.color,
-    this.subtitle,
-    super.key,
-  });
-
+class const ContactWidget({
+  required final Contact? contact,
+  required final String title,
+  required final Color color,
+  final String? subtitle,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -153,24 +144,20 @@ class ContactWidget extends StatelessWidget {
   }
 }
 
-enum ContactItemType { website, email, phone }
+enum ContactItemType() {
+  website,
+  email,
+  phone,
+}
 
-class ContactItem extends StatelessWidget {
-  final IconData iconData;
-  final String itemName;
-  final String? itemValue;
-  final ContactItemType? type;
-  final Color? iconColor;
-
-  const ContactItem({
-    required this.itemName,
-    required this.itemValue,
-    required this.iconData,
-    this.type,
-    this.iconColor,
-    super.key,
-  });
-
+class const ContactItem({
+  required final String itemName,
+  required final String? itemValue,
+  required final IconData iconData,
+  final ContactItemType? type,
+  final Color? iconColor,
+  super.key,
+}) extends StatelessWidget {
   Future<void> launchContact() async {
     {
       Uri uri;

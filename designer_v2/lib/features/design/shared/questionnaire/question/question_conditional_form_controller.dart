@@ -10,7 +10,7 @@ import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-abstract class IConditionalQuestionProperties {
+abstract class IConditionalQuestionProperties() {
   String get currentQuestionId;
   CompositeExpression? get compositeExpression;
   bool get isReadonly;
@@ -30,19 +30,12 @@ abstract class IConditionalQuestionProperties {
   Stream<void> get conditionsValueChanges;
 }
 
-class ConditionalQuestionFormViewModel extends FormViewModel
-    implements IConditionalQuestionProperties {
-  ConditionalQuestionFormViewModel({
-    required this.currentQuestionId,
-    required this.questionConditionalControl,
-  });
-
+class ConditionalQuestionFormViewModel({
+  @override required final String currentQuestionId,
   @override
-  final String currentQuestionId;
-
-  @override
-  final FormControl<QuestionConditional<dynamic>?> questionConditionalControl;
-
+  required final FormControl<QuestionConditional<dynamic>?>
+  questionConditionalControl,
+}) extends FormViewModel implements IConditionalQuestionProperties {
   /// Flag to prevent marking form as dirty during programmatic updates
   bool _isUpdatingProgrammatically = false;
 
@@ -297,9 +290,9 @@ class ConditionalQuestionFormViewModel extends FormViewModel
     if (streams.isEmpty) {
       _conditionsValueChangesStream = const Stream<void>.empty();
     } else {
-      _conditionsValueChangesStream = StreamGroup.merge(
-        streams,
-      ).distinct().asBroadcastStream();
+      _conditionsValueChangesStream = StreamGroup.merge(streams)
+          .distinct()
+          .asBroadcastStream();
 
       _conditionsValueChangesSubscription = _conditionsValueChangesStream.listen(
         (_) {

@@ -4,33 +4,26 @@ import 'package:studyu_designer_v2/common_views/mouse_events.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
-abstract class ISyncIndicatorViewModel {
+abstract class ISyncIndicatorViewModel() {
   AsyncValue get syncState;
   bool get isDirty;
   DateTime? get lastSynced;
 }
 
-class SyncIndicator<T> extends StatefulWidget {
-  const SyncIndicator({
-    required this.state,
-    required this.isDirty,
-    this.lastSynced,
-    this.animationDuration = 1500,
-    this.iconSize = 15.0,
-    super.key,
-  });
-
-  final AsyncValue<T> state;
-  final DateTime? lastSynced;
-  final bool isDirty;
-  final int animationDuration;
-  final double iconSize;
-
+class const SyncIndicator<T>({
+  required final AsyncValue<T> state,
+  required final bool isDirty,
+  final DateTime? lastSynced,
+  final int animationDuration = 1500,
+  final double iconSize = 15.0,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<SyncIndicator> createState() => _SyncIndicatorState();
 }
 
-class _SyncIndicatorState extends State<SyncIndicator>
+class _SyncIndicatorState()
+    extends State<SyncIndicator>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final Animation<double> _animation;

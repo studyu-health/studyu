@@ -2,7 +2,7 @@ schema_version = 1
 
 [filters.fvm-melos-bootstrap]
 description = "Compact melos bootstrap success and failures"
-match_command = "^(fvm\\s+exec\\s+)?melos\\s+(bs|bootstrap)(\\s|$)"
+match_command = "^((fvm\\s+)?dart\\s+run\\s+melos|(fvm\\s+exec\\s+)?melos)\\s+(bs|bootstrap)(\\s|$)"
 strip_ansi = true
 filter_stderr = true
 keep_lines_matching = [
@@ -15,7 +15,7 @@ on_empty = "melos bootstrap: ok"
 
 [filters.melos-qualitycheck]
 description = "Compact melos qualitycheck wrapper output"
-match_command = "^(fvm\\s+exec\\s+)?melos\\s+(run\\s+)?qualitycheck(\\s|$)"
+match_command = "^((fvm\\s+)?dart\\s+run\\s+melos|(fvm\\s+exec\\s+)?melos)\\s+(run\\s+)?qualitycheck(\\s|$)"
 strip_ansi = true
 filter_stderr = true
 keep_lines_matching = [
@@ -441,9 +441,47 @@ Analyzing lib...
 """
 expected = "  Correcting some_file.dart...\n  1 issue found."
 
+[filters.melos-test]
+description = "Compact melos test output — strip per-test progress while keeping failures and summaries"
+match_command = "^(fvm\\s+exec\\s+)?melos\\s+(run\\s+)?test(\\s|$)"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^QuestionnaireWidget:",
+  "^\\[[^]]+\\]:\\s+QuestionnaireWidget:",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*loading\\b",
+  "^\\[[^]]+\\]:\\s+\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*loading\\b",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*(test|integration_test)/",
+  "^\\[[^]]+\\]:\\s+\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s+(/|test|integration_test)",
+]
+max_lines = 120
+
+[[tests.melos-test]]
+name = "melos test strips progress but keeps summaries"
+input = """
+00:00 +0: loading test/foo_test.dart
+00:00 +1: test/foo_test.dart: passes
+QuestionnaireWidget: Answer received for question q1 - Answer(q1: yes)
+00:00 +1: All tests passed!
+studyu_app: SUCCESS
+"""
+expected = "00:00 +1: All tests passed!\nstudyu_app: SUCCESS"
+
+[[tests.melos-test]]
+name = "melos test keeps failure details"
+input = """
+00:00 +0 -1: test/foo_test.dart: fails [E]
+  Expected: true
+    Actual: false
+00:00 +0 -1: Some tests failed.
+studyu_app: FAILURE
+"""
+expected = "00:00 +0 -1: test/foo_test.dart: fails [E]\n  Expected: true\n    Actual: false\n00:00 +0 -1: Some tests failed.\nstudyu_app: FAILURE"
+
 [filters.melos-format]
 description = "Compact melos format — only show packages with actual changes"
-match_command = "^(fvm\\s+(exec\\s+)?)?melos\\s+format\\b"
+match_command = "^((fvm\\s+)?dart\\s+format|(fvm\\s+(exec\\s+)?)?melos\\s+format)\\b"
 strip_ansi = true
 filter_stderr = true
 keep_lines_matching = [

@@ -23,18 +23,20 @@ import 'package:studyu_designer_v2/utils/validation.dart';
 import 'package:uuid/uuid.dart';
 
 // TODO: refactor break up into separate classes for each type
-class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
+class QuestionFormViewModel({
+  super.formData,
+  super.delegate,
+  super.validationSet = StudyFormValidationSet.draft,
+
+  /// Customized titles (if any) depending on the context of use
+  final Map<FormMode, String Function()>? _titles,
+}) extends ManagedFormViewModel<QuestionFormData>
     implements
         IListActionProvider<FormControl<dynamic>>,
         IConditionalQuestionProperties {
   static const defaultQuestionType = SurveyQuestionType.choice;
 
-  QuestionFormViewModel({
-    super.formData,
-    super.delegate,
-    super.validationSet = StudyFormValidationSet.draft,
-    Map<FormMode, String Function()>? titles,
-  }) : _titles = titles {
+  this {
     freeTextTypeControl.onChanged(
       (_) => _onFreeTextTypeChanged(freeTextTypeControl.value),
     );
@@ -72,9 +74,6 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
       (control) => onResponseOptionsChanged(control.controls),
     );
   }
-
-  /// Customized titles (if any) depending on the context of use
-  final Map<FormMode, LocalizedStringResolver>? _titles;
 
   // - Form fields (any question type)
 
@@ -172,6 +171,10 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
 
   // Multiple Choice
   final FormControl<bool> isMultipleChoiceControl = FormControl(
+    validators: [Validators.required],
+    value: false,
+  );
+  final FormControl<bool> isSelectionRequiredControl = FormControl(
     validators: [Validators.required],
     value: false,
   );
@@ -552,6 +555,7 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
     }),
     SurveyQuestionType.choice: FormGroup({
       'isMultipleChoice': isMultipleChoiceControl,
+      'isSelectionRequired': isSelectionRequiredControl,
       'choiceOptionsArray': choiceResponseOptionsArray,
     }),
     SurveyQuestionType.scale: FormGroup({
@@ -948,6 +952,7 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
       case SurveyQuestionType.choice:
         isMultipleChoiceControl.value =
             (data as ChoiceQuestionFormData).isMultipleChoice;
+        isSelectionRequiredControl.value = data.isSelectionRequired;
         // Unfortunately needed because of how [FormArray.updateValue] is implemented
         // Note: `formArray.value = []` does not remove any controls!
         answerOptionsArray.clear();
@@ -1024,6 +1029,9 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
           questionInfoText: questionInfoTextControl.value,
           conditional: questionConditionalControl.value,
           isMultipleChoice: isMultipleChoiceControl.value!,
+          isSelectionRequired:
+              isMultipleChoiceControl.value! &&
+              isSelectionRequiredControl.value!,
           // required
           answerOptions: validAnswerOptions,
         );

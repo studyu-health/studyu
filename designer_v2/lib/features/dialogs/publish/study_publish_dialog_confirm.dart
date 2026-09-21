@@ -12,9 +12,8 @@ import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class PublishConfirmationDialog extends StudyPageWidget {
-  const PublishConfirmationDialog(super.studyId, {super.key});
-
+class const PublishConfirmationDialog(super.studyId, {super.key})
+    extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(studyControllerProvider(studyId).notifier);
@@ -59,9 +58,8 @@ class PublishConfirmationDialog extends StudyPageWidget {
                       const SizedBox(height: 4.0),
                       SelectableText(
                         state.studyParticipation!.launchDescription,
-                        style: ThemeConfig.bodyTextMuted(
-                          theme,
-                        ).copyWith(fontStyle: FontStyle.italic),
+                        style: ThemeConfig.bodyTextMuted(theme)
+                            .copyWith(fontStyle: FontStyle.italic),
                       ),
                     ],
                   ),
@@ -81,9 +79,8 @@ class PublishConfirmationDialog extends StudyPageWidget {
                       ),
                     ),
                     onPressed: () {
-                      Navigator.maybePop(
-                        context,
-                      ).then((_) => controller.onChangeStudyParticipation());
+                      Navigator.maybePop(context)
+                          .then((_) => controller.onChangeStudyParticipation());
                     },
                   ),
                 ),

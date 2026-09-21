@@ -14,15 +14,15 @@ class Answer<V> {
   @JsonKey(includeToJson: false, includeFromJson: false)
   late V response;
 
-  Answer(this.question, this.timestamp);
+  new(this.question, this.timestamp);
 
-  Answer.forQuestion(Question question, this.response)
+  new forQuestion(Question question, this.response)
     : question = question.id,
       timestamp = DateTime.now();
 
   static const String keyResponseType = 'responseType';
 
-  factory Answer.parseJson(Map<String, dynamic> json) =>
+  factory parseJson(Map<String, dynamic> json) =>
       _$AnswerFromJson(json)..response = json[keyResponse] as V;
 
   Map<String, dynamic> toJson() {

@@ -9,22 +9,17 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class ImageCapturingQuestionWidget extends QuestionWidget {
-  final ImageCapturingQuestion question;
-  final Function(Answer<FutureBlobFile>)? onDone;
-
-  const ImageCapturingQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-  });
-
+class const ImageCapturingQuestionWidget({
+  super.key,
+  required final ImageCapturingQuestion question,
+  final Function(Answer<FutureBlobFile>)? onDone,
+}) extends QuestionWidget {
   @override
   State<ImageCapturingQuestionWidget> createState() =>
       _ImageCapturingQuestionWidgetState();
 }
 
-class _ImageCapturingQuestionWidgetState
+class _ImageCapturingQuestionWidgetState()
     extends State<ImageCapturingQuestionWidget> {
   bool _hasCaptured = false;
 

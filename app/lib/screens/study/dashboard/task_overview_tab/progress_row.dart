@@ -6,16 +6,13 @@ import 'package:studyu_app/util/intervention.dart';
 import 'package:studyu_app/widgets/intervention_card.dart';
 import 'package:studyu_core/core.dart';
 
-class ProgressRow extends StatefulWidget {
-  final StudySubject? subject;
-
-  const ProgressRow({super.key, this.subject});
-
+class const ProgressRow({super.key, final StudySubject? subject})
+    extends StatefulWidget {
   @override
   State<ProgressRow> createState() => _ProgressRowState();
 }
 
-class _ProgressRowState extends State<ProgressRow> {
+class _ProgressRowState() extends State<ProgressRow> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -73,24 +70,15 @@ class _ProgressRowState extends State<ProgressRow> {
   }
 }
 
-class InterventionSegment extends StatelessWidget {
-  final Intervention intervention;
-  final double percentCompleted;
-  final double percentMissed;
-  final bool isCurrent;
-  final bool isFuture;
-  final int phaseDuration;
-
-  const InterventionSegment({
-    required this.intervention,
-    required this.percentCompleted,
-    required this.percentMissed,
-    required this.isCurrent,
-    required this.isFuture,
-    required this.phaseDuration,
-    super.key,
-  });
-
+class const InterventionSegment({
+  required final Intervention intervention,
+  required final double percentCompleted,
+  required final double percentMissed,
+  required final bool isCurrent,
+  required final bool isFuture,
+  required final int phaseDuration,
+  super.key,
+}) extends StatelessWidget {
   List<Widget> buildSeparators(int nbSeparators) {
     final sep = <Widget>[];
     for (var i = 0; i < nbSeparators; i++) {

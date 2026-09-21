@@ -5,11 +5,10 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/localization/locale_providers.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
-class ParticipantInfo extends ConsumerWidget {
-  const ParticipantInfo({required this.monitorItem, super.key});
-
-  final StudyMonitorItem monitorItem;
-
+class const ParticipantInfo({
+  required final StudyMonitorItem monitorItem,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final languageCode = ref.watch(localeProvider).languageCode;

@@ -4,23 +4,17 @@ import 'package:studyu_app/widgets/questionnaire/custom_slider.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class ScaleQuestionWidget extends QuestionWidget {
-  final ScaleQuestion question;
-  final Function(Answer)? onDone;
-  final Answer<num>? initialAnswer;
-
-  const ScaleQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-    this.initialAnswer,
-  });
-
+class const ScaleQuestionWidget({
+  super.key,
+  required final ScaleQuestion question,
+  final Function(Answer)? onDone,
+  final Answer<num>? initialAnswer,
+}) extends QuestionWidget {
   @override
   State<ScaleQuestionWidget> createState() => _ScaleQuestionWidgetState();
 }
 
-class _ScaleQuestionWidgetState extends State<ScaleQuestionWidget> {
+class _ScaleQuestionWidgetState() extends State<ScaleQuestionWidget> {
   double? value;
 
   @override

@@ -2,7 +2,7 @@ name: studyu
 description: The root of the StudyU project
 publish_to: none
 environment:
-  sdk: '>=3.5.0 <4.0.0'
+  sdk: '>=3.13.0 <4.0.0'
 workspace:
   - core
   - flutter_common
@@ -12,7 +12,7 @@ workspace:
   - tools/study_data_docs
   - tools/studyu_mcp
 dev_dependencies:
-  melos: ^8.2.0
+  melos: ^8.7.0
 
 melos:
   repository: https://github.com/hpi-studyu/studyu
@@ -20,56 +20,70 @@ melos:
   scripts:
     setup:
       run: git config core.hooksPath .githooks
-      description: Configure git to use the project's tracked hooks in .githooks/
+      description: >-
+        Configure git to use the project's tracked hooks in .githooks/
 
     fix:
       run: |
-        melos exec -c 6 -- \
+        dart run melos exec -c 6 -- \
           "dart fix --apply"
       description: Fix auto-fixable lint errors
 
     outdated:
       run: |
-        melos exec -c 6 --fail-fast -- \
+        dart run melos exec -c 6 --fail-fast -- \
           "dart pub outdated"
-      description: Check all outdated dependencies
+      description: Check workspace packages for outdated dependencies
 
     upgrade:
       run: |
         dart pub upgrade
-        melos exec -c 6 --fail-fast -- \
-          "dart pub upgrade" && melos bootstrap
-      description: Check all outdated dependencies
+        dart run melos exec -c 6 --fail-fast -- \
+          "dart pub upgrade" && dart run melos bootstrap
+      description: >-
+        Upgrade root and workspace dependencies, then bootstrap the workspace
 
     # Warning: This will also upgrade to dev versions.
     #upgrade:major:
     #  run: |
     #    dart pub upgrade --major-versions
-    #    melos exec -c 6 --fail-fast -- \
-    #      "dart pub upgrade --major-versions" && melos bootstrap
+    #    dart run melos exec -c 6 --fail-fast -- \
+    #      "dart pub upgrade --major-versions" && dart run melos bootstrap
     #  description: Upgrade all dependencies to their latest major versions
 
     test:
       run: |
         rtk_prefix=""
-        if command -v rtk >/dev/null 2>&1; then
+        if [ "${CI:-}" != "true" ] && command -v rtk >/dev/null 2>&1; then
           rtk_prefix="rtk "
         fi
-        melos exec -c 1 --fail-fast -- \
-          'rtk_prefix=""; \
-          if command -v rtk >/dev/null 2>&1; then rtk_prefix="rtk "; fi; \
-          if grep -q "sdk: flutter" pubspec.yaml; then ${rtk_prefix}flutter test; else dart test; fi'
-      description: Run `flutter test` for a specific package.
+        dart run melos exec -c 6 --fail-fast -- \
+          "${rtk_prefix}flutter test"
+      description: >-
+        Run `flutter test` for workspace packages that contain a test directory
+      packageFilters:
+        dirExists: test
+
+    test:coverage:
+      run: |
+        rtk_prefix=""
+        if [ "${CI:-}" != "true" ] && command -v rtk >/dev/null 2>&1; then
+          rtk_prefix="rtk "
+        fi
+        dart run melos exec -c 6 --fail-fast -- \
+          "mkdir -p coverage && ${rtk_prefix}flutter test --coverage --file-reporter=json:coverage/tests.output"
+      description: Run `flutter test --coverage` per package with a test directory
       packageFilters:
         dirExists: test
 
     generate:
       run: |
         rtk_prefix=""
-        if command -v rtk >/dev/null 2>&1; then
+        if [ "${CI:-}" != "true" ] && command -v rtk >/dev/null 2>&1; then
           rtk_prefix="rtk "
         fi
-        melos exec -c 1 --fail-fast --scope studyu_core --scope studyu_designer_v2 -- \
+        dart run melos exec -c 1 --fail-fast \
+          --scope studyu_core --scope studyu_designer_v2 -- \
           "${rtk_prefix}dart run build_runner build"
       description: Generate files with build_runner
 
@@ -87,35 +101,32 @@ melos:
       run: |
         set -e
         rtk_prefix=""
-        if command -v rtk >/dev/null 2>&1; then
+        if [ "${CI:-}" != "true" ] && command -v rtk >/dev/null 2>&1; then
           rtk_prefix="rtk "
         fi
-        if [ "$CI" != "true" ]; then
-          ${rtk_prefix}fvm install
-        fi
-        ${rtk_prefix}melos format
-        ${rtk_prefix}melos generate
-        ${rtk_prefix}melos docs:study-data:check
         if [ "$CI" = "true" ]; then
-          ${rtk_prefix}dart analyze
-          ${rtk_prefix}flutter analyze
+          dart_cmd="dart"
+          flutter_cmd="flutter"
         else
-          ${rtk_prefix}fvm exec dart analyze
-          ${rtk_prefix}fvm exec flutter analyze
+          dart_cmd="fvm dart"
+          flutter_cmd="fvm flutter"
         fi
-      description: Run format, generate, and analyze checks
+        ${rtk_prefix}${dart_cmd} format \
+          --output=none --set-exit-if-changed .
+        ${rtk_prefix}${dart_cmd} analyze
+      description: Run read-only format and analysis checks
 
     reset:
       run: |
         git clean -x -d -f -q || true
-        melos clean
-        melos exec --flutter --concurrency=1 -- "flutter clean"
-        melos bootstrap
+        dart run melos clean
+        dart run melos exec --flutter --concurrency=1 -- "flutter clean"
+        dart run melos bootstrap
       description: Reset the workspace to a pristine checkout status.
 
     app:
       run: |
-        melos exec -c 1 -- \
+        dart run melos exec -c 1 -- \
           "flutter run -d chrome --web-port 8080"
       packageFilters:
         scope: studyu_app
@@ -123,7 +134,7 @@ melos:
 
     designer_v2:
       run: |
-        melos exec -c 1 -- \
+        dart run melos exec -c 1 -- \
           "flutter run -d chrome --web-port 8081"
       packageFilters:
         scope: studyu_designer_v2
@@ -131,24 +142,27 @@ melos:
 
     dev:app:
       run: |
-        melos exec -c 1 -- \
-          "flutter run -d chrome --web-port 8080 --dart-define=STUDYU_ENV=.env.dev"
+        dart run melos exec -c 1 -- \
+          "flutter run -d chrome --web-port 8080 \
+           --dart-define=STUDYU_ENV=.env.dev"
       packageFilters:
         scope: studyu_app
       description: Runs StudyU App with the development environment
 
     dev:designer_v2:
       run: |
-        melos exec -c 1 -- \
-          "flutter run -d chrome --web-port 8081 --dart-define=STUDYU_ENV=.env.dev"
+        dart run melos exec -c 1 -- \
+          "flutter run -d chrome --web-port 8081 \
+           --dart-define=STUDYU_ENV=.env.dev"
       packageFilters:
         scope: studyu_designer_v2
       description: Runs StudyU Designer with the development environment
 
     local:app:
       run: |
-        melos exec -c 1 -- \
-          "flutter run -d chrome --web-port 8080 --dart-define=STUDYU_ENV=.env.local"
+        dart run melos exec -c 1 -- \
+          "flutter run -d chrome --web-port 8080 \
+           --dart-define=STUDYU_ENV=.env.local"
       packageFilters:
         scope: studyu_app
       description: Runs StudyU App with local environment
@@ -168,7 +182,7 @@ melos:
 
     local:designer_v2:
       run: |
-        melos exec -c 1 -- \
+        dart run melos exec -c 1 -- \
           "flutter run -d chrome --web-port 8081 \
            --dart-define=STUDYU_ENV=.env.local \
            --dart-define=EMAIL=user1@studyu.health \
@@ -193,7 +207,7 @@ melos:
 
     build:android:
       run: |
-        melos exec -c 2 --fail-fast -- \
+        dart run melos exec -c 2 --fail-fast -- \
           "flutter build apk"
       description: Build app for Android.
       packageFilters:
@@ -201,7 +215,7 @@ melos:
 
     build:ios:
       run: |
-        melos exec -c 2 --fail-fast -- \
+        dart run melos exec -c 2 --fail-fast -- \
           "flutter build ipa --no-codesign"
       description: Build app for iOS.
       packageFilters:
@@ -209,16 +223,16 @@ melos:
 
     build:web:
       run: |
-        melos exec -c 2 --fail-fast -- \
+        dart run melos exec -c 2 --fail-fast -- \
           "flutter build web"
       description: Build app for Web.
       packageFilters:
-        scope: [ studyu_app, studyu_designer_v2 ]
+        scope: [studyu_app, studyu_designer_v2]
         dirExists: web
 
     build:web:app:
       run: |
-        melos exec -c 1 --fail-fast -- \
+        dart run melos exec -c 1 --fail-fast -- \
           "flutter build web"
       description: Build app for Web.
       packageFilters:
@@ -226,7 +240,7 @@ melos:
 
     build:web:designer_v2:
       run: |
-        melos exec -c 1 --fail-fast -- \
+        dart run melos exec -c 1 --fail-fast -- \
           "flutter build web"
       description: Build designer_v2 for Web.
       packageFilters:
@@ -234,16 +248,16 @@ melos:
 
     build:web:dev:
       run: |
-        melos exec -c 2 --fail-fast -- \
+        dart run melos exec -c 2 --fail-fast -- \
           "flutter build web --dart-define=STUDYU_ENV=.env.dev"
       description: Build web dev.
       packageFilters:
-        scope: [ studyu_app, studyu_designer_v2 ]
+        scope: [studyu_app, studyu_designer_v2]
         dirExists: web
 
     build:web:app:dev:
       run: |
-        melos exec -c 2 --fail-fast -- \
+        dart run melos exec -c 2 --fail-fast -- \
           "flutter build web --dart-define=STUDYU_ENV=.env.dev"
       description: Build web app dev.
       packageFilters:
@@ -252,7 +266,7 @@ melos:
 
     build:web:designer_v2:dev:
       run: |
-        melos exec -c 2 --fail-fast -- \
+        dart run melos exec -c 2 --fail-fast -- \
           "flutter build web --dart-define=STUDYU_ENV=.env.dev"
       description: Build web designer_v2 dev.
       packageFilters:

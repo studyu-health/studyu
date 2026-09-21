@@ -8,22 +8,17 @@ import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_app/widgets/questionnaire/questionnaire_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class QuestionnaireTaskWidget extends StatefulWidget {
-  final QuestionnaireTask task;
-  final CompletionPeriod completionPeriod;
-
-  const QuestionnaireTaskWidget({
-    required this.task,
-    required this.completionPeriod,
-    super.key,
-  });
-
+class const QuestionnaireTaskWidget({
+  required final QuestionnaireTask task,
+  required final CompletionPeriod completionPeriod,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<QuestionnaireTaskWidget> createState() =>
       _QuestionnaireTaskWidgetState();
 }
 
-class _QuestionnaireTaskWidgetState extends State<QuestionnaireTaskWidget> {
+class _QuestionnaireTaskWidgetState() extends State<QuestionnaireTaskWidget> {
   DateTime? _lastClickTime;
   bool _isLoading = false;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();

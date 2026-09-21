@@ -8,38 +8,22 @@ typedef ActionsProvider<T> = List<ModelAction> Function();
 typedef ActionsProviderFor<T> = List<ModelAction> Function(T from);
 typedef ActionsProviderAt<T> = List<ModelAction> Function(T from, int idx);
 
-class ActionPopUpMenuButton extends StatelessWidget {
-  const ActionPopUpMenuButton({
-    required this.actions,
-    this.orientation = Axis.horizontal,
-    this.elevation = 5,
-    this.splashRadius = 24.0,
-    this.triggerIconSize = 18.0,
-    this.position = PopupMenuPosition.under,
-    this.triggerIcon,
-    this.triggerIconColor,
-    this.triggerIconColorHover,
-    this.disableSplashEffect = false,
-    this.hideOnEmpty = true,
-    this.enabled = true,
-    this.triggerBuilder,
-    super.key,
-  });
-
-  final List<ModelAction> actions;
-  final IconData? triggerIcon;
-  final Color? triggerIconColor;
-  final Color? triggerIconColorHover;
-  final double triggerIconSize;
-  final bool disableSplashEffect;
-  final bool hideOnEmpty;
-  final Axis orientation;
-  final double? elevation;
-  final double? splashRadius;
-  final bool enabled;
-  final PopupMenuPosition position;
-  final Widget? triggerBuilder;
-
+class const ActionPopUpMenuButton({
+  required final List<ModelAction> actions,
+  final Axis orientation = Axis.horizontal,
+  final double? elevation = 5,
+  final double? splashRadius = 24.0,
+  final double triggerIconSize = 18.0,
+  final PopupMenuPosition position = PopupMenuPosition.under,
+  final IconData? triggerIcon,
+  final Color? triggerIconColor,
+  final Color? triggerIconColorHover,
+  final bool disableSplashEffect = false,
+  final bool hideOnEmpty = true,
+  final bool enabled = true,
+  final Widget? triggerBuilder,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (actions.isEmpty) {

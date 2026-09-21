@@ -56,7 +56,9 @@ FILTER_REGEX_EXCLUDE: (.*\.g\.dart|.*\/CHANGELOG.md|docs/database/.*|studyu|dock
 BASH_SHELLCHECK_ARGUMENTS: -ax -S style --shell=bash
 MARKDOWN_MARKDOWN_LINK_CHECK_CONFIG_FILE: .markdown_link_check.yml
 # todo deploy-apps.yml can be removed from the excluded list after actionlint#393 is released
-ACTION_ACTIONLINT_FILTER_REGEX_EXCLUDE: (.*\/.github\/workflows\/init-workspace\/action\.yml|.*\/.github\/workflows\/deploy-apps\.yml)
+# gh-aw *.lock.yml files are generated (see .gitattributes) and use GitHub permission scopes
+# that actionlint does not know yet (copilot-requests) plus gh-aw specific concurrency keys.
+ACTION_ACTIONLINT_FILTER_REGEX_EXCLUDE: (.*\/.github\/workflows\/init-workspace\/action\.yml|.*\/.github\/workflows\/deploy-apps\.yml|.*\.lock\.yml)
 # SQL_SQLFLUFF_CONFIG_FILE: .sqlfluff
 
 GITHUB_COMMENT_REPORTER: false

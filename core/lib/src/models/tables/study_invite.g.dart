@@ -13,6 +13,8 @@ StudyInvite _$StudyInviteFromJson(Map<String, dynamic> json) => StudyInvite(
       (json['preselected_intervention_ids'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+  participantCount:
+      (json['study_invite_participant_count'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$StudyInviteToJson(StudyInvite instance) =>

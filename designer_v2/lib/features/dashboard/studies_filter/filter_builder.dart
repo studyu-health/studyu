@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/dashboard/dashboard_controller.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_draft_controller.dart';
-import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_evaluator.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_types.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/bool_filter.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/date_range_filter.dart';
@@ -13,17 +12,14 @@ import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/num
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/text_filter.dart';
 import 'package:studyu_designer_v2/localization/app_localizations.dart';
 import 'package:studyu_designer_v2/localization/string_hardcoded.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-class FilterBuilder extends ConsumerStatefulWidget {
-  const FilterBuilder({super.key});
-
+class const FilterBuilder({super.key}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<FilterBuilder> createState() => _FilterBuilderState();
 }
 
-class _FilterBuilderState extends ConsumerState<FilterBuilder> {
+class _FilterBuilderState() extends ConsumerState<FilterBuilder> {
   // Text/Number inputs need controllers for the UI, but we sync them with state
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _participantCountController =
@@ -111,15 +107,6 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
     super.dispose();
   }
 
-  int _calculateMatchCount(FilterGroup filter) {
-    final studies = ref.read(dashboardControllerProvider).studies.value ?? [];
-    final supabaseUser = Supabase.instance.client.auth.currentUser;
-    if (supabaseUser == null) return 0;
-    return studies
-        .where((s) => FilterEvaluator.evaluate(filter, s, supabaseUser))
-        .length;
-  }
-
   bool _areFiltersEqual(FilterElement? a, FilterElement? b) {
     if (a == null && b == null) return true;
     if (a == null || b == null) return false;
@@ -163,9 +150,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
         content: TextField(
           controller: controller,
           decoration: InputDecoration(
-            hintText: AppLocalizations.of(
-              context,
-            )!.filter_dialog_preset_name_hint,
+            hintText: AppLocalizations.of(context)!
+                .filter_dialog_preset_name_hint,
           ),
         ),
         actions: [
@@ -265,9 +251,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
     if (id == DefaultPresets.myActiveStudies.id) {
       return AppLocalizations.of(context)!.preset_tooltip_my_active_studies;
     } else if (id == DefaultPresets.studiesNeedingAttention.id) {
-      return AppLocalizations.of(
-        context,
-      )!.preset_tooltip_studies_needing_attention;
+      return AppLocalizations.of(context)!
+          .preset_tooltip_studies_needing_attention;
     } else if (id == DefaultPresets.recentlyCreated.id) {
       return AppLocalizations.of(context)!.preset_tooltip_recently_created;
     } else if (id == DefaultPresets.publicStudies.id) {
@@ -297,7 +282,6 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
   Widget build(BuildContext context) {
     final draft = ref.watch(filterDraftControllerProvider);
     final controller = ref.watch(filterDraftControllerProvider.notifier);
-    final matchCount = _calculateMatchCount(draft.toFilterGroup);
 
     SavedFilter? loadedPreset;
     if (draft.loadedPresetId != null) {
@@ -375,9 +359,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                               }
                             },
                             child: Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.filter_manage_presets,
+                              AppLocalizations.of(context)!
+                                  .filter_manage_presets,
                             ),
                           );
                         },
@@ -521,9 +504,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                                 ? null
                                 : _onDeletePreset,
                             child: Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.filter_delete_preset,
+                              AppLocalizations.of(context)!
+                                  .filter_delete_preset,
                               style: TextStyle(
                                 color:
                                     (isDefault || draft.loadedPresetId == null)
@@ -539,9 +521,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                   if (draft.loadedPresetId != null) ...[
                     const SizedBox(height: 12),
                     Tooltip(
-                      message: AppLocalizations.of(
-                        context,
-                      )!.preset_loaded_tooltip,
+                      message: AppLocalizations.of(context)!
+                          .preset_loaded_tooltip,
                       child: Chip(
                         label: Text(loadedPresetName),
                         onDeleted: _onResetAll,
@@ -561,14 +542,12 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FilterCategory(
-                      title: AppLocalizations.of(
-                        context,
-                      )!.filter_category_basic,
+                      title: AppLocalizations.of(context)!
+                          .filter_category_basic,
                       children: [
                         TextFilter(
-                          title: AppLocalizations.of(
-                            context,
-                          )!.filter_field_title,
+                          title: AppLocalizations.of(context)!
+                              .filter_field_title,
                           controller: _titleController,
                           op: draft.titleOp,
                           onOpChanged: controller.updateTitleOp,
@@ -579,9 +558,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                               controller.toggleExpansion("Title".hardcoded, v),
                         ),
                         EnumFilter<StudyStatus>(
-                          title: AppLocalizations.of(
-                            context,
-                          )!.filter_field_status,
+                          title: AppLocalizations.of(context)!
+                              .filter_field_status,
                           values: StudyStatus.values,
                           selected: draft.status,
                           op: draft.statusOp,
@@ -598,14 +576,12 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                     ),
                     const SizedBox(height: 16),
                     FilterCategory(
-                      title: AppLocalizations.of(
-                        context,
-                      )!.filter_category_visibility,
+                      title: AppLocalizations.of(context)!
+                          .filter_category_visibility,
                       children: [
                         EnumFilter<Participation>(
-                          title: AppLocalizations.of(
-                            context,
-                          )!.filter_field_participation,
+                          title: AppLocalizations.of(context)!
+                              .filter_field_participation,
                           values: Participation.values,
                           selected: draft.participation,
                           op: draft.participationOp,
@@ -621,9 +597,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                           ),
                         ),
                         EnumFilter<ResultSharing>(
-                          title: AppLocalizations.of(
-                            context,
-                          )!.filter_field_result_sharing,
+                          title: AppLocalizations.of(context)!
+                              .filter_field_result_sharing,
                           values: ResultSharing.values,
                           selected: draft.resultSharing,
                           op: draft.resultSharingOp,
@@ -639,9 +614,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                           ),
                         ),
                         BoolFilter(
-                          title: AppLocalizations.of(
-                            context,
-                          )!.filter_field_registry_published,
+                          title: AppLocalizations.of(context)!
+                              .filter_field_registry_published,
                           selected: draft.registryPublished,
                           op: draft.registryPublishedOp,
                           onChanged: controller.updateRegistryPublished,
@@ -658,14 +632,12 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                     ),
                     const SizedBox(height: 16),
                     FilterCategory(
-                      title: AppLocalizations.of(
-                        context,
-                      )!.filter_category_participants,
+                      title: AppLocalizations.of(context)!
+                          .filter_category_participants,
                       children: [
                         NumberFilter(
-                          title: AppLocalizations.of(
-                            context,
-                          )!.filter_field_participant_count,
+                          title: AppLocalizations.of(context)!
+                              .filter_field_participant_count,
                           controller: _participantCountController,
                           op: draft.participantCountOp,
                           onOpChanged: controller.updateParticipantCountOp,
@@ -678,9 +650,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                           ),
                         ),
                         NumberFilter(
-                          title: AppLocalizations.of(
-                            context,
-                          )!.filter_field_active_count,
+                          title: AppLocalizations.of(context)!
+                              .filter_field_active_count,
                           controller: _activeSubjectCountController,
                           op: draft.activeSubjectCountOp,
                           onOpChanged: controller.updateActiveSubjectCountOp,
@@ -693,9 +664,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                           ),
                         ),
                         NumberFilter(
-                          title: AppLocalizations.of(
-                            context,
-                          )!.filter_field_completed_count,
+                          title: AppLocalizations.of(context)!
+                              .filter_field_completed_count,
                           controller: _endedCountController,
                           op: draft.endedCountOp,
                           onOpChanged: controller.updateEndedCountOp,
@@ -711,9 +681,8 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                     ),
                     const SizedBox(height: 16),
                     FilterCategory(
-                      title: AppLocalizations.of(
-                        context,
-                      )!.filter_category_dates,
+                      title: AppLocalizations.of(context)!
+                          .filter_category_dates,
                       children: [
                         DateRangeFilter(
                           start: draft.createdAfter,
@@ -751,9 +720,9 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                           AppLocalizations.of(context)!.filter_reset_all,
                         ),
                         style: TextButton.styleFrom(
-                          foregroundColor: Theme.of(
-                            context,
-                          ).colorScheme.onSurfaceVariant,
+                          foregroundColor: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
                         ),
                       ),
                       const Spacer(),
@@ -765,9 +734,7 @@ class _FilterBuilderState extends ConsumerState<FilterBuilder> {
                         },
                         icon: const Icon(Icons.check),
                         label: Text(
-                          AppLocalizations.of(
-                            context,
-                          )!.filter_show_studies(matchCount),
+                          AppLocalizations.of(context)!.filter_studies,
                         ),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(

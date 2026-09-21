@@ -8,19 +8,17 @@ import 'package:studyu_designer_v2/features/study/study_scaffold.dart';
 import 'package:studyu_designer_v2/repositories/model_repository.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 
-class StudyControllerState extends StudyControllerBaseState
+class const StudyControllerState({
+  required super.studyId,
+  required super.studyRepository,
+  required super.router,
+  required super.currentUser,
+  super.studyWithMetadata,
+  @override final bool isDirty = false,
+  @override final AsyncValue syncState = const AsyncValue<void>.data(null),
+  @override final DateTime? lastSynced,
+}) extends StudyControllerBaseState
     implements IStudyAppBarViewModel, ISyncIndicatorViewModel {
-  const StudyControllerState({
-    required super.studyId,
-    required super.studyRepository,
-    required super.router,
-    required super.currentUser,
-    super.studyWithMetadata,
-    this.isDirty = false,
-    this.syncState = const AsyncValue<void>.data(null),
-    this.lastSynced,
-  });
-
   bool get isPublished => studyValue?.status == StudyStatus.running;
 
   bool get isClosed => studyValue?.status == StudyStatus.closed;
@@ -41,15 +39,6 @@ class StudyControllerState extends StudyControllerBaseState
   }
 
   // - ISyncIndicatorViewModel
-
-  @override
-  final AsyncValue syncState;
-
-  @override
-  final bool isDirty;
-
-  @override
-  final DateTime? lastSynced;
 
   // - IStudyNavViewModel
 

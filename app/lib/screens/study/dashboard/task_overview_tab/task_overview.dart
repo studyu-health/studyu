@@ -11,29 +11,20 @@ import 'package:studyu_app/widgets/intervention_card.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class TaskOverview extends StatefulWidget {
-  final StudySubject? subject;
-  final List<TaskInstance>? scheduleToday;
-  final String? interventionIcon;
-  final GlobalKey? progressShowcaseKey;
-  final GlobalKey? currentInterventionShowcaseKey;
-  final GlobalKey? todayTasksShowcaseKey;
-
-  const TaskOverview({
-    required this.subject,
-    required this.scheduleToday,
-    super.key,
-    this.interventionIcon,
-    this.progressShowcaseKey,
-    this.currentInterventionShowcaseKey,
-    this.todayTasksShowcaseKey,
-  });
-
+class const TaskOverview({
+  required final StudySubject? subject,
+  required final List<TaskInstance>? scheduleToday,
+  super.key,
+  final String? interventionIcon,
+  final GlobalKey? progressShowcaseKey,
+  final GlobalKey? currentInterventionShowcaseKey,
+  final GlobalKey? todayTasksShowcaseKey,
+}) extends StatefulWidget {
   @override
   State<TaskOverview> createState() => _TaskOverviewState();
 }
 
-class _TaskOverviewState extends State<TaskOverview> {
+class _TaskOverviewState() extends State<TaskOverview> {
   void _navigateToReportIfStudyCompleted(BuildContext context) {
     if (widget.subject!.completedStudy) {
       // Workaround to reload dashboard
@@ -91,7 +82,14 @@ class _TaskOverviewState extends State<TaskOverview> {
           key: widget.progressShowcaseKey,
           title: l10n.dashboard_showcase_progress_title,
           description: l10n.dashboard_showcase_progress_description,
-          child: ProgressRow(subject: widget.subject),
+          child: ProgressRow(
+            // Unlike the dashboard container, this marker exists only when
+            // the loaded subject has actual persisted subject_progress.
+            key: widget.subject!.progress.isNotEmpty
+                ? const ValueKey('dashboard_persisted_progress')
+                : null,
+            subject: widget.subject,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),

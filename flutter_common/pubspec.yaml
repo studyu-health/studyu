@@ -1,12 +1,12 @@
 name: studyu_flutter_common
-version: 1.10.4
+version: 1.11.0
 description: >-
   StudyU common flutter components and functions for app and designer
 homepage: https://studyu.health
 repository: https://github.com/hpi-studyu/studyu
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.13.0 <4.0.0"
 resolution: workspace
 
 dependencies:
@@ -15,12 +15,12 @@ dependencies:
   flutter_dotenv: ^6.0.1
   flutter_material_design_icons: ^3.1.0
   flutter_secure_storage: ^10.3.1
-  lint: ^2.8.0
+  lint: ^2.14.0
   shared_preferences: ^2.5.5
-  studyu_core: ^4.9.0
-  supabase_flutter: ^2.16.0
-  synchronized: ^3.4.1
-  uuid: ^4.5.3
+  studyu_core: ^4.10.0
+  supabase_flutter: ^2.17.2
+  synchronized: ^3.4.2
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0

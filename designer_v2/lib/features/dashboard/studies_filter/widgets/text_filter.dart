@@ -4,24 +4,15 @@ import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/fil
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/filter_operator_dropdown.dart';
 import 'package:studyu_designer_v2/localization/app_localizations.dart';
 
-class TextFilter extends StatelessWidget {
-  final String title;
-  final TextEditingController controller;
-  final FilterOperator op;
-  final ValueChanged<FilterOperator> onOpChanged;
-  final bool isExpanded;
-  final ValueChanged<bool> onExpansionChanged;
-
-  const TextFilter({
-    required this.title,
-    required this.controller,
-    required this.op,
-    required this.onOpChanged,
-    required this.isExpanded,
-    required this.onExpansionChanged,
-    super.key,
-  });
-
+class const TextFilter({
+  required final String title,
+  required final TextEditingController controller,
+  required final FilterOperator op,
+  required final ValueChanged<FilterOperator> onOpChanged,
+  required final bool isExpanded,
+  required final ValueChanged<bool> onExpansionChanged,
+  super.key,
+}) extends StatelessWidget {
   String _getTextLabel(BuildContext context, FilterOperator op) {
     switch (op) {
       case FilterOperator.contains:

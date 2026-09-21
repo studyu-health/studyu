@@ -4,28 +4,21 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/models/app_state.dart';
-import 'package:studyu_app/theme.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_app/widgets/round_checkbox.dart';
 import 'package:studyu_core/core.dart';
 
-class TaskBox extends StatefulWidget {
-  final TaskInstance taskInstance;
-  final Icon icon;
-  final Function() onCompleted;
-
-  const TaskBox({
-    super.key,
-    required this.taskInstance,
-    required this.icon,
-    required this.onCompleted,
-  });
-
+class const TaskBox({
+  super.key,
+  required final TaskInstance taskInstance,
+  required final Icon icon,
+  required final Function() onCompleted,
+}) extends StatefulWidget {
   @override
   State<TaskBox> createState() => _TaskBoxState();
 }
 
-class _TaskBoxState extends State<TaskBox> {
+class _TaskBoxState() extends State<TaskBox> {
   Future<void> _navigateToTaskScreen() async {
     await context.push<bool>('/${RouteNames.task}', extra: widget.taskInstance);
     widget.onCompleted();
@@ -36,6 +29,7 @@ class _TaskBoxState extends State<TaskBox> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final completed = context
         .watch<AppState>()
         .activeSubject!

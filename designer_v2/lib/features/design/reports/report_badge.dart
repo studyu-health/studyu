@@ -2,20 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/common_views/badge.dart' as study_badge;
 import 'package:studyu_designer_v2/features/design/reports/reports_form_data.dart';
 
-class ReportBadge extends StatelessWidget {
-  const ReportBadge({
-    required this.status,
-    this.type = study_badge.BadgeType.outlineFill,
-    this.showPrefixIcon = true,
-    this.showTooltip = true,
-    super.key,
-  });
-
-  final ReportStatus? status;
-  final study_badge.BadgeType type;
-  final bool showPrefixIcon;
-  final bool showTooltip;
-
+class const ReportBadge({
+  required final ReportStatus? status,
+  final study_badge.BadgeType type = study_badge.BadgeType.outlineFill,
+  final bool showPrefixIcon = true,
+  final bool showTooltip = true,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

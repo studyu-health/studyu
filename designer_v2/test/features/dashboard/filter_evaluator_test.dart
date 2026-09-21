@@ -7,11 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 // Mock User class
 // ignore: avoid_implementing_value_types
-class MockUser extends Mock implements supabase.User {
-  @override
-  final String id;
-  MockUser(this.id);
-}
+class MockUser(@override final String id) extends Mock implements supabase.User;
 
 void main() {
   group('FilterEvaluator', () {

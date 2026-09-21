@@ -3,19 +3,13 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/common_views/study_title_confirmation_dialog.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyDeleteConfirmationDialog extends StatelessWidget {
-  const StudyDeleteConfirmationDialog({
-    required this.study,
-    required this.confirmLabel,
-    required this.onDownloadBackup,
-    required this.onCloseInstead,
-    super.key,
-  });
-
-  final Study study;
-  final String confirmLabel;
-  final Future<void> Function() onDownloadBackup;
-  final Future<void> Function() onCloseInstead;
+class const StudyDeleteConfirmationDialog({
+  required final Study study,
+  required final String confirmLabel,
+  required final Future<void> Function() onDownloadBackup,
+  required final Future<void> Function() onCloseInstead,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StudyTitleConfirmationDialog(
@@ -65,19 +59,12 @@ class StudyDeleteConfirmationDialog extends StatelessWidget {
   }
 }
 
-class _InlineDeleteAction extends StatelessWidget {
-  const _InlineDeleteAction({
-    required this.icon,
-    required this.description,
-    required this.actionLabel,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String description;
-  final String actionLabel;
-  final Future<void> Function() onPressed;
-
+class const _InlineDeleteAction({
+  required final IconData icon,
+  required final String description,
+  required final String actionLabel,
+  required final Future<void> Function() onPressed,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

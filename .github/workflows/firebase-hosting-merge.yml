@@ -35,10 +35,10 @@ jobs:
         with:
           workflowId: 'publish_pubdev.yml'
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
       - name: Init workspace
@@ -49,20 +49,22 @@ jobs:
         run: |
           # Flutter command needs to be run to clear the initial welcome message
           flutter config --no-analytics
-          
+
           # --- studyu_app ---
           cd app/
-          app_version=$(flutter pub deps --json | jq -r '.packages[] | select(.name == "studyu_app").version')
+          app_version=$(flutter pub deps --json | jq -r \
+            '.packages[] | select(.name == "studyu_app").version')
           echo "STUDYU_APP_VERSION=$app_version" >> "$GITHUB_ENV"
           cd ..
-          
+
           # --- studyu_designer_v2 ---
           cd designer_v2/
-          designer_version=$(flutter pub deps --json | jq -r '.packages[] | select(.name == "studyu_designer_v2").version')
+          designer_version=$(flutter pub deps --json | jq -r \
+            '.packages[] | select(.name == "studyu_designer_v2").version')
           echo "STUDYU_DESIGNER_VERSION=$designer_version" >> "$GITHUB_ENV"
           cd ..
       - name: Build Web
-        run: melos build:web --no-select
+        run: dart run melos build:web --no-select
       - name: Stamp version info into web builds
         run: |
           # --- Stamp version info into app build ---
@@ -71,7 +73,7 @@ jobs:
             --arg buildNumber "${{ github.run_number }}" \
             app/build/web/version.json > app_version.json
           mv app_version.json app/build/web/version.json
-          
+
           # --- Stamp version info into designer_v2 build ---
           jq '. + {version:$version,build_number:$buildNumber}' \
             --arg version "$STUDYU_DESIGNER_VERSION" \
@@ -81,6 +83,7 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_STUDYU_E37AF }}'
+          firebaseServiceAccount: >-
+            ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STUDYU_E37AF }}
           channelId: live
           projectId: studyu-e37af

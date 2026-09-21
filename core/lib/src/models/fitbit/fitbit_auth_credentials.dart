@@ -3,12 +3,10 @@ import 'package:json_annotation/json_annotation.dart';
 part 'fitbit_auth_credentials.g.dart';
 
 @JsonSerializable()
-class FitbitAuthCredentials {
-  String clientId;
-  String clientSecret;
-
-  FitbitAuthCredentials({required this.clientId, required this.clientSecret});
-
+class FitbitAuthCredentials({
+  required var String clientId,
+  required var String clientSecret,
+}) {
   FitbitAuthCredentials copyWith({String? clientId, String? clientSecret}) {
     return FitbitAuthCredentials(
       clientId: clientId ?? this.clientId,
@@ -16,7 +14,7 @@ class FitbitAuthCredentials {
     );
   }
 
-  factory FitbitAuthCredentials.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$FitbitAuthCredentialsFromJson(json);
 
   Map<String, dynamic> toJson() => _$FitbitAuthCredentialsToJson(this);

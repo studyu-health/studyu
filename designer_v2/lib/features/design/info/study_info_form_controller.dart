@@ -8,17 +8,13 @@ import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/validation.dart';
 
-class StudyInfoFormViewModel extends FormViewModel<StudyInfoFormData> {
-  StudyInfoFormViewModel({
-    required this.study,
-    super.delegate,
-    super.formData,
-    super.autosave = true,
-    super.validationSet,
-  });
-
-  final Study study;
-
+class StudyInfoFormViewModel({
+  required final Study study,
+  super.delegate,
+  super.formData,
+  super.autosave = true,
+  super.validationSet,
+}) extends FormViewModel<StudyInfoFormData> {
   // - Form fields
 
   final FormControl<String> titleControl = FormControl();

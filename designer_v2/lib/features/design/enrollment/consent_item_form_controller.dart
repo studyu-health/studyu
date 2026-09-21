@@ -8,16 +8,11 @@ import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dar
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:uuid/uuid.dart';
 
-class ConsentItemFormViewModel
-    extends ManagedFormViewModel<ConsentItemFormData> {
-  ConsentItemFormViewModel({
-    super.formData,
-    super.delegate,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  // - Form fields
-
+class ConsentItemFormViewModel({
+  super.formData,
+  super.delegate,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends ManagedFormViewModel<ConsentItemFormData> {
   final FormControl<String> consentIdControl = FormControl(
     value: const Uuid().v4(),
   ); // hidden

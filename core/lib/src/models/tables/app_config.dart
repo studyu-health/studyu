@@ -5,41 +5,25 @@ import 'package:studyu_core/core.dart';
 part 'app_config.g.dart';
 
 @JsonSerializable()
-class AppConfig extends SupabaseObjectFunctions<AppConfig> {
+class AppConfig(
+  var String id, {
+  @JsonKey(name: 'app_min_version') required var String appMinVersion,
+  @JsonKey(name: 'app_privacy') required var Map<String, String> appPrivacy,
+  @JsonKey(name: 'app_terms') required var Map<String, String> appTerms,
+  @JsonKey(name: 'designer_privacy')
+  required var Map<String, String> designerPrivacy,
+  @JsonKey(name: 'designer_terms')
+  required var Map<String, String> designerTerms,
+  required var Contact contact,
+  required var Map<String, String> imprint,
+  required var StudyUAnalytics? analytics,
+}) extends SupabaseObjectFunctions<AppConfig> {
   static const String tableName = 'app_config';
 
   @override
   Map<String, Object> get primaryKeys => {'id': id};
 
-  String id;
-  @JsonKey(name: 'app_min_version')
-  String appMinVersion;
-  @JsonKey(name: 'app_privacy')
-  Map<String, String> appPrivacy;
-  @JsonKey(name: 'app_terms')
-  Map<String, String> appTerms;
-  @JsonKey(name: 'designer_privacy')
-  Map<String, String> designerPrivacy;
-  @JsonKey(name: 'designer_terms')
-  Map<String, String> designerTerms;
-  Map<String, String> imprint;
-  Contact contact;
-  StudyUAnalytics? analytics;
-
-  AppConfig(
-    this.id, {
-    required this.appMinVersion,
-    required this.appPrivacy,
-    required this.appTerms,
-    required this.designerPrivacy,
-    required this.designerTerms,
-    required this.contact,
-    required this.imprint,
-    required this.analytics,
-  });
-
-  factory AppConfig.fromJson(Map<String, dynamic> json) =>
-      _$AppConfigFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$AppConfigFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$AppConfigToJson(this);

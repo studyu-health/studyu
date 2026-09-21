@@ -9,23 +9,17 @@ import 'package:studyu_app/util/string_extensions.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class FitbitQuestionWidget extends QuestionWidget {
-  final FitbitQuestion question;
-  final String taskId;
-  final Function(Answer) onDone;
-
-  const FitbitQuestionWidget({
-    super.key,
-    required this.question,
-    required this.taskId,
-    required this.onDone,
-  });
-
+class const FitbitQuestionWidget({
+  super.key,
+  required final FitbitQuestion question,
+  required final String taskId,
+  required final Function(Answer) onDone,
+}) extends QuestionWidget {
   @override
   State<FitbitQuestionWidget> createState() => _FitbitQuestionWidgetState();
 }
 
-class _FitbitQuestionWidgetState extends State<FitbitQuestionWidget> {
+class _FitbitQuestionWidgetState() extends State<FitbitQuestionWidget> {
   late List<FitbitData> value;
   bool _isLoading = false;
 
@@ -73,9 +67,8 @@ class _FitbitQuestionWidgetState extends State<FitbitQuestionWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(
-              context,
-            )!.error_syncing_fitbit_data(e.toString()),
+            AppLocalizations.of(context)!
+                .error_syncing_fitbit_data(e.toString()),
           ),
         ),
       );

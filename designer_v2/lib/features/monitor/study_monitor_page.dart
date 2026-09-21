@@ -13,9 +13,8 @@ import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyMonitorScreen extends StudyPageWidget {
-  const StudyMonitorScreen(super.studyId, {super.key});
-
+class const StudyMonitorScreen(super.studyId, {super.key})
+    extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyControllerProvider(studyId));
@@ -58,8 +57,7 @@ class StudyMonitorScreen extends StudyPageWidget {
   ) {
     final theme = Theme.of(context);
     final int total = monitorData.length;
-    const double minPercentage =
-        0; // Minimum percentage for visibility, change to 0.01 if min visibility is required.
+    const double minPercentage = 0; // Minimum percentage for visibility, change to 0.01 if min visibility is required.
 
     double activePercentage = monitorData.activeParticipants.length / total;
     double inactivePercentage = monitorData.inactiveParticipants.length / total;

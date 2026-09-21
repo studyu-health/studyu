@@ -5,16 +5,11 @@ import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class HtmlStylingBanner extends StatelessWidget {
-  const HtmlStylingBanner({
-    this.isDismissed = false,
-    this.onDismissed,
-    super.key,
-  });
-
-  final bool isDismissed;
-  final Function()? onDismissed;
-
+class const HtmlStylingBanner({
+  final bool isDismissed = false,
+  final Function()? onDismissed,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

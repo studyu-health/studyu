@@ -4,24 +4,15 @@ import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class InterventionCard extends StatelessWidget {
-  final Intervention intervention;
-  final bool selected;
-  final bool showCheckbox;
-  final bool showTasks;
-  final bool showDescription;
-  final Function()? onTap;
-
-  const InterventionCard(
-    this.intervention, {
-    this.onTap,
-    this.selected = false,
-    this.showCheckbox = false,
-    this.showTasks = true,
-    this.showDescription = true,
-    super.key,
-  });
-
+class const InterventionCard(
+  final Intervention intervention, {
+  final Function()? onTap,
+  final bool selected = false,
+  final bool showCheckbox = false,
+  final bool showTasks = true,
+  final bool showDescription = true,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -44,22 +35,14 @@ class InterventionCard extends StatelessWidget {
   }
 }
 
-class InterventionCardTitle extends StatelessWidget {
-  final Intervention? intervention;
-  final bool selected;
-  final bool showCheckbox;
-  final bool showDescriptionButton;
-  final Function()? onTap;
-
-  const InterventionCardTitle({
-    required this.intervention,
-    this.selected = false,
-    this.showCheckbox = false,
-    this.showDescriptionButton = true,
-    this.onTap,
-    super.key,
-  });
-
+class const InterventionCardTitle({
+  required final Intervention? intervention,
+  final bool selected = false,
+  final bool showCheckbox = false,
+  final bool showDescriptionButton = true,
+  final Function()? onTap,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -114,11 +97,10 @@ class InterventionCardTitle extends StatelessWidget {
   }
 }
 
-class InterventionCardDescription extends StatelessWidget {
-  final Intervention intervention;
-
-  const InterventionCardDescription({required this.intervention, super.key});
-
+class const InterventionCardDescription({
+  required final Intervention intervention,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -140,11 +122,8 @@ class InterventionCardDescription extends StatelessWidget {
   }
 }
 
-class _TaskList extends StatelessWidget {
-  final List<InterventionTask> tasks;
-
-  const _TaskList({required this.tasks});
-
+class const _TaskList({required final List<InterventionTask> tasks})
+    extends StatelessWidget {
   String scheduleString(List<CompletionPeriod> schedules) {
     return schedules
         .map(

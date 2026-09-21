@@ -3,8 +3,10 @@ import 'package:studyu_designer_v2/common_views/form_table_layout.dart';
 import 'package:studyu_designer_v2/common_views/mouse_events.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-typedef CollapsibleSectionBuilder =
-    Widget Function(BuildContext context, bool isCollapsed);
+typedef CollapsibleSectionBuilder = Widget Function(
+  BuildContext context,
+  bool isCollapsed,
+);
 
 /// Simple non-animated & more customizable alternative to [ExpansionPanel]
 /// and [ExpansionTile]
@@ -12,31 +14,26 @@ typedef CollapsibleSectionBuilder =
 /// Note: none of the default Flutter widgets can be controlled via a property
 /// *and* have the [ExpandIcon] inject into the header be replaced by something
 /// more fitting
-class Collapsible extends StatefulWidget {
-  const Collapsible({
-    required this.contentBuilder,
-    this.headerBuilder,
-    this.title,
-    this.isCollapsed = true,
-    this.maintainState = true,
-    super.key,
-  }) : assert(
-         (headerBuilder != null && title == null) ||
-             (headerBuilder == null && title != null),
-         "Must provide either headerBuilder or title",
-       );
-
-  final CollapsibleSectionBuilder contentBuilder;
-  final CollapsibleSectionBuilder? headerBuilder;
-  final String? title;
-  final bool isCollapsed;
-  final bool maintainState;
+class const Collapsible({
+  required final CollapsibleSectionBuilder contentBuilder,
+  final CollapsibleSectionBuilder? headerBuilder,
+  final String? title,
+  final bool isCollapsed = true,
+  final bool maintainState = true,
+  super.key,
+}) extends StatefulWidget {
+  this
+    : assert(
+        (headerBuilder != null && title == null) ||
+            (headerBuilder == null && title != null),
+        "Must provide either headerBuilder or title",
+      );
 
   @override
   State<Collapsible> createState() => _CollapsibleState();
 }
 
-class _CollapsibleState extends State<Collapsible> {
+class _CollapsibleState() extends State<Collapsible> {
   late bool isCollapsed = widget.isCollapsed;
 
   @override

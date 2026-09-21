@@ -1,3 +1,19 @@
+## 1.11.0
+
+ - **FIX**: remove obsolete analyzer plugins.
+ - **FIX**: resolve analysis and web build failures.
+ - **FIX**(deps): update flutter and deps.
+ - **FIX**(deep-links): separate web and app links.
+ - **FIX**: clear CI analysis failures.
+ - **FIX**: address review feedback.
+ - **FIX**(app): resolve dev merge conflicts.
+ - **FIX**(app,core,db): address code review findings from dev merge.
+ - **FIX**(app): reuse onboarding participant.
+ - **FEAT**(localization): synchronize app language with server and improve locale handling.
+ - **FEAT**: Update deep link handling and environment configuration for Android and iOS.
+ - **FEAT**: Enhance recovery flow with validation, constants, and integration tests.
+ - **FEAT**: Introduce QR code generation and deep link sharing for study invite codes, supported by new environment variables and localization.
+
 ## 1.10.4
 
  - **FIX**: upgrade deps.

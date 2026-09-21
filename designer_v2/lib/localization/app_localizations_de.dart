@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -289,10 +290,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get notification_invite_link_copied => 'Einladungslink kopiert';
 
   @override
+  String get notification_invitation_copied => 'Einladung kopiert';
+
+  @override
   String get action_button_new_study => 'Neue Studie';
 
   @override
+  String get action_button_retry => 'Erneut versuchen';
+
+  @override
   String get search => 'Suche';
+
+  @override
+  String get navlink_all_studies => 'Alle Studien';
 
   @override
   String get studies_list_header_title => 'Titel';
@@ -323,11 +333,58 @@ class AppLocalizationsDe extends AppLocalizations {
       'Verändere deine Suchanfrage, um mehr Studien in die Suche miteinzubeziehen';
 
   @override
+  String studies_count_total(int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total Studien',
+      one: '1 Studie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String studies_count_filtered(int visible, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total Studien',
+      one: '1 Studie',
+    );
+    return '$visible von $_temp0';
+  }
+
+  @override
+  String get studies_filter_server_side_unsupported =>
+      'Dieser Filter kann hier gerade nicht verwendet werden. Setze den Filter zurück und versuche es erneut.';
+
+  @override
   String get studies_empty => 'Du hast noch keine Studien erstellt';
 
   @override
   String get studies_empty_description =>
       'Erstelle deine eigene Studie von Grund auf oder erstelle einen Entwurf aus einer bereits veröffentlichten Studie';
+
+  @override
+  String get studies_empty_public => 'Keine öffentlichen Studien gefunden';
+
+  @override
+  String get studies_empty_public_description =>
+      'Es gibt keine Studien im öffentlichen Register, die deinen aktuellen Filtern entsprechen.';
+
+  @override
+  String get studies_empty_shared => 'Keine geteilten Studien gefunden';
+
+  @override
+  String get studies_empty_shared_description =>
+      'Es wurden noch keine Studien mit dir geteilt.';
+
+  @override
+  String get studies_end_of_list => 'Alle Studien geladen.';
+
+  @override
+  String get studies_load_failed =>
+      'Studien konnten nicht geladen werden. Bitte versuche es erneut.';
 
   @override
   String get navlink_learn => 'Lernen';
@@ -550,6 +607,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dialog_subject_invite_code => 'Teilnahmecode';
 
   @override
+  String get dialog_delete_invite_code_title => 'Teilnahmecode löschen?';
+
+  @override
+  String dialog_delete_invite_code_message(Object code) {
+    return 'Jeder mit dem Teilnahmecode $code kann ihn danach nicht mehr verwenden.';
+  }
+
+  @override
   String get dialog_subject_fitbit_credentials => 'Fitbit-Zugangsdaten';
 
   @override
@@ -602,7 +667,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wähle die Antwortoptionen so, dass sie zur Frage passen und die von dir gewünschten Daten erhoben werden.';
 
   @override
-  String get question_type_choice => 'Multiple-Choice';
+  String get question_type_choice => 'Auswahl';
 
   @override
   String get question_type_free_text => 'Freitext';
@@ -669,11 +734,19 @@ class AppLocalizationsDe extends AppLocalizations {
       'Maximale Aufnahmedauer in Sekunden';
 
   @override
-  String get form_field_response_choice_multiple => 'Mehrfachauswahl';
+  String get form_field_response_choice_multiple => 'Mehrfachauswahl erlauben';
 
   @override
   String get form_field_response_choice_multiple_tooltip =>
-      'Erlaubt die Auswahl von mehreren Antwortoptionen gleichzeitig,\nansonsten kann nur eine einzige Option ausgewählt werden';
+      'Teilnehmende können mehr als eine Antwort auswählen.';
+
+  @override
+  String get form_field_response_choice_required =>
+      'Mindestens eine Auswahl erforderlich';
+
+  @override
+  String get form_field_response_choice_required_tooltip =>
+      'Teilnehmende müssen mindestens eine Antwortoption auswählen.';
 
   @override
   String get form_array_response_options_choice_new =>
@@ -1480,8 +1553,7 @@ class AppLocalizationsDe extends AppLocalizations {
       count,
       locale: localeName,
       other: 'form_array_interventions_minlength',
-      two:
-          'Du brauchst mindestens einen Fragebogen, um den Effekt der Intervention(en) zu messen.',
+      two: 'Du brauchst mindestens einen Fragebogen, um den Effekt der Intervention(en) zu messen.',
     );
     return '$_temp0';
   }
@@ -1550,8 +1622,7 @@ class AppLocalizationsDe extends AppLocalizations {
       count,
       locale: localeName,
       other: 'form_array_intervention_tasks_minlength',
-      one:
-          'Du musst mindestens eine Maßnahme definieren, die während der Interventionsphase erfüllt werden soll',
+      one: 'Du musst mindestens eine Maßnahme definieren, die während der Interventionsphase erfüllt werden soll',
     );
     return '$_temp0';
   }
@@ -1664,8 +1735,7 @@ class AppLocalizationsDe extends AppLocalizations {
       count,
       locale: localeName,
       other: 'form_array_measurements_minlength',
-      one:
-          'Du brauchst mindestens einen Fragebogen, um den Effekt der Intervention(en) zu messen.',
+      one: 'Du brauchst mindestens einen Fragebogen, um den Effekt der Intervention(en) zu messen.',
     );
     return '$_temp0';
   }
@@ -1741,8 +1811,7 @@ class AppLocalizationsDe extends AppLocalizations {
       count,
       locale: localeName,
       other: 'form_array_measurement_survey_questions_minlength',
-      one:
-          'Es ist mindestens eine Frage erforderlich, um den Effekt der Intervention(en) zu messen.',
+      one: 'Es ist mindestens eine Frage erforderlich, um den Effekt der Intervention(en) zu messen.',
     );
     return '$_temp0';
   }
@@ -2068,8 +2137,7 @@ class AppLocalizationsDe extends AppLocalizations {
       other:
           '$count Teilnehmer haben sich mit diesem Code zur Studie angemeldet',
       one: '$count Teilnehmer hat sich mit diesem Code zur Studie angemeldet',
-      zero:
-          'Bisher hat sich niemand mit diesem Teilnahme-Code zur Studie angemeldet',
+      zero: 'Bisher hat sich niemand mit diesem Teilnahme-Code zur Studie angemeldet',
     );
     return '$_temp0';
   }
@@ -2149,6 +2217,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get code_list_header_code => 'Code';
+
+  @override
+  String get code_list_header_actions => 'Aktionen';
 
   @override
   String get action_button_code_new => 'Neuer Code';
@@ -2455,6 +2526,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get action_delete_invite_code => 'Teilnahmecode löschen';
 
   @override
+  String get action_delete_code => 'Code löschen';
+
+  @override
   String get action_remove => 'Entfernen';
 
   @override
@@ -2480,6 +2554,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get action_copy_link => 'Link kopieren';
+
+  @override
+  String get action_copy_invitation => 'Einladung kopieren';
 
   @override
   String get action_reportPrimary => 'Als Primärauswertung setzen';
@@ -2824,6 +2901,39 @@ class AppLocalizationsDe extends AppLocalizations {
   String get filter_reset_all => 'Zurücksetzen';
 
   @override
+  String get code_list_filter_title => 'Einladungscodes filtern';
+
+  @override
+  String get code_list_filter_enrolled_status => 'Anmeldestatus';
+
+  @override
+  String get code_list_filter_enrolled_min => 'Angemeldet min';
+
+  @override
+  String get code_list_filter_enrolled_max => 'Angemeldet max';
+
+  @override
+  String get code_list_filter_intervention_assignment =>
+      'Interventionszuweisung';
+
+  @override
+  String get code_list_filter_apply => 'Anwenden';
+
+  @override
+  String get code_list_filter_option_all => 'Alle';
+
+  @override
+  String get code_list_filter_option_unused => 'Ungenutzt';
+
+  @override
+  String get code_list_filter_option_used => 'Genutzt';
+
+  @override
+  String code_list_filter_button_active(int count) {
+    return 'Filtern ($count)';
+  }
+
+  @override
   String filter_show_studies(int count) {
     return '$count Studien anzeigen';
   }
@@ -2990,4 +3100,136 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get filter_button_main => 'Filtern';
+
+  @override
+  String get code_list_no_results_title => 'Keine passenden Einladungscodes';
+
+  @override
+  String get code_list_no_results_description =>
+      'Ändere deine Suche, um mehr Einladungscodes zu sehen.';
+
+  @override
+  String get code_list_search_hint => 'Einladungscodes suchen';
+
+  @override
+  String get code_list_search_hint_compact => 'Codes suchen';
+
+  @override
+  String code_list_active_count(int count) {
+    return '$count aktive Einladungscodes';
+  }
+
+  @override
+  String code_list_total_count(int count) {
+    return '$count insgesamt';
+  }
+
+  @override
+  String get code_list_page_size => 'Zeilen';
+
+  @override
+  String get code_list_rows_per_page => 'Zeilen pro Seite:';
+
+  @override
+  String code_list_page(int page) {
+    return 'Seite $page';
+  }
+
+  @override
+  String code_list_page_range(int start, int end, int count) {
+    return '$start–$end von $count';
+  }
+
+  @override
+  String code_list_page_loading(int start, int end) {
+    return '$start–$end wird geladen...';
+  }
+
+  @override
+  String get code_list_page_fetch_error =>
+      'Nächste Seite konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get code_list_retry => 'Erneut versuchen';
+
+  @override
+  String get code_list_previous_page => 'Vorherige Seite';
+
+  @override
+  String get code_list_next_page => 'Nächste Seite';
+
+  @override
+  String get action_regenerate_invite_code => 'Teilnahmecode neu generieren';
+
+  @override
+  String get dialog_qr_code_description =>
+      'Teilen Sie den Link oder QR-Code mit den Teilnehmenden, damit sie auf diese Studie zugreifen können. Wenn Teilnehmende den Link öffnen oder den QR-Code mit ihrem Smartphone scannen, öffnet sich die StudyU-App und fügt sie dieser Studie hinzu.';
+
+  @override
+  String get all_studies => 'Alle Studien';
+
+  @override
+  String get studies_filter_add_filter => 'Filter hinzufügen';
+
+  @override
+  String get studies_filter_remove_filter => 'Filter entfernen';
+
+  @override
+  String get studies_end_of_list_create => 'Erstelle eine Studie.';
+
+  @override
+  String get studies_end_of_list_public => 'Nicht gefunden, was du suchst?';
+
+  @override
+  String get error_qr_code_generation =>
+      'Der QR-Code konnte nicht angezeigt werden.';
+
+  @override
+  String get form_field_invite_link => 'Einladungslink';
+
+  @override
+  String get form_field_invite_link_tooltip =>
+      'Teilen Sie diesen Link mit den Teilnehmenden, damit sie die StudyU-App öffnen und auf diese Studie zugreifen können.';
+
+  @override
+  String get form_field_invitation_message => 'Einladungsnachricht';
+
+  @override
+  String invitation_message_intro(Object title) {
+    return 'Sie wurden eingeladen, mit StudyU an der Studie „$title“ teilzunehmen.';
+  }
+
+  @override
+  String get invitation_message_install_app =>
+      '1. Installieren Sie bei Bedarf die StudyU Health-App auf Ihrem Telefon:';
+
+  @override
+  String invitation_message_android(Object link) {
+    return 'Android: $link';
+  }
+
+  @override
+  String invitation_message_ios(Object link) {
+    return 'iPhone/iPad: $link';
+  }
+
+  @override
+  String get invitation_message_open_link =>
+      '2. Öffnen Sie diesen Einladungslink auf Ihrem Telefon:';
+
+  @override
+  String get invitation_message_alternative =>
+      'Alternativ können Sie die StudyU Health-App öffnen und diesen Teilnahmecode eingeben:';
+
+  @override
+  String get form_field_report_improvementDirection_hint =>
+      'Wählen Sie eine Verbesserungsrichtung aus';
+
+  @override
+  String get form_field_report_data_source_hint =>
+      'Wählen Sie eine Datenquelle aus';
+
+  @override
+  String get form_field_report_data_source_empty =>
+      'Keine Skalenfrage definiert';
 }

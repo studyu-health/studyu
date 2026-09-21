@@ -1,7 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:studyu_designer_v2/services/notification_service.dart';
 
-enum NotificationType { snackbar, alert, custom }
+enum NotificationType() {
+  snackbar,
+  alert,
+  custom,
+}
 
 /// Base class for notifications that are dispatched via [NotificationService]
 /// to inform the user & capture their attention.
@@ -9,24 +13,18 @@ enum NotificationType { snackbar, alert, custom }
 /// The currently supported notification types are:
 ///   [SnackbarIntent] - renders the notification as a snackbar
 ///   [AlertIntent] - renders the notification as an alert dialog
-abstract class NotificationIntent {
-  NotificationIntent({
-    this.message,
-    this.customContent,
-    this.icon,
-    this.actions,
-    required this.type,
-  }) {
+abstract class NotificationIntent({
+  final String? message,
+  final Widget? customContent,
+  final IconData? icon,
+  var List<NotificationAction>? actions,
+  required final NotificationType type,
+}) {
+  this {
     if (message == null && customContent == null) {
       throw Exception("Invalid AlertIntent");
     }
   }
-
-  final String? message;
-  final Widget? customContent;
-  final IconData? icon;
-  List<NotificationAction>? actions;
-  final NotificationType type;
 
   void register(NotificationAction action) {
     actions ??= [];
@@ -45,43 +43,32 @@ abstract class NotificationIntent {
 
 typedef FutureActionHandler = Future<void> Function();
 
-class NotificationAction {
-  final String label;
-  final FutureActionHandler onSelect;
-  final bool isDestructive;
-
-  NotificationAction({
-    required this.label,
-    required this.onSelect,
-    this.isDestructive = false,
-  });
-}
+class NotificationAction({
+  required final String label,
+  required final FutureActionHandler onSelect,
+  final bool isDestructive = false,
+});
 
 /// Encapsulates a call to [showSnackbar]
-class SnackbarIntent extends NotificationIntent {
-  SnackbarIntent({
-    required String super.message,
-    super.icon,
-    super.actions,
-    this.duration,
-  }) : super(type: NotificationType.snackbar);
-
-  final int? duration;
+class SnackbarIntent({
+  required String super.message,
+  super.icon,
+  super.actions,
+  final int? duration,
+}) extends NotificationIntent {
+  this : super(type: NotificationType.snackbar);
 }
 
 /// Encapsulates a call to [showDialog] using an alert-style widget
-class AlertIntent extends NotificationIntent {
-  AlertIntent({
-    required this.title,
-    super.message,
-    super.customContent,
-    super.icon,
-    super.actions,
-    this.dismissOnAction = true,
-  }) : super(type: NotificationType.alert);
-
-  final String title;
-  final bool dismissOnAction;
+class AlertIntent({
+  required final String title,
+  super.message,
+  super.customContent,
+  super.icon,
+  super.actions,
+  final bool dismissOnAction = true,
+}) extends NotificationIntent {
+  this : super(type: NotificationType.alert);
 
   bool get isDestructive =>
       actions != null && actions!.any((action) => action.isDestructive);

@@ -8,14 +8,14 @@ import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
-class ScreenerQuestionFormViewModel extends QuestionFormViewModel
+class ScreenerQuestionFormViewModel({
+  super.formData,
+  super.delegate,
+  super.validationSet = StudyFormValidationSet.draft,
+  super.titles,
+}) extends QuestionFormViewModel
     implements IScreenerQuestionLogicFormViewModel {
-  ScreenerQuestionFormViewModel({
-    super.formData,
-    super.delegate,
-    super.validationSet = StudyFormValidationSet.draft,
-    super.titles,
-  }) {
+  this {
     // Make sure form is initialized with base controls override
     markFormGroupChanged();
   }

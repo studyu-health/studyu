@@ -65,7 +65,7 @@
   "@__________________DOMAIN__________________": {},
   "study_status_draft": "Entwurf",
   "study_status_draft_description": "Die Studie ist noch in Planung",
-  "study_status_running": "Live",
+  "study_status_running": "Läuft",
   "study_status_running_description": "Die Studie wird gerade durchgeführt",
   "study_status_closed": "Abgeschlossen",
   "study_status_closed_description": "Diese Studie ist abgeschlossen.\nEs können sich keine neuen Teilnehmer mehr einschreiben.",
@@ -95,7 +95,9 @@
   "navlink_logout": "Abmelden",
   "@__________________DASHBOARD__________________": {},
   "action_button_new_study": "Neue Studie",
+  "action_button_retry": "Erneut versuchen",
   "search": "Suche",
+  "navlink_all_studies": "Alle Studien",
   "studies_list_header_title": "Titel",
   "studies_list_header_status": "Status",
   "studies_list_header_participation": "Teilnahme",
@@ -105,8 +107,34 @@
   "studies_list_header_participants_completed": "Abgeschlossen",
   "studies_not_found": "Es konnten keine Studien gefunden werden",
   "modify_query": "Verändere deine Suchanfrage, um mehr Studien in die Suche miteinzubeziehen",
+  "studies_count_total": "{total, plural, =1{1 Studie} other{{total} Studien}}",
+  "@studies_count_total": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "studies_count_filtered": "{visible} von {total, plural, =1{1 Studie} other{{total} Studien}}",
+  "@studies_count_filtered": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "studies_filter_server_side_unsupported": "Dieser Filter kann hier gerade nicht verwendet werden. Setze den Filter zurück und versuche es erneut.",
   "studies_empty": "Du hast noch keine Studien erstellt",
   "studies_empty_description": "Erstelle deine eigene Studie von Grund auf oder erstelle einen Entwurf aus einer bereits veröffentlichten Studie",
+  "studies_empty_public": "Keine öffentlichen Studien gefunden",
+  "studies_empty_public_description": "Es gibt keine Studien im öffentlichen Register, die deinen aktuellen Filtern entsprechen.",
+  "studies_empty_shared": "Keine geteilten Studien gefunden",
+  "studies_empty_shared_description": "Es wurden noch keine Studien mit dir geteilt.",
+  "studies_end_of_list": "Alle Studien geladen.",
+  "studies_load_failed": "Studien konnten nicht geladen werden. Bitte versuche es erneut.",
   "@__________________STUDYPAGE__________________": {},
   "navlink_learn": "Lernen",
   "navlink_study_design": "Entwerfen",
@@ -200,6 +228,13 @@
   "dialog_subject_consent_item": "Einwilligungspunkt",
   "dialog_subject_report_section": "Berichtsabschnitt",
   "dialog_subject_invite_code": "Teilnahmecode",
+  "dialog_delete_invite_code_title": "Teilnahmecode löschen?",
+  "dialog_delete_invite_code_message": "Jeder mit dem Teilnahmecode {code} kann ihn danach nicht mehr verwenden.",
+  "@dialog_delete_invite_code_message": {
+    "placeholders": {
+      "code": {}
+    }
+  },
   "dialog_subject_fitbit_credentials": "Fitbit-Zugangsdaten",
   "@__________________STUDYPAGE_DESIGN_SHARED__________________": {},
   "form_question_create": "Neue Frage",
@@ -216,7 +251,7 @@
   "form_field_question_response_options": "Antwortoptionen",
   "form_field_question_response_options_tooltip": "Definiere welche Optionen zur Beantwortung der Frage in der App verfügbar sind",
   "form_field_question_response_options_description": "Wähle die Antwortoptionen so, dass sie zur Frage passen und die von dir gewünschten Daten erhoben werden.",
-  "question_type_choice": "Multiple-Choice",
+  "question_type_choice": "Auswahl",
   "question_type_free_text": "Freitext",
   "question_type_pain": "Schmerz-Tracker",
   "question_type_pain_description": "Teilnehmer können ein oder mehrere Körperteile auf einem Diagramm auswählen und jedem ausgewählten Teil mithilfe einer Schmerzskala eine Schmerzstufe zuweisen. Dies ist nützlich für die Verfolgung von lokalisierten Schmerzen.",
@@ -298,8 +333,10 @@
   "form_field_response_image": "Bild",
   "form_field_response_audio": "Audio",
   "form_field_response_audio_max_duration_label": "Maximale Aufnahmedauer in Sekunden",
-  "form_field_response_choice_multiple": "Mehrfachauswahl",
-  "form_field_response_choice_multiple_tooltip": "Erlaubt die Auswahl von mehreren Antwortoptionen gleichzeitig,\nansonsten kann nur eine einzige Option ausgewählt werden",
+  "form_field_response_choice_multiple": "Mehrfachauswahl erlauben",
+  "form_field_response_choice_multiple_tooltip": "Teilnehmende können mehr als eine Antwort auswählen.",
+  "form_field_response_choice_required": "Mindestens eine Auswahl erforderlich",
+  "form_field_response_choice_required_tooltip": "Teilnehmende müssen mindestens eine Antwortoption auswählen.",
   "form_array_response_options_choice_new": "Antwortoption hinzufügen",
   "form_array_response_options_choice_hint": "Option",
   "form_field_response_scale_min_label": "Start-Beschriftung",
@@ -749,7 +786,6 @@
   "preview_overlay_remote_unavailable_message": "Die StudyU-App ist vorübergehend nicht verfügbar oder wird gewartet. Bitte versuche es später noch einmal.",
   "preview_overlay_could_not_load": "Die App-Vorschau konnte nicht geladen werden.",
   "preview_overlay_preview_not_opened": "Die App-Vorschau konnte gerade nicht geöffnet werden.",
-
   "banner_study_test_unavailable": "Um den Testmodus nutzen zu können, gib bitte folgende Informationen korrekt & vollständig ein:",
   "banner_study_preview_unavailable": "Um die Vorschau nutzen zu können, gib bitte folgende Informationen korrekt und vollständig ein:",
   "dialog_study_test_help_title": "Teste deine Studie!",
@@ -807,11 +843,13 @@
   "code_list_empty_title": "Noch keine Teilnehmer eingeladen",
   "code_list_empty_description": "Erstelle Teilnahmecodes, mit denen sich Teilnehmer zu deiner Studie in der StudyU App anmelden können.",
   "code_list_header_code": "Code",
+  "code_list_header_actions": "Aktionen",
   "action_button_code_new": "Neuer Code",
   "notification_code_deleted": "Teilnahmecode gelöscht",
   "notification_code_clipboard": "Code wurde in die Zwischenablage kopiert",
   "notification_invite_code_copied": "Teilnahmecode kopiert",
   "notification_invite_link_copied": "Einladungslink kopiert",
+  "notification_invitation_copied": "Einladung kopiert",
   "@__________________STUDYPAGE_MONITOR__________________": {},
   "participant_details_title": "Teilnehmerdetails",
   "participant_details_study_days_overview": "Übersicht über Studientage",
@@ -850,9 +888,9 @@
   "monitoring_table_column_completed_intervention_tasks": "Abgeschlossene Interventionsaufgaben",
   "monitoring_table_column_completed_surveys": "Abgeschlossene Fragebögen",
   "monitoring_table_row_tooltip_dropout": "Dieser Teilnehmer hat die Studie verlassen und es wird keine neue Aktivität hinzugefügt",
-  "monitoring_table_days_in_study_header_tooltip":"Die Anzahl der Tage, die der Teilnehmer in der Studie verbracht hat",
+  "monitoring_table_days_in_study_header_tooltip": "Die Anzahl der Tage, die der Teilnehmer in der Studie verbracht hat",
   "monitoring_table_completed_interventions_header_tooltip": "Alle Interventionsaufgaben wurden während der gesamten Studie abgeschlossen",
-  "monitoring_table_completed_surveys_header_tooltip":"Die Umfrage zählt als abgeschlossen, wenn alle Aufgaben für den Tag erledigt wurden",
+  "monitoring_table_completed_surveys_header_tooltip": "Die Umfrage zählt als abgeschlossen, wenn alle Aufgaben für den Tag erledigt wurden",
   "@__________________STUDYPAGE_ANALYZE__________________": {},
   "banner_text_study_recruit_draft": "Solange die Studie noch nicht live ist, funktionieren die Links auf dieser Seite noch nicht.",
   "banner_text_study_analyze_draft": "Solange die Studie noch nicht live ist, basieren die Ergebnisse hier auf den Daten aus den Testläufen der Studie.\nDie Ergebnisdaten werden automatisch zurückgesetzt sobald die Studie mit echten Teilnehmern startet.",
@@ -861,7 +899,7 @@
   "study_export_unavailable_empty_tooltip": "Es sind noch keine Ergebnisdaten verfügbar",
   "study_export_unavailable_no_permission_tooltip": "Du bist nicht berechtigt, auf die Ergebnisdaten der Studie zuzugreifen",
   "@__________________STUDY_LAUNCH_DIALOG__________________": {},
-  "study_launch_title": "Super Arbeit! \uD83D\uDC4F Alles bereit?",
+  "study_launch_title": "Super Arbeit! 👏 Alles bereit?",
   "study_launch_participation_intro": "Die von dir erstellte Studie ist",
   "study_launch_participation_outro": "",
   "study_launch_post_launch_intro": "Wenn die Studie gestartet wird, beachte:",
@@ -931,6 +969,7 @@
   "action_edit": "Bearbeiten",
   "action_delete": "Löschen",
   "action_delete_invite_code": "Teilnahmecode löschen",
+  "action_delete_code": "Code löschen",
   "action_remove": "Entfernen",
   "action_duplicate": "Duplizieren",
   "action_clipboard": "In Zwischenablage kopieren",
@@ -940,6 +979,7 @@
   "action_qr_code_download": "QR-Code herunterladen",
   "action_share": "Einladungslink teilen",
   "action_copy_link": "Link kopieren",
+  "action_copy_invitation": "Einladung kopieren",
   "action_reportPrimary": "Als Primärauswertung setzen",
   "action_study_duplicate_draft": "Als Entwurf duplizieren",
   "action_study_export_results": "Ergebnisdaten exportieren",
@@ -1045,6 +1085,23 @@
   "filter_save_as_new": "Als neu speichern",
   "filter_delete_preset": "Vorlage löschen",
   "filter_reset_all": "Zurücksetzen",
+  "code_list_filter_title": "Einladungscodes filtern",
+  "code_list_filter_enrolled_status": "Anmeldestatus",
+  "code_list_filter_enrolled_min": "Angemeldet min",
+  "code_list_filter_enrolled_max": "Angemeldet max",
+  "code_list_filter_intervention_assignment": "Interventionszuweisung",
+  "code_list_filter_apply": "Anwenden",
+  "code_list_filter_option_all": "Alle",
+  "code_list_filter_option_unused": "Ungenutzt",
+  "code_list_filter_option_used": "Genutzt",
+  "code_list_filter_button_active": "Filtern ({count})",
+  "@code_list_filter_button_active": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "filter_show_studies": "{count} Studien anzeigen",
   "@filter_show_studies": {
     "placeholders": {
@@ -1099,14 +1156,105 @@
   "filter_result_sharing_public": "Öffentlich",
   "filter_result_sharing_private": "Privat",
   "filter_result_sharing_organization": "Organisation",
-  "study_status_draft": "Entwurf",
-  "study_status_running": "Läuft",
-  "study_status_closed": "Abgeschlossen",
   "participation_open": "Offen",
   "participation_invite": "Nur Einladung",
   "filter_section_default_presets": "Standardvorlagen",
   "filter_section_custom_presets": "Benutzerdefinierte Vorlagen",
   "filter_button_advanced": "Konfiguriere Filter...",
   "filter_button_clear": "Filter entfernen",
-  "filter_button_main": "Filtern"
+  "filter_button_main": "Filtern",
+  "code_list_no_results_title": "Keine passenden Einladungscodes",
+  "code_list_no_results_description": "Ändere deine Suche, um mehr Einladungscodes zu sehen.",
+  "code_list_search_hint": "Einladungscodes suchen",
+  "code_list_active_count": "{count} aktive Einladungscodes",
+  "@code_list_active_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_total_count": "{count} insgesamt",
+  "@code_list_total_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_page_size": "Zeilen",
+  "code_list_rows_per_page": "Zeilen pro Seite:",
+  "code_list_page": "Seite {page}",
+  "@code_list_page": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_page_range": "{start}–{end} von {count}",
+  "@code_list_page_range": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_page_loading": "{start}–{end} wird geladen...",
+  "@code_list_page_loading": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_page_fetch_error": "Nächste Seite konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "code_list_retry": "Erneut versuchen",
+  "code_list_previous_page": "Vorherige Seite",
+  "code_list_next_page": "Nächste Seite",
+  "code_list_search_hint_compact": "Codes suchen",
+  "action_regenerate_invite_code": "Teilnahmecode neu generieren",
+  "dialog_qr_code_description": "Teilen Sie den Link oder QR-Code mit den Teilnehmenden, damit sie auf diese Studie zugreifen können. Wenn Teilnehmende den Link öffnen oder den QR-Code mit ihrem Smartphone scannen, öffnet sich die StudyU-App und fügt sie dieser Studie hinzu.",
+  "all_studies": "Alle Studien",
+  "studies_filter_add_filter": "Filter hinzufügen",
+  "studies_filter_remove_filter": "Filter entfernen",
+  "studies_end_of_list_create": "Erstelle eine Studie.",
+  "studies_end_of_list_public": "Nicht gefunden, was du suchst?",
+  "error_qr_code_generation": "Der QR-Code konnte nicht angezeigt werden.",
+  "form_field_invite_link": "Einladungslink",
+  "form_field_invite_link_tooltip": "Teilen Sie diesen Link mit den Teilnehmenden, damit sie die StudyU-App öffnen und auf diese Studie zugreifen können.",
+  "form_field_invitation_message": "Einladungsnachricht",
+  "invitation_message_intro": "Sie wurden eingeladen, mit StudyU an der Studie „{title}“ teilzunehmen.",
+  "@invitation_message_intro": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "invitation_message_install_app": "1. Installieren Sie bei Bedarf die StudyU Health-App auf Ihrem Telefon:",
+  "invitation_message_android": "Android: {link}",
+  "@invitation_message_android": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "invitation_message_ios": "iPhone/iPad: {link}",
+  "@invitation_message_ios": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "invitation_message_open_link": "2. Öffnen Sie diesen Einladungslink auf Ihrem Telefon:",
+  "invitation_message_alternative": "Alternativ können Sie die StudyU Health-App öffnen und diesen Teilnahmecode eingeben:",
+  "form_field_report_improvementDirection_hint": "Wählen Sie eine Verbesserungsrichtung aus",
+  "form_field_report_data_source_hint": "Wählen Sie eine Datenquelle aus",
+  "form_field_report_data_source_empty": "Keine Skalenfrage definiert"
 }

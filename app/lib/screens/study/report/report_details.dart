@@ -6,16 +6,13 @@ import 'package:studyu_app/screens/study/report/general_details_section.dart';
 import 'package:studyu_app/screens/study/report/report_section_container.dart';
 import 'package:studyu_core/core.dart';
 
-class ReportDetailsScreen extends StatelessWidget {
-  final StudySubject subject;
-
+class const ReportDetailsScreen(final StudySubject subject, {super.key})
+    extends StatelessWidget {
   static MaterialPageRoute routeFor({required StudySubject subject}) =>
       MaterialPageRoute(
         builder: (_) => ReportDetailsScreen(subject),
         settings: const RouteSettings(name: 'reportDetails'),
       );
-
-  const ReportDetailsScreen(this.subject, {super.key});
 
   @override
   Widget build(BuildContext context) {

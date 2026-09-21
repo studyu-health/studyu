@@ -4,17 +4,15 @@ import 'package:studyu_designer_v2/features/study/study_test_frame.dart';
 import 'package:studyu_designer_v2/features/study/study_test_frame_views.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 
-class InterventionPreview extends ConsumerWidget {
-  const InterventionPreview({required this.routeArgs, super.key});
-
-  final InterventionFormRouteArgs routeArgs;
-
+class const InterventionPreview({
+  required final InterventionFormRouteArgs routeArgs,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ColoredBox(
-      color: Theme.of(
-        context,
-      ).colorScheme.primaryContainer.withValues(alpha: 0.25),
+      color: Theme.of(context).colorScheme.primaryContainer
+          .withValues(alpha: 0.25),
       child: Stack(
         fit: StackFit.expand,
         children: [

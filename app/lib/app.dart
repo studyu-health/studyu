@@ -9,22 +9,17 @@ import 'package:studyu_app/theme.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class MyApp extends StatefulWidget {
-  const MyApp(
-    this.queryParameters,
-    this.appConfig, {
-    super.key,
-    required this.initialRoute,
-  });
-  final Map<String, String> queryParameters;
-  final AppConfig? appConfig;
-  final String initialRoute;
-
+class const MyApp(
+  final Map<String, String> queryParameters,
+  final AppConfig? appConfig, {
+  super.key,
+  required final String initialRoute,
+}) extends StatefulWidget {
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState() extends State<MyApp> {
   late final GoRouter _router;
 
   @override

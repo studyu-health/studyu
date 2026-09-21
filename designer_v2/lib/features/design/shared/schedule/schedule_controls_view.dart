@@ -9,11 +9,10 @@ import 'package:studyu_designer_v2/features/design/shared/schedule/schedule_form
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/time_of_day.dart';
 
-class ScheduleControls extends FormConsumerWidget {
-  const ScheduleControls({required this.formViewModel, super.key});
-
-  final WithScheduleControls formViewModel;
-
+class const ScheduleControls({
+  required final WithScheduleControls formViewModel,
+  super.key,
+}) extends FormConsumerWidget {
   @override
   Widget build(BuildContext context, FormGroup form) {
     formViewModel.reminderTimePickerControl.valueChanges.listen((event) {
