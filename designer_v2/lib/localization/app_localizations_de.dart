@@ -2646,7 +2646,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get fitbit_credentials_instruction =>
-      'Um Fitbit-Daten zu integrieren, folge diesen Schritten, um deine Client-ID und deinen Client-Secret zu erhalten:';
+      'Um Fitbit-Daten zu integrieren, folge diesen Schritten, um deine Client-ID und dein Client-Secret zu erhalten:';
 
   @override
   String get fitbit_credentials_step1 => '1. Gehe zum Fitbit Developer Portal.';
@@ -2669,7 +2669,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get fitbit_credentials_step6 =>
-      '6. Sende das Formular ab, um deine \"Client ID\" und deinen \"Client Secret\" zu erhalten.';
+      '6. Sende das Formular ab, um deine \"Client ID\" und dein \"Client Secret\" zu erhalten.';
 
   @override
   String get fitbit_credentials_step7 =>
@@ -2783,7 +2783,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get client_secret_label_help =>
-      'Gib den Client Secret aus dem Fitbit Developer Portal ein.';
+      'Gib das Client Secret aus dem Fitbit Developer Portal ein.';
 
   @override
   String get client_secret_hint => 'Client Secret';
@@ -2807,7 +2807,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get fitbit_credentials_not_set =>
-      'Fitbit-Anmeldedaten sind nicht gesetzt. Bitte navigiere zum \'Fitbit\'-Tab im Studien-Designer, um deine Fitbit-Client-ID und deinen Client-Secret einzugeben. Kehre anschließend hierher zurück, um Fitbit-Fragen hinzuzufügen.';
+      'Fitbit-Anmeldedaten sind nicht gesetzt. Bitte navigiere zum \'Fitbit\'-Tab im Studien-Designer, um deine Fitbit-Client-ID und dein Client-Secret einzugeben. Kehre anschließend hierher zurück, um Fitbit-Fragen hinzuzufügen.';
 
   @override
   String get fitbit_question_type_heartrate_description =>
