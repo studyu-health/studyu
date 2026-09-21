@@ -13,14 +13,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get loading => 'Laden';
 
   @override
-  String get starting_study => 'Ihre Studie wird gestartet…';
+  String get starting_study => 'Deine Studie wird gestartet…';
 
   @override
   String get loading_error_title => 'Ladefehler';
 
   @override
   String get loading_error_description =>
-      'Die Studiendaten konnten nicht abgerufen werden. Wenn Sie aktuell an einer Studie teilnehmen, wenden Sie sich bitte zuerst an Ihre Studienleitung. Kontaktieren Sie den Support nur, wenn Sie nicht an einer Studie teilnehmen oder Ihre Studienleitung Sie dazu auffordert. Löschen Sie Ihre Daten nur, wenn Sie von der Studienleitung oder dem Support dazu aufgefordert werden. Das Löschen entfernt alle Ihre Studiendaten und Sie müssen der Studie erneut beitreten.';
+      'Die Studiendaten konnten nicht abgerufen werden. Wenn du aktuell an einer Studie teilnimmst, wende dich bitte zuerst an deine Studienleitung. Kontaktiere den Support nur, wenn du nicht an einer Studie teilnimmst oder deine Studienleitung dich dazu auffordert. Lösche deine Daten nur, wenn du von der Studienleitung oder dem Support dazu aufgefordert wirst. Beim Löschen werden alle deine Studiendaten entfernt und du musst der Studie erneut beitreten.';
 
   @override
   String get try_again => 'Erneut versuchen';
@@ -30,7 +30,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get delete_all_data_description =>
-      'Möchten Sie wirklich alle Daten löschen? Dadurch werden alle Ihre Studiendaten gelöscht und Sie müssen der Studie erneut beitreten.';
+      'Möchtest du wirklich alle Daten löschen? Dadurch werden alle deine Studiendaten gelöscht und du musst der Studie erneut beitreten.';
 
   @override
   String get reset_app => 'App zurücksetzen';
@@ -40,35 +40,35 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get description_part1 =>
-      'Stellen Sie sich vor, Sie lesen den Satz: \"Studien konnten zeigen, dass Essen nach 18 Uhr die Schlafqualität verschlechtert.\"';
+      'Stell dir vor, du liest den Satz: \"Studien konnten zeigen, dass Essen nach 18 Uhr die Schlafqualität verschlechtert.\"';
 
   @override
   String get description_part2 =>
-      'Sie denken jetzt möglicherweise: Okay... gut zu wissen, aber trifft das wirklich auf jeden, also auch auf MICH zu?';
+      'Du denkst jetzt möglicherweise: Okay... gut zu wissen, aber trifft das wirklich auf jeden, also auch auf MICH zu?';
 
   @override
   String get description_part3 =>
-      'Das Problem ist: Sie haben nicht persönlich an der Studie teilgenommen, sodass wir Ihnen die Frage nicht beantworten können. Eine gewöhnliche Studie kann nur beantworten, ob sich Ihre Schlafqualität WAHRSCHEINLICH reduziert. Sie müssten also bei sich selber testen, welche Wirkung spätes Essen auf IHREN Schlaf hat.';
+      'Das Problem ist, dass du nicht persönlich an der Studie teilgenommen hast, sodass wir dir die Frage nicht beantworten können. Eine gewöhnliche Studie kann nur beantworten, ob sich deine Schlafqualität WAHRSCHEINLICH reduziert. Daher müsstest du bei dir selbst testen, welche Wirkung spätes Essen auf DEINEN Schlaf hat.';
 
   @override
   String get description_part4 =>
-      'Das heißt nichts anderes, als dass Sie Ihre ganz persönliche Studie durchführen, in der Sie mal spät essen und mal auf spätes Essen verzichten. Sie würden regelmäßig Ihre Schlafqualität beurteilen und am Ende zu einem Ergebnis kommen, dass Ihnen endlich die Frage beantworten kann, ob Ihre Schlafqualität durch spätes Essen beeinflusst wird. Ihnen solche Fragen sicher beantworten zu können, ist das Ziel von StudyU.';
+      'Das heißt nichts anderes, als dass du deine ganz persönliche Studie durchführst, in der du mal spät isst und mal auf spätes Essen verzichtest. Du würdest regelmäßig deine Schlafqualität beurteilen und am Ende zu einem Ergebnis kommen, das dir endlich die Frage beantworten kann, ob deine Schlafqualität durch spätes Essen beeinflusst wird. Dir solche Fragen sicher beantworten zu können, ist das Ziel von StudyU.';
 
   @override
   String get description_part5 =>
-      'StudyU bietet Ihnen die Möglichkeit, an professionell erstellten N-of-1 Studien teilzunehmen. N-of-1 heißt, dass die Anzahl der Studienteilnehmer, die normalerweise mit N angegeben wird, bei 1 liegt. Und genauso wie gewöhnliche Studien brauchen auch N-of-1 Studien einen klar festgelegten Plan (ein so genanntes Studienprotokoll).';
+      'StudyU bietet dir die Möglichkeit, an professionell erstellten N-of-1 Studien teilzunehmen. N-of-1 heißt, dass die Anzahl der Studienteilnehmer, die normalerweise mit N angegeben wird, bei 1 liegt. Und genauso wie gewöhnliche Studien brauchen auch N-of-1 Studien einen klar festgelegten Plan (ein so genanntes Studienprotokoll).';
 
   @override
   String get description_part6 =>
-      'Und da gute Studienprotokolle nicht einfach zu machen sind, haben wir diese App entwickelt. Hier können Sie zwischen verschiedenen N-of-1 Studien wählen, ganz nach IHREM persönlichen Interesse, und Sie erhalten ganz automatisch einen Plan, der von Experten entwickelt wurde und Ihnen ein zuverlässiges Ergebnis liefern wird.';
+      'Und da gute Studienprotokolle nicht einfach zu machen sind, haben wir diese App entwickelt. Hier kannst du zwischen verschiedenen N-of-1 Studien wählen, ganz nach DEINEM persönlichen Interesse, und du erhältst ganz automatisch einen Plan, der von Experten entwickelt wurde und dir ein zuverlässiges Ergebnis liefern wird.';
 
   @override
   String get description_part7 =>
-      'Nachdem Sie sich für eine Studie entschieden haben, werden wir sichergehen, dass Ihr Gesundheitsstatus eine Teilnahme erlaubt. Danach können Sie sich als Teilnehmer einschreiben und den Studienplan an Ihren Alltag anpassen. Anschließend werden Sie regelmäßig (meistens 1x pro Tag) eine von zwei möglichen Aufgaben (bspw. essen nach 18 Uhr) absolvieren und Ihre Beobachtungen (bspw. Müdigkeit) eintragen. Ihre Ergebnisse können Sie kostenlos freischalten sobald Sie die minimale Studiendauer (meist nur wenige Wochen) erreicht haben.';
+      'Nachdem du dich für eine Studie entschieden hast, werden wir sicherstellen, dass dein Gesundheitsstatus eine Teilnahme erlaubt. Danach kannst du dich als Teilnehmer einschreiben und den Studienplan an deinen Alltag anpassen. Anschließend wirst du regelmäßig (meistens 1x pro Tag) eine von zwei möglichen Aufgaben (bspw. essen nach 18 Uhr) absolvieren und deine Beobachtungen (bspw. Müdigkeit) eintragen. Deine Ergebnisse kannst du kostenlos freischalten, sobald du die minimale Studiendauer (meist nur wenige Wochen) erreicht hast.';
 
   @override
   String get description_part8 =>
-      'Aber bitte beachten Sie Folgendes: Ergebnisse sind umso aussagekräftiger, je länger Sie aktiv an der Studie teilnehmen. Um systematische Fehler zu vermeiden, ist eine weitere Teilnahme nach Freischaltung der Ergebnisse ausgeschlossen. Daher werden wir Ihnen mit einem Fortschrittsbalken anzeigen, wie viele weitere Aufgaben mindestens noch absolviert werden müssen und wie sehr sie die Aussagekraft der Ergebnisse mit ein paar weiteren Wochen verbessern können.';
+      'Aber bitte beachte Folgendes: Ergebnisse sind umso aussagekräftiger, je länger du aktiv an der Studie teilnimmst. Um systematische Fehler zu vermeiden, ist eine weitere Teilnahme nach Freischaltung der Ergebnisse ausgeschlossen. Daher zeigen wir dir mit einem Fortschrittsbalken, wie viele weitere Aufgaben mindestens noch absolviert werden müssen und wie sehr du die Aussagekraft der Ergebnisse mit ein paar weiteren Wochen verbessern kannst.';
 
   @override
   String get description_part9 =>
@@ -85,14 +85,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get welcome_find_study_description =>
-      'Wählen Sie eine öffentliche Studie aus oder verwenden Sie eine Einladung.';
+      'Wähle eine öffentliche Studie aus oder verwende eine Einladung.';
 
   @override
   String get browse_public_studies => 'Öffentliche Studien ansehen';
 
   @override
   String get welcome_returning_participant =>
-      'Sie haben bereits mit StudyU an einer Studie teilgenommen?';
+      'Hast du bereits mit StudyU an einer Studie teilgenommen?';
 
   @override
   String get restore_studyu_account => 'StudyU-Konto wiederherstellen';
@@ -105,56 +105,56 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboarding_page0_subtitle =>
-      'Forschende können ermitteln, was im Durchschnitt wirkt. Sie können nicht feststellen, ob eine Gewohnheit oder Behandlung bei Ihnen wirkt. Mit StudyU testen Sie diese Frage selbst.';
+      'Forschende können ermitteln, was im Durchschnitt wirkt. Sie können nicht feststellen, ob eine Gewohnheit oder Behandlung bei dir wirkt. Mit StudyU testest du diese Frage selbst.';
 
   @override
-  String get onboarding_page1_title => 'Ihre persönliche Studie';
+  String get onboarding_page1_title => 'Deine persönliche Studie';
 
   @override
   String get onboarding_page1_subtitle =>
-      'Bei einer N-of-1-Studie sind Sie die einzige teilnehmende Person. Sie durchlaufen verschiedene Phasen, zum Beispiel frühes und spätes Essen, und erfassen Ergebnisse wie Ihre Schlafqualität.';
+      'Bei einer N-of-1-Studie bist du die einzige teilnehmende Person. Du durchläufst verschiedene Phasen, zum Beispiel frühes und spätes Essen, und erfasst Ergebnisse wie deine Schlafqualität.';
 
   @override
   String get onboarding_page2_title => 'Ein Plan von Fachleuten';
 
   @override
   String get onboarding_page2_subtitle =>
-      'Wählen Sie eine Studie, die zu Ihrer Frage passt. StudyU stellt einen von Fachleuten entwickelten Studienplan bereit, prüft, ob Sie sicher teilnehmen können, und hilft Ihnen, den Plan in Ihren Alltag einzubauen.';
+      'Wähle eine Studie, die zu deiner Frage passt. StudyU stellt einen von Fachleuten entwickelten Studienplan bereit, prüft, ob du sicher teilnehmen kannst, und hilft dir, den Plan in deinen Alltag einzubauen.';
 
   @override
   String get onboarding_page3_title => 'Regelmäßige Aufgaben';
 
   @override
   String get onboarding_page3_subtitle =>
-      'Befolgen Sie die zugewiesene Option und dokumentieren Sie Ihre Beobachtungen, meist einmal täglich. Der Fortschrittsbalken zeigt, wie viele Aufgaben bis zur Auswertung fehlen.';
+      'Befolge die zugewiesene Option und dokumentiere deine Beobachtungen, meist einmal täglich. Der Fortschrittsbalken zeigt, wie viele Aufgaben bis zur Auswertung fehlen.';
 
   @override
   String get onboarding_page4_title => 'Aussagekräftige Ergebnisse';
 
   @override
   String get onboarding_page4_subtitle =>
-      'Nach einigen Wochen können Sie vergleichen, welche Option bei Ihnen besser funktioniert hat. Mit jeder zusätzlichen Aufgabe erhöhen Sie die Aussagekraft. Wenn Sie die Ergebnisse freischalten, beendet StudyU die Studie, damit die Auswertung unverfälscht bleibt.';
+      'Nach einigen Wochen kannst du vergleichen, welche Option bei dir besser funktioniert hat. Mit jeder zusätzlichen Aufgabe erhöhst du die Aussagekraft. Wenn du die Ergebnisse freischaltest, beendet StudyU die Studie, damit die Auswertung unverfälscht bleibt.';
 
   @override
   String get study_selection => 'Studienauswahl';
 
   @override
   String get study_selection_single =>
-      'Sie können zu jeder Zeit maximal an einer Studie teilnehmen.';
+      'Du kannst zu jeder Zeit maximal an einer Studie teilnehmen.';
 
   @override
   String get study_selection_single_why => 'Warum?';
 
   @override
   String get study_selection_single_reason =>
-      'Wenn Sie zur selben Zeit an mehreren Studien teilnehmen würde, könnten die Kombination der Interventionen die Ergebnisse verfälschen.';
+      'Wenn du zur selben Zeit an mehreren Studien teilnehmen würdest, könnte die Kombination der Interventionen die Ergebnisse verfälschen.';
 
   @override
   String get study_selection_unsupported_title => 'Veraltete App-Version';
 
   @override
   String get study_selection_unsupported =>
-      'Die Studie, an der Sie teilnehmen möchten, ist nicht mit Ihrer App-Version kompatibel. Bitte aktualisieren Sie die App auf die neueste Version.';
+      'Die Studie, an der du teilnehmen möchtest, ist nicht mit deiner App-Version kompatibel. Bitte aktualisiere die App auf die neueste Version.';
 
   @override
   String get study_selection_closed_title => 'Studie geschlossen';
@@ -165,11 +165,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get study_selection_hidden_studies =>
-      'Einige Studien konnten nicht angezeigt werden. Das kann passieren, wenn Ihre App-Version veraltet ist. Bitte aktualisieren Sie die App, um alle verfügbaren Studien zu sehen, oder nehmen Sie an einer der unten angezeigten Studien teil.';
+      'Einige Studien konnten nicht angezeigt werden. Das kann passieren, wenn deine App-Version veraltet ist. Bitte aktualisiere die App, um alle verfügbaren Studien zu sehen, oder nimm an einer der unten angezeigten Studien teil.';
 
   @override
   String get study_selection_no_public_studies =>
-      'Derzeit sind keine öffentlichen Studien verfügbar. Wenn Sie einen Einladungscode haben, können Sie trotzdem an einer privaten Studie teilnehmen.';
+      'Derzeit sind keine öffentlichen Studien verfügbar. Wenn du einen Einladungscode hast, kannst du trotzdem an einer privaten Studie teilnehmen.';
 
   @override
   String get study_overview_title => 'Studienübersicht';
@@ -179,14 +179,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get please_answer_eligibility =>
-      'Bitte beantworten Sie ein paar Fragen um sicherzugehen, dass diese Studie für Sie geeignet ist';
+      'Bitte beantworte ein paar Fragen, um sicherzustellen, dass diese Studie für dich geeignet ist';
 
   @override
   String get intervention_selection_title => 'Interventionsauswahl';
 
   @override
   String get please_select_interventions =>
-      'Bitte wählen Sie zwei Interventionen für die Studie aus.';
+      'Bitte wähle zwei Interventionen für die Studie aus.';
 
   @override
   String get please_select_interventions_description =>
@@ -212,7 +212,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get study_notification_body =>
-      'Eine neue Aufgabe benötigt Ihre Aufmerksamkeit';
+      'Eine neue Aufgabe benötigt deine Aufmerksamkeit';
 
   @override
   String get intervention_phase_duration => 'Länge der Interventionphasen';
@@ -231,7 +231,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get baseline_description =>
-      'Die Baseline ist eine Phase innerhalb einer Studie, in der der Ausgangszustand gemessen wird, um spätere Vergleiche zu ermöglichen. Während der Baseline-Phase sollen Sie sich wie gewohnt verhalten, studienspezifische Maßnahmen werden noch keine durchgeführt.';
+      'Die Baseline ist eine Phase innerhalb einer Studie, in der der Ausgangszustand gemessen wird, um spätere Vergleiche zu ermöglichen. Während der Baseline-Phase sollst du dich wie gewohnt verhalten, studienspezifische Maßnahmen werden noch keine durchgeführt.';
 
   @override
   String get baseline => 'Baseline';
@@ -253,11 +253,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get leave_study_keep_data_title =>
-      'Studie verlassen und Ihre Daten behalten?';
+      'Studie verlassen und deine Daten behalten?';
 
   @override
   String leave_study_keep_data_body(String studyName) {
-    return 'Sie beenden Ihre Teilnahme an der Studie „$studyName“. Wir behalten die bereits übermittelten Fortschrittsdaten und Antworten. Forschende dürfen Ihre anonymisierten Daten weiterhin verwenden.\n\nNach dem Verlassen können Sie dieser Studienteilnahme nicht erneut beitreten. Ihre früheren Studien bleiben unverändert.';
+    return 'Du beendest deine Teilnahme an der Studie „$studyName“. Wir behalten die bereits übermittelten Fortschrittsdaten und Antworten. Forschende dürfen deine anonymisierten Daten weiterhin verwenden.\n\nNach dem Verlassen kannst du dieser Studienteilnahme nicht erneut beitreten. Deine früheren Studien bleiben unverändert.';
   }
 
   @override
@@ -272,7 +272,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get leave_study_description =>
-      'Beenden Sie Ihre Teilnahme. Ihre bestehenden Studiendaten bleiben erhalten.';
+      'Beende deine Teilnahme. Deine bestehenden Studiendaten bleiben erhalten.';
 
   @override
   String get delete_data => 'Studie verlassen und meine Daten löschen';
@@ -283,7 +283,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String leave_study_delete_data_body(String studyName) {
-    return 'Sie beenden Ihre Teilnahme an der Studie „$studyName“. Wir löschen Ihre Fortschrittsdaten und Antworten für diese Studie dauerhaft von unseren Servern und entfernen die auf diesem Gerät gespeicherten Daten.\n\nDies kann nicht rückgängig gemacht werden. Weder Sie noch Mitglieder des Studienteams können diese Daten danach wiederherstellen.';
+    return 'Du beendest deine Teilnahme an der Studie „$studyName“. Wir löschen deine Fortschrittsdaten und Antworten für diese Studie dauerhaft von unseren Servern und entfernen die auf diesem Gerät gespeicherten Daten.\n\nDies kann nicht rückgängig gemacht werden. Weder du noch Mitglieder des Studienteams können diese Daten danach wiederherstellen.';
   }
 
   @override
@@ -291,25 +291,25 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get delete_study_data_description =>
-      'Löschen Sie Ihre Studiendaten dauerhaft. Dies kann nicht rückgängig gemacht werden.';
+      'Lösche deine Studiendaten dauerhaft. Dies kann nicht rückgängig gemacht werden.';
 
   @override
-  String get soft_delete_desc => 'Sie werden Ihren Fortschritt in der Studie ';
+  String get soft_delete_desc => 'Dein Fortschritt in der Studie ';
 
   @override
   String get soft_delete_desc_2 =>
-      ' unwiederbringlich verlieren. Bereits abgeschlossene Studien werden nicht gelöscht.\nIhre anonymisierten Daten bis zu diesem Zeitpunkt können weiterhin für Forschungszwecke verwendet werden.';
+      ' geht unwiederbringlich verloren. Bereits abgeschlossene Studien werden nicht gelöscht.\nDeine anonymisierten Daten bis zu diesem Zeitpunkt können weiterhin für Forschungszwecke verwendet werden.';
 
   @override
   String get hard_delete_desc =>
-      'Sie werden alle Daten von Ihrem Gerät und unseren Servern löschen. Sie können Ihre Daten nicht wiederherstellen. Ihre anonymisierten Daten werden nicht mehr für Forschungszwecke zur Verfügung stehen.';
+      'Du wirst alle Daten von deinem Gerät und unseren Servern löschen. Du kannst deine Daten nicht wiederherstellen. Deine anonymisierten Daten werden nicht mehr für Forschungszwecke zur Verfügung stehen.';
 
   @override
   String get your_journey => 'Deine Reise';
 
   @override
   String get journey_overview_description =>
-      'Sehen Sie sich den Ablauf Ihrer Studie an, bevor Sie fortfahren.';
+      'Sieh dir den Ablauf deiner Studie an, bevor du fortfährst.';
 
   @override
   String get journey_results_available => 'Ergebnisse verfügbar';
@@ -340,25 +340,25 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get how_would_you_rate_your_pain_today =>
-      'Wie würden Sie heute Ihren Schmerz bewerten? (0 = kein Schmerz, 10 = extreme Schmerzen)';
+      'Wie würdest du heute deinen Schmerz bewerten? (0 = kein Schmerz, 10 = extreme Schmerzen)';
 
   @override
-  String get thank_you_for_your_input => 'Danke für Ihre Eingaben';
+  String get thank_you_for_your_input => 'Danke für deine Eingaben';
 
   @override
   String get please_give_consent =>
-      'Bitte geben Sie Ihr Einverständnis ab, um an der Studie teilzunehmen. Sie müssen alle Boxen anklicken und lesen.';
+      'Bitte gib dein Einverständnis ab, um an der Studie teilzunehmen. Du musst alle Boxen anklicken und lesen.';
 
   @override
   String get please_give_consent_why => 'Warum?';
 
   @override
   String get please_give_consent_reason =>
-      'Aus Gründen der Sicherheit und des Datenschutzes müssen Studien das Einverständnis der Teilnehmer einholen. Aus diesem Grund müssen Sie für jede Studie erneut Ihr Einverständnis abgeben.';
+      'Aus Gründen der Sicherheit und des Datenschutzes müssen Studien das Einverständnis der Teilnehmer einholen. Aus diesem Grund musst du für jede Studie erneut dein Einverständnis abgeben.';
 
   @override
   String get user_did_not_give_consent =>
-      'Um an der Studie teilzunehmen müssen Sie erst Ihr Einverständnis abgeben.';
+      'Um an der Studie teilzunehmen, musst du erst dein Einverständnis abgeben.';
 
   @override
   String get dashboard => 'Dashboard';
@@ -384,7 +384,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String support_email_body(String subjectId) {
-    return 'Hallo,\n\nich habe einen Ladefehler in der StudyU App. Meine Subject-ID ist: $subjectId\n\nBitte helfen Sie mir bei diesem Problem.\n\nVielen Dank.';
+    return 'Hallo,\n\nich habe einen Ladefehler in der StudyU App. Meine Subject-ID ist: $subjectId\n\nBitte hilf mir bei diesem Problem.\n\nVielen Dank.';
   }
 
   @override
@@ -395,7 +395,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get study_information_description =>
-      'Teilen Sie diese Angaben nur mit Ihrem Studienteam, wenn Sie dazu aufgefordert werden.';
+      'Teile diese Angaben nur mit deinem Studienteam, wenn du dazu aufgefordert wirst.';
 
   @override
   String get study_name => 'Studienname';
@@ -446,7 +446,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get participant_information_email_intro =>
-      'Hallo,\n\nich kontaktiere Sie wegen meiner Studienteilnahme. Das sind meine StudyU-Angaben:';
+      'Hallo,\n\nich kontaktiere dich wegen meiner Studienteilnahme. Das sind meine StudyU-Angaben:';
 
   @override
   String get email_app_unavailable => 'Es ist keine E-Mail-App verfügbar.';
@@ -526,7 +526,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get multimodal_not_supported =>
-      'Multimodale Aufgaben werden in der Web-Version zur Zeit nicht unterstützt. Bitte verwenden Sie die App Version für iOS oder Android.';
+      'Multimodale Aufgaben werden in der Web-Version zur Zeit nicht unterstützt. Bitte verwende die App-Version für iOS oder Android.';
 
   @override
   String get camera_access_denied => 'Zugriff auf Kamera verweigert';
@@ -627,7 +627,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get privacy_content =>
-      'Die Datenschutzbestimmung beschreibt welche Daten gespeichert werden, warum, wann, wo, Zugangsrechte und welche Rechte Sie haben.';
+      'Die Datenschutzbestimmung beschreibt, welche Daten gespeichert werden, warum, wann und wo sie gespeichert werden, wer Zugangsrechte hat und welche Rechte du hast.';
 
   @override
   String get privacy_agree =>
@@ -651,7 +651,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get private_study_invite_code_description =>
-      'Geben Sie den Code ein, den Sie vom Studienteam erhalten haben.';
+      'Gib den Code ein, den du vom Studienteam erhalten hast.';
 
   @override
   String get invite_code => 'Einladungscode';
@@ -673,14 +673,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dateidownload ist in der Web-Version zur Zeit nicht unterstützt.';
 
   @override
-  String get eligible_no => 'Diese Studie ist für Sie leider nicht auswählbar';
+  String get eligible_no => 'Diese Studie ist für dich leider nicht auswählbar';
 
   @override
-  String get eligible_yes => 'Sie sind berechtigt, diese Studie auszuwählen';
+  String get eligible_yes => 'Du bist berechtigt, diese Studie auszuwählen';
 
   @override
   String get eligible_mistake =>
-      'Falls Sie einen Fehler gemacht haben, können Sie Ihre Antworten ändern';
+      'Falls du einen Fehler gemacht hast, kannst du deine Antworten ändern';
 
   @override
   String get eligible_back => 'Zurück zur Studienauswahl';
@@ -701,7 +701,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get report_disclaimer =>
-      'Die Ergebnisse sind nur korrekt, wenn Sie alle Informationen wahrheitsgemäß angegeben haben';
+      'Die Ergebnisse sind nur korrekt, wenn du alle Informationen wahrheitsgemäß angegeben hast';
 
   @override
   String get performance => 'Fortschritt';
@@ -733,7 +733,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get completed_study =>
-      'Sie haben Ihre letzte Studie abgeschlossen. Schauen Sie vergangene Ergebnisse an oder starten Sie eine neue Studie.';
+      'Du hast deine letzte Studie abgeschlossen. Schau dir vergangene Ergebnisse an oder starte eine neue Studie.';
 
   @override
   String get app_support => 'App Support';
@@ -772,29 +772,28 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String free_text_min_length_error(num min) {
-    return 'Bitte geben Sie mindestens $min Zeichen ein';
+    return 'Bitte gib mindestens $min Zeichen ein';
   }
 
   @override
   String free_text_max_length_error(num max) {
-    return 'Bitte geben Sie maximal $max Zeichen ein';
+    return 'Bitte gib maximal $max Zeichen ein';
   }
 
   @override
   String get free_text_alphanumeric_error =>
-      'Bitte geben Sie nur alphanumerische Zeichen ein';
+      'Bitte gib nur alphanumerische Zeichen ein';
 
   @override
-  String get free_text_numeric_error =>
-      'Bitte geben Sie nur numerische Zeichen ein';
+  String get free_text_numeric_error => 'Bitte gib nur numerische Zeichen ein';
 
   @override
   String get free_text_custom_error =>
-      'Bitte geben Sie einen Wert im erforderlichen Format ein';
+      'Bitte gib einen Wert im erforderlichen Format ein';
 
   @override
   String get app_outdated_message =>
-      'Eine neue Version der StudyU App ist verfügbar. Bitte führen Sie eine Aktualisierung durch, um die neuesten Funktionen und Verbesserungen zu erhalten. Vielen Dank für Ihre Unterstützung!';
+      'Eine neue Version der StudyU App ist verfügbar. Bitte aktualisiere die App, um die neuesten Funktionen und Verbesserungen zu erhalten. Vielen Dank für deine Unterstützung!';
 
   @override
   String get update_now => 'Jetzt aktualisieren';
@@ -934,11 +933,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get support_email_sent_description =>
-      'Ihre Nachricht an das Studienteam wurde in Ihrer E-Mail-App vorbereitet. Prüfen und senden Sie die E-Mail. Warten Sie dann auf eine Antwort.\n\nWenn Sie aktuell an einer Studie teilnehmen, dokumentieren Sie Ihre Ergebnisse außerhalb der App, bis das Problem behoben ist.';
+      'Deine Nachricht an das Studienteam wurde in deiner E-Mail-App vorbereitet. Prüfe und sende die E-Mail. Warte dann auf eine Antwort.\n\nWenn du aktuell an einer Studie teilnimmst, dokumentiere deine Ergebnisse außerhalb der App, bis das Problem behoben ist.';
 
   @override
   String get no_contact_email =>
-      'Keine Kontakt-E-Mail-Adresse angegeben. Bitte wenden Sie sich an Ihre Studienleitung.';
+      'Keine Kontakt-E-Mail-Adresse angegeben. Bitte wende dich an deine Studienleitung.';
 
   @override
   String get sync_fitbit_data => 'Fitbit-Daten synchronisieren';
@@ -949,7 +948,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get fitbit_data_not_synced =>
-      'Fitbit-Daten konnten nicht synchronisiert werden. Bitte stellen Sie sicher, dass Sie Ihre Fitbit-Daten in der Fitbit-App synchronisiert haben.';
+      'Fitbit-Daten konnten nicht synchronisiert werden. Bitte stelle sicher, dass du deine Fitbit-Daten in der Fitbit-App synchronisiert hast.';
 
   @override
   String error_syncing_fitbit_data(String error) {
@@ -1340,7 +1339,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get preview_mode_description =>
-      'Sie befinden sich derzeit im Vorschau-Modus. Dies ermöglicht Ihnen:\n\n• Schneller Vorlauf durch Studientage mit der \"Nächster Tag\" Schaltfläche\n• Mehrfaches Abschließen von Aufgaben ohne Einschränkungen\n• Erleben des vollständigen Studienablaufs ohne Beeinflussung echter Daten\n\nWichtig: Ergebnisse und Daten aus dem Vorschau-Modus werden nicht gespeichert oder mit tatsächlichen Teilnehmerergebnissen aus laufenden Studien vermischt.';
+      'Du befindest dich derzeit im Vorschau-Modus. Dies ermöglicht dir:\n\n• Schneller Vorlauf durch Studientage mit der \"Nächster Tag\" Schaltfläche\n• Mehrfaches Abschließen von Aufgaben ohne Einschränkungen\n• Erleben des vollständigen Studienablaufs ohne Beeinflussung echter Daten\n\nWichtig: Ergebnisse und Daten aus dem Vorschau-Modus werden nicht gespeichert oder mit tatsächlichen Teilnehmerergebnissen aus laufenden Studien vermischt.';
 
   @override
   String get preview_mode_results_not_saved =>
@@ -1538,19 +1537,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deep_link_switch_warning_title =>
-      'Sie nehmen bereits an einer Studie teil';
+      'Du nimmst bereits an einer Studie teil';
 
   @override
   String deep_link_switch_warning_description(
     String currentStudy,
     String targetStudy,
   ) {
-    return 'Sie sind aktuell eingeschrieben in:\n$currentStudy\n\nDer Deep Link verweist auf:\n$targetStudy\n\nSie können zur aktuellen Studie zurückkehren (empfohlen) oder fortfahren, diese zu verlassen und zu wechseln.';
+    return 'Du bist aktuell eingeschrieben in:\n$currentStudy\n\nDer Deep Link verweist auf:\n$targetStudy\n\nDu kannst zur aktuellen Studie zurückkehren (empfohlen) oder fortfahren, diese zu verlassen und zu wechseln.';
   }
 
   @override
   String deep_link_switch_warning_opt_out_instruction(String optOut) {
-    return 'Wenn Sie Ihre aktuelle Studie verlassen möchten, öffnen Sie die Einstellungen und verwenden Sie zuerst \"$optOut\". Öffnen Sie dann die Einladung erneut.';
+    return 'Wenn du deine aktuelle Studie verlassen möchtest, öffne die Einstellungen und verwende zuerst \"$optOut\". Öffne dann die Einladung erneut.';
   }
 
   @override
@@ -1569,11 +1568,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deep_link_switch_data_choice_title =>
-      'Wie möchten Sie die aktuelle Studie verlassen?';
+      'Wie möchtest du die aktuelle Studie verlassen?';
 
   @override
   String get deep_link_switch_data_choice_description =>
-      'Wählen Sie, was vor dem Wechsel mit Ihren aktuellen Studiendaten passieren soll.';
+      'Wähle aus, was vor dem Wechsel mit deinen aktuellen Studiendaten passieren soll.';
 
   @override
   String get deep_link_switch_soft_delete_button => 'Soft-Delete und wechseln';
@@ -1592,17 +1591,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deep_link_switch_confirm_hard_description =>
-      'Dadurch werden alle Ihre Daten dauerhaft und unwiderruflich gelöscht.';
+      'Dadurch werden alle deine Daten dauerhaft und unwiderruflich gelöscht.';
 
   @override
   String get deep_link_switch_confirm_hard_button => 'Hard-Delete bestätigen';
 
   @override
   String get open_link_on_mobile =>
-      'Bitte öffnen Sie diesen Link auf Ihrem mobilen Gerät.';
+      'Bitte öffne diesen Link auf deinem mobilen Gerät.';
 
   @override
-  String get you_have_been_invited => 'Sie wurden zu einer Studie eingeladen!';
+  String get you_have_been_invited => 'Du wurdest zu einer Studie eingeladen!';
 
   @override
   String get download_app_join => 'StudyU App herunterladen & Beitreten';
@@ -1612,14 +1611,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deleted_study_error_description =>
-      'Diese Studie ist auf dem Server nicht mehr verfügbar. Ihre Daten bleiben vorerst auf diesem Gerät. Bitte kontaktieren Sie Ihre Studienleitung oder den Support, bevor Sie etwas löschen. Nutzen Sie \'Alle Daten löschen\' nur, wenn Sie zum Zurücksetzen der App aufgefordert werden.';
+      'Diese Studie ist auf dem Server nicht mehr verfügbar. Deine Daten bleiben vorerst auf diesem Gerät. Bitte kontaktiere deine Studienleitung oder den Support, bevor du etwas löschst. Nutze \'Alle Daten löschen\' nur, wenn du zum Zurücksetzen der App aufgefordert wirst.';
 
   @override
   String get dashboard_showcase_progress_title => 'Studienfortschritt';
 
   @override
   String get dashboard_showcase_progress_description =>
-      'Hier sehen Sie, welche Studienteile Sie bereits abgeschlossen haben und welche noch folgen.';
+      'Hier siehst du, welche Studienteile du bereits abgeschlossen hast und welche noch folgen.';
 
   @override
   String get dashboard_showcase_current_intervention_title =>
@@ -1627,35 +1626,35 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dashboard_showcase_current_intervention_description =>
-      'Hier sehen Sie Ihre aktuelle Intervention und wie viele Tage in dieser Phase noch verbleiben.';
+      'Hier siehst du deine aktuelle Intervention und wie viele Tage in dieser Phase noch verbleiben.';
 
   @override
   String get dashboard_showcase_today_tasks_title => 'Heutige Aufgaben';
 
   @override
   String get dashboard_showcase_today_tasks_description =>
-      'Hier finden Sie die Aufgaben, die Sie heute für die Studie erledigen sollen.';
+      'Hier findest du die Aufgaben, die du heute für die Studie erledigen sollst.';
 
   @override
   String get dashboard_showcase_contact_title => 'Kontakt';
 
   @override
   String get dashboard_showcase_contact_description =>
-      'Nutzen Sie diese Option, wenn Sie Hilfe vom Studienteam benötigen.';
+      'Nutze diese Option, wenn du Hilfe vom Studienteam benötigst.';
 
   @override
   String get dashboard_showcase_report_title => 'Bericht';
 
   @override
   String get dashboard_showcase_report_description =>
-      'Öffnen Sie Ihren aktuellen Bericht, sobald Ergebnisse verfügbar sind.';
+      'Öffne deinen aktuellen Bericht, sobald Ergebnisse verfügbar sind.';
 
   @override
   String get dashboard_showcase_menu_title => 'Weitere Optionen';
 
   @override
   String get dashboard_showcase_menu_description =>
-      'Hier finden Sie Einstellungen, FAQs, den Berichtsverlauf und mehr.';
+      'Hier findest du Einstellungen, FAQs, den Berichtsverlauf und mehr.';
 
   @override
   String get dashboard_showcase_finish => 'Fertig';
@@ -1670,7 +1669,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String deleted_study_support_email_body(String subjectId) {
-    return 'Hallo,\n\ndie StudyU App zeigt an, dass meine Studie auf dem Server nicht mehr verfügbar ist. Meine Subject-ID ist: $subjectId\n\nBitte teilen Sie mir mit, ob ich meine lokalen Daten behalten oder die App zurücksetzen soll.\n\nVielen Dank.';
+    return 'Hallo,\n\ndie StudyU App zeigt an, dass meine Studie auf dem Server nicht mehr verfügbar ist. Meine Subject-ID ist: $subjectId\n\nBitte teile mir mit, ob ich meine lokalen Daten behalten oder die App zurücksetzen soll.\n\nVielen Dank.';
   }
 
   @override
@@ -1680,7 +1679,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get show_again => 'Tour erneut ansehen';
 
   @override
-  String get free_text_hint => 'Geben Sie Ihre Antwort ein';
+  String get free_text_hint => 'Gib deine Antwort ein';
 
   @override
   String get preview_failed_to_initialize =>
@@ -1732,10 +1731,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get date_picker_hint => 'Wählen Sie ein Datum';
+  String get date_picker_hint => 'Wähle ein Datum';
 
   @override
-  String get time_picker_hint => 'Wählen Sie eine Zeit';
+  String get time_picker_hint => 'Wähle eine Zeit';
 
   @override
   String get date_picker_button_label => 'Datum wählen';
@@ -1756,18 +1755,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get date_picker_clear => 'Löschen';
 
   @override
-  String get date_picker_validation_required => 'Bitte wählen Sie ein Datum';
+  String get date_picker_validation_required => 'Bitte wähle ein Datum';
 
   @override
-  String get time_picker_validation_required => 'Bitte wählen Sie eine Zeit';
+  String get time_picker_validation_required => 'Bitte wähle eine Zeit';
 
   @override
   String get datetime_picker_validation_required =>
-      'Bitte wählen Sie Datum und Zeit';
+      'Bitte wähle Datum und Zeit';
 
   @override
   String get time_picker_validation_range =>
-      'Bitte wählen Sie eine Zeit innerhalb des erlaubten Bereichs';
+      'Bitte wähle eine Zeit innerhalb des erlaubten Bereichs';
 
   @override
   String time_picker_range_hint(Object min, Object max) {
@@ -1809,11 +1808,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'StudyU verwendet keine Passwörter oder E-Mail-Konten. Diese 13 Wörter sind die einzige Möglichkeit, dein Konto wiederherzustellen, wenn du ein neues Handy bekommst oder die App neu installierst. Schreibe sie auf oder speichere sie digital an einem Ort, auf den nur du zugreifen kannst. Teile sie niemals mit anderen. Du kannst deine Wiederherstellungsphrase jederzeit unter Einstellungen → Studieneinstellungen erneut ansehen.';
 
   @override
-  String get study_not_started_title => 'Sie nehmen an der Studie teil';
+  String get study_not_started_title => 'Du nimmst an der Studie teil';
 
   @override
   String get study_not_started_description =>
-      'Kommen Sie morgen zurück, um zu beginnen. Wir erinnern Sie, sobald es etwas zu tun gibt.';
+      'Komm morgen zurück, um zu beginnen. Wir erinnern dich, sobald es etwas zu tun gibt.';
 
   @override
   String recovery_phrase_word_count(Object count, Object total) {
@@ -1833,7 +1832,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get faq_answer_data_storage =>
-      'Die von Ihnen gesammelten Daten werden lokal auf Ihrem Gerät gespeichert und bei Verbindung mit dem Internet auf einen sicheren Server hochgeladen. Alle Studiendaten werden anonymisiert erfasst und gespeichert.';
+      'Die von dir gesammelten Daten werden lokal auf deinem Gerät gespeichert und bei Verbindung mit dem Internet auf einen sicheren Server hochgeladen. Alle Studiendaten werden anonymisiert erfasst und gespeichert.';
 
   @override
   String get faq_question_personal_data =>
@@ -1860,7 +1859,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get faq_answer_change_intervention =>
-      'Vor Beginn der Studie können Sie zum Bildschirm für die Interventionsauswahl zurückkehren und andere Interventionen auswählen. Nach Beginn der Studie können die ausgewählten Interventionen für diese Teilnahme nicht mehr geändert werden. Um andere Interventionen auszuwählen, verlassen Sie die Studie über die Einstellungen, wählen Sie, ob Sie Ihre vorhandenen Daten behalten oder dauerhaft löschen möchten, und wählen Sie anschließend während der Anmeldung erneut eine Studie und deren Interventionen aus.';
+      'Vor Beginn der Studie kannst du zum Bildschirm für die Interventionsauswahl zurückkehren und andere Interventionen auswählen. Nach Beginn der Studie können die ausgewählten Interventionen für diese Teilnahme nicht mehr geändert werden. Um andere Interventionen auszuwählen, verlasse die Studie über die Einstellungen, wähle aus, ob du deine vorhandenen Daten behalten oder dauerhaft löschen möchtest, und wähle anschließend während der Anmeldung erneut eine Studie und deren Interventionen aus.';
 
   @override
   String get faq_question_missed_tasks =>
@@ -1868,7 +1867,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get faq_answer_missed_tasks =>
-      'Nein, Sie können eine verpasste Aufgabe zu einem späteren Zeitpunkt nicht wiederholen. Sie können die Aufgabe nur am selben Tag bearbeiten.';
+      'Nein, du kannst eine verpasste Aufgabe zu einem späteren Zeitpunkt nicht wiederholen. Du kannst die Aufgabe nur am selben Tag bearbeiten.';
 
   @override
   String get faq_question_leave_study =>
@@ -1876,7 +1875,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get faq_answer_leave_study =>
-      'Gehen Sie zur Registerkarte \"Einstellungen\" im Dashboard und klicken Sie auf \"Studie verlassen\". Dies wird die Studie beenden, ohne Ihre Fortschrittsdaten zu löschen, sodass sie in die Studienanalyse einbezogen werden können. Um die Studie zu verlassen und alle Fortschrittsdaten sowohl lokal als auch auf dem Server zu löschen, klicken Sie auf \"Studie verlassen und alle Daten löschen\". Alle Daten werden dauerhaft vom Server und Ihrem Gerät entfernt.';
+      'Gehe zur Registerkarte \"Einstellungen\" im Dashboard und klicke auf \"Studie verlassen\". Dadurch wird die Studie beendet, ohne deine Fortschrittsdaten zu löschen, sodass sie in die Studienanalyse einbezogen werden können. Um die Studie zu verlassen und alle Fortschrittsdaten sowohl lokal als auch auf dem Server zu löschen, klicke auf \"Studie verlassen und alle Daten löschen\". Alle Daten werden dauerhaft vom Server und deinem Gerät entfernt.';
 
   @override
   String get faq_section_report_details => 'Berichtsdetails';
@@ -1887,15 +1886,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get faq_answer_daily_tasks =>
-      'Um herauszufinden, welche Intervention für Sie am besten geeignet ist, müssen Sie für jede Intervention einige tägliche Aufgaben ausführen. Bitte stellen Sie sicher, dass Sie nach Abschluss auf die Schaltfläche \"Fertig stellen\" klicken.';
+      'Um herauszufinden, welche Intervention für dich am besten geeignet ist, musst du für jede Intervention einige tägliche Aufgaben ausführen. Bitte stelle sicher, dass du nach Abschluss auf die Schaltfläche \"Fertig stellen\" klickst.';
 
   @override
-  String get faq_question_rate_your_day =>
-      'Was ist \"Bewerten Sie Ihren Tag\"?';
+  String get faq_question_rate_your_day => 'Was ist \"Bewerte deinen Tag\"?';
 
   @override
   String get faq_answer_rate_your_day =>
-      '\"Bewerten Sie Ihren Tag\" ist eine Funktion, die Ihre Gesundheit während des gesamten Studienzeitraums erfasst. Sie müssen bestimmte gesundheitsbezogene Abfragen auf einer Skala von 1 bis 10 bewerten.';
+      '\"Bewerte deinen Tag\" ist eine Funktion, die deine Gesundheit während des gesamten Studienzeitraums erfasst. Du musst bestimmte gesundheitsbezogene Abfragen auf einer Skala von 1 bis 10 bewerten.';
 
   @override
   String get faq_question_track_activities =>
@@ -1903,7 +1901,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get faq_answer_track_activities =>
-      'Im Abschnitt \"Berichtsverlauf\" erhalten Sie einen Überblick über Ihre täglichen Aufgaben und Ihren Gesundheitszustand.';
+      'Im Abschnitt \"Berichtsverlauf\" erhältst du einen Überblick über deine täglichen Aufgaben und deinen Gesundheitszustand.';
 
   @override
   String get faq_question_download_report =>
@@ -1911,26 +1909,26 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get faq_answer_download_report =>
-      'Ihr Bericht kann heruntergeladen werden, sobald Sie die für eine Studie erforderlichen Mindestaufgaben erledigt haben. Es ist auf der Registerkarte Berichtsverlauf im Dashboard verfügbar.';
+      'Dein Bericht kann heruntergeladen werden, sobald du die für eine Studie erforderlichen Mindestaufgaben erledigt hast. Er ist auf der Registerkarte Berichtsverlauf im Dashboard verfügbar.';
 
   @override
   String get debug_notifications_not_initialized =>
-      'Benachrichtigungen sind noch nicht initialisiert. Bitte starten Sie eine Studie und öffnen Sie diese Funktion über den Bereich Über.';
+      'Benachrichtigungen sind noch nicht initialisiert. Bitte starte eine Studie und öffne diese Funktion über den Bereich Über.';
 
   @override
   String get debug_test_notification_title => 'StudyU-Testbenachrichtigung';
 
   @override
   String get debug_test_notification_body =>
-      'Diese Benachrichtigung bestätigt, dass Sie StudyU-Benachrichtigungen empfangen.';
+      'Diese Benachrichtigung bestätigt, dass du StudyU-Benachrichtigungen empfängst.';
 
   @override
   String get debug_reset_success =>
-      'Die App wurde erfolgreich zurückgesetzt. Bitte starten Sie die App neu.';
+      'Die App wurde erfolgreich zurückgesetzt. Bitte starte die App neu.';
 
   @override
   String get debug_reset_error =>
-      'Beim Zurücksetzen der App ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.';
+      'Beim Zurücksetzen der App ist ein Fehler aufgetreten. Bitte versuche es erneut.';
 
   @override
   String get debug_screen_title => 'Debug-Bildschirm';
@@ -1948,7 +1946,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get invite_landing_instruction_title =>
-      'Nehmen Sie mit StudyU Health an der Studie teil';
+      'Nimm mit StudyU Health an der Studie teil';
 
   @override
   String get invite_landing_qr_label => 'QR-Code für die Studieneinladung';
@@ -1958,11 +1956,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get invite_landing_invalid =>
-      'Diese Einladung ist nicht mehr verfügbar. Bitte überprüfen Sie den Link oder Code und versuchen Sie es erneut.';
+      'Diese Einladung ist nicht mehr verfügbar. Bitte überprüfe den Link oder Code und versuche es erneut.';
 
   @override
   String get invite_landing_load_error =>
-      'Diese Einladung konnte nicht geladen werden. Bitte versuchen Sie es später erneut.';
+      'Diese Einladung konnte nicht geladen werden. Bitte versuche es später erneut.';
 
   @override
   String get invite_landing_loading => 'Einladung wird geladen …';
@@ -1972,7 +1970,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get scan_invite_code_description =>
-      'Richten Sie Ihre Kamera auf den QR-Code der Einladung.';
+      'Richte deine Kamera auf den QR-Code der Einladung.';
 
   @override
   String get open_study_app => 'In StudyU Health öffnen';
@@ -1991,19 +1989,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get invite_landing_step_join_description =>
-      'Öffnen Sie StudyU Health auf Ihrem Smartphone und tippen Sie auf „Mit einem Einladungscode beitreten“. Geben Sie den Einladungscode ein oder scannen Sie den QR-Code, um an der Studie teilzunehmen.';
+      'Öffne StudyU Health auf deinem Smartphone und tippe auf „Mit einem Einladungscode beitreten“. Gib den Einladungscode ein oder scanne den QR-Code, um an der Studie teilzunehmen.';
 
   @override
   String get invite_landing_invited_title =>
-      'Sie sind eingeladen zur Teilnahme an';
+      'Du bist eingeladen zur Teilnahme an';
 
   @override
   String get invite_landing_phone_instruction =>
-      'Geben Sie diesen Einladungscode in der StudyU Health-App ein.';
+      'Gib diesen Einladungscode in der StudyU Health-App ein.';
 
   @override
   String get invite_landing_other_device_instruction =>
-      'Für einen schnellen Zugang scannen Sie diesen QR-Code mit Ihrem Smartphone.';
+      'Scanne für einen schnellen Zugang diesen QR-Code mit deinem Smartphone.';
 
   @override
   String get invite_landing_enter_code_title => 'Einladungscode eingeben';
@@ -2016,4 +2014,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get invite_landing_copy_code => 'Einladungscode kopieren';
+
+  @override
+  String get date_format => 'Datumsformat';
+
+  @override
+  String get date_format_european => 'Europäisch (31/12/2024)';
+
+  @override
+  String get date_format_german => 'Deutsch (31.12.2024)';
+
+  @override
+  String get date_format_iso => 'ISO (2024-12-31)';
+
+  @override
+  String get date_format_us => 'US (12/31/2024)';
+
+  @override
+  String get system => 'System';
+
+  @override
+  String get time_format => 'Zeitformat';
+
+  @override
+  String get time_format_12_hour => '12-Stunden (2:30 PM)';
+
+  @override
+  String get time_format_24_hour => '24-Stunden (14:30)';
 }

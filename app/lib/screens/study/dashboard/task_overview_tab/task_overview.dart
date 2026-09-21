@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/progress_row.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_box.dart';
 import 'package:studyu_app/theme.dart';
+import 'package:studyu_app/util/date_time_preferences.dart';
 import 'package:studyu_app/widgets/intervention_card.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
@@ -34,6 +36,7 @@ class _TaskOverviewState() extends State<TaskOverview> {
 
   List<Widget> buildScheduleToday(BuildContext context) {
     final theme = Theme.of(context);
+    final timeFormat = context.watch<DateTimePreferences?>()?.timeFormat;
     final List<Widget> list = [];
     for (final taskInstance in widget.scheduleToday!) {
       list
@@ -45,7 +48,11 @@ class _TaskOverviewState() extends State<TaskOverview> {
                 Icon(Icons.access_time, color: theme.primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  taskInstance.completionPeriod.formatted(),
+                  formatCompletionPeriod(
+                    context,
+                    taskInstance.completionPeriod,
+                    preference: timeFormat,
+                  ),
                   style: theme.textTheme.titleSmall!.copyWith(
                     fontSize: 16,
                     color: theme.primaryColor,

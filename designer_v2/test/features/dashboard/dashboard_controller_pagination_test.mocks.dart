@@ -725,6 +725,32 @@ class MockUserRepository extends _i1.Mock implements _i17.UserRepository {
   ) as _i13.Future<_i8.StudyUUser>);
 
   @override
+  _i13.Future<_i8.StudyUUser> updateDateFormat(
+    _i8.DateFormatPreference? value,
+  ) => (super.noSuchMethod(
+    Invocation.method(#updateDateFormat, [value]),
+    returnValue: _i13.Future<_i8.StudyUUser>.value(
+      _FakeStudyUUser_10(this, Invocation.method(#updateDateFormat, [value])),
+    ),
+    returnValueForMissingStub: _i13.Future<_i8.StudyUUser>.value(
+      _FakeStudyUUser_10(this, Invocation.method(#updateDateFormat, [value])),
+    ),
+  ) as _i13.Future<_i8.StudyUUser>);
+
+  @override
+  _i13.Future<_i8.StudyUUser> updateTimeFormat(
+    _i8.TimeFormatPreference? value,
+  ) => (super.noSuchMethod(
+    Invocation.method(#updateTimeFormat, [value]),
+    returnValue: _i13.Future<_i8.StudyUUser>.value(
+      _FakeStudyUUser_10(this, Invocation.method(#updateTimeFormat, [value])),
+    ),
+    returnValueForMissingStub: _i13.Future<_i8.StudyUUser>.value(
+      _FakeStudyUUser_10(this, Invocation.method(#updateTimeFormat, [value])),
+    ),
+  ) as _i13.Future<_i8.StudyUUser>);
+
+  @override
   _i13.Future<_i8.StudyUUser> updateLanguage(
     String? language,
   ) => (super.noSuchMethod(

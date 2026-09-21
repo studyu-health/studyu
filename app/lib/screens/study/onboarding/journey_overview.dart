@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
@@ -8,6 +7,7 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
 import 'package:studyu_app/services/pending_deep_link_service.dart';
 import 'package:studyu_app/services/study_start_service.dart';
+import 'package:studyu_app/util/date_time_preferences.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
 import 'package:studyu_app/widgets/loading_overlay.dart';
 import 'package:studyu_app/widgets/onboarding_shell.dart';
@@ -200,6 +200,7 @@ class const InterventionTile({
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final dateTimePreferences = context.watch<DateTimePreferences?>();
     return TimelineTile(
       alignment: TimelineAlign.manual,
       lineXY: 0.4,
@@ -223,7 +224,8 @@ class const InterventionTile({
       ),
       startChild: TimelineChild(
         child: Text(
-          DateFormat('dd-MM-yyyy').format(date),
+          dateTimePreferences?.formatDate(context, date) ??
+              DateTimeFormat.formatDate(context, date),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),

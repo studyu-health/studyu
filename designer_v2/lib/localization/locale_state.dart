@@ -83,8 +83,9 @@ class LocaleStateNotifier() extends _$LocaleStateNotifier {
 
       final loadedState = await load();
       if (loadedState != null) {
-        user.preferences.language = loadedState.locale.toLanguageTag();
-        await ref.read(userRepositoryProvider).saveUser();
+        await ref
+            .read(userRepositoryProvider)
+            .updateLanguage(loadedState.locale.toLanguageTag());
         state = loadedState;
         return true;
       }
