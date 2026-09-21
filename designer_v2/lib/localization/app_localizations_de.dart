@@ -711,7 +711,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get question_type_pain_preview_description =>
-      'Unten sehen Sie eine vereinfachte Darstellung, wie die Schmerzauswahl-Oberfläche den Teilnehmern in der StudyU-App angezeigt wird. Sie können auf Körperteile tippen, um sie auszuwählen und dann eine Schmerzstufe zuzuweisen.';
+      'Unten siehst du eine vereinfachte Darstellung, wie die Schmerzauswahl-Oberfläche den Teilnehmern in der StudyU-App angezeigt wird. Sie können auf Körperteile tippen, um sie auszuwählen und dann eine Schmerzstufe zuzuweisen.';
 
   @override
   String get question_type_pain_front_view => 'Vorderansicht';
@@ -884,25 +884,25 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get free_text_range_label_helper =>
-      'Geben Sie die minimale und maximale Anzahl von Zeichen ein, die für die Antwort erlaubt sind';
+      'Gib die minimale und maximale Anzahl von Zeichen ein, die für die Antwort erlaubt sind';
 
   @override
   String get free_text_type_label => 'Erlaubter Texttyp';
 
   @override
   String get free_text_type_label_helper =>
-      'Wählen Sie den Typ des Texts aus, der für die Antwort erlaubt ist';
+      'Wähle den Typ des Texts aus, der für die Antwort erlaubt ist';
 
   @override
   String get free_text_type_custom_label => 'Regulärer Ausdruck';
 
   @override
   String get free_text_type_custom_label_helper =>
-      'Geben Sie einen regulären Ausdruck ein, den die Antwort erfüllen muss';
+      'Gib einen regulären Ausdruck ein, den die Antwort erfüllen muss';
 
   @override
   String get free_text_type_custom_helper =>
-      'Beispiel: Geben Sie [a-zA-Z]+ ein, um nur Buchstaben zuzulassen.';
+      'Beispiel: Gib [a-zA-Z]+ ein, um nur Buchstaben zuzulassen.';
 
   @override
   String get free_text_type_custom_explanation =>
@@ -916,11 +916,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dies ist ein Beispiel für das Textfeld, das dem Teilnehmer angezeigt wird. Die oben angegebenen Einschränkungen zur Länge und zum Eingabetyp werden angewendet.';
 
   @override
-  String get free_text_example_valid => 'Ihre Beispiel-Eingabe ist gültig';
+  String get free_text_example_valid => 'Deine Beispieleingabe ist gültig';
 
   @override
   String get free_text_example_default_helper =>
-      'Führen Sie einen Validierungstest durch, indem Sie hier Text eingeben.';
+      'Führe einen Validierungstest durch, indem du hier Text eingibst.';
 
   @override
   String free_text_validation_min_length(num countMin) {
@@ -1716,7 +1716,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get form_field_crossover_schedule_num_cycles_tooltip =>
-      'Alternierend / Ausgeglichen / Zufällig:\nAnzahl der Zyklen (Phasenpaare), die wiederholt werden. Ein Zyklus = zwei Phasen (z. B. AB oder BA).\n\nBenutzerdefiniert:\nAnzahl der Wiederholungen der gesamten benutzerdefinierten Sequenz. Ein Zyklus = die gesamte von Ihnen definierte Sequenz (z. B. ABBAA).';
+      'Alternierend / Ausgeglichen / Zufällig:\nAnzahl der Zyklen (Phasenpaare), die wiederholt werden. Ein Zyklus = zwei Phasen (z. B. AB oder BA).\n\nBenutzerdefiniert:\nAnzahl der Wiederholungen der gesamten benutzerdefinierten Sequenz. Ein Zyklus = die gesamte von dir definierte Sequenz (z. B. ABBAA).';
 
   @override
   String form_field_crossover_schedule_num_cycles_range(num min, num max) {
@@ -2219,7 +2219,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get code_public_disabled_description =>
-      'Teilnehmer können dieser Studie einfach über die untenstehenden Links, durch Scannen des QR-Codes oder über die öffentliche Studienliste der App beitreten. Beachten Sie, dass Teilnahmecodes hier nicht verfügbar sind, da sie ausschließlich für private Studien verwendet werden.';
+      'Teilnehmer können dieser Studie einfach über die untenstehenden Links, durch Scannen des QR-Codes oder über die öffentliche Studienliste der App beitreten. Beachte, dass Teilnahmecodes hier nicht verfügbar sind, da sie ausschließlich für private Studien verwendet werden.';
 
   @override
   String get code_list_empty_title => 'Noch keine Teilnehmer eingeladen';
@@ -2646,47 +2646,46 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get fitbit_credentials_instruction =>
-      'Um Fitbit-Daten zu integrieren, folgen Sie diesen Schritten, um Ihre Client-ID und Ihren Client-Secret zu erhalten:';
+      'Um Fitbit-Daten zu integrieren, folge diesen Schritten, um deine Client-ID und dein Client-Secret zu erhalten:';
 
   @override
-  String get fitbit_credentials_step1 =>
-      '1. Gehen Sie zum Fitbit Developer Portal.';
+  String get fitbit_credentials_step1 => '1. Gehe zum Fitbit Developer Portal.';
 
   @override
   String get fitbit_credentials_step2 =>
-      '2. Melden Sie sich mit Ihrem Fitbit-Konto an oder erstellen Sie eins, falls Sie noch keines haben.';
+      '2. Melde dich mit deinem Fitbit-Konto an oder erstelle eins, falls du noch keines hast.';
 
   @override
   String get fitbit_credentials_step3 =>
-      '3. Navigieren Sie zum Abschnitt \"Verwalten\" und wählen Sie \"App registrieren\".';
+      '3. Navigiere zum Abschnitt \"Verwalten\" und wähle \"App registrieren\".';
 
   @override
   String get fitbit_credentials_step4 =>
-      '4. Füllen Sie die erforderlichen Felder wie Anwendungsname, Beschreibung und Redirect-URL (verwenden Sie: \"studyu://fitbit/auth\") aus.';
+      '4. Fülle die erforderlichen Felder wie Anwendungsname, Beschreibung und Redirect-URL (verwende: \"studyu://fitbit/auth\") aus.';
 
   @override
   String get fitbit_credentials_step5 =>
-      '5. Wählen Sie unter \"OAuth 2.0 Application Type\" die Option \"Client\" und setzen Sie den Zugriff auf \"Nur Lesen\".';
+      '5. Wähle unter \"OAuth 2.0 Application Type\" die Option \"Client\" und setze den Zugriff auf \"Nur Lesen\".';
 
   @override
   String get fitbit_credentials_step6 =>
-      '6. Senden Sie das Formular ab, um Ihre \"Client ID\" und \"Client Secret\" zu erhalten.';
+      '6. Sende das Formular ab, um deine \"Client ID\" und dein \"Client Secret\" zu erhalten.';
 
   @override
   String get fitbit_credentials_step7 =>
-      '7. Bitte füllen Sie das folgende Formular aus, um Zugang zu Intraday-Daten zu erhalten. Ohne diesen Schritt können Sie keine Daten von Fitbit für Ihre Versuche abrufen.';
+      '7. Bitte fülle das folgende Formular aus, um Zugang zu Intraday-Daten zu erhalten. Ohne diesen Schritt kannst du keine Daten von Fitbit für deine Versuche abrufen.';
 
   @override
   String get fitbit_credentials_step8 =>
-      '8. Kopieren Sie die unten stehenden Zugangsdaten und fügen Sie sie ein.';
+      '8. Kopiere die unten stehenden Zugangsdaten und füge sie ein.';
 
   @override
   String get fitbit_credentials_success_instruction =>
-      'Sobald Sie die Zugangsdaten eingegeben haben, wird die Fitbit-Integration für Ihre Studie aktiviert.';
+      'Sobald du die Zugangsdaten eingegeben hast, wird die Fitbit-Integration für deine Studie aktiviert.';
 
   @override
   String get fitbit_credentials_add_question_instruction =>
-      'Um eine Fitbit-Frage hinzuzufügen, navigieren Sie zum Bereich Messungen und erstellen Sie innerhalb einer Messung eine neue Fitbit-Frage.';
+      'Um eine Fitbit-Frage hinzuzufügen, navigiere zum Bereich Messungen und erstelle innerhalb einer Messung eine neue Fitbit-Frage.';
 
   @override
   String get fitbit_credentials_screenshot_step1 =>
@@ -2748,7 +2747,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get study_import_description =>
-      'Importieren Sie eine Studiendefinition aus einer JSON-Datei. Dies wird einen neuen Studienentwurf erstellen.';
+      'Importiere eine Studiendefinition aus einer JSON-Datei. Dadurch wird ein neuer Studienentwurf erstellt.';
 
   @override
   String get study_import_button => 'Studie aus JSON importieren';
@@ -2774,7 +2773,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get client_id_label_help =>
-      'Geben Sie die Client-ID aus dem Fitbit Developer Portal ein.';
+      'Gib die Client-ID aus dem Fitbit Developer Portal ein.';
 
   @override
   String get client_id_hint => 'Client ID';
@@ -2784,14 +2783,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get client_secret_label_help =>
-      'Geben Sie den Client Secret aus dem Fitbit Developer Portal ein.';
+      'Gib das Client Secret aus dem Fitbit Developer Portal ein.';
 
   @override
   String get client_secret_hint => 'Client Secret';
 
   @override
   String get fitbit_credentials_how_to_obtain =>
-      'So erhalten Sie Fitbit-Zugangsdaten';
+      'So erhältst du Fitbit-Zugangsdaten';
 
   @override
   String get fitbit_client_id_required => 'Client-ID ist erforderlich';
@@ -2808,7 +2807,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get fitbit_credentials_not_set =>
-      'Fitbit-Anmeldedaten sind nicht gesetzt. Bitte navigieren Sie zum \'Fitbit\'-Tab im Studien-Designer, um Ihre Fitbit-Client-ID und Ihr Client-Secret einzugeben. Sobald dies abgeschlossen ist, kehren Sie hierher zurück, um Fitbit-Fragen hinzuzufügen.';
+      'Fitbit-Anmeldedaten sind nicht gesetzt. Bitte navigiere zum \'Fitbit\'-Tab im Studien-Designer, um deine Fitbit-Client-ID und dein Client-Secret einzugeben. Kehre anschließend hierher zurück, um Fitbit-Fragen hinzuzufügen.';
 
   @override
   String get fitbit_question_type_heartrate_description =>
@@ -2824,7 +2823,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get html_styling_banner_description =>
-      'Sie können grundlegende HTML-Tags verwenden, um den Inhalt der mit \'styleable\' markierten Felder zu formatieren. Einige Beispiele sind:';
+      'Du kannst grundlegende HTML-Tags verwenden, um den Inhalt der mit \'styleable\' markierten Felder zu formatieren. Einige Beispiele sind:';
 
   @override
   String get html_styling_bold_example => 'Text fett formatieren';
@@ -2859,7 +2858,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get html_styling_more_info =>
-      'Weitere Informationen finden Sie in der';
+      'Weitere Informationen findest du in der';
 
   @override
   String get html_styling_documentation_link => 'HTML-Dokumentation';
@@ -2874,7 +2873,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get study_schedule_banner_description =>
-      'Entwerfen Sie effektive Crossover-Studien, indem Sie die verschiedenen Sequenztypen und ihre Auswirkungen auf Ihre Studienergebnisse verstehen.';
+      'Entwirf effektive Crossover-Studien, indem du die verschiedenen Sequenztypen und ihre Auswirkungen auf deine Studienergebnisse verstehst.';
 
   @override
   String get study_schedule_alternating_description =>
@@ -2890,7 +2889,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get study_schedule_custom_description =>
-      'Benutzerdefiniert: Definieren Sie Ihr eigenes Sequenzmuster, um spezifische Studienanforderungen zu erfüllen.';
+      'Benutzerdefiniert: Definiere dein eigenes Sequenzmuster, um spezifische Studienanforderungen zu erfüllen.';
 
   @override
   String get filter_studies => 'Studien filtern';
@@ -3176,7 +3175,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dialog_qr_code_description =>
-      'Teilen Sie den Link oder QR-Code mit den Teilnehmenden, damit sie auf diese Studie zugreifen können. Wenn Teilnehmende den Link öffnen oder den QR-Code mit ihrem Smartphone scannen, öffnet sich die StudyU-App und fügt sie dieser Studie hinzu.';
+      'Teile den Link oder QR-Code mit den Teilnehmenden, damit sie auf diese Studie zugreifen können. Wenn Teilnehmende den Link öffnen oder den QR-Code mit ihrem Smartphone scannen, öffnet sich die StudyU-App und fügt sie dieser Studie hinzu.';
 
   @override
   String get all_studies => 'Alle Studien';
@@ -3202,19 +3201,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get form_field_invite_link_tooltip =>
-      'Teilen Sie diesen Link mit den Teilnehmenden, damit sie die StudyU-App öffnen und auf diese Studie zugreifen können.';
+      'Teile diesen Link mit den Teilnehmenden, damit sie die StudyU-App öffnen und auf diese Studie zugreifen können.';
 
   @override
   String get form_field_invitation_message => 'Einladungsnachricht';
 
   @override
   String invitation_message_intro(Object title) {
-    return 'Sie wurden eingeladen, mit StudyU an der Studie „$title“ teilzunehmen.';
+    return 'Du wurdest eingeladen, mit StudyU an der Studie „$title“ teilzunehmen.';
   }
 
   @override
   String get invitation_message_install_app =>
-      '1. Installieren Sie bei Bedarf die StudyU Health-App auf Ihrem Telefon:';
+      '1. Installiere bei Bedarf die StudyU Health-App auf deinem Telefon:';
 
   @override
   String invitation_message_android(Object link) {
@@ -3228,19 +3227,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get invitation_message_open_link =>
-      '2. Öffnen Sie diesen Einladungslink auf Ihrem Telefon:';
+      '2. Öffne diesen Einladungslink auf deinem Telefon:';
 
   @override
   String get invitation_message_alternative =>
-      'Alternativ können Sie die StudyU Health-App öffnen und diesen Teilnahmecode eingeben:';
+      'Alternativ kannst du die StudyU Health-App öffnen und diesen Teilnahmecode eingeben:';
 
   @override
   String get form_field_report_improvementDirection_hint =>
-      'Wählen Sie eine Verbesserungsrichtung aus';
+      'Wähle eine Verbesserungsrichtung aus';
 
   @override
-  String get form_field_report_data_source_hint =>
-      'Wählen Sie eine Datenquelle aus';
+  String get form_field_report_data_source_hint => 'Wähle eine Datenquelle aus';
 
   @override
   String get form_field_report_data_source_empty =>
