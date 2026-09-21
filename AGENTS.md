@@ -60,10 +60,9 @@ code, tests, or linked project documentation.
   SDK is unavailable.
 - Prefer the existing root script catalog. For a targeted package check with no catalog entry,
   use a root-level `fvm dart run melos exec` command with the appropriate package filter.
-- The tracked `.githooks/pre-commit` hook runs `scripts/pre-commit-check` automatically.
-  Run that check manually before a PR only when the hook has not checked the current changes.
-- Do not use `fvm dart run melos qualitycheck` as the default pre-commit or pre-PR check. Use it for
-  a full CI-style workspace check or when explicitly requested.
+- There is no automated pre-commit hook. Run `fvm dart run melos qualitycheck` before a PR; it
+  checks formatting and analyzes the workspace without writing files. Run `fvm dart format .`
+  and `fvm dart run melos generate` to apply fixes.
 
 ## Environments
 

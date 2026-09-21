@@ -51,7 +51,6 @@ worktree and all unrelated changes. In the fresh worktree, run:
 ```bash
 fvm install
 ./setup.sh
-fvm dart run melos setup
 ```
 
 `./setup.sh` bootstraps the workspace. If the repository setup script no longer
@@ -306,10 +305,9 @@ Run unit tests for workspace packages with tests:
 fvm exec melos test
 ```
 
-Run `fvm exec melos qualitycheck` when the pre-commit hook has not already run
-an equivalent check, or when a full workspace check is required. This script
-formats, generates, and analyzes. Review any formatting changes and keep only
-changes caused by the upgrade.
+Run `fvm exec melos qualitycheck` for a full workspace check. It checks formatting and
+analyzes the workspace without writing files. Review any formatting or analysis issues and
+fix only those caused by the upgrade.
 
 Build every affected platform. Use a current environment-specific build
 script from the root `pubspec.yaml`. Every app or Designer build must provide
