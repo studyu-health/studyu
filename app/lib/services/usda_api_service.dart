@@ -1,11 +1,12 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:studyu_app/models/usda_models.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 /// Service for interacting with USDA FoodData Central API
 /// Documentation: https://fdc.nal.usda.gov/api-guide.html
-class UsdaApiService {
+class UsdaApiService() {
   static const String _baseUrl = 'https://api.nal.usda.gov/fdc/v1';
 
   /// Get USDA API key from environment
@@ -46,8 +47,7 @@ class UsdaApiService {
         'api_key': apiKey,
         'query': barcode,
         'pageSize': '10',
-        'dataType':
-            'Foundation,SR Legacy,Branded', // Include Branded products for barcodes
+        'dataType': 'Foundation,SR Legacy,Branded', // Include Branded products for barcodes
       },
     );
 
@@ -115,8 +115,7 @@ class UsdaApiService {
         'query': query,
         'pageSize': pageSize.toString(),
         'pageNumber': pageNumber.toString(),
-        'dataType':
-            'Foundation,SR Legacy', // Foundation foods + Standard Reference Legacy
+        'dataType': 'Foundation,SR Legacy', // Foundation foods + Standard Reference Legacy
       },
     );
 

@@ -6,33 +6,27 @@ import 'package:studyu_core/core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Result of a food image analysis containing detected food items.
-class FoodAnalysisResult {
-  /// Creates a new [FoodAnalysisResult].
-  const FoodAnalysisResult({
-    required this.items,
-    required this.overallConfidence,
-    this.notes,
-    required this.success,
-    this.errorMessage,
-  });
-
+class const FoodAnalysisResult({
   /// List of detected food items.
-  final List<AnalyzedFoodItem> items;
+  required final List<AnalyzedFoodItem> items,
 
   /// Overall confidence score (0.0 to 1.0) for the analysis.
-  final double overallConfidence;
+  required final double overallConfidence,
 
   /// Optional notes about the analysis (e.g., "appears to be homemade").
-  final String? notes;
+  final String? notes,
 
   /// Whether the analysis was successful.
-  final bool success;
+  required final bool success,
 
   /// Error message if analysis failed.
-  final String? errorMessage;
+  final String? errorMessage,
+}) {
+  /// Creates a new [FoodAnalysisResult].
+  this;
 
   /// Creates a failed result with the given error message.
-  factory FoodAnalysisResult.failure(String errorMessage) {
+  factory failure(String errorMessage) {
     return FoodAnalysisResult(
       items: const [],
       overallConfidence: 0,
@@ -43,22 +37,19 @@ class FoodAnalysisResult {
 }
 
 /// A single food item detected in an image analysis.
-class AnalyzedFoodItem {
-  /// Creates a new [AnalyzedFoodItem].
-  const AnalyzedFoodItem({
-    required this.foodEntry,
-    required this.confidenceScore,
-  });
-
+class const AnalyzedFoodItem({
   /// The food entry with estimated nutrition data.
-  final FoodEntry foodEntry;
+  required final FoodEntry foodEntry,
 
   /// Confidence score (0.0 to 1.0) for this specific item.
-  final double confidenceScore;
+  required final double confidenceScore,
+}) {
+  /// Creates a new [AnalyzedFoodItem].
+  this;
 }
 
 /// Service for analyzing food images using LLM via Supabase Edge Function.
-class FoodAnalysisService {
+class FoodAnalysisService() {
   /// Analyzes a food image and returns detected food items with estimated
   /// nutrition data.
   ///
@@ -108,8 +99,8 @@ class FoodAnalysisService {
         'analyze-food-image',
         body: {
           'imageBase64': base64Image,
-          if (mealTypeString != null) 'mealType': mealTypeString,
-          if (mealTimeString != null) 'mealTime': mealTimeString,
+          'mealType': ?mealTypeString,
+          'mealTime': ?mealTimeString,
         },
       );
 

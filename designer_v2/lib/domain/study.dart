@@ -6,7 +6,7 @@ import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'package:uuid/uuid.dart';
 
-enum StudyActionType {
+enum StudyActionType() {
   pin,
   pinoff,
   edit,
@@ -225,7 +225,7 @@ extension StudyRegistryX on Study {
   bool get publishedToRegistryResults => resultSharing == ResultSharing.public;
 }
 
-class StudyTemplates {
+class StudyTemplates() {
   static String get kUnnamedStudyTitle => tr.form_field_study_title_default;
 
   static Study emptyDraft(String userId) {
@@ -243,7 +243,7 @@ extension StudyParticipantCountX on Study {
     }
     int count = 0;
     for (final participant in participants!) {
-      if (participant.inviteCode == invite.code) {
+      if (!participant.isDeleted && participant.inviteCode == invite.code) {
         count += 1;
       }
     }

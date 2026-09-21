@@ -5,7 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:studyu_app/models/photo_reference.dart';
 
 /// Service for querying device photo gallery.
-class PhotoGalleryService {
+class PhotoGalleryService() {
   /// Time window around meal time to search for photos (in hours).
   static const int _defaultTimeWindowHours = 2;
 

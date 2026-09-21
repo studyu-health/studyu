@@ -6,9 +6,7 @@ import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
-class BarcodeScannerScreen extends StatefulWidget {
-  const BarcodeScannerScreen({super.key});
-
+class const BarcodeScannerScreen({super.key}) extends StatefulWidget {
   static MaterialPageRoute<studyu.FoodEntry> route() =>
       MaterialPageRoute(builder: (_) => const BarcodeScannerScreen());
 
@@ -16,7 +14,7 @@ class BarcodeScannerScreen extends StatefulWidget {
   State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
 }
 
-class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
+class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
   final MobileScannerController _controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.unrestricted, // Fastest detection!
     // No format restrictions - detects ALL barcode types!
@@ -264,9 +262,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     // Parse serving size
     double servingSizeGrams = 100.0;
     if (product.servingSize != null) {
-      final match = RegExp(
-        r'(\d+(?:\.\d+)?)\s*g',
-      ).firstMatch(product.servingSize!);
+      final match = RegExp(r'(\d+(?:\.\d+)?)\s*g')
+          .firstMatch(product.servingSize!);
       if (match != null) {
         servingSizeGrams = double.tryParse(match.group(1)!) ?? 100.0;
       }
@@ -578,7 +575,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   }
 }
 
-class ScannerOverlayPainter extends CustomPainter {
+class ScannerOverlayPainter() extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()

@@ -8,38 +8,27 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:uuid/uuid.dart';
 
-class MeasurementSurveyFormData extends IFormDataWithSchedule {
+class MeasurementSurveyFormData({
+  required final MeasurementID measurementId,
+  required super.instanceId,
+  required final String title,
+  final String? introText,
+  final String? outroText,
+  required super.isTimeLocked,
+  super.timeLockStart,
+  super.timeLockEnd,
+  required super.hasReminder,
+  super.reminderTime,
+  required final QuestionnaireFormData questionnaireFormData,
+  final TaskScheduleRule? scheduleRule,
+}) extends IFormDataWithSchedule {
   static String get kDefaultTitle =>
       tr.form_field_measurement_survey_title_default;
-
-  MeasurementSurveyFormData({
-    required this.measurementId,
-    required super.instanceId,
-    required this.title,
-    this.introText,
-    this.outroText,
-    required super.isTimeLocked,
-    super.timeLockStart,
-    super.timeLockEnd,
-    required super.hasReminder,
-    super.reminderTime,
-    required this.questionnaireFormData,
-    this.scheduleRule,
-  });
-
-  final MeasurementID measurementId;
-  final String title;
-  final String? introText;
-  final String? outroText;
-  final QuestionnaireFormData questionnaireFormData;
-  final TaskScheduleRule? scheduleRule;
 
   @override
   FormDataID get id => measurementId;
 
-  factory MeasurementSurveyFormData.fromDomainModel(
-    QuestionnaireTask questionnaireTask,
-  ) {
+  factory fromDomainModel(QuestionnaireTask questionnaireTask) {
     return MeasurementSurveyFormData(
       measurementId: questionnaireTask.id,
       title: questionnaireTask.title ?? '',

@@ -7,38 +7,27 @@ import 'package:studyu_designer_v2/features/forms/form_data.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:uuid/uuid.dart';
 
-class NutritionFormData extends IFormDataWithSchedule {
-  static String get kDefaultTitle =>
-      'Nutrition Tracking'; // TODO: Add to translation
-
-  NutritionFormData({
-    required this.measurementId,
-    required super.instanceId,
-    required this.title,
-    this.instructions,
-    required super.isTimeLocked,
-    super.timeLockStart,
-    super.timeLockEnd,
-    required super.hasReminder,
-    super.reminderTime,
-    this.collectMealContext = true,
-    this.allowRecipes = true,
-    this.minimumMealsRequired,
-    this.customMealTypes,
-  });
-
-  final MeasurementID measurementId;
-  final String title;
-  final String? instructions;
-  final bool collectMealContext;
-  final bool allowRecipes;
-  final int? minimumMealsRequired;
-  final List<String>? customMealTypes;
+class NutritionFormData({
+  required final MeasurementID measurementId,
+  required super.instanceId,
+  required final String title,
+  final String? instructions,
+  required super.isTimeLocked,
+  super.timeLockStart,
+  super.timeLockEnd,
+  required super.hasReminder,
+  super.reminderTime,
+  final bool collectMealContext = true,
+  final bool allowRecipes = true,
+  final int? minimumMealsRequired,
+  final List<String>? customMealTypes,
+}) extends IFormDataWithSchedule {
+  static String get kDefaultTitle => 'Nutrition Tracking';
 
   @override
   FormDataID get id => measurementId;
 
-  factory NutritionFormData.fromDomainModel(NutritionTask nutritionTask) {
+  factory fromDomainModel(NutritionTask nutritionTask) {
     return NutritionFormData(
       measurementId: nutritionTask.id,
       title: nutritionTask.title ?? '',

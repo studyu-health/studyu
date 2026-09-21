@@ -59,7 +59,7 @@ final class StudyTestControllerProvider
 }
 
 String _$studyTestControllerHash() =>
-    r'de261192453a0cf58ca8fa1c996a71d09bc4778c';
+    r'9a0cf27813e58fff60d1652f2ee4044c40763736';
 
 final class StudyTestControllerFamily extends $Family
     with
@@ -180,7 +180,7 @@ final class StudyTestPlatformControllerProvider
 }
 
 String _$studyTestPlatformControllerHash() =>
-    r'8e61d8677426d6b048c028bc9117134f179b79b6';
+    r'1c9fb9e71895b8be7542eafd6185641c2b31766e';
 
 /// Provide a controller parametrized by [StudyID]
 

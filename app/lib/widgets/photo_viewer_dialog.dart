@@ -5,24 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 /// Full-screen dialog for viewing a photo in detail.
-class PhotoViewerDialog extends StatelessWidget {
-  /// Creates a new [PhotoViewerDialog].
-  const PhotoViewerDialog({
-    required this.photoId,
-    required this.photoDate,
-    this.onAnalyze,
-    super.key,
-  });
-
+class const PhotoViewerDialog({
   /// The ID of the photo to display.
-  final String photoId;
+  required final String photoId,
 
   /// The date the photo was taken.
-  final DateTime photoDate;
+  required final DateTime photoDate,
 
   /// Optional callback triggered when the user taps "Analyze Meal".
   /// When provided, an analyze button is shown in the full-screen view.
-  final VoidCallback? onAnalyze;
+  final VoidCallback? onAnalyze,
+  super.key,
+}) extends StatelessWidget {
+  /// Creates a new [PhotoViewerDialog].
+  this;
 
   /// Shows the photo viewer dialog.
   static Future<void> show(

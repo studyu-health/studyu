@@ -1,7 +1,7 @@
 import 'package:studyu_core/core.dart';
 
 /// DHQ3 Past Year with Serving Sizes – shared choice sets (exact FFQ wording).
-class Dhq3Choices {
+class Dhq3Choices() {
   static List<Choice> get sex => [
     Choice.withText(text: 'Male', id: 'male'),
     Choice.withText(text: 'Female', id: 'female'),
@@ -220,8 +220,7 @@ class Dhq3Choices {
   static List<Choice> get teaSweetenerType => [
     Choice.withText(text: 'Sugar or honey', id: 'sugar'),
     Choice.withText(
-      text:
-          "Artificial sweeteners (such as Splenda, Equal, Sweet'N Low or others)",
+      text: "Artificial sweeteners (such as Splenda, Equal, Sweet'N Low or others)",
       id: 'artificial',
     ),
   ];

@@ -1,24 +1,65 @@
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
+import 'package:studyu_app/widgets/onboarding_shell.dart';
 import 'package:studyu_app/widgets/questionnaire/questionnaire_widget.dart';
+import 'package:studyu_app/widgets/study_onboarding_description.dart';
+import 'package:studyu_app/widgets/title_description_layout.dart';
 import 'package:studyu_core/core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class EligibilityResult {
-  final bool eligible;
-  final QuestionnaireState answers;
-  final EligibilityCriterion? firstFailed;
+class EligibilityResult(
+  final QuestionnaireState answers, {
+  required final bool eligible,
+  final EligibilityCriterion? firstFailed,
+});
 
-  EligibilityResult(this.answers, {required this.eligible, this.firstFailed});
+typedef EligibilityContinuation = Future<void> Function(BuildContext context);
+
+Future<void> continueAfterEligibility(BuildContext context) async {
+  final appState = context.read<AppState>();
+  if (!appState.isPreview && appState.activeSubject?.startedAt != null) {
+    context.go('/${RouteNames.dashboard}');
+    return;
+  }
+
+  final study = appState.selectedStudy!;
+  final selectedIds = appState.preselectedInterventionIds;
+  if (selectedIds == null && study.interventions.length > 2) {
+    appState.onboardingPhase = StudyOnboardingPhase.interventionSelection;
+    context.push('/${RouteNames.interventionSelection}');
+    return;
+  }
+
+  appState.activeSubject = StudySubject.fromStudy(
+    study,
+    Supabase.instance.client.auth.currentUser!.id,
+    selectedIds ??
+        study.interventions.map((intervention) => intervention.id).toList(),
+    appState.inviteCode,
+  );
+  appState.onboardingPhase = StudyOnboardingPhase.journey;
+  context.push('/${RouteNames.journey}');
 }
 
-class EligibilityScreen extends StatefulWidget {
-  final Study? study;
+class const EligibilityScreenArguments({
+  required final Study? study,
+  final EligibilityContinuation? onEligible,
+});
 
+class const EligibilityScreen({
+  required final Study? study,
+  final EligibilityContinuation? onEligible,
+  super.key,
+}) extends StatefulWidget {
   static MaterialPageRoute<EligibilityResult> routeFor({
     required Study? study,
   }) => MaterialPageRoute(
@@ -26,13 +67,11 @@ class EligibilityScreen extends StatefulWidget {
     settings: const RouteSettings(name: '/eligibilityCheck'),
   );
 
-  const EligibilityScreen({required this.study, super.key});
-
   @override
   State<StatefulWidget> createState() => _EligibilityScreenState();
 }
 
-class _EligibilityScreenState extends State<EligibilityScreen> {
+class _EligibilityScreenState() extends State<EligibilityScreen> {
   EligibilityResult? activeResult;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   bool _ignoreNextNullResponse = false;
@@ -128,8 +167,20 @@ class _EligibilityScreenState extends State<EligibilityScreen> {
         false;
   }*/
 
-  void _finish() {
-    context.pop(activeResult);
+  Future<void> _finish() async {
+    final result = kDebugMode && activeResult?.eligible != true
+        ? EligibilityResult(
+            activeResult?.answers ?? QuestionnaireState(),
+            eligible: true,
+          )
+        : activeResult;
+
+    if (result?.eligible == true && widget.onEligible != null) {
+      await widget.onEligible!(context);
+      return;
+    }
+
+    context.pop(result);
   }
 
   Widget _constructPassBanner() => MaterialBanner(
@@ -172,9 +223,9 @@ class _EligibilityScreenState extends State<EligibilityScreen> {
     ),
     actions: [
       TextButton(
-        key: const ValueKey('eligibility_back'),
-        onPressed: _finish,
-        child: Text(AppLocalizations.of(context)!.eligible_back),
+        key: const ValueKey('eligibility_failed_back'),
+        onPressed: () => context.pop(activeResult),
+        child: Text(AppLocalizations.of(context)!.back),
       ),
     ],
     forceActionsBelow: true,
@@ -186,42 +237,51 @@ class _EligibilityScreenState extends State<EligibilityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final nav = BottomOnboardingNavigation(
+      onBack: context.canPop() ? () => context.pop() : null,
+      nextButtonKey: const ValueKey('eligibility_continue'),
+      onNext: activeResult?.eligible == true || kDebugMode ? _finish : null,
+      progress: OnboardingProgress.forPage(
+        context.read<AppState>(),
+        OnboardingStep.eligibility,
+      ),
+    );
+
+    final navNotifier = OnboardingNavNotifier.maybeOf(context);
+    navNotifier?.register(
+      this,
+      '/${RouteNames.eligibilityCheck}',
+      OnboardingNavConfig.fromNav(nav),
+    );
+
     return Scaffold(
       key: const ValueKey('eligibility_screen'),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
         title: Text(
           AppLocalizations.of(context)!.eligibility_questionnaire_title,
         ),
-        leading: const Icon(MdiIcons.clipboardList),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              AppLocalizations.of(context)!.please_answer_eligibility,
-              style: theme.textTheme.titleMedium,
-            ),
+      body: TitleDescriptionLayout(
+        descriptionWidget: StudyOnboardingDescription(
+          text: AppLocalizations.of(context)!.please_answer_eligibility,
+        ),
+        descriptionBottomSpacing: 0,
+        scrollable: false,
+        bottomContent: activeResult != null ? _constructResultBanner() : null,
+        child: Expanded(
+          child: QuestionnaireWidget(
+            widget.study!.questionnaire.questions,
+            title: widget.study!.title,
+            onComplete: _evaluateResponse,
+            shouldContinue: _checkContinuation,
+            hideCta: activeResult?.eligible == false,
+            autoComplete: true,
           ),
-          Expanded(
-            child: QuestionnaireWidget(
-              widget.study!.questionnaire.questions,
-              title: widget.study!.title,
-              onComplete: _evaluateResponse,
-              shouldContinue: _checkContinuation,
-              hideCta: activeResult?.eligible == false,
-              autoComplete: true,
-            ),
-          ),
-          if (activeResult != null) _constructResultBanner(),
-        ],
+        ),
       ),
-      bottomNavigationBar: BottomOnboardingNavigation(
-        nextButtonKey: const ValueKey('eligibility_continue'),
-        onNext: activeResult?.eligible ?? false ? _finish : null,
-        progress: const OnboardingProgress(stage: 0, progress: 0.5),
-      ),
+      bottomNavigationBar: navNotifier != null ? null : nav,
     );
   }
 }

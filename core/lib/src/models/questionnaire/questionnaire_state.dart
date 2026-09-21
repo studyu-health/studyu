@@ -1,17 +1,13 @@
 import 'package:studyu_core/src/models/questionnaire/answer.dart';
 
-class QuestionnaireAnswerMetadata {
-  bool restoredFromCache;
-  bool needsReview;
-  Map<String, Object?>? cacheContext;
-
-  QuestionnaireAnswerMetadata({
-    this.restoredFromCache = false,
-    this.needsReview = false,
-    Map<String, Object?>? cacheContext,
-  }) : cacheContext = cacheContext == null
-           ? null
-           : Map<String, Object?>.from(cacheContext);
+class QuestionnaireAnswerMetadata({
+  var bool restoredFromCache = false,
+  var bool needsReview = false,
+  Map<String, Object?>? cacheContext,
+}) {
+  Map<String, Object?>? cacheContext = cacheContext == null
+      ? null
+      : Map<String, Object?>.from(cacheContext);
 
   QuestionnaireAnswerMetadata copy() {
     return QuestionnaireAnswerMetadata(
@@ -26,9 +22,9 @@ class QuestionnaireState {
   Map<String, Answer> answers;
   Map<String, QuestionnaireAnswerMetadata> answerMetadata;
 
-  QuestionnaireState() : answers = {}, answerMetadata = {};
+  new() : answers = {}, answerMetadata = {};
 
-  QuestionnaireState.fromJson(List<Map<String, dynamic>> json)
+  new fromJson(List<Map<String, dynamic>> json)
     : answers = Map<String, Answer>.fromIterable(
         json.map<Answer>(Answer.fromJson),
         key: (answer) => (answer as Answer).question,

@@ -8,16 +8,15 @@ import 'package:studyu_designer_v2/features/design/shared/schedule/schedule_cont
 import 'package:studyu_designer_v2/features/forms/form_validation.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class NutritionFormView extends ConsumerStatefulWidget {
-  const NutritionFormView({required this.formViewModel, super.key});
-
-  final NutritionFormViewModel formViewModel;
-
+class const NutritionFormView({
+  required final NutritionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<NutritionFormView> createState() => _NutritionFormViewState();
 }
 
-class _NutritionFormViewState extends ConsumerState<NutritionFormView> {
+class _NutritionFormViewState() extends ConsumerState<NutritionFormView> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -97,15 +96,10 @@ class _NutritionFormViewState extends ConsumerState<NutritionFormView> {
   }
 }
 
-class _CustomMealTypesSection extends StatelessWidget {
-  final NutritionFormViewModel formViewModel;
-  final bool isReadonly;
-
-  const _CustomMealTypesSection({
-    required this.formViewModel,
-    required this.isReadonly,
-  });
-
+class const _CustomMealTypesSection({
+  required final NutritionFormViewModel formViewModel,
+  required final bool isReadonly,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

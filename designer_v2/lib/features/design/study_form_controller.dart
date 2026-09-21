@@ -28,16 +28,16 @@ import 'package:studyu_designer_v2/routing/router.dart';
 
 part 'study_form_controller.g.dart';
 
-class StudyFormViewModel extends FormViewModel<Study>
+class StudyFormViewModel({
+  required final GoRouter router,
+  required final IStudyRepository studyRepository,
+  required final IAuthRepository authRepository,
+  required final IFitbitCredentialsRepository fitbitCredentialsRepository,
+  required super.formData, // Study
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends FormViewModel<Study>
     implements IFormViewModelDelegate<FormViewModel> {
-  StudyFormViewModel({
-    required this.router,
-    required this.studyRepository,
-    required this.authRepository,
-    required this.fitbitCredentialsRepository,
-    required super.formData, // Study
-    super.validationSet = StudyFormValidationSet.draft,
-  }) {
+  this {
     if (isStudyReadonly) {
       read();
     }
@@ -45,11 +45,6 @@ class StudyFormViewModel extends FormViewModel<Study>
 
   /// On-write copy of the [Study] object managed by the view model
   Study? studyDirtyCopy;
-
-  final IStudyRepository studyRepository;
-  final IAuthRepository authRepository;
-  final IFitbitCredentialsRepository fitbitCredentialsRepository;
-  final GoRouter router;
 
   bool get isStudyReadonly =>
       formData?.isReadonly(authRepository.currentUser!) ?? false;

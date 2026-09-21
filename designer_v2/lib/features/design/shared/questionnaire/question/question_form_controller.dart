@@ -23,18 +23,20 @@ import 'package:studyu_designer_v2/utils/validation.dart';
 import 'package:uuid/uuid.dart';
 
 // TODO: refactor break up into separate classes for each type
-class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
+class QuestionFormViewModel({
+  super.formData,
+  super.delegate,
+  super.validationSet = StudyFormValidationSet.draft,
+
+  /// Customized titles (if any) depending on the context of use
+  final Map<FormMode, String Function()>? _titles,
+}) extends ManagedFormViewModel<QuestionFormData>
     implements
         IListActionProvider<FormControl<dynamic>>,
         IConditionalQuestionProperties {
   static const defaultQuestionType = SurveyQuestionType.choice;
 
-  QuestionFormViewModel({
-    super.formData,
-    super.delegate,
-    super.validationSet = StudyFormValidationSet.draft,
-    Map<FormMode, String Function()>? titles,
-  }) : _titles = titles {
+  this {
     freeTextTypeControl.onChanged(
       (_) => _onFreeTextTypeChanged(freeTextTypeControl.value),
     );
@@ -72,9 +74,6 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
       (control) => onResponseOptionsChanged(control.controls),
     );
   }
-
-  /// Customized titles (if any) depending on the context of use
-  final Map<FormMode, LocalizedStringResolver>? _titles;
 
   // - Form fields (any question type)
 
@@ -175,6 +174,10 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
     validators: [Validators.required],
     value: false,
   );
+  final FormControl<bool> isSelectionRequiredControl = FormControl(
+    validators: [Validators.required],
+    value: false,
+  );
   late final FormArray<Choice> choiceResponseOptionsArray = FormArray([
     for (int i = 0; i < customOptionsInitial; i++)
       FormControl(value: Choice.withId()),
@@ -252,10 +255,6 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
       );
   final FormControl<String?> dateMinTimeControl = FormControl<String?>();
   final FormControl<String?> dateMaxTimeControl = FormControl<String?>();
-  final FormControl<DateFormatPreset> dateFormatPresetControl =
-      FormControl<DateFormatPreset>(value: DateFormatPreset.iso);
-  final FormControl<TimeFormatPreset> timeFormatPresetControl =
-      FormControl<TimeFormatPreset>(value: TimeFormatPreset.h24);
   final FormControl<DefaultDateOption> dateDefaultOptionControl =
       FormControl<DefaultDateOption>(value: DefaultDateOption.none);
   late final FormControl<DateTime?> dateDefaultSpecificDateControl =
@@ -272,8 +271,6 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
     dateMaxControl,
     dateMinTimeControl,
     dateMaxTimeControl,
-    dateFormatPresetControl,
-    timeFormatPresetControl,
     dateDefaultOptionControl,
     dateDefaultSpecificDateControl,
     dateDefaultSpecificTimeControl,
@@ -552,6 +549,7 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
     }),
     SurveyQuestionType.choice: FormGroup({
       'isMultipleChoice': isMultipleChoiceControl,
+      'isSelectionRequired': isSelectionRequiredControl,
       'choiceOptionsArray': choiceResponseOptionsArray,
     }),
     SurveyQuestionType.scale: FormGroup({
@@ -587,8 +585,6 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
       'dateMax': dateMaxControl,
       'dateMinTime': dateMinTimeControl,
       'dateMaxTime': dateMaxTimeControl,
-      'dateFormatPreset': dateFormatPresetControl,
-      'timeFormatPreset': timeFormatPresetControl,
       'dateDefaultOption': dateDefaultOptionControl,
       'dateDefaultSpecificDate': dateDefaultSpecificDateControl,
       'dateDefaultSpecificTime': dateDefaultSpecificTimeControl,
@@ -948,6 +944,7 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
       case SurveyQuestionType.choice:
         isMultipleChoiceControl.value =
             (data as ChoiceQuestionFormData).isMultipleChoice;
+        isSelectionRequiredControl.value = data.isSelectionRequired;
         // Unfortunately needed because of how [FormArray.updateValue] is implemented
         // Note: `formArray.value = []` does not remove any controls!
         answerOptionsArray.clear();
@@ -995,8 +992,6 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
         dateMaxControl.value = data.maxDate;
         dateMinTimeControl.value = data.minTime;
         dateMaxTimeControl.value = data.maxTime;
-        dateFormatPresetControl.value = data.dateFormatPreset;
-        timeFormatPresetControl.value = data.timeFormatPreset;
         dateDefaultOptionControl.value = data.defaultOption;
         dateDefaultSpecificDateControl.value = data.defaultSpecificDate;
         dateDefaultSpecificTimeControl.value = data.defaultSpecificTime;
@@ -1024,6 +1019,9 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
           questionInfoText: questionInfoTextControl.value,
           conditional: questionConditionalControl.value,
           isMultipleChoice: isMultipleChoiceControl.value!,
+          isSelectionRequired:
+              isMultipleChoiceControl.value! &&
+              isSelectionRequiredControl.value!,
           // required
           answerOptions: validAnswerOptions,
         );
@@ -1115,10 +1113,6 @@ class QuestionFormViewModel extends ManagedFormViewModel<QuestionFormData>
           maxDate: dateMaxControl.value,
           minTime: dateMinTimeControl.value,
           maxTime: dateMaxTimeControl.value,
-          dateFormatPreset:
-              dateFormatPresetControl.value ?? DateFormatPreset.iso,
-          timeFormatPreset:
-              timeFormatPresetControl.value ?? TimeFormatPreset.h24,
           defaultOption:
               dateDefaultOptionControl.value ?? DefaultDateOption.none,
           defaultSpecificDate: dateDefaultSpecificDateControl.value,

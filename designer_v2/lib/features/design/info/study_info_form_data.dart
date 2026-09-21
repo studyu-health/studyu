@@ -1,20 +1,13 @@
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/design/study_form_data.dart';
 
-class StudyInfoFormData implements IStudyFormData {
-  StudyInfoFormData({
-    required this.title,
-    this.description,
-    required this.contactInfoFormData,
-    required this.iconName,
-  });
-
-  final String title;
-  final String? description;
-  final String iconName;
-  final StudyContactInfoFormData contactInfoFormData;
-
-  factory StudyInfoFormData.fromStudy(Study study) {
+class StudyInfoFormData({
+  required final String title,
+  final String? description,
+  required final StudyContactInfoFormData contactInfoFormData,
+  required final String iconName,
+}) implements IStudyFormData {
+  factory fromStudy(Study study) {
     return StudyInfoFormData(
       title: study.title ?? '',
       description: study.description ?? '',
@@ -41,28 +34,17 @@ class StudyInfoFormData implements IStudyFormData {
   }
 }
 
-class StudyContactInfoFormData implements IStudyFormData {
-  StudyContactInfoFormData({
-    this.organization,
-    this.institutionalReviewBoard,
-    this.institutionalReviewBoardNumber,
-    this.researchers,
-    this.email,
-    this.website,
-    this.phone,
-    this.additionalInfo,
-  });
-
-  final String? organization;
-  final String? institutionalReviewBoard;
-  final String? institutionalReviewBoardNumber;
-  final String? researchers;
-  final String? email;
-  final String? website;
-  final String? phone;
-  final String? additionalInfo;
-
-  factory StudyContactInfoFormData.fromStudy(Study study) {
+class StudyContactInfoFormData({
+  final String? organization,
+  final String? institutionalReviewBoard,
+  final String? institutionalReviewBoardNumber,
+  final String? researchers,
+  final String? email,
+  final String? website,
+  final String? phone,
+  final String? additionalInfo,
+}) implements IStudyFormData {
+  factory fromStudy(Study study) {
     final contact = study.contact;
     return StudyContactInfoFormData(
       organization: contact.organization,

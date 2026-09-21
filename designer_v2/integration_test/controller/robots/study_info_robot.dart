@@ -3,11 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/patrol_finders.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyInfoRobot {
-  const StudyInfoRobot(this.$);
-
-  final PatrolTester $;
-
+class const StudyInfoRobot(final PatrolTester $) {
   Future<void> validateOnStudyInfoScreen() async {
     await $(tr.navlink_study_design).waitUntilVisible();
   }

@@ -5,10 +5,12 @@ import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 
-class DailyRecallEntryViewModel extends ChangeNotifier {
-  final StudySubject? subject;
-  final NutritionTask? task;
-  final CompletionPeriod? completionPeriod;
+class DailyRecallEntryViewModel({
+  final StudySubject? subject,
+  final NutritionTask? task,
+  final CompletionPeriod? completionPeriod,
+  DailyRecall? existingRecall,
+}) extends ChangeNotifier {
   final NutritionRecallAutoSaveManager _autoSaveManager =
       NutritionRecallAutoSaveManager();
 
@@ -23,12 +25,7 @@ class DailyRecallEntryViewModel extends ChangeNotifier {
   String? _periodId;
   bool _isDisposed = false;
 
-  DailyRecallEntryViewModel({
-    this.subject,
-    this.task,
-    this.completionPeriod,
-    DailyRecall? existingRecall,
-  }) {
+  this {
     if (existingRecall != null) {
       recall = existingRecall;
       _studyDaySnapshot = recall.studyDaySnapshot;

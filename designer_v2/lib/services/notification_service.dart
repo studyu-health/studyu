@@ -6,7 +6,7 @@ import 'package:studyu_designer_v2/services/notification_types.dart';
 
 part 'notification_service.g.dart';
 
-abstract class INotificationService {
+abstract class INotificationService() {
   void showMessage(
     String notificationText, {
     List<NotificationAction>? actions,
@@ -25,7 +25,7 @@ abstract class INotificationService {
 ///
 /// Enables notifications to be decoupled from UI widgets so that
 /// they can be dispatched by controllers / blocs & tested independently
-class NotificationService implements INotificationService {
+class NotificationService() implements INotificationService {
   /// A stream controller that exposes a stream of [Notifications]s that
   /// are consumed & dispatched by a [NotificationDispatcher] widget
   final BehaviorSubject<NotificationIntent> _streamController =

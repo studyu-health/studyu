@@ -7,7 +7,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to build and upload, for example studyu_app-v2.13.0'
+        description: >-
+          Release tag to build and upload, for example studyu_app-v2.13.0
         required: true
         type: string
 
@@ -42,17 +43,20 @@ jobs:
 
           echo "TAG=$tag" >> "$GITHUB_ENV"
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          ref: >-
+            ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
       - name: Prepare upload key
         run: |
-          echo "$STUDYU_ANDROID_KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
+          echo "$STUDYU_ANDROID_KEYSTORE_BASE64" \
+            | base64 --decode > app/keystore.jks
           echo "$STUDYU_KEY_PROPERTIES" > key.properties
         working-directory: app/android
         env:
-          STUDYU_ANDROID_KEYSTORE_BASE64: ${{ secrets.STUDYU_ANDROID_KEYSTORE_BASE64 }}
+          STUDYU_ANDROID_KEYSTORE_BASE64: >-
+            ${{ secrets.STUDYU_ANDROID_KEYSTORE_BASE64 }}
           STUDYU_KEY_PROPERTIES: ${{ secrets.STUDYU_KEY_PROPERTIES }}
       - uses: actions/setup-java@v5
         with:
@@ -72,11 +76,13 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists"
           else
-            gh release create "$TAG" --title "$TAG" --target "$(git rev-parse HEAD)"
+            gh release create "$TAG" --title "$TAG" \
+              --target "$(git rev-parse HEAD)"
           fi
       - name: Upload APK Asset
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cp ./app/build/app/outputs/flutter-apk/app-release.apk "studyu-$TAG.apk"
+          apk_path="./app/build/app/outputs/flutter-apk/app-release.apk"
+          cp "$apk_path" "studyu-$TAG.apk"
           gh release upload "$TAG" "studyu-$TAG.apk" --clobber

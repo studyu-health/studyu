@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -197,6 +198,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navlink_logout => 'Sign out';
 
   @override
+  String get date_format => 'Date format';
+
+  @override
+  String get time_format => 'Time format';
+
+  @override
+  String get system => 'System';
+
+  @override
+  String get date_format_iso => 'ISO (2024-12-31)';
+
+  @override
+  String get date_format_european => 'European (31/12/2024)';
+
+  @override
+  String get date_format_us => 'US (12/31/2024)';
+
+  @override
+  String get date_format_german => 'German (31.12.2024)';
+
+  @override
+  String get time_format_12_hour => '12-hour (2:30 PM)';
+
+  @override
+  String get time_format_24_hour => '24-hour (14:30)';
+
+  @override
   String get study_status_draft => 'Draft';
 
   @override
@@ -283,10 +311,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notification_invite_link_copied => 'Invite link copied';
 
   @override
+  String get notification_invitation_copied => 'Invitation copied';
+
+  @override
   String get action_button_new_study => 'New study';
 
   @override
+  String get action_button_retry => 'Retry';
+
+  @override
   String get search => 'Search';
+
+  @override
+  String get navlink_all_studies => 'All Studies';
 
   @override
   String get studies_list_header_title => 'Title';
@@ -316,11 +353,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modify_query => 'Modify your query';
 
   @override
+  String studies_count_total(int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total studies',
+      one: '1 study',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String studies_count_filtered(int visible, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total studies',
+      one: '1 study',
+    );
+    return '$visible of $_temp0';
+  }
+
+  @override
+  String get studies_filter_server_side_unsupported =>
+      'This filter can\'t be used here right now. Clear the filter and try again.';
+
+  @override
   String get studies_empty => 'You don\'t have any studies yet';
 
   @override
   String get studies_empty_description =>
       'Build your own study from scratch or create a new draft copy from an already published study!';
+
+  @override
+  String get studies_empty_public => 'No public studies found';
+
+  @override
+  String get studies_empty_public_description =>
+      'There are no studies in the public registry matching your current filters.';
+
+  @override
+  String get studies_empty_shared => 'No shared studies found';
+
+  @override
+  String get studies_empty_shared_description =>
+      'No studies have been shared with you yet.';
+
+  @override
+  String get studies_end_of_list => 'All studies loaded.';
+
+  @override
+  String get studies_load_failed => 'Couldn\'t load studies. Try again.';
 
   @override
   String get navlink_learn => 'Learn';
@@ -541,6 +624,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dialog_subject_invite_code => 'invite code';
 
   @override
+  String get dialog_delete_invite_code_title => 'Delete invite code?';
+
+  @override
+  String dialog_delete_invite_code_message(Object code) {
+    return 'Anyone with invite code $code will no longer be able to use it.';
+  }
+
+  @override
   String get dialog_subject_fitbit_credentials => 'fitbit credentials';
 
   @override
@@ -592,7 +683,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose the response type that best matches your question and define the response options according to the data you want to collect.';
 
   @override
-  String get question_type_choice => 'Multiple choice';
+  String get question_type_choice => 'Choice';
 
   @override
   String get question_type_free_text => 'Free text';
@@ -659,11 +750,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Maximum recording duration in seconds';
 
   @override
-  String get form_field_response_choice_multiple => 'Select multiple';
+  String get form_field_response_choice_multiple => 'Allow multiple selections';
 
   @override
   String get form_field_response_choice_multiple_tooltip =>
-      'Allow the participant to select multiple response options. Otherwise only a single option can be selected.';
+      'Participants can select more than one answer.';
+
+  @override
+  String get form_field_response_choice_required =>
+      'Require at least one selection';
+
+  @override
+  String get form_field_response_choice_required_tooltip =>
+      'Require the participant to select at least one response option.';
 
   @override
   String get form_array_response_options_choice_new => 'Add option';
@@ -876,13 +975,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The latest date participants can select';
 
   @override
-  String get date_format_preset_label => 'Date format preset';
-
-  @override
-  String get date_format_preset_label_helper =>
-      'Select how dates are displayed to participants';
-
-  @override
   String get date_picker_hint => 'Select a date';
 
   @override
@@ -903,12 +995,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get date_input_type_datetime => 'Date and time';
-
-  @override
-  String get time_format_preset_label => 'Time format';
-
-  @override
-  String get time_format_preset_label_helper => 'Select how time is displayed';
 
   @override
   String get date_default_option_label => 'Default value';
@@ -1535,8 +1621,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'form_array_intervention_tasks_minlength',
-      one:
-          'You must define at least one task for participants to complete during this intervention phase',
+      one: 'You must define at least one task for participants to complete during this intervention phase',
     );
     return '$_temp0';
   }
@@ -1647,8 +1732,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'form_array_measurements_minlength',
-      one:
-          'You need to define at least one survey to determine the effect of your intervention(s).',
+      one: 'You need to define at least one survey to determine the effect of your intervention(s).',
     );
     return '$_temp0';
   }
@@ -1723,8 +1807,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'form_array_measurement_survey_questions_minlength',
-      one:
-          'You need to define at least one question to determine the effect of your intervention(s)',
+      one: 'You need to define at least one question to determine the effect of your intervention(s)',
     );
     return '$_temp0';
   }
@@ -2108,7 +2191,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select intervention...';
 
   @override
-  String get code_list_section_title => 'Invite codes';
+  String get code_list_section_title => 'Invite Codes';
 
   @override
   String get code_public_disabled => 'Public Recruitment';
@@ -2126,6 +2209,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get code_list_header_code => 'Code';
+
+  @override
+  String get code_list_header_actions => 'Actions';
 
   @override
   String get action_button_code_new => 'New code';
@@ -2428,6 +2514,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get action_delete_invite_code => 'Delete invite code';
 
   @override
+  String get action_delete_code => 'Delete code';
+
+  @override
   String get action_remove => 'Remove';
 
   @override
@@ -2453,6 +2542,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get action_copy_link => 'Copy link';
+
+  @override
+  String get action_copy_invitation => 'Copy invitation';
 
   @override
   String get action_reportPrimary => 'Set as primary report';
@@ -2855,6 +2947,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filter_reset_all => 'Clear all';
 
   @override
+  String get code_list_filter_title => 'Filter invite codes';
+
+  @override
+  String get code_list_filter_enrolled_status => 'Enrolled status';
+
+  @override
+  String get code_list_filter_enrolled_min => 'Enrolled min';
+
+  @override
+  String get code_list_filter_enrolled_max => 'Enrolled max';
+
+  @override
+  String get code_list_filter_intervention_assignment =>
+      'Intervention assignment';
+
+  @override
+  String get code_list_filter_apply => 'Apply';
+
+  @override
+  String get code_list_filter_option_all => 'All';
+
+  @override
+  String get code_list_filter_option_unused => 'Unused';
+
+  @override
+  String get code_list_filter_option_used => 'Used';
+
+  @override
+  String code_list_filter_button_active(int count) {
+    return 'Filter ($count)';
+  }
+
+  @override
   String filter_show_studies(int count) {
     return 'Show $count Studies';
   }
@@ -3021,4 +3146,141 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filter_button_main => 'Filter';
+
+  @override
+  String get code_list_no_results_title => 'No matching invite codes';
+
+  @override
+  String get code_list_no_results_description =>
+      'Try changing your search to see more invite codes.';
+
+  @override
+  String get code_list_search_hint => 'Search invite codes';
+
+  @override
+  String get code_list_search_hint_compact => 'Search codes';
+
+  @override
+  String code_list_active_count(int count) {
+    return '$count active invite codes';
+  }
+
+  @override
+  String code_list_total_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invites',
+      one: '1 invite',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get code_list_page_size => 'Rows';
+
+  @override
+  String get code_list_rows_per_page => 'Rows per page:';
+
+  @override
+  String code_list_page(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String code_list_page_range(int start, int end, int count) {
+    return '$start–$end of $count';
+  }
+
+  @override
+  String code_list_page_loading(int start, int end) {
+    return 'Loading $start–$end...';
+  }
+
+  @override
+  String get code_list_page_fetch_error =>
+      'Couldn’t load the next page. Check your connection and try again.';
+
+  @override
+  String get code_list_retry => 'Retry';
+
+  @override
+  String get code_list_previous_page => 'Previous page';
+
+  @override
+  String get code_list_next_page => 'Next page';
+
+  @override
+  String get action_regenerate_invite_code => 'Regenerate invite code';
+
+  @override
+  String get dialog_qr_code_description =>
+      'Share the link or QR code with participants so they can access this study. When participants open the link or scan the QR code with their phone, the StudyU App opens and adds them to the study.';
+
+  @override
+  String get all_studies => 'All Studies';
+
+  @override
+  String get studies_filter_add_filter => 'Add filter';
+
+  @override
+  String get studies_filter_remove_filter => 'Remove filter';
+
+  @override
+  String get studies_end_of_list_create => 'Create a study.';
+
+  @override
+  String get studies_end_of_list_public =>
+      'Didn\'t find what you\'re looking for?';
+
+  @override
+  String get error_qr_code_generation => 'The QR code could not be displayed.';
+
+  @override
+  String get form_field_invite_link => 'Invite link';
+
+  @override
+  String get form_field_invite_link_tooltip =>
+      'Share this link with participants so they can open the StudyU App and join the study.';
+
+  @override
+  String get form_field_invitation_message => 'Invitation message';
+
+  @override
+  String invitation_message_intro(Object title) {
+    return 'You have been invited to participate in the study \"$title\" using StudyU.';
+  }
+
+  @override
+  String get invitation_message_install_app =>
+      '1. Install the StudyU Health app on your phone if needed:';
+
+  @override
+  String invitation_message_android(Object link) {
+    return 'Android: $link';
+  }
+
+  @override
+  String invitation_message_ios(Object link) {
+    return 'iPhone/iPad: $link';
+  }
+
+  @override
+  String get invitation_message_open_link =>
+      '2. Open this invitation link on your phone:';
+
+  @override
+  String get invitation_message_alternative =>
+      'Alternatively, open the StudyU Health app and enter this invitation code:';
+
+  @override
+  String get form_field_report_improvementDirection_hint =>
+      'Select an improvement direction';
+
+  @override
+  String get form_field_report_data_source_hint => 'Select a data source';
+
+  @override
+  String get form_field_report_data_source_empty =>
+      'No scale survey question defined';
 }

@@ -24,12 +24,11 @@ class NutritionTask extends Observation {
   /// Custom meal types if needed (otherwise uses default enum values)
   List<String>? customMealTypes;
 
-  NutritionTask() : super(taskType);
+  new() : super(taskType);
 
-  NutritionTask.withId() : super.withId(taskType);
+  new withId() : super.withId(taskType);
 
-  factory NutritionTask.fromJson(Map<String, dynamic> json) =>
-      _$NutritionTaskFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$NutritionTaskFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$NutritionTaskToJson(this);

@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:studyu_app/util/template_storage_manager.dart';
 import 'package:studyu_core/core.dart';
 
-enum TemplateFilter { all, meals, foods, recipes }
+enum TemplateFilter() {
+  all,
+  meals,
+  foods,
+  recipes,
+}
 
-class TemplateViewModel extends ChangeNotifier {
+class TemplateViewModel({required final String userId}) extends ChangeNotifier {
   final TemplateStorageManager _storageManager = TemplateStorageManager();
-  final String userId;
-
   List<SavedMealTemplate> _mealTemplates = [];
   List<SavedFoodTemplate> _foodTemplates = [];
 
@@ -16,7 +19,7 @@ class TemplateViewModel extends ChangeNotifier {
   TemplateFilter _currentFilter = TemplateFilter.all;
   String _searchQuery = '';
 
-  TemplateViewModel({required this.userId}) {
+  this {
     loadAllTemplates();
   }
 

@@ -21,7 +21,7 @@ class MealLog {
   String? templateId;
   List<FoodEntry> foods;
 
-  MealLog({
+  new({
     required this.id,
     required this.mealType,
     this.customMealLabel,
@@ -37,7 +37,7 @@ class MealLog {
     required this.foods,
   });
 
-  MealLog.withId({
+  new withId({
     required this.mealType,
     this.customMealLabel,
     required this.mealContext,
@@ -52,8 +52,7 @@ class MealLog {
     required this.foods,
   }) : id = const Uuid().v4();
 
-  factory MealLog.fromJson(Map<String, dynamic> json) =>
-      _$MealLogFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$MealLogFromJson(json);
 
   Map<String, dynamic> toJson() => _$MealLogToJson(this);
 

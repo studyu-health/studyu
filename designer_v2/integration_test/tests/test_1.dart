@@ -6,8 +6,8 @@ import '../mockup/mockup_studies.dart';
 import '../test_log.dart';
 import 'study_base_test.dart';
 
-class Test1 extends StudyBaseTest {
-  Test1.go(PatrolTester $) : super.go($, MockupStudies.study1);
+class Test1.go(PatrolTester $) extends StudyBaseTest {
+  this : super.go($, MockupStudies.study1);
 
   @override
   Future<void> execute(String email, String password) async {

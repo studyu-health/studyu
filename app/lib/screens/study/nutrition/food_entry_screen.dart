@@ -8,15 +8,14 @@ import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_core/core.dart';
 
-class FoodEntryScreen extends StatefulWidget {
-  final FoodEntry? existingFood;
+class const FoodEntryScreen({
+  final FoodEntry? existingFood,
 
   /// Confidence score from AI analysis (0.0 to 1.0).
   /// If provided, shows a banner indicating AI-estimated values.
-  final double? confidenceScore;
-
-  const FoodEntryScreen({this.existingFood, this.confidenceScore, super.key});
-
+  final double? confidenceScore,
+  super.key,
+}) extends StatefulWidget {
   static MaterialPageRoute<FoodEntry> route({
     FoodEntry? existingFood,
     double? confidenceScore,
@@ -31,7 +30,7 @@ class FoodEntryScreen extends StatefulWidget {
   State<FoodEntryScreen> createState() => _FoodEntryScreenState();
 }
 
-class _FoodEntryScreenState extends State<FoodEntryScreen> {
+class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _brandController;
@@ -262,9 +261,8 @@ class _FoodEntryScreenState extends State<FoodEntryScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.enter_food_name)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.enter_food_name)));
       return;
     }
 
@@ -292,9 +290,8 @@ class _FoodEntryScreenState extends State<FoodEntryScreen> {
         tags: result.tags,
       );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.template_saved)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
       }
     }
   }
@@ -416,19 +413,12 @@ class _FoodEntryScreenState extends State<FoodEntryScreen> {
 // ============================================================
 
 /// Banner displayed when food entry data comes from AI analysis.
-class _AiEstimationBanner extends StatelessWidget {
-  final double confidenceScore;
-  final bool isLowConfidence;
-  final AppLocalizations l10n;
-  final ThemeData theme;
-
-  const _AiEstimationBanner({
-    required this.confidenceScore,
-    required this.isLowConfidence,
-    required this.l10n,
-    required this.theme,
-  });
-
+class const _AiEstimationBanner({
+  required final double confidenceScore,
+  required final bool isLowConfidence,
+  required final AppLocalizations l10n,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -489,31 +479,18 @@ class _AiEstimationBanner extends StatelessWidget {
   }
 }
 
-class _EssentialFieldsCard extends StatelessWidget {
-  final TextEditingController nameController;
-  final TextEditingController amountController;
-  final TextEditingController unitController;
-  final TextEditingController energyController;
-  final TextEditingController proteinController;
-  final TextEditingController carbsController;
-  final TextEditingController fatController;
-  final AppLocalizations l10n;
-  final ThemeData theme;
-  final bool isEditing;
-
-  const _EssentialFieldsCard({
-    required this.nameController,
-    required this.amountController,
-    required this.unitController,
-    required this.energyController,
-    required this.proteinController,
-    required this.carbsController,
-    required this.fatController,
-    required this.l10n,
-    required this.theme,
-    required this.isEditing,
-  });
-
+class const _EssentialFieldsCard({
+  required final TextEditingController nameController,
+  required final TextEditingController amountController,
+  required final TextEditingController unitController,
+  required final TextEditingController energyController,
+  required final TextEditingController proteinController,
+  required final TextEditingController carbsController,
+  required final TextEditingController fatController,
+  required final AppLocalizations l10n,
+  required final ThemeData theme,
+  required final bool isEditing,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -745,26 +722,18 @@ class _EssentialFieldsCard extends StatelessWidget {
   }
 }
 
-class _DetailedNutritionCard extends StatefulWidget {
-  final TextEditingController fiberController;
-  final TextEditingController sugarsController;
-  final TextEditingController saturatedFatController;
-  final TextEditingController sodiumController;
-  final AppLocalizations l10n;
-
-  const _DetailedNutritionCard({
-    required this.fiberController,
-    required this.sugarsController,
-    required this.saturatedFatController,
-    required this.sodiumController,
-    required this.l10n,
-  });
-
+class const _DetailedNutritionCard({
+  required final TextEditingController fiberController,
+  required final TextEditingController sugarsController,
+  required final TextEditingController saturatedFatController,
+  required final TextEditingController sodiumController,
+  required final AppLocalizations l10n,
+}) extends StatefulWidget {
   @override
   State<_DetailedNutritionCard> createState() => _DetailedNutritionCardState();
 }
 
-class _DetailedNutritionCardState extends State<_DetailedNutritionCard> {
+class _DetailedNutritionCardState() extends State<_DetailedNutritionCard> {
   bool _isExpanded = false;
 
   @override
@@ -933,42 +902,26 @@ class _DetailedNutritionCardState extends State<_DetailedNutritionCard> {
   }
 }
 
-class _AdvancedOptionsCard extends StatefulWidget {
-  final FoodEntryType entryType;
-  final TextEditingController brandController;
-  final TextEditingController descriptionController;
-  final TextEditingController servingSizeController;
-  final TextEditingController portionReferenceController;
-  final PortionEstimationMethod portionMethod;
-  final PortionState portionState;
-  final TextEditingController yieldFactorController;
-  final TextEditingController ediblePortionController;
-  final AppLocalizations l10n;
-  final ValueChanged<FoodEntryType?> onEntryTypeChanged;
-  final ValueChanged<PortionEstimationMethod?> onPortionMethodChanged;
-  final ValueChanged<PortionState?> onPortionStateChanged;
-
-  const _AdvancedOptionsCard({
-    required this.entryType,
-    required this.brandController,
-    required this.descriptionController,
-    required this.servingSizeController,
-    required this.portionReferenceController,
-    required this.portionMethod,
-    required this.portionState,
-    required this.yieldFactorController,
-    required this.ediblePortionController,
-    required this.l10n,
-    required this.onEntryTypeChanged,
-    required this.onPortionMethodChanged,
-    required this.onPortionStateChanged,
-  });
-
+class const _AdvancedOptionsCard({
+  required final FoodEntryType entryType,
+  required final TextEditingController brandController,
+  required final TextEditingController descriptionController,
+  required final TextEditingController servingSizeController,
+  required final TextEditingController portionReferenceController,
+  required final PortionEstimationMethod portionMethod,
+  required final PortionState portionState,
+  required final TextEditingController yieldFactorController,
+  required final TextEditingController ediblePortionController,
+  required final AppLocalizations l10n,
+  required final ValueChanged<FoodEntryType?> onEntryTypeChanged,
+  required final ValueChanged<PortionEstimationMethod?> onPortionMethodChanged,
+  required final ValueChanged<PortionState?> onPortionStateChanged,
+}) extends StatefulWidget {
   @override
   State<_AdvancedOptionsCard> createState() => _AdvancedOptionsCardState();
 }
 
-class _AdvancedOptionsCardState extends State<_AdvancedOptionsCard> {
+class _AdvancedOptionsCardState() extends State<_AdvancedOptionsCard> {
   bool _isExpanded = false;
 
   @override

@@ -1,9 +1,9 @@
-class Config {
+class Config() {
   static const isDebugMode = false;
 
   static const defaultLocale = {'en', 'US'};
 
-  static const supportedLocales = {'en': 'US', 'de': 'DE'};
+  static const supportedLocales = {'en': 'US', 'de': 'DE', 'ko': 'KR'};
 
   /// Default id for new studies that haven't been saved yet
   static const newStudyId = 'new';

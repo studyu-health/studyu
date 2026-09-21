@@ -3,32 +3,25 @@ import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/localization/string_hardcoded.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
-abstract class ResultTypes {}
+abstract class ResultTypes();
 
-class MeasurementResultTypes extends ResultTypes {
+class MeasurementResultTypes() extends ResultTypes {
   static const String questionnaire = 'QuestionnaireState';
   static const String nutrition = 'DailyRecall';
   static List<String> get values => [questionnaire, nutrition];
 }
 
-class InterventionResultTypes extends ResultTypes {
+class InterventionResultTypes() extends ResultTypes {
   static const String checkmarkTask = 'bool';
   static List<String> get values => [checkmarkTask];
 }
 
-class StudyExportData {
-  StudyExportData({
-    required this.study,
-    required this.measurementsData,
-    required this.interventionsData,
-    required this.mediaData,
-  });
-
-  final Study study;
-  final List<Map<String, dynamic>> measurementsData;
-  final List<Map<String, dynamic>> interventionsData;
-  final List<String> mediaData;
-
+class StudyExportData({
+  required final Study study,
+  required final List<Map<String, dynamic>> measurementsData,
+  required final List<Map<String, dynamic>> interventionsData,
+  required final List<String> mediaData,
+}) {
   bool get isEmpty => measurementsData.isEmpty && interventionsData.isEmpty;
 }
 

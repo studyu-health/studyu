@@ -31,10 +31,8 @@ void markTestStep(
     'stepLog': testStepLog,
   };
 
-  // ignore: avoid_print
   print('[${entry['timestamp']}] [$status] $step (+${elapsedMs}ms)');
   if (error != null) {
-    // ignore: avoid_print
     print('[${entry['timestamp']}] [error] $error');
   }
 }

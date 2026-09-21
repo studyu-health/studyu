@@ -5,7 +5,7 @@ import 'package:studyu_core/src/models/data/dhq3_choices.dart';
 /// 14 named DHQ3 surveys – each is a separate entity with a meaningful title.
 /// Order defines scheduling: survey 1 = day 1, etc.
 /// Skip logic: frequency/portion only when item is selected (checklists) or when frequency != NEVER.
-class Dhq3Questions {
+class Dhq3Questions() {
   static const int surveyCount = 14;
 
   /// Ordered list of survey titles (day 1 = index 0, etc.). Balanced cluster sizes (~16–34 questions each).
@@ -494,8 +494,7 @@ class Dhq3Questions {
             id: 'sugar',
           ),
           Choice.withText(
-            text:
-                'Cream, milk (including soy, rice, almond, and coconut), or non-dairy creamer',
+            text: 'Cream, milk (including soy, rice, almond, and coconut), or non-dairy creamer',
             id: 'cream',
           ),
         ],
@@ -3673,8 +3672,7 @@ class Dhq3Questions {
     // Individual supplements with dosage and years
     final suppList = [
       {
-        'name':
-            'eye health supplement (such as Ocuvite, PreserVision, ICaps, or others)',
+        'name': 'eye health supplement (such as Ocuvite, PreserVision, ICaps, or others)',
         'id': 'eye',
       },
       {'name': 'B-complex vitamins', 'id': 'bcomplex'},

@@ -22,17 +22,16 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class MeasurementSurveyFormView extends ConsumerStatefulWidget {
-  const MeasurementSurveyFormView({required this.formViewModel, super.key});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const MeasurementSurveyFormView({
+  required final MeasurementSurveyFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<MeasurementSurveyFormView> createState() =>
       _MeasurementSurveyFormViewState();
 }
 
-class _MeasurementSurveyFormViewState
+class _MeasurementSurveyFormViewState()
     extends ConsumerState<MeasurementSurveyFormView> {
   bool isStylingInformationDismissed = true;
 
@@ -210,12 +209,12 @@ class _MeasurementSurveyFormViewState
                           message: viewModel.questionType.string,
                           child: Icon(
                             viewModel.questionType.icon,
-                            color: ThemeConfig.dropdownMenuItemTheme(
-                              theme,
-                            ).iconTheme!.color,
-                            size: ThemeConfig.dropdownMenuItemTheme(
-                              theme,
-                            ).iconTheme!.size,
+                            color: ThemeConfig.dropdownMenuItemTheme(theme)
+                                .iconTheme!
+                                .color,
+                            size: ThemeConfig.dropdownMenuItemTheme(theme)
+                                .iconTheme!
+                                .size,
                           ),
                         ),
                         const SizedBox(width: 16.0),
@@ -392,11 +391,9 @@ class _MeasurementSurveyFormViewState
 // Schedule Rule Editor Widget
 // =============================================================================
 
-class _ScheduleRuleEditor extends StatelessWidget {
-  const _ScheduleRuleEditor({required this.formViewModel});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const _ScheduleRuleEditor({
+  required final MeasurementSurveyFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -505,11 +502,9 @@ class _ScheduleRuleEditor extends StatelessWidget {
 // Schedule Type Selector (Segmented Button)
 // =============================================================================
 
-class _ScheduleTypeSelector extends StatelessWidget {
-  const _ScheduleTypeSelector({required this.formViewModel});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const _ScheduleTypeSelector({
+  required final MeasurementSurveyFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -560,11 +555,9 @@ class _ScheduleTypeSelector extends StatelessWidget {
 // Type-specific Controls
 // =============================================================================
 
-class _ScheduleTypeControls extends StatelessWidget {
-  const _ScheduleTypeControls({required this.formViewModel});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const _ScheduleTypeControls({
+  required final MeasurementSurveyFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ReactiveFormConsumer(
@@ -584,11 +577,9 @@ class _ScheduleTypeControls extends StatelessWidget {
 
 // --- Specific Days: Multi-select chip grid ---
 
-class _SpecificDaysEditor extends StatelessWidget {
-  const _SpecificDaysEditor({required this.formViewModel});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const _SpecificDaysEditor({
+  required final MeasurementSurveyFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -652,11 +643,9 @@ class _SpecificDaysEditor extends StatelessWidget {
 
 // --- Every N Days ---
 
-class _EveryNDaysEditor extends StatelessWidget {
-  const _EveryNDaysEditor({required this.formViewModel});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const _EveryNDaysEditor({
+  required final MeasurementSurveyFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -747,11 +736,9 @@ class _EveryNDaysEditor extends StatelessWidget {
 
 // --- Per Cycle ---
 
-class _PerCycleEditor extends StatelessWidget {
-  const _PerCycleEditor({required this.formViewModel});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const _PerCycleEditor({
+  required final MeasurementSurveyFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -893,11 +880,9 @@ class _PerCycleEditor extends StatelessWidget {
 // Schedule Preview
 // =============================================================================
 
-class _SchedulePreview extends StatelessWidget {
-  const _SchedulePreview({required this.formViewModel});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const _SchedulePreview({
+  required final MeasurementSurveyFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

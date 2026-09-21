@@ -22,25 +22,39 @@ import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DashboardScreen extends StatefulWidget {
-  final String? error;
+@visibleForTesting
+bool isDashboardShowcaseEligible({
+  required DateTime? startedAt,
+  required DateTime now,
+  required bool isPreview,
+  required bool checkStarted,
+}) {
+  return !checkStarted &&
+      !isPreview &&
+      startedAt != null &&
+      !startedAt.isAfter(now);
+}
 
-  const DashboardScreen({super.key, this.error});
+@visibleForTesting
+bool shouldMarkDashboardShowcaseCompleted({required bool wasStarted}) {
+  return wasStarted;
+}
 
+class const DashboardScreen({super.key, final String? error})
+    extends StatefulWidget {
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class OverflowMenuItem {
-  final String name;
-  final IconData icon;
-  final String? routeName;
-  final Future<void> Function()? onTap;
+class OverflowMenuItem(
+  final String name,
+  final IconData icon, {
+  final String? routeName,
+  final Future<void> Function()? onTap,
+});
 
-  OverflowMenuItem(this.name, this.icon, {this.routeName, this.onTap});
-}
-
-class _DashboardScreenState extends State<DashboardScreen>
+class _DashboardScreenState()
+    extends State<DashboardScreen>
     with WidgetsBindingObserver {
   final GlobalKey _progressShowcaseKey = GlobalKey();
   final GlobalKey _currentInterventionShowcaseKey = GlobalKey();
@@ -58,6 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _hasCheckedPendingRecalls = false;
   String? _lastSubjectId;
   bool _showcaseCheckStarted = false;
+  bool _dashboardShowcaseStarted = false;
   bool _redirectingToLoading = false;
   bool _isDisposing = false;
 
@@ -120,8 +135,8 @@ class _DashboardScreenState extends State<DashboardScreen>
       globalTooltipActions: [
         TooltipActionButton(
           type: TooltipDefaultActionType.skip,
-          backgroundColor: app_theme.theme.colorScheme.primary,
-          textStyle: showcaseActionTextStyle,
+          backgroundColor: Colors.transparent,
+          textStyle: TextStyle(color: app_theme.theme.colorScheme.primary),
           hideActionWidgetForShowcase: [_menuShowcaseKey],
         ),
         TooltipActionButton(
@@ -144,8 +159,9 @@ class _DashboardScreenState extends State<DashboardScreen>
           setState(() {
             scheduleToday = subject!.scheduleFor(DateTime.now());
           });
-          _submitPendingNutritionRecalls();
+          unawaited(_submitPendingNutritionRecalls());
           _scheduleMidnightSubmitTimer();
+          unawaited(_startDashboardShowcaseIfNeeded());
         }
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
@@ -180,12 +196,13 @@ class _DashboardScreenState extends State<DashboardScreen>
 
       if (widget.error != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(widget.error!)));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(widget.error!)));
         });
       }
-      unawaited(_startDashboardShowcaseIfNeeded());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_startDashboardShowcaseIfNeeded());
+      });
     }
   }
 
@@ -201,10 +218,10 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     if (subject == null) {
-      if (!_redirectingToLoading) {
+      if (ModalRoute.of(context)?.isCurrent == true && !_redirectingToLoading) {
         _redirectingToLoading = true;
         SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
+          if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
           context.go('/${RouteNames.loading}');
         });
       }
@@ -264,8 +281,8 @@ class _DashboardScreenState extends State<DashboardScreen>
             tooltipActions: [
               TooltipActionButton(
                 type: TooltipDefaultActionType.skip,
-                backgroundColor: theme.colorScheme.primary,
-                textStyle: showcaseActionTextStyle,
+                backgroundColor: Colors.transparent,
+                textStyle: TextStyle(color: theme.colorScheme.primary),
               ),
               TooltipActionButton(
                 type: TooltipDefaultActionType.next,
@@ -460,6 +477,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     });
                     await _submitPendingNutritionRecalls();
                     _scheduleMidnightSubmitTimer();
+                    unawaited(_startDashboardShowcaseIfNeeded());
                   } on SocketException catch (_) {}
                 },
                 label: Text(AppLocalizations.of(context)!.next_day),
@@ -503,22 +521,48 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (subject!.completedStudy) {
       return const StudyFinishedPlaceholder();
     } else if (subject!.startedAt!.isAfter(DateTime.now())) {
+      final l10n = AppLocalizations.of(context)!;
       final theme = Theme.of(context);
       return Center(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(32, 32, 32, 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.study_not_started,
-                style: TextStyle(
-                  fontSize: 20,
-                  color: theme.primaryColor,
-                  fontWeight: FontWeight.bold,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.flag_outlined,
+                    size: 26,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  l10n.study_not_started_title,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  l10n.study_not_started_description,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -535,11 +579,19 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Future<void> _startDashboardShowcaseIfNeeded() async {
-    if (_showcaseCheckStarted || context.read<AppState>().isPreview) return;
+    if (!isDashboardShowcaseEligible(
+      startedAt: subject?.startedAt,
+      now: DateTime.now(),
+      isPreview: context.read<AppState>().isPreview,
+      checkStarted: _showcaseCheckStarted,
+    )) {
+      return;
+    }
+
     _showcaseCheckStarted = true;
 
     final completed = await DashboardShowcaseStorage.isCompleted();
-    if (completed || !mounted || subject == null) return;
+    if (completed || !mounted) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -551,6 +603,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         _reportShowcaseKey,
         _menuShowcaseKey,
       ], delay: const Duration(milliseconds: 300));
+      _dashboardShowcaseStarted = true;
     });
   }
 
@@ -560,15 +613,18 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _markDashboardShowcaseCompleted() {
-    if (_isDisposing) return;
+    if (_isDisposing ||
+        !shouldMarkDashboardShowcaseCompleted(
+          wasStarted: _dashboardShowcaseStarted,
+        )) {
+      return;
+    }
     unawaited(DashboardShowcaseStorage.markCompleted());
   }
 }
 
-class StudyFinishedPlaceholder extends StatelessWidget {
+class const StudyFinishedPlaceholder({super.key}) extends StatelessWidget {
   static const space = SizedBox(height: 80);
-
-  const StudyFinishedPlaceholder({super.key});
 
   @override
   Widget build(BuildContext context) {

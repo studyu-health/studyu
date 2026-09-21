@@ -4,30 +4,18 @@ import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/fil
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/filter_operator_dropdown.dart';
 import 'package:studyu_designer_v2/localization/app_localizations.dart';
 
-class EnumFilter<T> extends StatelessWidget {
-  final String title;
-  final List<T> values;
-  final T? selected;
-  final FilterOperator op;
-  final ValueChanged<T?> onChanged;
-  final ValueChanged<FilterOperator> onOpChanged;
-  final bool isExpanded;
-  final ValueChanged<bool> onExpansionChanged;
-  final String Function(T)? getValueLabel;
-
-  const EnumFilter({
-    required this.title,
-    required this.values,
-    required this.selected,
-    required this.op,
-    required this.onChanged,
-    required this.onOpChanged,
-    required this.isExpanded,
-    required this.onExpansionChanged,
-    this.getValueLabel,
-    super.key,
-  });
-
+class const EnumFilter<T>({
+  required final String title,
+  required final List<T> values,
+  required final T? selected,
+  required final FilterOperator op,
+  required final ValueChanged<T?> onChanged,
+  required final ValueChanged<FilterOperator> onOpChanged,
+  required final bool isExpanded,
+  required final ValueChanged<bool> onExpansionChanged,
+  final String Function(T)? getValueLabel,
+  super.key,
+}) extends StatelessWidget {
   String _getSelectLabel(BuildContext context, FilterOperator op) {
     switch (op) {
       case FilterOperator.equals:

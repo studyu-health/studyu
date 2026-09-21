@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 
-class SaveTemplateResult {
-  final String name;
-  final List<String> tags;
+class SaveTemplateResult({
+  required final String name,
+  required final List<String> tags,
+});
 
-  SaveTemplateResult({required this.name, required this.tags});
+enum TemplateType() {
+  meal,
+  food,
+  recipe,
 }
 
-enum TemplateType { meal, food, recipe }
-
-class SaveTemplateDialog extends StatefulWidget {
-  final String initialName;
-  final TemplateType templateType;
-
-  const SaveTemplateDialog({
-    required this.initialName,
-    required this.templateType,
-    super.key,
-  });
-
+class const SaveTemplateDialog({
+  required final String initialName,
+  required final TemplateType templateType,
+  super.key,
+}) extends StatefulWidget {
   static Future<SaveTemplateResult?> show(
     BuildContext context, {
     required String initialName,
@@ -38,7 +35,7 @@ class SaveTemplateDialog extends StatefulWidget {
   State<SaveTemplateDialog> createState() => _SaveTemplateDialogState();
 }
 
-class _SaveTemplateDialogState extends State<SaveTemplateDialog> {
+class _SaveTemplateDialogState() extends State<SaveTemplateDialog> {
   late TextEditingController _nameController;
   late TextEditingController _tagsController;
 

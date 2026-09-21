@@ -58,7 +58,7 @@ final class StudyControllerProvider
   }
 }
 
-String _$studyControllerHash() => r'80a8da6f39804b0e16aa06b653eb2dffaa05d89d';
+String _$studyControllerHash() => r'82a17ea3572d46aa96ef53bb39c06588a8926bc2';
 
 final class StudyControllerFamily extends $Family
     with

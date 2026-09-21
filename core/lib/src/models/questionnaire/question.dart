@@ -17,30 +17,32 @@ abstract class Question<V> {
   static const String keyConditional = 'conditional';
   QuestionConditional<V>? conditional;
 
-  Question(this.type);
+  new(this.type);
 
-  Question.withId(this.type) : id = const Uuid().v4();
+  new withId(this.type) : id = const Uuid().v4();
 
-  factory Question.fromJson(Map<String, dynamic> data) =>
-      switch (data[keyType]) {
-            BooleanQuestion.questionType => BooleanQuestion.fromJson(data),
-            ChoiceQuestion.questionType => ChoiceQuestion.fromJson(data),
-            ScaleQuestion.questionType => ScaleQuestion.fromJson(data),
-            AnnotatedScaleQuestion.questionType =>
-              AnnotatedScaleQuestion.fromJson(data),
-            VisualAnalogueQuestion.questionType =>
-              VisualAnalogueQuestion.fromJson(data),
-            ImageCapturingQuestion.questionType =>
-              ImageCapturingQuestion.fromJson(data),
-            AudioRecordingQuestion.questionType =>
-              AudioRecordingQuestion.fromJson(data),
-            DateQuestion.questionType => DateQuestion.fromJson(data),
-            FreeTextQuestion.questionType => FreeTextQuestion.fromJson(data),
-            FitbitQuestion.questionType => FitbitQuestion.fromJson(data),
-            PainQuestion.questionType => PainQuestion.fromJson(data),
-            _ => throw UnknownJsonTypeError(data[keyType]),
-          }
-          as Question<V>;
+  factory fromJson(Map<String, dynamic> data) => switch (data[keyType]) {
+    BooleanQuestion.questionType => BooleanQuestion.fromJson(data),
+    ChoiceQuestion.questionType => ChoiceQuestion.fromJson(data),
+    ScaleQuestion.questionType => ScaleQuestion.fromJson(data),
+    AnnotatedScaleQuestion.questionType => AnnotatedScaleQuestion.fromJson(
+      data,
+    ),
+    VisualAnalogueQuestion.questionType => VisualAnalogueQuestion.fromJson(
+      data,
+    ),
+    ImageCapturingQuestion.questionType => ImageCapturingQuestion.fromJson(
+      data,
+    ),
+    AudioRecordingQuestion.questionType => AudioRecordingQuestion.fromJson(
+      data,
+    ),
+    DateQuestion.questionType => DateQuestion.fromJson(data),
+    FreeTextQuestion.questionType => FreeTextQuestion.fromJson(data),
+    FitbitQuestion.questionType => FitbitQuestion.fromJson(data),
+    PainQuestion.questionType => PainQuestion.fromJson(data),
+    _ => throw UnknownJsonTypeError(data[keyType]),
+  } as Question<V>;
 
   Map<String, dynamic> toJson();
 

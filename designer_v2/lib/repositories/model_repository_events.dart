@@ -1,23 +1,11 @@
 import 'package:studyu_designer_v2/repositories/model_repository.dart';
 
-abstract class ModelEvent<T> {
-  const ModelEvent(this.modelId, this.model);
-  final ModelID modelId;
-  final T model;
-}
+abstract class const ModelEvent<T>(final ModelID modelId, final T model);
 
-class IsFetched<T> extends ModelEvent<T> {
-  const IsFetched(super.modelId, super.model);
-}
+class const IsFetched<T>(super.modelId, super.model) extends ModelEvent<T>;
 
-class IsSaving<T> extends ModelEvent<T> {
-  const IsSaving(super.modelId, super.model);
-}
+class const IsSaving<T>(super.modelId, super.model) extends ModelEvent<T>;
 
-class IsSaved<T> extends ModelEvent<T> {
-  const IsSaved(super.modelId, super.model);
-}
+class const IsSaved<T>(super.modelId, super.model) extends ModelEvent<T>;
 
-class IsDeleted<T> extends ModelEvent<T> {
-  const IsDeleted(super.modelId, super.model);
-}
+class const IsDeleted<T>(super.modelId, super.model) extends ModelEvent<T>;

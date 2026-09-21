@@ -4,20 +4,13 @@ part 'usda_models.g.dart';
 
 /// USDA Search Response Model
 @JsonSerializable()
-class UsdaSearchResponse {
-  final int totalHits;
-  final int currentPage;
-  final int totalPages;
-  final List<UsdaFoodItem> foods;
-
-  UsdaSearchResponse({
-    required this.totalHits,
-    required this.currentPage,
-    required this.totalPages,
-    required this.foods,
-  });
-
-  factory UsdaSearchResponse.fromJson(Map<String, dynamic> json) =>
+class UsdaSearchResponse({
+  required final int totalHits,
+  required final int currentPage,
+  required final int totalPages,
+  required final List<UsdaFoodItem> foods,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
       _$UsdaSearchResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$UsdaSearchResponseToJson(this);
@@ -25,37 +18,22 @@ class UsdaSearchResponse {
 
 /// USDA Food Item Model
 @JsonSerializable()
-class UsdaFoodItem {
-  final int fdcId;
-  final String? description;
-  final String? dataType; // Foundation, SR Legacy, etc.
-  final String? brandOwner;
-  final String? brandName;
-  final String? gtinUpc;
-  final String? ingredients;
-  final double? servingSize;
-  final String? servingSizeUnit;
-  final String? householdServingFullText;
-  final List<UsdaFoodNutrient> foodNutrients;
-  final List<UsdaFoodPortion>? foodPortions;
-
-  UsdaFoodItem({
-    required this.fdcId,
-    this.description,
-    this.dataType,
-    this.brandOwner,
-    this.brandName,
-    this.gtinUpc,
-    this.ingredients,
-    this.servingSize,
-    this.servingSizeUnit,
-    this.householdServingFullText,
-    required this.foodNutrients,
-    this.foodPortions,
-  });
-
-  factory UsdaFoodItem.fromJson(Map<String, dynamic> json) =>
-      _$UsdaFoodItemFromJson(json);
+class UsdaFoodItem({
+  required final int fdcId,
+  final String? description,
+  final String? dataType,
+  final String? brandOwner,
+  final String? brandName,
+  final String? gtinUpc,
+  final String? ingredients,
+  final double? servingSize,
+  final String? servingSizeUnit,
+  final String? householdServingFullText,
+  required final List<UsdaFoodNutrient> foodNutrients,
+  final List<UsdaFoodPortion>? foodPortions,
+}) {
+  // Foundation, SR Legacy, etc.
+  factory fromJson(Map<String, dynamic> json) => _$UsdaFoodItemFromJson(json);
 
   Map<String, dynamic> toJson() => _$UsdaFoodItemToJson(this);
 
@@ -112,26 +90,16 @@ class UsdaFoodItem {
 
 /// USDA Food Nutrient Model
 @JsonSerializable()
-class UsdaFoodNutrient {
-  final int nutrientId;
-  final String? nutrientName;
-  final String? nutrientNumber;
-  final String? unitName;
-  final double? value;
-  final int? derivationId;
-  final String? derivationDescription;
-
-  UsdaFoodNutrient({
-    required this.nutrientId,
-    this.nutrientName,
-    this.nutrientNumber,
-    this.unitName,
-    this.value,
-    this.derivationId,
-    this.derivationDescription,
-  });
-
-  factory UsdaFoodNutrient.fromJson(Map<String, dynamic> json) =>
+class UsdaFoodNutrient({
+  required final int nutrientId,
+  final String? nutrientName,
+  final String? nutrientNumber,
+  final String? unitName,
+  final double? value,
+  final int? derivationId,
+  final String? derivationDescription,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
       _$UsdaFoodNutrientFromJson(json);
 
   Map<String, dynamic> toJson() => _$UsdaFoodNutrientToJson(this);
@@ -139,22 +107,14 @@ class UsdaFoodNutrient {
 
 /// USDA Food Portion Model
 @JsonSerializable()
-class UsdaFoodPortion {
-  final int id;
-  final double amount;
-  final String? measureUnit;
-  final String? portionDescription;
-  final String? modifier;
-
-  UsdaFoodPortion({
-    required this.id,
-    required this.amount,
-    this.measureUnit,
-    this.portionDescription,
-    this.modifier,
-  });
-
-  factory UsdaFoodPortion.fromJson(Map<String, dynamic> json) =>
+class UsdaFoodPortion({
+  required final int id,
+  required final double amount,
+  final String? measureUnit,
+  final String? portionDescription,
+  final String? modifier,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
       _$UsdaFoodPortionFromJson(json);
 
   Map<String, dynamic> toJson() => _$UsdaFoodPortionToJson(this);

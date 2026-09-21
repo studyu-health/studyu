@@ -6,29 +6,23 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:uuid/uuid.dart';
 
-class InterventionTaskFormData extends IFormDataWithSchedule {
+class InterventionTaskFormData({
+  required final TaskID taskId,
+  required final String taskTitle,
+  final String? taskDescription,
+  required super.isTimeLocked,
+  super.timeLockStart,
+  super.timeLockEnd,
+  required super.hasReminder,
+  super.reminderTime,
+  required super.instanceId,
+}) extends IFormDataWithSchedule {
   static String get kDefaultTitle => tr.form_field_intervention_task_default;
-
-  InterventionTaskFormData({
-    required this.taskId,
-    required this.taskTitle,
-    this.taskDescription,
-    required super.isTimeLocked,
-    super.timeLockStart,
-    super.timeLockEnd,
-    required super.hasReminder,
-    super.reminderTime,
-    required super.instanceId,
-  });
-
-  final TaskID taskId;
-  final String taskTitle;
-  final String? taskDescription;
 
   @override
   String get id => taskId;
 
-  factory InterventionTaskFormData.fromDomainModel(CheckmarkTask task) {
+  factory fromDomainModel(CheckmarkTask task) {
     return InterventionTaskFormData(
       taskId: task.id,
       taskTitle: task.title ?? '',

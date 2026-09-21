@@ -8,33 +8,28 @@ import 'package:studyu_app/services/photo_gallery_service.dart';
 
 /// A section that displays photos from the device gallery
 /// taken around the specified meal time to help with recall.
-class PhotoRecallSection extends StatefulWidget {
-  /// Creates a new [PhotoRecallSection].
-  const PhotoRecallSection({
-    required this.mealTime,
-    this.onPhotoTap,
-    this.onAnalyzePhoto,
-    this.analyzingPhotoId,
-    super.key,
-  });
-
+class const PhotoRecallSection({
   /// The meal time to search for photos around.
-  final DateTime mealTime;
+  required final DateTime mealTime,
 
   /// Callback when a photo is tapped.
-  final ValueChanged<PhotoReference>? onPhotoTap;
+  final ValueChanged<PhotoReference>? onPhotoTap,
 
   /// Callback when the analyze button is tapped on a photo.
-  final ValueChanged<PhotoReference>? onAnalyzePhoto;
+  final ValueChanged<PhotoReference>? onAnalyzePhoto,
 
   /// ID of the photo currently being analyzed (for loading state).
-  final String? analyzingPhotoId;
+  final String? analyzingPhotoId,
+  super.key,
+}) extends StatefulWidget {
+  /// Creates a new [PhotoRecallSection].
+  this;
 
   @override
   State<PhotoRecallSection> createState() => _PhotoRecallSectionState();
 }
 
-class _PhotoRecallSectionState extends State<PhotoRecallSection> {
+class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
   final PhotoGalleryService _photoService = PhotoGalleryService();
   List<PhotoReference>? _photos;
   bool _isLoading = false;
@@ -400,19 +395,12 @@ class _PhotoRecallSectionState extends State<PhotoRecallSection> {
   }
 }
 
-class _PhotoThumbnail extends StatelessWidget {
-  final PhotoReference photo;
-  final VoidCallback? onTap;
-  final VoidCallback? onAnalyze;
-  final bool isAnalyzing;
-
-  const _PhotoThumbnail({
-    required this.photo,
-    this.onTap,
-    this.onAnalyze,
-    this.isAnalyzing = false,
-  });
-
+class const _PhotoThumbnail({
+  required final PhotoReference photo,
+  final VoidCallback? onTap,
+  final VoidCallback? onAnalyze,
+  final bool isAnalyzing = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -478,17 +466,11 @@ class _PhotoThumbnail extends StatelessWidget {
   }
 }
 
-class _AnalyzeButton extends StatelessWidget {
-  final VoidCallback onTap;
-  final bool isAnalyzing;
-  final String tooltip;
-
-  const _AnalyzeButton({
-    required this.onTap,
-    required this.tooltip,
-    this.isAnalyzing = false,
-  });
-
+class const _AnalyzeButton({
+  required final VoidCallback onTap,
+  required final String tooltip,
+  final bool isAnalyzing = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

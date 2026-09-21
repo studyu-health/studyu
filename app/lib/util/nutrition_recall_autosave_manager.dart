@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 
-class NutritionRecallAutoSaveManager {
+class NutritionRecallAutoSaveManager() {
   static const String _keyPrefix = 'studyu_nutrition_autosave';
   static const Duration debounceDuration = Duration(seconds: 2);
   static const int maxRetentionDays = 7;
@@ -372,20 +372,11 @@ class NutritionRecallAutoSaveManager {
   }
 }
 
-class PendingRecall {
-  final DailyRecall recall;
-  final String subjectId;
-  final String taskId;
-  final String interventionId;
-  final String periodId;
-  final int studyDaySnapshot;
-
-  PendingRecall({
-    required this.recall,
-    required this.subjectId,
-    required this.taskId,
-    required this.interventionId,
-    required this.periodId,
-    required this.studyDaySnapshot,
-  });
-}
+class PendingRecall({
+  required final DailyRecall recall,
+  required final String subjectId,
+  required final String taskId,
+  required final String interventionId,
+  required final String periodId,
+  required final int studyDaySnapshot,
+});

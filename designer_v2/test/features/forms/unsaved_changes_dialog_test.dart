@@ -38,9 +38,9 @@ void main() {
     );
 
     final button = tester.widget<ElevatedButton>(discardButton);
-    final errorColor = Theme.of(
-      tester.element(discardButton),
-    ).colorScheme.error;
+    final errorColor = Theme.of(tester.element(discardButton))
+        .colorScheme
+        .error;
     expect(button.style?.backgroundColor?.resolve({}), errorColor);
   });
 }

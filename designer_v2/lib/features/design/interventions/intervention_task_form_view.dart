@@ -12,16 +12,16 @@ import 'package:studyu_designer_v2/features/forms/form_validation.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class InterventionTaskFormView extends StatefulWidget {
-  const InterventionTaskFormView({required this.formViewModel, super.key});
-
-  final InterventionTaskFormViewModel formViewModel;
+class const InterventionTaskFormView({
+  required final InterventionTaskFormViewModel formViewModel,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<InterventionTaskFormView> createState() =>
       _InterventionTaskFormViewState();
 }
 
-class _InterventionTaskFormViewState extends State<InterventionTaskFormView> {
+class _InterventionTaskFormViewState() extends State<InterventionTaskFormView> {
   bool isStylingInformationDismissed = true;
 
   void onDismissedCallback() => setState(() {

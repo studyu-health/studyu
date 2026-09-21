@@ -7,9 +7,8 @@ import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class CloseConfirmationDialog extends StudyPageWidget {
-  const CloseConfirmationDialog(super.studyId, {super.key});
-
+class const CloseConfirmationDialog(super.studyId, {super.key})
+    extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(studyControllerProvider(studyId).notifier);

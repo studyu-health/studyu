@@ -12,18 +12,12 @@ import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class LinearRegressionSectionFormView extends ConsumerWidget {
-  const LinearRegressionSectionFormView({
-    required this.formViewModel,
-    required this.studyId,
-    required this.reportSectionColumnWidth,
-    super.key,
-  });
-
-  final ReportItemFormViewModel formViewModel;
-  final StudyID studyId;
-  final Map<int, TableColumnWidth> reportSectionColumnWidth;
-
+class const LinearRegressionSectionFormView({
+  required final ReportItemFormViewModel formViewModel,
+  required final StudyID studyId,
+  required final Map<int, TableColumnWidth> reportSectionColumnWidth,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -50,7 +44,7 @@ class LinearRegressionSectionFormView extends ConsumerWidget {
                 ),
                 child: ReactiveDropdownField<ImprovementDirectionFormatted>(
                   formControl: formViewModel.improvementDirectionControl,
-                  hint: const Text("Select an improvement direction"),
+                  hint: Text(tr.form_field_report_improvementDirection_hint),
                   items: ReportItemFormViewModel
                       .improvementDirectionControlOptions
                       .map((option) {

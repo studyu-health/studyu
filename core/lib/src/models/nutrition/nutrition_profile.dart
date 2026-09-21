@@ -3,36 +3,21 @@ import 'package:json_annotation/json_annotation.dart';
 part 'nutrition_profile.g.dart';
 
 @JsonSerializable()
-class NutritionProfile {
-  double energyKcal;
-  double protein;
-  double carbs;
-  double fat;
-  double sugars;
-  double fiber;
-  double saturatedFat;
-  double transFat;
-  double cholesterol;
-  double sodium;
-  double waterContent;
-  Map<String, double> micros;
-
-  NutritionProfile({
-    required this.energyKcal,
-    required this.protein,
-    required this.carbs,
-    required this.fat,
-    required this.sugars,
-    required this.fiber,
-    required this.saturatedFat,
-    required this.transFat,
-    required this.cholesterol,
-    required this.sodium,
-    required this.waterContent,
-    required this.micros,
-  });
-
-  factory NutritionProfile.fromJson(Map<String, dynamic> json) =>
+class NutritionProfile({
+  required var double energyKcal,
+  required var double protein,
+  required var double carbs,
+  required var double fat,
+  required var double sugars,
+  required var double fiber,
+  required var double saturatedFat,
+  required var double transFat,
+  required var double cholesterol,
+  required var double sodium,
+  required var double waterContent,
+  required var Map<String, double> micros,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
       _$NutritionProfileFromJson(json);
 
   Map<String, dynamic> toJson() => _$NutritionProfileToJson(this);

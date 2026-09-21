@@ -44,16 +44,16 @@ Map<String, dynamic> _$SurveyTemplateToJson(SurveyTemplate instance) =>
       'id': instance.id,
       'title': instance.title,
       'description': instance.description,
-      'tags': instance.tags,
       'source': instance.source.toJson(),
       'sharing': instance.sharing.toJson(),
       'registry_published': instance.registryPublished,
       'user_id': ?instance.userId,
       'collaborator_emails': instance.collaboratorEmails,
-      'created_at': ?instance.createdAt?.toIso8601String(),
-      'updated_at': ?instance.updatedAt?.toIso8601String(),
+      'tags': instance.tags,
       'task_json': ?instance.taskJson,
       'day_entries': ?instance.dayEntries?.map((e) => e.toJson()).toList(),
+      'created_at': ?instance.createdAt?.toIso8601String(),
+      'updated_at': ?instance.updatedAt?.toIso8601String(),
     };
 
 const _$SurveyTemplateSourceEnumMap = {

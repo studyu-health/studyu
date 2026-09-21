@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
 
-class TextParagraph extends StatelessWidget {
-  TextParagraph({
-    this.text,
-    this.style,
-    this.selectable = true,
-    this.span,
-    super.key,
-  }) {
+class TextParagraph({
+  final String? text,
+  final TextStyle? style,
+  final bool selectable = true,
+  final List<TextSpan>? span,
+  super.key,
+}) extends StatelessWidget {
+  this {
     if (text == null && span == null) {
       throw Exception("Either text or TextSpan has to be provided");
     }
   }
-
-  final String? text;
-  final TextStyle? style;
-  final bool selectable;
-  final List<TextSpan>? span;
 
   @override
   Widget build(BuildContext context) {

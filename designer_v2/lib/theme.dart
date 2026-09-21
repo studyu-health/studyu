@@ -4,12 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
-class DropdownMenuItemTheme with Diagnosticable {
-  const DropdownMenuItemTheme({this.iconTheme});
-  final IconThemeData? iconTheme;
-}
+class const DropdownMenuItemTheme({final IconThemeData? iconTheme})
+    with Diagnosticable;
 
-class ThemeConfig {
+class ThemeConfig() {
   static const double kMinContentWidth = 600.0;
   static const double kMaxContentWidth = 1264.0;
 
@@ -60,9 +58,7 @@ class ThemeConfig {
       );
 }
 
-class NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
-  const NoAnimationPageTransitionsBuilder();
-
+class const NoAnimationPageTransitionsBuilder() extends PageTransitionsBuilder {
   @override
   Widget buildTransitions<T>(
     PageRoute<T> route,
@@ -75,8 +71,7 @@ class NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-class WebTransitionBuilder extends PageTransitionsBuilder {
-  const WebTransitionBuilder();
+class const WebTransitionBuilder() extends PageTransitionsBuilder {
   @override
   Widget buildTransitions<T>(
     PageRoute<T> route,
@@ -104,24 +99,17 @@ class WebTransitionBuilder extends PageTransitionsBuilder {
   }
 }
 
-class ThemeSettingChange extends Notification {
-  ThemeSettingChange({required this.settings});
-  final ThemeSettings settings;
-}
+class ThemeSettingChange({required final ThemeSettings settings})
+    extends Notification;
 
-class ThemeProvider extends InheritedWidget {
-  ThemeProvider({
-    super.key,
-    required this.settings,
-    required this.lightDynamic,
-    required this.darkDynamic,
-    required super.child,
-  });
-
-  final ValueNotifier<ThemeSettings> settings;
-  final ColorScheme? lightDynamic;
-  final ColorScheme? darkDynamic;
-
+// ignore: prefer_const_constructors_in_immutables
+class ThemeProvider({
+  super.key,
+  required final ValueNotifier<ThemeSettings> settings,
+  required final ColorScheme? lightDynamic,
+  required final ColorScheme? darkDynamic,
+  required super.child,
+}) extends InheritedWidget {
   final pageTransitionsTheme = PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
       // Only populates the map if running on Web
@@ -554,12 +542,10 @@ class ThemeProvider extends InheritedWidget {
   }
 }
 
-class ThemeSettings {
-  ThemeSettings({required this.sourceColor, required this.themeMode});
-
-  final Color sourceColor;
-  final ThemeMode themeMode;
-}
+class ThemeSettings({
+  required final Color sourceColor,
+  required final ThemeMode themeMode,
+});
 
 Color randomColor() {
   return Color(Random().nextInt(0xFFFFFFFF));
@@ -568,17 +554,11 @@ Color randomColor() {
 // Custom Colors
 const linkColor = CustomColor(name: 'Link Color', color: Color(0xFF00B0FF));
 
-class CustomColor {
-  const CustomColor({
-    required this.name,
-    required this.color,
-    this.blend = true,
-  });
-
-  final String name;
-  final Color color;
-  final bool blend;
-
+class const CustomColor({
+  required final String name,
+  required final Color color,
+  final bool blend = true,
+}) {
   Color value(ThemeProvider provider) {
     return provider.custom(this);
   }

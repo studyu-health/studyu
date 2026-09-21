@@ -5,7 +5,7 @@ import 'package:logger/logger.dart';
 
 part 'analytics.g.dart';
 
-class StudyULogger {
+class StudyULogger() {
   static Logger logger = Logger();
 
   static void trace(
@@ -64,21 +64,15 @@ class StudyULogger {
 }
 
 @JsonSerializable()
-class StudyUAnalytics {
-  bool enabled;
-
-  @JsonKey(name: 'dsn')
-  String dsn;
-
-  @JsonKey(name: 'samplingRate')
-  double? samplingRate;
-
+class StudyUAnalytics(
+  var bool enabled,
+  @JsonKey(name: 'dsn') var String dsn,
+  @JsonKey(name: 'samplingRate') var double? samplingRate,
+) {
   @JsonKey(includeFromJson: false, includeToJson: false)
   static const String keyStudyUAnalytics = 'analytics_settings';
 
-  StudyUAnalytics(this.enabled, this.dsn, this.samplingRate);
-
-  factory StudyUAnalytics.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$StudyUAnalyticsFromJson(json);
 
   Map<String, dynamic> toJson() => _$StudyUAnalyticsToJson(this);

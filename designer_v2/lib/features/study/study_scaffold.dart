@@ -21,7 +21,7 @@ import 'package:studyu_designer_v2/features/study/study_status_badge.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-abstract class IStudyAppBarViewModel
+abstract class IStudyAppBarViewModel()
     implements IStudyStatusBadgeViewModel, IStudyNavViewModel {
   bool get isSyncIndicatorVisible;
 
@@ -33,52 +33,31 @@ abstract class IStudyAppBarViewModel
 }
 
 /// Custom scaffold shared between all pages for an individual [Study]
-class StudyScaffold extends ConsumerStatefulWidget {
-  const StudyScaffold({
-    this.studyId = Config.newStudyId,
-    required this.body,
-    this.layoutType,
-    this.tabs,
-    this.tabsSubnav,
-    this.selectedTab,
-    this.selectedTabSubnav,
-    this.drawer = const AppDrawer(),
-    this.disableActions = false,
-    this.actionsSpacing = 2.0,
-    this.actionsPadding = 4.0,
-    this.appbarHeight = 56.0,
-    this.appbarSubnavHeight = 44.0,
-    super.key,
-  });
-
+class const StudyScaffold({
   /// The currently selected [Study.id]
   /// Defaults to [Config.newStudyId] when creating a new study
-  final String studyId;
-
-  final List<NavbarTab>? tabs;
-  final List<NavbarTab>? tabsSubnav;
-  final NavbarTab? selectedTab;
-  final NavbarTab? selectedTabSubnav;
+  final String studyId = Config.newStudyId,
 
   /// The widget to be rendered as the main page body
-  final StudyPageWidget body;
-
-  final Widget? drawer;
-
-  final bool disableActions;
-  final double actionsSpacing;
-  final double actionsPadding;
-
-  final SingleColumnLayoutType? layoutType;
-
-  final double appbarHeight;
-  final double appbarSubnavHeight;
-
+  required final StudyPageWidget body,
+  final SingleColumnLayoutType? layoutType,
+  final List<NavbarTab>? tabs,
+  final List<NavbarTab>? tabsSubnav,
+  final NavbarTab? selectedTab,
+  final NavbarTab? selectedTabSubnav,
+  final Widget? drawer = const AppDrawer(),
+  final bool disableActions = false,
+  final double actionsSpacing = 2.0,
+  final double actionsPadding = 4.0,
+  final double appbarHeight = 56.0,
+  final double appbarSubnavHeight = 44.0,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<StudyScaffold> createState() => _StudyScaffoldState();
 }
 
-class _StudyScaffoldState extends ConsumerState<StudyScaffold> {
+class _StudyScaffoldState() extends ConsumerState<StudyScaffold> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

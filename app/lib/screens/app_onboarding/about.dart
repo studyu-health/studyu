@@ -6,14 +6,15 @@ import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 
-class AboutScreen extends StatelessWidget {
-  const AboutScreen({super.key});
-
+class const AboutScreen({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasActiveSubject = context.read<AppState>().activeSubject != null;
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.what_is_studyu)),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(AppLocalizations.of(context)!.what_is_studyu),
+      ),
       body: PageView(
         scrollDirection: Axis.vertical,
         children: <Widget>[
@@ -392,7 +393,8 @@ class AboutScreen extends StatelessWidget {
                     if (!hasActiveSubject)
                       OutlinedButton.icon(
                         icon: const Icon(MdiIcons.rocket),
-                        onPressed: () => context.go('/${RouteNames.terms}'),
+                        onPressed: () =>
+                            context.go('/${RouteNames.studySelection}'),
                         label: Text(
                           AppLocalizations.of(context)!.get_started,
                           style: const TextStyle(fontSize: 20),

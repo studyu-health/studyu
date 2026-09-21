@@ -2,16 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/common_views/mouse_events.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class MeasurementSelectionCards extends StatelessWidget {
-  const MeasurementSelectionCards({
-    required this.onNewSurvey,
-    required this.onNewNutrition,
-    super.key,
-  });
-
-  final VoidCallback? onNewSurvey;
-  final VoidCallback? onNewNutrition;
-
+class const MeasurementSelectionCards({
+  required final VoidCallback? onNewSurvey,
+  required final VoidCallback? onNewNutrition,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

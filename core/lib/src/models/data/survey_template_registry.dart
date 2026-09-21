@@ -4,9 +4,7 @@ import 'package:studyu_core/core.dart';
 ///
 /// This class holds system-provided presets only. User-created templates
 /// are managed by a [SurveyTemplateRepository] implementation.
-class SurveyTemplateRegistry {
-  SurveyTemplateRegistry._();
-
+class SurveyTemplateRegistry._() {
   static final List<SurveyTemplate> templates = [
     _ffqTemplate(),
     _dhq3Template(),

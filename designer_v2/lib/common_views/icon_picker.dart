@@ -9,7 +9,7 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/typings.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class IconPack {
+class IconPack() {
   static final defaultPack = IconPack.material;
 
   static final List<IconOption> material = () {
@@ -39,12 +39,8 @@ class IconPack {
   }
 }
 
-class IconOption extends Equatable {
-  const IconOption(this.name, [this.icon]);
-
-  final String name;
-  final IconData? icon;
-
+class const IconOption(final String name, [final IconData? icon])
+    extends Equatable {
   bool get isEmpty => name == '';
 
   @override
@@ -54,65 +50,52 @@ class IconOption extends Equatable {
   IconOption fromJson(String json) => IconOption(json);
 }
 
-class ReactiveIconPicker
-    extends ReactiveFocusableFormField<IconOption, IconOption> {
-  ReactiveIconPicker({
-    required List<IconOption> iconOptions,
-    double? selectedIconSize = 20.0,
-    double? galleryIconSize = 28.0,
-    bool readOnly = false,
-    ReactiveFormFieldCallback<IconOption>? onSelect,
-    super.formControl,
-    super.formControlName,
-    super.showErrors,
-    super.validationMessages,
-    super.focusNode,
-    super.key,
-  }) : super(
-         builder: (ReactiveFormFieldState<IconOption, IconOption> field) {
-           // Unsupported: showErrors, validationMessages
-           final isDisabled = readOnly || field.control.disabled;
+class ReactiveIconPicker({
+  required List<IconOption> iconOptions,
+  double? selectedIconSize = 20.0,
+  double? galleryIconSize = 28.0,
+  bool readOnly = false,
+  ReactiveFormFieldCallback<IconOption>? onSelect,
+  super.formControl,
+  super.formControlName,
+  super.showErrors,
+  super.validationMessages,
+  super.focusNode,
+  super.key,
+}) extends ReactiveFocusableFormField<IconOption, IconOption> {
+  this
+    : super(
+        builder: (ReactiveFormFieldState<IconOption, IconOption> field) {
+          // Unsupported: showErrors, validationMessages
+          final isDisabled = readOnly || field.control.disabled;
 
-           return IconPicker(
-             iconOptions: iconOptions,
-             isDisabled: isDisabled,
-             focusNode: focusNode,
-             selectedOption: field.value,
-             galleryIconSize: galleryIconSize,
-             selectedIconSize: selectedIconSize,
-             onSelect: (iconOption) {
-               if (isDisabled) return;
-               field.didChange(iconOption);
-               onSelect?.call(field.control);
-             },
-           );
-         },
-       );
+          return IconPicker(
+            iconOptions: iconOptions,
+            isDisabled: isDisabled,
+            focusNode: focusNode,
+            selectedOption: field.value,
+            galleryIconSize: galleryIconSize,
+            selectedIconSize: selectedIconSize,
+            onSelect: (iconOption) {
+              if (isDisabled) return;
+              field.didChange(iconOption);
+              onSelect?.call(field.control);
+            },
+          );
+        },
+      );
 }
 
-class IconPicker extends StatelessWidget {
-  const IconPicker({
-    required this.iconOptions,
-    this.selectedOption,
-    this.selectedIconSize,
-    this.galleryIconSize = 28.0,
-    this.onSelect,
-    this.isDisabled = false,
-    this.focusNode,
-    super.key,
-  });
-
-  final List<IconOption> iconOptions;
-  final IconOption? selectedOption;
-  final VoidCallbackOn<IconOption>? onSelect;
-
-  final double? galleryIconSize;
-  final double? selectedIconSize;
-
-  final FocusNode? focusNode;
-
-  final bool isDisabled;
-
+class const IconPicker({
+  required final List<IconOption> iconOptions,
+  final IconOption? selectedOption,
+  final double? selectedIconSize,
+  final double? galleryIconSize = 28.0,
+  final VoidCallbackOn<IconOption>? onSelect,
+  final bool isDisabled = false,
+  final FocusNode? focusNode,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconPickerField(
@@ -127,29 +110,16 @@ class IconPicker extends StatelessWidget {
   }
 }
 
-class IconPickerField extends StatelessWidget {
-  const IconPickerField({
-    required this.iconOptions,
-    this.selectedOption,
-    this.selectedIconSize,
-    this.galleryIconSize,
-    this.onSelect,
-    this.isDisabled = false,
-    this.focusNode,
-    super.key,
-  });
-
-  final List<IconOption> iconOptions;
-
-  final IconOption? selectedOption;
-  final double? selectedIconSize;
-  final double? galleryIconSize;
-  final VoidCallbackOn<IconOption>? onSelect;
-
-  final FocusNode? focusNode;
-
-  final bool isDisabled;
-
+class const IconPickerField({
+  required final List<IconOption> iconOptions,
+  final IconOption? selectedOption,
+  final double? selectedIconSize,
+  final double? galleryIconSize,
+  final VoidCallbackOn<IconOption>? onSelect,
+  final bool isDisabled = false,
+  final FocusNode? focusNode,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actualGalleryIconSize =
@@ -188,18 +158,12 @@ class IconPickerField extends StatelessWidget {
   }
 }
 
-class IconPickerGallery extends StatelessWidget {
-  const IconPickerGallery({
-    required this.iconOptions,
-    required this.iconSize,
-    this.onSelect,
-    super.key,
-  });
-
-  final List<IconOption> iconOptions;
-  final VoidCallbackOn<IconOption>? onSelect;
-  final double iconSize;
-
+class const IconPickerGallery({
+  required final List<IconOption> iconOptions,
+  required final double iconSize,
+  final VoidCallbackOn<IconOption>? onSelect,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> iconWidgets = [];

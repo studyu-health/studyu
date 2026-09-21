@@ -14,11 +14,8 @@ import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
-class FoodSearchScreen extends StatelessWidget {
-  final bool allowRecipes;
-
-  const FoodSearchScreen({this.allowRecipes = true, super.key});
-
+class const FoodSearchScreen({final bool allowRecipes = true, super.key})
+    extends StatelessWidget {
   static MaterialPageRoute<studyu.FoodEntry> route({
     bool allowRecipes = true,
   }) => MaterialPageRoute(
@@ -37,17 +34,14 @@ class FoodSearchScreen extends StatelessWidget {
   }
 }
 
-class _FoodSearchScreenContent extends StatefulWidget {
-  final bool allowRecipes;
-
-  const _FoodSearchScreenContent({this.allowRecipes = true});
-
+class const _FoodSearchScreenContent({final bool allowRecipes = true})
+    extends StatefulWidget {
   @override
   State<_FoodSearchScreenContent> createState() =>
       _FoodSearchScreenContentState();
 }
 
-class _FoodSearchScreenContentState extends State<_FoodSearchScreenContent> {
+class _FoodSearchScreenContentState() extends State<_FoodSearchScreenContent> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -375,9 +369,8 @@ class _FoodSearchScreenContentState extends State<_FoodSearchScreenContent> {
 
     double servingSizeGrams = 100.0;
     if (product.servingSize != null) {
-      final match = RegExp(
-        r'(\d+(?:\.\d+)?)\s*g',
-      ).firstMatch(product.servingSize!);
+      final match = RegExp(r'(\d+(?:\.\d+)?)\s*g')
+          .firstMatch(product.servingSize!);
       if (match != null) {
         servingSizeGrams = double.tryParse(match.group(1)!) ?? 100.0;
       }
@@ -528,21 +521,13 @@ class _FoodSearchScreenContentState extends State<_FoodSearchScreenContent> {
 // WIDGETS
 // ============================================================
 
-class _SearchBarHeader extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final AppLocalizations l10n;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
-
-  const _SearchBarHeader({
-    required this.controller,
-    required this.focusNode,
-    required this.l10n,
-    required this.onChanged,
-    required this.onClear,
-  });
-
+class const _SearchBarHeader({
+  required final TextEditingController controller,
+  required final FocusNode focusNode,
+  required final AppLocalizations l10n,
+  required final ValueChanged<String> onChanged,
+  required final VoidCallback onClear,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -583,17 +568,11 @@ class _SearchBarHeader extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color iconColor;
-
-  const _SectionHeader({
-    required this.icon,
-    required this.title,
-    required this.iconColor,
-  });
-
+class const _SectionHeader({
+  required final IconData icon,
+  required final String title,
+  required final Color iconColor,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -620,17 +599,11 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _TemplateCard extends StatelessWidget {
-  final studyu.SavedFoodTemplate template;
-  final VoidCallback onTap;
-  final ThemeData theme;
-
-  const _TemplateCard({
-    required this.template,
-    required this.onTap,
-    required this.theme,
-  });
-
+class const _TemplateCard({
+  required final studyu.SavedFoodTemplate template,
+  required final VoidCallback onTap,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRecipe =
@@ -681,17 +654,11 @@ class _TemplateCard extends StatelessWidget {
   }
 }
 
-class _FoodResultCard extends StatelessWidget {
-  final UnifiedFoodResult result;
-  final VoidCallback onTap;
-  final ThemeData theme;
-
-  const _FoodResultCard({
-    required this.result,
-    required this.onTap,
-    required this.theme,
-  });
-
+class const _FoodResultCard({
+  required final UnifiedFoodResult result,
+  required final VoidCallback onTap,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -804,11 +771,8 @@ class _FoodResultCard extends StatelessWidget {
   }
 }
 
-class _SourceBadge extends StatelessWidget {
-  final studyu.FoodSource source;
-
-  const _SourceBadge({required this.source});
-
+class const _SourceBadge({required final studyu.FoodSource source})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOff = source == studyu.FoodSource.openfoodfacts;
@@ -834,11 +798,8 @@ class _SourceBadge extends StatelessWidget {
   }
 }
 
-class _LoadingState extends StatelessWidget {
-  final ThemeData theme;
-
-  const _LoadingState({required this.theme});
-
+class const _LoadingState({required final ThemeData theme})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -858,11 +819,8 @@ class _LoadingState extends StatelessWidget {
   }
 }
 
-class _ErrorMessage extends StatelessWidget {
-  final String message;
-
-  const _ErrorMessage({required this.message});
-
+class const _ErrorMessage({required final String message})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -876,11 +834,8 @@ class _ErrorMessage extends StatelessWidget {
   }
 }
 
-class _EmptySectionMessage extends StatelessWidget {
-  final String message;
-
-  const _EmptySectionMessage({required this.message});
-
+class const _EmptySectionMessage({required final String message})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -894,19 +849,12 @@ class _EmptySectionMessage extends StatelessWidget {
   }
 }
 
-class _InitialPrompt extends StatelessWidget {
-  final VoidCallback onManualTap;
-  final VoidCallback onRecipeTap;
-  final VoidCallback onScanTap;
-  final ThemeData theme;
-
-  const _InitialPrompt({
-    required this.onManualTap,
-    required this.onRecipeTap,
-    required this.onScanTap,
-    required this.theme,
-  });
-
+class const _InitialPrompt({
+  required final VoidCallback onManualTap,
+  required final VoidCallback onRecipeTap,
+  required final VoidCallback onScanTap,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -939,21 +887,13 @@ class _InitialPrompt extends StatelessWidget {
   }
 }
 
-class _QuickActionsCard extends StatelessWidget {
-  final VoidCallback onManualTap;
-  final VoidCallback onRecipeTap;
-  final VoidCallback onScanTap;
-  final bool allowRecipes;
-  final ThemeData theme;
-
-  const _QuickActionsCard({
-    required this.onManualTap,
-    required this.onRecipeTap,
-    required this.onScanTap,
-    this.allowRecipes = true,
-    required this.theme,
-  });
-
+class const _QuickActionsCard({
+  required final VoidCallback onManualTap,
+  required final VoidCallback onRecipeTap,
+  required final VoidCallback onScanTap,
+  final bool allowRecipes = true,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -996,23 +936,14 @@ class _QuickActionsCard extends StatelessWidget {
   }
 }
 
-class _QuickActionTile extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  final ThemeData theme;
-
-  const _QuickActionTile({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-    required this.theme,
-  });
-
+class const _QuickActionTile({
+  required final IconData icon,
+  required final Color iconColor,
+  required final String title,
+  required final String subtitle,
+  required final VoidCallback onTap,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -1063,51 +994,28 @@ class _QuickActionTile extends StatelessWidget {
 
 /// Optimized ListView.builder for food search results.
 /// Uses lazy loading for better performance with large result sets.
-class _FoodSearchListView extends StatelessWidget {
-  final ScrollController scrollController;
-  final AppLocalizations l10n;
-  final ThemeData theme;
-  final TemplateViewModel templateViewModel;
-  final TextEditingController searchController;
-  final bool isInitialLoading;
-  final bool isLoadingMore;
-  final bool hasSearched;
-  final bool offSearched;
-  final bool usdaSearched;
-  final bool offHasMore;
-  final bool usdaHasMore;
-  final String? errorMessage;
-  final List<UnifiedFoodResult> combinedResults;
-  final void Function(studyu.SavedFoodTemplate) onSelectTemplate;
-  final void Function(UnifiedFoodResult) onSelectResult;
-  final VoidCallback onAddManually;
-  final VoidCallback onCreateRecipe;
-  final VoidCallback onScanBarcode;
-  final bool allowRecipes;
-
-  const _FoodSearchListView({
-    required this.scrollController,
-    required this.l10n,
-    required this.theme,
-    required this.templateViewModel,
-    required this.searchController,
-    required this.isInitialLoading,
-    required this.isLoadingMore,
-    required this.hasSearched,
-    required this.offSearched,
-    required this.usdaSearched,
-    required this.offHasMore,
-    required this.usdaHasMore,
-    required this.errorMessage,
-    required this.combinedResults,
-    required this.onSelectTemplate,
-    required this.onSelectResult,
-    required this.onAddManually,
-    required this.onCreateRecipe,
-    required this.onScanBarcode,
-    this.allowRecipes = true,
-  });
-
+class const _FoodSearchListView({
+  required final ScrollController scrollController,
+  required final AppLocalizations l10n,
+  required final ThemeData theme,
+  required final TemplateViewModel templateViewModel,
+  required final TextEditingController searchController,
+  required final bool isInitialLoading,
+  required final bool isLoadingMore,
+  required final bool hasSearched,
+  required final bool offSearched,
+  required final bool usdaSearched,
+  required final bool offHasMore,
+  required final bool usdaHasMore,
+  required final String? errorMessage,
+  required final List<UnifiedFoodResult> combinedResults,
+  required final void Function(studyu.SavedFoodTemplate) onSelectTemplate,
+  required final void Function(UnifiedFoodResult) onSelectResult,
+  required final VoidCallback onAddManually,
+  required final VoidCallback onCreateRecipe,
+  required final VoidCallback onScanBarcode,
+  final bool allowRecipes = true,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filteredTemplates = templateViewModel.filteredTemplates

@@ -5,29 +5,27 @@ import 'package:studyu_app/screens/study/report/util/report_utilities.dart';
 import 'package:studyu_app/widgets/report/descriptive_statistics_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class DescriptiveStatsSectionWidget extends ReportSectionWidget {
-  final DescriptiveStatsSection section;
-
-  const DescriptiveStatsSectionWidget(super.subject, this.section, {super.key});
-
+class const DescriptiveStatsSectionWidget(
+  super.subject,
+  final DescriptiveStatsSection section, {
+  super.key,
+}) extends ReportSectionWidget {
   @override
   Widget build(BuildContext context) {
     return _DescriptiveStatsSectionStatefulWidget(subject, section);
   }
 }
 
-class _DescriptiveStatsSectionStatefulWidget extends StatefulWidget {
-  final StudySubject subject;
-  final DescriptiveStatsSection section;
-
-  const _DescriptiveStatsSectionStatefulWidget(this.subject, this.section);
-
+class const _DescriptiveStatsSectionStatefulWidget(
+  final StudySubject subject,
+  final DescriptiveStatsSection section,
+) extends StatefulWidget {
   @override
   State<_DescriptiveStatsSectionStatefulWidget> createState() =>
       _DescriptiveStatsSectionState();
 }
 
-class _DescriptiveStatsSectionState
+class _DescriptiveStatsSectionState()
     extends State<_DescriptiveStatsSectionStatefulWidget> {
   bool _isLoading = true;
   bool showColorlessGauges = false;

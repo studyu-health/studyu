@@ -5,7 +5,7 @@ import 'package:supabase/supabase.dart';
 part 'survey_template.g.dart';
 
 /// Where a template originates from.
-enum SurveyTemplateSource {
+enum SurveyTemplateSource() {
   /// System-provided preset (FFQ, DHQ3, etc.)
   builtIn,
 
@@ -24,76 +24,52 @@ enum SurveyTemplateSource {
 /// - [sharing] ([ResultSharing]) for data visibility
 /// - [registryPublished] for public listing in the template registry
 @JsonSerializable()
-class SurveyTemplate {
-  SurveyTemplate({
-    required this.id,
-    required this.title,
-    required this.description,
-    this.source = SurveyTemplateSource.builtIn,
-    this.sharing = ResultSharing.public,
-    this.registryPublished = false,
-    this.userId,
-    this.collaboratorEmails = const [],
-    this.tags = const [],
-    this.createTask,
-    this.taskJson,
-    this.dayEntries,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  factory SurveyTemplate.fromJson(Map<String, dynamic> json) =>
-      _$SurveyTemplateFromJson(json);
-
-  final String id;
-  String title;
-  String description;
-  @JsonKey(defaultValue: [])
-  List<String> tags;
-
-  // --- Source & Sharing (aligned with Study) ---
+class SurveyTemplate({
+  required final String id,
+  required var String title,
+  required var String description,
 
   /// Whether this is a built-in preset or a user-created template.
-  final SurveyTemplateSource source;
+  final SurveyTemplateSource source = SurveyTemplateSource.builtIn,
 
   /// Visibility setting — reuses the existing [ResultSharing] enum.
-  ResultSharing sharing;
+  var ResultSharing sharing = ResultSharing.public,
 
   /// Whether this template is listed in the public template registry.
   @JsonKey(name: 'registry_published', defaultValue: false)
-  bool registryPublished;
+  var bool registryPublished = false,
 
   /// Owner of the template. Null for [SurveyTemplateSource.builtIn].
-  @JsonKey(name: 'user_id')
-  String? userId;
+  @JsonKey(name: 'user_id') var String? userId,
 
   /// Emails of collaborators who can view/edit this template.
   @JsonKey(name: 'collaborator_emails', defaultValue: [])
-  List<String> collaboratorEmails;
-
-  /// When the template was first created.
-  @JsonKey(name: 'created_at')
-  DateTime? createdAt;
-
-  /// When the template was last updated.
-  @JsonKey(name: 'updated_at')
-  DateTime? updatedAt;
-
-  // --- Task content ---
+  var List<String> collaboratorEmails = const [],
+  @JsonKey(defaultValue: []) var List<String> tags = const [],
 
   /// Factory that creates a fresh [QuestionnaireTask].
   /// Used by built-in templates; excluded from serialization.
   @JsonKey(includeToJson: false, includeFromJson: false)
-  final QuestionnaireTask Function()? createTask;
+  final QuestionnaireTask Function()? createTask,
 
   /// Serialized task JSON for user-created templates.
-  @JsonKey(name: 'task_json')
-  Map<String, dynamic>? taskJson;
+  @JsonKey(name: 'task_json') var Map<String, dynamic>? taskJson,
 
   /// For multi-day templates (e.g. DHQ3 14-day), individual day entries.
   /// Excluded from auto-serialization; built-in day entries use factories.
-  @JsonKey(name: 'day_entries')
-  final List<SurveyTemplateDayEntry>? dayEntries;
+  @JsonKey(name: 'day_entries') final List<SurveyTemplateDayEntry>? dayEntries,
+
+  /// When the template was first created.
+  @JsonKey(name: 'created_at') var DateTime? createdAt,
+
+  /// When the template was last updated.
+  @JsonKey(name: 'updated_at') var DateTime? updatedAt,
+}) {
+  factory fromJson(Map<String, dynamic> json) => _$SurveyTemplateFromJson(json);
+
+  // --- Source & Sharing (aligned with Study) ---
+
+  // --- Task content ---
 
   // --- Computed properties ---
 
@@ -140,28 +116,19 @@ class SurveyTemplate {
 
 /// A single day/section entry within a multi-day survey template.
 @JsonSerializable()
-class SurveyTemplateDayEntry {
-  SurveyTemplateDayEntry({
-    required this.dayIndex,
-    required this.title,
-    this.createTask,
-    this.taskJson,
-  });
-
-  factory SurveyTemplateDayEntry.fromJson(Map<String, dynamic> json) =>
-      _$SurveyTemplateDayEntryFromJson(json);
-
-  @JsonKey(name: 'day_index')
-  final int dayIndex;
-  final String title;
+class SurveyTemplateDayEntry({
+  @JsonKey(name: 'day_index') required final int dayIndex,
+  required final String title,
 
   /// Factory for built-in templates; excluded from serialization.
   @JsonKey(includeToJson: false, includeFromJson: false)
-  final QuestionnaireTask Function(int dayIndex)? createTask;
+  final QuestionnaireTask Function(int dayIndex)? createTask,
 
   /// Serialized task JSON for user-created templates.
-  @JsonKey(name: 'task_json')
-  Map<String, dynamic>? taskJson;
+  @JsonKey(name: 'task_json') var Map<String, dynamic>? taskJson,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
+      _$SurveyTemplateDayEntryFromJson(json);
 
   /// Creates a [QuestionnaireTask] from this entry.
   QuestionnaireTask buildTask() {

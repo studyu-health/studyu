@@ -7,7 +7,7 @@ import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class Cache {
+class Cache() {
   static bool isSynchronizing = false;
 
   static Future<void> storeSubject(StudySubject? subject) async {
@@ -78,9 +78,9 @@ class Cache {
     return null;
   }
 
-  static Future<void> delete() async {
+  static Future<void> delete() {
     StudyULogger.warning("Delete cache");
-    SecureStorage.delete(cacheSubjectKey);
+    return SecureStorage.delete(cacheSubjectKey);
   }
 
   static Future<void> uploadBlobFiles() async {

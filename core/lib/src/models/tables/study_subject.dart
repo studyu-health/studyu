@@ -39,14 +39,9 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   @JsonKey(includeToJson: false, includeFromJson: false)
   late List<SubjectProgress> progress = [];
 
-  StudySubject(
-    this.id,
-    this.studyId,
-    this.userId,
-    this.selectedInterventionIds,
-  );
+  new(this.id, this.studyId, this.userId, this.selectedInterventionIds);
 
-  factory StudySubject.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     final subject = _$StudySubjectFromJson(json);
 
     final Map<String, dynamic>? study = json['study'] as Map<String, dynamic>?;
@@ -67,7 +62,7 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   @override
   Map<String, dynamic> toJson() => _$StudySubjectToJson(this);
 
-  StudySubject.fromStudy(
+  new fromStudy(
     this.study,
     this.userId,
     this.selectedInterventionIds,

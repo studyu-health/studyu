@@ -15,7 +15,7 @@ class SavedFoodTemplate {
   DateTime? updatedAt;
   FoodEntry prototype;
 
-  SavedFoodTemplate({
+  new({
     required this.id,
     required this.userId,
     required this.name,
@@ -26,7 +26,7 @@ class SavedFoodTemplate {
     required this.prototype,
   });
 
-  SavedFoodTemplate.withId({
+  new withId({
     required this.userId,
     required this.name,
     this.tags,
@@ -36,7 +36,7 @@ class SavedFoodTemplate {
   }) : id = const Uuid().v4(),
        createdAt = DateTime.now();
 
-  factory SavedFoodTemplate.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$SavedFoodTemplateFromJson(json);
 
   Map<String, dynamic> toJson() => _$SavedFoodTemplateToJson(this);

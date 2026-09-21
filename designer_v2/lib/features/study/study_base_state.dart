@@ -4,27 +4,19 @@ import 'package:go_router/go_router.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/repositories/model_repository.dart';
-import 'package:studyu_designer_v2/repositories/study_repository.dart';
+import 'package:studyu_designer_v2/repositories/study_repository_interface.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class StudyControllerBaseState extends Equatable {
-  const StudyControllerBaseState({
-    required this.studyId,
-    required this.studyRepository,
-    required this.router,
-    required this.currentUser,
-    required this.studyWithMetadata,
-  });
-
-  final StudyID studyId;
-  final IStudyRepository studyRepository;
-  final GoRouter router;
-  final User? currentUser;
+class const StudyControllerBaseState({
+  required final StudyID studyId,
+  required final IStudyRepository studyRepository,
+  required final GoRouter router,
+  required final User? currentUser,
 
   /// The study that is currently being viewed or edited, wrapped in a
   /// [WrappedModel] for additional metadata
-  final WrappedModel<Study>? studyWithMetadata;
-
+  required final WrappedModel<Study>? studyWithMetadata,
+}) extends Equatable {
   /// The study that is currently being viewed or edited, wrapped in a
   /// a [AsyncValue] for loading & error states
   AsyncValue<Study> get study {

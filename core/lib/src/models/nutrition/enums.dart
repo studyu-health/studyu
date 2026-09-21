@@ -1,6 +1,6 @@
 // Enums for Nutrition Models
 
-enum RecallMode {
+enum RecallMode() {
   realtimeRecord,
   yesterdayRecall;
 
@@ -8,7 +8,7 @@ enum RecallMode {
   static RecallMode fromJson(String json) => values.byName(json);
 }
 
-enum MealType {
+enum MealType() {
   breakfast,
   brunch,
   lunch,
@@ -20,7 +20,7 @@ enum MealType {
   static MealType fromJson(String json) => values.byName(json);
 }
 
-enum MealContext {
+enum MealContext() {
   home,
   restaurant,
   takeout,
@@ -31,7 +31,7 @@ enum MealContext {
   static MealContext fromJson(String json) => values.byName(json);
 }
 
-enum CompanyContext {
+enum CompanyContext() {
   alone,
   family,
   friends,
@@ -42,7 +42,7 @@ enum CompanyContext {
   static CompanyContext fromJson(String json) => values.byName(json);
 }
 
-enum DistractionContext {
+enum DistractionContext() {
   none,
   tv,
   phone,
@@ -53,7 +53,7 @@ enum DistractionContext {
   static DistractionContext fromJson(String json) => values.byName(json);
 }
 
-enum FoodEntryType {
+enum FoodEntryType() {
   singleIngredient,
   recipe,
   brandedProduct,
@@ -63,7 +63,7 @@ enum FoodEntryType {
   static FoodEntryType fromJson(String json) => values.byName(json);
 }
 
-enum PortionEstimationMethod {
+enum PortionEstimationMethod() {
   householdMeasure,
   photograph,
   standardUnit,
@@ -74,7 +74,7 @@ enum PortionEstimationMethod {
   static PortionEstimationMethod fromJson(String json) => values.byName(json);
 }
 
-enum PortionState {
+enum PortionState() {
   raw,
   cooked,
   asServed;
@@ -83,7 +83,7 @@ enum PortionState {
   static PortionState fromJson(String json) => values.byName(json);
 }
 
-enum FoodSource {
+enum FoodSource() {
   openfoodfacts,
   usda,
   mealdb,

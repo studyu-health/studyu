@@ -1,0 +1,2591 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Korean (`ko`).
+class AppLocalizationsKo extends AppLocalizations {
+  AppLocalizationsKo([String locale = 'ko']) : super(locale);
+
+  @override
+  String get loading => '로딩 중';
+
+  @override
+  String get starting_study => '연구를 시작하는 중…';
+
+  @override
+  String get loading_error_title => '로딩 오류';
+
+  @override
+  String get loading_error_description =>
+      '연구 데이터를 가져올 수 없습니다. 현재 연구에 참여 중이라면 먼저 연구 담당자에게 도움을 요청하십시오. 연구에 참여하지 않거나 담당자가 요청하는 경우에만 지원팀에 연락하십시오. 담당자나 지원팀의 지시 없이 데이터를 삭제하지 마십시오. 데이터를 삭제하면 연구 데이터가 모두 제거되며 연구에 다시 참여해야 합니다.';
+
+  @override
+  String get try_again => '다시 시도';
+
+  @override
+  String get delete_all_data => '모든 데이터 삭제';
+
+  @override
+  String get delete_all_data_description =>
+      '정말로 모든 데이터를 삭제하시겠습니까? 이렇게 하면 모든 연구 데이터가 삭제되며 연구에 다시 참여해야 합니다.';
+
+  @override
+  String get reset_app => '앱 재설정';
+
+  @override
+  String get what_is_studyu => 'StudyU란 무엇입니까?';
+
+  @override
+  String get description_part1 =>
+      '다음 문장을 읽는 것을 상상해보세요: \"오후 6시 이후에 먹으면 수면의 질이 떨어진다\"';
+
+  @override
+  String get description_part2 =>
+      '이제 이렇게 생각할 수 있습니다: 음… 알겠지만, 그게 모든 사람에게 그리고 나에게도 영향을 미치나?';
+
+  @override
+  String get description_part3 =>
+      '문제는 본인이 해당 연구에 직접 참여하지 않았기 때문에 이 질문에 답할 수 없다는 점입니다. 일반적인 연구로는 수면의 질이 영향을 받을 가능성만 알 수 있습니다. 늦은 식사가 본인의 수면에 미치는 영향은 직접 확인해야 합니다.';
+
+  @override
+  String get description_part4 =>
+      '이를 확인하려면 늦게 먹는 기간과 늦게 먹지 않는 기간을 나누어 개인 연구를 진행하고, 수면의 질을 정기적으로 기록해야 합니다. 이렇게 모은 결과로 늦은 식사가 본인의 수면의 질을 낮추는지 판단할 수 있습니다. StudyU는 이런 질문에 신뢰할 수 있는 답을 얻도록 돕습니다.';
+
+  @override
+  String get description_part5 =>
+      'StudyU에서는 전문가가 설계한 N-of-1 연구에 참여할 수 있습니다. N-of-1은 연구 참가자 수(N)가 1명이라는 뜻입니다. 일반적인 임상시험과 마찬가지로 N-of-1 시험에도 명확한 연구 계획, 즉 연구 프로토콜이 필요합니다.';
+
+  @override
+  String get description_part6 =>
+      '그리고 좋은 연구 프로토콜을 만드는 것이 쉽지 않기 때문에, 저희는 이 앱을 개발했습니다. 여기에서 여러분은 개인적인 관심사에 따라 다양한 N-of-1 연구를 선택할 수 있으며, 전문가가 개발한 계획을 자동으로 받아 신뢰할 수 있는 결과를 얻을 수 있습니다.';
+
+  @override
+  String get description_part7 =>
+      '연구를 선택하면 건강 상태상 안전하게 참여할 수 있는지 확인합니다. 참가 등록 후에는 연구 계획을 일상에 맞게 조정할 수 있습니다. 늦게 먹기나 피로도 평가 같은 과제를 정해진 주기(예: 하루 한 번)에 수행합니다. 최소 연구 기간(보통 몇 주)을 채우면 무료로 결과를 확인할 수 있습니다.';
+
+  @override
+  String get description_part8 =>
+      '연구에 오래 참여하고 과제를 꾸준히 수행할수록 결과의 신뢰도가 높아집니다. 체계적 오류를 막기 위해 결과를 확인한 뒤에는 연구를 계속할 수 없습니다. 진행률 표시줄에서 결과 확인까지 남은 과제 수와 연구를 더 진행할 때 높아지는 결과의 신뢰도를 확인할 수 있습니다.';
+
+  @override
+  String get description_part9 => '설명은 이쯤 하고, 이제 StudyU를 시작해 보세요!';
+
+  @override
+  String get get_started => '시작하기';
+
+  @override
+  String get welcome_find_study_title => '나에게 맞는 연구 찾기';
+
+  @override
+  String get made_with_love_in_potsdam => '포츠담에서 정성을 담아 제작';
+
+  @override
+  String get welcome_find_study_description => '공개 연구를 선택하거나 초대장을 사용하세요.';
+
+  @override
+  String get browse_public_studies => '공개 연구 둘러보기';
+
+  @override
+  String get welcome_returning_participant => 'StudyU 연구에 참여한 적이 있나요?';
+
+  @override
+  String get restore_studyu_account => 'StudyU 계정 복구';
+
+  @override
+  String get show_onboarding_again => '온보딩 다시 보기';
+
+  @override
+  String get onboarding_page0_title => 'StudyU에 오신 것을 환영합니다.';
+
+  @override
+  String get onboarding_page0_subtitle =>
+      '연구원들은 평균적으로 무엇이 효과가 있는지 추정할 수 있습니다. 하지만 어떤 습관이나 치료가 본인에게 효과가 있는지는 판단할 수 없습니다. StudyU는 그 질문을 직접 확인할 수 있도록 도와줍니다.';
+
+  @override
+  String get onboarding_page1_title => '나만을 위한 연구';
+
+  @override
+  String get onboarding_page1_subtitle =>
+      'N-of-1 연구에서는 참가자가 단 한 명입니다. 일찍 먹기와 늦게 먹기처럼 서로 다른 단계를 따르고, 수면의 질과 같은 결과를 기록합니다.';
+
+  @override
+  String get onboarding_page2_title => '전문가 연구 계획';
+
+  @override
+  String get onboarding_page2_subtitle =>
+      '궁금한 점에 맞는 연구를 선택하세요. StudyU는 전문가가 설계한 프로토콜을 제공하고, 안전하게 참여할 수 있는지 확인하며, 계획을 일상에 맞추도록 돕습니다.';
+
+  @override
+  String get onboarding_page3_title => '정기 작업 완료';
+
+  @override
+  String get onboarding_page3_subtitle =>
+      '지정된 옵션을 따라 일일 관찰을 기록하세요. 진행률 표시줄은 결과를 볼 수 있기 전에 남은 작업 수를 보여줍니다.';
+
+  @override
+  String get onboarding_page4_title => '신뢰할 수 있는 근거 쌓기';
+
+  @override
+  String get onboarding_page4_subtitle =>
+      '몇 주가 지나면 각 옵션이 얼마나 효과가 있었는지 비교할 수 있습니다. 과제를 완료할수록 결과의 신뢰도가 높아집니다. 결과를 확인하면 분석 결과가 왜곡되지 않도록 StudyU가 연구를 종료합니다.';
+
+  @override
+  String get study_selection => '연구 선택';
+
+  @override
+  String get study_selection_single => '한 번에 하나의 연구에만 참여할 수 있습니다.';
+
+  @override
+  String get study_selection_single_why => '이유는 무엇인가요?';
+
+  @override
+  String get study_selection_single_reason =>
+      '여러 연구에 동시에 참여하면, 이러한 연구들의 개입이 서로 간섭하여 결과를 변경시킬 수 있습니다.';
+
+  @override
+  String get study_selection_unsupported_title => '오래된 앱 버전';
+
+  @override
+  String get study_selection_unsupported =>
+      '참여하려는 연구는 현재 앱 버전과 호환되지 않습니다. 앱을 최신 버전으로 업데이트해 주세요.';
+
+  @override
+  String get study_selection_closed_title => '신규 등록 마감';
+
+  @override
+  String get study_selection_closed => '이 연구는 현재 신규 참여자를 받지 않습니다.';
+
+  @override
+  String get study_selection_hidden_studies =>
+      '일부 연구를 표시할 수 없습니다. 이는 앱 버전이 오래된 경우 발생할 수 있습니다. 모든 사용 가능한 연구를 확인하려면 앱을 업데이트하거나 아래에 표시된 연구 중 하나에 참여하세요.';
+
+  @override
+  String get study_selection_no_public_studies =>
+      '현재 참여할 수 있는 공개 연구가 없습니다. 초대 코드가 있으면 비공개 연구에 참여할 수 있습니다.';
+
+  @override
+  String get study_overview_title => '개요';
+
+  @override
+  String get eligibility_questionnaire_title => '설문지';
+
+  @override
+  String get please_answer_eligibility =>
+      '귀하가 안전하게 이 연구에 참여할 수 있는지 확인하기 위해 몇 가지 질문에 답해 주시기 바랍니다.';
+
+  @override
+  String get intervention_selection_title => '중재 선택';
+
+  @override
+  String get please_select_interventions => '연구 중에 적용할 두 가지 개입을 선택해 주십시오.';
+
+  @override
+  String get please_select_interventions_description =>
+      '연구 동안 이 두 개입의 효과를 측정하고 비교합니다.';
+
+  @override
+  String get no_interventions_available => '사용 가능한 개입이 없습니다';
+
+  @override
+  String get loading_interventions => '개입 로딩 중';
+
+  @override
+  String get task_already_completed => '오늘 이미 이 작업을 완료했습니다';
+
+  @override
+  String get task_cannot_be_completed => '작업을 완료할 수 없습니다';
+
+  @override
+  String get task_outside_period => '개입 기간 외에는 작업을 완료할 수 없습니다';
+
+  @override
+  String get study_notification_body => '완료할 새 과제가 있습니다.';
+
+  @override
+  String get intervention_phase_duration => '개입 단계 기간';
+
+  @override
+  String get days => '일';
+
+  @override
+  String get study_length => '연구 길이';
+
+  @override
+  String get study_publisher => '연구 발행자';
+
+  @override
+  String get tasks_daily => '작업:';
+
+  @override
+  String get baseline_description =>
+      '기준선은 연구의 초기 상태를 측정해 나중에 비교할 수 있도록 하는 단계입니다. 기준선 단계에서는 평소처럼 행동하며, 연구에서 정한 중재는 아직 시행하지 않습니다.';
+
+  @override
+  String get baseline => '기준선';
+
+  @override
+  String get days_left => '남은 일';
+
+  @override
+  String get today_tasks => '오늘의 작업';
+
+  @override
+  String get intervention_current => '현재 개입';
+
+  @override
+  String get study_current => '현재 연구:';
+
+  @override
+  String get opt_out => '연구 탈퇴';
+
+  @override
+  String get leave_study_keep_data_title => '연구를 종료하고 데이터를 유지할까요?';
+
+  @override
+  String leave_study_keep_data_body(String studyName) {
+    return '“$studyName” 연구 참여를 종료합니다. 이미 제출한 진행 상황과 응답은 유지되며, 연구자는 익명화된 데이터를 계속 사용할 수 있습니다.\n\n연구를 종료한 뒤에는 이 참여에 다시 참여할 수 없습니다. 이전 연구에는 영향을 주지 않습니다.';
+  }
+
+  @override
+  String get stay_in_study => '연구 계속 참여';
+
+  @override
+  String get acknowledge_consequences => '이 정보를 읽었으며 그 결과를 이해했습니다.';
+
+  @override
+  String get leave_keep_data => '연구를 종료하고 내 데이터 유지';
+
+  @override
+  String get leave_study_description => '연구 참여를 종료합니다. 기존 연구 데이터는 유지됩니다.';
+
+  @override
+  String get delete_data => '연구를 탈퇴하고 모든 데이터를 삭제하세요';
+
+  @override
+  String get leave_study_delete_data_title => '연구를 종료하고 내 데이터를 삭제할까요?';
+
+  @override
+  String leave_study_delete_data_body(String studyName) {
+    return '“$studyName” 연구 참여를 종료합니다. 서버에서 이 연구의 진행 상황과 응답을 영구적으로 삭제하고, 이 기기에 저장된 데이터도 삭제합니다.\n\n이 작업은 취소할 수 없습니다. 본인과 연구팀 모두 이 데이터를 복구할 수 없습니다.';
+  }
+
+  @override
+  String get leave_delete_data => '연구를 종료하고 내 데이터 삭제';
+
+  @override
+  String get delete_study_data_description =>
+      '연구 데이터를 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.';
+
+  @override
+  String get soft_delete_desc => '다음 ';
+
+  @override
+  String get soft_delete_desc_2 =>
+      ' 연구의 진행 상황이 삭제되며 복구할 수 없습니다. 이전에 완료한 연구는 삭제되지 않습니다.\n지금까지 익명화된 데이터는 연구 목적으로 계속 사용될 수 있습니다.';
+
+  @override
+  String get hard_delete_desc =>
+      '기기와 서버에서 모든 데이터를 삭제하려고 합니다. 데이터를 복원할 수 없습니다.\n익명화된 데이터는 더 이상 연구 목적으로 사용되지 않습니다.';
+
+  @override
+  String get your_journey => '나의 연구 여정';
+
+  @override
+  String get journey_overview_description => '계속하기 전에 연구 일정을 확인하세요.';
+
+  @override
+  String get journey_results_available => '결과 이용 가능';
+
+  @override
+  String get summary => '요약';
+
+  @override
+  String get consent => '동의';
+
+  @override
+  String get error => '오류가 발생했습니다!';
+
+  @override
+  String get tea_vs_coffee => '차 vs. 커피';
+
+  @override
+  String get weed_vs_alcohol => '대마초 vs. 알코올';
+
+  @override
+  String get back_pain => '허리 통증';
+
+  @override
+  String get video_task => '비디오 과제';
+
+  @override
+  String get finished => '완료됨';
+
+  @override
+  String get how_would_you_rate_your_pain_today =>
+      '오늘 통증 정도를 어떻게 평가하시겠습니까? (0 = 통증 없음, 10 = 극심한 통증)';
+
+  @override
+  String get thank_you_for_your_input => '의견을 주셔서 감사합니다';
+
+  @override
+  String get please_give_consent =>
+      '이 연구에 참여하는 데 동의해 주시기 바랍니다. 모든 상자를 클릭하여 읽어야 합니다.';
+
+  @override
+  String get please_give_consent_why => '이유는 무엇입니까?';
+
+  @override
+  String get please_give_consent_reason =>
+      '연구자는 안전 및 데이터 개인정보 보호를 위해 참가자로부터 특정 동의를 요청해야 합니다. 따라서 각 연구에 참여하려면 명시적으로 동의해야 합니다.';
+
+  @override
+  String get user_did_not_give_consent => '동의하지 않으셨습니다. 참여하려면 동의가 필요합니다.';
+
+  @override
+  String get dashboard => '대시보드';
+
+  @override
+  String get study_not_available_for_testing_yet => '이 연구는 아직 테스트할 수 없습니다.';
+
+  @override
+  String get home => '홈';
+
+  @override
+  String get profile => '프로필';
+
+  @override
+  String get help => '도움말';
+
+  @override
+  String get contact => '연락처';
+
+  @override
+  String get contact_support => '지원팀에 연락';
+
+  @override
+  String support_email_body(String subjectId) {
+    return '안녕하세요,\n\nStudyU 앱에서 로딩 오류가 발생하고 있습니다. 제 참여자 ID는: $subjectId 입니다.\n\n이 문제에 대해 도와주시기 바랍니다.\n\n감사합니다.';
+  }
+
+  @override
+  String get about => '정보';
+
+  @override
+  String get study_information => '연구 정보';
+
+  @override
+  String get study_information_description => '연구팀에서 요청하는 경우에만 이 정보를 공유하세요.';
+
+  @override
+  String get study_name => '연구 이름';
+
+  @override
+  String get study_id => '연구 ID';
+
+  @override
+  String get subject_id => '참여자 ID';
+
+  @override
+  String get study_start_date => '연구 시작일';
+
+  @override
+  String get app_version => '앱 버전';
+
+  @override
+  String get platform => '플랫폼';
+
+  @override
+  String get not_available => '사용할 수 없음';
+
+  @override
+  String get view_study_information => '세부 정보 보기';
+
+  @override
+  String get email_study_team => '연구팀에 문의';
+
+  @override
+  String get study_team_email_unavailable => '이 연구에는 문의 이메일이 없습니다.';
+
+  @override
+  String get copy_all_information => '모두 복사';
+
+  @override
+  String value_copied(String label) {
+    return '$label이(가) 클립보드에 복사되었습니다.';
+  }
+
+  @override
+  String get all_information_copied => '모든 정보가 클립보드에 복사되었습니다.';
+
+  @override
+  String get participant_information_email_subject => '[StudyU] 참여자 정보';
+
+  @override
+  String get participant_information_email_intro =>
+      '안녕하세요,\n\n연구 참여와 관련하여 문의드립니다. 제 StudyU 정보는 다음과 같습니다:';
+
+  @override
+  String get email_app_unavailable => '사용할 수 있는 이메일 앱이 없습니다.';
+
+  @override
+  String get settings => '설정';
+
+  @override
+  String get yes => '예';
+
+  @override
+  String get no => '아니요';
+
+  @override
+  String get confirm => '선택 확인';
+
+  @override
+  String get survey => '설문조사';
+
+  @override
+  String get complete => '완료';
+
+  @override
+  String get cancel => '취소';
+
+  @override
+  String get accept => '수락';
+
+  @override
+  String get decline => '거절';
+
+  @override
+  String get next => '다음';
+
+  @override
+  String get back => '뒤로';
+
+  @override
+  String get done => '완료';
+
+  @override
+  String get completed => '완료됨';
+
+  @override
+  String get faq_full => '자주 묻는 질문';
+
+  @override
+  String get faq => '자주 묻는 질문';
+
+  @override
+  String get start_study => '연구 시작';
+
+  @override
+  String get next_day => '다음 날';
+
+  @override
+  String get could_not_save_results => '결과를 저장할 수 없습니다';
+
+  @override
+  String get take_a_photo => '사진 촬영';
+
+  @override
+  String get start_recording => '녹음 시작';
+
+  @override
+  String get stop_recording => '녹음 중지';
+
+  @override
+  String get error_recording => '녹음 중 오류 발생';
+
+  @override
+  String get photo_captured => '촬영된 사진';
+
+  @override
+  String get audio_recorded => '오디오 녹음됨';
+
+  @override
+  String get multimodal_not_supported =>
+      '다중 모드 과제는 현재 웹 브라우저에서 실행할 수 없습니다. Android 또는 iOS용 StudyU 앱을 사용해 주세요.';
+
+  @override
+  String get camera_access_denied => '카메라 접근 거부됨';
+
+  @override
+  String get no_camera_available => '사용 가능한 카메라가 없습니다';
+
+  @override
+  String get microphone_access_denied => '마이크 접근 거부됨';
+
+  @override
+  String get camera_error => '카메라 오류';
+
+  @override
+  String get recording_error => '녹음 오류';
+
+  @override
+  String get storing_photo => '사진이 저장되고 있습니다';
+
+  @override
+  String get storing_audio => '오디오 파일이 저장되고 있습니다';
+
+  @override
+  String get upload_error => '파일을 업로드할 수 없습니다';
+
+  @override
+  String get language => '언어';
+
+  @override
+  String get use_device_language => '기기 언어 사용';
+
+  @override
+  String get en => '영어';
+
+  @override
+  String get de => '독일어';
+
+  @override
+  String get allow_analytics => '앱 분석 허용';
+
+  @override
+  String get allow_analytics_desc =>
+      '수집된 모든 데이터는 앱 성능 개선에만 사용되며 추적 목적으로는 사용되지 않습니다. 자세한 내용은 개인정보 처리방침에서 확인할 수 있습니다.';
+
+  @override
+  String get video_test => '이것은 비디오 테스트입니다';
+
+  @override
+  String get survey_test => '이것은 설문조사 테스트입니다';
+
+  @override
+  String get current_report => '현재 보고서';
+
+  @override
+  String get report_history => '보고서 기록';
+
+  @override
+  String get no_reports_found => '아직 정의된 보고서가 없습니다';
+
+  @override
+  String get current_power_level => '현재 상태';
+
+  @override
+  String get not_enough_data => '데이터가 충분하지 않습니다';
+
+  @override
+  String get barely_enough_data => '최소한의 데이터 확보';
+
+  @override
+  String get enough_data => '충분한 데이터';
+
+  @override
+  String get legal_documents => '법적 문서';
+
+  @override
+  String get legal_documents_description => '계속하려면 이 문서를 검토하고 동의하세요.';
+
+  @override
+  String get terms => '이용 약관';
+
+  @override
+  String get terms_read => '이용 약관 읽기';
+
+  @override
+  String get terms_content =>
+      '이용 약관은 StudyU 앱의 목적과 사용에 대한 개요를 제공합니다. 궁금한 점이 있으시면 법적 고지에 있는 연락처를 통해 문의해 주십시오.';
+
+  @override
+  String get terms_agree => '이용 약관을 읽었으며 이에 동의합니다';
+
+  @override
+  String get privacy => '개인정보 처리방침';
+
+  @override
+  String get privacy_read => '개인정보 처리방침 읽기';
+
+  @override
+  String get privacy_content =>
+      '개인정보 처리방침에는 저장되는 데이터와 저장 이유, 시기, 장소, 데이터 접근 권한 및 이용자의 권리가 설명되어 있습니다. 문의 사항이 있으면 법적 고지에 있는 연락처로 문의해 주세요.';
+
+  @override
+  String get privacy_agree => '개인정보 처리방침을 읽었으며 이에 동의합니다';
+
+  @override
+  String get legal_notice => '법적 고지';
+
+  @override
+  String get legal_notice_content => '법적 고지에는 StudyU의 책임자와 문의 방법이 나와 있습니다.';
+
+  @override
+  String get imprint_read => '법적 고지 읽기';
+
+  @override
+  String get invite_code_button => '초대 코드 사용';
+
+  @override
+  String get private_study_invite_code => '비공개 연구 초대 코드';
+
+  @override
+  String get private_study_invite_code_description => '연구팀에서 받은 코드를 입력하세요.';
+
+  @override
+  String get invite_code => '초대 코드';
+
+  @override
+  String get invalid_invite_code => '유효하지 않은 초대 코드입니다';
+
+  @override
+  String get save_pdf => 'PDF로 저장';
+
+  @override
+  String get was_saved_to => '파일 저장 위치: ';
+
+  @override
+  String get save_not_supported => '오류';
+
+  @override
+  String get save_not_supported_description => '현재 웹 버전에서는 파일 다운로드를 지원하지 않습니다.';
+
+  @override
+  String get eligible_no => '귀하는 이 연구에 적합하지 않습니다';
+
+  @override
+  String get eligible_yes => '귀하는 이 연구에 적합합니다';
+
+  @override
+  String get eligible_mistake => '실수를 했다면 여전히 답변을 변경할 수 있습니다';
+
+  @override
+  String get eligible_back => '연구 선택으로 돌아가기';
+
+  @override
+  String get eligible_choice_multi_selection => '해당되는 모든 항목 선택';
+
+  @override
+  String get eligible_choice_multi_selection_required =>
+      '해당하는 항목을 모두 선택하세요(하나 이상 필수)';
+
+  @override
+  String get report_overview => '보고서 개요';
+
+  @override
+  String get report_primary_result => '주요 결과';
+
+  @override
+  String get report_disclaimer => '이 보고서는 모든 정보를 올바르게 입력했을 경우에만 유효합니다.';
+
+  @override
+  String get performance => '수행';
+
+  @override
+  String get performance_overview => '작업 완료 개요';
+
+  @override
+  String get performance_overview_interventions => '개입';
+
+  @override
+  String get performance_overview_observations => '관찰';
+
+  @override
+  String get report_outcome_inconclusive =>
+      '결과는 결론을 내리기 어렵습니다. 중재 간에 통계적으로 유의미한 차이가 없는 것으로 보입니다.';
+
+  @override
+  String get report_outcome_neither => '두 중재 모두 귀하의 결과에 부정적인 영향을 미친 것으로 보입니다.';
+
+  @override
+  String report_outcome_one(Object intervention) {
+    return '$intervention 중재가 귀하의 결과를 개선하는 것으로 보입니다.';
+  }
+
+  @override
+  String get report_axis_phase => '단계';
+
+  @override
+  String get completed_study => '마지막 연구를 완료했습니다. 이전 보고서를 확인하거나 새 연구를 시작하세요.';
+
+  @override
+  String get app_support => '앱 지원';
+
+  @override
+  String get app_support_text => '앱 관련 문제나 질문 문의';
+
+  @override
+  String get study_support => '연구 지원';
+
+  @override
+  String get study_support_text => '연구 관련 문제나 문의 연락처';
+
+  @override
+  String get organization => '조직';
+
+  @override
+  String get irb => '기관생명윤리위원회(IRB)';
+
+  @override
+  String get researchers => '연구원';
+
+  @override
+  String get website => '웹사이트';
+
+  @override
+  String get email => '이메일';
+
+  @override
+  String get phone => '전화';
+
+  @override
+  String get additionalInfo => '추가 정보';
+
+  @override
+  String free_text_min_length_error(num min) {
+    return '최소 $min자 이상 입력해 주세요';
+  }
+
+  @override
+  String free_text_max_length_error(num max) {
+    return '최대 $max자까지 입력해 주세요';
+  }
+
+  @override
+  String get free_text_alphanumeric_error => '영숫자 문자만 입력해 주세요';
+
+  @override
+  String get free_text_numeric_error => '숫자만 입력해 주세요';
+
+  @override
+  String get free_text_custom_error => '필수 형식으로 값을 입력해 주세요';
+
+  @override
+  String get app_outdated_message =>
+      'StudyU 앱의 새로운 버전이 있습니다. 최신 기능과 개선 사항을 이용하려면 업데이트해 주세요. 지원해 주셔서 감사합니다!';
+
+  @override
+  String get update_now => '지금 업데이트';
+
+  @override
+  String get text_summary_section_prefix_higher => '귀하의 ';
+
+  @override
+  String get text_summary_section_was_higher => ' 수치가 더 높았던 중재: ';
+
+  @override
+  String get text_summary_section_was_lower => ' 수치가 더 낮았던 중재: ';
+
+  @override
+  String get text_summary_section_compared_to => ', 비교 대상: ';
+
+  @override
+  String get text_summary_section_and => ' 및 ';
+
+  @override
+  String get text_summary_section_no_evidence => '중재 간 ';
+
+  @override
+  String get text_summary_section_between => ' 차이가 있다는 근거가 없습니다. 비교한 중재: ';
+
+  @override
+  String get intervention => '개입';
+
+  @override
+  String get phase => '단계';
+
+  @override
+  String get day => '일';
+
+  @override
+  String get no_data_available_yet => '아직 사용 가능한 데이터가 없습니다';
+
+  @override
+  String get value => '값';
+
+  @override
+  String get show_colorless_gauges => '접근 가능한 차트 활성화';
+
+  @override
+  String get welchs_t_test_results => 'Welch의 t-검정 결과';
+
+  @override
+  String get sample_a => '샘플 A';
+
+  @override
+  String get sample_b => '샘플 B';
+
+  @override
+  String get sample_size => 'n';
+
+  @override
+  String get mean => '평균';
+
+  @override
+  String get variance => '분산';
+
+  @override
+  String get t_statistic => 't-통계량';
+
+  @override
+  String get degrees_of_freedom => '자유도';
+
+  @override
+  String get p_value => 'p-값';
+
+  @override
+  String get result_significant => '통계적으로 유의한 차이 있음';
+
+  @override
+  String get result_not_significant => '통계적으로 유의한 차이 없음';
+
+  @override
+  String get level_of_significance => '유의 수준';
+
+  @override
+  String get t_test_outcome_based_on => '결과는 다음 값에 따라 결정됩니다:';
+
+  @override
+  String get statistical_information => '통계 정보';
+
+  @override
+  String get close => '닫기';
+
+  @override
+  String get significance_level_and_p_value => '유의수준 및 p-값';
+
+  @override
+  String get descriptive_statistics => '기술 통계';
+
+  @override
+  String compare_results_between(String nameA, String nameB) {
+    return '$nameA 및 $nameB 결과 비교';
+  }
+
+  @override
+  String get missing_observations_note =>
+      '참고: 누락된 관측값은 데이터가 기록되지 않은 날짜를 나타냅니다.';
+
+  @override
+  String get quick_summary => '간단 요약';
+
+  @override
+  String get average_score => '평균 점수';
+
+  @override
+  String get data_completeness => '데이터 완전성';
+
+  @override
+  String get statistic => '통계';
+
+  @override
+  String get total_recordings => '총 녹음 수';
+
+  @override
+  String get missing_recordings => '누락된 녹음';
+
+  @override
+  String get average => '평균';
+
+  @override
+  String get minimum => '최소';
+
+  @override
+  String get maximum => '최대';
+
+  @override
+  String get support_email_sent => '지원 이메일이 준비되었습니다';
+
+  @override
+  String get support_email_sent_description =>
+      '지원 요청이 이메일 앱에 작성되었습니다. 이메일을 보내 지원팀에 문의한 뒤 답변을 기다려 주세요.\n\n현재 연구에 참여 중이라면 문제가 해결될 때까지 앱 외부에서 결과를 계속 기록해 주세요. 이해해 주셔서 감사합니다.';
+
+  @override
+  String get no_contact_email =>
+      '지원 이메일 주소가 구성되지 않았습니다. 도움을 받으려면 연구 감독자에게 문의하십시오.';
+
+  @override
+  String get sync_fitbit_data => 'Fitbit 데이터 동기화';
+
+  @override
+  String get fitbit_data_synced => 'Fitbit 데이터 동기화에 성공했습니다';
+
+  @override
+  String get fitbit_data_not_synced =>
+      'Fitbit 데이터를 동기화할 수 없습니다. Fitbit 데이터를 Fitbit 앱과 동기화했는지 확인하세요.';
+
+  @override
+  String error_syncing_fitbit_data(String error) {
+    return 'Fitbit 데이터 동기화 중 오류 발생: $error';
+  }
+
+  @override
+  String get fitbit_data_synced_dialog_title => 'Fitbit 데이터 동기화 완료';
+
+  @override
+  String get fitbit_data_synced_info => '다음 데이터 유형에 대해 데이터가 동기화되었습니다:';
+
+  @override
+  String fitbit_data_earliest_date(String date) {
+    return '가장 이른 날짜: $date';
+  }
+
+  @override
+  String fitbit_data_latest_date(String date) {
+    return '가장 최근 날짜: $date';
+  }
+
+  @override
+  String get fitbit_data_details_btn => '세부 정보';
+
+  @override
+  String get fitbit_data_close_btn => '닫기';
+
+  @override
+  String get painIndicatorText => '통증 수준';
+
+  @override
+  String get dialogTitle => '통증 수준 선택';
+
+  @override
+  String get okButton => '확인';
+
+  @override
+  String get cancelButton => '취소';
+
+  @override
+  String get painLevel_0 => '통증 없음';
+
+  @override
+  String get painLevel_2 => '약간 아픔';
+
+  @override
+  String get painLevel_4 => '조금 더 아픔';
+
+  @override
+  String get painLevel_6 => '훨씬 더 아픔';
+
+  @override
+  String get painLevel_8 => '매우 아픔';
+
+  @override
+  String get painLevel_10 => '가능한 최악의 통증';
+
+  @override
+  String get body_head => '머리';
+
+  @override
+  String get body_head_front => '머리 (앞)';
+
+  @override
+  String get body_face => '얼굴';
+
+  @override
+  String get body_forehead => '이마';
+
+  @override
+  String get body_eyes => '눈';
+
+  @override
+  String get body_nose => '코';
+
+  @override
+  String get body_mouth => '입';
+
+  @override
+  String get body_head_back => '머리 (뒤)';
+
+  @override
+  String get body_inner_ear_balance => '내이 / 균형';
+
+  @override
+  String get body_neck => '목';
+
+  @override
+  String get body_neck_front => '목 (앞)';
+
+  @override
+  String get body_neck_back => '목 (뒤)';
+
+  @override
+  String get body_torso => '몸통';
+
+  @override
+  String get body_chest => '가슴';
+
+  @override
+  String get body_left_chest => '왼쪽 가슴';
+
+  @override
+  String get body_right_chest => '오른쪽 가슴';
+
+  @override
+  String get body_breastbone => '흉골';
+
+  @override
+  String get body_upper_back => '등 상부';
+
+  @override
+  String get body_left_shoulder_blade => '왼쪽 어깨뼈';
+
+  @override
+  String get body_right_shoulder_blade => '오른쪽 어깨뼈';
+
+  @override
+  String get body_spine_upper_middle => '척추 (상부/중간)';
+
+  @override
+  String get body_abdomen => '복부';
+
+  @override
+  String get body_upper_abdomen => '상복부';
+
+  @override
+  String get body_lower_abdomen => '하복부';
+
+  @override
+  String get body_left_side_abdomen => '왼쪽 측면 (복부)';
+
+  @override
+  String get body_right_side_abdomen => '오른쪽 옆 (복부)';
+
+  @override
+  String get body_lower_back => '허리';
+
+  @override
+  String get body_spine_lower => '척추 (하부)';
+
+  @override
+  String get body_left_flank => '왼쪽 옆구리';
+
+  @override
+  String get body_right_flank => '오른쪽 옆구리';
+
+  @override
+  String get body_arms => '팔';
+
+  @override
+  String get body_left_arm => '왼팔';
+
+  @override
+  String get body_left_shoulder => '왼쪽 어깨';
+
+  @override
+  String get body_left_upper_arm => '왼쪽 상완';
+
+  @override
+  String get body_left_bicep => '왼쪽 이두근';
+
+  @override
+  String get body_left_tricep => '왼쪽 삼두근';
+
+  @override
+  String get body_left_elbow => '왼쪽 팔꿈치';
+
+  @override
+  String get body_left_lower_arm => '왼쪽 하부 팔';
+
+  @override
+  String get body_left_forearm => '왼쪽 팔뚝';
+
+  @override
+  String get body_left_wrist => '왼쪽 손목';
+
+  @override
+  String get body_left_hand => '왼손';
+
+  @override
+  String get body_left_palm => '왼손바닥';
+
+  @override
+  String get body_left_fingers => '왼쪽 손가락';
+
+  @override
+  String get body_right_arm => '오른팔';
+
+  @override
+  String get body_right_shoulder => '오른쪽 어깨';
+
+  @override
+  String get body_right_upper_arm => '오른쪽 상완';
+
+  @override
+  String get body_right_bicep => '오른쪽 이두근';
+
+  @override
+  String get body_right_tricep => '오른쪽 삼두근';
+
+  @override
+  String get body_right_elbow => '오른쪽 팔꿈치';
+
+  @override
+  String get body_right_lower_arm => '오른쪽 하부 팔';
+
+  @override
+  String get body_right_forearm => '오른쪽 팔뚝';
+
+  @override
+  String get body_right_wrist => '오른쪽 손목';
+
+  @override
+  String get body_right_hand => '오른쪽 손';
+
+  @override
+  String get body_right_palm => '오른쪽 손바닥';
+
+  @override
+  String get body_right_fingers => '오른쪽 손가락';
+
+  @override
+  String get body_lower_body => '하체';
+
+  @override
+  String get body_pelvis => '골반';
+
+  @override
+  String get body_groin => '사타구니';
+
+  @override
+  String get body_hips => '엉덩이 / 골반';
+
+  @override
+  String get body_buttocks => '엉덩이';
+
+  @override
+  String get body_legs => '다리';
+
+  @override
+  String get body_left_leg => '왼쪽 다리';
+
+  @override
+  String get body_left_upper_leg => '왼쪽 허벅지';
+
+  @override
+  String get body_left_thigh_front => '왼쪽 허벅지 (앞)';
+
+  @override
+  String get body_left_thigh_back => '왼쪽 허벅지 (뒤)';
+
+  @override
+  String get body_left_knee => '왼쪽 무릎';
+
+  @override
+  String get body_left_lower_leg => '왼쪽 하부 다리';
+
+  @override
+  String get body_left_shin => '왼쪽 정강이';
+
+  @override
+  String get body_left_calf => '왼쪽 종아리';
+
+  @override
+  String get body_left_ankle => '왼쪽 발목';
+
+  @override
+  String get body_left_foot => '왼발';
+
+  @override
+  String get body_left_heel => '왼쪽 뒤꿈치';
+
+  @override
+  String get body_left_foot_sole => '왼쪽 발바닥 / 아치';
+
+  @override
+  String get body_left_toes => '왼쪽 발가락';
+
+  @override
+  String get body_right_leg => '오른쪽 다리';
+
+  @override
+  String get body_right_upper_leg => '오른쪽 허벅지';
+
+  @override
+  String get body_right_thigh_front => '오른쪽 허벅지 (앞)';
+
+  @override
+  String get body_right_thigh_back => '오른쪽 허벅지 (뒤)';
+
+  @override
+  String get body_right_knee => '오른쪽 무릎';
+
+  @override
+  String get body_right_lower_leg => '오른쪽 하부 다리';
+
+  @override
+  String get body_right_shin => '오른쪽 정강이';
+
+  @override
+  String get body_right_calf => '오른쪽 종아리';
+
+  @override
+  String get body_right_ankle => '오른쪽 발목';
+
+  @override
+  String get body_right_foot => '오른쪽 발';
+
+  @override
+  String get body_right_heel => '오른쪽 뒤꿈치';
+
+  @override
+  String get body_right_foot_sole => '오른쪽 발바닥 / 아치';
+
+  @override
+  String get body_right_toes => '오른쪽 발가락';
+
+  @override
+  String get painTypeLabel => '통증 유형';
+
+  @override
+  String get bodyPartLabel => '신체 부위';
+
+  @override
+  String get painTypeUnspecified => '지정 안됨';
+
+  @override
+  String get painTypeBurning => '화끈거림';
+
+  @override
+  String get painTypeStabbing => '칼로 찌르는 듯한 통증';
+
+  @override
+  String get painTypeAching => '쑤심';
+
+  @override
+  String get painTypeThrobbing => '욱신거림';
+
+  @override
+  String get painTypeSharp => '날카로움';
+
+  @override
+  String get painTypeDull => '둔함';
+
+  @override
+  String get painTypeCramping => '경련';
+
+  @override
+  String get painTypeRadiating => '방사통';
+
+  @override
+  String get painTypeTingling => '따끔거림';
+
+  @override
+  String get painTypeShooting => '쏘는 듯한 통증';
+
+  @override
+  String get painTypePulsing => '맥박치듯';
+
+  @override
+  String get painTypePressure => '압박감';
+
+  @override
+  String get painTypeTightness => '긴장감';
+
+  @override
+  String get painTypeSoreness => '뻐근함';
+
+  @override
+  String get painTypeStiffness => '뻣뻣함';
+
+  @override
+  String get preview_mode => '미리보기 모드';
+
+  @override
+  String get preview_mode_active => '미리보기 모드 활성';
+
+  @override
+  String get preview_mode_active_state => '미리보기 모드가 이제 활성화되었습니다.';
+
+  @override
+  String get preview_mode_inactive_state => '미리보기 모드가 비활성화되었습니다.';
+
+  @override
+  String get preview_mode_description =>
+      '현재 미리보기 모드에 있습니다. 이를 통해 다음을 할 수 있습니다:\n\n• \'다음 날\' 버튼을 사용하여 연구 일정을 빠르게 진행\n• 제한 없이 여러 번 과제를 완료\n• 실제 데이터에 영향을 주지 않고 전체 연구 흐름을 경험\n\n중요: 미리보기 모드에서의 결과와 데이터는 저장되지 않으며 실제 참가자 결과와 혼합되지 않습니다.';
+
+  @override
+  String get preview_mode_results_not_saved =>
+      '미리보기 모드에서 과제가 완료되었습니다 - 연구 데이터 무결성 보호를 위해 결과는 저장되지 않습니다.';
+
+  @override
+  String get ok => '확인';
+
+  @override
+  String get submit => '제출';
+
+  @override
+  String get go_back => '뒤로 가기';
+
+  @override
+  String get study_settings_section => '연구 설정';
+
+  @override
+  String get recovery_phrase_header => '복구 문구';
+
+  @override
+  String get copy_to_clipboard => '클립보드에 복사';
+
+  @override
+  String get copied_to_clipboard =>
+      '클립보드에 복사되었습니다. 지금 휴대전화의 안전한 곳에 복구 문구를 붙여 넣으세요.';
+
+  @override
+  String get recovery_phrase_save_warning => '다른 사람과 절대 공유하지 마세요.';
+
+  @override
+  String get show_recovery_phrase => '복구 문구 표시';
+
+  @override
+  String get recovery_phrase_saved_confirmation =>
+      '13개 단어를 모두 안전한 곳에 저장했으며, 계정을 복구할 때 다시 확인할 수 있습니다. 연구 설정에서도 다시 확인할 수 있습니다.';
+
+  @override
+  String get recovery_phrase_rotate_button => '복구 문구 재발급';
+
+  @override
+  String get recovery_phrase_rotate_dialog_title => '복구 문구를 재발급할까요?';
+
+  @override
+  String get recovery_phrase_rotate_dialog_description =>
+      '현재 복구 문구는 즉시 더 이상 작동하지 않습니다. 나중에 계정을 복구하려면 새 문구를 저장해야 합니다.';
+
+  @override
+  String get recovery_phrase_rotate_acknowledgement =>
+      '현재 복구 문구가 즉시 더 이상 작동하지 않는다는 점을 이해합니다.';
+
+  @override
+  String get recovery_phrase_rotate_confirm => '문구 재발급';
+
+  @override
+  String get recovery_phrase_rotate_success => '새 복구 문구가 발급되었습니다. 지금 저장하세요.';
+
+  @override
+  String get recovery_phrase_rotate_error => '새 복구 문구를 발급할 수 없습니다. 다시 시도하세요.';
+
+  @override
+  String get continue_to_study => '완료';
+
+  @override
+  String get restore_account => '계정 복구';
+
+  @override
+  String get enter_recovery_phrase => '복구 문구를 입력하세요';
+
+  @override
+  String get restore_account_signed_in_title => '이미 로그인됨';
+
+  @override
+  String get restore_account_signed_in_description =>
+      '이 기기에는 이미 로그인되어 있습니다. 계정을 복구하면 현재 계정이 교체됩니다. 복구 후에도 복구 문구는 계속 유효합니다.';
+
+  @override
+  String get required => '필수';
+
+  @override
+  String get invalid_recovery_phrase =>
+      '이 복구 문구와 일치하는 계정이 없습니다. 13개 단어가 올바른 순서인지 확인하세요.';
+
+  @override
+  String get recovery_phrase_too_many_words =>
+      '복구 문구는 13개 단어로 구성됩니다. 계속하려면 추가 단어를 삭제하세요.';
+
+  @override
+  String recovery_successful(String id) {
+    return '복구에 성공했습니다! ID: $id';
+  }
+
+  @override
+  String get deep_link_error_title => '오류';
+
+  @override
+  String deep_link_study_not_found(String studyId) {
+    return '연구 ID $studyId에 해당하는 연구를 찾을 수 없거나 사용할 수 없습니다';
+  }
+
+  @override
+  String get recovery_in_progress => '계정을 복구하는 중...';
+
+  @override
+  String get recovery_failed => '계정 복구에 실패했습니다. 복구 문구를 확인하고 다시 시도하세요.';
+
+  @override
+  String get recovery_user_not_found => '이 복구 문구와 일치하는 계정을 찾을 수 없습니다.';
+
+  @override
+  String get recovery_network_error => '네트워크 오류입니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get restore_account_description =>
+      '연구에 참여하기 전에 저장한 복구 문구를 사용하여 이 기기에서 계정을 복구하세요.';
+
+  @override
+  String get restore_account_help_title => '복구 문구로 계정 복구';
+
+  @override
+  String get restore_account_help_1 => '13개 단어를 순서대로 모두 입력하세요';
+
+  @override
+  String get restore_account_help_2 => '문구를 직접 입력하거나 붙여 넣을 수 있습니다';
+
+  @override
+  String get share_recovery => '복구 문구 공유';
+
+  @override
+  String get share_as_text => '텍스트로 공유';
+
+  @override
+  String get download_recovery => '복구 문구 다운로드';
+
+  @override
+  String get download_as_text => '텍스트 파일로 다운로드';
+
+  @override
+  String get file_saved => '파일이 저장되었습니다';
+
+  @override
+  String get file_save_error => '파일 저장 오류';
+
+  @override
+  String get share_btn => '공유';
+
+  @override
+  String get copy_btn => '복사';
+
+  @override
+  String get download_btn => '다운로드';
+
+  @override
+  String get general_section => '일반';
+
+  @override
+  String get current_study_section => '현재 연구';
+
+  @override
+  String get participation_options_section => '참여 관리';
+
+  @override
+  String get share_recovery_text_btn => '복구 문구 텍스트 공유';
+
+  @override
+  String get recovery_phrase_load_error => '복구 문구를 불러오지 못했습니다';
+
+  @override
+  String share_error(String error) {
+    return '공유 오류: $error';
+  }
+
+  @override
+  String get deep_link_study_invite_only => '이 연구는 참여를 위해 초대 코드가 필요합니다';
+
+  @override
+  String deep_link_invite_invalid(String code) {
+    return '잘못되었거나 만료된 초대 코드: $code';
+  }
+
+  @override
+  String get deep_link_error_invalid_invite => '잘못된 초대 코드';
+
+  @override
+  String get deep_link_switch_warning_title => '이미 연구에 참여 중입니다';
+
+  @override
+  String deep_link_switch_warning_description(
+    String currentStudy,
+    String targetStudy,
+  ) {
+    return '현재 다음 연구에 참여 중입니다:\n$currentStudy\n\n딥 링크가 가리키는 곳:\n$targetStudy\n\n현재 연구로 돌아가거나(권장) 계속해서 떠나고 전환할 수 있습니다.';
+  }
+
+  @override
+  String deep_link_switch_warning_opt_out_instruction(String optOut) {
+    return '현재 연구를 종료하려면 설정을 열고 먼저 \"$optOut\"을 사용하세요. 그런 다음 초대장을 다시 여세요.';
+  }
+
+  @override
+  String get deep_link_switch_open_settings => '설정 열기';
+
+  @override
+  String get deep_link_switch_continue_study => '연구 계속하기';
+
+  @override
+  String get deep_link_switch_primary_return => '현재 연구로 돌아가기';
+
+  @override
+  String get deep_link_switch_secondary_continue => '현재 연구를 떠나고 전환';
+
+  @override
+  String get deep_link_switch_data_choice_title => '현재 연구를 어떻게 종료하시겠습니까?';
+
+  @override
+  String get deep_link_switch_data_choice_description =>
+      '전환하기 전에 현재 연구 데이터에 대해 어떤 조치를 취할지 선택하세요.';
+
+  @override
+  String get deep_link_switch_soft_delete_button => '소프트 삭제 후 전환';
+
+  @override
+  String get deep_link_switch_hard_delete_button => '하드 삭제 후 전환';
+
+  @override
+  String get deep_link_switch_confirm_soft_title => '소프트 삭제 확인';
+
+  @override
+  String get deep_link_switch_confirm_soft_button => '소프트 삭제 확인';
+
+  @override
+  String get deep_link_switch_confirm_hard_title => '하드 삭제 확인';
+
+  @override
+  String get deep_link_switch_confirm_hard_description =>
+      '이렇게 하면 모든 데이터가 영구적으로 되돌릴 수 없이 삭제됩니다.';
+
+  @override
+  String get deep_link_switch_confirm_hard_button => '하드 삭제 확인';
+
+  @override
+  String get open_link_on_mobile => '이 링크를 모바일 기기에서 열어주세요.';
+
+  @override
+  String get you_have_been_invited => '연구에 초대되었습니다!';
+
+  @override
+  String get download_app_join => 'StudyU 앱 다운로드 & 참여';
+
+  @override
+  String get deleted_study_error_title => '연구를 사용할 수 없습니다';
+
+  @override
+  String get deleted_study_error_description =>
+      '이 연구는 더 이상 서버에서 사용할 수 없습니다. 현재 데이터는 이 기기에 남아 있습니다. 삭제하기 전에 연구 책임자나 지원팀에 문의하세요. \'모든 데이터 삭제\'는 그들이 앱을 재설정하라고 지시할 때만 사용하세요.';
+
+  @override
+  String get dashboard_showcase_progress_title => '연구 진행 상황';
+
+  @override
+  String get dashboard_showcase_progress_description =>
+      '연구 진행 상황과 남은 과제를 확인할 수 있습니다.';
+
+  @override
+  String get dashboard_showcase_current_intervention_title => '현재 개입';
+
+  @override
+  String get dashboard_showcase_current_intervention_description =>
+      '여기에서 현재 개입과 이 단계에 남은 일수를 확인할 수 있습니다.';
+
+  @override
+  String get dashboard_showcase_today_tasks_title => '오늘의 작업';
+
+  @override
+  String get dashboard_showcase_today_tasks_description =>
+      '여기에서 연구의 일환으로 오늘 완료해야 할 작업을 찾을 수 있습니다.';
+
+  @override
+  String get dashboard_showcase_contact_title => '연락처';
+
+  @override
+  String get dashboard_showcase_contact_description =>
+      '연구 팀의 도움이 필요할 때 이 옵션을 사용하세요.';
+
+  @override
+  String get dashboard_showcase_report_title => '보고서';
+
+  @override
+  String get dashboard_showcase_report_description => '결과가 준비되면 현재 보고서를 엽니다.';
+
+  @override
+  String get dashboard_showcase_menu_title => '추가 옵션';
+
+  @override
+  String get dashboard_showcase_menu_description =>
+      '설정, FAQ, 보고서 기록 등을 여기에서 찾을 수 있습니다.';
+
+  @override
+  String get dashboard_showcase_finish => '완료';
+
+  @override
+  String get support_email_subject_loading_error => 'StudyU 지원 요청 - 로딩 오류';
+
+  @override
+  String get support_email_subject_deleted_study => 'StudyU 지원 요청 - 연구 이용 불가';
+
+  @override
+  String deleted_study_support_email_body(String subjectId) {
+    return '안녕하세요,\n\nStudyU 앱에서 제 연구가 더 이상 서버에서 사용할 수 없다고 나옵니다. 제 참여자 ID는: $subjectId 입니다.\n\n로컬 데이터를 유지해야 하는지 아니면 앱을 재설정해야 하는지 알려주세요.\n\n감사합니다.';
+  }
+
+  @override
+  String get dashboard_tour => '대시보드 둘러보기';
+
+  @override
+  String get show_again => '둘러보기 다시 보기';
+
+  @override
+  String get free_text_hint => '답변을 입력해 주세요';
+
+  @override
+  String get preview_failed_to_initialize => '미리보기를 초기화하지 못했습니다.';
+
+  @override
+  String get preview_overlay_reset_hint =>
+      '미리보기를 지금 열 수 없습니다. 미리보기 재설정을 시도해 주세요.';
+
+  @override
+  String get preview_overlay_study_not_ready =>
+      '이 연구에 대한 미리보기를 아직 열 수 없습니다. 미리보기 재설정을 시도해 주세요.';
+
+  @override
+  String get preview_overlay_route_open_failed => '미리보기 경로를 지금 열 수 없습니다.';
+
+  @override
+  String get continue_label => '계속';
+
+  @override
+  String get restored_answer_needs_review => '복원된 답변은 검토가 필요합니다';
+
+  @override
+  String get restored_answer_review_description => '검토 후 과제 완료가 가능합니다.';
+
+  @override
+  String get mark_answer_reviewed => '이 답변을 검토했습니다';
+
+  @override
+  String get answer_reviewed => '답변 검토됨';
+
+  @override
+  String get review_restored_answer_to_continue => '계속하려면 복원된 답변을 검토하세요.';
+
+  @override
+  String get complete_task => '작업 완료';
+
+  @override
+  String get no_internet_connection => '인터넷에 연결되어 있지 않습니다. 온라인 상태에서 다시 시도하십시오.';
+
+  @override
+  String error_occurred_with_message(String message) {
+    return '오류가 발생했습니다: $message';
+  }
+
+  @override
+  String get date_picker_hint => '날짜 선택';
+
+  @override
+  String get time_picker_hint => '시간을 선택하세요';
+
+  @override
+  String get date_picker_button_label => '날짜 선택';
+
+  @override
+  String get date_time_picker_button_label => '날짜와 시간 선택';
+
+  @override
+  String get date_picker_button_label_datetime => '날짜 선택';
+
+  @override
+  String get time_picker_button_label_datetime => '시간 선택';
+
+  @override
+  String get time_picker_button_label => '시간을 선택하세요';
+
+  @override
+  String get date_picker_clear => '지우기';
+
+  @override
+  String get date_picker_validation_required => '날짜를 선택해 주세요';
+
+  @override
+  String get time_picker_validation_required => '시간을 선택해 주세요';
+
+  @override
+  String get datetime_picker_validation_required => '날짜와 시간을 모두 선택해 주세요';
+
+  @override
+  String get time_picker_validation_range => '허용 범위 내에서 시간을 선택해 주세요';
+
+  @override
+  String time_picker_range_hint(Object min, Object max) {
+    return '$min~$max 사이의 시간을 선택해 주세요';
+  }
+
+  @override
+  String time_picker_min_hint(Object min) {
+    return '허용되는 가장 이른 시간: $min';
+  }
+
+  @override
+  String time_picker_max_hint(Object max) {
+    return '허용되는 가장 늦은 시간: $max';
+  }
+
+  @override
+  String date_picker_validation_min_date(String minDate) {
+    return '날짜는 $minDate 이후여야 합니다';
+  }
+
+  @override
+  String date_picker_validation_max_date(String maxDate) {
+    return '날짜는 $maxDate 이전이어야 합니다';
+  }
+
+  @override
+  String get please_select_interventions_why => '왜인가요?';
+
+  @override
+  String get recovery_phrase_description =>
+      '이 13개 단어를 안전한 곳에 보관하세요. 이 기기에 접근할 수 없게 될 경우 계정을 복구할 수 있는 유일한 방법입니다.';
+
+  @override
+  String get recovery_phrase_why => '왜 필요한가요?';
+
+  @override
+  String get recovery_phrase_reason =>
+      'StudyU는 비밀번호나 이메일 계정을 사용하지 않습니다. 이 13개 단어는 새 휴대전화를 사용하거나 앱을 다시 설치할 때 계정을 복구할 수 있는 유일한 방법입니다. 단어를 적어 두거나 본인만 접근할 수 있는 곳에 디지털 방식으로 보관하세요. 다른 사람과 절대 공유하지 마세요. 설정 → 연구 설정에서 언제든지 복구 문구를 다시 확인할 수 있습니다.';
+
+  @override
+  String get study_not_started_title => '연구에 참여했습니다';
+
+  @override
+  String get study_not_started_description =>
+      '내일 다시 방문하여 시작하세요. 할 일이 생기면 알려드리겠습니다.';
+
+  @override
+  String recovery_phrase_word_count(Object count, Object total) {
+    return '$count/$total개 단어';
+  }
+
+  @override
+  String get ko => '한국어';
+
+  @override
+  String get faq_section_data_storage_privacy => '데이터 저장 및 개인정보 보호';
+
+  @override
+  String get faq_question_data_storage => '데이터는 어디에 어떻게 저장되나요?';
+
+  @override
+  String get faq_answer_data_storage =>
+      '사용자에게서 수집된 데이터는 기기에 로컬로 저장되며, 인터넷에 연결되면 보안 서버에 업로드됩니다. 모든 연구 데이터는 익명으로 수집 및 저장됩니다.';
+
+  @override
+  String get faq_question_personal_data => '앱은 어떤 개인 데이터를 수집하나요?';
+
+  @override
+  String get faq_answer_personal_data => '앱은 사용자의 개인 데이터를 수집하지 않습니다.';
+
+  @override
+  String get faq_section_studies => '연구';
+
+  @override
+  String get faq_question_study_duration => '연구를 완료하는 데 얼마나 걸리나요?';
+
+  @override
+  String get faq_answer_study_duration => '각 연구의 기간은 처음 연구를 선택할 때 안내됩니다.';
+
+  @override
+  String get faq_question_change_intervention => '다른 중재를 선택할 수 있나요?';
+
+  @override
+  String get faq_answer_change_intervention =>
+      '연구를 시작하기 전에는 중재 선택 화면으로 돌아가 다른 중재를 선택할 수 있습니다. 연구가 시작된 후에는 해당 참여에서 선택한 중재를 변경할 수 없습니다. 다른 중재를 선택하려면 설정에서 연구를 탈퇴한 다음 기존 데이터를 유지할지 영구적으로 삭제할지 선택하고, 연구 참여 절차에서 연구와 중재를 다시 선택하세요.';
+
+  @override
+  String get faq_question_missed_tasks => '놓친 과제를 나중에 다시 수행할 수 있나요?';
+
+  @override
+  String get faq_answer_missed_tasks =>
+      '아니요. 놓친 과제를 나중에 다시 수행할 수는 없습니다. 하지만 같은 날에는 언제든지 완료할 수 있습니다.';
+
+  @override
+  String get faq_question_leave_study => '현재 연구를 어떻게 탈퇴할 수 있나요?';
+
+  @override
+  String get faq_answer_leave_study =>
+      '대시보드의 \"설정\" 탭으로 이동하여 \"연구 탈퇴\"를 선택하세요. 그러면 진행 데이터가 삭제되지 않고 연구에서 탈퇴되며, 해당 데이터는 연구 분석에 포함될 수 있습니다. 연구에서 탈퇴하고 기기와 서버의 모든 진행 데이터를 삭제하려면 \"연구 탈퇴 및 모든 데이터 삭제\"를 선택하세요. 모든 데이터가 서버와 기기에서 영구적으로 삭제됩니다.';
+
+  @override
+  String get faq_section_report_details => '보고서 세부 정보';
+
+  @override
+  String get faq_question_daily_tasks => '일일 과제란 무엇이며 어떻게 완료하나요?';
+
+  @override
+  String get faq_answer_daily_tasks =>
+      '어떤 중재가 자신에게 가장 효과적인지 확인하려면 각 중재에 대해 몇 가지 일일 과제를 수행해야 합니다. 과제를 마친 후 반드시 \"완료\" 버튼을 누르세요.';
+
+  @override
+  String get faq_question_rate_your_day => '\"하루 평가\"란 무엇인가요?';
+
+  @override
+  String get faq_answer_rate_your_day =>
+      '\"하루 평가\"는 전체 연구 기간 동안 건강 상태를 추적하는 기능입니다. 특정 건강 관련 질문에 1점부터 10점까지 점수를 매겨야 합니다.';
+
+  @override
+  String get faq_question_track_activities => '활동을 어떻게 추적할 수 있나요?';
+
+  @override
+  String get faq_answer_track_activities =>
+      '\"보고서 기록\" 섹션에서 일일 과제와 건강 상태를 한눈에 확인할 수 있습니다.';
+
+  @override
+  String get faq_question_download_report => '연구 보고서를 어떻게 다운로드할 수 있나요?';
+
+  @override
+  String get faq_answer_download_report =>
+      '연구에 필요한 최소 과제를 완료하면 보고서를 다운로드할 수 있습니다. 보고서는 대시보드의 보고서 기록 탭에서 확인할 수 있습니다.';
+
+  @override
+  String get debug_notifications_not_initialized =>
+      '알림이 아직 초기화되지 않았습니다. 연구를 시작한 후 정보 섹션을 통해 이 기능을 여세요.';
+
+  @override
+  String get debug_test_notification_title => 'StudyU 테스트 알림';
+
+  @override
+  String get debug_test_notification_body => '이 알림은 StudyU 알림을 받을 수 있음을 확인합니다.';
+
+  @override
+  String get debug_reset_success => '앱이 성공적으로 재설정되었습니다. 앱을 다시 시작하세요.';
+
+  @override
+  String get debug_reset_error => '앱을 재설정하는 중 오류가 발생했습니다. 다시 시도하세요.';
+
+  @override
+  String get debug_screen_title => '디버그 화면';
+
+  @override
+  String get debug_send_information_via_email => '디버그 정보를 이메일로 보내기';
+
+  @override
+  String get debug_receive_test_notification => '테스트 알림 받기';
+
+  @override
+  String get debug_show_onboarding => '온보딩 보기';
+
+  @override
+  String get invite_landing_instruction_title => 'StudyU Health로 연구에 참여하세요';
+
+  @override
+  String get invite_landing_qr_label => '연구 초대 QR 코드';
+
+  @override
+  String get invite_landing_invite_code => '초대 코드';
+
+  @override
+  String get invite_landing_invalid =>
+      '이 초대는 더 이상 사용할 수 없습니다. 링크 또는 코드를 확인한 후 다시 시도해 주세요.';
+
+  @override
+  String get invite_landing_load_error => '초대를 불러올 수 없습니다. 나중에 다시 시도해 주세요.';
+
+  @override
+  String get invite_landing_loading => '초대를 불러오는 중…';
+
+  @override
+  String get scan_invite_code => 'QR 코드 스캔';
+
+  @override
+  String get scan_invite_code_description => '카메라를 초대 QR 코드에 맞추세요.';
+
+  @override
+  String get open_study_app => 'StudyU Health에서 열기';
+
+  @override
+  String get invite_landing_google_play => 'Google Play에서 다운로드';
+
+  @override
+  String get invite_landing_app_store => 'App Store에서 다운로드';
+
+  @override
+  String get invite_landing_step_download => 'StudyU Health 앱 다운로드';
+
+  @override
+  String get invite_landing_step_join => '앱에서 연구 참여';
+
+  @override
+  String get invite_landing_step_join_description =>
+      '휴대폰에서 StudyU Health를 열고 ‘초대 코드로 참여’를 누르세요. 초대 코드를 입력하거나 QR 코드를 스캔하여 연구에 참여하세요.';
+
+  @override
+  String get invite_landing_invited_title => '연구 참여 초대를 받았습니다';
+
+  @override
+  String get invite_landing_phone_instruction =>
+      '이 초대 코드를 StudyU Health 앱에 입력하세요.';
+
+  @override
+  String get invite_landing_other_device_instruction =>
+      '빠르게 접속하려면 휴대폰으로 이 QR 코드를 스캔하세요.';
+
+  @override
+  String get invite_landing_enter_code_title => '초대 코드 입력';
+
+  @override
+  String get invite_landing_scan_qr_title => 'QR 코드 스캔';
+
+  @override
+  String get invite_landing_copied => '복사됨';
+
+  @override
+  String get invite_landing_copy_code => '초대 코드 복사';
+
+  @override
+  String get date_format => '날짜 형식';
+
+  @override
+  String get date_format_european => '유럽식 (31/12/2024)';
+
+  @override
+  String get date_format_german => '독일식 (31.12.2024)';
+
+  @override
+  String get date_format_iso => 'ISO (2024-12-31)';
+
+  @override
+  String get date_format_us => '미국식 (12/31/2024)';
+
+  @override
+  String get system => '시스템';
+
+  @override
+  String get time_format => '시간 형식';
+
+  @override
+  String get time_format_12_hour => '12시간제 (오후 2:30)';
+
+  @override
+  String get time_format_24_hour => '24시간제 (14:30)';
+
+  @override
+  String get daily_food_diary => 'Daily Food Diary';
+
+  @override
+  String get saving => 'Saving...';
+
+  @override
+  String saved_ago(String time) {
+    return 'Saved $time ago';
+  }
+
+  @override
+  String get just_now => 'just now';
+
+  @override
+  String seconds_ago(int seconds) {
+    return '$seconds seconds ago';
+  }
+
+  @override
+  String minutes_ago(int minutes) {
+    return '$minutes minute(s) ago';
+  }
+
+  @override
+  String hours_ago(int hours) {
+    return '$hours hour(s) ago';
+  }
+
+  @override
+  String get instructions => 'Instructions';
+
+  @override
+  String get nutrition_instructions_default =>
+      'Please record all the foods and beverages you consumed today. For each meal or snack, provide as much detail as possible including portion sizes and preparation methods.';
+
+  @override
+  String min_meals_required(int count) {
+    return 'Please record at least $count meal(s)';
+  }
+
+  @override
+  String get recall_details => 'Recall Details';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get recall_mode => 'Recall Mode';
+
+  @override
+  String get recall_mode_realtime => 'Real-time Recording';
+
+  @override
+  String get recall_mode_yesterday => 'Yesterday Recall';
+
+  @override
+  String get usual_intake_day => 'Usual Intake Day';
+
+  @override
+  String get usual_intake_question => 'Was this a typical day for your diet?';
+
+  @override
+  String get special_occasion => 'Special Occasion';
+
+  @override
+  String get special_occasion_hint => 'e.g., Birthday, Holiday, etc.';
+
+  @override
+  String meals_count(int count) {
+    return 'Meals ($count)';
+  }
+
+  @override
+  String get add_meal => 'Add Meal';
+
+  @override
+  String get no_meals_recorded => 'No meals recorded yet';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get meal_type_breakfast => 'Breakfast';
+
+  @override
+  String get meal_type_lunch => 'Lunch';
+
+  @override
+  String get meal_type_dinner => 'Dinner';
+
+  @override
+  String get meal_type_snack => 'Snack';
+
+  @override
+  String get meal_type_brunch => 'Brunch';
+
+  @override
+  String get meal_type_other => 'Other';
+
+  @override
+  String food_items_count(int count) {
+    return '$count food items';
+  }
+
+  @override
+  String get meal_entry_title => 'Meal Entry';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get meal_information => 'Meal Information';
+
+  @override
+  String get meal_type_label => 'Meal Type';
+
+  @override
+  String get custom_meal_label => 'Custom Meal Label';
+
+  @override
+  String get time => 'Time';
+
+  @override
+  String get where_did_you_eat => 'Where did you eat?';
+
+  @override
+  String get location_description => 'Location Description';
+
+  @override
+  String get location_description_hint => 'Describe where you ate';
+
+  @override
+  String get who_were_you_with => 'Who were you with?';
+
+  @override
+  String get distractions_during_meal => 'Distractions during meal?';
+
+  @override
+  String get skipped_this_meal => 'Skipped this meal';
+
+  @override
+  String get reason_for_skipping => 'Reason for skipping';
+
+  @override
+  String food_items_section(int count) {
+    return 'Food Items ($count)';
+  }
+
+  @override
+  String get add_food => 'Add Food';
+
+  @override
+  String get no_food_items_yet => 'No food items yet';
+
+  @override
+  String get not_specified => 'Not specified';
+
+  @override
+  String get context_home => 'Home';
+
+  @override
+  String get context_restaurant => 'Restaurant';
+
+  @override
+  String get context_takeout => 'Takeout';
+
+  @override
+  String get context_vending => 'Vending';
+
+  @override
+  String get context_other => 'Other';
+
+  @override
+  String get company_alone => '👤 Alone';
+
+  @override
+  String get company_family => '👨‍👩‍👧‍👦 Family';
+
+  @override
+  String get company_friends => '👥 Friends';
+
+  @override
+  String get company_colleagues => '💼 Colleagues';
+
+  @override
+  String get company_other => '🤝 Other';
+
+  @override
+  String get distraction_none => '🧘 None';
+
+  @override
+  String get distraction_tv => '📺 TV';
+
+  @override
+  String get distraction_phone => '📱 Phone';
+
+  @override
+  String get distraction_work => '💻 Work';
+
+  @override
+  String get distraction_other => '📖 Other';
+
+  @override
+  String get food_entry_title => 'Food Entry';
+
+  @override
+  String get food_information => 'Food Information';
+
+  @override
+  String get entry_type => 'Entry Type';
+
+  @override
+  String get food_name => 'Food Name *';
+
+  @override
+  String get brand_name => 'Brand Name';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get description_hint => 'Optional notes about this food';
+
+  @override
+  String get recipe_info =>
+      'Recipe: Use Recipe Builder for better ingredient management';
+
+  @override
+  String get open_recipe_builder => 'Open Recipe Builder';
+
+  @override
+  String get amount => 'Amount *';
+
+  @override
+  String get unit => 'Unit *';
+
+  @override
+  String get serving_size => 'Serving Size (grams) *';
+
+  @override
+  String get portion_reference => 'Portion Reference';
+
+  @override
+  String get portion_reference_hint => 'e.g., 1 cup, 3 oz, medium apple';
+
+  @override
+  String get portion_estimation_method => 'Portion Estimation Method';
+
+  @override
+  String get portion_state => 'Portion State';
+
+  @override
+  String get yield_factor => 'Yield Factor';
+
+  @override
+  String get yield_factor_hint => 'e.g., 0.75';
+
+  @override
+  String get edible_portion => 'Edible Portion';
+
+  @override
+  String get edible_portion_hint => 'e.g., 0.85';
+
+  @override
+  String get nutrition_information => 'Nutrition Information';
+
+  @override
+  String get energy_kcal => 'Energy (kcal) *';
+
+  @override
+  String get protein_g => 'Protein (g)';
+
+  @override
+  String get carbs_g => 'Carbs (g)';
+
+  @override
+  String get fat_g => 'Fat (g)';
+
+  @override
+  String get saturated_fat_g => 'Sat. Fat (g)';
+
+  @override
+  String get sugars_g => 'Sugars (g)';
+
+  @override
+  String get fiber_g => 'Fiber (g)';
+
+  @override
+  String get sodium_mg => 'Sodium (mg)';
+
+  @override
+  String get required_error => 'Required';
+
+  @override
+  String get enter_food_name => 'Please enter a food name';
+
+  @override
+  String get enter_serving_size => 'Please enter serving size';
+
+  @override
+  String get entry_type_single_ingredient => '🥕 Single Ingredient';
+
+  @override
+  String get entry_type_recipe => '📖 Recipe';
+
+  @override
+  String get entry_type_branded_product => '🏷️ Branded Product';
+
+  @override
+  String get entry_type_manual_entry => '✏️ Manual Entry';
+
+  @override
+  String get portion_method_household => 'Household Measure';
+
+  @override
+  String get portion_method_photograph => 'Photograph';
+
+  @override
+  String get portion_method_standard_unit => 'Standard Unit';
+
+  @override
+  String get portion_method_user_weighted => 'User Weighted';
+
+  @override
+  String get portion_method_unknown => 'Unknown';
+
+  @override
+  String get portion_state_raw => 'Raw';
+
+  @override
+  String get portion_state_cooked => 'Cooked';
+
+  @override
+  String get portion_state_as_served => 'As Served';
+
+  @override
+  String get my_templates => 'My Templates';
+
+  @override
+  String get save_as_template => 'Save as Template';
+
+  @override
+  String get save_meal_template => 'Save Meal Template';
+
+  @override
+  String get save_food_template => 'Save Food Template';
+
+  @override
+  String get save_recipe_template => 'Save Recipe Template';
+
+  @override
+  String get template_name => 'Template Name';
+
+  @override
+  String get template_tags_optional => 'Tags (optional)';
+
+  @override
+  String get template_tags_hint => 'breakfast, quick, healthy';
+
+  @override
+  String get template_saved => 'Template saved';
+
+  @override
+  String get select_meal_template => 'Select Meal Template';
+
+  @override
+  String get select_food_template => 'Select Food Template';
+
+  @override
+  String get search_templates => 'Search templates...';
+
+  @override
+  String get no_templates_saved => 'No templates saved yet';
+
+  @override
+  String get save_templates_hint =>
+      'Save your favorite meals and foods as templates for quick access';
+
+  @override
+  String get from_template => 'From Template';
+
+  @override
+  String get add_new_food => 'Add New Food';
+
+  @override
+  String get delete_template => 'Delete Template';
+
+  @override
+  String get delete_template_confirmation =>
+      'Are you sure you want to delete this template?';
+
+  @override
+  String get filter_all => 'All';
+
+  @override
+  String get filter_meals => 'Meals';
+
+  @override
+  String get filter_foods => 'Foods';
+
+  @override
+  String get filter_recipes => 'Recipes';
+
+  @override
+  String items_count(int count) {
+    return '$count items';
+  }
+
+  @override
+  String kcal_value(String value) {
+    return '$value kcal';
+  }
+
+  @override
+  String get template_type_meal => 'Meal';
+
+  @override
+  String get template_type_food => 'Food';
+
+  @override
+  String get template_type_recipe => 'Recipe';
+
+  @override
+  String get rename_template => 'Rename Template';
+
+  @override
+  String get new_name => 'New Name';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get meals => 'Meals';
+
+  @override
+  String get food_items => 'Food items';
+
+  @override
+  String get tap_to_add_first_meal =>
+      'Tap the button above to add your first meal';
+
+  @override
+  String get tap_to_add_food => 'Tap to add food';
+
+  @override
+  String get add_food_title => 'Add Food';
+
+  @override
+  String get edit_food_title => 'Edit Food';
+
+  @override
+  String get add_food_manually => 'Add Food Manually';
+
+  @override
+  String get basic_information => 'Basic Information';
+
+  @override
+  String get macronutrients => 'Macronutrients';
+
+  @override
+  String get detailed_nutrients => 'Detailed Nutrients';
+
+  @override
+  String get daily_nutrition_total => 'Daily Nutrition Total';
+
+  @override
+  String get meal_nutrition => 'Meal Nutrition';
+
+  @override
+  String get nutrition_summary => 'Nutrition Summary';
+
+  @override
+  String get calorie_distribution => 'Calorie Distribution';
+
+  @override
+  String get more_options => 'More options';
+
+  @override
+  String get search_food_hint => 'Search food (e.g., \"apple\", \"chicken\")';
+
+  @override
+  String get my_saved_items => 'My Saved Items';
+
+  @override
+  String get global_database => 'Global Database';
+
+  @override
+  String get quick_actions => 'Quick Actions';
+
+  @override
+  String get create_recipe => 'Create Recipe';
+
+  @override
+  String get create_recipe_subtitle => 'Build from multiple ingredients';
+
+  @override
+  String get add_manually => 'Add Manually';
+
+  @override
+  String get add_manually_subtitle => 'Enter nutrition facts yourself';
+
+  @override
+  String get scan_barcode => 'Scan Barcode';
+
+  @override
+  String get scan_barcode_subtitle => 'Find packaged products quickly';
+
+  @override
+  String get search_for_food => 'Search for Food';
+
+  @override
+  String get search_food_description => 'Type above to search global databases';
+
+  @override
+  String get searching_databases => 'Searching databases...';
+
+  @override
+  String get end_of_results => 'End of results';
+
+  @override
+  String get no_results_found => 'No results found. Try different keywords.';
+
+  @override
+  String get no_matching_templates => 'No matching templates';
+
+  @override
+  String get detailed_nutrition => 'Detailed Nutrition';
+
+  @override
+  String get detailed_nutrition_subtitle => 'Fiber, Sugar, Sodium';
+
+  @override
+  String get advanced_options => 'Advanced Options';
+
+  @override
+  String get advanced_options_subtitle => 'Food type, serving size, portions';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get search_food_database => 'Search Food Database';
+
+  @override
+  String get no_data_yet => 'No data yet';
+
+  @override
+  String get start_tracking_nutrition =>
+      'Start tracking your nutrition by adding meals';
+
+  @override
+  String get photoRecallTitle => 'Photo Recall';
+
+  @override
+  String get photoRecallSubtitle => 'View photos from around this time';
+
+  @override
+  String get photoRecallPermissionNeeded => 'Tap to enable photo access';
+
+  @override
+  String get photoRecallPermissionTitle => 'Enable Photo Access';
+
+  @override
+  String get photoRecallPermissionDescription =>
+      'Access to your photos helps you recall what you ate. Photos are only displayed on your device.';
+
+  @override
+  String get photoRecallNoPhotos => 'No photos found';
+
+  @override
+  String get photoRecallNoPhotosSubtitle =>
+      'We couldn\'t find any photos taken around this time';
+
+  @override
+  String get photoRecallTapToEnlarge => 'Tap a photo to view it full screen';
+
+  @override
+  String photoRecallTimeInfo(String time) {
+    return 'Showing photos from around $time (±2 hours)';
+  }
+
+  @override
+  String get grantPermission => 'Grant Permission';
+
+  @override
+  String get analyzePhotoTooltip => 'Analyze this food photo';
+
+  @override
+  String get analyzingPhoto => 'Analyzing photo...';
+
+  @override
+  String get foodAnalysisError => 'Could not analyze image - try manual entry';
+
+  @override
+  String get foodAnalysisNetworkError =>
+      'Could not connect to analysis service';
+
+  @override
+  String get foodAnalysisNoItems => 'No food items detected in image';
+
+  @override
+  String get aiEstimatedBanner => 'AI-estimated values - please review';
+
+  @override
+  String get selectFoodItemsTitle => 'Select Food Items';
+
+  @override
+  String get selectFoodItemsSubtitle =>
+      'Select which items to add to your meal';
+
+  @override
+  String get addSelected => 'Add Selected';
+
+  @override
+  String get analyzeAgain => 'Analyze Again';
+
+  @override
+  String get select_all => 'Select All';
+
+  @override
+  String get deselect_all => 'Deselect All';
+
+  @override
+  String confidenceLabel(int percentage) {
+    return 'Confidence: $percentage%';
+  }
+
+  @override
+  String get min_meals_not_met_title => 'Minimum meals not reached';
+
+  @override
+  String min_meals_not_met_message(int count) {
+    return 'This task requires at least $count meal(s). You have recorded fewer than required. Leave anyway?';
+  }
+
+  @override
+  String get leave_anyway => 'Leave anyway';
+}

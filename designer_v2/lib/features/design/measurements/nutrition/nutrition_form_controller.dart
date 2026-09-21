@@ -12,17 +12,12 @@ import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dar
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:uuid/uuid.dart';
 
-class NutritionFormViewModel extends ManagedFormViewModel<NutritionFormData>
-    with WithScheduleControls {
-  NutritionFormViewModel({
-    required this.study,
-    super.delegate,
-    super.formData,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  final Study study;
-
+class NutritionFormViewModel({
+  required final Study study,
+  super.delegate,
+  super.formData,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends ManagedFormViewModel<NutritionFormData> with WithScheduleControls {
   // - Form fields
 
   final FormControl<MeasurementID> measurementIdControl = FormControl(

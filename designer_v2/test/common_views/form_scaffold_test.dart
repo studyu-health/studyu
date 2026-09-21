@@ -4,9 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('clean FormScaffold cancellation notifies the form view model', () {
-    final source = File(
-      'lib/common_views/form_scaffold.dart',
-    ).readAsStringSync();
+    final source = File('lib/common_views/form_scaffold.dart')
+        .readAsStringSync();
     final cleanPopStart = source.indexOf('if (!formViewModel.isDirty)');
     final cleanPopEnd = source.indexOf('return;', cleanPopStart);
 

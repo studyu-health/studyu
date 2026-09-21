@@ -2,23 +2,14 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/domain/schedule.dart';
 import 'package:studyu_designer_v2/features/forms/form_data.dart';
 
-abstract class IFormDataWithSchedule implements IFormData {
-  IFormDataWithSchedule({
-    required this.instanceId,
-    required this.isTimeLocked,
-    this.timeLockStart,
-    this.timeLockEnd,
-    required this.hasReminder,
-    this.reminderTime,
-  });
-
-  final String instanceId;
-  final bool isTimeLocked;
-  final StudyUTimeOfDay? timeLockStart;
-  final StudyUTimeOfDay? timeLockEnd;
-  final bool hasReminder;
-  final StudyUTimeOfDay? reminderTime;
-
+abstract class IFormDataWithSchedule({
+  required final String instanceId,
+  required final bool isTimeLocked,
+  final StudyUTimeOfDay? timeLockStart,
+  final StudyUTimeOfDay? timeLockEnd,
+  required final bool hasReminder,
+  final StudyUTimeOfDay? reminderTime,
+}) implements IFormData {
   Schedule toSchedule() {
     final schedule = Schedule();
     schedule.reminders = (!hasReminder || reminderTime == null)

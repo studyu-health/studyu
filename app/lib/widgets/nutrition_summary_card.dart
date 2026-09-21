@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_core/core.dart';
 
-class NutritionSummaryCard extends StatelessWidget {
-  final NutritionProfile nutrition;
-  final String? title;
-
-  const NutritionSummaryCard({required this.nutrition, this.title, super.key});
-
+class const NutritionSummaryCard({
+  required final NutritionProfile nutrition,
+  final String? title,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -182,10 +181,8 @@ class NutritionSummaryCard extends StatelessWidget {
               ),
               Text(
                 '${value.toStringAsFixed(0)} $unit',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.headlineSmall
+                    ?.copyWith(color: color, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -212,18 +209,14 @@ class NutritionSummaryCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: color, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
             '${value.toStringAsFixed(1)}$unit',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(color: color, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -285,9 +278,8 @@ class NutritionSummaryCard extends StatelessWidget {
       children: [
         Text(
           AppLocalizations.of(context)!.calorie_distribution,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         ClipRRect(
@@ -375,11 +367,10 @@ class NutritionSummaryCard extends StatelessWidget {
   }
 }
 
-class DailyNutritionSummaryCard extends StatelessWidget {
-  final DailyRecall dailyRecall;
-
-  const DailyNutritionSummaryCard({required this.dailyRecall, super.key});
-
+class const DailyNutritionSummaryCard({
+  required final DailyRecall dailyRecall,
+  super.key,
+}) extends StatelessWidget {
   NutritionProfile _calculateDailyNutrition() {
     double totalEnergy = 0;
     double totalProtein = 0;
@@ -443,11 +434,8 @@ class DailyNutritionSummaryCard extends StatelessWidget {
   }
 }
 
-class MealNutritionSummaryCard extends StatelessWidget {
-  final MealLog meal;
-
-  const MealNutritionSummaryCard({required this.meal, super.key});
-
+class const MealNutritionSummaryCard({required final MealLog meal, super.key})
+    extends StatelessWidget {
   NutritionProfile _calculateMealNutrition() {
     double totalEnergy = 0;
     double totalProtein = 0;

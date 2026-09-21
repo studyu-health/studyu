@@ -9,8 +9,8 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 
 /// A cancel / dismiss button for use with [FormScaffold] [showFormSideSheet)
 /// Heavily inspired by [CloseButton]
-class DismissButton extends StatelessWidget {
-  const DismissButton({this.text, this.onPressed, super.key});
+class const DismissButton({
+  final String? text,
 
   /// An override callback to perform instead of the default behavior which is
   /// to pop the [Navigator].
@@ -20,10 +20,9 @@ class DismissButton extends StatelessWidget {
   /// situations.
   ///
   /// Defaults to null.
-  final VoidCallback? onPressed;
-
-  final String? text;
-
+  final VoidCallback? onPressed,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));

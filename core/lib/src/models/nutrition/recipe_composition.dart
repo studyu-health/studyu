@@ -12,7 +12,7 @@ class RecipeComposition {
   String unit;
   int? sortOrder;
 
-  RecipeComposition({
+  new({
     required this.id,
     required this.recipeId,
     required this.ingredientId,
@@ -21,7 +21,7 @@ class RecipeComposition {
     this.sortOrder,
   });
 
-  RecipeComposition.withId({
+  new withId({
     required this.recipeId,
     required this.ingredientId,
     required this.amount,
@@ -29,7 +29,7 @@ class RecipeComposition {
     this.sortOrder,
   }) : id = const Uuid().v4();
 
-  factory RecipeComposition.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$RecipeCompositionFromJson(json);
 
   Map<String, dynamic> toJson() => _$RecipeCompositionToJson(this);

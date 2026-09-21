@@ -10,50 +10,40 @@ part 'task_schedule_rule.g.dart';
 /// - [TaskScheduleType.everyNDays] — repeating interval
 /// - [TaskScheduleType.perCycle] — relative to cycle boundaries
 @JsonSerializable()
-class TaskScheduleRule {
-  TaskScheduleType type;
+class TaskScheduleRule({
+  required var TaskScheduleType type,
 
   /// For [TaskScheduleType.specificDays]: 0-based study day indices.
-  List<int> specificDays;
+  var List<int> specificDays = const [],
 
   /// For [TaskScheduleType.everyNDays]: repetition interval.
-  int? intervalDays;
+  var int? intervalDays,
 
   /// For [TaskScheduleType.everyNDays]: 0-based start offset.
-  int? startDayOffset;
+  var int? startDayOffset,
 
   /// For [TaskScheduleType.perCycle]: 0-based day within each cycle.
-  int? dayOfCycle;
+  var int? dayOfCycle,
 
   /// For [TaskScheduleType.perCycle]: restrict to specific cycle indices
   /// (0-based). null or empty means all cycles.
-  List<int>? targetCycles;
+  var List<int>? targetCycles,
 
   /// For [TaskScheduleType.perCycle]: whether the baseline phase counts
   /// as a cycle for this rule.
-  bool includeBaseline;
-
-  TaskScheduleRule({
-    required this.type,
-    this.specificDays = const [],
-    this.intervalDays,
-    this.startDayOffset,
-    this.dayOfCycle,
-    this.targetCycles,
-    this.includeBaseline = false,
-  });
-
-  factory TaskScheduleRule.fromJson(Map<String, dynamic> json) =>
+  var bool includeBaseline = false,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
       _$TaskScheduleRuleFromJson(json);
 
   Map<String, dynamic> toJson() => _$TaskScheduleRuleToJson(this);
 
   /// Convenience: create a rule for specific days.
-  factory TaskScheduleRule.forSpecificDays(List<int> days) =>
+  factory forSpecificDays(List<int> days) =>
       TaskScheduleRule(type: TaskScheduleType.specificDays, specificDays: days);
 
   /// Convenience: create a rule for every N days.
-  factory TaskScheduleRule.forEveryNDays(int interval, {int startOffset = 0}) =>
+  factory forEveryNDays(int interval, {int startOffset = 0}) =>
       TaskScheduleRule(
         type: TaskScheduleType.everyNDays,
         intervalDays: interval,
@@ -61,7 +51,7 @@ class TaskScheduleRule {
       );
 
   /// Convenience: create a cycle-relative rule.
-  factory TaskScheduleRule.forPerCycle(
+  factory forPerCycle(
     int dayOfCycle, {
     List<int>? targetCycles,
     bool includeBaseline = false,
@@ -142,7 +132,7 @@ class TaskScheduleRule {
       'includeBaseline: $includeBaseline)';
 }
 
-enum TaskScheduleType {
+enum TaskScheduleType() {
   /// Show on exact study days.
   specificDays,
 

@@ -4,18 +4,16 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_core/core.dart';
 
-enum TemplateSelectionMode { meal, food }
+enum TemplateSelectionMode() {
+  meal,
+  food,
+}
 
-class TemplateSelectionSheet extends StatefulWidget {
-  final TemplateSelectionMode mode;
-  final String userId;
-
-  const TemplateSelectionSheet({
-    required this.mode,
-    required this.userId,
-    super.key,
-  });
-
+class const TemplateSelectionSheet({
+  required final TemplateSelectionMode mode,
+  required final String userId,
+  super.key,
+}) extends StatefulWidget {
   static Future<dynamic> show(
     BuildContext context, {
     required TemplateSelectionMode mode,
@@ -44,7 +42,7 @@ class TemplateSelectionSheet extends StatefulWidget {
   State<TemplateSelectionSheet> createState() => _TemplateSelectionSheetState();
 }
 
-class _TemplateSelectionSheetState extends State<TemplateSelectionSheet> {
+class _TemplateSelectionSheetState() extends State<TemplateSelectionSheet> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -57,21 +55,16 @@ class _TemplateSelectionSheetState extends State<TemplateSelectionSheet> {
   }
 }
 
-class _TemplateSelectionSheetContent extends StatefulWidget {
-  final TemplateSelectionMode mode;
-  final ScrollController scrollController;
-
-  const _TemplateSelectionSheetContent({
-    required this.mode,
-    required this.scrollController,
-  });
-
+class const _TemplateSelectionSheetContent({
+  required final TemplateSelectionMode mode,
+  required final ScrollController scrollController,
+}) extends StatefulWidget {
   @override
   State<_TemplateSelectionSheetContent> createState() =>
       _TemplateSelectionSheetContentState();
 }
 
-class _TemplateSelectionSheetContentState
+class _TemplateSelectionSheetContentState()
     extends State<_TemplateSelectionSheetContent> {
   final TextEditingController _searchController = TextEditingController();
 

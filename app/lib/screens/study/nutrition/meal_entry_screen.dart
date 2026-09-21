@@ -16,12 +16,11 @@ import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_app/widgets/template_selection_sheet.dart';
 import 'package:studyu_core/core.dart';
 
-class MealEntryScreen extends StatefulWidget {
-  final MealLog? existingMeal;
-  final NutritionTask? task;
-
-  const MealEntryScreen({this.existingMeal, this.task, super.key});
-
+class const MealEntryScreen({
+  final MealLog? existingMeal,
+  final NutritionTask? task,
+  super.key,
+}) extends StatefulWidget {
   static MaterialPageRoute<MealLog> route({
     MealLog? existingMeal,
     NutritionTask? task,
@@ -33,7 +32,7 @@ class MealEntryScreen extends StatefulWidget {
   State<MealEntryScreen> createState() => _MealEntryScreenState();
 }
 
-class _MealEntryScreenState extends State<MealEntryScreen> {
+class _MealEntryScreenState() extends State<MealEntryScreen> {
   static const int _breakfastStart = 6;
   static const int _brunchStart = 10;
   static const int _lunchStart = 12;
@@ -130,9 +129,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
   }
 
   Future<void> _editFood(FoodEntry food, int index) async {
-    final result = await Navigator.of(
-      context,
-    ).push(FoodEntryScreen.route(existingFood: food));
+    final result = await Navigator.of(context)
+        .push(FoodEntryScreen.route(existingFood: food));
     if (result != null) {
       setState(() {
         _meal.foods[index] = result;
@@ -221,9 +219,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
       );
       if (mounted) {
         setState(() => _isSavingTemplate = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.template_saved)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
       }
     }
   }
@@ -267,9 +264,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
       );
       if (mounted) {
         setState(() => _isSavingFoodTemplate = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.template_saved)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
       }
     }
   }
@@ -284,9 +280,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
       final asset = await _photoService.getAsset(photo.id);
       if (asset == null) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.foodAnalysisError)));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.foodAnalysisError)));
         }
         return;
       }
@@ -295,9 +290,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
       final file = await asset.originFile;
       if (file == null) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.foodAnalysisError)));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.foodAnalysisError)));
         }
         return;
       }
@@ -324,9 +318,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
       }
 
       if (result.items.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.foodAnalysisNoItems)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.foodAnalysisNoItems)));
         return;
       }
 
@@ -374,9 +367,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.foodAnalysisError)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.foodAnalysisError)));
       }
     } finally {
       if (mounted) {
@@ -517,23 +509,14 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
   }
 }
 
-class _MealTypeSelector extends StatelessWidget {
-  final MealType mealType;
-  final String? customMealLabel;
-  final TextEditingController customMealLabelController;
-  final List<String>? customMealTypes;
-  final ValueChanged<MealType> onMealTypeChanged;
-  final ValueChanged<String> onCustomLabelChanged;
-
-  const _MealTypeSelector({
-    required this.mealType,
-    required this.customMealLabel,
-    required this.customMealLabelController,
-    this.customMealTypes,
-    required this.onMealTypeChanged,
-    required this.onCustomLabelChanged,
-  });
-
+class const _MealTypeSelector({
+  required final MealType mealType,
+  required final String? customMealLabel,
+  required final TextEditingController customMealLabelController,
+  final List<String>? customMealTypes,
+  required final ValueChanged<MealType> onMealTypeChanged,
+  required final ValueChanged<String> onCustomLabelChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -629,17 +612,11 @@ class _MealTypeSelector extends StatelessWidget {
   }
 }
 
-class _MealTypeChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onSelect;
-
-  const _MealTypeChip({
-    required this.label,
-    required this.isSelected,
-    required this.onSelect,
-  });
-
+class const _MealTypeChip({
+  required final String label,
+  required final bool isSelected,
+  required final VoidCallback onSelect,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -669,12 +646,10 @@ class _MealTypeChip extends StatelessWidget {
   }
 }
 
-class _TimeSelector extends StatelessWidget {
-  final DateTime timestamp;
-  final VoidCallback onSelectTime;
-
-  const _TimeSelector({required this.timestamp, required this.onSelectTime});
-
+class const _TimeSelector({
+  required final DateTime timestamp,
+  required final VoidCallback onSelectTime,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -737,27 +712,16 @@ class _TimeSelector extends StatelessWidget {
   }
 }
 
-class _FoodListSection extends StatelessWidget {
-  final MealLog meal;
-  final bool isSkipped;
-  final VoidCallback onAddFood;
-  final VoidCallback onAddFoodFromTemplate;
-  final Function(FoodEntry, int) onEditFood;
-  final Function(int) onRemoveFood;
-  final Function(FoodEntry) onSaveFoodAsTemplate;
-  final bool isSavingFoodTemplate;
-
-  const _FoodListSection({
-    required this.meal,
-    required this.isSkipped,
-    required this.onAddFood,
-    required this.onAddFoodFromTemplate,
-    required this.onEditFood,
-    required this.onRemoveFood,
-    required this.onSaveFoodAsTemplate,
-    this.isSavingFoodTemplate = false,
-  });
-
+class const _FoodListSection({
+  required final MealLog meal,
+  required final bool isSkipped,
+  required final VoidCallback onAddFood,
+  required final VoidCallback onAddFoodFromTemplate,
+  required final Function(FoodEntry, int) onEditFood,
+  required final Function(int) onRemoveFood,
+  required final Function(FoodEntry) onSaveFoodAsTemplate,
+  final bool isSavingFoodTemplate = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -842,17 +806,11 @@ class _FoodListSection extends StatelessWidget {
   }
 }
 
-class _EmptyFoodState extends StatelessWidget {
-  final ThemeData theme;
-  final AppLocalizations l10n;
-  final VoidCallback onAddFood;
-
-  const _EmptyFoodState({
-    required this.theme,
-    required this.l10n,
-    required this.onAddFood,
-  });
-
+class const _EmptyFoodState({
+  required final ThemeData theme,
+  required final AppLocalizations l10n,
+  required final VoidCallback onAddFood,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -909,25 +867,15 @@ class _EmptyFoodState extends StatelessWidget {
   }
 }
 
-class _FoodCard extends StatelessWidget {
-  final FoodEntry food;
-  final int index;
-  final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-  final VoidCallback onSaveTemplate;
-  final bool isSavingTemplate;
-
-  const _FoodCard({
-    required this.food,
-    required this.index,
-    required this.onTap,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onSaveTemplate,
-    this.isSavingTemplate = false,
-  });
-
+class const _FoodCard({
+  required final FoodEntry food,
+  required final int index,
+  required final VoidCallback onTap,
+  required final VoidCallback onEdit,
+  required final VoidCallback onDelete,
+  required final VoidCallback onSaveTemplate,
+  final bool isSavingTemplate = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1072,41 +1020,23 @@ class _FoodCard extends StatelessWidget {
   }
 }
 
-class _MealOptionsCard extends StatelessWidget {
-  final bool showMealContext;
-  final MealContext mealContext;
-  final CompanyContext? companyContext;
-  final DistractionContext? distractionContext;
-  final String? locationDescription;
-  final TextEditingController locationDescriptionController;
-  final bool isSkipped;
-  final String? skipReason;
-  final TextEditingController skipReasonController;
-  final ValueChanged<MealContext> onMealContextChanged;
-  final ValueChanged<CompanyContext?> onCompanyContextChanged;
-  final ValueChanged<DistractionContext?> onDistractionContextChanged;
-  final ValueChanged<String> onLocationDescriptionChanged;
-  final ValueChanged<bool> onSkippedChanged;
-  final ValueChanged<String> onSkipReasonChanged;
-
-  const _MealOptionsCard({
-    this.showMealContext = true,
-    required this.mealContext,
-    required this.companyContext,
-    required this.distractionContext,
-    required this.locationDescription,
-    required this.locationDescriptionController,
-    required this.isSkipped,
-    required this.skipReason,
-    required this.skipReasonController,
-    required this.onMealContextChanged,
-    required this.onCompanyContextChanged,
-    required this.onDistractionContextChanged,
-    required this.onLocationDescriptionChanged,
-    required this.onSkippedChanged,
-    required this.onSkipReasonChanged,
-  });
-
+class const _MealOptionsCard({
+  final bool showMealContext = true,
+  required final MealContext mealContext,
+  required final CompanyContext? companyContext,
+  required final DistractionContext? distractionContext,
+  required final String? locationDescription,
+  required final TextEditingController locationDescriptionController,
+  required final bool isSkipped,
+  required final String? skipReason,
+  required final TextEditingController skipReasonController,
+  required final ValueChanged<MealContext> onMealContextChanged,
+  required final ValueChanged<CompanyContext?> onCompanyContextChanged,
+  required final ValueChanged<DistractionContext?> onDistractionContextChanged,
+  required final ValueChanged<String> onLocationDescriptionChanged,
+  required final ValueChanged<bool> onSkippedChanged,
+  required final ValueChanged<String> onSkipReasonChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1252,21 +1182,13 @@ class _MealOptionsCard extends StatelessWidget {
   }
 }
 
-class _DropdownField<T> extends StatelessWidget {
-  final String label;
-  final T? value;
-  final List<T?> items;
-  final String Function(T) itemLabel;
-  final ValueChanged<T?> onChanged;
-
-  const _DropdownField({
-    required this.label,
-    required this.value,
-    required this.items,
-    required this.itemLabel,
-    required this.onChanged,
-  });
-
+class const _DropdownField<T>({
+  required final String label,
+  required final T? value,
+  required final List<T?> items,
+  required final String Function(T) itemLabel,
+  required final ValueChanged<T?> onChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T?>(
@@ -1292,17 +1214,11 @@ class _DropdownField<T> extends StatelessWidget {
   }
 }
 
-class _PopupMenuItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isDestructive;
-
-  const _PopupMenuItem({
-    required this.icon,
-    required this.label,
-    this.isDestructive = false,
-  });
-
+class const _PopupMenuItem({
+  required final IconData icon,
+  required final String label,
+  final bool isDestructive = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(

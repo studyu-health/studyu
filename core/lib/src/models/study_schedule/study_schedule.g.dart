@@ -15,11 +15,11 @@ StudySchedule _$StudyScheduleFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$StudyScheduleToJson(StudySchedule instance) =>
     <String, dynamic>{
+      'sequenceCustom': instance.sequenceCustom,
       'numberOfCycles': instance.numberOfCycles,
       'phaseDuration': instance.phaseDuration,
       'includeBaseline': instance.includeBaseline,
       'sequence': instance.sequence.toJson(),
-      'sequenceCustom': instance.sequenceCustom,
     };
 
 const _$PhaseSequenceEnumMap = {

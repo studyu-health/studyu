@@ -1,1 +1,5 @@
-enum TemporalAggregation { day, phase, intervention }
+enum TemporalAggregation() {
+  day,
+  phase,
+  intervention,
+}

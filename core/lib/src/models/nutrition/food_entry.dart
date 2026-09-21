@@ -37,7 +37,7 @@ class FoodEntry {
   RecipeMetadata? recipeMetadata;
   List<RecipeComposition>? recipeIngredients;
 
-  FoodEntry({
+  new({
     required this.id,
     required this.entryType,
     required this.name,
@@ -65,7 +65,7 @@ class FoodEntry {
     this.recipeIngredients,
   });
 
-  FoodEntry.withId({
+  new withId({
     required this.entryType,
     required this.name,
     this.brandName,
@@ -92,8 +92,7 @@ class FoodEntry {
   }) : id = const Uuid().v4(),
        createdAt = DateTime.now();
 
-  factory FoodEntry.fromJson(Map<String, dynamic> json) =>
-      _$FoodEntryFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$FoodEntryFromJson(json);
 
   Map<String, dynamic> toJson() => _$FoodEntryToJson(this);
 

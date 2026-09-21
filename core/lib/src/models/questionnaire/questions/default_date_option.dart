@@ -1,11 +1,8 @@
-enum DefaultDateOption {
+enum DefaultDateOption(final String value) {
   none('none'),
   today('today'),
   now('now'),
   specific('specific');
-
-  final String value;
-  const DefaultDateOption(this.value);
 
   String toJson() => value;
   static DefaultDateOption fromJson(String json) => values.firstWhere(

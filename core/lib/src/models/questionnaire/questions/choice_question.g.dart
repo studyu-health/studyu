@@ -18,6 +18,7 @@ ChoiceQuestion _$ChoiceQuestionFromJson(Map<String, dynamic> json) =>
               json['conditional'] as Map<String, dynamic>,
             )
       ..multiple = json['multiple'] as bool
+      ..selectionRequired = json['selectionRequired'] as bool? ?? false
       ..choices = (json['choices'] as List<dynamic>)
           .map((e) => Choice.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -30,6 +31,7 @@ Map<String, dynamic> _$ChoiceQuestionToJson(ChoiceQuestion instance) =>
       'rationale': ?instance.rationale,
       'conditional': ?instance.conditional?.toJson(),
       'multiple': instance.multiple,
+      'selectionRequired': instance.selectionRequired,
       'choices': instance.choices.map((e) => e.toJson()).toList(),
     };
 

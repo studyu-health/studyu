@@ -9,11 +9,11 @@ class DescriptiveStatsSection extends ReportSection {
 
   DataReference<num>? resultProperty;
 
-  DescriptiveStatsSection() : super(sectionType);
+  new() : super(sectionType);
 
-  DescriptiveStatsSection.withId() : super.withId(sectionType);
+  new withId() : super.withId(sectionType);
 
-  factory DescriptiveStatsSection.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$DescriptiveStatsSectionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$DescriptiveStatsSectionToJson(this);

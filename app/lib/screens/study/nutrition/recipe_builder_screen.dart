@@ -8,11 +8,8 @@ import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_core/core.dart';
 
-class RecipeBuilderScreen extends StatefulWidget {
-  final FoodEntry? existingRecipe;
-
-  const RecipeBuilderScreen({this.existingRecipe, super.key});
-
+class const RecipeBuilderScreen({final FoodEntry? existingRecipe, super.key})
+    extends StatefulWidget {
   static MaterialPageRoute<FoodEntry> route({FoodEntry? existingRecipe}) =>
       MaterialPageRoute(
         builder: (_) => RecipeBuilderScreen(existingRecipe: existingRecipe),
@@ -22,7 +19,7 @@ class RecipeBuilderScreen extends StatefulWidget {
   State<RecipeBuilderScreen> createState() => _RecipeBuilderScreenState();
 }
 
-class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
+class _RecipeBuilderScreenState() extends State<RecipeBuilderScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
@@ -358,9 +355,8 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
         tags: result.tags,
       );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.template_saved)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
       }
     }
   }
@@ -490,21 +486,13 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
 // WIDGETS
 // ============================================================
 
-class _RecipeInfoCard extends StatelessWidget {
-  final TextEditingController nameController;
-  final TextEditingController descriptionController;
-  final TextEditingController servingsController;
-  final ThemeData theme;
-  final AppLocalizations l10n;
-
-  const _RecipeInfoCard({
-    required this.nameController,
-    required this.descriptionController,
-    required this.servingsController,
-    required this.theme,
-    required this.l10n,
-  });
-
+class const _RecipeInfoCard({
+  required final TextEditingController nameController,
+  required final TextEditingController descriptionController,
+  required final TextEditingController servingsController,
+  required final ThemeData theme,
+  required final AppLocalizations l10n,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -605,19 +593,12 @@ class _RecipeInfoCard extends StatelessWidget {
   }
 }
 
-class _RecipeMetadataCard extends StatelessWidget {
-  final TextEditingController rawWeightController;
-  final TextEditingController cookedWeightController;
-  final TextEditingController preparationMethodController;
-  final ThemeData theme;
-
-  const _RecipeMetadataCard({
-    required this.rawWeightController,
-    required this.cookedWeightController,
-    required this.preparationMethodController,
-    required this.theme,
-  });
-
+class const _RecipeMetadataCard({
+  required final TextEditingController rawWeightController,
+  required final TextEditingController cookedWeightController,
+  required final TextEditingController preparationMethodController,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -683,21 +664,13 @@ class _RecipeMetadataCard extends StatelessWidget {
   }
 }
 
-class _IngredientsSectionHeader extends StatelessWidget {
-  final int ingredientCount;
-  final ThemeData theme;
-  final VoidCallback onAddIngredient;
-  final VoidCallback onToggleQuickAdd;
-  final bool showQuickAdd;
-
-  const _IngredientsSectionHeader({
-    required this.ingredientCount,
-    required this.theme,
-    required this.onAddIngredient,
-    required this.onToggleQuickAdd,
-    required this.showQuickAdd,
-  });
-
+class const _IngredientsSectionHeader({
+  required final int ingredientCount,
+  required final ThemeData theme,
+  required final VoidCallback onAddIngredient,
+  required final VoidCallback onToggleQuickAdd,
+  required final bool showQuickAdd,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -745,26 +718,18 @@ class _IngredientsSectionHeader extends StatelessWidget {
   }
 }
 
-class _QuickAddForm extends StatefulWidget {
-  final TextEditingController nameController;
-  final TextEditingController amountController;
-  final TextEditingController caloriesController;
-  final VoidCallback onAdd;
-  final ThemeData theme;
-
-  const _QuickAddForm({
-    required this.nameController,
-    required this.amountController,
-    required this.caloriesController,
-    required this.onAdd,
-    required this.theme,
-  });
-
+class const _QuickAddForm({
+  required final TextEditingController nameController,
+  required final TextEditingController amountController,
+  required final TextEditingController caloriesController,
+  required final VoidCallback onAdd,
+  required final ThemeData theme,
+}) extends StatefulWidget {
   @override
   State<_QuickAddForm> createState() => _QuickAddFormState();
 }
 
-class _QuickAddFormState extends State<_QuickAddForm> {
+class _QuickAddFormState() extends State<_QuickAddForm> {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -867,12 +832,10 @@ class _QuickAddFormState extends State<_QuickAddForm> {
   }
 }
 
-class _EmptyIngredientsState extends StatelessWidget {
-  final ThemeData theme;
-  final AppLocalizations l10n;
-
-  const _EmptyIngredientsState({required this.theme, required this.l10n});
-
+class const _EmptyIngredientsState({
+  required final ThemeData theme,
+  required final AppLocalizations l10n,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -929,23 +892,14 @@ class _EmptyIngredientsState extends StatelessWidget {
   }
 }
 
-class _IngredientCard extends StatelessWidget {
-  final FoodEntry ingredient;
-  final RecipeComposition composition;
-  final int index;
-  final ThemeData theme;
-  final VoidCallback onRemove;
-  final Function(double amount, String unit) onUpdateAmount;
-
-  const _IngredientCard({
-    required this.ingredient,
-    required this.composition,
-    required this.index,
-    required this.theme,
-    required this.onRemove,
-    required this.onUpdateAmount,
-  });
-
+class const _IngredientCard({
+  required final FoodEntry ingredient,
+  required final RecipeComposition composition,
+  required final int index,
+  required final ThemeData theme,
+  required final VoidCallback onRemove,
+  required final Function(double amount, String unit) onUpdateAmount,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -1055,17 +1009,11 @@ class _IngredientCard extends StatelessWidget {
   }
 }
 
-class _NutritionSummaryCard extends StatelessWidget {
-  final NutritionProfile nutrition;
-  final ThemeData theme;
-  final int servingsCount;
-
-  const _NutritionSummaryCard({
-    required this.nutrition,
-    required this.theme,
-    required this.servingsCount,
-  });
-
+class const _NutritionSummaryCard({
+  required final NutritionProfile nutrition,
+  required final ThemeData theme,
+  required final int servingsCount,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -1157,21 +1105,13 @@ class _NutritionSummaryCard extends StatelessWidget {
   }
 }
 
-class _NutritionChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final ThemeData theme;
-  final bool isPrimary;
-
-  const _NutritionChip({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.theme,
-    this.isPrimary = false,
-  });
-
+class const _NutritionChip({
+  required final String label,
+  required final String value,
+  required final IconData icon,
+  required final ThemeData theme,
+  final bool isPrimary = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(

@@ -5,11 +5,10 @@ import 'package:studyu_designer_v2/common_views/standard_table.dart';
 import 'package:studyu_designer_v2/features/design/shared/questionnaire/question/question_form_controller.dart';
 import 'package:studyu_designer_v2/features/design/shared/questionnaire/question/types/choice_question_form_view.dart';
 
-class BoolQuestionFormView extends ConsumerWidget {
-  const BoolQuestionFormView({required this.formViewModel, super.key});
-
-  final QuestionFormViewModel formViewModel;
-
+class const BoolQuestionFormView({
+  required final QuestionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(

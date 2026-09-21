@@ -5,9 +5,7 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_core/core.dart';
 
-class MyTemplatesScreen extends StatelessWidget {
-  const MyTemplatesScreen({super.key});
-
+class const MyTemplatesScreen({super.key}) extends StatelessWidget {
   static MaterialPageRoute<void> route() =>
       MaterialPageRoute(builder: (_) => const MyTemplatesScreen());
 
@@ -23,15 +21,14 @@ class MyTemplatesScreen extends StatelessWidget {
   }
 }
 
-class _MyTemplatesScreenContent extends StatefulWidget {
-  const _MyTemplatesScreenContent();
-
+class const _MyTemplatesScreenContent() extends StatefulWidget {
   @override
   State<_MyTemplatesScreenContent> createState() =>
       _MyTemplatesScreenContentState();
 }
 
-class _MyTemplatesScreenContentState extends State<_MyTemplatesScreenContent> {
+class _MyTemplatesScreenContentState()
+    extends State<_MyTemplatesScreenContent> {
   final TextEditingController _searchController = TextEditingController();
 
   @override

@@ -164,11 +164,10 @@ mixin WithQuestionnaireControls<D, Q extends QuestionFormViewModel>
 
   Q provideQuestionFormViewModel(QuestionFormData? formData) {
     return QuestionFormViewModel(
-          formData: formData,
-          delegate: this,
-          validationSet: validationSet,
-          titles: questionTitles.isNotEmpty ? questionTitles : null,
-        )
-        as Q;
+      formData: formData,
+      delegate: this,
+      validationSet: validationSet,
+      titles: questionTitles.isNotEmpty ? questionTitles : null,
+    ) as Q;
   }
 }

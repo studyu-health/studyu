@@ -8,15 +8,14 @@ import 'package:studyu_core/core.dart';
 
 /// A data class to hold the renderable SVG picture and the extracted interactive paths.
 @immutable
-class SvgData {
-  const SvgData(this.pictureInfo, this.paths);
-  final PictureInfo pictureInfo;
-  final Map<String, Path> paths;
-}
+class const SvgData(
+  final PictureInfo pictureInfo,
+  final Map<String, Path> paths,
+);
 
 /// A singleton service that loads the SVGs for the body sides.
-class SvgService {
-  SvgService._() {
+class SvgService._() {
+  this {
     _init();
   }
 

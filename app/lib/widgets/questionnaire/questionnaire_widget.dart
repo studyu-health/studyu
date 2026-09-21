@@ -11,40 +11,27 @@ import 'package:studyu_core/core.dart';
 typedef StateHandler = void Function(QuestionnaireState?);
 typedef ContinuationPredicate = bool Function(QuestionnaireState);
 
-class QuestionnaireWidget extends StatefulWidget {
-  final String? title;
-  final String? header;
-  final String? footer;
-  final List<Question> questions;
-  final String? taskId;
-  final StateHandler? onComplete;
-  final ContinuationPredicate? shouldContinue;
+class const QuestionnaireWidget(
+  final List<Question> questions, {
+  final String? taskId,
+  final String? title,
+  final String? header,
+  final String? footer,
+  final StateHandler? onComplete,
+  final ContinuationPredicate? shouldContinue,
 
   /// When true, the global CTA shows a loading spinner and is disabled.
   /// The parent sets this while it processes a completed submission.
-  final bool isSubmitting;
-  final bool hideCta;
-  final bool autoComplete;
-
-  const QuestionnaireWidget(
-    this.questions, {
-    this.taskId,
-    this.title,
-    this.header,
-    this.footer,
-    this.onComplete,
-    this.shouldContinue,
-    this.isSubmitting = false,
-    this.hideCta = false,
-    this.autoComplete = false,
-    super.key,
-  });
-
+  final bool isSubmitting = false,
+  final bool hideCta = false,
+  final bool autoComplete = false,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => QuestionnaireWidgetState();
 }
 
-class QuestionnaireWidgetState extends State<QuestionnaireWidget> {
+class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
   late final QuestionnaireController _controller;
   final List<QuestionContainer> shownQuestions = <QuestionContainer>[];
   final List<GlobalKey> questionKeys = <GlobalKey>[];
@@ -147,7 +134,6 @@ class QuestionnaireWidgetState extends State<QuestionnaireWidget> {
         question is DateQuestion ||
         question is AnnotatedScaleQuestion ||
         // todo remove this when older studies are finished
-        // ignore: deprecated_member_use_from_same_package
         question is VisualAnalogueQuestion;
   }
 
@@ -606,10 +592,8 @@ class QuestionnaireWidgetState extends State<QuestionnaireWidget> {
             const SizedBox(width: 8),
             Text(
               l10n.answer_reviewed,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: color, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -676,11 +660,8 @@ class QuestionnaireWidgetState extends State<QuestionnaireWidget> {
   }
 }
 
-class HtmlTextBox extends StatelessWidget {
-  final String? text;
-
-  const HtmlTextBox(this.text, {super.key});
-
+class const HtmlTextBox(final String? text, {super.key})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(

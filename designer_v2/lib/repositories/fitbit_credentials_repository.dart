@@ -16,37 +16,30 @@ import 'package:studyu_designer_v2/utils/optimistic_update.dart';
 
 part 'fitbit_credentials_repository.g.dart';
 
-abstract class IFitbitCredentialsRepository
-    implements ModelRepository<StudyFitbitCredentials> {}
+abstract class IFitbitCredentialsRepository()
+    implements ModelRepository<StudyFitbitCredentials>;
 
-class FitbitCredentialsRepository
-    extends ModelRepository<StudyFitbitCredentials>
-    implements IFitbitCredentialsRepository {
-  FitbitCredentialsRepository({
-    required this.studyId,
-    required this.apiClient,
-    required this.authRepository,
-    required this.studyRepository,
-    required this.ref,
-  }) : super(
-         FitbitCredentialsRepositoryDelegate(
-           study: studyRepository.get(studyId)!.model,
-           apiClient: apiClient,
-           studyRepository: studyRepository,
-         ),
-       );
-
+class FitbitCredentialsRepository({
   /// The [Study] this repository operates on
-  final StudyID studyId;
-
-  Study get study => studyRepository.get(studyId)!.model;
+  required final StudyID studyId,
+  required final StudyUApi apiClient,
+  required final IAuthRepository authRepository,
+  required final IStudyRepository studyRepository,
 
   /// Reference to Riverpod's context to resolve dependencies in callbacks
-  final Ref ref;
+  required final Ref ref,
+}) extends ModelRepository<StudyFitbitCredentials>
+    implements IFitbitCredentialsRepository {
+  this
+    : super(
+        FitbitCredentialsRepositoryDelegate(
+          study: studyRepository.get(studyId)!.model,
+          apiClient: apiClient,
+          studyRepository: studyRepository,
+        ),
+      );
 
-  final StudyUApi apiClient;
-  final IAuthRepository authRepository;
-  final IStudyRepository studyRepository;
+  Study get study => studyRepository.get(studyId)!.model;
 
   @override
   ModelID getKey(StudyFitbitCredentials model) {
@@ -107,18 +100,11 @@ class FitbitCredentialsRepository
   }
 }
 
-class FitbitCredentialsRepositoryDelegate
-    extends IModelRepositoryDelegate<StudyFitbitCredentials> {
-  FitbitCredentialsRepositoryDelegate({
-    required this.study,
-    required this.apiClient,
-    required this.studyRepository,
-  });
-
-  final Study study;
-  final StudyUApi apiClient;
-  final IStudyRepository studyRepository;
-
+class FitbitCredentialsRepositoryDelegate({
+  required final Study study,
+  required final StudyUApi apiClient,
+  required final IStudyRepository studyRepository,
+}) extends IModelRepositoryDelegate<StudyFitbitCredentials> {
   @override
   Future<StudyFitbitCredentials> fetch(ModelID modelId) {
     // Read directly from the study instead of fetching from the network

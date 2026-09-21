@@ -1,11 +1,6 @@
 import 'package:studyu_core/core.dart';
 
-abstract class FitbitData {
-  String type;
-  DateTime dateTime;
-
-  FitbitData(this.type, this.dateTime);
-
+abstract class FitbitData(var String type, var DateTime dateTime) {
   @override
   String toString() {
     return 'FitbitData(type: $type, dateTime: $dateTime)';
@@ -13,7 +8,7 @@ abstract class FitbitData {
 
   Map<String, dynamic> toJson();
 
-  factory FitbitData.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     switch (json['type']) {
       case FitbitHeartData.dataType:
         return FitbitHeartData.fromJson(json) as FitbitData;

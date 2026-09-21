@@ -15,9 +15,8 @@ import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dar
 import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyDesignMeasurementsFormView extends StudyDesignPageWidget {
-  const StudyDesignMeasurementsFormView(super.studyId, {super.key});
-
+class const StudyDesignMeasurementsFormView(super.studyId, {super.key})
+    extends StudyDesignPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyControllerProvider(studyId));

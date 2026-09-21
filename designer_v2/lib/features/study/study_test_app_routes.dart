@@ -1,4 +1,4 @@
-class TestAppRoutes {
+class TestAppRoutes() {
   static const studyOverview = 'studyOverview';
   static const eligibility = 'eligibilityCheck';
   static const intervention = 'interventionSelection';

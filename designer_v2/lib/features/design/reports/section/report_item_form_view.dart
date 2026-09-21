@@ -15,16 +15,11 @@ import 'package:studyu_designer_v2/features/forms/form_validation.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class ReportItemFormView extends StatelessWidget {
-  const ReportItemFormView({
-    required this.formViewModel,
-    required this.studyId,
-    super.key,
-  });
-
-  final ReportItemFormViewModel formViewModel;
-  final StudyID studyId;
-
+class const ReportItemFormView({
+  required final ReportItemFormViewModel formViewModel,
+  required final StudyID studyId,
+  super.key,
+}) extends StatelessWidget {
   Map<int, TableColumnWidth> get reportSectionColumnWidth => const {
     0: FixedColumnWidth(180.0),
     1: FlexColumnWidth(),

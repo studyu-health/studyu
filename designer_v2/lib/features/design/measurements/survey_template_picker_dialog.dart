@@ -5,11 +5,10 @@ import 'package:studyu_designer_v2/features/design/measurements/measurements_for
 import 'package:studyu_designer_v2/features/design/measurements/survey_template_providers.dart';
 
 /// A Material 3 dialog that lets researchers browse and apply premade survey templates.
-class SurveyTemplatePickerDialog extends ConsumerWidget {
-  const SurveyTemplatePickerDialog({required this.formViewModel, super.key});
-
-  final MeasurementsFormViewModel formViewModel;
-
+class const SurveyTemplatePickerDialog({
+  required final MeasurementsFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -110,22 +109,16 @@ class SurveyTemplatePickerDialog extends ConsumerWidget {
   }
 }
 
-class _TemplateItem extends StatefulWidget {
-  const _TemplateItem({
-    required this.template,
-    required this.formViewModel,
-    required this.onApplied,
-  });
-
-  final SurveyTemplate template;
-  final MeasurementsFormViewModel formViewModel;
-  final VoidCallback onApplied;
-
+class const _TemplateItem({
+  required final SurveyTemplate template,
+  required final MeasurementsFormViewModel formViewModel,
+  required final VoidCallback onApplied,
+}) extends StatefulWidget {
   @override
   State<_TemplateItem> createState() => _TemplateItemState();
 }
 
-class _TemplateItemState extends State<_TemplateItem> {
+class _TemplateItemState() extends State<_TemplateItem> {
   bool _expanded = false;
 
   bool get _isAlreadyAdded =>
@@ -243,12 +236,10 @@ class _TemplateItemState extends State<_TemplateItem> {
   }
 }
 
-class _DayEntryTile extends StatelessWidget {
-  const _DayEntryTile({required this.entry, required this.formViewModel});
-
-  final SurveyTemplateDayEntry entry;
-  final MeasurementsFormViewModel formViewModel;
-
+class const _DayEntryTile({
+  required final SurveyTemplateDayEntry entry,
+  required final MeasurementsFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_types.dart';
 
-class FilterOperatorDropdown extends StatelessWidget {
-  final List<FilterOperator> options;
-  final FilterOperator selected;
-  final ValueChanged<FilterOperator> onChanged;
-  final String Function(FilterOperator) getLabel;
-
-  const FilterOperatorDropdown({
-    required this.options,
-    required this.selected,
-    required this.onChanged,
-    required this.getLabel,
-    super.key,
-  });
-
+class const FilterOperatorDropdown({
+  required final List<FilterOperator> options,
+  required final FilterOperator selected,
+  required final ValueChanged<FilterOperator> onChanged,
+  required final String Function(FilterOperator) getLabel,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<FilterOperator>(

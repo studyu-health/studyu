@@ -112,9 +112,9 @@ QuestionFormViewModel surveyQuestionFormViewModel(
   Ref ref,
   SurveyQuestionFormRouteArgs args,
 ) {
-  return (ref.watch(measurementFormViewModelProvider(args))
-          as MeasurementSurveyFormViewModel)
-      .provide(args);
+  return (ref.watch(
+    measurementFormViewModelProvider(args),
+  ) as MeasurementSurveyFormViewModel).provide(args);
 }
 
 // - Reports

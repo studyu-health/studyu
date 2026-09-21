@@ -3,7 +3,7 @@ import 'package:studyu_core/core.dart';
 /// Food Frequency Questionnaire (FFQ) – test/single survey (26 questions).
 /// Use createFFQTask() for the normal one-off FFQ.
 /// Use createFFQTaskForDay(0..13) for 14-day cluster surveys (DHQ3 split into 14).
-class FFQQuestions {
+class FFQQuestions() {
   /// Standard frequency options for FFQ questions
   static List<Choice> get frequencyChoices => [
     Choice.withText(
@@ -29,15 +29,13 @@ class FFQQuestions {
     questions.add(
       _createFrequencyQuestion(
         id: 'ffq_ground_meat',
-        prompt:
-            'Ground meat, e.g. from beef or lamb, in burgers, Bolognese sauce, etc.',
+        prompt: 'Ground meat, e.g. from beef or lamb, in burgers, Bolognese sauce, etc.',
       ),
     );
     questions.add(
       _createFrequencyQuestion(
         id: 'ffq_pork_beef',
-        prompt:
-            'Pork or beef in the form of steaks, ribs, roasts or as sandwich meat/on sandwiches',
+        prompt: 'Pork or beef in the form of steaks, ribs, roasts or as sandwich meat/on sandwiches',
       ),
     );
     questions.add(
@@ -98,8 +96,7 @@ class FFQQuestions {
     questions.add(
       _createFrequencyQuestion(
         id: 'ffq_pastries',
-        prompt:
-            'Pancakes/donuts, croissants, sweet baked goods (e.g. plum cake, streusel cake, etc.)',
+        prompt: 'Pancakes/donuts, croissants, sweet baked goods (e.g. plum cake, streusel cake, etc.)',
       ),
     );
     questions.add(
@@ -156,8 +153,7 @@ class FFQQuestions {
     questions.add(
       _createFrequencyQuestion(
         id: 'ffq_sweetened_beverages',
-        prompt:
-            'Other sweetened beverages (such as juice with added sugar, syrup, iced tea, etc.)',
+        prompt: 'Other sweetened beverages (such as juice with added sugar, syrup, iced tea, etc.)',
       ),
     );
     questions.add(
@@ -166,8 +162,7 @@ class FFQQuestions {
     questions.add(
       _createFrequencyQuestion(
         id: 'ffq_fast_food',
-        prompt:
-            'How often have you eaten at a fast food restaurant or had food delivered in the last year? (e.g. McDonalds, Pizza, Asian, etc.)',
+        prompt: 'How often have you eaten at a fast food restaurant or had food delivered in the last year? (e.g. McDonalds, Pizza, Asian, etc.)',
         choices: [
           Choice.withText(text: 'None', id: 'none'),
           Choice.withText(text: '1-2', id: '1_2'),
@@ -180,8 +175,7 @@ class FFQQuestions {
     questions.add(
       _createFrequencyQuestion(
         id: 'ffq_added_sugar',
-        prompt:
-            'How many teaspoons of sugar have you added to drinks, muesli, or other foods in the last week?',
+        prompt: 'How many teaspoons of sugar have you added to drinks, muesli, or other foods in the last week?',
         choices: [
           Choice.withText(text: 'None', id: 'none'),
           Choice.withText(text: '1-2', id: '1_2'),

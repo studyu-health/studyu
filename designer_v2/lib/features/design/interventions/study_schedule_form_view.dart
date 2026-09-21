@@ -10,16 +10,15 @@ import 'package:studyu_designer_v2/features/design/interventions/study_schedule_
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/input_formatter.dart';
 
-class StudyScheduleFormView extends StatefulWidget {
-  const StudyScheduleFormView({required this.formViewModel, super.key});
-
-  final StudyScheduleControls formViewModel;
-
+class const StudyScheduleFormView({
+  required final StudyScheduleControls formViewModel,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<StudyScheduleFormView> createState() => _StudyScheduleFormViewState();
 }
 
-class _StudyScheduleFormViewState extends State<StudyScheduleFormView> {
+class _StudyScheduleFormViewState() extends State<StudyScheduleFormView> {
   bool _isBannerDismissed = true;
 
   FormTableRow _renderCustomSequence() {
