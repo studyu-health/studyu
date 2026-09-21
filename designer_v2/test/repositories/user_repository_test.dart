@@ -73,6 +73,30 @@ void main() {
     expect(api.savedUsers, hasLength(2));
   });
 
+  test('overlapping date and language updates preserve both values', () async {
+    final api = _FakeApi(initialUser)..firstSaveBlocker = Completer<void>();
+    final container = createContainer(api);
+    addTearDown(container.dispose);
+
+    final repository = container.read(userRepositoryProvider);
+    await repository.fetchUser();
+
+    final dateUpdate = repository.updateDateFormat(DateFormatPreference.iso);
+    final languageUpdate = repository.updateLanguage('de-DE');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(api.saveCalls, 1);
+    api.firstSaveBlocker!.complete();
+    await Future.wait([dateUpdate, languageUpdate]);
+
+    expect(
+      repository.cachedUser?.preferences.dateFormat,
+      DateFormatPreference.iso,
+    );
+    expect(repository.cachedUser?.preferences.language, 'de-DE');
+    expect(api.savedUsers, hasLength(2));
+  });
+
   test('user state publishes the saved preferences to consumers', () async {
     final api = _FakeApi(initialUser);
     final container = createContainer(api);

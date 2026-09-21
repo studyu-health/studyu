@@ -27,6 +27,7 @@ class DateTimePreferences() extends ChangeNotifier {
   int _loadGeneration = 0;
   int _dateFormatOperation = 0;
   int _timeFormatOperation = 0;
+  Future<void> _preferencePersistence = Future.value();
 
   this {
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
@@ -79,64 +80,100 @@ class DateTimePreferences() extends ChangeNotifier {
       return;
     }
 
+    final dateOperation = _dateFormatOperation;
+    final timeOperation = _timeFormatOperation;
     try {
       final user = await SupabaseQuery.getById<StudyUUser>(userId);
       if (generation != _loadGeneration) return;
 
+      final dateOperationIsCurrent = dateOperation == _dateFormatOperation;
+      final timeOperationIsCurrent = timeOperation == _timeFormatOperation;
+      final dateFormat = dateOperationIsCurrent
+          ? synchronizedPreference(
+              serverValue: user.preferences.dateFormat,
+              localValue: localDateFormat,
+              localValueIsDirty: localDateFormatIsDirty,
+            )
+          : _dateFormat;
+      final timeFormat = timeOperationIsCurrent
+          ? synchronizedPreference(
+              serverValue: user.preferences.timeFormat,
+              localValue: localTimeFormat,
+              localValueIsDirty: localTimeFormatIsDirty,
+            )
+          : _timeFormat;
+
       _user = user;
-      final dateFormat = synchronizedPreference(
-        serverValue: user.preferences.dateFormat,
-        localValue: localDateFormat,
-        localValueIsDirty: localDateFormatIsDirty,
-      );
-      final timeFormat = synchronizedPreference(
-        serverValue: user.preferences.timeFormat,
-        localValue: localTimeFormat,
-        localValueIsDirty: localTimeFormatIsDirty,
-      );
-      _dateFormat = dateFormat;
-      _timeFormat = timeFormat;
-
-      if (localDateFormatIsDirty) user.preferences.dateFormat = dateFormat;
-      if (localTimeFormatIsDirty) user.preferences.timeFormat = timeFormat;
-
-      final hasUnsynchronizedLocalPreferences =
-          localDateFormatIsDirty || localTimeFormatIsDirty;
-      if (hasUnsynchronizedLocalPreferences) {
-        try {
-          final synchronizedUser = await user.save(onlyUpdate: true);
-          if (generation != _loadGeneration) return;
-          _user = synchronizedUser;
-          if (localDateFormatIsDirty &&
-              await _cachePreference(
-                _dateFormatKeyPrefix,
-                userId,
-                dateFormat,
-              )) {
-            await _clearDirtyPreference(_dateFormatDirtyKeyPrefix, userId);
-          }
-          if (localTimeFormatIsDirty &&
-              await _cachePreference(
-                _timeFormatKeyPrefix,
-                userId,
-                timeFormat,
-              )) {
-            await _clearDirtyPreference(_timeFormatDirtyKeyPrefix, userId);
-          }
-        } catch (error) {
-          debugPrint(
-            'Could not synchronize local date and time preferences: $error',
-          );
-        }
+      if (dateOperationIsCurrent) {
+        _dateFormat = dateFormat;
+        if (localDateFormatIsDirty) user.preferences.dateFormat = dateFormat;
       } else {
-        await _cachePreference(_dateFormatKeyPrefix, userId, dateFormat);
-        await _cachePreference(_timeFormatKeyPrefix, userId, timeFormat);
+        user.preferences.dateFormat = _dateFormat;
       }
+      if (timeOperationIsCurrent) {
+        _timeFormat = timeFormat;
+        if (localTimeFormatIsDirty) user.preferences.timeFormat = timeFormat;
+      } else {
+        user.preferences.timeFormat = _timeFormat;
+      }
+
+      await _queuePreferencePersistence(() async {
+        if (!_isCurrent(generation, userId)) return;
+
+        final synchronizeDate =
+            dateOperation == _dateFormatOperation && localDateFormatIsDirty;
+        final synchronizeTime =
+            timeOperation == _timeFormatOperation && localTimeFormatIsDirty;
+        if (synchronizeDate || synchronizeTime) {
+          try {
+            final synchronizedUser = await user.save(onlyUpdate: true);
+            if (!_isCurrent(generation, userId)) return;
+            if (dateOperation == _dateFormatOperation &&
+                timeOperation == _timeFormatOperation) {
+              _user = synchronizedUser;
+            }
+            if (synchronizeDate &&
+                dateOperation == _dateFormatOperation &&
+                await _cachePreference(
+                  _dateFormatKeyPrefix,
+                  userId,
+                  dateFormat,
+                )) {
+              await _clearDirtyPreference(_dateFormatDirtyKeyPrefix, userId);
+            }
+            if (synchronizeTime &&
+                timeOperation == _timeFormatOperation &&
+                await _cachePreference(
+                  _timeFormatKeyPrefix,
+                  userId,
+                  timeFormat,
+                )) {
+              await _clearDirtyPreference(_timeFormatDirtyKeyPrefix, userId);
+            }
+          } catch (error) {
+            debugPrint(
+              'Could not synchronize local date and time preferences: $error',
+            );
+          }
+        } else {
+          if (dateOperation == _dateFormatOperation) {
+            await _cachePreference(_dateFormatKeyPrefix, userId, dateFormat);
+          }
+          if (timeOperation == _timeFormatOperation) {
+            await _cachePreference(_timeFormatKeyPrefix, userId, timeFormat);
+          }
+        }
+      });
     } catch (error) {
       debugPrint('Could not load date and time preferences: $error');
+      if (generation != _loadGeneration) return;
       _user = null;
-      _dateFormat = localDateFormat;
-      _timeFormat = localTimeFormat;
+      if (dateOperation == _dateFormatOperation) {
+        _dateFormat = localDateFormat;
+      }
+      if (timeOperation == _timeFormatOperation) {
+        _timeFormat = localTimeFormat;
+      }
     }
 
     if (generation == _loadGeneration) notifyListeners();
@@ -156,8 +193,11 @@ class DateTimePreferences() extends ChangeNotifier {
         _dateFormatKeyPrefix,
         value?.name,
         generation: generation,
+        dateOperation: operation,
+        timeOperation: _timeFormatOperation,
         userId: userId,
         user: user,
+        previousUserValue: previousUserValue,
       );
     } catch (error) {
       if (_isCurrent(generation, userId) && operation == _dateFormatOperation) {
@@ -188,8 +228,11 @@ class DateTimePreferences() extends ChangeNotifier {
         _timeFormatKeyPrefix,
         value?.name,
         generation: generation,
+        dateOperation: _dateFormatOperation,
+        timeOperation: operation,
         userId: userId,
         user: user,
+        previousUserValue: previousUserValue,
       );
     } catch (error) {
       if (_isCurrent(generation, userId) && operation == _timeFormatOperation) {
@@ -227,46 +270,74 @@ class DateTimePreferences() extends ChangeNotifier {
     String keyPrefix,
     String? value, {
     required int generation,
+    required int dateOperation,
+    required int timeOperation,
     required String? userId,
     required StudyUUser? user,
-  }) async {
-    final dirtyKeyPrefix = keyPrefix == _dateFormatKeyPrefix
-        ? _dateFormatDirtyKeyPrefix
-        : _timeFormatDirtyKeyPrefix;
-    if (userId == null) return;
+    required Object? previousUserValue,
+  }) {
+    return _queuePreferencePersistence(() async {
+      final dirtyKeyPrefix = keyPrefix == _dateFormatKeyPrefix
+          ? _dateFormatDirtyKeyPrefix
+          : _timeFormatDirtyKeyPrefix;
+      if (userId == null) return;
 
-    final cacheKey = '$keyPrefix$userId';
-    final dirtyKey = '$dirtyKeyPrefix$userId';
-    final previousCachedValue = await SecureStorage.read(cacheKey);
-    final previousDirtyValue = await SecureStorage.readBool(dirtyKey);
+      final cacheKey = '$keyPrefix$userId';
+      final dirtyKey = '$dirtyKeyPrefix$userId';
+      final previousCachedValue = await SecureStorage.read(cacheKey);
+      final previousDirtyValue = await SecureStorage.readBool(dirtyKey);
 
-    if (user == null) {
-      await _cacheDirtyPreference(
-        cacheKey,
-        dirtyKey,
-        value,
-        previousCachedValue,
-        previousDirtyValue,
-      );
-      return;
-    }
+      if (user == null) {
+        await _cacheDirtyPreference(
+          cacheKey,
+          dirtyKey,
+          value,
+          previousCachedValue,
+          previousDirtyValue,
+        );
+        return;
+      }
 
-    StudyUUser savedUser;
-    try {
-      savedUser = await user.save(onlyUpdate: true);
-    } on SocketException {
-      await _cacheDirtyPreference(
-        cacheKey,
-        dirtyKey,
-        value,
-        previousCachedValue,
-        previousDirtyValue,
-      );
-      return;
-    }
-    await _cachePreference(keyPrefix, userId, value);
-    await _clearDirtyPreference(dirtyKeyPrefix, userId);
-    if (_isCurrent(generation, userId)) _user = savedUser;
+      StudyUUser savedUser;
+      try {
+        savedUser = await user.save(onlyUpdate: true);
+      } on SocketException {
+        await _cacheDirtyPreference(
+          cacheKey,
+          dirtyKey,
+          value,
+          previousCachedValue,
+          previousDirtyValue,
+        );
+        return;
+      } catch (_) {
+        if (_isCurrent(generation, userId) && user == _user) {
+          if (keyPrefix == _dateFormatKeyPrefix &&
+              dateOperation == _dateFormatOperation) {
+            user.preferences.dateFormat =
+                previousUserValue as DateFormatPreference?;
+          } else if (keyPrefix == _timeFormatKeyPrefix &&
+              timeOperation == _timeFormatOperation) {
+            user.preferences.timeFormat =
+                previousUserValue as TimeFormatPreference?;
+          }
+        }
+        rethrow;
+      }
+      await _cachePreference(keyPrefix, userId, value);
+      await _clearDirtyPreference(dirtyKeyPrefix, userId);
+      if (_isCurrent(generation, userId) &&
+          dateOperation == _dateFormatOperation &&
+          timeOperation == _timeFormatOperation) {
+        _user = savedUser;
+      }
+    });
+  }
+
+  Future<T> _queuePreferencePersistence<T>(Future<T> Function() operation) {
+    final result = _preferencePersistence.then((_) => operation());
+    _preferencePersistence = result.then<void>((_) {}, onError: (_, _) {});
+    return result;
   }
 
   bool _isCurrent(int generation, String? userId) {

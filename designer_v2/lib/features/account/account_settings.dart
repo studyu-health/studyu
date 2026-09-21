@@ -50,11 +50,15 @@ class _AccountSettingsDialogState()
                 ),
               ],
               onChanged: (value) async {
+                final currentContext = context;
                 try {
                   final savedUser = await repository.updateDateFormat(value);
                   container.read(userStateProvider.notifier).setUser(savedUser);
                 } catch (error) {
                   debugPrint('Could not save date format preference: $error');
+                  if (!currentContext.mounted) return;
+                  ScaffoldMessenger.of(currentContext)
+                      .showSnackBar(SnackBar(content: Text(tr.sync_failed)));
                 }
               },
             ),
@@ -76,11 +80,15 @@ class _AccountSettingsDialogState()
                 ),
               ],
               onChanged: (value) async {
+                final currentContext = context;
                 try {
                   final savedUser = await repository.updateTimeFormat(value);
                   container.read(userStateProvider.notifier).setUser(savedUser);
                 } catch (error) {
                   debugPrint('Could not save time format preference: $error');
+                  if (!currentContext.mounted) return;
+                  ScaffoldMessenger.of(currentContext)
+                      .showSnackBar(SnackBar(content: Text(tr.sync_failed)));
                 }
               },
             ),
@@ -161,7 +169,7 @@ class _AccountSettingsDialogState()
               const SizedBox(height: 16.0),
               userState.when(
                 data: _buildDateTimePreferences,
-                error: (error, stackTrace) => Text(error.toString()),
+                error: (error, stackTrace) => Text(tr.sync_failed),
                 loading: () => const Center(child: CircularProgressIndicator()),
               ),
               const SizedBox(height: 16.0),
