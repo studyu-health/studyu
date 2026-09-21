@@ -12,23 +12,18 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/main.dart';
 import 'package:studyu_core/core.dart';
 
-class NotificationValidators {
-  bool didNotificationLaunchApp = false;
+class NotificationValidators(
+  var bool didNotificationLaunchApp,
   // do not launch notification action twice if user subscribes to a new study
-  bool wasNotificationActionHandled = false;
-  bool wasNotificationActionCompleted = false;
+  var bool wasNotificationActionHandled,
+  var bool wasNotificationActionCompleted,
+);
 
-  NotificationValidators(
-    this.didNotificationLaunchApp,
-    this.wasNotificationActionHandled,
-    this.wasNotificationActionCompleted,
-  );
-}
-
-class StudyNotifications {
-  StudySubject? subject;
+class StudyNotifications._create(
+  var StudySubject? subject,
+  var BuildContext context,
+) {
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  BuildContext context;
   final StreamController<ReceivedNotification>
   didReceiveLocalNotificationStream =
       StreamController<ReceivedNotification>.broadcast();
@@ -45,7 +40,7 @@ class StudyNotifications {
   static String? scheduledNotificationsDebug;
 
   /// Private constructor
-  StudyNotifications._create(this.subject, this.context) {
+  this {
     _initNotificationsPlugin();
     _requestPermissions();
     _isAndroidPermissionGranted();
@@ -142,7 +137,7 @@ class StudyNotifications {
                   context.pop();
                   await context.push('/${RouteNames.dashboard}');
                 },
-                child: const Text('Ok'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
@@ -176,14 +171,9 @@ class StudyNotifications {
       settings: initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
-            switch (notificationResponse.notificationResponseType) {
-              case NotificationResponseType.selectedNotification:
-                selectNotificationStream.add(notificationResponse.payload);
-              case NotificationResponseType.selectedNotificationAction:
-                /*if (notificationResponse.actionId == navigationActionId) {
+            if (notificationResponse.notificationResponseType ==
+                NotificationResponseType.selectedNotification) {
               selectNotificationStream.add(notificationResponse.payload);
-            }*/
-                break;
             }
           },
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
@@ -227,11 +217,9 @@ class StudyNotifications {
   }
 }
 
-class ReceivedNotification {
-  ReceivedNotification({this.id, this.title, this.body, this.payload});
-
-  final int? id;
-  final String? title;
-  final String? body;
-  final String? payload;
-}
+class ReceivedNotification({
+  final int? id,
+  final String? title,
+  final String? body,
+  final String? payload,
+});

@@ -159,6 +159,7 @@ generated/
 
 # Ruby bundler files for fastlane
 .bundle
+**/vendor/bundle/
 
 # Megalinter
 megalinter-reports/
@@ -181,3 +182,4 @@ interview/
 .pi-subagents/
 
 .vscode/settings.json
+/.qwen/

@@ -9,13 +9,15 @@ late final String? projectGeneratorUrl;
 late final String? androidPackageName;
 late final String? iosAppStoreId;
 late final String? developerEmail;
-late final String? appDeepLinkScheme;
+String? appDeepLinkScheme;
 
 String get appScheme {
   if (appDeepLinkScheme != null) {
     try {
       final scheme = Uri.parse(appDeepLinkScheme!).scheme;
-      if (scheme.isNotEmpty) return scheme;
+      if (scheme.isNotEmpty && scheme != 'http' && scheme != 'https') {
+        return scheme;
+      }
     } catch (_) {}
   }
   return 'studyu-app';
@@ -26,8 +28,8 @@ String generateAppSchemeLink(String path) {
 }
 
 String generateAppDeepLink(String path) {
-  final scheme = appDeepLinkScheme ?? 'https://app.studyu.health';
-  return '$scheme/${path.startsWith('/') ? path.substring(1) : path}';
+  final baseUrl = appUrl ?? 'https://app.studyu.health';
+  return '$baseUrl/${path.startsWith('/') ? path.substring(1) : path}';
 }
 
 void setEnv(

@@ -4,27 +4,19 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class FreeTextQuestionWidget extends QuestionWidget {
-  final FreeTextQuestion question;
-  final Function(Answer)? onDone;
-  final Answer<String>? initialAnswer;
-  final void Function(String questionId, String value)? onDraftChanged;
-  final bool isLastQuestion;
-
-  const FreeTextQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-    this.initialAnswer,
-    this.onDraftChanged,
-    this.isLastQuestion = false,
-  });
-
+class const FreeTextQuestionWidget({
+  super.key,
+  required final FreeTextQuestion question,
+  final Function(Answer)? onDone,
+  final Answer<String>? initialAnswer,
+  final void Function(String questionId, String value)? onDraftChanged,
+  final bool isLastQuestion = false,
+}) extends QuestionWidget {
   @override
   State<FreeTextQuestionWidget> createState() => FreeTextQuestionWidgetState();
 }
 
-class FreeTextQuestionWidgetState extends State<FreeTextQuestionWidget> {
+class FreeTextQuestionWidgetState() extends State<FreeTextQuestionWidget> {
   final _textFieldController = TextEditingController();
   final _formFieldKey = GlobalKey<FormFieldState>();
   final _focusNode = FocusNode();

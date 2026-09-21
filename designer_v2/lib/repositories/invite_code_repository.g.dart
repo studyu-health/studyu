@@ -73,7 +73,7 @@ final class InviteCodeRepositoryProvider
 }
 
 String _$inviteCodeRepositoryHash() =>
-    r'301a627858ddb89e3c4a291bb9ebd09d6b933513';
+    r'a9fb04158c1a28ab43e7db764875569151b7ad34';
 
 final class InviteCodeRepositoryFamily extends $Family
     with $FunctionalFamilyOverride<InviteCodeRepository, StudyID> {

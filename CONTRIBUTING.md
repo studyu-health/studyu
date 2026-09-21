@@ -4,12 +4,11 @@
 
 1. Install [FVM](https://fvm.app/documentation/getting-started/installation).
 2. Clone this repository and open its root directory.
-3. Run `fvm install` to install the Flutter SDK version defined in `.fvmrc`.
-4. Run `./setup.sh` to install Melos, dependencies, and workspace links.
-5. Run `fvm exec melos setup` to configure the tracked Git hooks.
+3. Run `./setup.sh` to install the pinned Flutter SDK, resolve Melos from the lockfile,
+   dependencies, workspace links, and tracked Git hooks.
 
 The root [`pubspec.yaml`](pubspec.yaml) is the command catalog. Run its Melos
-scripts as `fvm exec melos <script>`.
+scripts as `fvm dart run melos <script>`.
 
 ## Flutter SDK Setup
 
@@ -27,25 +26,25 @@ must be run from the repository root.
 After installing FVM, run:
 
 ```bash
-fvm install
+./setup.sh
 fvm flutter --version
 fvm dart --version
-./setup.sh
-fvm exec melos setup
 ```
 
-`fvm install` reads `.fvmrc` and creates the ignored `.fvm/flutter_sdk` link to the
-cached project SDK. The root `pubspec.yaml` points Melos to the same SDK through
-`melos.sdkPath`; no manual `MELOS_SDK_PATH` export is required.
+`./setup.sh` reads `.fvmrc`, installs the pinned Flutter SDK, and creates the ignored
+`.fvm/flutter_sdk` link to the cached project SDK. It also installs Melos, bootstraps the
+workspace, fetches root dependencies, creates `.env.local` from `.env.local.example` when
+needed, and configures the tracked Git hooks. The root `pubspec.yaml` points Melos to the same
+SDK through `melos.sdkPath`; no manual `MELOS_SDK_PATH` export is required.
 
 Use the project SDK for development commands:
 
 ```bash
 fvm flutter test
 fvm dart analyze
-fvm exec melos test
-fvm exec melos dev:app
-fvm exec melos local:designer_v2
+fvm dart run melos test
+fvm dart run melos dev:app
+fvm dart run melos local:designer_v2
 ```
 
 ### IDE configuration
@@ -85,7 +84,7 @@ Backend and tooling at the repo root (outside the Flutter workspace):
 - [supabase/](./supabase): migrations, seeds, local CLI config, and database tests.
 - [database/migration-legacy/](./database/migration-legacy): historical migrations; no longer the current migration path.
 
-Run `fvm exec melos <script>` from the repository root to operate on the
+Run `fvm dart run melos <script>` from the repository root to operate on the
 workspace. See `pubspec.yaml` for the full script catalog.
 
 ## Environments
@@ -94,7 +93,8 @@ Environment files live under `flutter_common/lib/envs/`:
 
 - `.env` — Production database using main branch (default; do **not** use for routine development).
 - `.env.dev` — Development database using dev branch.
-- `.env.local` — Local Supabase CLI instance (copy from `.env.local.example`).
+- `.env.local` — Local Supabase CLI instance. `./setup.sh` creates this file from
+  `.env.local.example` when it does not exist.
 
 Use the `dev:*` Melos scripts for the development environment and `local:*`
 for a local Supabase instance. Only `.env.dev` or `.env.local` should be used
@@ -148,7 +148,7 @@ adds Riverpod, routing, and json_serializable output on top of that.
 After changing annotated models, controllers, or routes, run:
 
 ```bash
-fvm exec melos generate
+fvm dart run melos generate
 ```
 
 Contrary to most recommendations, the generated files (`*.g.dart`) are committed
@@ -160,11 +160,12 @@ resolution.
 
 The shared Dart and Flutter lint rules are defined in [`analysis_options.yaml`](analysis_options.yaml).
 The tracked pre-commit hook runs [`scripts/pre-commit-check`](scripts/pre-commit-check), which
-formats, generates affected output, and analyzes the workspace. The Git hooks are configured
-by `fvm exec melos setup`. If you develop manually without the automated pre-commit check
-running your changes, run `fvm exec melos qualitycheck` instead; it formats, analyzes, and
-regenerates code across the workspace. Otherwise run `fvm exec melos qualitycheck` for a full
-CI-style workspace check or when explicitly requested.
+formats, generates affected output, and analyzes the workspace. The Git hooks are configured by
+`./setup.sh`. If you develop manually without the automated pre-commit check running your
+changes, run `fvm dart run melos qualitycheck` instead; it checks formatting and
+analyzes the workspace without writing files. Run `fvm dart run melos generate` separately when
+code generation is required. Use `fvm dart run melos qualitycheck` for a full CI-style workspace
+check or when explicitly requested.
 
 ## Frontend
 
@@ -195,10 +196,21 @@ Examples from this repo:
 For any new feature or bug fix, create a branch and open a pull request. Follow the
 pull request template and these conventions:
 
-- Branch: `<type>/studyu-<ticket-number>-<short-description>`
-- PR title: `[STUDYU-<ticket-number>] <type>[(<scope>)]: <description>`
+- Jira-backed branch: `<type>/studyu-<ticket-number>-<short-description>`
+- Jira-backed PR title: `[STUDYU-<ticket-number>] <type>[(<scope>)]: <description>`
+- Dependency-upgrade PRs created through `.agents/skills/dependency-upgrade`
+  are maintenance and do not require Jira. Use a `chore/<short-description>`
+  branch and a `chore(deps): <description>` PR title.
+- A small maintenance PR can omit Jira only when all these conditions apply:
+  - Its type is `chore`, `docs`, `ci`, `build`, or `test`.
+  - It changes no user-facing behavior, database, deployment, or release.
+  - It changes at most 500 non-generated lines.
+  - The author explicitly confirms that no Jira ticket is needed.
+- A ticketless maintenance branch uses `<type>/<short-description>`.
+- A ticketless maintenance PR title uses `<type>[(<scope>)]: <description>`.
 - PR description must include:
-  - A direct link to the matching Jira ticket.
+  - A direct Jira link, or `Not applicable — maintenance PR.` for an approved
+    ticketless maintenance PR.
   - A **description** of the change and its motivation, with any related
     issues or context.
   - **Testing steps** that let a reviewer reproduce and verify the change

@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:studyu_designer_v2/localization/platform_locale/platform_locale_interface.dart';
 
-class PlatformLocaleMobile implements PlatformLocale {
+class PlatformLocaleMobile() implements PlatformLocale {
   @override
   Locale getPlatformLocale() {
     final String platformLocaleName = Platform.localeName;

@@ -25,47 +25,36 @@ SOFTWARE.
 import 'package:flutter/material.dart';
 import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 
-typedef CustomErrorWidgetBuilder =
-    Widget Function(
-      BuildContext context,
-      dynamic error,
-      void Function() reload,
-    );
+typedef CustomErrorWidgetBuilder = Widget Function(
+  BuildContext context,
+  dynamic error,
+  void Function() reload,
+);
 
-class RetryFutureBuilder<T> extends StatefulWidget {
-  static RetryFutureBuilderState? of(BuildContext context) =>
-      context.findAncestorStateOfType<RetryFutureBuilderState>();
-
-  final Future<T> Function() tryFunction;
-  final Widget Function(BuildContext, T?) successBuilder;
+class const RetryFutureBuilder<T>({
+  super.key,
+  required final Future<T> Function() tryFunction,
+  required final Widget Function(BuildContext, T?) successBuilder,
 
   /// a value to show immediately, before evaluating [tryFunction]
-  final T? initialData;
-  final Widget Function(BuildContext)? loadingBuilder;
+  final T? initialData,
+  final Widget Function(BuildContext)? loadingBuilder,
 
   /// error handler function that gets to handle the error
   /// and return a widget to be displayed instead.
   /// return [null] to revert to default behavior
-  final CustomErrorWidgetBuilder? errorWidgetBuilder;
-  final List<Widget> extraWidgets;
-  final bool trackConnectionStatus;
-
-  const RetryFutureBuilder({
-    super.key,
-    required this.tryFunction,
-    required this.successBuilder,
-    this.initialData,
-    this.loadingBuilder,
-    this.errorWidgetBuilder,
-    this.extraWidgets = const [],
-    this.trackConnectionStatus = false,
-  });
+  final CustomErrorWidgetBuilder? errorWidgetBuilder,
+  final List<Widget> extraWidgets = const [],
+  final bool trackConnectionStatus = false,
+}) extends StatefulWidget {
+  static RetryFutureBuilderState? of(BuildContext context) =>
+      context.findAncestorStateOfType<RetryFutureBuilderState>();
 
   @override
   State<RetryFutureBuilder<T>> createState() => RetryFutureBuilderState<T>();
 }
 
-class RetryFutureBuilderState<T> extends State<RetryFutureBuilder<T>> {
+class RetryFutureBuilderState<T>() extends State<RetryFutureBuilder<T>> {
   late Future<T> _future;
 
   @override
@@ -100,7 +89,6 @@ class RetryFutureBuilderState<T> extends State<RetryFutureBuilder<T>> {
           case ConnectionState.done:
             if (snapshot.hasError) {
               _syncConnectionStatus(snapshot.error);
-              // ignore: only_throw_errors
               if (widget.errorWidgetBuilder != null) {
                 return widget.errorWidgetBuilder!(
                   context,

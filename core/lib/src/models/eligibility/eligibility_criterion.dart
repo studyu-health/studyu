@@ -12,13 +12,11 @@ class EligibilityCriterion {
   String? reason;
   late Expression condition;
 
-  EligibilityCriterion(this.id);
+  new(this.id);
 
-  EligibilityCriterion.withId()
-    : id = const Uuid().v4(),
-      condition = BooleanExpression();
+  new withId() : id = const Uuid().v4(), condition = BooleanExpression();
 
-  factory EligibilityCriterion.fromJson(Map<String, dynamic> data) =>
+  factory fromJson(Map<String, dynamic> data) =>
       _$EligibilityCriterionFromJson(data);
   Map<String, dynamic> toJson() => _$EligibilityCriterionToJson(this);
 

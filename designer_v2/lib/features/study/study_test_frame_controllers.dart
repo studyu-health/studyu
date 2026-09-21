@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:js_interop' as js;
-import 'dart:js_interop_unsafe';
+import 'dart:js_interop';
 import 'dart:ui_web' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:studyu_core/env.dart' as env;
+import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/study/study_test_frame_views.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:web/web.dart' as web;
@@ -64,23 +64,19 @@ void _removePreviewIframeStyles() {
   }
 }
 
-class RouteInformation {
-  String? route;
-  String? extra;
-  String? cmd;
-  String? data;
-
-  RouteInformation(this.route, this.extra, this.cmd, this.data);
-
+class RouteInformation(
+  var String? route,
+  var String? extra,
+  var String? cmd,
+  var String? data,
+) {
   @override
   String toString() {
     return 'RouteInformation{route: $route, extra: $extra, cmd: $cmd, data: $data}';
   }
 }
 
-abstract class PlatformController {
-  final String studyId;
-  final String baseSrc;
+abstract class PlatformController(final String baseSrc, final String studyId) {
   final ValueNotifier<bool> navigationEnabled = ValueNotifier(false);
   late String previewSrc;
   late RouteInformation routeInformation;
@@ -91,8 +87,6 @@ abstract class PlatformController {
   VoidCallback? onReady;
   ValueChanged<String>? onError;
 
-  PlatformController(this.baseSrc, this.studyId);
-
   void activate();
   void registerViews(Key key);
   void generateUrl({String? route, String? extra, String? cmd, String? data});
@@ -101,7 +95,7 @@ abstract class PlatformController {
   void listen();
   void updateData(String data) {
     routeInformation.data = data;
-    send(data);
+    send(createPreviewStudyMessage(data));
   }
 
   void send(String message);
@@ -109,11 +103,17 @@ abstract class PlatformController {
   void dispose() {}
 }
 
-class WebController extends PlatformController {
+class WebController(
+  super.baseSrc,
+  super.studyId,
+  final String serializedSession,
+) extends PlatformController {
   late web.HTMLIFrameElement iFrameElement;
+  web.CrossOriginWindow? _previewWindow;
   bool _isListening = false;
+  StreamSubscription<web.MessageEvent>? _messageSubscription;
 
-  WebController(super.baseSrc, super.studyId) {
+  this {
     super.frameWidget = Container();
     routeInformation = RouteInformation(null, null, null, null);
   }
@@ -158,21 +158,13 @@ class WebController extends PlatformController {
     );
   }
 
-  String _buildPreviewUrl({
-    String? route,
-    String? extra,
-    String? cmd,
-    String? data,
-  }) {
+  String _buildPreviewUrl({String? route, String? extra, String? cmd}) {
     if (baseSrc == '') return '';
 
     var url = baseSrc;
     if (route != null) url = "$url&route=$route";
     if (extra != null) url = "$url&extra=$extra";
     if (cmd != null) url = "$url&cmd=$cmd";
-    if (data != null) {
-      url = "$url&data=${Uri.encodeQueryComponent(data)}";
-    }
     return url;
   }
 
@@ -181,43 +173,34 @@ class WebController extends PlatformController {
     onLoadStarted?.call();
     navigationEnabled.value = false;
     routeInformation = RouteInformation(route, extra, cmd, data);
-    previewSrc = _buildPreviewUrl(
-      route: route,
-      extra: extra,
-      cmd: cmd,
-      data: data,
-    );
+    previewSrc = _buildPreviewUrl(route: route, extra: extra, cmd: cmd);
+    _navigatePreviewWindow();
   }
 
   @override
   void updateData(String data) {
     routeInformation.data = data;
-    previewSrc = _buildPreviewUrl(
-      route: routeInformation.route,
-      extra: routeInformation.extra,
-      cmd: routeInformation.cmd,
-      data: data,
-    );
-    if (_isListening) send(data);
+    if (_isListening) send(createPreviewStudyMessage(data));
   }
 
   @override
   void navigate({String? route, String? extra, String? cmd, String? data}) {
+    final latestData = data ?? routeInformation.data;
     if (navigationEnabled.value && cmd == null) {
-      routeInformation = RouteInformation(route, extra, cmd, data);
+      routeInformation = RouteInformation(route, extra, cmd, latestData);
+      if (data != null) send(createPreviewStudyMessage(data));
       send(
         jsonEncode({
           'type': 'previewNavigate',
-          if (route != null) 'route': route,
-          if (extra != null) 'extra': extra,
-          if (data != null) 'data': data,
+          'route': ?route,
+          'extra': ?extra,
         }),
       );
       navigationEnabled.value = false;
       return;
     }
 
-    generateUrl(route: route, extra: extra, cmd: cmd, data: data);
+    generateUrl(route: route, extra: extra, cmd: cmd, data: latestData);
     if (iFrameElement.src != previewSrc) {
       iFrameElement.src = previewSrc;
     }
@@ -247,23 +230,121 @@ class WebController extends PlatformController {
     return;
   }
 
+  String? get _appOrigin {
+    final uri = Uri.tryParse(baseSrc);
+    return uri == null || !uri.hasScheme || uri.host.isEmpty
+        ? null
+        : uri.origin;
+  }
+
+  web.CrossOriginWindow? get _activePreviewWindow {
+    final previewWindow = _previewWindow;
+    if (previewWindow == null) return null;
+    try {
+      if (previewWindow.closed) {
+        _previewWindow = null;
+        return null;
+      }
+    } catch (_) {
+      _previewWindow = null;
+      return null;
+    }
+    return previewWindow;
+  }
+
+  void _navigatePreviewWindow() {
+    final previewWindow = _activePreviewWindow;
+    if (previewWindow == null) return;
+    try {
+      final location = previewWindow.location;
+      if (location == null) {
+        _previewWindow = null;
+        return;
+      }
+      location.href = previewSrc;
+      previewWindow.focus();
+    } catch (_) {
+      _previewWindow = null;
+    }
+  }
+
   @override
   void openNewPage() {
-    js.globalContext.callMethod('open'.toJS, previewSrc.toJS);
+    if (baseSrc == '' || previewSrc == '') return;
+
+    final existingWindow = _activePreviewWindow;
+    if (existingWindow != null) {
+      _navigatePreviewWindow();
+      return;
+    }
+
+    try {
+      _previewWindow = web.window.openCrossOrigin(previewSrc);
+      _previewWindow?.focus();
+    } catch (_) {
+      _previewWindow = null;
+    }
   }
 
   @override
   void listen() {
     if (_isListening) return;
     _isListening = true;
-    web.window.onMessage.listen((event) {
+    _messageSubscription = web.window.onMessage.listen((event) {
+      final appOrigin = _appOrigin;
+      final frameWindow = iFrameElement.contentWindow;
+      final previewWindow = _activePreviewWindow;
+      // Use identity, not ==: comparing cross-origin Window objects with
+      // Dart == makes DDC read `dartx._equals` from the foreign Window, which
+      // the browser blocks with a SecurityError.
+      final isFrameMessage =
+          frameWindow != null && identical(event.source, frameWindow);
+      final isPreviewMessage =
+          previewWindow != null &&
+          identical(event.source, previewWindow.unsafeWindow);
+      if (appOrigin == null ||
+          event.origin != appOrigin ||
+          (!isFrameMessage && !isPreviewMessage)) {
+        return;
+      }
+
       final data = event.data.dartify();
+      if (isPreviewSessionRequest(data)) {
+        final message = createPreviewSessionMessage(serializedSession).toJS;
+        if (isFrameMessage) {
+          frameWindow.postMessage(message, appOrigin.toJS);
+        } else {
+          previewWindow!.postMessage(message, appOrigin.toJS);
+        }
+        return;
+      }
+      if (isPreviewStudyRequest(data)) {
+        final study = routeInformation.data;
+        if (study != null) {
+          final message = createPreviewStudyMessage(study).toJS;
+          if (isFrameMessage) {
+            frameWindow.postMessage(message, appOrigin.toJS);
+          } else {
+            previewWindow!.postMessage(message, appOrigin.toJS);
+          }
+        }
+        return;
+      }
+
+      // Only the embedded iframe controls the Designer's loading state.
+      if (!isFrameMessage) return;
+
       if (data is String) {
         try {
           final parsed = jsonDecode(data);
           if (parsed is Map<String, dynamic> &&
-              parsed['type'] == 'previewStatus') {
-            final status = parsed['status'] as String?;
+              parsed['type'] == 'previewStatus' &&
+              parsed.keys.every(
+                (key) => const {'type', 'status', 'message'}.contains(key),
+              ) &&
+              parsed['status'] is String &&
+              (parsed['message'] == null || parsed['message'] is String)) {
+            final status = parsed['status'] as String;
             switch (status) {
               case 'loading':
                 onLoading?.call();
@@ -301,22 +382,34 @@ class WebController extends PlatformController {
 
   @override
   void send(String message) {
-    iFrameElement.contentWindow?.postMessage(
-      message.toJS,
-      (env.appUrl ?? '').toJS,
-    );
+    final appOrigin = _appOrigin;
+    if (appOrigin == null) return;
+
+    iFrameElement.contentWindow?.postMessage(message.toJS, appOrigin.toJS);
+    final previewWindow = _activePreviewWindow;
+    previewWindow?.postMessage(message.toJS, appOrigin.toJS);
   }
 
   @override
   void dispose() {
+    _messageSubscription?.cancel();
+    _messageSubscription = null;
+    final previewWindow = _previewWindow;
+    _previewWindow = null;
+    try {
+      previewWindow?.close();
+    } catch (_) {
+      // The popup may have been closed or become inaccessible already.
+    }
     // Clean up injected styles when the controller is disposed
     _removePreviewIframeStyles();
   }
 }
 
 // Mostly unfinished, since we only support Desktop for now
-class MobileController extends PlatformController {
-  MobileController(super.previewSrc, super.studyId) {
+class MobileController(super.previewSrc, super.studyId)
+    extends PlatformController {
+  this {
     frameWidget = const MobileFrame();
   }
 

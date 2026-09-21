@@ -7,7 +7,12 @@ import 'package:studyu_app/screens/study/dashboard/dashboard.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
 import 'package:studyu_core/core.dart';
 
-Widget _dashboardWith(int interventionCount, {bool withTask = false}) {
+Widget _dashboardWith(
+  int interventionCount, {
+  bool withTask = false,
+  bool preview = true,
+  DateTime? startedAt,
+}) {
   final study = Study('study', 'user')
     ..status = StudyStatus.running
     ..interventions = List.generate(
@@ -25,9 +30,9 @@ Widget _dashboardWith(int interventionCount, {bool withTask = false}) {
     'user',
     study.interventions.map((intervention) => intervention.id).toList(),
     null,
-  )..startedAt = DateTime.now().add(const Duration(days: 1));
+  )..startedAt = startedAt ?? DateTime.now().add(const Duration(days: 1));
   final appState = AppState()..activeSubject = subject;
-  appState.updatePreviewMode(true);
+  appState.updatePreviewMode(preview);
 
   return ChangeNotifierProvider.value(
     value: appState,

@@ -7,7 +7,13 @@ import 'package:studyu_core/src/util/supabase_object.dart';
 part 'subject_progress.g.dart';
 
 @JsonSerializable()
-class SubjectProgress extends SupabaseObjectFunctions<SubjectProgress> {
+class SubjectProgress({
+  @JsonKey(name: 'subject_id') required var String subjectId,
+  @JsonKey(name: 'intervention_id') required var String interventionId,
+  @JsonKey(name: 'task_id') required var String taskId,
+  @JsonKey(name: 'result_type') required var String resultType,
+  required var Result result,
+}) extends SupabaseObjectFunctions<SubjectProgress> {
   static const String tableName = 'subject_progress';
 
   @override
@@ -19,28 +25,10 @@ class SubjectProgress extends SupabaseObjectFunctions<SubjectProgress> {
   // stored in UTC format, be careful when comparing dates
   @JsonKey(name: 'completed_at')
   DateTime? completedAt;
-  @JsonKey(name: 'subject_id')
-  String subjectId;
-  @JsonKey(name: 'intervention_id')
-  String interventionId;
-  @JsonKey(name: 'task_id')
-  String taskId;
-  @JsonKey(name: 'result_type')
-  String resultType;
-  Result result;
-
   @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime? startedAt;
 
-  SubjectProgress({
-    required this.subjectId,
-    required this.interventionId,
-    required this.taskId,
-    required this.resultType,
-    required this.result,
-  });
-
-  factory SubjectProgress.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     final progress = _$SubjectProgressFromJson(json);
 
     final String? startedAt = json['started_at'] as String?;

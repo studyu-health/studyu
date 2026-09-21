@@ -5,9 +5,9 @@ typedef KeyAccessor<K, V> = K Function(V);
 class GroupedIterable<K, V> extends Iterable<MapEntry<K, Iterable<V>>> {
   Map<K, Iterable<V>> data;
 
-  GroupedIterable() : data = {};
+  new() : data = {};
 
-  GroupedIterable.from(this.data);
+  new from(this.data);
 
   @override
   Iterator<MapEntry<K, Iterable<V>>> get iterator => data.entries.iterator;

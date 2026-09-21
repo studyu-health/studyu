@@ -3,9 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 
-class StudyUnavailableScreen extends StatelessWidget {
-  const StudyUnavailableScreen({super.key});
-
+class const StudyUnavailableScreen({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

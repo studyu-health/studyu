@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 /// Inspired by [GoRouterRefreshStream]
 /// This class can be used to make [GoRouter]'s `refreshListenable` react to
 /// to events from multiple source streams.
-class CombinedStreamNotifier extends ChangeNotifier {
+class CombinedStreamNotifier(List<Stream<dynamic>> streams)
+    extends ChangeNotifier {
   late final List<StreamSubscription<dynamic>> _subscriptions = [];
 
   /// Creates a [CombinedStreamNotifier].
   ///
   /// Every time any of the [streams] receives an event, the
   /// [CombinedStreamNotifier] will notify its listeners
-  CombinedStreamNotifier(List<Stream<dynamic>> streams) {
+  this {
     notifyListeners();
     for (final stream in streams) {
       final subscription = stream.asBroadcastStream().listen(

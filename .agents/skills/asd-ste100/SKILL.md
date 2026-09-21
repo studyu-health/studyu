@@ -1,6 +1,6 @@
 ---
 name: asd-ste100
-description: Rewrite text agents consume — commits, PR bodies, review comments, code comments, errors, docs — into unambiguous STE100. Use when writing or editing any text another agent or non-native reader will parse. Triggers on: disambiguate, simplify, STE100, "make clearer", "non-native", or any commit, PR, review, or comment edit. Not for creative or marketing copy.
+description: 'Rewrite text agents consume — commits, PR bodies, review comments, code comments, errors, docs — into unambiguous STE100. Use when writing or editing any text another agent or non-native reader will parse. Triggers on: disambiguate, simplify, STE100, "make clearer", "non-native", or any commit, PR, review, or comment edit. Not for creative or marketing copy.'
 ---
 
 # Simplified Technical English

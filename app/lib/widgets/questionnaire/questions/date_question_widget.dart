@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/util/date_time_preferences.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class DateQuestionWidget extends QuestionWidget {
-  final DateQuestion question;
-  final Function(Answer)? onDone;
-  final VoidCallback? onCleared;
-  final Answer<DateTime>? initialAnswer;
-
-  const DateQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-    this.onCleared,
-    this.initialAnswer,
-  });
-
+class const DateQuestionWidget({
+  super.key,
+  required final DateQuestion question,
+  final Function(Answer)? onDone,
+  final VoidCallback? onCleared,
+  final Answer<DateTime>? initialAnswer,
+}) extends QuestionWidget {
   @override
   State<DateQuestionWidget> createState() => _DateQuestionWidgetState();
 }
 
-class _DateQuestionWidgetState extends State<DateQuestionWidget> {
+class _DateQuestionWidgetState() extends State<DateQuestionWidget> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   bool _hasInteracted = false;
@@ -103,10 +98,24 @@ class _DateQuestionWidgetState extends State<DateQuestionWidget> {
     final now = TimeOfDay.now();
     final initialTime = _selectedTime ?? now;
 
+    final timeFormat = context.read<DateTimePreferences?>()?.timeFormat;
+    final use24HourFormat = switch (timeFormat) {
+      TimeFormatPreference.h12 => false,
+      TimeFormatPreference.h24 => true,
+      null => null,
+    };
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: initialTime,
       helpText: widget.question.prompt,
+      builder: (context, child) {
+        if (use24HourFormat == null) return child!;
+        return MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(alwaysUse24HourFormat: use24HourFormat),
+          child: child!,
+        );
+      },
     );
 
     if (pickedTime != null) {
@@ -271,6 +280,7 @@ class _DateQuestionWidgetState extends State<DateQuestionWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context)!;
+    final dateTimePreferences = context.watch<DateTimePreferences?>();
     final validationError = _hasInteracted ? _getValidationError() : null;
 
     return Column(
@@ -283,9 +293,8 @@ class _DateQuestionWidgetState extends State<DateQuestionWidget> {
             icon: const Icon(Icons.calendar_today),
             label: Text(
               _selectedDate != null
-                  ? DateFormat(
-                      widget.question.dateFormat,
-                    ).format(_selectedDate!)
+                  ? dateTimePreferences?.formatDate(context, _selectedDate!) ??
+                        DateTimeFormat.formatDate(context, _selectedDate!)
                   : (widget.question.isDateTime
                         ? localizations.date_picker_button_label_datetime
                         : localizations.date_picker_button_label),
@@ -305,15 +314,8 @@ class _DateQuestionWidgetState extends State<DateQuestionWidget> {
             icon: const Icon(Icons.access_time),
             label: Text(
               _selectedTime != null
-                  ? DateFormat(widget.question.timeFormat).format(
-                      DateTime(
-                        2000,
-                        1,
-                        1,
-                        _selectedTime!.hour,
-                        _selectedTime!.minute,
-                      ),
-                    )
+                  ? dateTimePreferences?.formatTime(context, _selectedTime!) ??
+                        _selectedTime!.format(context)
                   : (widget.question.isDateTime
                         ? localizations.time_picker_button_label_datetime
                         : localizations.time_picker_button_label),
@@ -341,7 +343,7 @@ class _DateQuestionWidgetState extends State<DateQuestionWidget> {
         if (widget.question.minTime != null ||
             widget.question.maxTime != null) ...[
           Text(
-            _formatTimeRangeHint(localizations),
+            _formatTimeRangeHint(localizations, dateTimePreferences),
             style: theme.textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
@@ -363,17 +365,41 @@ class _DateQuestionWidgetState extends State<DateQuestionWidget> {
     );
   }
 
-  String _formatTimeRangeHint(AppLocalizations localizations) {
+  String _formatTimeRangeHint(
+    AppLocalizations localizations,
+    DateTimePreferences? preferences,
+  ) {
     final minTime = widget.question.minTime;
     final maxTime = widget.question.maxTime;
+    final formattedMinTime = minTime == null
+        ? null
+        : _formatTimeValue(minTime, preferences);
+    final formattedMaxTime = maxTime == null
+        ? null
+        : _formatTimeValue(maxTime, preferences);
 
-    if (minTime != null && maxTime != null) {
-      return localizations.time_picker_range_hint(minTime, maxTime);
-    } else if (minTime != null) {
-      return localizations.time_picker_min_hint(minTime);
-    } else if (maxTime != null) {
-      return localizations.time_picker_max_hint(maxTime);
+    if (formattedMinTime != null && formattedMaxTime != null) {
+      return localizations.time_picker_range_hint(
+        formattedMinTime,
+        formattedMaxTime,
+      );
+    } else if (formattedMinTime != null) {
+      return localizations.time_picker_min_hint(formattedMinTime);
+    } else if (formattedMaxTime != null) {
+      return localizations.time_picker_max_hint(formattedMaxTime);
     }
     return '';
+  }
+
+  String _formatTimeValue(String value, DateTimePreferences? preferences) {
+    final parts = value.split(':');
+    if (parts.length != 2) return value;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return value;
+
+    final time = TimeOfDay(hour: hour, minute: minute);
+    return preferences?.formatTime(context, time) ??
+        DateTimeFormat.formatTime(context, time);
   }
 }

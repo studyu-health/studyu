@@ -5,49 +5,32 @@ import 'package:studyu_designer_v2/common_views/form_buttons.dart';
 import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyConfirmationCheckbox {
-  const StudyConfirmationCheckbox({required this.key, required this.label});
+class const StudyConfirmationCheckbox({
+  required final Key key,
+  required final Widget label,
+});
 
-  final Key key;
-  final Widget label;
-}
-
-class StudyTitleConfirmationDialog extends StatefulWidget {
-  const StudyTitleConfirmationDialog({
-    required this.study,
-    required this.title,
-    required this.description,
-    required this.instruction,
-    required this.textFieldLabel,
-    required this.confirmLabel,
-    required this.onConfirmed,
-    this.textFieldKey = const ValueKey('study_title_confirmation_field'),
-    this.additionalContent = const [],
-    this.confirmationCheckboxes = const [],
-    this.hideConfirmUntilValid = false,
-    this.destructive = false,
-    super.key,
-  });
-
-  final Study study;
-  final String title;
-  final String description;
-  final String instruction;
-  final String textFieldLabel;
-  final String confirmLabel;
-  final Future<void> Function() onConfirmed;
-  final Key textFieldKey;
-  final List<Widget> additionalContent;
-  final List<StudyConfirmationCheckbox> confirmationCheckboxes;
-  final bool hideConfirmUntilValid;
-  final bool destructive;
-
+class const StudyTitleConfirmationDialog({
+  required final Study study,
+  required final String title,
+  required final String description,
+  required final String instruction,
+  required final String textFieldLabel,
+  required final String confirmLabel,
+  required final Future<void> Function() onConfirmed,
+  final Key textFieldKey = const ValueKey('study_title_confirmation_field'),
+  final List<Widget> additionalContent = const [],
+  final List<StudyConfirmationCheckbox> confirmationCheckboxes = const [],
+  final bool hideConfirmUntilValid = false,
+  final bool destructive = false,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<StudyTitleConfirmationDialog> createState() =>
       _StudyTitleConfirmationDialogState();
 }
 
-class _StudyTitleConfirmationDialogState
+class _StudyTitleConfirmationDialogState()
     extends State<StudyTitleConfirmationDialog> {
   final _formKey = GlobalKey<FormState>();
   final _studyTitleController = TextEditingController();

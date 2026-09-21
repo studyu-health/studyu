@@ -5,29 +5,27 @@ import 'package:studyu_app/screens/study/report/util/report_utilities.dart';
 import 'package:studyu_app/widgets/report/textual_summary_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class TextualSummarySectionWidget extends ReportSectionWidget {
-  final TextualSummarySection section;
-
-  const TextualSummarySectionWidget(super.subject, this.section, {super.key});
-
+class const TextualSummarySectionWidget(
+  super.subject,
+  final TextualSummarySection section, {
+  super.key,
+}) extends ReportSectionWidget {
   @override
   Widget build(BuildContext context) {
     return _TextualSummarySectionStatefulWidget(subject, section);
   }
 }
 
-class _TextualSummarySectionStatefulWidget extends StatefulWidget {
-  final StudySubject subject;
-  final TextualSummarySection section;
-
-  const _TextualSummarySectionStatefulWidget(this.subject, this.section);
-
+class const _TextualSummarySectionStatefulWidget(
+  final StudySubject subject,
+  final TextualSummarySection section,
+) extends StatefulWidget {
   @override
   State<_TextualSummarySectionStatefulWidget> createState() =>
       _TextualSummarySectionState();
 }
 
-class _TextualSummarySectionState
+class _TextualSummarySectionState()
     extends State<_TextualSummarySectionStatefulWidget> {
   bool _isLoading = true;
   late final ReportUtilities _reportUtilities;

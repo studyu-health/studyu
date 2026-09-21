@@ -9,9 +9,8 @@ import 'package:studyu_designer_v2/features/study/settings/study_settings_form_c
 import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudySettingsDialog extends StudyPageWidget {
-  const StudySettingsDialog(super.studyId, {super.key});
-
+class const StudySettingsDialog(super.studyId, {super.key})
+    extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formViewModel = ref.watch(

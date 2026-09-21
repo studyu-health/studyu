@@ -9,6 +9,7 @@ argument-hint: "[target-branch]"
 ## Defaults
 
 - Default target branch: `dev`, unless the user specifies a target branch or repository context clearly indicates a different default.
+- Jira is required unless the change is a dependency upgrade or meets the ticketless maintenance exception in `CONTRIBUTING.md`.
 - Do not force-push, rebase, amend, or rename branches unless the user explicitly asks.
 - Never create a PR until branch name, commit compliance, and diff size audit have been presented and the user confirms continuing.
 
@@ -20,25 +21,26 @@ Run:
 git rev-parse --abbrev-ref HEAD
 ```
 
-Branch names must match:
+A Jira-backed branch must match:
 
 ```text
 <type>/studyu-<ticket-number>-<short-description>
 ```
 
-Allowed types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `perf`, `ci`, `build`.
-
-Examples: `fix/studyu-42-designer-picker`, `feat/studyu-128-date-question`.
-
-If the current branch does not match, stop and propose:
+A ticketless maintenance branch must match:
 
 ```text
-Branch name "<current>" doesn't follow conventions.
-Suggested: <type>/studyu-<ticket-number>-<kebab-description>
-Rename with: git branch -m <new-name>
+<type>/<short-description>
 ```
 
-Wait for the user to rename or explicitly confirm continuing.
+Ticketless branches allow only `chore`, `docs`, `ci`, `build`, or `test`.
+They remain provisional until the maintenance scope gate in Step 3 passes.
+
+Examples: `fix/studyu-42-designer-picker`, `feat/studyu-128-date-question`,
+`chore/update-agent-skill`.
+
+If neither format matches, stop and propose the applicable valid format. Wait
+for the user to rename the branch or explicitly confirm continuing.
 
 ## Step 2: Audit Commits
 
@@ -91,6 +93,15 @@ Count changed lines excluding generated and translation files:
 - `*.lock`
 - `pubspec.lock`
 
+A dependency upgrade performed through `.agents/skills/dependency-upgrade` is
+ticketless maintenance. Do not require Jira or apply the small-maintenance
+scope limits to it.
+
+For any other ticketless branch, confirm all maintenance exception conditions
+from `CONTRIBUTING.md`. Stop if the diff exceeds 500 non-generated lines or
+changes user-facing behavior, a database, a deployment, or a release. Record
+the user's explicit confirmation that no Jira ticket is needed.
+
 If total non-excluded changed lines exceed 500, analyze the diff and propose an independently mergeable split by feature area, layer, or dependency order:
 
 ```text
@@ -118,29 +129,33 @@ git log <target-branch>..HEAD --format="%s%n%b"
 
 Derive:
 
-- Jira ticket: key from the branch and its direct URL. Ask the author for the URL if needed.
+- Jira ticket: key from the branch and its direct URL. Ask the author for the URL if needed. For an approved ticketless maintenance PR, use `Not applicable — maintenance PR.`
 - Problem: what was broken or missing, using commits and diff context.
 - Changes: grouped bullet list by area.
 - Testing: checklist of verification steps, including commands already run.
 
 ## Step 5: Create the PR
 
-When composing the body, use an available PR template. Fill applicable sections from Step 4, include a direct link to the matching Jira ticket, and follow removal instructions.
+When composing the body, use an available PR template and follow its removal
+instructions. Include the direct Jira link for Jira-backed work. Use
+`Not applicable — maintenance PR.` for an approved ticketless maintenance PR.
 
-If no template exists, write a concise body covering the Jira ticket, problem, changes, and verification.
+If no template exists, write a concise body covering the ticket or maintenance
+exception, problem, changes, and verification.
 
 ```bash
 git push -u origin HEAD
 gh pr create \
-  --title "[STUDYU-<ticket-number>] <type>[(<scope>)]: <imperative description>" \
+  --title "<validated-title>" \
   --base <target-branch> \
   --body "<completed-body>"
 ```
 
 PR title rules:
 
-- Format: `[STUDYU-<ticket-number>] <type>[(<scope>)]: <description>`.
-- The ticket must match the branch and Jira link.
+- Jira-backed format: `[STUDYU-<ticket-number>] <type>[(<scope>)]: <description>`.
+- Ticketless maintenance format: `<type>[(<scope>)]: <description>`.
+- For Jira-backed work, the ticket must match the branch and Jira link.
 - Maximum 72 characters.
 - Imperative mood.
 - No trailing period.

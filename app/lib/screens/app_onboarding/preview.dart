@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:studyu_app/app_router.dart';
@@ -9,9 +7,10 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class Preview {
-  final Map<String, String>? queryParameters;
-  final AppLanguage appLanguage;
+class Preview(
+  final Map<String, String>? queryParameters,
+  final AppLanguage appLanguage,
+) {
   String? selectedRoute;
   String? extra;
 
@@ -20,7 +19,7 @@ class Preview {
   String? selectedStudyObjectId;
   StudySubject? subject;
 
-  Preview(this.queryParameters, this.appLanguage) {
+  this {
     handleQueries();
   }
 
@@ -45,24 +44,25 @@ class Preview {
     }
   }
 
-  Future<bool> handleAuthorization() async {
-    if (!containsQuery('studyid') && !containsQuery('session')) return false;
+  Future<bool> handleAuthorization(
+    String session, {
+    Future<void> Function(String)? recoverSession,
+  }) async {
+    if (!containsQuery('studyid') || session.isEmpty) return false;
 
-    if (!containsQuery('session')) return false;
-
-    final String session = Uri.decodeComponent(queryParameters!['session']!);
     try {
-      await Supabase.instance.client.auth.recoverSession(session);
+      await (recoverSession ?? Supabase.instance.client.auth.recoverSession)(
+        session,
+      );
     } catch (_) {
       return false;
     }
 
-    if (containsQuery('data')) {
-      final data =
-          jsonDecode(queryParameters!['data']!) as Map<String, dynamic>;
-      study = Study.fromJson(data);
-    } else {
-      study = await SupabaseQuery.getById<Study>(queryParameters!['studyid']!);
+    if (study == null) {
+      final savedStudy = await SupabaseQuery.getById<Study>(
+        queryParameters!['studyid']!,
+      );
+      study ??= savedStudy;
     }
     // todo are results visible for published studies inside preview?
     if (study == null) return false;

@@ -18,7 +18,7 @@ Output principle: the checklist describes observable behavior, never code. Write
 - Tests live in `<package>/test/`; designer integration tests in `designer_v2/integration_test/`.
 - Stack: Flutter web-first (app on Chrome :8080, designer on :8081), `go_router`, provider + riverpod, `supabase_flutter`, intl/l10n, `json_serializable` generated `*.g.dart`.
 - Run tests from a package dir: `cd <pkg> && fvm flutter test <path>`. Prefix `rtk ` when `command -v rtk` succeeds. Never use bare `flutter`/`dart`; always through `fvm`.
-- Env selection: `.env.dev` (`melos dev:app` / `melos dev:designer_v2`) and `.env.local` (`melos local:app` / `melos local:designer_v2`).
+- Env selection: `.env.dev` (`fvm dart run melos dev:app` / `fvm dart run melos dev:designer_v2`) and `.env.local` (`fvm dart run melos local:app` / `fvm dart run melos local:designer_v2`).
 
 ## Step 1 — Resolve the change and read the diff
 
@@ -106,7 +106,7 @@ Some changes cannot be tested on the branch under review. Detect these and produ
 - The diff IS the workflow that posts this QA (e.g. `.github/workflows/manual-qa*`), and the workflow is not yet merged to the default branch — every end-to-end check ("post a checklist", "edit triggers regen") requires the workflow to exist first.
 - The diff adds or modifies a CI tool, hook, linter, generator, or script that the test steps rely on (`scripts/pre-commit-check`, `melos` command, `fvm` setup, build-runner config, code generator with `*.g.dart` consumers).
 - The diff changes infrastructure QA cannot reach from the source branch (deployment scripts, Supabase migrations applied only post-merge, feature flags toggled at deploy time).
-- The diff updates or replaces a dependency, lockfile, or build configuration whose effects only show after `melos bootstrap` runs against the merged state.
+- The diff updates or replaces a dependency, lockfile, or build configuration whose effects only show after `fvm dart run melos bootstrap` runs against the merged state.
 
 When ANY of these hold:
 
@@ -180,7 +180,7 @@ The deliverable is a Markdown checklist file. Test items use `- [ ]` checkboxes 
 2-3 sentences: which apps are affected, the biggest test risk, and whether the surface is broad or tightly bounded. Name the context you used: PR description, Jira <key> (fetched / not accessible / not found), user input from Step 3. End with the item count excluding Setup, e.g. "12 test items: 5 auto-covered, 7 manual-only".
 
 ## Setup (not test items)
-- Env and run commands (e.g. `.env.dev`, `rtk fvm exec melos dev:app`).
+- Env and run commands (e.g. `.env.dev`, `rtk fvm dart run melos dev:app`).
 - Accounts/roles needed, study state needed (e.g. "a published study with at least one participant").
 - Secrets, variables, or repo config QA must have before testing.
 - Note: Setup items are prerequisites QA reads once and arranges, not behavior tests. Do not count them in the item total.

@@ -53,14 +53,16 @@ code, tests, or linked project documentation.
 
 - Run all commands from the repository root. Do not change into a package directory for routine
   work.
-- Use `fvm exec melos <script>` for root Melos scripts.
-- Use `fvm dart` or `fvm flutter` for direct SDK commands. Run `fvm install` if the configured
+- After creating a linked worktree, run `./setup.sh` once from its repository root before any
+  other project command.
+- Use `fvm dart run melos <script>` for root Melos scripts.
+- Use `fvm dart` or `fvm flutter` for direct SDK commands. Run `./setup.sh` if the configured
   SDK is unavailable.
 - Prefer the existing root script catalog. For a targeted package check with no catalog entry,
-  use a root-level `melos exec` command with the appropriate package filter.
+  use a root-level `fvm dart run melos exec` command with the appropriate package filter.
 - The tracked `.githooks/pre-commit` hook runs `scripts/pre-commit-check` automatically.
   Run that check manually before a PR only when the hook has not checked the current changes.
-- Do not use `fvm exec melos qualitycheck` as the default pre-commit or pre-PR check. Use it for
+- Do not use `fvm dart run melos qualitycheck` as the default pre-commit or pre-PR check. Use it for
   a full CI-style workspace check or when explicitly requested.
 
 ## Environments
@@ -88,7 +90,7 @@ code, tests, or linked project documentation.
 ## Verification
 
 - Determine which packages and boundaries are affected, then run the narrowest relevant checks.
-- Use `fvm exec melos test` for workspace Flutter unit and widget tests. This does not cover
+- Use `fvm dart run melos test` for workspace Flutter unit and widget tests. This does not cover
   Designer browser E2E tests or Supabase/pgTAP tests.
 - Run generation after model or annotation changes, and analyze/test affected packages after
   generated output is updated.
@@ -127,7 +129,7 @@ code, tests, or linked project documentation.
 Do not run any of the following without explicit user authorization and immediate verification
 of the target, environment, and data-loss impact:
 
-- `fvm exec melos reset`, `git clean`, or other commands that discard local changes or files.
+- `fvm dart run melos reset`, `git clean`, or other commands that discard local changes or files.
 - Supabase reset commands or `scripts/reset-test-db.sh` with an unverified or non-local
   `SUPABASE_DB_URL`.
 - `supabase link`, remote `db push`, remote migration commands, or any command against a remote
@@ -145,7 +147,7 @@ routine agent sessions and use hooks, permissions, CI, and review gates for hard
 
 - Keep shared model and serialization contracts compatible with both frontends and active study
   data unless a breaking change is explicitly intended.
-- Run `fvm exec melos generate` after model or annotation changes and commit tracked output.
+- Run `fvm dart run melos generate` after model or annotation changes and commit tracked output.
 - Prefer package-level tests for serialization and public model behavior.
 
 ### When changing `flutter_common/`

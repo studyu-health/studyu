@@ -4,24 +4,16 @@ import 'package:statistics/statistics.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_core/core.dart';
 
-class DescriptiveStats {
-  final String name;
-  final int observations;
-  final int missing;
-  final int total;
-  final double? average;
-  final double? minimum;
-  final double? maximum;
-
-  DescriptiveStats({
-    required this.name,
-    required this.total,
-    required List<num> values,
-  }) : observations = values.length,
-       missing = total - values.length,
-       average = values.isNotEmpty ? values.mean : null,
-       minimum = values.isNotEmpty ? values.min as double : null,
-       maximum = values.isNotEmpty ? values.max as double : null;
+class DescriptiveStats({
+  required final String name,
+  required final int total,
+  required List<num> values,
+}) {
+  final int observations = values.length;
+  final int missing = total - values.length;
+  final double? average = values.isNotEmpty ? values.mean : null;
+  final double? minimum = values.isNotEmpty ? values.min as double : null;
+  final double? maximum = values.isNotEmpty ? values.max as double : null;
 
   String formatted(double? value) =>
       value != null ? value.toStringAsFixed(2) : 'No data';
@@ -33,33 +25,30 @@ class DescriptiveStats {
       : 'Null';
 }
 
-class DescriptiveStatisticsWidget extends StatelessWidget {
-  final DescriptiveStats statsA;
-  final DescriptiveStats statsB;
-  final bool initiallyExpanded;
-
-  DescriptiveStatisticsWidget({
-    super.key,
-    required List<num> valuesInterventionA,
-    required String nameInterventionA,
-    required List<num> valuesInterventionB,
-    required String nameInterventionB,
-    required StudySubject subject,
-    this.initiallyExpanded = false,
-  }) : statsA = DescriptiveStats(
-         name: nameInterventionA,
-         total:
-             subject.study.schedule.phaseDuration *
-             subject.study.schedule.numberOfCycles,
-         values: valuesInterventionA,
-       ),
-       statsB = DescriptiveStats(
-         name: nameInterventionB,
-         total:
-             subject.study.schedule.phaseDuration *
-             subject.study.schedule.numberOfCycles,
-         values: valuesInterventionB,
-       );
+// ignore: prefer_const_constructors_in_immutables
+class DescriptiveStatisticsWidget({
+  super.key,
+  required List<num> valuesInterventionA,
+  required String nameInterventionA,
+  required List<num> valuesInterventionB,
+  required String nameInterventionB,
+  required StudySubject subject,
+  final bool initiallyExpanded = false,
+}) extends StatelessWidget {
+  final DescriptiveStats statsA = DescriptiveStats(
+    name: nameInterventionA,
+    total:
+        subject.study.schedule.phaseDuration *
+        subject.study.schedule.numberOfCycles,
+    values: valuesInterventionA,
+  );
+  final DescriptiveStats statsB = DescriptiveStats(
+    name: nameInterventionB,
+    total:
+        subject.study.schedule.phaseDuration *
+        subject.study.schedule.numberOfCycles,
+    values: valuesInterventionB,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +64,8 @@ class DescriptiveStatisticsWidget extends StatelessWidget {
           style: theme.textTheme.titleLarge,
         ),
         subtitle: Text(
-          AppLocalizations.of(
-            context,
-          )!.compare_results_between(statsA.name, statsB.name),
+          AppLocalizations.of(context)!
+              .compare_results_between(statsA.name, statsB.name),
           style: theme.textTheme.bodyMedium,
         ),
         initiallyExpanded: initiallyExpanded,

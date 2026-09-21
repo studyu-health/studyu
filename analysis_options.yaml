@@ -13,6 +13,9 @@ analyzer:
     - macos/**
     - linux/**
 
+plugins:
+  riverpod_lint: ^3.1.9
+
 # You can customize the lint rules set to your own liking. A list of all rules
 # can be found at https://dart-lang.github.io/linter/lints/options/options.html
 linter:

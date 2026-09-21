@@ -15,21 +15,21 @@ import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/color.dart';
 import 'package:studyu_designer_v2/utils/input_formatter.dart';
 
-abstract class IScaleQuestionFormViewModel {
+abstract class IScaleQuestionFormViewModel() {
   bool get isMidValuesClearedInfoVisible;
 }
 
-class ScaleQuestionFormView extends ConsumerStatefulWidget {
-  const ScaleQuestionFormView({required this.formViewModel, super.key});
-
-  final QuestionFormViewModel formViewModel;
-
+class const ScaleQuestionFormView({
+  required final QuestionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<ScaleQuestionFormView> createState() =>
       _ScaleQuestionFormViewState();
 }
 
-class _ScaleQuestionFormViewState extends ConsumerState<ScaleQuestionFormView> {
+class _ScaleQuestionFormViewState()
+    extends ConsumerState<ScaleQuestionFormView> {
   QuestionFormViewModel get formViewModel => widget.formViewModel;
 
   late bool isMinMaxColorsVisible =

@@ -1,6 +1,6 @@
 import 'package:studyu_core/core.dart';
 
-class MockupStudies {
+class MockupStudies() {
   static late Study study;
 
   static void init(String userID) {

@@ -6,11 +6,10 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class AppConnectionStatusBannerHost extends StatelessWidget {
-  const AppConnectionStatusBannerHost({required this.child, super.key});
-
-  final Widget child;
-
+class const AppConnectionStatusBannerHost({
+  required final Widget child,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
@@ -36,9 +35,9 @@ class AppConnectionStatusBannerHost extends StatelessWidget {
   }
 }
 
-class _AppConnectionStatusBanner extends StatelessWidget {
-  const _AppConnectionStatusBanner({required this.status});
-
+class const _AppConnectionStatusBanner({
+  required final AppConnectionStatus status,
+}) extends StatelessWidget {
   static const _borderRadius = 18.0;
   static const _outerPadding = EdgeInsets.fromLTRB(12, 8, 12, 0);
   static const _innerPadding = EdgeInsets.symmetric(
@@ -50,8 +49,6 @@ class _AppConnectionStatusBanner extends StatelessWidget {
   static const _messageTextColor = Color(0xFF18405A);
   static const _messageFontSize = 13.5;
   static const _messageLineHeight = 1.28;
-
-  final AppConnectionStatus status;
 
   @override
   Widget build(BuildContext context) {

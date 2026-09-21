@@ -9,13 +9,13 @@ part 'app_controller.g.dart';
 
 /// Interface for implementation by any resources that want to bind themselves
 /// to the application lifecycle
-abstract class IAppDelegate {
+abstract class IAppDelegate() {
   Future<bool> onAppStart();
 }
 
 /// Main controller that's bound to the top-level application widget's state
 @riverpod
-class AppController extends _$AppController {
+class AppController() extends _$AppController {
   @override
   Stream<AppControllerState> build() {
     state = const AsyncValue<AppControllerState>.data(AppControllerState());

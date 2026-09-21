@@ -2,10 +2,9 @@ import 'package:studyu_core/core.dart';
 
 import 'mockup_studies.dart';
 
-class MockupLoader extends MockupStudies {
-  final String userID;
-
-  MockupLoader(this.userID, Study Function() studyRef) {
+class MockupLoader(final String userID, Study Function() studyRef)
+    extends MockupStudies {
+  this {
     MockupStudies.init(userID);
     studyRef();
     resetStudy(MockupStudies.study);

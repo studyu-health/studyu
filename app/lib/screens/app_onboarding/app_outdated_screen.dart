@@ -6,9 +6,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_core/env.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AppOutdatedScreen extends StatelessWidget {
-  const AppOutdatedScreen({super.key});
-
+class const AppOutdatedScreen({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;

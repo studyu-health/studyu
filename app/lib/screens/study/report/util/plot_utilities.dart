@@ -11,13 +11,11 @@ Map<String, int> getInterventionPositions(List<Intervention> interventions) {
   return order;
 }
 
-class LegendWidget extends StatelessWidget {
-  LegendWidget({super.key, required Legend legend})
-    : name = legend.name,
-      color = legend.color;
-
-  final String name;
-  final Color color;
+// ignore: prefer_const_constructors_in_immutables
+class LegendWidget({super.key, required Legend legend})
+    extends StatelessWidget {
+  final String name = legend.name;
+  final Color color = legend.color;
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +35,8 @@ class LegendWidget extends StatelessWidget {
   }
 }
 
-class LegendsListWidget extends StatelessWidget {
-  const LegendsListWidget({super.key, required this.legends});
-  final List<Legend> legends;
-
+class const LegendsListWidget({super.key, required final List<Legend> legends})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -50,8 +46,4 @@ class LegendsListWidget extends StatelessWidget {
   }
 }
 
-class Legend {
-  Legend(this.name, this.color);
-  final String name;
-  final Color color;
-}
+class Legend(final String name, final Color color);

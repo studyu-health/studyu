@@ -6,66 +6,30 @@ import 'package:studyu_designer_v2/localization/string_hardcoded.dart';
 
 part 'filter_draft_controller.g.dart';
 
-class FilterDraft {
-  final String? loadedPresetId;
-
-  final StudyStatus? status;
-  final FilterOperator statusOp;
-
-  final Participation? participation;
-  final FilterOperator participationOp;
-
-  final ResultSharing? resultSharing;
-  final FilterOperator resultSharingOp;
-
-  final bool? registryPublished;
-  final FilterOperator registryPublishedOp;
-
-  final bool? isOwner;
-  final FilterOperator isOwnerOp;
-
-  final String title;
-  final FilterOperator titleOp;
-
-  final String participantCount;
-  final FilterOperator participantCountOp;
-
-  final String activeSubjectCount;
-  final FilterOperator activeSubjectCountOp;
-
-  final String endedCount;
-  final FilterOperator endedCountOp;
-
-  final DateTime? createdAfter;
-  final DateTime? createdBefore;
-
-  final Set<String> expandedFields;
-
-  const FilterDraft({
-    this.loadedPresetId,
-    this.status,
-    this.statusOp = FilterOperator.equals,
-    this.participation,
-    this.participationOp = FilterOperator.equals,
-    this.resultSharing,
-    this.resultSharingOp = FilterOperator.equals,
-    this.registryPublished,
-    this.registryPublishedOp = FilterOperator.equals,
-    this.isOwner,
-    this.isOwnerOp = FilterOperator.equals,
-    this.title = '',
-    this.titleOp = FilterOperator.contains,
-    this.participantCount = '',
-    this.participantCountOp = FilterOperator.greaterThanOrEqual,
-    this.activeSubjectCount = '',
-    this.activeSubjectCountOp = FilterOperator.greaterThanOrEqual,
-    this.endedCount = '',
-    this.endedCountOp = FilterOperator.greaterThanOrEqual,
-    this.createdAfter,
-    this.createdBefore,
-    this.expandedFields = const {},
-  });
-
+class const FilterDraft({
+  final String? loadedPresetId,
+  final StudyStatus? status,
+  final FilterOperator statusOp = FilterOperator.equals,
+  final Participation? participation,
+  final FilterOperator participationOp = FilterOperator.equals,
+  final ResultSharing? resultSharing,
+  final FilterOperator resultSharingOp = FilterOperator.equals,
+  final bool? registryPublished,
+  final FilterOperator registryPublishedOp = FilterOperator.equals,
+  final bool? isOwner,
+  final FilterOperator isOwnerOp = FilterOperator.equals,
+  final String title = '',
+  final FilterOperator titleOp = FilterOperator.contains,
+  final String participantCount = '',
+  final FilterOperator participantCountOp = FilterOperator.greaterThanOrEqual,
+  final String activeSubjectCount = '',
+  final FilterOperator activeSubjectCountOp = FilterOperator.greaterThanOrEqual,
+  final String endedCount = '',
+  final FilterOperator endedCountOp = FilterOperator.greaterThanOrEqual,
+  final DateTime? createdAfter,
+  final DateTime? createdBefore,
+  final Set<String> expandedFields = const {},
+}) {
   FilterDraft copyWith({
     String? loadedPresetId,
     bool setLoadedPresetIdToNull = false,
@@ -256,7 +220,7 @@ class FilterDraft {
 }
 
 @riverpod
-class FilterDraftController extends _$FilterDraftController {
+class FilterDraftController() extends _$FilterDraftController {
   @override
   FilterDraft build() {
     return const FilterDraft();

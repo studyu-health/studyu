@@ -64,7 +64,7 @@ jobs:
           echo "STUDYU_DESIGNER_VERSION=$designer_version" >> "$GITHUB_ENV"
           cd ..
       - name: Build Web
-        run: melos build:web --no-select
+        run: dart run melos build:web --no-select
       - name: Stamp version info into web builds
         run: |
           # --- Stamp version info into app build ---

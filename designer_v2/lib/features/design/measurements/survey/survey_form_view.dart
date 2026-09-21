@@ -22,17 +22,16 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class MeasurementSurveyFormView extends ConsumerStatefulWidget {
-  const MeasurementSurveyFormView({required this.formViewModel, super.key});
-
-  final MeasurementSurveyFormViewModel formViewModel;
-
+class const MeasurementSurveyFormView({
+  required final MeasurementSurveyFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<MeasurementSurveyFormView> createState() =>
       _MeasurementSurveyFormViewState();
 }
 
-class _MeasurementSurveyFormViewState
+class _MeasurementSurveyFormViewState()
     extends ConsumerState<MeasurementSurveyFormView> {
   bool isStylingInformationDismissed = true;
 
@@ -205,12 +204,12 @@ class _MeasurementSurveyFormViewState
                           message: viewModel.questionType.string,
                           child: Icon(
                             viewModel.questionType.icon,
-                            color: ThemeConfig.dropdownMenuItemTheme(
-                              theme,
-                            ).iconTheme!.color,
-                            size: ThemeConfig.dropdownMenuItemTheme(
-                              theme,
-                            ).iconTheme!.size,
+                            color: ThemeConfig.dropdownMenuItemTheme(theme)
+                                .iconTheme!
+                                .color,
+                            size: ThemeConfig.dropdownMenuItemTheme(theme)
+                                .iconTheme!
+                                .size,
                           ),
                         ),
                         const SizedBox(width: 16.0),

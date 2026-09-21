@@ -19,8 +19,12 @@ import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-class InterventionFormViewModel
-    extends ManagedFormViewModel<InterventionFormData>
+class InterventionFormViewModel({
+  required final Study study,
+  super.delegate,
+  super.formData,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends ManagedFormViewModel<InterventionFormData>
     implements
         IFormViewModelDelegate<InterventionTaskFormViewModel>,
         IListActionProvider<InterventionTaskFormViewModel>,
@@ -28,15 +32,6 @@ class InterventionFormViewModel
           InterventionTaskFormViewModel,
           InterventionTaskFormRouteArgs
         > {
-  InterventionFormViewModel({
-    required this.study,
-    super.delegate,
-    super.formData,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  final Study study;
-
   // - Form fields
 
   final FormControl<InterventionID> interventionIdControl = FormControl(

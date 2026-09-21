@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:studyu_designer_v2/features/app.dart';
+import 'package:studyu_designer_v2/features/dashboard/dashboard_navigation.dart';
+import 'package:studyu_designer_v2/routing/router.dart';
+import 'package:studyu_designer_v2/routing/router_intent.dart';
 import 'package:studyu_designer_v2/utils/performance.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
@@ -26,7 +29,17 @@ Future<void> main() async {
       runApp(
         // Make dependencies managed by Riverpod available in Widget.build methods
         // by wrapping the app in a [ProviderScope]
-        const ProviderScope(child: App()),
+        ProviderScope(
+          overrides: [
+            dashboardDispatchProvider.overrideWith(
+              (ref) =>
+                  (studyId) => ref
+                      .read(routerProvider)
+                      .dispatch(RoutingIntents.studyEdit(studyId)),
+            ),
+          ],
+          child: const App(),
+        ),
       );
     },
     (error, stackTrace) {

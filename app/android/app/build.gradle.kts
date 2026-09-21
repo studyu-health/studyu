@@ -31,7 +31,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "health.studyu.app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
+    compileSdkMinor = 0
     // Start flutter_local_notifications
     // compileSdk = 35
     // End flutter_local_notifications

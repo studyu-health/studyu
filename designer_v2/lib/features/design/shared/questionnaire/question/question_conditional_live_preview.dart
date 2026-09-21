@@ -3,18 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class LiveConditionPreview extends StatelessWidget {
-  final CompositeExpression? compositeExpression;
-  final List<Question> allQuestions;
-  final String currentQuestionId;
-
-  const LiveConditionPreview({
-    super.key,
-    required this.compositeExpression,
-    required this.allQuestions,
-    required this.currentQuestionId,
-  });
-
+class const LiveConditionPreview({
+  super.key,
+  required final CompositeExpression? compositeExpression,
+  required final List<Question> allQuestions,
+  required final String currentQuestionId,
+}) extends StatelessWidget {
   String _getQuestionPreviewText(String questionId) {
     /*if (questionId == currentQuestionId) {
       // Use the specific question text from the ViewModel for clarity

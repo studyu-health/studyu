@@ -65,7 +65,7 @@ jobs:
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3 # do not use head
+          ruby-version: 3.4 # do not use head
           bundler-cache: true
 
       - name: Set up java env
@@ -78,12 +78,6 @@ jobs:
         run: bundle install
         timeout-minutes: 5
         working-directory: ./app/android
-
-      - name: Set up Flutter with FVM
-        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
-        with:
-          # todo
-          cache: false
 
       - name: Prepare upload key
         run: |
@@ -145,7 +139,7 @@ jobs:
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3 # do not use head
+          ruby-version: 3.4 # do not use head
           # todo
           bundler-cache: false
 
@@ -153,12 +147,6 @@ jobs:
         run: bundle install
         timeout-minutes: 5
         working-directory: ./app/ios
-
-      - name: Set up Flutter with FVM
-        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
-        with:
-          # todo
-          cache: false
 
       - name: Get StudyU app version
         run: |

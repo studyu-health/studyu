@@ -1,12 +1,9 @@
 import 'package:studyu_core/core.dart';
 
-class TaskInstance {
-  final Task task;
-  final String id;
+class TaskInstance(final Task task, final String id) {
+  this : assert(task.id != id);
 
-  TaskInstance(this.task, this.id) : assert(task.id != id);
-
-  factory TaskInstance.fromInstanceId(
+  factory fromInstanceId(
     String taskInstanceId, {
     StudySubject? subject,
     Study? study,

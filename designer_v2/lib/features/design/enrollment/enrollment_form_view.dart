@@ -22,9 +22,8 @@ import 'package:studyu_designer_v2/routing/router_config.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
-class StudyDesignEnrollmentFormView extends StudyDesignPageWidget {
-  const StudyDesignEnrollmentFormView(super.studyId, {super.key});
-
+class const StudyDesignEnrollmentFormView(super.studyId, {super.key})
+    extends StudyDesignPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -160,12 +159,12 @@ class StudyDesignEnrollmentFormView extends StudyDesignPageWidget {
                               message: viewModel.questionType.string,
                               child: Icon(
                                 viewModel.questionType.icon,
-                                color: ThemeConfig.dropdownMenuItemTheme(
-                                  theme,
-                                ).iconTheme!.color,
-                                size: ThemeConfig.dropdownMenuItemTheme(
-                                  theme,
-                                ).iconTheme!.size,
+                                color: ThemeConfig.dropdownMenuItemTheme(theme)
+                                    .iconTheme!
+                                    .color,
+                                size: ThemeConfig.dropdownMenuItemTheme(theme)
+                                    .iconTheme!
+                                    .size,
                               ),
                             ),
                             const SizedBox(width: 16.0),

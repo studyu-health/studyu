@@ -15,32 +15,19 @@ import 'package:studyu_app/widgets/questionnaire/questions/scale_question_widget
 import 'package:studyu_app/widgets/questionnaire/questions/visual_analogue_question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class QuestionContainer extends StatelessWidget {
-  final Function(Answer, int) onDone;
-  final VoidCallback? onCleared;
-  final Question question;
-  final int index;
-  final String? taskId;
-  final GlobalKey? containerKey;
-  final Answer? initialAnswer;
-  final void Function(String questionId, String value)? onFreeTextDraftChanged;
-  final bool isLastQuestion;
-  final GlobalKey<FreeTextQuestionWidgetState>? freeTextKey;
-
-  const QuestionContainer({
-    required this.onDone,
-    required this.question,
-    required this.index,
-    this.onCleared,
-    this.taskId,
-    this.containerKey,
-    this.initialAnswer,
-    this.onFreeTextDraftChanged,
-    this.isLastQuestion = false,
-    this.freeTextKey,
-    super.key,
-  });
-
+class const QuestionContainer({
+  required final Function(Answer, int) onDone,
+  required final Question question,
+  required final int index,
+  final VoidCallback? onCleared,
+  final String? taskId,
+  final GlobalKey? containerKey,
+  final Answer? initialAnswer,
+  final void Function(String questionId, String value)? onFreeTextDraftChanged,
+  final bool isLastQuestion = false,
+  final GlobalKey<FreeTextQuestionWidgetState>? freeTextKey,
+  super.key,
+}) extends StatelessWidget {
   QuestionWidget _buildQuestionBody(BuildContext context) {
     switch (question) {
       case final ChoiceQuestion choiceQuestion:
@@ -48,9 +35,11 @@ class QuestionContainer extends StatelessWidget {
           question: choiceQuestion,
           onDone: (answer) => onDone(answer, index),
           initialAnswer: initialAnswer as Answer<List<String>>?,
-          multiSelectionText: AppLocalizations.of(
-            context,
-          )!.eligible_choice_multi_selection,
+          onCleared: onCleared,
+          multiSelectionText: AppLocalizations.of(context)!
+              .eligible_choice_multi_selection,
+          requiredMultiSelectionText: AppLocalizations.of(context)!
+              .eligible_choice_multi_selection_required,
         );
       case final BooleanQuestion booleanQuestion:
         return BooleanQuestionWidget(
@@ -78,7 +67,6 @@ class QuestionContainer extends StatelessWidget {
         );
       case final VisualAnalogueQuestion visualAnalogueQuestion:
         // todo remove this when older studies are finished
-        // ignore: deprecated_member_use_from_same_package
         return VisualAnalogueQuestionWidget(
           question: visualAnalogueQuestion,
           onDone: (answer) => onDone(answer, index),

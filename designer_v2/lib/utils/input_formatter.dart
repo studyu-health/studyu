@@ -3,12 +3,8 @@ import 'package:flutter/services.dart';
 String normalizeStudySequenceInput(String value) =>
     value.replaceAll(RegExp(r'\s+'), '').toUpperCase();
 
-class NumericalRangeFormatter extends TextInputFormatter {
-  NumericalRangeFormatter({this.min, this.max});
-
-  final int? min;
-  final int? max;
-
+class NumericalRangeFormatter({final int? min, final int? max})
+    extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
@@ -35,7 +31,7 @@ class NumericalRangeFormatter extends TextInputFormatter {
   }
 }
 
-class StudySequenceFormatter extends TextInputFormatter {
+class StudySequenceFormatter() extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,

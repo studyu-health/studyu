@@ -5,13 +5,12 @@ import 'package:studyu_core/src/models/unknown_json_type_error.dart';
 typedef ObservationTaskParser = Observation Function(Map<String, dynamic> data);
 
 abstract class Observation extends Task {
-  Observation(super.type);
+  new(super.type);
 
-  Observation.withId(super.type) : super.withId();
+  new withId(super.type) : super.withId();
 
-  factory Observation.fromJson(Map<String, dynamic> data) =>
-      switch (data[Task.keyType]) {
-        QuestionnaireTask.taskType => QuestionnaireTask.fromJson(data),
-        _ => throw UnknownJsonTypeError(data[Task.keyType]),
-      };
+  factory fromJson(Map<String, dynamic> data) => switch (data[Task.keyType]) {
+    QuestionnaireTask.taskType => QuestionnaireTask.fromJson(data),
+    _ => throw UnknownJsonTypeError(data[Task.keyType]),
+  };
 }

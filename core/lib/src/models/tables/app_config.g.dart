@@ -27,7 +27,7 @@ Map<String, dynamic> _$AppConfigToJson(AppConfig instance) => <String, dynamic>{
   'app_terms': instance.appTerms,
   'designer_privacy': instance.designerPrivacy,
   'designer_terms': instance.designerTerms,
-  'imprint': instance.imprint,
   'contact': instance.contact.toJson(),
+  'imprint': instance.imprint,
   'analytics': ?instance.analytics?.toJson(),
 };

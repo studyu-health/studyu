@@ -9,9 +9,7 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ReportHistoryScreen extends StatelessWidget {
-  const ReportHistoryScreen({super.key});
-
+class const ReportHistoryScreen({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,11 +39,8 @@ class ReportHistoryScreen extends StatelessWidget {
   }
 }
 
-class ReportHistoryItem extends StatelessWidget {
-  final StudySubject subject;
-
-  const ReportHistoryItem(this.subject, {super.key});
-
+class const ReportHistoryItem(final StudySubject subject, {super.key})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

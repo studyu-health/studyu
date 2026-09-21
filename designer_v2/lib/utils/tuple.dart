@@ -1,12 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:studyu_designer_v2/utils/typings.dart';
 
-class Tuple<T1, T2> extends Equatable {
-  final T1 first;
-  final T2 second;
-
-  const Tuple(this.first, this.second);
-
+class const Tuple<T1, T2>(final T1 first, final T2 second) extends Equatable {
   @override
   List<Object?> get props => [first, second];
 

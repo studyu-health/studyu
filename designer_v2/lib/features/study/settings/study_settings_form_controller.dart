@@ -9,16 +9,14 @@ import 'package:studyu_designer_v2/utils/performance.dart';
 
 part 'study_settings_form_controller.g.dart';
 
-class StudySettingsFormViewModel extends FormViewModel<Study> {
-  StudySettingsFormViewModel({
-    required this.studyRepository,
-    required Study initialStudy,
-  }) : super(formData: initialStudy) {
+class StudySettingsFormViewModel({
+  required final IStudyRepository studyRepository,
+  required Study initialStudy,
+}) extends FormViewModel<Study> {
+  this : super(formData: initialStudy) {
     // defer registering listeners so that controls can be initialized properly
     runAsync(keepControlsSynced);
   }
-
-  final IStudyRepository studyRepository;
 
   static const defaultPublishedToRegistry = true;
   static const defaultPublishedToRegistryResults = false;

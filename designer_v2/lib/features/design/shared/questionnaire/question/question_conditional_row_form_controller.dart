@@ -7,8 +7,10 @@ import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dar
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/comparator_utils.dart';
 
-class ConditionRowFormViewModel
-    extends ManagedFormViewModel<ConditionRowFormData> {
+class ConditionRowFormViewModel({
+  required final String currentQuestionId,
+  Expression? initialExpression,
+}) extends ManagedFormViewModel<ConditionRowFormData> {
   // --- Controls ---
   final questionIdControl = FormControl<String>();
   final comparatorControl = FormControl<dynamic>();
@@ -38,8 +40,6 @@ class ConditionRowFormViewModel
 
   // todo do not make this static, try to use a provider to get the questions
   static List<Question> availableQuestions = [];
-  final String currentQuestionId;
-
   void refreshAvailableQuestions() {
     final question = selectedQuestion;
     if (question != null) {
@@ -47,10 +47,7 @@ class ConditionRowFormViewModel
     }
   }
 
-  ConditionRowFormViewModel({
-    required this.currentQuestionId,
-    Expression? initialExpression,
-  }) {
+  this {
     if (initialExpression != null) {
       questionIdControl.value = extractQuestionId(initialExpression);
       comparatorControl.value = extractComparator(initialExpression);

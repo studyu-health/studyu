@@ -6,17 +6,16 @@ import 'package:studyu_app/util/misc.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 
-class CheckmarkTaskWidget extends StatefulWidget {
-  final CheckmarkTask? task;
-  final CompletionPeriod? completionPeriod;
-
-  const CheckmarkTaskWidget({this.task, this.completionPeriod, super.key});
-
+class const CheckmarkTaskWidget({
+  final CheckmarkTask? task,
+  final CompletionPeriod? completionPeriod,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<CheckmarkTaskWidget> createState() => _CheckmarkTaskWidgetState();
 }
 
-class _CheckmarkTaskWidgetState extends State<CheckmarkTaskWidget> {
+class _CheckmarkTaskWidgetState() extends State<CheckmarkTaskWidget> {
   DateTime? _lastClickTime;
   bool _isLoading = false;
 

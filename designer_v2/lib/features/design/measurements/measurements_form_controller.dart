@@ -18,7 +18,14 @@ import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/riverpod.dart';
 
-class MeasurementsFormViewModel extends FormViewModel<MeasurementsFormData>
+class MeasurementsFormViewModel({
+  required final Study study,
+  required final GoRouter router,
+  super.delegate,
+  super.formData,
+  super.autosave = true,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends FormViewModel<MeasurementsFormData>
     implements
         IFormViewModelDelegate<MeasurementSurveyFormViewModel>,
         IListActionProvider<MeasurementSurveyFormViewModel>,
@@ -26,18 +33,6 @@ class MeasurementsFormViewModel extends FormViewModel<MeasurementsFormData>
           MeasurementSurveyFormViewModel,
           MeasurementFormRouteArgs
         > {
-  MeasurementsFormViewModel({
-    required this.study,
-    required this.router,
-    super.delegate,
-    super.formData,
-    super.autosave = true,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  final Study study;
-  final GoRouter router;
-
   // - Form fields
 
   final FormArray measurementsArray = FormArray([]);

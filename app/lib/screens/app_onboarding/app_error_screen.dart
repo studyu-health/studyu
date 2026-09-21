@@ -6,42 +6,31 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_core/env.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum AppErrorReason {
+enum AppErrorReason() {
   loading,
   deletedStudy,
   cacheUnavailableMissing,
   cacheUnavailableCorrupt,
 }
 
-class AppErrorScreenArguments {
-  final String? selectedSubjectId;
-  final AppErrorReason reason;
+class const AppErrorScreenArguments({
+  final String? selectedSubjectId,
+  final AppErrorReason reason = AppErrorReason.loading,
+});
 
-  const AppErrorScreenArguments({
-    this.selectedSubjectId,
-    this.reason = AppErrorReason.loading,
-  });
-}
-
-class AppErrorScreen extends StatefulWidget {
-  final String? selectedSubjectId;
-  final AppErrorReason reason;
-
-  const AppErrorScreen({
-    super.key,
-    this.selectedSubjectId,
-    this.reason = AppErrorReason.loading,
-  });
-
+class const AppErrorScreen({
+  super.key,
+  final String? selectedSubjectId,
+  final AppErrorReason reason = AppErrorReason.loading,
+}) extends StatefulWidget {
   @override
   State<AppErrorScreen> createState() => _AppErrorScreenState();
 }
 
-class _AppErrorScreenState extends State<AppErrorScreen> {
+class _AppErrorScreenState() extends State<AppErrorScreen> {
   String? cachedUserData;
   bool isLoadingData = true;
 
@@ -159,14 +148,14 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
                     Expanded(
                       child: ElevatedButton.icon(
                         icon: const Icon(MdiIcons.emailOutline),
-                        onPressed: () => _contactSupport(context),
+                        onPressed: () => _contactStudyTeam(context),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary,
                         ),
-                        label: Text(loc.contact_support),
+                        label: Text(loc.email_study_team),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -191,8 +180,10 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
     );
   }
 
-  Future<void> _contactSupport(BuildContext context) async {
-    StudyULogger.info("User chose to contact support from AppErrorScreen");
+  Future<void> _contactStudyTeam(BuildContext context) async {
+    StudyULogger.info(
+      "User chose to contact the study team from AppErrorScreen",
+    );
     final loc = AppLocalizations.of(context)!;
 
     final emailSubject = switch (widget.reason) {
@@ -225,24 +216,23 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
       emailBody += '\n\n--- Debug Information ---\nNo cached data available';
     }
 
-    // Get contact email with fallback to developer email
-    String? contactEmail;
+    String contactEmail = '';
     try {
-      final appContact = await AppConfig.getAppContact();
-      contactEmail = appContact.email;
+      final cachedSubject = await Cache.loadSubject();
+      if (cachedSubject.id != widget.selectedSubjectId) {
+        throw StateError('Cached subject does not match selected subject');
+      }
+      contactEmail = cachedSubject.study.contact.email.trim();
     } catch (e) {
-      StudyULogger.warning(
-        'Failed to get app contact, using developer email fallback: $e',
-      );
-      contactEmail = developerEmail;
+      StudyULogger.warning('Failed to load study team contact email: $e');
     }
 
-    if (contactEmail == null || contactEmail.isEmpty) {
-      StudyULogger.error('No contact email available.');
+    if (contactEmail.isEmpty) {
+      StudyULogger.error('No study team contact email available.');
       if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(loc.no_contact_email)));
+      ).showSnackBar(SnackBar(content: Text(loc.study_team_email_unavailable)));
       return;
     }
 
@@ -256,14 +246,14 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
         mode: LaunchMode.externalApplication,
       );
     } catch (e) {
-      StudyULogger.warning('Failed to launch support email uri: $e');
+      StudyULogger.warning('Failed to launch study team email URI: $e');
     }
 
     if (!didLaunch) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(loc.no_contact_email)));
+      ).showSnackBar(SnackBar(content: Text(loc.study_team_email_unavailable)));
       return;
     }
 
