@@ -91,6 +91,7 @@ class _SettingsState() extends State<Settings> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final activeSubject = context.watch<AppState>().activeSubject;
+    final dateTimePreferences = context.watch<DateTimePreferences?>();
     final now = DateTime.now();
     final dashboardHasTasks =
         activeSubject?.startedAt != null &&
@@ -175,7 +176,7 @@ class _SettingsState() extends State<Settings> {
                       width: _selectorWidth,
                       child: DropdownButton<DateFormatPreference?>(
                         isExpanded: true,
-                        value: context.watch<DateTimePreferences>().dateFormat,
+                        value: dateTimePreferences?.dateFormat,
                         underline: const SizedBox(),
                         items: [
                           DropdownMenuItem<DateFormatPreference?>(
@@ -193,15 +194,17 @@ class _SettingsState() extends State<Settings> {
                             ),
                           ),
                         ],
-                        onChanged: (value) async {
-                          try {
-                            await context
-                                .read<DateTimePreferences>()
-                                .changeDateFormat(value);
-                          } catch (error) {
-                            if (mounted) _showPreferenceSaveError(error);
-                          }
-                        },
+                        onChanged: dateTimePreferences == null
+                            ? null
+                            : (value) async {
+                                try {
+                                  await dateTimePreferences.changeDateFormat(
+                                    value,
+                                  );
+                                } catch (error) {
+                                  if (mounted) _showPreferenceSaveError(error);
+                                }
+                              },
                       ),
                     ),
                   ],
@@ -226,7 +229,7 @@ class _SettingsState() extends State<Settings> {
                       width: _selectorWidth,
                       child: DropdownButton<TimeFormatPreference?>(
                         isExpanded: true,
-                        value: context.watch<DateTimePreferences>().timeFormat,
+                        value: dateTimePreferences?.timeFormat,
                         underline: const SizedBox(),
                         items: [
                           DropdownMenuItem<TimeFormatPreference?>(
@@ -244,15 +247,17 @@ class _SettingsState() extends State<Settings> {
                             ),
                           ),
                         ],
-                        onChanged: (value) async {
-                          try {
-                            await context
-                                .read<DateTimePreferences>()
-                                .changeTimeFormat(value);
-                          } catch (error) {
-                            if (mounted) _showPreferenceSaveError(error);
-                          }
-                        },
+                        onChanged: dateTimePreferences == null
+                            ? null
+                            : (value) async {
+                                try {
+                                  await dateTimePreferences.changeTimeFormat(
+                                    value,
+                                  );
+                                } catch (error) {
+                                  if (mounted) _showPreferenceSaveError(error);
+                                }
+                              },
                       ),
                     ),
                   ],
