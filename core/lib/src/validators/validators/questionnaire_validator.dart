@@ -40,8 +40,7 @@ ValidationResult validateQuestionnaire(
             path: '$context.questions',
             message:
                 'Question id "$id" appears in both the screener and an observation questionnaire',
-            fixHint:
-                'Assign unique IDs across all questionnaires in the study. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
+            fixHint: 'Assign unique IDs across all questionnaires in the study. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
           ),
         );
       }

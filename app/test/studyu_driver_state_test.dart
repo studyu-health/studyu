@@ -8,9 +8,9 @@ void main() {
   test('visible study data includes typed core validation results', () async {
     StudyUDriverState.visibleStudies = [Study('study-id', 'user-id')];
 
-    final response =
-        jsonDecode(await StudyUDriverState.handleRequest('visibleStudies'))
-            as Map<String, dynamic>;
+    final response = jsonDecode(
+      await StudyUDriverState.handleRequest('visibleStudies'),
+    ) as Map<String, dynamic>;
     final study = (response['studies'] as List).single as Map<String, dynamic>;
     final validation = study['validation'] as Map<String, dynamic>;
 

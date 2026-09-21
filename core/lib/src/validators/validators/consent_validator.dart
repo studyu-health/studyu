@@ -11,10 +11,8 @@ ValidationResult validateConsent(Study study, ValidationLevel level) {
       const ValidationError(
         code: 'consent.no_items',
         path: r'$.consent',
-        message:
-            'No consent items defined — participants will not be shown consent terms in the app',
-        fixHint:
-            'Add a consent item in the Enrollment section of the Designer, or leave empty if consent is obtained externally.',
+        message: 'No consent items defined — participants will not be shown consent terms in the app',
+        fixHint: 'Add a consent item in the Enrollment section of the Designer, or leave empty if consent is obtained externally.',
       ),
     );
   }

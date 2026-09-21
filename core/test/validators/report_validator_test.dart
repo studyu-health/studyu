@@ -87,25 +87,22 @@ void main() {
     );
   });
 
-  test(
-    'section references non-existent intervention task id -> report.task_reference_missing',
-    () {
-      final s = Study('id', 'user');
-      final section = AverageSection.withId();
-      section.resultProperty = DataReference<num>(
-        'ghost-task-id',
-        'some-property',
-      );
-      s.reportSpecification.secondary = [section];
+  test('section references non-existent intervention task id -> report.task_reference_missing', () {
+    final s = Study('id', 'user');
+    final section = AverageSection.withId();
+    section.resultProperty = DataReference<num>(
+      'ghost-task-id',
+      'some-property',
+    );
+    s.reportSpecification.secondary = [section];
 
-      final r = validateReport(s, ValidationLevel.publish);
-      expect(r.valid, isFalse);
-      expect(
-        r.errors.any((e) => e.code == 'report.task_reference_missing'),
-        isTrue,
-      );
-    },
-  );
+    final r = validateReport(s, ValidationLevel.publish);
+    expect(r.valid, isFalse);
+    expect(
+      r.errors.any((e) => e.code == 'report.task_reference_missing'),
+      isTrue,
+    );
+  });
 
   test(
     'section references questionnaire task with valid question -> passes',

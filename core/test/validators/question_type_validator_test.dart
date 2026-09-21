@@ -170,42 +170,36 @@ void main() {
       );
     });
 
-    test(
-      'textType=custom, customTypeExpression=null -> free_text_question.missing_custom_expression',
-      () {
-        final q = FreeTextQuestion.withId(
-          textType: FreeTextQuestionType.custom,
-          lengthRange: [0, 100],
-        );
-        final r = validateQuestion(q, _ctx, ValidationLevel.draft, {q.id});
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any(
-            (e) => e.code == 'free_text_question.missing_custom_expression',
-          ),
-          isTrue,
-        );
-      },
-    );
+    test('textType=custom, customTypeExpression=null -> free_text_question.missing_custom_expression', () {
+      final q = FreeTextQuestion.withId(
+        textType: FreeTextQuestionType.custom,
+        lengthRange: [0, 100],
+      );
+      final r = validateQuestion(q, _ctx, ValidationLevel.draft, {q.id});
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any(
+          (e) => e.code == 'free_text_question.missing_custom_expression',
+        ),
+        isTrue,
+      );
+    });
 
-    test(
-      'textType=custom, customTypeExpression="" -> free_text_question.missing_custom_expression',
-      () {
-        final q = FreeTextQuestion.withId(
-          textType: FreeTextQuestionType.custom,
-          lengthRange: [0, 100],
-          customTypeExpression: '',
-        );
-        final r = validateQuestion(q, _ctx, ValidationLevel.draft, {q.id});
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any(
-            (e) => e.code == 'free_text_question.missing_custom_expression',
-          ),
-          isTrue,
-        );
-      },
-    );
+    test('textType=custom, customTypeExpression="" -> free_text_question.missing_custom_expression', () {
+      final q = FreeTextQuestion.withId(
+        textType: FreeTextQuestionType.custom,
+        lengthRange: [0, 100],
+        customTypeExpression: '',
+      );
+      final r = validateQuestion(q, _ctx, ValidationLevel.draft, {q.id});
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any(
+          (e) => e.code == 'free_text_question.missing_custom_expression',
+        ),
+        isTrue,
+      );
+    });
 
     test('textType=custom, customTypeExpression="[a-z]+" -> passes', () {
       final q = FreeTextQuestion.withId(
@@ -294,27 +288,24 @@ void main() {
   });
 
   group('conditional target', () {
-    test(
-      'conditional references an id not in the questionnaire -> question.conditional_target_missing',
-      () {
-        final q = BooleanQuestion.withId();
-        q.prompt = 'Are you okay?';
-        final expr = ChoiceExpression();
-        expr.target = 'ghost-id';
-        final composite = CompositeExpression(
-          logicType: LogicType.and,
-          expressions: [expr],
-        );
-        q.conditional = QuestionConditional.withCondition(composite);
+    test('conditional references an id not in the questionnaire -> question.conditional_target_missing', () {
+      final q = BooleanQuestion.withId();
+      q.prompt = 'Are you okay?';
+      final expr = ChoiceExpression();
+      expr.target = 'ghost-id';
+      final composite = CompositeExpression(
+        logicType: LogicType.and,
+        expressions: [expr],
+      );
+      q.conditional = QuestionConditional.withCondition(composite);
 
-        final r = validateQuestion(q, _ctx, ValidationLevel.draft, {q.id});
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any((e) => e.code == 'question.conditional_target_missing'),
-          isTrue,
-        );
-      },
-    );
+      final r = validateQuestion(q, _ctx, ValidationLevel.draft, {q.id});
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any((e) => e.code == 'question.conditional_target_missing'),
+        isTrue,
+      );
+    });
 
     test('conditional references a valid id -> passes', () {
       final qA = BooleanQuestion.withId();

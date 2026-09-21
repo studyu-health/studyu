@@ -117,7 +117,7 @@ class _StudyOverviewScreen() extends State<StudyOverviewScreen> {
         }
         unawaited(_returnToStudySelection(appState));
       },
-      nextButtonKey: const ValueKey('study_overview_continue'),
+      nextButtonKey: const ValueKey('study_overview_next'),
       onNext: () => _continueOnboarding(context),
       progress: OnboardingProgress.forPage(appState, OnboardingStep.overview),
     );

@@ -108,6 +108,7 @@ class _InterventionSelectionScreenState()
   @override
   Widget build(BuildContext context) {
     final nav = BottomOnboardingNavigation(
+      nextButtonKey: const ValueKey('intervention_selection_continue'),
       onBack: context.canPop() ? _goBack : null,
       onNext: selectedInterventionIds.length == 2 ? onFinished : null,
       progress: OnboardingProgress.forPage(

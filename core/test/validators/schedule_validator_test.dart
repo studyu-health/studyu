@@ -24,58 +24,47 @@ void main() {
   });
 
   group('custom sequence', () {
-    test(
-      'customized sequence with empty sequenceCustom -> schedule.custom_sequence_empty',
-      () {
-        final s = Study('id', 'user');
-        s.schedule.phaseDuration = 7;
-        s.schedule.numberOfCycles = 2;
-        s.schedule.sequence = PhaseSequence.customized;
-        s.schedule.sequenceCustom = '';
-        final r = validateSchedule(s, ValidationLevel.draft);
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any((e) => e.code == 'schedule.custom_sequence_empty'),
-          isTrue,
-        );
-      },
-    );
+    test('customized sequence with empty sequenceCustom -> schedule.custom_sequence_empty', () {
+      final s = Study('id', 'user');
+      s.schedule.phaseDuration = 7;
+      s.schedule.numberOfCycles = 2;
+      s.schedule.sequence = PhaseSequence.customized;
+      s.schedule.sequenceCustom = '';
+      final r = validateSchedule(s, ValidationLevel.draft);
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any((e) => e.code == 'schedule.custom_sequence_empty'),
+        isTrue,
+      );
+    });
 
-    test(
-      'customized sequence with whitespace-only sequenceCustom -> schedule.custom_sequence_empty',
-      () {
-        final s = Study('id', 'user');
-        s.schedule.phaseDuration = 7;
-        s.schedule.numberOfCycles = 2;
-        s.schedule.sequence = PhaseSequence.customized;
-        s.schedule.sequenceCustom = '   ';
-        final r = validateSchedule(s, ValidationLevel.draft);
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any((e) => e.code == 'schedule.custom_sequence_empty'),
-          isTrue,
-        );
-      },
-    );
+    test('customized sequence with whitespace-only sequenceCustom -> schedule.custom_sequence_empty', () {
+      final s = Study('id', 'user');
+      s.schedule.phaseDuration = 7;
+      s.schedule.numberOfCycles = 2;
+      s.schedule.sequence = PhaseSequence.customized;
+      s.schedule.sequenceCustom = '   ';
+      final r = validateSchedule(s, ValidationLevel.draft);
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any((e) => e.code == 'schedule.custom_sequence_empty'),
+        isTrue,
+      );
+    });
 
-    test(
-      'customized sequence with invalid chars "ABCX" -> schedule.custom_sequence_invalid_chars',
-      () {
-        final s = Study('id', 'user');
-        s.schedule.phaseDuration = 7;
-        s.schedule.numberOfCycles = 2;
-        s.schedule.sequence = PhaseSequence.customized;
-        s.schedule.sequenceCustom = 'ABCX';
-        final r = validateSchedule(s, ValidationLevel.draft);
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any(
-            (e) => e.code == 'schedule.custom_sequence_invalid_chars',
-          ),
-          isTrue,
-        );
-      },
-    );
+    test('customized sequence with invalid chars "ABCX" -> schedule.custom_sequence_invalid_chars', () {
+      final s = Study('id', 'user');
+      s.schedule.phaseDuration = 7;
+      s.schedule.numberOfCycles = 2;
+      s.schedule.sequence = PhaseSequence.customized;
+      s.schedule.sequenceCustom = 'ABCX';
+      final r = validateSchedule(s, ValidationLevel.draft);
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any((e) => e.code == 'schedule.custom_sequence_invalid_chars'),
+        isTrue,
+      );
+    });
 
     test('customized sequence with valid "AABB" -> passes', () {
       final s = Study('id', 'user');

@@ -99,6 +99,7 @@ class _ConsentScreenState() extends State<ConsentScreen> {
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
     final nav = BottomOnboardingNavigation(
+      nextButtonKey: const ValueKey('consent_accept'),
       backLabel: AppLocalizations.of(context)!.decline,
       showBackIcon: false,
       onBack: _declineConsent,

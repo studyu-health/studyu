@@ -61,8 +61,7 @@ ValidationResult _validateSection(
           path: '$path.resultProperty.task',
           message:
               'Report section references task "${ref.task}" which does not exist in observations or intervention tasks',
-          fixHint:
-              'Set resultProperty.task to an existing observation or intervention task id.',
+          fixHint: 'Set resultProperty.task to an existing observation or intervention task id.',
         ),
       );
       return ValidationResult(errors: errors, warnings: []);
@@ -88,8 +87,7 @@ ValidationResult _validateSection(
             path: '$path.resultProperty.property',
             message:
                 'Report section references question "${ref.property}" which does not exist in observation "${ref.task}"',
-            fixHint:
-                'Set resultProperty.property to a question id within that observation',
+            fixHint: 'Set resultProperty.property to a question id within that observation',
           ),
         );
       }

@@ -96,6 +96,7 @@ class _JourneyOverviewScreen() extends State<JourneyOverviewScreen> {
   @override
   Widget build(BuildContext context) {
     final nav = BottomOnboardingNavigation(
+      nextButtonKey: const ValueKey('journey_overview_next'),
       onBack: context.canPop() ? _goBack : null,
       onNext: () => getConsentAndNavigateToDashboard(context),
       progress: OnboardingProgress.forPage(
@@ -117,6 +118,7 @@ class _JourneyOverviewScreen() extends State<JourneyOverviewScreen> {
     );
 
     final scaffold = Scaffold(
+      key: const ValueKey('journey_overview_screen'),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,

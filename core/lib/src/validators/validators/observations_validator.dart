@@ -19,8 +19,7 @@ ValidationResult validateObservations(Study study, ValidationLevel level) {
           code: 'observations.duplicate_observation_id',
           path: '\$.observations[$i].id',
           message: 'Observation id "${observation.id}" appears more than once',
-          fixHint:
-              'Regenerate a unique UUID for each observation. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
+          fixHint: 'Regenerate a unique UUID for each observation. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
         ),
       );
     }

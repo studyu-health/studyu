@@ -66,100 +66,77 @@ void main() {
       },
     );
 
-    test(
-      'StudyFixtures.invalidInterventionNoTasks() passes with interventions.no_tasks as warning',
-      () {
-        final r = validateStudy(
-          StudyFixtures.invalidInterventionNoTasks(),
-          ValidationLevel.publish,
-        );
-        expect(r.valid, isTrue);
-        expect(
-          r.warnings.any((w) => w.code == 'interventions.no_tasks'),
-          isTrue,
-        );
-      },
-    );
+    test('StudyFixtures.invalidInterventionNoTasks() passes with interventions.no_tasks as warning', () {
+      final r = validateStudy(
+        StudyFixtures.invalidInterventionNoTasks(),
+        ValidationLevel.publish,
+      );
+      expect(r.valid, isTrue);
+      expect(r.warnings.any((w) => w.code == 'interventions.no_tasks'), isTrue);
+    });
 
-    test(
-      'StudyFixtures.warningAlwaysTrueEligibility() has no errors but has warnings',
-      () {
-        final r = validateStudy(
-          StudyFixtures.warningAlwaysTrueEligibility(),
-          ValidationLevel.publish,
-        );
-        expect(r.valid, isTrue);
-        expect(r.warnings, isNotEmpty);
-        expect(
-          r.warnings.any((w) => w.code == 'eligibility.condition_always_true'),
-          isTrue,
-        );
-      },
-    );
+    test('StudyFixtures.warningAlwaysTrueEligibility() has no errors but has warnings', () {
+      final r = validateStudy(
+        StudyFixtures.warningAlwaysTrueEligibility(),
+        ValidationLevel.publish,
+      );
+      expect(r.valid, isTrue);
+      expect(r.warnings, isNotEmpty);
+      expect(
+        r.warnings.any((w) => w.code == 'eligibility.condition_always_true'),
+        isTrue,
+      );
+    });
 
-    test(
-      'StudyFixtures.invalidDuplicateInterventionId() fails with interventions.duplicate_intervention_id',
-      () {
-        final r = validateStudy(
-          StudyFixtures.invalidDuplicateInterventionId(),
-          ValidationLevel.publish,
-        );
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any(
-            (e) => e.code == 'interventions.duplicate_intervention_id',
-          ),
-          isTrue,
-        );
-      },
-    );
+    test('StudyFixtures.invalidDuplicateInterventionId() fails with interventions.duplicate_intervention_id', () {
+      final r = validateStudy(
+        StudyFixtures.invalidDuplicateInterventionId(),
+        ValidationLevel.publish,
+      );
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any(
+          (e) => e.code == 'interventions.duplicate_intervention_id',
+        ),
+        isTrue,
+      );
+    });
 
-    test(
-      'StudyFixtures.invalidThreeInterventionsAlternating() passes (count enforced at enrolment)',
-      () {
-        final r = validateStudy(
-          StudyFixtures.invalidThreeInterventionsAlternating(),
-          ValidationLevel.publish,
-        );
-        expect(
-          r.errors.where(
-            (e) => e.code == 'interventions.count_must_be_two_for_sequence',
-          ),
-          isEmpty,
-        );
-      },
-    );
+    test('StudyFixtures.invalidThreeInterventionsAlternating() passes (count enforced at enrolment)', () {
+      final r = validateStudy(
+        StudyFixtures.invalidThreeInterventionsAlternating(),
+        ValidationLevel.publish,
+      );
+      expect(
+        r.errors.where(
+          (e) => e.code == 'interventions.count_must_be_two_for_sequence',
+        ),
+        isEmpty,
+      );
+    });
 
-    test(
-      'StudyFixtures.invalidCustomSequenceBadChars() fails with schedule.custom_sequence_invalid_chars',
-      () {
-        final r = validateStudy(
-          StudyFixtures.invalidCustomSequenceBadChars(),
-          ValidationLevel.publish,
-        );
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any(
-            (e) => e.code == 'schedule.custom_sequence_invalid_chars',
-          ),
-          isTrue,
-        );
-      },
-    );
+    test('StudyFixtures.invalidCustomSequenceBadChars() fails with schedule.custom_sequence_invalid_chars', () {
+      final r = validateStudy(
+        StudyFixtures.invalidCustomSequenceBadChars(),
+        ValidationLevel.publish,
+      );
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any((e) => e.code == 'schedule.custom_sequence_invalid_chars'),
+        isTrue,
+      );
+    });
 
-    test(
-      'StudyFixtures.invalidBadEmailFormat() fails with study_info.email_invalid_format',
-      () {
-        final r = validateStudy(
-          StudyFixtures.invalidBadEmailFormat(),
-          ValidationLevel.publish,
-        );
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any((e) => e.code == 'study_info.email_invalid_format'),
-          isTrue,
-        );
-      },
-    );
+    test('StudyFixtures.invalidBadEmailFormat() fails with study_info.email_invalid_format', () {
+      final r = validateStudy(
+        StudyFixtures.invalidBadEmailFormat(),
+        ValidationLevel.publish,
+      );
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any((e) => e.code == 'study_info.email_invalid_format'),
+        isTrue,
+      );
+    });
   });
 }

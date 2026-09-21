@@ -39,8 +39,7 @@ ValidationResult validateInterventions(Study study, ValidationLevel level) {
           path: '\$.interventions[$i].id',
           message:
               'Intervention id "${intervention.id}" appears more than once',
-          fixHint:
-              'Regenerate a unique UUID for each intervention. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
+          fixHint: 'Regenerate a unique UUID for each intervention. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
         ),
       );
     }
@@ -60,8 +59,7 @@ ValidationResult validateInterventions(Study study, ValidationLevel level) {
             path: '\$.interventions[$i].tasks[$j].id',
             message:
                 'Task id "$taskId" appears more than once across interventions',
-            fixHint:
-                'Regenerate a unique UUID for each task. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
+            fixHint: 'Regenerate a unique UUID for each task. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
           ),
         );
       }
@@ -78,8 +76,7 @@ ValidationResult validateInterventions(Study study, ValidationLevel level) {
             code: 'interventions.no_tasks',
             path: '\$.interventions[$i].tasks',
             message: 'Intervention at index $i has no tasks',
-            fixHint:
-                'Add at least one task, or leave empty if this is an intentional control arm.',
+            fixHint: 'Add at least one task, or leave empty if this is an intentional control arm.',
           ),
         );
       }

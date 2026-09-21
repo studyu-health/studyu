@@ -47,68 +47,59 @@ void main() {
     },
   );
 
-  test(
-    'BooleanExpression with no target -> eligibility.condition_always_true warning',
-    () {
-      final criterion = EligibilityCriterion.withId();
-      criterion.condition = BooleanExpression(); // no target set
+  test('BooleanExpression with no target -> eligibility.condition_always_true warning', () {
+    final criterion = EligibilityCriterion.withId();
+    criterion.condition = BooleanExpression(); // no target set
 
-      final s = Study('id', 'user');
-      s.eligibilityCriteria = [criterion];
+    final s = Study('id', 'user');
+    s.eligibilityCriteria = [criterion];
 
-      final r = validateEligibilityConsent(s, ValidationLevel.draft);
-      expect(r.valid, isTrue); // warning only, not an error
-      expect(
-        r.warnings.any((w) => w.code == 'eligibility.condition_always_true'),
-        isTrue,
-      );
-    },
-  );
+    final r = validateEligibilityConsent(s, ValidationLevel.draft);
+    expect(r.valid, isTrue); // warning only, not an error
+    expect(
+      r.warnings.any((w) => w.code == 'eligibility.condition_always_true'),
+      isTrue,
+    );
+  });
 
-  test(
-    'CompositeExpression with empty expressions -> eligibility.condition_always_true warning',
-    () {
-      final criterion = EligibilityCriterion.withId();
-      criterion.condition = CompositeExpression(
-        logicType: LogicType.and,
-        expressions: [],
-      );
+  test('CompositeExpression with empty expressions -> eligibility.condition_always_true warning', () {
+    final criterion = EligibilityCriterion.withId();
+    criterion.condition = CompositeExpression(
+      logicType: LogicType.and,
+      expressions: [],
+    );
 
-      final s = Study('id', 'user');
-      s.eligibilityCriteria = [criterion];
+    final s = Study('id', 'user');
+    s.eligibilityCriteria = [criterion];
 
-      final r = validateEligibilityConsent(s, ValidationLevel.draft);
-      expect(r.valid, isTrue);
-      expect(
-        r.warnings.any((w) => w.code == 'eligibility.condition_always_true'),
-        isTrue,
-      );
-    },
-  );
+    final r = validateEligibilityConsent(s, ValidationLevel.draft);
+    expect(r.valid, isTrue);
+    expect(
+      r.warnings.any((w) => w.code == 'eligibility.condition_always_true'),
+      isTrue,
+    );
+  });
 
-  test(
-    'CompositeExpression with one valid ChoiceExpression -> no always-true warning',
-    () {
-      final q = BooleanQuestion.withId();
-      final expr = ChoiceExpression();
-      expr.target = q.id;
-      final criterion = EligibilityCriterion.withId();
-      criterion.condition = CompositeExpression(
-        logicType: LogicType.and,
-        expressions: [expr],
-      );
+  test('CompositeExpression with one valid ChoiceExpression -> no always-true warning', () {
+    final q = BooleanQuestion.withId();
+    final expr = ChoiceExpression();
+    expr.target = q.id;
+    final criterion = EligibilityCriterion.withId();
+    criterion.condition = CompositeExpression(
+      logicType: LogicType.and,
+      expressions: [expr],
+    );
 
-      final s = Study('id', 'user');
-      s.questionnaire.questions = [q];
-      s.eligibilityCriteria = [criterion];
+    final s = Study('id', 'user');
+    s.questionnaire.questions = [q];
+    s.eligibilityCriteria = [criterion];
 
-      final r = validateEligibilityConsent(s, ValidationLevel.draft);
-      expect(
-        r.warnings.where((w) => w.code == 'eligibility.condition_always_true'),
-        isEmpty,
-      );
-    },
-  );
+    final r = validateEligibilityConsent(s, ValidationLevel.draft);
+    expect(
+      r.warnings.where((w) => w.code == 'eligibility.condition_always_true'),
+      isEmpty,
+    );
+  });
 
   test('BooleanExpression with target set -> no always-true warning', () {
     final q = BooleanQuestion.withId();

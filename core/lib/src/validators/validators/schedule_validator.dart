@@ -37,8 +37,7 @@ ValidationResult validateSchedule(Study study, ValidationLevel level) {
           path: r'$.schedule.sequenceCustom',
           message:
               'sequenceCustom must not be blank when sequence is customized',
-          fixHint:
-              'Set sequenceCustom to a non-empty string of A and B characters, e.g. "AABB".',
+          fixHint: 'Set sequenceCustom to a non-empty string of A and B characters, e.g. "AABB".',
         ),
       );
     } else if (!RegExp(r'^[ABab]+$').hasMatch(custom)) {

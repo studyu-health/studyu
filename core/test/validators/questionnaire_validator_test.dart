@@ -105,47 +105,40 @@ void main() {
       );
     });
 
-    test(
-      'cross-context duplicate ID produces questionnaire.duplicate_question_id_cross_context',
-      () {
-        final obsQ = _boolQ('shared-id'); // same ID as screener
+    test('cross-context duplicate ID produces questionnaire.duplicate_question_id_cross_context', () {
+      final obsQ = _boolQ('shared-id'); // same ID as screener
 
-        final obsQuestionnaire = _questionnaire([obsQ]);
-        final screenerIds = {'shared-id'};
+      final obsQuestionnaire = _questionnaire([obsQ]);
+      final screenerIds = {'shared-id'};
 
-        final r = validateQuestionnaire(
-          obsQuestionnaire,
-          r'$.observations[0].questions',
-          ValidationLevel.draft,
-          knownIds: screenerIds,
-        );
-        expect(r.valid, isFalse);
-        expect(
-          r.errors.any(
-            (e) =>
-                e.code == 'questionnaire.duplicate_question_id_cross_context',
-          ),
-          isTrue,
-        );
-      },
-    );
+      final r = validateQuestionnaire(
+        obsQuestionnaire,
+        r'$.observations[0].questions',
+        ValidationLevel.draft,
+        knownIds: screenerIds,
+      );
+      expect(r.valid, isFalse);
+      expect(
+        r.errors.any(
+          (e) => e.code == 'questionnaire.duplicate_question_id_cross_context',
+        ),
+        isTrue,
+      );
+    });
 
-    test(
-      'same ID in two observation questionnaires does NOT produce cross-context error',
-      () {
-        // knownIds contains only screener IDs, not observation IDs
-        final obsQ = _boolQ('obs-unique-id');
-        final obsQuestionnaire = _questionnaire([obsQ]);
-        final screenerIds = <String>{}; // no screener questions
+    test('same ID in two observation questionnaires does NOT produce cross-context error', () {
+      // knownIds contains only screener IDs, not observation IDs
+      final obsQ = _boolQ('obs-unique-id');
+      final obsQuestionnaire = _questionnaire([obsQ]);
+      final screenerIds = <String>{}; // no screener questions
 
-        final r = validateQuestionnaire(
-          obsQuestionnaire,
-          r'$.observations[0].questions',
-          ValidationLevel.draft,
-          knownIds: screenerIds,
-        );
-        expect(r.valid, isTrue);
-      },
-    );
+      final r = validateQuestionnaire(
+        obsQuestionnaire,
+        r'$.observations[0].questions',
+        ValidationLevel.draft,
+        knownIds: screenerIds,
+      );
+      expect(r.valid, isTrue);
+    });
   });
 }

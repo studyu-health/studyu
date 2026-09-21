@@ -97,8 +97,7 @@ ValidationResult _validateChoiceQuestion(ChoiceQuestion q, String path) {
           code: 'choice_question.blank_choice_text',
           path: '$path.choices[$i].text',
           message: 'Choice at index $i in $path has blank text',
-          fixHint:
-              'Fill in the text for every choice option. The Designer text field accepts any non-empty string.',
+          fixHint: 'Fill in the text for every choice option. The Designer text field accepts any non-empty string.',
         ),
       );
     }
@@ -110,8 +109,7 @@ ValidationResult _validateChoiceQuestion(ChoiceQuestion q, String path) {
           code: 'choice_question.duplicate_choice_id',
           path: '$path.choices[$i].id',
           message: 'Choice id "${choice.id}" appears more than once in $path',
-          fixHint:
-              'Regenerate a unique UUID for the duplicated choice. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
+          fixHint: 'Regenerate a unique UUID for the duplicated choice. This cannot happen via the Designer UI; it indicates a manual JSON edit.',
         ),
       );
     }
@@ -183,8 +181,7 @@ ValidationResult _validateFreeTextQuestion(FreeTextQuestion q, String path) {
           path: '$path.customTypeExpression',
           message:
               'FreeTextQuestion at $path has textType=custom but no customTypeExpression',
-          fixHint:
-              'Set customTypeExpression to a valid regex when textType is custom.',
+          fixHint: 'Set customTypeExpression to a valid regex when textType is custom.',
         ),
       );
     }
@@ -253,8 +250,7 @@ ValidationResult _validateConditionalTarget(
           path: '$path.conditional.condition.target',
           message:
               'Question at $path has conditional that references id "$target" which does not exist in this questionnaire',
-          fixHint:
-              'The conditional references a question ID that does not exist in this questionnaire. Add that question or remove the conditional.',
+          fixHint: 'The conditional references a question ID that does not exist in this questionnaire. Add that question or remove the conditional.',
         ),
       );
     }

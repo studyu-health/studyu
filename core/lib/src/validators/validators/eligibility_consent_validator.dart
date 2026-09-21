@@ -60,8 +60,7 @@ ValidationResult validateEligibilityConsent(
           path: r'$.eligibility_criteria' + '[$i].condition',
           message:
               'Eligibility criterion at index $i will always pass (condition is unconditionally true)',
-          fixHint:
-              'Replace the condition with a specific expression that checks a screener question answer.',
+          fixHint: 'Replace the condition with a specific expression that checks a screener question answer.',
         ),
       );
     }
