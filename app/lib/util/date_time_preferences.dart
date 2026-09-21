@@ -27,7 +27,23 @@ T? synchronizedPreference<T>({
   required bool localValueIsDirty,
 }) => localValueIsDirty ? localValue : serverValue;
 
-class DateTimePreferences() extends ChangeNotifier {
+class DateTimePreferences({
+  @visibleForTesting Stream<String?> Function()? userIds,
+  @visibleForTesting String? Function()? currentUserId,
+  @visibleForTesting Future<StudyUUser> Function(String)? loadUser,
+  @visibleForTesting Future<StudyUUser> Function(StudyUUser)? saveUser,
+}) extends ChangeNotifier {
+  this {
+    final auth = userIds == null || currentUserId == null
+        ? Supabase.instance.client.auth
+        : null;
+    _authSubscription =
+        (userIds?.call() ??
+                auth!.onAuthStateChange.map((state) => state.session?.user.id))
+            .listen(_loadUser);
+    initialLoad = _loadUser(currentUserId?.call() ?? auth!.currentUser?.id);
+  }
+
   static const _dateFormatKeyPrefix = 'date_format_';
   static const _timeFormatKeyPrefix = 'time_format_';
   static const _dateFormatDirtyKeyPrefix = 'date_format_dirty_';
@@ -37,18 +53,18 @@ class DateTimePreferences() extends ChangeNotifier {
   TimeFormatPreference? _timeFormat;
   StudyUUser? _user;
   String? _userId;
-  StreamSubscription<AuthState>? _authSubscription;
+  final Future<StudyUUser> Function(String) _loadUserById =
+      loadUser ?? SupabaseQuery.getById<StudyUUser>;
+  final Future<StudyUUser> Function(StudyUUser) _saveUser =
+      saveUser ?? ((user) => user.save(onlyUpdate: true));
+  StreamSubscription<String?>? _authSubscription;
   int _loadGeneration = 0;
   int _dateFormatOperation = 0;
   int _timeFormatOperation = 0;
   Future<void> _preferencePersistence = Future.value();
 
-  this {
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
-      (authState) => _loadUser(authState.session?.user.id),
-    );
-    _loadUser(Supabase.instance.client.auth.currentUser?.id);
-  }
+  @visibleForTesting
+  late final Future<void> initialLoad;
 
   DateFormatPreference? get dateFormat => _dateFormat;
   TimeFormatPreference? get timeFormat => _timeFormat;
@@ -97,7 +113,7 @@ class DateTimePreferences() extends ChangeNotifier {
     final dateOperation = _dateFormatOperation;
     final timeOperation = _timeFormatOperation;
     try {
-      final user = await SupabaseQuery.getById<StudyUUser>(userId);
+      final user = await _loadUserById(userId);
       if (generation != _loadGeneration) return;
 
       final dateOperationIsCurrent = dateOperation == _dateFormatOperation;
@@ -140,7 +156,7 @@ class DateTimePreferences() extends ChangeNotifier {
             timeOperation == _timeFormatOperation && localTimeFormatIsDirty;
         if (synchronizeDate || synchronizeTime) {
           try {
-            final synchronizedUser = await user.save(onlyUpdate: true);
+            final synchronizedUser = await _saveUser(user);
             if (!_isCurrent(generation, userId)) return;
             if (dateOperation == _dateFormatOperation &&
                 timeOperation == _timeFormatOperation) {
@@ -314,7 +330,7 @@ class DateTimePreferences() extends ChangeNotifier {
 
       StudyUUser savedUser;
       try {
-        savedUser = await user.save(onlyUpdate: true);
+        savedUser = await _saveUser(user);
       } on SocketException {
         await _cacheDirtyPreference(
           cacheKey,
@@ -453,6 +469,7 @@ class DateTimePreferences() extends ChangeNotifier {
 
   @override
   void dispose() {
+    _loadGeneration++;
     _authSubscription?.cancel();
     super.dispose();
   }

@@ -87,6 +87,111 @@ void main() {
     );
   });
 
+  test('formats dates and date-times with explicit preferences', () {
+    final dateTime = DateTime(2024, 12, 31, 14, 30);
+
+    expect(
+      DateTimeFormat.formatDateForLocale(
+        const Locale('en', 'US'),
+        dateTime,
+        preference: DateFormatPreference.iso,
+      ),
+      '2024-12-31',
+    );
+    expect(
+      DateTimeFormat.formatDateTimeForLocale(
+        const Locale('en', 'US'),
+        dateTime,
+        datePreference: DateFormatPreference.european,
+        timePreference: TimeFormatPreference.h24,
+      ),
+      '31/12/2024 14:30',
+    );
+  });
+
+  testWidgets('uses MediaQuery preferences with a BuildContext', (
+    tester,
+  ) async {
+    Future<void> verify(
+      bool? alwaysUse24HourFormat,
+      String expectedTime,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en', 'US'),
+          home: MediaQuery(
+            data: MediaQueryData(
+              alwaysUse24HourFormat: alwaysUse24HourFormat ?? false,
+            ),
+            child: Builder(
+              builder: (context) {
+                if (alwaysUse24HourFormat == null) {
+                  expect(
+                    DateTimeFormat.defaultTimeFormatForLocale(
+                      const Locale('en', 'US'),
+                    ),
+                    TimeFormatPreference.h12,
+                  );
+                } else {
+                  expect(
+                    DateTimeFormat.defaultTimeFormat(context),
+                    alwaysUse24HourFormat
+                        ? TimeFormatPreference.h24
+                        : TimeFormatPreference.h12,
+                  );
+                }
+                expect(
+                  DateTimeFormat.formatDate(
+                    context,
+                    DateTime(2024, 12, 31),
+                    preference: DateFormatPreference.iso,
+                  ),
+                  '2024-12-31',
+                );
+                expect(
+                  DateTimeFormat.formatTime(
+                    context,
+                    const TimeOfDay(hour: 14, minute: 30),
+                  ),
+                  expectedTime,
+                );
+                expect(
+                  DateTimeFormat.formatDateTime(
+                    context,
+                    DateTime(2024, 12, 31, 14, 30),
+                  ),
+                  '${DateTimeFormat.formatDateForLocale(const Locale('en', 'US'), DateTime(2024, 12, 31))} $expectedTime',
+                );
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await verify(false, '2:30 PM');
+    await verify(true, '14:30');
+  });
+
+  testWidgets('uses platform defaults without MediaQuery', (tester) async {
+    tester.platformDispatcher.localeTestValue = const Locale('en', 'US');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (context) {
+          expect(DateTimeFormat.defaultDateFormat(), DateFormatPreference.us);
+          expect(
+            DateTimeFormat.defaultTimeFormat(context),
+            TimeFormatPreference.h12,
+          );
+          return const SizedBox();
+        },
+      ),
+    );
+  });
+
   test('ensureParticipantSignedIn returns true for existing session', () async {
     var signInCalls = 0;
     var signUpCalls = 0;
