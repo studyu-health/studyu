@@ -10,7 +10,6 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/invite_qr_scanner.dart';
 import 'package:studyu_app/widgets/study_onboarding_description.dart';
 import 'package:studyu_app/widgets/study_tile.dart';
-import 'package:studyu_app/widgets/title_description_layout.dart';
 import 'package:studyu_app/widgets/why_dialog.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
@@ -103,91 +102,115 @@ class _StudySelectionScreenState() extends State<StudySelectionScreen> {
         ),
         title: Text(AppLocalizations.of(context)!.browse_public_studies),
       ),
-      body: TitleDescriptionLayout(
-        descriptionWidget: StudyOnboardingDescription(
-          text: AppLocalizations.of(context)!.study_selection_single,
-          actionLabel: AppLocalizations.of(context)!.study_selection_single_why,
-          onAction: () => showDialog(
-            context: context,
-            builder: (context) => WhyDialog(
-              content: AppLocalizations.of(context)!
-                  .study_selection_single_reason,
-            ),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_hiddenStudies) ...[
-              MaterialBanner(
-                padding: const EdgeInsets.all(8),
-                leading: const Icon(
-                  MdiIcons.exclamationThick,
-                  color: Colors.orange,
-                  size: 32,
-                ),
-                content: Text(
-                  AppLocalizations.of(context)!.study_selection_hidden_studies,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                actions: const [SizedBox.shrink()],
-                backgroundColor: Colors.yellow[100],
-              ),
-              const SizedBox(height: 16),
-            ],
-            SizedBox(
-              height: 360,
-              child: RetryFutureBuilder<ExtractionResult<Study>>(
-                tryFunction: () => publishedStudies,
-                successBuilder:
-                    (
-                      BuildContext context,
-                      ExtractionResult<Study>? extractionResult,
-                    ) {
-                      final studies = extractionResult!.extracted;
-                      if (extractionResult
-                          is ExtractionFailedException<Study>) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (_hiddenStudies) return;
-                          debugPrint(
-                            '${extractionResult.notExtracted.length} studies could not be extracted.',
-                          );
-                          setState(() {
-                            _hiddenStudies = true;
-                          });
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 700),
+            child: RetryFutureBuilder<ExtractionResult<Study>>(
+              tryFunction: () => publishedStudies,
+              successBuilder:
+                  (
+                    BuildContext context,
+                    ExtractionResult<Study>? extractionResult,
+                  ) {
+                    final studies = extractionResult!.extracted;
+                    if (extractionResult is ExtractionFailedException<Study>) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (_hiddenStudies) return;
+                        debugPrint(
+                          '${extractionResult.notExtracted.length} studies could not be extracted.',
+                        );
+                        setState(() {
+                          _hiddenStudies = true;
                         });
-                      }
-                      if (studies.isEmpty) {
-                        return const NoPublicStudiesWidget();
-                      }
+                      });
+                    }
 
-                      return ListView.builder(
-                        itemCount: studies.length,
-                        itemBuilder: (context, index) {
-                          final study = studies[index];
-                          return Material(
-                            child: InkWell(
-                              onTap: () {
-                                unawaited(
-                                  navigateToStudyOverview(context, study),
-                                );
-                              },
-                              child: Hero(
-                                tag: 'study_tile_${studies[index].id}',
-                                child: Material(
-                                  type: MaterialType.transparency,
-                                  child: StudyTile.fromStudy(study: study),
+                    return CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          sliver: SliverToBoxAdapter(
+                            child: StudyOnboardingDescription(
+                              text: AppLocalizations.of(context)!
+                                  .study_selection_single,
+                              actionLabel: AppLocalizations.of(context)!
+                                  .study_selection_single_why,
+                              onAction: () => showDialog(
+                                context: context,
+                                builder: (context) => WhyDialog(
+                                  content: AppLocalizations.of(context)!
+                                      .study_selection_single_reason,
                                 ),
                               ),
                             ),
-                          );
-                        },
-                      );
-                    },
-              ),
+                          ),
+                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                        if (_hiddenStudies) ...[
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            sliver: SliverToBoxAdapter(
+                              child: MaterialBanner(
+                                padding: const EdgeInsets.all(8),
+                                leading: const Icon(
+                                  MdiIcons.exclamationThick,
+                                  color: Colors.orange,
+                                  size: 32,
+                                ),
+                                content: Text(
+                                  AppLocalizations.of(context)!
+                                      .study_selection_hidden_studies,
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                                actions: const [SizedBox.shrink()],
+                                backgroundColor: Colors.yellow[100],
+                              ),
+                            ),
+                          ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                        ],
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                          sliver: studies.isEmpty
+                              ? const SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: NoPublicStudiesWidget(),
+                                )
+                              : SliverList.builder(
+                                  itemCount: studies.length,
+                                  itemBuilder: (context, index) {
+                                    final study = studies[index];
+                                    return Material(
+                                      child: InkWell(
+                                        onTap: () {
+                                          unawaited(
+                                            navigateToStudyOverview(
+                                              context,
+                                              study,
+                                            ),
+                                          );
+                                        },
+                                        child: Hero(
+                                          tag: 'study_tile_${study.id}',
+                                          child: Material(
+                                            type: MaterialType.transparency,
+                                            child: StudyTile.fromStudy(
+                                              study: study,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
+                    );
+                  },
             ),
-          ],
+          ),
         ),
       ),
     );
