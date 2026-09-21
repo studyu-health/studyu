@@ -38,29 +38,37 @@ class _AccountSettingsDialogState()
           label: tr.date_format,
           input: Align(
             alignment: Alignment.centerRight,
-            child: DropdownButton<DateFormatPreference?>(
-              value: user.preferences.dateFormat,
-              items: [
-                DropdownMenuItem<DateFormatPreference?>(child: Text(tr.system)),
-                ...DateFormatPreference.values.map(
-                  (format) => DropdownMenuItem(
-                    value: format,
-                    child: Text(_dateFormatLabel(format)),
+            child: SizedBox(
+              width: 250,
+              child: DropdownButton<DateFormatPreference?>(
+                isExpanded: true,
+                value: user.preferences.dateFormat,
+                items: [
+                  DropdownMenuItem<DateFormatPreference?>(
+                    child: Text(tr.system),
                   ),
-                ),
-              ],
-              onChanged: (value) async {
-                final currentContext = context;
-                try {
-                  final savedUser = await repository.updateDateFormat(value);
-                  container.read(userStateProvider.notifier).setUser(savedUser);
-                } catch (error) {
-                  debugPrint('Could not save date format preference: $error');
-                  if (!currentContext.mounted) return;
-                  ScaffoldMessenger.of(currentContext)
-                      .showSnackBar(SnackBar(content: Text(tr.sync_failed)));
-                }
-              },
+                  ...DateFormatPreference.values.map(
+                    (format) => DropdownMenuItem(
+                      value: format,
+                      child: Text(_dateFormatLabel(format)),
+                    ),
+                  ),
+                ],
+                onChanged: (value) async {
+                  final currentContext = context;
+                  try {
+                    final savedUser = await repository.updateDateFormat(value);
+                    container
+                        .read(userStateProvider.notifier)
+                        .setUser(savedUser);
+                  } catch (error) {
+                    debugPrint('Could not save date format preference: $error');
+                    if (!currentContext.mounted) return;
+                    ScaffoldMessenger.of(currentContext)
+                        .showSnackBar(SnackBar(content: Text(tr.sync_failed)));
+                  }
+                },
+              ),
             ),
           ),
         ),
@@ -68,29 +76,37 @@ class _AccountSettingsDialogState()
           label: tr.time_format,
           input: Align(
             alignment: Alignment.centerRight,
-            child: DropdownButton<TimeFormatPreference?>(
-              value: user.preferences.timeFormat,
-              items: [
-                DropdownMenuItem<TimeFormatPreference?>(child: Text(tr.system)),
-                ...TimeFormatPreference.values.map(
-                  (format) => DropdownMenuItem(
-                    value: format,
-                    child: Text(_timeFormatLabel(format)),
+            child: SizedBox(
+              width: 250,
+              child: DropdownButton<TimeFormatPreference?>(
+                isExpanded: true,
+                value: user.preferences.timeFormat,
+                items: [
+                  DropdownMenuItem<TimeFormatPreference?>(
+                    child: Text(tr.system),
                   ),
-                ),
-              ],
-              onChanged: (value) async {
-                final currentContext = context;
-                try {
-                  final savedUser = await repository.updateTimeFormat(value);
-                  container.read(userStateProvider.notifier).setUser(savedUser);
-                } catch (error) {
-                  debugPrint('Could not save time format preference: $error');
-                  if (!currentContext.mounted) return;
-                  ScaffoldMessenger.of(currentContext)
-                      .showSnackBar(SnackBar(content: Text(tr.sync_failed)));
-                }
-              },
+                  ...TimeFormatPreference.values.map(
+                    (format) => DropdownMenuItem(
+                      value: format,
+                      child: Text(_timeFormatLabel(format)),
+                    ),
+                  ),
+                ],
+                onChanged: (value) async {
+                  final currentContext = context;
+                  try {
+                    final savedUser = await repository.updateTimeFormat(value);
+                    container
+                        .read(userStateProvider.notifier)
+                        .setUser(savedUser);
+                  } catch (error) {
+                    debugPrint('Could not save time format preference: $error');
+                    if (!currentContext.mounted) return;
+                    ScaffoldMessenger.of(currentContext)
+                        .showSnackBar(SnackBar(content: Text(tr.sync_failed)));
+                  }
+                },
+              ),
             ),
           ),
         ),

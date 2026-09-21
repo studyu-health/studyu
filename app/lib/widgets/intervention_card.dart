@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/util/date_time_preferences.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
@@ -124,18 +126,16 @@ class const InterventionCardDescription({
 
 class const _TaskList({required final List<InterventionTask> tasks})
     extends StatelessWidget {
-  String scheduleString(List<CompletionPeriod> schedules) {
-    return schedules
-        .map(
-          (completionPeriod) =>
-              '${completionPeriod.unlockTime} - ${completionPeriod.lockTime}',
-        )
-        .join(',');
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final timeFormat = context.watch<DateTimePreferences?>()?.timeFormat;
+    String scheduleString(List<CompletionPeriod> schedules) => schedules
+        .map(
+          (period) =>
+              formatCompletionPeriod(context, period, preference: timeFormat),
+        )
+        .join(',');
     return Column(
       children: [
         Padding(

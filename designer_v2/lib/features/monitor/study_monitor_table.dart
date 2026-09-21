@@ -105,7 +105,7 @@ class const StudyMonitorTable({
     int rowIdx,
     Set<WidgetState> states,
   ) {
-    final languageCode = ref.watch(localeProvider).languageCode;
+    final locale = ref.watch(localeProvider).toLanguageTag();
     final preferences = ref.watch(userStateProvider).value?.preferences;
     final theme = Theme.of(context);
     return [
@@ -122,7 +122,7 @@ class const StudyMonitorTable({
         ),
       Tooltip(
         message: item.startedAt.toLocalizedString(
-          locale: languageCode,
+          locale: locale,
           showTime: false,
           datePreference: preferences?.dateFormat,
         ),
@@ -130,7 +130,7 @@ class const StudyMonitorTable({
       ),
       Tooltip(
         message: item.lastActivityAt.toLocalizedString(
-          locale: languageCode,
+          locale: locale,
           datePreference: preferences?.dateFormat,
           timePreference: preferences?.timeFormat,
         ),

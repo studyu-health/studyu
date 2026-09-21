@@ -27,6 +27,8 @@ class const Settings({super.key}) extends StatefulWidget {
 }
 
 class _SettingsState() extends State<Settings> {
+  static const _selectorWidth = 180.0;
+
   Locale? _selectedValue;
   StudySubject? subject;
 
@@ -38,7 +40,11 @@ class _SettingsState() extends State<Settings> {
   }
 
   List<DropdownMenuItem<Locale>> _buildDropdownItems(BuildContext context) {
-    final dropDownItems = <DropdownMenuItem<Locale>>[];
+    final dropDownItems = <DropdownMenuItem<Locale>>[
+      DropdownMenuItem(
+        child: Text(AppLocalizations.of(context)!.use_device_language),
+      ),
+    ];
 
     for (final locale in AppLocalizations.supportedLocales) {
       dropDownItems.add(
@@ -49,11 +55,6 @@ class _SettingsState() extends State<Settings> {
       );
     }
 
-    dropDownItems.add(
-      DropdownMenuItem(
-        child: Text(AppLocalizations.of(context)!.use_device_language),
-      ),
-    );
     return dropDownItems;
   }
 
@@ -131,20 +132,26 @@ class _SettingsState() extends State<Settings> {
                         style: theme.textTheme.bodyMedium!.copyWith(),
                       ),
                     ),
-                    DropdownButton<Locale>(
-                      value: _selectedValue,
-                      style: theme.textTheme.bodyMedium,
-                      hint: Text(
-                        AppLocalizations.of(context)!.use_device_language,
+                    SizedBox(
+                      width: _selectorWidth,
+                      child: DropdownButton<Locale>(
+                        isExpanded: true,
+                        value: _selectedValue,
+                        style: theme.textTheme.bodyMedium,
+                        hint: Text(
+                          AppLocalizations.of(context)!.use_device_language,
+                        ),
+                        underline: const SizedBox(),
+                        items: _buildDropdownItems(context),
+                        onChanged: (value) async {
+                          setState(() {
+                            _selectedValue = value;
+                          });
+                          await context.read<AppLanguage>().changeLanguage(
+                            value,
+                          );
+                        },
                       ),
-                      underline: const SizedBox(),
-                      items: _buildDropdownItems(context),
-                      onChanged: (value) async {
-                        setState(() {
-                          _selectedValue = value;
-                        });
-                        await context.read<AppLanguage>().changeLanguage(value);
-                      },
                     ),
                   ],
                 ),
@@ -164,34 +171,38 @@ class _SettingsState() extends State<Settings> {
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
-                    DropdownButton<DateFormatPreference?>(
-                      value: context.watch<DateTimePreferences>().dateFormat,
-                      underline: const SizedBox(),
-                      items: [
-                        DropdownMenuItem<DateFormatPreference?>(
-                          child: Text(AppLocalizations.of(context)!.system),
-                        ),
-                        ...DateFormatPreference.values.map(
-                          (format) => DropdownMenuItem(
-                            value: format,
-                            child: Text(
-                              _dateFormatLabel(
-                                AppLocalizations.of(context)!,
-                                format,
+                    SizedBox(
+                      width: _selectorWidth,
+                      child: DropdownButton<DateFormatPreference?>(
+                        isExpanded: true,
+                        value: context.watch<DateTimePreferences>().dateFormat,
+                        underline: const SizedBox(),
+                        items: [
+                          DropdownMenuItem<DateFormatPreference?>(
+                            child: Text(AppLocalizations.of(context)!.system),
+                          ),
+                          ...DateFormatPreference.values.map(
+                            (format) => DropdownMenuItem(
+                              value: format,
+                              child: Text(
+                                _dateFormatLabel(
+                                  AppLocalizations.of(context)!,
+                                  format,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                      onChanged: (value) async {
-                        try {
-                          await context
-                              .read<DateTimePreferences>()
-                              .changeDateFormat(value);
-                        } catch (error) {
-                          if (mounted) _showPreferenceSaveError(error);
-                        }
-                      },
+                        ],
+                        onChanged: (value) async {
+                          try {
+                            await context
+                                .read<DateTimePreferences>()
+                                .changeDateFormat(value);
+                          } catch (error) {
+                            if (mounted) _showPreferenceSaveError(error);
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -211,34 +222,38 @@ class _SettingsState() extends State<Settings> {
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
-                    DropdownButton<TimeFormatPreference?>(
-                      value: context.watch<DateTimePreferences>().timeFormat,
-                      underline: const SizedBox(),
-                      items: [
-                        DropdownMenuItem<TimeFormatPreference?>(
-                          child: Text(AppLocalizations.of(context)!.system),
-                        ),
-                        ...TimeFormatPreference.values.map(
-                          (format) => DropdownMenuItem(
-                            value: format,
-                            child: Text(
-                              _timeFormatLabel(
-                                AppLocalizations.of(context)!,
-                                format,
+                    SizedBox(
+                      width: _selectorWidth,
+                      child: DropdownButton<TimeFormatPreference?>(
+                        isExpanded: true,
+                        value: context.watch<DateTimePreferences>().timeFormat,
+                        underline: const SizedBox(),
+                        items: [
+                          DropdownMenuItem<TimeFormatPreference?>(
+                            child: Text(AppLocalizations.of(context)!.system),
+                          ),
+                          ...TimeFormatPreference.values.map(
+                            (format) => DropdownMenuItem(
+                              value: format,
+                              child: Text(
+                                _timeFormatLabel(
+                                  AppLocalizations.of(context)!,
+                                  format,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                      onChanged: (value) async {
-                        try {
-                          await context
-                              .read<DateTimePreferences>()
-                              .changeTimeFormat(value);
-                        } catch (error) {
-                          if (mounted) _showPreferenceSaveError(error);
-                        }
-                      },
+                        ],
+                        onChanged: (value) async {
+                          try {
+                            await context
+                                .read<DateTimePreferences>()
+                                .changeTimeFormat(value);
+                          } catch (error) {
+                            if (mounted) _showPreferenceSaveError(error);
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),

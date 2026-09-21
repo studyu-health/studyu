@@ -12,7 +12,7 @@ class const ParticipantInfo({
 }) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final languageCode = ref.watch(localeProvider).languageCode;
+    final locale = ref.watch(localeProvider).toLanguageTag();
     final preferences = ref.watch(userStateProvider).value?.preferences;
     return SelectionArea(
       child: Column(
@@ -29,7 +29,7 @@ class const ParticipantInfo({
           _buildInfoRow(
             tr.monitoring_table_column_enrolled,
             monitorItem.startedAt.toLocalizedString(
-              locale: languageCode,
+              locale: locale,
               showTime: false,
               datePreference: preferences?.dateFormat,
             ),
@@ -37,7 +37,7 @@ class const ParticipantInfo({
           _buildInfoRow(
             tr.monitoring_table_column_last_activity,
             monitorItem.lastActivityAt.toLocalizedString(
-              locale: languageCode,
+              locale: locale,
               datePreference: preferences?.dateFormat,
               timePreference: preferences?.timeFormat,
             ),

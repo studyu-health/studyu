@@ -6,6 +6,20 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+String formatCompletionPeriod(
+  BuildContext context,
+  CompletionPeriod period, {
+  TimeFormatPreference? preference,
+}) {
+  String format(StudyUTimeOfDay time) => DateTimeFormat.formatTime(
+    context,
+    TimeOfDay(hour: time.hour, minute: time.minute),
+    preference: preference,
+  );
+
+  return '${format(period.unlockTime)} - ${format(period.lockTime)}';
+}
+
 @visibleForTesting
 T? synchronizedPreference<T>({
   required T? serverValue,
