@@ -2130,7 +2130,7 @@ void main() {
           ],
         ),
       );
-    final q2ChoiceAId = q2.choices.first.id;
+    final q2ChoiceBId = q2.choices.last.id;
 
     final List<QuestionnaireState?> completions = [];
 
@@ -2171,6 +2171,19 @@ void main() {
     );
     expect(completions.last, isNull);
 
+    // Editing the flagged later answer must not dismiss the aggregate review.
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(find.text('Review your answers'), findsOneWidget);
+    expect(
+      tester
+          .widget<ElevatedButton>(
+            find.widgetWithText(ElevatedButton, 'Complete task'),
+          )
+          .onPressed,
+      isNull,
+    );
+
     final completionCountBeforeBlockedSubmit = completions
         .whereType<QuestionnaireState>()
         .length;
@@ -2208,7 +2221,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final reviewedCompletion = completions.whereType<QuestionnaireState>().last;
-    expect(reviewedCompletion.answers['q2']?.response, [q2ChoiceAId]);
+    expect(reviewedCompletion.answers['q2']?.response, [q2ChoiceBId]);
     expect(reviewedCompletion.answerMetadata['q2']?.needsReview, isFalse);
   });
 

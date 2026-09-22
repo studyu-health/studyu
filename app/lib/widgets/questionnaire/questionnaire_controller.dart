@@ -319,7 +319,11 @@ class QuestionnaireController(final List<Question> questions)
     final preserveDraftContext =
         question is FreeTextQuestion && _drafts.containsKey(answer.question);
     _answers.answers[answer.question] = answer;
-    _storeCurrentContext(question, preserveCacheContext: preserveDraftContext);
+    _storeCurrentContext(
+      question,
+      preserveNeedsReview: true,
+      preserveCacheContext: preserveDraftContext,
+    );
     _drafts.remove(answer.question);
     _applyHiddenDefaults();
     _markAnsweredDependentsForReview(answer.question);
