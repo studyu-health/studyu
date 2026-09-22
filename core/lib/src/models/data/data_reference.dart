@@ -6,14 +6,8 @@ import 'package:studyu_core/src/models/models.dart';
 part 'data_reference.g.dart';
 
 @JsonSerializable()
-class DataReference<T> {
-  String task;
-  String property;
-
-  DataReference(this.task, this.property);
-
-  factory DataReference.fromJson(Map<String, dynamic> json) =>
-      _$DataReferenceFromJson(json);
+class DataReference<T>(var String task, var String property) {
+  factory fromJson(Map<String, dynamic> json) => _$DataReferenceFromJson(json);
 
   Map<String, dynamic> toJson() => _$DataReferenceToJson(this);
 

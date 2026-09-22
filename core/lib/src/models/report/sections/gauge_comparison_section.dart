@@ -9,11 +9,11 @@ class GaugeComparisonSection extends ReportSection {
 
   DataReference<num>? resultProperty;
 
-  GaugeComparisonSection() : super(sectionType);
+  new() : super(sectionType);
 
-  GaugeComparisonSection.withId() : super.withId(sectionType);
+  new withId() : super.withId(sectionType);
 
-  factory GaugeComparisonSection.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$GaugeComparisonSectionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$GaugeComparisonSectionToJson(this);

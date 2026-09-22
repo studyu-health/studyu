@@ -19,25 +19,20 @@ import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/riverpod.dart';
 
-class ReportsFormViewModel extends FormViewModel<ReportsFormData>
+class ReportsFormViewModel({
+  required final Study study,
+  required final GoRouter router,
+  super.delegate,
+  super.formData,
+  super.autosave = true,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends FormViewModel<ReportsFormData>
     implements
         IFormViewModelDelegate<ReportItemFormViewModel>,
         IProviderArgsResolver<
           ReportItemFormViewModel,
           ReportItemFormRouteArgs
         > {
-  ReportsFormViewModel({
-    required this.study,
-    required this.router,
-    super.delegate,
-    super.formData,
-    super.autosave = true,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  final Study study;
-  final GoRouter router;
-
   late final reportItemDelegate = ReportFormItemDelegate(
     formViewModelCollection: reportItemFormViewModels,
     owner: this,
@@ -153,27 +148,19 @@ class ReportsFormViewModel extends FormViewModel<ReportsFormData>
   }
 }
 
-class ReportFormItemDelegate
-    implements
-        IFormViewModelDelegate<ReportItemFormViewModel>,
-        IListActionProvider<ReportItemFormViewModel>,
-        IProviderArgsResolver<
-          ReportItemFormViewModel,
-          ReportItemFormRouteArgs
-        > {
-  ReportFormItemDelegate({
-    required this.formViewModelCollection,
-    required this.owner,
-    this.validationSet,
-    this.propagateOnSave = true,
-  });
-
-  final FormViewModelCollection<ReportItemFormViewModel, ReportItemFormData>
-  formViewModelCollection;
-  final ReportsFormViewModel owner;
-  final bool propagateOnSave;
-  final FormValidationSetEnum? validationSet;
-
+class ReportFormItemDelegate({
+  required final FormViewModelCollection<
+    ReportItemFormViewModel,
+    ReportItemFormData
+  >
+  formViewModelCollection,
+  required final ReportsFormViewModel owner,
+  final FormValidationSetEnum? validationSet,
+  final bool propagateOnSave = true,
+}) implements
+    IFormViewModelDelegate<ReportItemFormViewModel>,
+    IListActionProvider<ReportItemFormViewModel>,
+    IProviderArgsResolver<ReportItemFormViewModel, ReportItemFormRouteArgs> {
   @override
   void onCancel(ReportItemFormViewModel formViewModel, FormMode prevFormMode) {
     return; // no-op

@@ -1,29 +1,24 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:studyu_app/screens/study/tasks/task_screen.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/misc.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_app/widgets/questionnaire/questionnaire_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class QuestionnaireTaskWidget extends StatefulWidget {
-  final QuestionnaireTask task;
-  final CompletionPeriod completionPeriod;
-
-  const QuestionnaireTaskWidget({
-    required this.task,
-    required this.completionPeriod,
-    super.key,
-  });
-
+class const QuestionnaireTaskWidget({
+  required final QuestionnaireTask task,
+  required final CompletionPeriod completionPeriod,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<QuestionnaireTaskWidget> createState() =>
       _QuestionnaireTaskWidgetState();
 }
 
-class _QuestionnaireTaskWidgetState extends State<QuestionnaireTaskWidget> {
+class _QuestionnaireTaskWidgetState() extends State<QuestionnaireTaskWidget> {
   DateTime? _lastClickTime;
   bool _isLoading = false;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -63,7 +58,7 @@ class _QuestionnaireTaskWidgetState extends State<QuestionnaireTaskWidget> {
   }
 
   Future<void> _handleCompletion(QuestionnaireState? qs) async {
-    if (kDebugMode) {
+    if (isDebugMode) {
       debugPrint('Questionnaire completed with response: $qs');
     }
     // Only a non-null payload (all visible questions answered) submits.

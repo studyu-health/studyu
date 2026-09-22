@@ -1,0 +1,261 @@
+name: SonarQube
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  MELOS_SDK_PATH: auto
+
+concurrency:
+  group: sonarqube-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: SonarQube Quality Gate
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        github.event.pull_request.user.login != 'dependabot[bot]') ||
+      (github.event_name == 'workflow_dispatch' &&
+        github.ref == 'refs/heads/dev')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify SonarQube configuration
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$SONAR_TOKEN" ]]; then
+            echo "::error::SONAR_TOKEN is unavailable." >&2
+            exit 1
+          fi
+          if [[ -z "$SONAR_HOST_URL" ]]; then
+            echo "::error::SONAR_HOST_URL is not configured." >&2
+            exit 1
+          fi
+
+      - name: Init workspace
+        uses: ./.github/workflows/init-workspace
+
+      - name: Verify coverage normalizer
+        run: dart scripts/normalize_lcov.dart --check
+
+      # All Packages runs the same coverage command and uploads its reports as
+      # the `sonar-coverage` artifact for the same commit. Reusing that artifact
+      # avoids running the full test suite twice for one commit. When no
+      # artifact is available, the test run below generates the reports.
+      - name: Reuse coverage from All Packages
+        id: reuse-coverage
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -uo pipefail
+
+          sha="${TARGET_SHA}"
+          reused="false"
+          runs_json() {
+            gh run list -R "${GITHUB_REPOSITORY}" --commit "$sha" --workflow all_packages.yml --limit 20 \
+              --json databaseId,conclusion,status 2>/dev/null || printf '[]'
+          }
+          runs="$(runs_json)"
+          run_id="$(jq -r '[.[] | select(.conclusion == "success")] | .[0].databaseId // empty' <<<"$runs")"
+          if [[ -z "$run_id" ]]; then
+            for _ in $(seq 1 15); do
+              active="$(jq -r '[.[] | select(.status == "queued" or .status == "in_progress" or .status == "waiting" or .status == "requested" or .status == "pending")] | length' <<<"$runs")"
+              if [[ "$active" == "0" ]]; then
+                break
+              fi
+              sleep 60
+              runs="$(runs_json)"
+              run_id="$(jq -r '[.[] | select(.conclusion == "success")] | .[0].databaseId // empty' <<<"$runs")"
+              [[ -n "$run_id" ]] && break
+            done
+          fi
+          if [[ -n "$run_id" ]] && gh run download -R "${GITHUB_REPOSITORY}" "$run_id" --name sonar-coverage --dir . 2>/dev/null; then
+            files_ok="true"
+            for package in app core designer_v2 flutter_common; do
+              if [[ ! -s "${package}/coverage/lcov.info" || ! -s "${package}/coverage/tests.output" ]]; then
+                files_ok="false"
+                break
+              fi
+            done
+            if [[ "$files_ok" == "true" ]]; then
+              reused="true"
+              echo "Reused coverage from All Packages run ${run_id} for commit ${sha}."
+            fi
+          fi
+          if [[ "$reused" != "true" ]]; then
+            echo "::notice::No reusable All Packages coverage artifact for commit ${sha}; running tests in this workflow."
+          fi
+          echo "reused=${reused}" >> "${GITHUB_OUTPUT}"
+
+      - name: Run tests with coverage
+        if: steps.reuse-coverage.outputs.reused != 'true'
+        run: dart run melos run test:coverage --no-select
+
+      - name: Validate Flutter test reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          reports=(
+            app/coverage/tests.output
+            core/coverage/tests.output
+            designer_v2/coverage/tests.output
+            flutter_common/coverage/tests.output
+          )
+          for report in "${reports[@]}"; do
+            if [[ ! -s "$report" ]]; then
+              echo "::error::Missing or empty Flutter test report: $report" >&2
+              exit 1
+            fi
+            if ! jq -s -e \
+              'length > 0 and any(.[]; .type == "suite") and (.[-1].type == "done" and .[-1].success == true)' \
+              "$report" >/dev/null; then
+              echo "::error::Invalid or unsuccessful Flutter test report: $report" >&2
+              exit 1
+            fi
+          done
+
+      - name: Validate and normalize coverage
+        run: dart scripts/normalize_lcov.dart coverage/sonar/lcov.info
+
+      - name: Generate Dart analyzer report
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p coverage/sonar
+          dart analyze --no-fatal-warnings --format=machine \
+            > coverage/sonar/dart-analyze.txt
+
+      - name: Scan project for pull request
+        id: scan_pr
+        if: github.event_name == 'pull_request'
+        uses: "SonarSource/sonarqube-scan-action@\
+          c7ee0f9df90b7aa20e8dcf9695dcfe2e7da5b4f2" # v7
+        with:
+          args: >
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
+            -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+      - name: Scan project
+        id: scan_push
+        if: github.event_name != 'pull_request'
+        uses: "SonarSource/sonarqube-scan-action@\
+          c7ee0f9df90b7aa20e8dcf9695dcfe2e7da5b4f2" # v7
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+      # The scan action fails when the quality gate does not pass, but it does
+      # not report which condition failed. This step resolves the analysis of
+      # this run from the scanner metadata and publishes the quality gate of
+      # that analysis to the check run and the job summary.
+      - name: Report quality gate failure
+        if: >-
+          failure() &&
+          (steps.scan_pr.outcome == 'failure' ||
+            steps.scan_push.outcome == 'failure')
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -uo pipefail
+
+          project=studyu-health_studyu
+          host="${SONAR_HOST_URL%/}"
+          scope="branch=dev"
+          target="branch dev"
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            scope="pullRequest=${PR_NUMBER}"
+            target="pull request #${PR_NUMBER}"
+          fi
+          dashboard="${host}/dashboard?id=${project}&${scope}"
+
+          # The scanner records the id of its own compute engine task in the
+          # metadata file of the analysis working directory. Resolving the
+          # quality gate through that task reports the analysis of this run,
+          # not the latest analysis of the branch or the pull request.
+          metadata=.scannerwork/report-task.txt
+          task="{}"
+          task_status=""
+          analysis_id=""
+          if [[ -f "${metadata}" ]]; then
+            task_id=$(sed -n 's/^ceTaskId=//p' "${metadata}" | tr -d '\r' | head -n 1)
+            task=$(curl -sS -u "${SONAR_TOKEN}:" \
+              "${host}/api/ce/task?id=${task_id}" || true)
+            task_status=$(jq -r '.task.status // empty' <<<"${task}" 2>/dev/null || true)
+            analysis_id=$(jq -r '.task.analysisId // empty' <<<"${task}" 2>/dev/null || true)
+          fi
+
+          if [[ ! -f "${metadata}" ]]; then
+            echo "::error title=SonarQube analysis::The scanner did not write ${metadata}. The quality gate of this run is unknown. Inspect the scan step log."
+          elif [[ "${task_status}" == "FAILED" ]]; then
+            message=$(jq -r '.task.errorMessage // "SonarQube reported no error message."' \
+              <<<"${task}" | tr '\n' ' ')
+            echo "::error title=SonarQube analysis failed::${message}"
+          elif [[ "${task_status}" != "SUCCESS" || -z "${analysis_id}" ]]; then
+            echo "::error title=SonarQube analysis::The analysis task of this run is ${task_status:-unknown}. The quality gate of this run is unknown. Inspect the scan step log."
+          else
+            gate=$(curl -sS -u "${SONAR_TOKEN}:" \
+              "${host}/api/qualitygates/project_status?analysisId=${analysis_id}" || true)
+            status=$(jq -r '.projectStatus.status // empty' <<<"${gate}" 2>/dev/null || true)
+
+            if [[ -z "${status}" ]]; then
+              echo "::error title=SonarQube quality gate::SonarQube returned no quality gate result for the analysis of ${target}. Inspect the scan step log. ${dashboard}"
+            elif [[ "${status}" == "OK" ]]; then
+              echo "The analysis task and the quality gate of this run succeeded, so the scan step failed for another reason. Inspect the scan step log."
+            else
+              {
+                echo "### SonarQube quality gate: ${status}"
+                echo
+                echo "| Condition | Status | Value | Threshold |"
+                echo "| --- | --- | --- | --- |"
+                jq -r '.projectStatus.conditions[]
+                  | "| `\(.metricKey)` | \(.status) | \(.actualValue) | \(.errorThreshold) |"' <<<"${gate}"
+                echo
+                echo "[Open the analysis in SonarQube](${dashboard})"
+              } | tee -a "${GITHUB_STEP_SUMMARY}"
+              jq -r --arg target "${target}" --arg dashboard "${dashboard}" '
+                .projectStatus.conditions[]
+                | select(.status == "ERROR")
+                | "::error title=SonarQube quality gate::\(.metricKey) is \(.actualValue) on \($target), \(
+                    if .comparator == "LT" then "below"
+                    elif .comparator == "GT" then "above"
+                    else "at"
+                    end) the \(.errorThreshold) threshold. \($dashboard)"
+              ' <<<"${gate}"
+            fi
+          fi
+          echo "Workflow run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"

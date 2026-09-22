@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:studyu_app/screens/study/report/report_section_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class LinearRegressionSectionWidget extends ReportSectionWidget {
-  final LinearRegressionSection section;
-
-  const LinearRegressionSectionWidget(super.subject, this.section, {super.key});
-
+class const LinearRegressionSectionWidget(
+  super.subject,
+  final LinearRegressionSection section, {
+  super.key,
+}) extends ReportSectionWidget {
   @override
   Widget build(BuildContext context) {
     return const Text("LinearRegression is currently not supported");

@@ -4,23 +4,19 @@ import 'package:studyu_app/services/food_analysis_service.dart';
 
 /// A dialog for selecting which food items to add when LLM detects multiple
 /// items in an image.
-class FoodItemSelectionDialog extends StatefulWidget {
-  /// Creates a new [FoodItemSelectionDialog].
-  const FoodItemSelectionDialog({
-    required this.items,
-    required this.overallConfidence,
-    this.notes,
-    super.key,
-  });
-
+class const FoodItemSelectionDialog({
   /// The list of analyzed food items to select from.
-  final List<AnalyzedFoodItem> items;
+  required final List<AnalyzedFoodItem> items,
 
   /// Overall confidence score for the analysis.
-  final double overallConfidence;
+  required final double overallConfidence,
 
   /// Optional notes about the analysis.
-  final String? notes;
+  final String? notes,
+  super.key,
+}) extends StatefulWidget {
+  /// Creates a new [FoodItemSelectionDialog].
+  this;
 
   /// Shows the dialog and returns the selected items.
   static Future<List<AnalyzedFoodItem>?> show(
@@ -44,7 +40,7 @@ class FoodItemSelectionDialog extends StatefulWidget {
       _FoodItemSelectionDialogState();
 }
 
-class _FoodItemSelectionDialogState extends State<FoodItemSelectionDialog> {
+class _FoodItemSelectionDialogState() extends State<FoodItemSelectionDialog> {
   final Set<int> _selectedIndices = {};
 
   @override
@@ -207,17 +203,11 @@ class _FoodItemSelectionDialogState extends State<FoodItemSelectionDialog> {
   }
 }
 
-class _FoodItemTile extends StatelessWidget {
-  final AnalyzedFoodItem item;
-  final bool isSelected;
-  final VoidCallback onToggle;
-
-  const _FoodItemTile({
-    required this.item,
-    required this.isSelected,
-    required this.onToggle,
-  });
-
+class const _FoodItemTile({
+  required final AnalyzedFoodItem item,
+  required final bool isSelected,
+  required final VoidCallback onToggle,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

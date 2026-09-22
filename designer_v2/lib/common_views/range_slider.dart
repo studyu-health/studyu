@@ -2,13 +2,11 @@
 // Source: https://github.com/flutter/flutter/issues/34704#issuecomment-1338849463
 import 'package:flutter/material.dart';
 
-class IndicatorRangeSliderThumbShape<T> extends RangeSliderThumbShape {
-  IndicatorRangeSliderThumbShape(this.buildContext, this.start, this.end);
-
-  final BuildContext buildContext;
-  T start;
-  T end;
-
+class IndicatorRangeSliderThumbShape<T>(
+  final BuildContext buildContext,
+  var T start,
+  var T end,
+) extends RangeSliderThumbShape {
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return const Size(15, 40);

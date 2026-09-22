@@ -19,21 +19,13 @@ int nutritionStudyDayFor(StudySubject subject, DateTime date) {
   ).difference(DateTime.utc(started.year, started.month, started.day)).inDays;
 }
 
-class NutritionRecallPersistenceTarget {
-  final String taskId;
-  final String periodId;
-  final String interventionId;
-  final DateTime completedAt;
-  final int studyDaySnapshot;
-
-  const NutritionRecallPersistenceTarget({
-    required this.taskId,
-    required this.periodId,
-    required this.interventionId,
-    required this.completedAt,
-    required this.studyDaySnapshot,
-  });
-
+class const NutritionRecallPersistenceTarget({
+  required final String taskId,
+  required final String periodId,
+  required final String interventionId,
+  required final DateTime completedAt,
+  required final int studyDaySnapshot,
+}) {
   Map<String, dynamic> toJson() => {
     'taskId': taskId,
     'periodId': periodId,
@@ -54,6 +46,12 @@ extension StudySubjectExtension on StudySubject {
     NutritionRecallPersistenceTarget? persistenceTarget,
     String? interventionIdOverride,
   }) async {
+    if (recall.entryCompletedAt == null) {
+      throw StateError(
+        'Nutrition drafts cannot be saved as completed progress',
+      );
+    }
+
     final target = persistenceTarget;
     final effectiveTaskId = target?.taskId ?? taskId;
     final effectivePeriodId = target?.periodId ?? periodId;

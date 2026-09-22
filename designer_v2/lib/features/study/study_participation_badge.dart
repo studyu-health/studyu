@@ -3,20 +3,13 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/common_views/badge.dart' as studybadge;
 import 'package:studyu_designer_v2/domain/participation.dart';
 
-class StudyParticipationBadge extends StatelessWidget {
-  const StudyParticipationBadge({
-    required this.participation,
-    this.type = studybadge.BadgeType.plain,
-    this.showPrefixIcon = true,
-    this.center = true,
-    super.key,
-  });
-
-  final Participation participation;
-  final studybadge.BadgeType type;
-  final bool showPrefixIcon;
-  final bool center;
-
+class const StudyParticipationBadge({
+  required final Participation participation,
+  final studybadge.BadgeType type = studybadge.BadgeType.plain,
+  final bool showPrefixIcon = true,
+  final bool center = true,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

@@ -10,41 +10,33 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_core/core.dart';
 
-class NutritionStatisticsView extends StatefulWidget {
-  final StudySubject? subject;
-  final String? taskId;
-  final DailyRecall? activeRecall;
-  final int? activeStudyDay;
-  final String? activePeriodId;
-  final Future<void> Function(NutritionRecallRecord record)? onOpenRecall;
-
-  const NutritionStatisticsView({
-    this.subject,
-    this.taskId,
-    this.activeRecall,
-    this.activeStudyDay,
-    this.activePeriodId,
-    this.onOpenRecall,
-    super.key,
-  });
-
+class const NutritionStatisticsView({
+  final StudySubject? subject,
+  final String? taskId,
+  final DailyRecall? activeRecall,
+  final int? activeStudyDay,
+  final String? activePeriodId,
+  final Future<void> Function(NutritionRecallRecord record)? onOpenRecall,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<NutritionStatisticsView> createState() =>
       _NutritionStatisticsViewState();
 }
 
-enum _StatisticsPeriod {
+enum _StatisticsPeriod(final int days) {
   recent7(7),
-  recent30(30);
-
-  final int days;
-
-  const _StatisticsPeriod(this.days);
+  recent30(30),
 }
 
-enum _Nutrient { carbs, protein, fat, fiber }
+enum _Nutrient() {
+  carbs,
+  protein,
+  fat,
+  fiber,
+}
 
-class _NutritionStatisticsViewState extends State<NutritionStatisticsView> {
+class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
   late Future<List<NutritionRecallRecord>> _records;
   _StatisticsPeriod _selectedPeriod = _StatisticsPeriod.recent7;
   _Nutrient _selectedNutrient = _Nutrient.carbs;
@@ -679,9 +671,8 @@ class _NutritionStatisticsViewState extends State<NutritionStatisticsView> {
             meta: meta,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: day.isToday ? FontWeight.bold : null,
-              ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(fontWeight: day.isToday ? FontWeight.bold : null),
             ),
           );
         },
@@ -747,9 +738,8 @@ class _NutritionStatisticsViewState extends State<NutritionStatisticsView> {
     final l10n = AppLocalizations.of(context)!;
     final date = day.isToday
         ? l10n.nutrition_today_so_far
-        : DateFormat.yMMMd(
-            Localizations.localeOf(context).toString(),
-          ).format(day.date);
+        : DateFormat.yMMMd(Localizations.localeOf(context).toString())
+              .format(day.date);
     return value == null
         ? l10n.nutrition_chart_day_missing(date)
         : l10n.nutrition_chart_day_value(date, value);
@@ -846,44 +836,27 @@ bool _energyUnavailable(NutritionProfile nutrition) {
       (nutrition.energyKcal <= 0 && macroEnergy > 0);
 }
 
-class NutritionStatisticsDay {
-  final int studyDaySnapshot;
-  final DateTime date;
-  final NutritionProfile nutrition;
-  final bool isRecorded;
-  final bool hasData;
-  final NutritionRecallRecord? record;
+class const NutritionStatisticsDay({
+  required final int studyDaySnapshot,
+  required final DateTime date,
+  required final NutritionProfile nutrition,
+  required final bool isRecorded,
+  required final bool hasData,
+  required final NutritionRecallRecord? record,
+});
 
-  const NutritionStatisticsDay({
-    required this.studyDaySnapshot,
-    required this.date,
-    required this.nutrition,
-    required this.isRecorded,
-    required this.hasData,
-    required this.record,
-  });
-}
-
-class NutritionStatisticsPeriodDay {
-  final DateTime date;
-  final NutritionStatisticsDay? data;
-  final bool isToday;
-
-  const NutritionStatisticsPeriodDay({
-    required this.date,
-    required this.data,
-    required this.isToday,
-  });
-
+class const NutritionStatisticsPeriodDay({
+  required final DateTime date,
+  required final NutritionStatisticsDay? data,
+  required final bool isToday,
+}) {
   bool get isRecorded => data?.isRecorded ?? false;
   bool get hasChartData => isRecorded || (isToday && (data?.hasData ?? false));
 }
 
-class NutritionStatisticsPeriod {
-  final List<NutritionStatisticsPeriodDay> days;
-
-  const NutritionStatisticsPeriod(this.days);
-
+class const NutritionStatisticsPeriod(
+  final List<NutritionStatisticsPeriodDay> days,
+) {
   DateTime get startDate => days.first.date;
   DateTime get endDate => days.last.date;
   int get recordedCount => days.where((day) => day.isRecorded).length;

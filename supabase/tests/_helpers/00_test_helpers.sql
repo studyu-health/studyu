@@ -143,10 +143,7 @@ CREATE OR REPLACE FUNCTION tests.authenticate_as (identifier text)
     AS $$
         DECLARE
                 user_data json;
-                original_auth_data text;
         BEGIN
-            -- store the request.jwt.claims in a variable in case we need it
-            original_auth_data := current_setting('request.jwt.claims', true);
             user_data := tests.get_supabase_user(identifier);
 
             if user_data is null OR user_data ->> 'id' IS NULL then
@@ -157,12 +154,6 @@ CREATE OR REPLACE FUNCTION tests.authenticate_as (identifier text)
             perform set_config('role', 'authenticated', true);
             perform set_config('request.jwt.claims', json_build_object('sub', user_data ->> 'id', 'email', user_data ->> 'email', 'phone', user_data ->> 'phone')::text, true);
 
-        EXCEPTION
-            -- revert back to original auth data
-            WHEN OTHERS THEN
-                set local role authenticated;
-                set local "request.jwt.claims" to original_auth_data;
-                RAISE;
         END
     $$ LANGUAGE plpgsql;
 

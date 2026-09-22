@@ -4,19 +4,14 @@ import 'package:studyu_core/core.dart';
 part 'study_schedule.g.dart';
 
 @JsonSerializable()
-class StudySchedule {
+class StudySchedule({var String sequenceCustom = 'ABAB'}) {
   static const int numberOfInterventions = 2;
 
   int numberOfCycles = 2;
   int phaseDuration = 7;
   bool includeBaseline = true;
   PhaseSequence sequence = PhaseSequence.alternating;
-  String sequenceCustom;
-
-  StudySchedule({this.sequenceCustom = 'ABAB'});
-
-  factory StudySchedule.fromJson(Map<String, dynamic> json) =>
-      _$StudyScheduleFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$StudyScheduleFromJson(json);
   Map<String, dynamic> toJson() => _$StudyScheduleToJson(this);
 
   int getNumberOfPhases() =>
@@ -106,7 +101,7 @@ class StudySchedule {
   }
 }
 
-enum PhaseSequence {
+enum PhaseSequence() {
   alternating,
   counterBalanced,
   randomized,

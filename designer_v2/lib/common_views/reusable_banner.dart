@@ -1,27 +1,16 @@
 import 'package:flutter/material.dart';
 
-class ReusableBanner extends StatelessWidget {
-  const ReusableBanner({
-    required this.body,
-    this.isDismissed = false,
-    this.onDismissed,
-    this.backgroundColor,
-    this.borderColor,
-    this.padding = const EdgeInsets.all(16.0),
-    this.margin = const EdgeInsets.all(8.0),
-    this.borderRadius = 8.0,
-    super.key,
-  });
-
-  final Widget body;
-  final bool isDismissed;
-  final Function()? onDismissed;
-  final Color? backgroundColor;
-  final Color? borderColor;
-  final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry margin;
-  final double borderRadius;
-
+class const ReusableBanner({
+  required final Widget body,
+  final bool isDismissed = false,
+  final Function()? onDismissed,
+  final Color? backgroundColor,
+  final Color? borderColor,
+  final EdgeInsetsGeometry padding = const EdgeInsets.all(16.0),
+  final EdgeInsetsGeometry margin = const EdgeInsets.all(8.0),
+  final double borderRadius = 8.0,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isDismissed) {

@@ -5,9 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:web/web.dart' as web;
 
-class QrCodeDownloader {
-  QrCodeDownloader._();
-
+class QrCodeDownloader._() {
   /// Generates a QR code widget for display in the UI
   static Future<Widget> generateQrWidget({
     required String data,

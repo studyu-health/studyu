@@ -11,9 +11,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 /// Note: [MdiMetadata.name] returns kebab-case (e.g. `'account-heart'`)
 /// whereas the old package used camelCase (e.g. `'accountHeart'`).
 /// This helper converts keys back to camelCase for backwards compatibility.
-class MdiIconsHelper {
-  MdiIconsHelper._();
-
+class MdiIconsHelper._() {
   static Map<String, IconData>? _iconMap;
 
   static Map<String, IconData> get _map {

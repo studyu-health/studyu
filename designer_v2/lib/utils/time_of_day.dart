@@ -4,9 +4,9 @@ import 'package:studyu_designer_v2/utils/typings.dart';
 
 /// JSON-encodable version of [TimeOfDay]
 class Time extends TimeOfDay {
-  const Time({required super.hour, required super.minute});
+  const new({required super.hour, required super.minute});
 
-  Time.fromTimeOfDay(TimeOfDay timeOfDay)
+  new fromTimeOfDay(TimeOfDay timeOfDay)
     : super(hour: timeOfDay.hour, minute: timeOfDay.minute);
 
   JsonMap toJson() => {"hour": super.hour, "minute": super.minute};
@@ -17,7 +17,7 @@ class Time extends TimeOfDay {
 }
 
 /// Control value accessor that converts between data types [Time] and [String]
-class TimeValueAccessor extends ControlValueAccessor<Time, String> {
+class TimeValueAccessor() extends ControlValueAccessor<Time, String> {
   @override
   String modelToViewValue(Time? modelValue) {
     return modelValue == null

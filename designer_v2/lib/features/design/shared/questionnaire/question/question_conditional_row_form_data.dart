@@ -1,17 +1,11 @@
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/forms/form_data.dart';
 
-class ConditionRowFormData extends IFormData {
-  ConditionRowFormData({
-    required this.questionId,
-    required this.comparator,
-    required this.value,
-  });
-
-  final String? questionId;
-  final dynamic comparator;
-  final dynamic value;
-
+class ConditionRowFormData({
+  required final String? questionId,
+  required final dynamic comparator,
+  required final dynamic value,
+}) extends IFormData {
   Expression? buildExpression() {
     if (questionId == null) return null;
 

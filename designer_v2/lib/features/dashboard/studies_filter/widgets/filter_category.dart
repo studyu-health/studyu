@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 
-class FilterCategory extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-
-  const FilterCategory({
-    required this.title,
-    required this.children,
-    super.key,
-  });
-
+class const FilterCategory({
+  required final String title,
+  required final List<Widget> children,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -17,9 +12,8 @@ class FilterCategory extends StatelessWidget {
         color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Theme.of(
-            context,
-          ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: Theme.of(context).colorScheme.outlineVariant
+              .withValues(alpha: 0.5),
         ),
       ),
       clipBehavior: Clip.hardEdge,

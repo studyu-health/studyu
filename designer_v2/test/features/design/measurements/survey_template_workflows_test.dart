@@ -87,9 +87,9 @@ void main() {
   test('adds selected predefined measurements without duplicates', () async {
     final measurements = _measurements();
     final template = SurveyTemplateRegistry.findById('ffq_26')!;
-    final dayEntry = SurveyTemplateRegistry.findById(
-      'dhq3_14day',
-    )!.dayEntries!.first;
+    final dayEntry = SurveyTemplateRegistry.findById('dhq3_14day')!
+        .dayEntries!
+        .first;
 
     await measurements.addPredefinedMeasurements(
       includeNutrition: true,

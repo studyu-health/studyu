@@ -5,17 +5,16 @@ import 'package:studyu_app/widgets/questionnaire/pain_selection/body_part_select
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class PainQuestionWidget extends QuestionWidget {
-  final PainQuestion question;
-  final Function(Answer)? onDone;
-
-  const PainQuestionWidget({super.key, required this.question, this.onDone});
-
+class const PainQuestionWidget({
+  super.key,
+  required final PainQuestion question,
+  final Function(Answer)? onDone,
+}) extends QuestionWidget {
   @override
   State<PainQuestionWidget> createState() => _PainQuestionWidgetState();
 }
 
-class _PainQuestionWidgetState extends State<PainQuestionWidget> {
+class _PainQuestionWidgetState() extends State<PainQuestionWidget> {
   Body? _body;
   PainScale? _scale;
 

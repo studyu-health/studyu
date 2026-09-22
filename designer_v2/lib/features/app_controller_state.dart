@@ -1,12 +1,13 @@
 import 'package:equatable/equatable.dart';
 
-enum AppStatus { initializing, initialized }
+enum AppStatus() {
+  initializing,
+  initialized,
+}
 
-class AppControllerState extends Equatable {
-  const AppControllerState({this.status = AppStatus.initializing});
-
-  final AppStatus status;
-
+class const AppControllerState({
+  final AppStatus status = AppStatus.initializing,
+}) extends Equatable {
   bool get isInitialized => status == AppStatus.initialized;
 
   @override

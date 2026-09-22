@@ -3,32 +3,25 @@ import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/localization/string_hardcoded.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
-abstract class ResultTypes {}
+abstract class ResultTypes();
 
-class MeasurementResultTypes extends ResultTypes {
+class MeasurementResultTypes() extends ResultTypes {
   static const String questionnaire = 'QuestionnaireState';
   static const String nutrition = 'DailyRecall';
   static List<String> get values => [questionnaire, nutrition];
 }
 
-class InterventionResultTypes extends ResultTypes {
+class InterventionResultTypes() extends ResultTypes {
   static const String checkmarkTask = 'bool';
   static List<String> get values => [checkmarkTask];
 }
 
-class StudyExportData {
-  StudyExportData({
-    required this.study,
-    required this.measurementsData,
-    required this.interventionsData,
-    required this.mediaData,
-  });
-
-  final Study study;
-  final List<Map<String, dynamic>> measurementsData;
-  final List<Map<String, dynamic>> interventionsData;
-  final List<String> mediaData;
-
+class StudyExportData({
+  required final Study study,
+  required final List<Map<String, dynamic>> measurementsData,
+  required final List<Map<String, dynamic>> interventionsData,
+  required final List<String> mediaData,
+}) {
   bool get isEmpty => measurementsData.isEmpty && interventionsData.isEmpty;
 }
 
@@ -170,30 +163,15 @@ extension StudyExportX on Study {
           // Add nutrition columns
           final dailyRecall = record.result.result as DailyRecall;
 
-          // Calculate nutritional totals
-          double totalCalories = 0;
-          double totalProtein = 0;
-          double totalCarbs = 0;
-          double totalFat = 0;
-          int mealCount = 0;
+          final nutrition = dailyRecall.totalNutrition;
 
-          for (final meal in dailyRecall.meals) {
-            if (!meal.isSkipped) {
-              mealCount++;
-              for (final food in meal.foods) {
-                totalCalories += food.nutrition.energyKcal;
-                totalProtein += food.nutrition.protein;
-                totalCarbs += food.nutrition.carbs;
-                totalFat += food.nutrition.fat;
-              }
-            }
-          }
-
-          row['total_calories'] = totalCalories;
-          row['total_protein'] = totalProtein;
-          row['total_carbs'] = totalCarbs;
-          row['total_fat'] = totalFat;
-          row['meal_count'] = mealCount;
+          row['total_calories'] = nutrition.energyKcal;
+          row['total_protein'] = nutrition.protein;
+          row['total_carbs'] = nutrition.carbs;
+          row['total_fat'] = nutrition.fat;
+          row['meal_count'] = dailyRecall.meals
+              .where((MealLog meal) => !meal.isSkipped)
+              .length;
           row['entry_completed_at'] =
               dailyRecall.entryCompletedAt?.toString() ?? '';
         }

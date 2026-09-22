@@ -1,0 +1,58 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "semanticCommits": "enabled",
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Internal workspace packages are versioned by melos, not Renovate",
+      "matchPackageNames": ["studyu_core", "studyu_flutter_common", "studyu_app", "studyu_designer_v2"],
+      "enabled": false
+    },
+    {
+      "description": "Native platform tooling (Android Gradle, iOS CocoaPods, fastlane Gemfiles) follows Flutter defaults; update it only with Flutter upgrades",
+      "matchManagers": ["gradle", "gradle-wrapper", "cocoapods", "bundler"],
+      "enabled": false
+    },
+    {
+      "description": "fitbitter is a pinned git-ref fork; skip automated updates",
+      "matchPackageNames": ["fitbitter"],
+      "enabled": false
+    },
+    {
+      "description": "Use chore(deps) commits for all updates",
+      "matchPackageNames": ["*"],
+      "semanticCommitType": "chore"
+    },
+    {
+      "description": "Soak pub releases for 7 days before proposing",
+      "matchManagers": ["pub"],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Group minor and patch updates into one PR",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all-non-major-dependencies"
+    },
+    {
+      "description": "Major updates get a separate breaking-change PR",
+      "matchUpdateTypes": ["major"],
+      "groupName": "major updates with breaking changes (review required)",
+      "groupSlug": "major-dependencies",
+      "addLabels": ["Do not merge"],
+      "commitMessageAction": "",
+      "commitMessageExtra": "",
+      "prTitleStrict": true,
+      "prBodyNotes": [
+        "This PR contains major (breaking) dependency updates. Review each dependency's changelog before merging.",
+        "Remove the `Do not merge` label when the updates are approved."
+      ]
+    },
+    {
+      "description": "Group Flutter and Dart SDK updates into one PR without release soak",
+      "matchDatasources": ["flutter-version", "dart-version"],
+      "groupName": "flutter-sdk",
+      "minimumReleaseAge": null
+    }
+  ]
+}

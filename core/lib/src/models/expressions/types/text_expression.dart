@@ -3,7 +3,7 @@ import 'package:studyu_core/src/models/expressions/types/value_expression.dart';
 
 part 'text_expression.g.dart';
 
-enum TextComparator {
+enum TextComparator() {
   @JsonValue('=')
   equal,
   @JsonValue('!=')
@@ -27,17 +27,17 @@ enum TextComparator {
 }
 
 @JsonSerializable()
-class TextExpression extends ValueExpression<String> {
+class TextExpression({
+  required var TextComparator comparator,
+  required var String value,
+}) extends ValueExpression<String> {
   static const String expressionType = 'text';
 
-  TextComparator comparator;
-  String value; // The text to compare against
+  // The text to compare against
 
-  TextExpression({required this.comparator, required this.value})
-    : super(expressionType);
+  this : super(expressionType);
 
-  factory TextExpression.fromJson(Map<String, dynamic> json) =>
-      _$TextExpressionFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$TextExpressionFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$TextExpressionToJson(this);

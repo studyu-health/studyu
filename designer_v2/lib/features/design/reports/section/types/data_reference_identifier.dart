@@ -1,8 +1,7 @@
 import 'package:studyu_core/core.dart';
 
-class DataReferenceIdentifier<T> extends DataReference<T> {
-  DataReferenceIdentifier(super.task, super.property);
-
+class DataReferenceIdentifier<T>(super.task, super.property)
+    extends DataReference<T> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

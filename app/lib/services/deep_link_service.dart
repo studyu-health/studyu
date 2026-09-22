@@ -2,48 +2,49 @@ import 'package:flutter/foundation.dart';
 import 'package:studyu_core/core.dart';
 
 /// Result types for deep link processing
-sealed class DeepLinkResult {}
+sealed class DeepLinkResult();
 
 /// Deep link was successfully processed
-class DeepLinkSuccess extends DeepLinkResult {
-  final Study study;
-  final String? inviteCode;
-  final List<String>? preselectedInterventionIds;
-  final bool alreadyEnrolled;
-
-  DeepLinkSuccess({
-    required this.study,
-    this.inviteCode,
-    this.preselectedInterventionIds,
-    this.alreadyEnrolled = false,
-  });
-}
+class DeepLinkSuccess({
+  required final Study study,
+  final String? inviteCode,
+  final List<String>? preselectedInterventionIds,
+  final bool alreadyEnrolled = false,
+}) extends DeepLinkResult;
 
 /// Deep link processing failed
-class DeepLinkError extends DeepLinkResult {
-  final DeepLinkErrorType type;
-  final String? errorValue;
-
-  DeepLinkError(this.type, [this.errorValue]);
-}
+class DeepLinkError(final DeepLinkErrorType type, [final String? errorValue])
+    extends DeepLinkResult;
 
 /// User needs to authenticate first
-class DeepLinkNeedsAuth extends DeepLinkResult {
-  final Study study;
-  final String? inviteCode;
-  final List<String>? preselectedInterventionIds;
-
-  DeepLinkNeedsAuth({
-    required this.study,
-    this.inviteCode,
-    this.preselectedInterventionIds,
-  });
-}
+class DeepLinkNeedsAuth({
+  required final Study study,
+  final String? inviteCode,
+  final List<String>? preselectedInterventionIds,
+}) extends DeepLinkResult;
 
 /// Types of deep link errors
-enum DeepLinkErrorType { studyNotFound, inviteOnly, invalidInvite }
+enum DeepLinkErrorType() {
+  studyNotFound,
+  inviteOnly,
+  invalidInvite,
+}
 
-class DeepLinkService {
+class DeepLinkService() {
+  @visibleForTesting
+  static Future<(StudyInvite?, Study?)> Function(String code)
+  fetchInviteForDeepLink = Study.fetchByInviteCode;
+
+  @visibleForTesting
+  static Future<Study?> Function(String studyId) fetchStudyForDeepLink =
+      fetchStudyById;
+
+  @visibleForTesting
+  static void resetTestOverrides() {
+    fetchInviteForDeepLink = Study.fetchByInviteCode;
+    fetchStudyForDeepLink = fetchStudyById;
+  }
+
   /// Fetches a study by its ID
   static Future<Study?> fetchStudyById(String studyId) async {
     try {
@@ -86,6 +87,7 @@ class DeepLinkService {
       final result = await _processInviteDeepLink(
         inviteCode: inviteCode,
         isAuthenticated: isAuthenticated,
+        activeStudyId: activeStudyId,
       );
       if (result is DeepLinkError && result.errorValue == null) {
         return DeepLinkError(
@@ -118,7 +120,7 @@ class DeepLinkService {
     String? activeStudyId,
     required bool isAuthenticated,
   }) async {
-    final study = await fetchStudyById(studyId);
+    final study = await fetchStudyForDeepLink(studyId);
 
     if (study == null) {
       return DeepLinkError(DeepLinkErrorType.studyNotFound, studyId);
@@ -145,9 +147,10 @@ class DeepLinkService {
   static Future<DeepLinkResult> _processInviteDeepLink({
     required String inviteCode,
     required bool isAuthenticated,
+    String? activeStudyId,
   }) async {
     try {
-      final (invite, study) = await Study.fetchByInviteCode(inviteCode);
+      final (invite, study) = await fetchInviteForDeepLink(inviteCode);
 
       if (invite == null || study == null) {
         return DeepLinkError(DeepLinkErrorType.invalidInvite, inviteCode);
@@ -165,6 +168,7 @@ class DeepLinkService {
         study: study,
         inviteCode: inviteCode,
         preselectedInterventionIds: invite.preselectedInterventionIds,
+        alreadyEnrolled: activeStudyId == study.id,
       );
     } catch (e) {
       debugPrint('Failed to fetch study by invite code: $e');

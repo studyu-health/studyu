@@ -3,9 +3,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class NutritionRecallScreen extends StatefulWidget {
-  const NutritionRecallScreen({super.key});
-
+class const NutritionRecallScreen({super.key}) extends StatefulWidget {
   static MaterialPageRoute<void> route() =>
       MaterialPageRoute(builder: (_) => const NutritionRecallScreen());
 
@@ -13,13 +11,12 @@ class NutritionRecallScreen extends StatefulWidget {
   State<NutritionRecallScreen> createState() => _NutritionRecallScreenState();
 }
 
-class _NutritionRecallScreenState extends State<NutritionRecallScreen> {
+class _NutritionRecallScreenState() extends State<NutritionRecallScreen> {
   List<DailyRecall> dailyRecalls = [];
 
   Future<void> _startNewRecall() async {
-    final result = await Navigator.of(
-      context,
-    ).push(NutritionTaskWidget.route());
+    final result = await Navigator.of(context)
+        .push(NutritionTaskWidget.route());
     if (result != null && mounted) {
       setState(() {
         dailyRecalls.add(result);
@@ -28,9 +25,8 @@ class _NutritionRecallScreenState extends State<NutritionRecallScreen> {
   }
 
   Future<void> _viewRecall(DailyRecall recall) async {
-    await Navigator.of(
-      context,
-    ).push(NutritionTaskWidget.route(existingRecall: recall));
+    await Navigator.of(context)
+        .push(NutritionTaskWidget.route(existingRecall: recall));
   }
 
   @override

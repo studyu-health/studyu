@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
 
-class EmptyBody extends StatelessWidget {
-  const EmptyBody({
-    this.icon,
-    this.leading,
-    this.leadingSpacing = 24.0,
-    required this.title,
-    required this.description,
-    this.button,
-    super.key,
-  });
-
-  final IconData? icon;
-  final Widget? leading;
-  final double? leadingSpacing;
-  final String? title;
-  final String? description;
-  final Widget? button;
-
+class const EmptyBody({
+  final IconData? icon,
+  final Widget? leading,
+  final double? leadingSpacing = 24.0,
+  required final String? title,
+  required final String? description,
+  final Widget? button,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

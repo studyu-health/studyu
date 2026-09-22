@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_core/core.dart';
 
-class TemplateStorageManager {
+class TemplateStorageManager() {
   static const String _foodTemplatesKey = 'studyu_food_templates';
 
   static SharedPreferences? _prefs;

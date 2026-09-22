@@ -7,18 +7,26 @@ import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 
-typedef NutritionRecallSubmitter =
-    Future<void> Function(PendingRecall pending, DailyRecall recall);
-typedef NutritionRecallStringWriter =
-    Future<bool> Function(
-      SharedPreferences preferences,
-      String key,
-      String value,
-    );
-typedef NutritionRecallKeyRemover =
-    Future<bool> Function(SharedPreferences preferences, String key);
+typedef NutritionRecallSubmitter = Future<void> Function(
+  PendingRecall pending,
+  DailyRecall recall,
+);
+typedef NutritionRecallStringWriter = Future<bool> Function(
+  SharedPreferences preferences,
+  String key,
+  String value,
+);
+typedef NutritionRecallKeyRemover = Future<bool> Function(
+  SharedPreferences preferences,
+  String key,
+);
 
-class NutritionRecallAutoSaveManager {
+class NutritionRecallAutoSaveManager({
+  final SharedPreferences? _preferences,
+  final NutritionRecallSubmitter? _submitter,
+  NutritionRecallStringWriter? stringWriter,
+  NutritionRecallKeyRemover? keyRemover,
+}) {
   static const String _keyPrefix = 'studyu_nutrition_autosave';
   static const Duration debounceDuration = Duration(seconds: 2);
 
@@ -26,20 +34,10 @@ class NutritionRecallAutoSaveManager {
   static const String unknownInterventionId = 'unknown';
   static const String defaultPeriodId = 'default';
 
-  NutritionRecallAutoSaveManager({
-    SharedPreferences? preferences,
-    NutritionRecallSubmitter? submitter,
-    NutritionRecallStringWriter? stringWriter,
-    NutritionRecallKeyRemover? keyRemover,
-  }) : _preferences = preferences,
-       _submitter = submitter,
-       _stringWriter = stringWriter ?? _defaultStringWriter,
-       _keyRemover = keyRemover ?? _defaultKeyRemover;
-
-  final SharedPreferences? _preferences;
-  final NutritionRecallSubmitter? _submitter;
-  final NutritionRecallStringWriter _stringWriter;
-  final NutritionRecallKeyRemover _keyRemover;
+  final NutritionRecallStringWriter _stringWriter =
+      stringWriter ?? _defaultStringWriter;
+  final NutritionRecallKeyRemover _keyRemover =
+      keyRemover ?? _defaultKeyRemover;
   static final Map<String, Future<void>> _mutationQueues = {};
   SharedPreferences? _prefs;
   bool _isSubmitting = false;
@@ -364,6 +362,18 @@ class NutritionRecallAutoSaveManager {
         }
 
         final isPreviousDay = pending.studyDaySnapshot < todayStudyDay;
+        if (isPreviousDay &&
+            pending.progressCompletedAt == null &&
+            pending.recall.entryCompletedAt == null &&
+            _hasCompletedProgressFor(
+              subject,
+              taskId: pending.taskId,
+              periodId: pending.periodId,
+              studyDay: pending.studyDaySnapshot,
+            )) {
+          await _deleteRecallIfUnchanged(pending);
+          continue;
+        }
         final recall = isPreviousDay && pending.progressCompletedAt == null
             ? _finalizeRecall(pending.recall, pending.studyDaySnapshot)
             : pending.recall;
@@ -443,6 +453,29 @@ class NutritionRecallAutoSaveManager {
     } finally {
       _isSubmitting = false;
     }
+  }
+
+  bool _hasCompletedProgressFor(
+    StudySubject subject, {
+    required String taskId,
+    required String periodId,
+    required int studyDay,
+  }) {
+    return subject.progress.any((progress) {
+      if (progress.taskId != taskId ||
+          progress.resultType != 'DailyRecall' ||
+          progress.result.periodId != periodId) {
+        return false;
+      }
+      final result = progress.result.result;
+      if (result is! DailyRecall || result.entryCompletedAt == null) {
+        return false;
+      }
+      if (result.studyDaySnapshot == studyDay) return true;
+      return result.studyDaySnapshot == null &&
+          progress.completedAt != null &&
+          subject.getDayOfStudyFor(progress.completedAt!.toLocal()) == studyDay;
+    });
   }
 
   DailyRecall _finalizeRecall(DailyRecall recall, int studyDaySnapshot) {
@@ -633,35 +666,19 @@ class NutritionRecallAutoSaveManager {
   }
 }
 
-class _IndexLocation {
-  final String storageKey;
+class const _IndexLocation(final String storageKey);
 
-  const _IndexLocation(this.storageKey);
-}
-
-class PendingRecall {
-  final DailyRecall recall;
-  final String subjectId;
-  final String taskId;
-  final String interventionId;
-  final String periodId;
-  final int studyDaySnapshot;
-  final String lastModifiedAt;
-  final DateTime? progressCompletedAt;
-  final String storageKey;
-
-  PendingRecall({
-    required this.recall,
-    required this.subjectId,
-    required this.taskId,
-    required this.interventionId,
-    required this.periodId,
-    required this.studyDaySnapshot,
-    required this.lastModifiedAt,
-    this.progressCompletedAt,
-    required this.storageKey,
-  });
-
+class PendingRecall({
+  required final DailyRecall recall,
+  required final String subjectId,
+  required final String taskId,
+  required final String interventionId,
+  required final String periodId,
+  required final int studyDaySnapshot,
+  required final String lastModifiedAt,
+  final DateTime? progressCompletedAt,
+  required final String storageKey,
+}) {
   DateTime get lastModifiedAtDate =>
       DateTime.tryParse(lastModifiedAt) ??
       DateTime.fromMillisecondsSinceEpoch(0);

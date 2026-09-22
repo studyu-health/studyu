@@ -3,7 +3,12 @@ import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_type
 import 'package:studyu_designer_v2/routing/router_utils.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-enum StudiesFilter with GoRouteParamEnum { all, owned, shared, public }
+enum StudiesFilter() with GoRouteParamEnum {
+  all,
+  owned,
+  shared,
+  public,
+}
 
 extension StudiesFilterByUser on StudiesFilter {
   FilterGroup toFilterGroup(User user) {

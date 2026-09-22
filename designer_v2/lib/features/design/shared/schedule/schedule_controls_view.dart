@@ -9,18 +9,12 @@ import 'package:studyu_designer_v2/features/design/shared/schedule/schedule_form
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/time_of_day.dart';
 
-class ScheduleControls extends FormConsumerWidget {
-  const ScheduleControls({
-    required this.formViewModel,
-    this.isReadonly = false,
-    this.showSectionHeader = true,
-    super.key,
-  });
-
-  final WithScheduleControls formViewModel;
-  final bool isReadonly;
-  final bool showSectionHeader;
-
+class const ScheduleControls({
+  required final WithScheduleControls formViewModel,
+  final bool isReadonly = false,
+  final bool showSectionHeader = true,
+  super.key,
+}) extends FormConsumerWidget {
   @override
   Widget build(BuildContext context, FormGroup form) {
     if (isReadonly) {
@@ -33,89 +27,93 @@ class ScheduleControls extends FormConsumerWidget {
 
     formViewModel.ensureTimePickerSynchronization();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showSectionHeader) ...[
-          FormSectionHeader(title: tr.form_section_scheduling),
-          const SizedBox(height: 4.0),
-          TextParagraph(text: tr.form_section_scheduling_description),
-          const SizedBox(height: 16.0),
-        ],
-        FormTableLayout(
-          rows: [
-            FormTableRow(
-              control: formViewModel.hasReminderControl,
-              label: tr.form_field_has_reminder,
-              labelHelpText: tr.form_field_has_reminder_tooltip,
-              input: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  ReactiveCheckbox(
-                    formControl: formViewModel.hasReminderControl,
-                  ),
-                  const SizedBox(width: 3.0),
-                  FormControlLabel(
-                    formControl: formViewModel.hasReminderControl,
-                    text: tr.form_field_has_reminder_label,
-                  ),
-                  const SizedBox(width: 8.0),
-                  Opacity(
-                    opacity: (formViewModel.hasReminder) ? 1 : 0.5,
-                    child: Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        IntrinsicWidth(
-                          child: PointerInterceptor(
-                            child: ReactiveTimePicker(
-                              formControl:
-                                  formViewModel.reminderTimePickerControl,
-                              initialEntryMode: TimePickerEntryMode.input,
-                              builder:
-                                  (
-                                    BuildContext context,
-                                    ReactiveTimePickerDelegate picker,
-                                    Widget? child,
-                                  ) {
-                                    return ReactiveTextField<Time>(
-                                      formControl:
-                                          formViewModel.reminderTimeControl,
-                                      valueAccessor: TimeValueAccessor(),
-                                      decoration: InputDecoration(
-                                        hintText:
-                                            tr.form_field_time_of_day_hint,
-                                        suffixIcon: Material(
-                                          color: Colors.transparent,
-                                          child: IconButton(
-                                            splashRadius: 18.0,
-                                            onPressed: picker.showPicker,
-                                            icon: const Icon(Icons.access_time),
+    return SelectionArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (showSectionHeader) ...[
+            FormSectionHeader(title: tr.form_section_scheduling),
+            const SizedBox(height: 4.0),
+            TextParagraph(text: tr.form_section_scheduling_description),
+            const SizedBox(height: 16.0),
+          ],
+          FormTableLayout(
+            rows: [
+              FormTableRow(
+                control: formViewModel.hasReminderControl,
+                label: tr.form_field_has_reminder,
+                labelHelpText: tr.form_field_has_reminder_tooltip,
+                input: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    ReactiveCheckbox(
+                      formControl: formViewModel.hasReminderControl,
+                    ),
+                    const SizedBox(width: 3.0),
+                    FormControlLabel(
+                      formControl: formViewModel.hasReminderControl,
+                      text: tr.form_field_has_reminder_label,
+                    ),
+                    const SizedBox(width: 8.0),
+                    Opacity(
+                      opacity: (formViewModel.hasReminder) ? 1 : 0.5,
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          IntrinsicWidth(
+                            child: PointerInterceptor(
+                              child: ReactiveTimePicker(
+                                formControl:
+                                    formViewModel.reminderTimePickerControl,
+                                initialEntryMode: TimePickerEntryMode.input,
+                                builder:
+                                    (
+                                      BuildContext context,
+                                      ReactiveTimePickerDelegate picker,
+                                      Widget? child,
+                                    ) {
+                                      return ReactiveTextField<Time>(
+                                        formControl:
+                                            formViewModel.reminderTimeControl,
+                                        valueAccessor: TimeValueAccessor(),
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              tr.form_field_time_of_day_hint,
+                                          suffixIcon: Material(
+                                            color: Colors.transparent,
+                                            child: IconButton(
+                                              splashRadius: 18.0,
+                                              onPressed: picker.showPicker,
+                                              icon: const Icon(
+                                                Icons.access_time,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
+                                      );
+                                    },
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            FormTableRow(
-              control: formViewModel.isTimeRestrictedControl,
-              label: tr.form_field_time_restriction,
-              labelHelpText: tr.form_field_time_restriction_tooltip,
-              input: ReactiveSwitch(
-                formControl: formViewModel.isTimeRestrictedControl,
+              FormTableRow(
+                control: formViewModel.isTimeRestrictedControl,
+                label: tr.form_field_time_restriction,
+                labelHelpText: tr.form_field_time_restriction_tooltip,
+                input: ReactiveSwitch(
+                  formControl: formViewModel.isTimeRestrictedControl,
+                ),
               ),
-            ),
-            ..._conditionalTimeRestrictions(context),
-          ],
-        ),
-      ],
+              ..._conditionalTimeRestrictions(context),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -126,7 +124,7 @@ class ScheduleControls extends FormConsumerWidget {
     return [
       FormTableRow(
         control: formViewModel.isTimeRestrictedControl,
-        label: " ",
+        label: ' ',
         input: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -154,13 +152,13 @@ class ScheduleControls extends FormConsumerWidget {
                                   formViewModel.restrictedTimeStartControl,
                               valueAccessor: TimeValueAccessor(),
                               decoration:
-                                  (formViewModel
+                                  formViewModel
                                       .restrictedTimeStartControl
-                                      .enabled)
+                                      .enabled
                                   ? InputDecoration(
                                       labelText: tr
                                           .form_field_time_restriction_start_hint,
-                                      helperText: "",
+                                      helperText: '',
                                       hintText: tr.form_field_time_of_day_hint,
                                       suffixIcon: Material(
                                         color: Colors.transparent,
@@ -194,13 +192,11 @@ class ScheduleControls extends FormConsumerWidget {
                                   formViewModel.restrictedTimeEndControl,
                               valueAccessor: TimeValueAccessor(),
                               decoration:
-                                  (formViewModel
-                                      .restrictedTimeEndControl
-                                      .enabled)
+                                  formViewModel.restrictedTimeEndControl.enabled
                                   ? InputDecoration(
                                       labelText: tr
                                           .form_field_time_restriction_end_hint,
-                                      helperText: "",
+                                      helperText: '',
                                       hintText: tr.form_field_time_of_day_hint,
                                       suffixIcon: Material(
                                         color: Colors.transparent,

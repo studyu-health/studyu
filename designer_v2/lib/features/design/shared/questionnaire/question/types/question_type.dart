@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-enum SurveyQuestionType {
+enum SurveyQuestionType() {
   choice,
   bool,
   scale,

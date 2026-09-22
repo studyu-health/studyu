@@ -17,9 +17,9 @@ abstract class Task {
   /// resolved by the rule (specific days, every N days, or per cycle).
   TaskScheduleRule? scheduleRule;
 
-  Task(this.type);
+  new(this.type);
 
-  Task.withId(this.type) : id = const Uuid().v4();
+  new withId(this.type) : id = const Uuid().v4();
 
   Map<String, dynamic> toJson();
 

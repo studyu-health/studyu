@@ -3,32 +3,20 @@ part of '../food_search_screen.dart';
 final class FoodSearchSelection {
   final List<studyu.FoodEntry> foods;
 
-  FoodSearchSelection(Iterable<studyu.FoodEntry> foods)
-    : foods = List.unmodifiable(foods);
+  new(Iterable<studyu.FoodEntry> foods) : foods = List.unmodifiable(foods);
 
-  FoodSearchSelection.single(studyu.FoodEntry food)
-    : foods = List.unmodifiable([food]);
+  new single(studyu.FoodEntry food) : foods = List.unmodifiable([food]);
 }
 
-final class FoodSelectionItem {
-  final String key;
-  final studyu.FoodEntry baselineFood;
-  final bool baselineGramsKnown;
-  studyu.FoodEntry baseFood;
-  int quantity;
-  bool caloriesKnown;
-  bool gramsKnown;
-
-  FoodSelectionItem({
-    required this.key,
-    required this.baselineFood,
-    required this.baseFood,
-    this.quantity = 1,
-    this.caloriesKnown = true,
-    this.gramsKnown = true,
-    this.baselineGramsKnown = true,
-  });
-
+final class FoodSelectionItem({
+  required final String key,
+  required final studyu.FoodEntry baselineFood,
+  required var studyu.FoodEntry baseFood,
+  var int quantity = 1,
+  var bool caloriesKnown = true,
+  var bool gramsKnown = true,
+  final bool baselineGramsKnown = true,
+}) {
   String get name => baseFood.name;
 
   bool get servingWeightOverridden =>
@@ -39,7 +27,7 @@ final class FoodSelectionItem {
 }
 
 /// Temporary, route-scoped state for the multi-select Add items flow.
-final class FoodSelectionStore extends ChangeNotifier {
+final class FoodSelectionStore() extends ChangeNotifier {
   final LinkedHashMap<String, FoodSelectionItem> _items = LinkedHashMap();
   final List<String> _recentKeys = [];
 

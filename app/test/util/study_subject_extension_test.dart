@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_core/env.dart';
 import 'package:supabase/supabase.dart';
 
 void main() {
@@ -65,7 +64,7 @@ void main() {
   });
 }
 
-class _OfflineClient extends http.BaseClient {
+class _OfflineClient() extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async =>
       throw const SocketException('offline');
@@ -76,6 +75,7 @@ DailyRecall _recall(String id, int studyDaySnapshot) => DailyRecall(
   date: DateTime.utc(2026, 7, 15),
   recallMode: RecallMode.realtimeRecord,
   entryStartedAt: DateTime.utc(2026, 7, 15, 8),
+  entryCompletedAt: DateTime.utc(2026, 7, 15, 12),
   meals: [],
   studyDaySnapshot: studyDaySnapshot,
 );

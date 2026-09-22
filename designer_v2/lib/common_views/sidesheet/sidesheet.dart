@@ -3,61 +3,48 @@ import 'package:studyu_designer_v2/common_views/navbar_tabbed.dart';
 import 'package:studyu_designer_v2/common_views/utils.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class SidesheetTab extends NavbarTab {
-  SidesheetTab({
-    required super.title,
-    required super.index,
-    required this.builder,
-    super.enabled,
-  });
+class SidesheetTab({
+  required super.title,
+  required super.index,
 
   /// The widget to be rendered as the [Sidesheet.body] when the tab is selected
-  WidgetBuilder builder;
-}
+  required var WidgetBuilder builder,
+  super.enabled,
+}) extends NavbarTab;
 
-class Sidesheet extends StatefulWidget {
+class const Sidesheet({
+  required final String titleText,
+  final Widget? body,
+  final List<SidesheetTab>? tabs,
+  final List<Widget>? actionButtons,
+  final double? width,
+  final bool withCloseButton = false,
+  final bool ignoreAppBar = true,
+  final bool collapseSingleTab = false,
+  final EdgeInsets? bodyPadding = const EdgeInsets.symmetric(
+    vertical: 32.0,
+    horizontal: 48.0,
+  ),
+  final WidgetDecorator? wrapContent,
+  super.key,
+}) extends StatefulWidget {
   static double kDefaultWidth = 740;
 
-  const Sidesheet({
-    required this.titleText,
-    this.body,
-    this.tabs,
-    this.actionButtons,
-    this.width,
-    this.withCloseButton = false,
-    this.ignoreAppBar = true,
-    this.collapseSingleTab = false,
-    this.bodyPadding = const EdgeInsets.symmetric(
-      vertical: 32.0,
-      horizontal: 48.0,
-    ),
-    this.wrapContent,
-    super.key,
-  }) : assert(
-         (body != null && tabs == null) || (body == null && tabs != null),
-         "Must provide either body or tabs to build sidesheet content",
-       ),
-       assert(
-         tabs == null || tabs.length >= 1,
-         "Must provide at least one tab to build sidesheet content",
-       );
-
-  final String titleText;
-  final Widget? body;
-  final List<SidesheetTab>? tabs;
-  final List<Widget>? actionButtons;
-  final double? width;
-  final bool withCloseButton;
-  final bool ignoreAppBar;
-  final bool collapseSingleTab;
-  final EdgeInsets? bodyPadding;
-  final WidgetDecorator? wrapContent;
+  this
+    : assert(
+        (body != null && tabs == null) || (body == null && tabs != null),
+        "Must provide either body or tabs to build sidesheet content",
+      ),
+      assert(
+        tabs == null || tabs.length >= 1,
+        "Must provide at least one tab to build sidesheet content",
+      );
 
   @override
   State<Sidesheet> createState() => _SidesheetState();
 }
 
-class _SidesheetState extends State<Sidesheet> {
+class _SidesheetState() extends State<Sidesheet> {
   SidesheetTab? selectedTab;
 
   @override
@@ -97,16 +84,22 @@ class _SidesheetState extends State<Sidesheet> {
         child: SizedBox(
           width: actualWidth,
           height: actualHeight,
-          child: Scaffold(
-            backgroundColor: backgroundColor,
-            body: widget.withCloseButton
-                ? Stack(
-                    children: [
-                      _build(context, widget.body, widget.tabs),
-                      const Positioned(top: 5, right: 5, child: CloseButton()),
-                    ],
-                  )
-                : _build(context, widget.body, widget.tabs),
+          child: ScaffoldMessenger(
+            child: Scaffold(
+              backgroundColor: backgroundColor,
+              body: widget.withCloseButton
+                  ? Stack(
+                      children: [
+                        _build(context, widget.body, widget.tabs),
+                        const Positioned(
+                          top: 5,
+                          right: 5,
+                          child: CloseButton(),
+                        ),
+                      ],
+                    )
+                  : _build(context, widget.body, widget.tabs),
+            ),
           ),
         ),
       ),

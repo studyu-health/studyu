@@ -4,30 +4,18 @@ import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/fil
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/filter_operator_dropdown.dart';
 import 'package:studyu_designer_v2/localization/app_localizations.dart';
 
-class BoolFilter extends StatelessWidget {
-  final String title;
-  final bool? selected;
-  final FilterOperator op;
-  final ValueChanged<bool?> onChanged;
-  final ValueChanged<FilterOperator> onOpChanged;
-  final String? trueLabel;
-  final String? falseLabel;
-  final bool isExpanded;
-  final ValueChanged<bool> onExpansionChanged;
-
-  const BoolFilter({
-    required this.title,
-    required this.selected,
-    required this.op,
-    required this.onChanged,
-    required this.onOpChanged,
-    required this.isExpanded,
-    required this.onExpansionChanged,
-    this.trueLabel,
-    this.falseLabel,
-    super.key,
-  });
-
+class const BoolFilter({
+  required final String title,
+  required final bool? selected,
+  required final FilterOperator op,
+  required final ValueChanged<bool?> onChanged,
+  required final ValueChanged<FilterOperator> onOpChanged,
+  required final bool isExpanded,
+  required final ValueChanged<bool> onExpansionChanged,
+  final String? trueLabel,
+  final String? falseLabel,
+  super.key,
+}) extends StatelessWidget {
   String _getSelectLabel(BuildContext context, FilterOperator op) {
     switch (op) {
       case FilterOperator.equals:

@@ -24,7 +24,7 @@ import 'package:studyu_designer_v2/repositories/model_repository.dart';
 import 'package:studyu_designer_v2/repositories/study_repository.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 
-class _MockStudyRepository extends Mock implements IStudyRepository {}
+class _MockStudyRepository() extends Mock implements IStudyRepository;
 
 void main() {
   setUpAll(() => AppTranslation.setForTesting(AppLocalizationsEn()));
@@ -158,9 +158,8 @@ _mountMeasurements(WidgetTester tester) async {
     ProviderScope(
       overrides: [
         studyControllerProvider(study.id).overrideWithValue(state),
-        measurementsFormViewModelProvider(
-          study.id,
-        ).overrideWithValue(measurements),
+        measurementsFormViewModelProvider(study.id)
+            .overrideWithValue(measurements),
       ],
       child: MaterialApp.router(routerConfig: router),
     ),

@@ -11,14 +11,11 @@ class NotExpression extends Expression {
 
   late Expression expression;
 
-  NotExpression() : super(expressionType);
+  new() : super(expressionType);
 
-  NotExpression.withId()
-    : expression = BooleanExpression(),
-      super(expressionType);
+  new withId() : expression = BooleanExpression(), super(expressionType);
 
-  factory NotExpression.fromJson(Map<String, dynamic> json) =>
-      _$NotExpressionFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$NotExpressionFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$NotExpressionToJson(this);

@@ -2,12 +2,14 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:studyu_core/core.dart';
 
-enum QuestionnaireCtaMode { hidden, continue_, complete }
+enum QuestionnaireCtaMode() {
+  hidden,
+  continue_,
+  complete,
+}
 
-class QuestionnaireController extends ChangeNotifier {
-  QuestionnaireController(this.questions);
-
-  final List<Question> questions;
+class QuestionnaireController(final List<Question> questions)
+    extends ChangeNotifier {
   final QuestionnaireState _answers = QuestionnaireState();
   final Map<String, String> _drafts = {};
 

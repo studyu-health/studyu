@@ -15,9 +15,8 @@ import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class StudyDesignInterventionsFormView extends StudyDesignPageWidget {
-  const StudyDesignInterventionsFormView(super.studyId, {super.key});
-
+class const StudyDesignInterventionsFormView(super.studyId, {super.key})
+    extends StudyDesignPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyControllerProvider(studyId));

@@ -5,28 +5,17 @@ part 'nutrition_food_definition.g.dart';
 
 /// Subject-scoped active definition and its immutable snapshot revision.
 @JsonSerializable()
-class NutritionFoodDefinition {
-  final String id;
-  final String subjectId;
-  final String kind;
-  final String currentVersionId;
-  final DateTime? deletedAt;
-  final FoodEntry snapshot;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
-  const NutritionFoodDefinition({
-    required this.id,
-    required this.subjectId,
-    required this.kind,
-    required this.currentVersionId,
-    required this.deletedAt,
-    required this.snapshot,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory NutritionFoodDefinition.fromJson(Map<String, dynamic> json) =>
+class const NutritionFoodDefinition({
+  required final String id,
+  required final String subjectId,
+  required final String kind,
+  required final String currentVersionId,
+  required final DateTime? deletedAt,
+  required final FoodEntry snapshot,
+  required final DateTime createdAt,
+  required final DateTime updatedAt,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
       _$NutritionFoodDefinitionFromJson(json);
 
   Map<String, dynamic> toJson() => _$NutritionFoodDefinitionToJson(this);
@@ -34,20 +23,13 @@ class NutritionFoodDefinition {
 
 /// Canonical RPC result with explicit persisted-row update counts.
 @JsonSerializable()
-class NutritionFoodMutationResult {
-  final NutritionFoodDefinition definition;
-  final List<Map<String, dynamic>> progress;
-  final int selectedHistoricalUpdateCount;
-  final int todayUpdateCount;
-
-  const NutritionFoodMutationResult({
-    required this.definition,
-    required this.progress,
-    required this.selectedHistoricalUpdateCount,
-    required this.todayUpdateCount,
-  });
-
-  factory NutritionFoodMutationResult.fromJson(Map<String, dynamic> json) =>
+class const NutritionFoodMutationResult({
+  required final NutritionFoodDefinition definition,
+  required final List<Map<String, dynamic>> progress,
+  required final int selectedHistoricalUpdateCount,
+  required final int todayUpdateCount,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
       _$NutritionFoodMutationResultFromJson(json);
 
   Map<String, dynamic> toJson() => _$NutritionFoodMutationResultToJson(this);

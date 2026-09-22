@@ -13,12 +13,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v2
         with:
           version: latest
+
+      - name: Diagnose Supabase port
+        run: |
+          sudo lsof -nP -iTCP:54322 -sTCP:LISTEN || true
+          docker ps --format 'table {{.Names}}\t{{.Ports}}'
 
       - name: Start Supabase database
         run: |

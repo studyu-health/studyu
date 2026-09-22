@@ -10,9 +10,8 @@ import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/localization/string_hardcoded.dart';
 
-class PublishSuccessDialog extends StudyPageWidget {
-  const PublishSuccessDialog(super.studyId, {super.key});
-
+class const PublishSuccessDialog(super.studyId, {super.key})
+    extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(studyControllerProvider(studyId).notifier);
@@ -60,9 +59,8 @@ class PublishSuccessDialog extends StudyPageWidget {
                   children: [
                     PrimaryButton(
                       text: tr.action_button_post_launch_followup,
-                      onPressed: () => Navigator.maybePop(
-                        context,
-                      ).whenComplete(() => controller.onAddParticipants()),
+                      onPressed: () => Navigator.maybePop(context)
+                          .whenComplete(() => controller.onAddParticipants()),
                     ),
                     const SizedBox(height: 8.0),
                     DismissButton(

@@ -9,13 +9,16 @@ import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-enum StudyDialogType { publish, close }
+enum StudyDialogType() {
+  publish,
+  close,
+}
 
-class StudyDialog extends StudyPageWidget {
-  final StudyDialogType dialogType;
-
-  const StudyDialog(this.dialogType, super.studyId, {super.key});
-
+class const StudyDialog(
+  final StudyDialogType dialogType,
+  super.studyId, {
+  super.key,
+}) extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyControllerProvider(studyId));

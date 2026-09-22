@@ -17,58 +17,44 @@ import 'package:studyu_core/core.dart';
 export 'package:studyu_app/screens/study/nutrition/food_item_components.dart'
     show SelectionFeedbackCard, SelectionQuantityButton, SelectionQuantityText;
 
-enum _FoodLibraryAction { add, edit, duplicate, delete }
+enum _FoodLibraryAction() {
+  add,
+  edit,
+  duplicate,
+  delete,
+}
 
-typedef FoodLibrarySelectionAction =
-    void Function(studyu.SavedFoodTemplate template, Offset? source);
+typedef FoodLibrarySelectionAction = void Function(
+  studyu.SavedFoodTemplate template,
+  Offset? source,
+);
 
-class FoodLibrary extends StatefulWidget {
-  final bool allowMeals;
-  final bool showSearch;
-  final ScrollController? scrollController;
-  final Widget? header;
-  final Widget? listHeader;
-  final ValueChanged<studyu.SavedFoodTemplate>? onTap;
-  final FoodLibrarySelectionAction? onAdd;
-  final bool Function(studyu.SavedFoodTemplate)? isSelected;
-  final int Function(studyu.SavedFoodTemplate)? selectedQuantity;
-  final FoodLibrarySelectionAction? onIncrement;
-  final ValueChanged<studyu.SavedFoodTemplate>? onDecrement;
-  final bool showManagementActions;
-  final bool showLibraryHeading;
-  final bool includeExternalLibrary;
-  final FoodSearchViewModel? externalSearchViewModel;
-  final OpenFoodFactsSearch? openFoodFactsSearch;
-  final UsdaFoodSearch? usdaFoodSearch;
-  final NutritionFoodRepository? repository;
-
-  const FoodLibrary({
-    this.allowMeals = true,
-    this.showSearch = true,
-    this.scrollController,
-    this.header,
-    this.listHeader,
-    this.onTap,
-    this.onAdd,
-    this.isSelected,
-    this.selectedQuantity,
-    this.onIncrement,
-    this.onDecrement,
-    this.showManagementActions = true,
-    this.showLibraryHeading = true,
-    this.includeExternalLibrary = false,
-    this.externalSearchViewModel,
-    this.openFoodFactsSearch,
-    this.usdaFoodSearch,
-    this.repository,
-    super.key,
-  });
-
+class const FoodLibrary({
+  final bool allowMeals = true,
+  final bool showSearch = true,
+  final ScrollController? scrollController,
+  final Widget? header,
+  final Widget? listHeader,
+  final ValueChanged<studyu.SavedFoodTemplate>? onTap,
+  final FoodLibrarySelectionAction? onAdd,
+  final bool Function(studyu.SavedFoodTemplate)? isSelected,
+  final int Function(studyu.SavedFoodTemplate)? selectedQuantity,
+  final FoodLibrarySelectionAction? onIncrement,
+  final ValueChanged<studyu.SavedFoodTemplate>? onDecrement,
+  final bool showManagementActions = true,
+  final bool showLibraryHeading = true,
+  final bool includeExternalLibrary = false,
+  final FoodSearchViewModel? externalSearchViewModel,
+  final OpenFoodFactsSearch? openFoodFactsSearch,
+  final UsdaFoodSearch? usdaFoodSearch,
+  final NutritionFoodRepository? repository,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<FoodLibrary> createState() => _FoodLibraryState();
 }
 
-class _FoodLibraryState extends State<FoodLibrary> {
+class _FoodLibraryState() extends State<FoodLibrary> {
   final TextEditingController _searchController = TextEditingController();
   FoodSearchViewModel? _ownedExternalViewModel;
   FoodSearchViewModel? _externalViewModel;
@@ -470,14 +456,16 @@ class _FoodLibraryState extends State<FoodLibrary> {
   }
 }
 
-enum _CopySaveFailureAction { retry, continueEditing, discard }
+enum _CopySaveFailureAction() {
+  retry,
+  continueEditing,
+  discard,
+}
 
-class _FoodLibrarySectionHeader extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const _FoodLibrarySectionHeader({required this.title, required this.icon});
-
+class const _FoodLibrarySectionHeader({
+  required final String title,
+  required final IconData icon,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -503,11 +491,8 @@ class _FoodLibrarySectionHeader extends StatelessWidget {
   }
 }
 
-class _FoodLibraryInlineMessage extends StatelessWidget {
-  final String message;
-
-  const _FoodLibraryInlineMessage({required this.message});
-
+class const _FoodLibraryInlineMessage({required final String message})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
@@ -520,12 +505,10 @@ class _FoodLibraryInlineMessage extends StatelessWidget {
   }
 }
 
-class _FoodLibraryInlineError extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _FoodLibraryInlineError({required this.message, required this.onRetry});
-
+class const _FoodLibraryInlineError({
+  required final String message,
+  required final VoidCallback onRetry,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -551,18 +534,12 @@ class _FoodLibraryInlineError extends StatelessWidget {
   }
 }
 
-class FoodLibraryExternalResultCard extends StatelessWidget {
-  final UnifiedFoodResult result;
-  final VoidCallback onCopy;
-  final bool busy;
-
-  const FoodLibraryExternalResultCard({
-    required this.result,
-    required this.onCopy,
-    this.busy = false,
-    super.key,
-  });
-
+class const FoodLibraryExternalResultCard({
+  required final UnifiedFoodResult result,
+  required final VoidCallback onCopy,
+  final bool busy = false,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -643,28 +620,17 @@ class FoodLibraryExternalResultCard extends StatelessWidget {
   }
 }
 
-class FoodLibraryItemCard extends StatelessWidget {
-  final studyu.SavedFoodTemplate template;
-  final ValueChanged<studyu.SavedFoodTemplate>? onTap;
-  final FoodLibrarySelectionAction? onAdd;
-  final bool isSelected;
-  final int selectedQuantity;
-  final ValueChanged<Offset?>? onIncrement;
-  final VoidCallback? onDecrement;
-  final bool showManagementActions;
-
-  const FoodLibraryItemCard({
-    required this.template,
-    this.onTap,
-    this.onAdd,
-    this.isSelected = false,
-    this.selectedQuantity = 1,
-    this.onIncrement,
-    this.onDecrement,
-    this.showManagementActions = true,
-    super.key,
-  });
-
+class const FoodLibraryItemCard({
+  required final studyu.SavedFoodTemplate template,
+  final ValueChanged<studyu.SavedFoodTemplate>? onTap,
+  final FoodLibrarySelectionAction? onAdd,
+  final bool isSelected = false,
+  final int selectedQuantity = 1,
+  final ValueChanged<Offset?>? onIncrement,
+  final VoidCallback? onDecrement,
+  final bool showManagementActions = true,
+  super.key,
+}) extends StatelessWidget {
   bool get _isMeal => template.prototype.entryType == studyu.FoodEntryType.meal;
 
   @override
@@ -885,17 +851,11 @@ class FoodLibraryItemCard extends StatelessWidget {
       Row(children: [Icon(icon), const SizedBox(width: 8), Text(label)]);
 }
 
-class _FoodLibraryToolbar extends StatelessWidget {
-  final TemplateViewModel viewModel;
-  final AppLocalizations l10n;
-  final ValueChanged<TemplateFilter> onChanged;
-
-  const _FoodLibraryToolbar({
-    required this.viewModel,
-    required this.l10n,
-    required this.onChanged,
-  });
-
+class const _FoodLibraryToolbar({
+  required final TemplateViewModel viewModel,
+  required final AppLocalizations l10n,
+  required final ValueChanged<TemplateFilter> onChanged,
+}) extends StatelessWidget {
   String _label(TemplateFilter filter) => switch (filter) {
     TemplateFilter.all => l10n.filter_all,
     TemplateFilter.foods => l10n.filter_foods,
@@ -929,12 +889,10 @@ IconData _templateFilterIcon(TemplateFilter filter) => switch (filter) {
   TemplateFilter.meals => Icons.restaurant_menu_outlined,
 };
 
-class FoodLibraryEmptyState extends StatelessWidget {
-  final IconData icon;
-  final String message;
-
-  const FoodLibraryEmptyState({required this.icon, required this.message});
-
+class const FoodLibraryEmptyState({
+  required final IconData icon,
+  required final String message,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

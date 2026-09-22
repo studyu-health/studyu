@@ -26,7 +26,7 @@ import 'package:studyu_designer_v2/repositories/model_repository.dart';
 import 'package:studyu_designer_v2/repositories/study_repository.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 
-class _MockStudyRepository extends Mock implements IStudyRepository {}
+class _MockStudyRepository() extends Mock implements IStudyRepository;
 
 void main() {
   setUpAll(() => AppTranslation.setForTesting(AppLocalizationsEn()));
@@ -46,25 +46,21 @@ void main() {
       ),
     );
 
-    final newSurvey =
-        measurements.provideWithType(
-              MeasurementFormRouteArgs(
-                studyId: study.id,
-                measurementId: Config.newModelId,
-              ),
-              null,
-            )
-            as MeasurementSurveyFormViewModel;
+    final newSurvey = measurements.provideWithType(
+      MeasurementFormRouteArgs(
+        studyId: study.id,
+        measurementId: Config.newModelId,
+      ),
+      null,
+    ) as MeasurementSurveyFormViewModel;
     newSurvey.surveyTitleControl.value = 'Draft survey';
-    final newNutrition =
-        measurements.provideWithType(
-              MeasurementFormRouteArgs(
-                studyId: study.id,
-                measurementId: Config.newModelId,
-              ),
-              'nutrition',
-            )
-            as NutritionFormViewModel;
+    final newNutrition = measurements.provideWithType(
+      MeasurementFormRouteArgs(
+        studyId: study.id,
+        measurementId: Config.newModelId,
+      ),
+      'nutrition',
+    ) as NutritionFormViewModel;
     newNutrition.titleControl.value = 'Draft nutrition';
 
     expect(measurements.measurementTitle(newSurvey), 'Draft survey');
@@ -100,9 +96,8 @@ void main() {
       ProviderScope(
         overrides: [
           studyControllerProvider(study.id).overrideWithValue(state),
-          measurementsFormViewModelProvider(
-            study.id,
-          ).overrideWithValue(measurements),
+          measurementsFormViewModelProvider(study.id)
+              .overrideWithValue(measurements),
         ],
         child: MaterialApp(
           home: Scaffold(body: StudyDesignMeasurementsFormView(study.id)),

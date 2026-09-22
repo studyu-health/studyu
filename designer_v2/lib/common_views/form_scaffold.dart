@@ -10,37 +10,30 @@ import 'package:studyu_designer_v2/theme.dart';
 
 /// Signature for a builder that renders the widget corresponding to the
 /// [FormViewModel] of type [T]
-typedef FormViewBuilder<T extends FormViewModel> =
-    Widget Function(T formViewModel);
+typedef FormViewBuilder<T extends FormViewModel> = Widget Function(
+  T formViewModel,
+);
 
 /// Signature for a builder that resolves the [FormViewModel] of type [T]
 /// via a Riverpod [WidgetRef]
-typedef FormViewModelBuilder<T extends FormViewModel> =
-    T Function(WidgetRef ref);
+typedef FormViewModelBuilder<T extends FormViewModel> = T Function(
+  WidgetRef ref,
+);
 
-class FormScaffold<T extends FormViewModel> extends ConsumerStatefulWidget {
-  const FormScaffold({
-    required this.formViewModel,
-    required this.body,
-    this.actions,
-    this.drawer,
-    this.actionsSpacing = 8.0,
-    this.actionsPadding = 24.0,
-    super.key,
-  });
-
-  final T formViewModel;
-  final List<Widget>? actions;
-  final Widget body;
-  final Widget? drawer;
-  final double actionsSpacing;
-  final double actionsPadding;
-
+class const FormScaffold<T extends FormViewModel>({
+  required final T formViewModel,
+  required final Widget body,
+  final List<Widget>? actions,
+  final Widget? drawer,
+  final double actionsSpacing = 8.0,
+  final double actionsPadding = 24.0,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<FormScaffold<T>> createState() => _FormScaffoldState();
 }
 
-class _FormScaffoldState<T extends FormViewModel>
+class _FormScaffoldState<T extends FormViewModel>()
     extends ConsumerState<FormScaffold<T>>
     implements PopEntry {
   T get formViewModel => widget.formViewModel;

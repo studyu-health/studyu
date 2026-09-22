@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-class StripedGradient {
-  StripedGradient({required this.colors});
-
-  final List<Color> colors;
-
+class StripedGradient({required final List<Color> colors}) {
   LinearGradient get gradient {
     return LinearGradient(
       begin: Alignment.topRight,

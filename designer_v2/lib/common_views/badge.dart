@@ -1,31 +1,27 @@
 import 'package:flutter/material.dart';
 
-enum BadgeType { filled, outlined, outlineFill, plain }
+enum BadgeType() {
+  filled,
+  outlined,
+  outlineFill,
+  plain,
+}
 
-class Badge extends StatelessWidget {
-  const Badge({
-    required this.label,
-    this.labelStyle,
-    this.icon = Icons.circle_rounded,
-    this.iconSize,
-    this.color,
-    this.borderRadius = 12.0,
-    this.padding = const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-    this.type = BadgeType.plain,
-    this.center = true,
-    super.key,
-  });
-
-  final IconData? icon;
-  final Color? color;
-  final double borderRadius;
-  final String label;
-  final BadgeType type;
-  final EdgeInsets padding;
-  final double? iconSize;
-  final TextStyle? labelStyle;
-  final bool center;
-
+class const Badge({
+  required final String label,
+  final TextStyle? labelStyle,
+  final IconData? icon = Icons.circle_rounded,
+  final double? iconSize,
+  final Color? color,
+  final double borderRadius = 12.0,
+  final EdgeInsets padding = const EdgeInsets.symmetric(
+    horizontal: 12.0,
+    vertical: 4.0,
+  ),
+  final BadgeType type = BadgeType.plain,
+  final bool center = true,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

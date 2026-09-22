@@ -26,7 +26,7 @@ import 'package:studyu_designer_v2/routing/router_config.dart';
 /// - If your route has a parameter that takes an infinite range of values,
 /// your [RoutingIntent] should be a [RoutingIntentFactory] instead.
 ///
-class RoutingIntents {
+class RoutingIntents() {
   static final root = RoutingIntent(route: RouterConf.route(rootRouteName));
   static final studies = RoutingIntent(
     route: RouterConf.route(studiesRouteName),
@@ -96,7 +96,7 @@ class RoutingIntents {
       RoutingIntent(
         route: RouterConf.route(studyTestRouteName),
         params: {RouteParams.studyId: studyId},
-        queryParams: {if (appRoute != null) RouteParams.testAppRoute: appRoute},
+        queryParams: {RouteParams.testAppRoute: ?appRoute},
       );
   static final studyRecruit = (StudyID studyId) => RoutingIntent(
     route: RouterConf.route(studyRecruitRouteName),
@@ -144,27 +144,24 @@ typedef RoutingIntentFactory = RoutingIntent Function(String);
 /// [RoutingIntent]
 ///
 /// Note: [push] should be mostly reserved for non-opaque modal routes
-enum RoutingIntentDispatch { go, push }
+enum RoutingIntentDispatch() {
+  go,
+  push,
+}
 
 /// Represent a unique routing event in the app, encapsulating a call to
 /// [GoRouter.goNamed]. The intent is unpacked & results in a route change
 /// when calling [GoRouter.dispatch].
-class RoutingIntent extends Equatable {
-  RoutingIntent({
-    required this.route,
-    this.params = const <String, String>{},
-    this.queryParams = const <String, String>{},
-    this.extra,
-    this.dispatch,
-  }) {
+class RoutingIntent({
+  required final GoRoute route,
+  final Map<String, String> params = const <String, String>{},
+  final Map<String, String> queryParams = const <String, String>{},
+  final Object? extra,
+  final RoutingIntentDispatch? dispatch,
+}) extends Equatable {
+  this {
     _validateRoute();
   }
-
-  final GoRoute route;
-  final Map<String, String> params;
-  final Map<String, String> queryParams;
-  final RoutingIntentDispatch? dispatch;
-  final Object? extra;
 
   String get routeName => route.name!;
   Map<String, String> get arguments => {...params, ...queryParams};

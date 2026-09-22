@@ -4,9 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/common_views/layout_two_column.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-enum SingleColumnLayoutType { boundedWide, boundedNarrow, stretched, split }
+enum SingleColumnLayoutType() {
+  boundedWide,
+  boundedNarrow,
+  stretched,
+  split,
+}
 
-class SingleColumnLayout extends StatefulWidget {
+class const SingleColumnLayout({
+  required final Widget body,
+  final Widget? header,
+  final bool stickyHeader = false,
+  final BoxConstraints? constraints = defaultConstraints,
+  final bool scroll = true,
+  final EdgeInsets? padding = TwoColumnLayout.defaultContentPadding,
+  super.key,
+}) extends StatefulWidget {
   static const defaultConstraints = BoxConstraints(
     minWidth: ThemeConfig.kMinContentWidth,
     maxWidth: ThemeConfig.kMaxContentWidth,
@@ -17,24 +30,7 @@ class SingleColumnLayout extends StatefulWidget {
     maxWidth: 8 / 12 * ThemeConfig.kMaxContentWidth,
   );
 
-  const SingleColumnLayout({
-    required this.body,
-    this.header,
-    this.stickyHeader = false,
-    this.constraints = defaultConstraints,
-    this.scroll = true,
-    this.padding = TwoColumnLayout.defaultContentPadding,
-    super.key,
-  });
-
-  final Widget body;
-  final Widget? header;
-  final bool stickyHeader;
-  final BoxConstraints? constraints;
-  final bool scroll;
-  final EdgeInsets? padding;
-
-  factory SingleColumnLayout.fromType({
+  factory fromType({
     required SingleColumnLayoutType type,
     required Widget body,
     required BuildContext context,
@@ -80,7 +76,7 @@ class SingleColumnLayout extends StatefulWidget {
   State<SingleColumnLayout> createState() => _SingleColumnLayoutState();
 }
 
-class _SingleColumnLayoutState extends State<SingleColumnLayout> {
+class _SingleColumnLayoutState() extends State<SingleColumnLayout> {
   final ScrollController _scrollController = ScrollController();
 
   @override

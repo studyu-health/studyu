@@ -24,81 +24,63 @@ import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
 
-sealed class MealEntryResult {
-  const MealEntryResult();
+sealed class const MealEntryResult();
+
+final class const SavedMealEntryResult(
+  final MealLog meal, {
+  final bool definitionMutated = false,
+}) extends MealEntryResult;
+
+final class const DeletedMealEntryResult() extends MealEntryResult;
+
+final class const DiscardedMealEntryResult() extends MealEntryResult;
+
+enum _FoodAction() {
+  details,
+  edit,
+  editDefinition,
+  saveTemplate,
+  remove,
 }
 
-final class SavedMealEntryResult extends MealEntryResult {
-  final MealLog meal;
-  final bool definitionMutated;
-
-  const SavedMealEntryResult(this.meal, {this.definitionMutated = false});
+enum _LibraryEditChoice() {
+  currentEntry,
+  currentEntryAndLibrary,
 }
 
-final class DeletedMealEntryResult extends MealEntryResult {
-  const DeletedMealEntryResult();
+enum _AddFoodSource() {
+  search,
+  photoRecall,
 }
 
-final class DiscardedMealEntryResult extends MealEntryResult {
-  const DiscardedMealEntryResult();
-}
+class const _MealTypeSelection(
+  final MealType type, [
+  final String? customLabel,
+]);
 
-enum _FoodAction { details, edit, editDefinition, saveTemplate, remove }
+class const _TimeSelection(
+  final DateTime? timestamp,
+  final MealOccurrenceTimePrecision precision,
+);
 
-enum _LibraryEditChoice { currentEntry, currentEntryAndLibrary }
+class const _MealDetailsSelection({
+  required final MealContext mealContext,
+  required final CompanyContext? companyContext,
+  required final DistractionContext? distractionContext,
+  required final String? locationDescription,
+});
 
-enum _AddFoodSource { search, photoRecall }
-
-class _MealTypeSelection {
-  final MealType type;
-  final String? customLabel;
-
-  const _MealTypeSelection(this.type, [this.customLabel]);
-}
-
-class _TimeSelection {
-  final DateTime? timestamp;
-  final MealOccurrenceTimePrecision precision;
-
-  const _TimeSelection(this.timestamp, this.precision);
-}
-
-class _MealDetailsSelection {
-  final MealContext mealContext;
-  final CompanyContext? companyContext;
-  final DistractionContext? distractionContext;
-  final String? locationDescription;
-
-  const _MealDetailsSelection({
-    required this.mealContext,
-    required this.companyContext,
-    required this.distractionContext,
-    required this.locationDescription,
-  });
-}
-
-class MealEntryScreen extends StatefulWidget {
-  final MealLog? existingMeal;
-  final NutritionTask? task;
-  final MealType? initialMealType;
-  final String? initialCustomMealLabel;
-  final DateTime? occurrenceDate;
-  final NutritionRecallPersistenceTarget? historicalTarget;
-  final NutritionFoodRepository? foodRepository;
-  final bool openFoodSearch;
-
-  const MealEntryScreen({
-    this.existingMeal,
-    this.task,
-    this.initialMealType,
-    this.initialCustomMealLabel,
-    this.occurrenceDate,
-    this.historicalTarget,
-    this.foodRepository,
-    this.openFoodSearch = false,
-    super.key,
-  });
-
+class const MealEntryScreen({
+  final MealLog? existingMeal,
+  final NutritionTask? task,
+  final MealType? initialMealType,
+  final String? initialCustomMealLabel,
+  final DateTime? occurrenceDate,
+  final NutritionRecallPersistenceTarget? historicalTarget,
+  final NutritionFoodRepository? foodRepository,
+  final bool openFoodSearch = false,
+  super.key,
+}) extends StatefulWidget {
   static MaterialPageRoute<MealEntryResult> route({
     MealLog? existingMeal,
     NutritionTask? task,
@@ -125,7 +107,7 @@ class MealEntryScreen extends StatefulWidget {
   State<MealEntryScreen> createState() => _MealEntryScreenState();
 }
 
-class _MealEntryScreenState extends State<MealEntryScreen> {
+class _MealEntryScreenState() extends State<MealEntryScreen> {
   late MealLog _meal;
   late MealType _mealType;
   late MealContext _mealContext;
@@ -310,18 +292,18 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => Navigator.of(
-                    dialogContext,
-                  ).pop(_LibraryEditChoice.currentEntry),
+                  onPressed: () =>
+                      Navigator.of(dialogContext)
+                          .pop(_LibraryEditChoice.currentEntry),
                   child: Text(l10n.library_edit_current_entry),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => Navigator.of(
-                    dialogContext,
-                  ).pop(_LibraryEditChoice.currentEntryAndLibrary),
+                  onPressed: () =>
+                      Navigator.of(dialogContext)
+                          .pop(_LibraryEditChoice.currentEntryAndLibrary),
                   child: Text(l10n.library_edit_current_entry_and_library),
                 ),
               ),
@@ -516,18 +498,16 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
       final message = _propagateToCurrentStudyDay
           ? l10n.food_definition_updated_current_day_opt_in
           : l10n.food_definition_updated_current_day_opt_out;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     } catch (error, stackTrace) {
       StudyULogger.error(
         'Failed to update historical composite meal definition: '
         '$error\n$stackTrace',
       );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.could_not_save_results)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.could_not_save_results)));
       }
     }
   }
@@ -1025,9 +1005,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
         tags: result.tags,
       );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.template_saved)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
       }
     }
   }
@@ -1066,9 +1045,8 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
                       ),
                     ),
                     IconButton(
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).closeButtonTooltip,
+                      tooltip: MaterialLocalizations.of(context)
+                          .closeButtonTooltip,
                       onPressed: () => Navigator.of(sheetContext).pop(),
                       icon: const Icon(Icons.close),
                     ),
@@ -1244,21 +1222,13 @@ class _MealEntryScreenState extends State<MealEntryScreen> {
   }
 }
 
-class _SettingsRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-  final String? errorText;
-
-  const _SettingsRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.onTap,
-    this.errorText,
-  });
-
+class const _SettingsRow({
+  required final IconData icon,
+  required final String label,
+  required final String value,
+  required final VoidCallback onTap,
+  final String? errorText,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -1283,22 +1253,16 @@ class _SettingsRow extends StatelessWidget {
   }
 }
 
-class _MealTypeSheet extends StatefulWidget {
-  final MealType mealType;
-  final String? customMealLabel;
-  final List<String>? customMealTypes;
-
-  const _MealTypeSheet({
-    required this.mealType,
-    required this.customMealLabel,
-    this.customMealTypes,
-  });
-
+class const _MealTypeSheet({
+  required final MealType mealType,
+  required final String? customMealLabel,
+  final List<String>? customMealTypes,
+}) extends StatefulWidget {
   @override
   State<_MealTypeSheet> createState() => _MealTypeSheetState();
 }
 
-class _MealTypeSheetState extends State<_MealTypeSheet> {
+class _MealTypeSheetState() extends State<_MealTypeSheet> {
   late final TextEditingController _customLabelController;
   late String _selectedKey;
   bool _editingOther = false;
@@ -1338,9 +1302,8 @@ class _MealTypeSheetState extends State<_MealTypeSheet> {
       return;
     }
     if (key.startsWith('custom:')) {
-      Navigator.of(
-        context,
-      ).pop(_MealTypeSelection(MealType.other, key.substring(7)));
+      Navigator.of(context)
+          .pop(_MealTypeSelection(MealType.other, key.substring(7)));
       return;
     }
     final type = MealType.values.firstWhere((value) => value.name == key);
@@ -1444,12 +1407,10 @@ class _MealTypeSheetState extends State<_MealTypeSheet> {
   }
 }
 
-class _TimeSelectionSheet extends StatelessWidget {
-  final DateTime? timestamp;
-  final MealOccurrenceTimePrecision? precision;
-
-  const _TimeSelectionSheet({required this.timestamp, required this.precision});
-
+class const _TimeSelectionSheet({
+  required final DateTime? timestamp,
+  required final MealOccurrenceTimePrecision? precision,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1459,9 +1420,8 @@ class _TimeSelectionSheet extends StatelessWidget {
         onChanged: (value) {
           final selectedPrecision = value ?? precision;
           if (selectedPrecision != null) {
-            Navigator.of(
-              context,
-            ).pop(_TimeSelection(timestamp, selectedPrecision));
+            Navigator.of(context)
+                .pop(_TimeSelection(timestamp, selectedPrecision));
           }
         },
         child: Column(
@@ -1494,21 +1454,13 @@ class _TimeSelectionSheet extends StatelessWidget {
   }
 }
 
-class _TimeSelector extends StatelessWidget {
-  final DateTime? timestamp;
-  final MealOccurrenceTimePrecision precision;
-  final bool hasSelection;
-  final bool showValidationError;
-  final VoidCallback onSelectTime;
-
-  const _TimeSelector({
-    required this.timestamp,
-    required this.precision,
-    required this.hasSelection,
-    required this.showValidationError,
-    required this.onSelectTime,
-  });
-
+class const _TimeSelector({
+  required final DateTime? timestamp,
+  required final MealOccurrenceTimePrecision precision,
+  required final bool hasSelection,
+  required final bool showValidationError,
+  required final VoidCallback onSelectTime,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1529,27 +1481,16 @@ class _TimeSelector extends StatelessWidget {
   }
 }
 
-class _FoodListSection extends StatelessWidget {
-  final MealLog meal;
-  final bool isSkipped;
-  final VoidCallback onAddFood;
-  final Future<void> Function(FoodEntry) onFoodTap;
-  final Future<void> Function(FoodEntry) onFoodActions;
-  final VoidCallback? onSaveToLibrary;
-  final bool showValidationError;
-  final bool allowMeals;
-
-  const _FoodListSection({
-    required this.meal,
-    required this.isSkipped,
-    required this.onAddFood,
-    required this.onFoodTap,
-    required this.onFoodActions,
-    required this.onSaveToLibrary,
-    required this.allowMeals,
-    this.showValidationError = false,
-  });
-
+class const _FoodListSection({
+  required final MealLog meal,
+  required final bool isSkipped,
+  required final VoidCallback onAddFood,
+  required final Future<void> Function(FoodEntry) onFoodTap,
+  required final Future<void> Function(FoodEntry) onFoodActions,
+  required final VoidCallback? onSaveToLibrary,
+  required final bool allowMeals,
+  final bool showValidationError = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1659,21 +1600,13 @@ class _FoodListSection extends StatelessWidget {
   }
 }
 
-class _EmptyFoodState extends StatelessWidget {
-  final ThemeData theme;
-  final AppLocalizations l10n;
-  final VoidCallback onAddFood;
-  final bool showValidationError;
-  final bool allowMeals;
-
-  const _EmptyFoodState({
-    required this.theme,
-    required this.l10n,
-    required this.onAddFood,
-    required this.showValidationError,
-    required this.allowMeals,
-  });
-
+class const _EmptyFoodState({
+  required final ThemeData theme,
+  required final AppLocalizations l10n,
+  required final VoidCallback onAddFood,
+  required final bool showValidationError,
+  required final bool allowMeals,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -1735,17 +1668,11 @@ class _EmptyFoodState extends StatelessWidget {
   }
 }
 
-class _FoodCard extends StatelessWidget {
-  final FoodEntry food;
-  final VoidCallback onTap;
-  final VoidCallback onOverflow;
-
-  const _FoodCard({
-    required this.food,
-    required this.onTap,
-    required this.onOverflow,
-  });
-
+class const _FoodCard({
+  required final FoodEntry food,
+  required final VoidCallback onTap,
+  required final VoidCallback onOverflow,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1837,24 +1764,17 @@ class _FoodCard extends StatelessWidget {
   }
 }
 
-class _MealDetailsSheet extends StatefulWidget {
-  final MealContext mealContext;
-  final CompanyContext? companyContext;
-  final DistractionContext? distractionContext;
-  final String? locationDescription;
-
-  const _MealDetailsSheet({
-    required this.mealContext,
-    required this.companyContext,
-    required this.distractionContext,
-    required this.locationDescription,
-  });
-
+class const _MealDetailsSheet({
+  required final MealContext mealContext,
+  required final CompanyContext? companyContext,
+  required final DistractionContext? distractionContext,
+  required final String? locationDescription,
+}) extends StatefulWidget {
   @override
   State<_MealDetailsSheet> createState() => _MealDetailsSheetState();
 }
 
-class _MealDetailsSheetState extends State<_MealDetailsSheet> {
+class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
   late MealContext _mealContext;
   CompanyContext? _companyContext;
   DistractionContext? _distractionContext;
@@ -2038,21 +1958,13 @@ String _getDistractionContextLabel(
   }
 }
 
-class _DropdownField<T> extends StatelessWidget {
-  final String label;
-  final T? value;
-  final List<T?> items;
-  final String Function(T?) itemLabel;
-  final ValueChanged<T?> onChanged;
-
-  const _DropdownField({
-    required this.label,
-    required this.value,
-    required this.items,
-    required this.itemLabel,
-    required this.onChanged,
-  });
-
+class const _DropdownField<T>({
+  required final String label,
+  required final T? value,
+  required final List<T?> items,
+  required final String Function(T?) itemLabel,
+  required final ValueChanged<T?> onChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T?>(

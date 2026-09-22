@@ -9,22 +9,17 @@ import 'package:studyu_designer_v2/features/design/shared/questionnaire/question
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/string_extensions.dart';
 
-class FitbitQuestionFormView extends ConsumerStatefulWidget {
-  const FitbitQuestionFormView({
-    required this.formViewModel,
-    required this.studyId,
-    super.key,
-  });
-
-  final QuestionFormViewModel formViewModel;
-  final String studyId;
-
+class const FitbitQuestionFormView({
+  required final QuestionFormViewModel formViewModel,
+  required final String studyId,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<FitbitQuestionFormView> createState() =>
       _FitbitQuestionFormViewState();
 }
 
-class _FitbitQuestionFormViewState
+class _FitbitQuestionFormViewState()
     extends ConsumerState<FitbitQuestionFormView> {
   QuestionFormViewModel get formViewModel => widget.formViewModel;
 
@@ -61,11 +56,9 @@ class _FitbitQuestionFormViewState
   }
 }
 
-class _FitbitTypeSelector extends StatelessWidget {
-  const _FitbitTypeSelector({required this.formViewModel});
-
-  final QuestionFormViewModel formViewModel;
-
+class const _FitbitTypeSelector({
+  required final QuestionFormViewModel formViewModel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ReactiveFormArray(

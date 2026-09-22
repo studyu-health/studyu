@@ -1,21 +1,25 @@
 part of '../food_search_screen.dart';
 
-enum _SelectionSurfaceMode { compact, expanded, details }
+enum _SelectionSurfaceMode() {
+  compact,
+  expanded,
+  details,
+}
 
-class _SelectionPeekTray extends StatefulWidget {
-  final GlobalKey anchorKey;
-  final GlobalKey headerAnchorKey;
-  final GlobalKey Function(String key) rowAnchorFor;
-  final GlobalKey Function(String key) quantityAnchorFor;
-  final FoodSelectionStore store;
-  final String mealLabel;
-  final double maxHeight;
-  final bool isConfirming;
-  final VoidCallback onConfirm;
-  final ValueChanged<FoodSelectionItem> onSelect;
-  final void Function(String key, Offset? source) onIncrement;
-  final ValueChanged<String> onDecrement;
-  final void Function(
+class const _SelectionPeekTray({
+  required final GlobalKey anchorKey,
+  required final GlobalKey headerAnchorKey,
+  required final GlobalKey Function(String key) rowAnchorFor,
+  required final GlobalKey Function(String key) quantityAnchorFor,
+  required final FoodSelectionStore store,
+  required final String mealLabel,
+  required final double maxHeight,
+  required final bool isConfirming,
+  required final VoidCallback onConfirm,
+  required final ValueChanged<FoodSelectionItem> onSelect,
+  required final void Function(String key, Offset? source) onIncrement,
+  required final ValueChanged<String> onDecrement,
+  required final void Function(
     studyu.FoodEntry result,
     String? key,
     FoodQuantityAction action,
@@ -23,32 +27,15 @@ class _SelectionPeekTray extends StatefulWidget {
     bool caloriesKnown,
     bool gramsKnown,
   )
-  onDetailsConfirmed;
-  final ValueChanged<bool> onActivityChanged;
-
-  const _SelectionPeekTray({
-    required this.anchorKey,
-    required this.headerAnchorKey,
-    required this.rowAnchorFor,
-    required this.quantityAnchorFor,
-    required this.store,
-    required this.mealLabel,
-    required this.maxHeight,
-    required this.isConfirming,
-    required this.onConfirm,
-    required this.onSelect,
-    required this.onIncrement,
-    required this.onDecrement,
-    required this.onDetailsConfirmed,
-    required this.onActivityChanged,
-    super.key,
-  });
-
+  onDetailsConfirmed,
+  required final ValueChanged<bool> onActivityChanged,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<_SelectionPeekTray> createState() => _SelectionPeekTrayState();
 }
 
-class _SelectionPeekTrayState extends State<_SelectionPeekTray> {
+class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
   _SelectionSurfaceMode _mode = _SelectionSurfaceMode.compact;
   _SelectionSurfaceMode _previousMode = _SelectionSurfaceMode.compact;
   studyu.FoodEntry? _detailFood;
@@ -416,28 +403,19 @@ class _SelectionPeekTrayState extends State<_SelectionPeekTray> {
   }
 }
 
-class _SelectionPreviewRows extends StatefulWidget {
-  final List<FoodSelectionItem> items;
-  final GlobalKey Function(String key) rowAnchorFor;
-  final GlobalKey Function(String key) quantityAnchorFor;
-  final ValueChanged<FoodSelectionItem> onSelect;
-  final void Function(String key, Offset? source) onIncrement;
-  final ValueChanged<String> onDecrement;
-
-  const _SelectionPreviewRows({
-    required this.items,
-    required this.rowAnchorFor,
-    required this.quantityAnchorFor,
-    required this.onSelect,
-    required this.onIncrement,
-    required this.onDecrement,
-  });
-
+class const _SelectionPreviewRows({
+  required final List<FoodSelectionItem> items,
+  required final GlobalKey Function(String key) rowAnchorFor,
+  required final GlobalKey Function(String key) quantityAnchorFor,
+  required final ValueChanged<FoodSelectionItem> onSelect,
+  required final void Function(String key, Offset? source) onIncrement,
+  required final ValueChanged<String> onDecrement,
+}) extends StatefulWidget {
   @override
   State<_SelectionPreviewRows> createState() => _SelectionPreviewRowsState();
 }
 
-class _SelectionPreviewRowsState extends State<_SelectionPreviewRows> {
+class _SelectionPreviewRowsState() extends State<_SelectionPreviewRows> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey();
   late List<FoodSelectionItem> _items = List.of(widget.items);
 
@@ -533,26 +511,16 @@ class _SelectionPreviewRowsState extends State<_SelectionPreviewRows> {
   }
 }
 
-class _SelectionPreviewRow extends StatelessWidget {
-  final GlobalKey? anchorKey;
-  final GlobalKey? quantityAnchorKey;
-  final FoodSelectionItem item;
-  final ValueChanged<FoodSelectionItem> onSelect;
-  final void Function(String key, Offset? source) onIncrement;
-  final ValueChanged<String> onDecrement;
-  final VoidCallback? onDelete;
-
-  const _SelectionPreviewRow({
-    this.anchorKey,
-    this.quantityAnchorKey,
-    required this.item,
-    required this.onSelect,
-    required this.onIncrement,
-    required this.onDecrement,
-    this.onDelete,
-    super.key,
-  });
-
+class const _SelectionPreviewRow({
+  final GlobalKey? anchorKey,
+  final GlobalKey? quantityAnchorKey,
+  required final FoodSelectionItem item,
+  required final ValueChanged<FoodSelectionItem> onSelect,
+  required final void Function(String key, Offset? source) onIncrement,
+  required final ValueChanged<String> onDecrement,
+  final VoidCallback? onDelete,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

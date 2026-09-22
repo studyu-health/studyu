@@ -7,21 +7,22 @@ import 'package:studyu_app/models/photo_reference.dart';
 import 'package:studyu_app/services/photo_gallery_service.dart';
 
 /// A section that displays photos from a local calendar date.
-class PhotoRecallSection extends StatefulWidget {
-  /// Creates a new [PhotoRecallSection].
-  const PhotoRecallSection({required this.date, this.onPhotoTap, super.key});
-
+class const PhotoRecallSection({
   /// The local calendar date to show photos for.
-  final DateTime date;
+  required final DateTime date,
 
   /// Callback when a photo is tapped.
-  final ValueChanged<PhotoReference>? onPhotoTap;
+  final ValueChanged<PhotoReference>? onPhotoTap,
+  super.key,
+}) extends StatefulWidget {
+  /// Creates a new [PhotoRecallSection].
+  this;
 
   @override
   State<PhotoRecallSection> createState() => _PhotoRecallSectionState();
 }
 
-class _PhotoRecallSectionState extends State<PhotoRecallSection> {
+class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
   final PhotoGalleryService _photoService = PhotoGalleryService();
   List<PhotoReference>? _photos;
   bool _isLoading = false;
@@ -188,9 +189,8 @@ class _PhotoRecallSectionState extends State<PhotoRecallSection> {
   }
 
   Widget _buildPhotoGrid(ThemeData theme, AppLocalizations l10n) {
-    final date = MaterialLocalizations.of(
-      context,
-    ).formatMediumDate(widget.date);
+    final date = MaterialLocalizations.of(context)
+        .formatMediumDate(widget.date);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,12 +246,10 @@ class _PhotoRecallSectionState extends State<PhotoRecallSection> {
   }
 }
 
-class _PhotoThumbnail extends StatelessWidget {
-  final PhotoReference photo;
-  final VoidCallback? onTap;
-
-  const _PhotoThumbnail({required this.photo, this.onTap});
-
+class const _PhotoThumbnail({
+  required final PhotoReference photo,
+  final VoidCallback? onTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

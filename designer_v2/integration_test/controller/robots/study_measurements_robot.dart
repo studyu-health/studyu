@@ -4,11 +4,7 @@ import 'package:patrol_finders/patrol_finders.dart';
 import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyMeasurementsRobot {
-  const StudyMeasurementsRobot(this.$);
-
-  final PatrolTester $;
-
+class const StudyMeasurementsRobot(final PatrolTester $) {
   Future<void> tapAddSurveyButton() async {
     await $(tr.form_array_measurements_surveys_new).tap();
   }

@@ -27,4 +27,4 @@ void main() {
   });
 }
 
-class _ScheduleControlsHarness with WithScheduleControls {}
+class _ScheduleControlsHarness() with WithScheduleControls;

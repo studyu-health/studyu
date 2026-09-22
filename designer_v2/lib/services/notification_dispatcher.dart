@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:studyu_designer_v2/common_views/confirmation_dialog.dart';
@@ -7,42 +8,31 @@ import 'package:studyu_designer_v2/services/notification_types.dart';
 
 /// A wrapper widgets that is subscribed to the [NotificationService] and
 /// automatically dispatches its [NotificationIntent]s to show a Snackbar.
-class NotificationDispatcher extends ConsumerStatefulWidget {
-  const NotificationDispatcher({
-    required this.child,
-    this.scaffoldMessengerKey,
-    this.navigatorKey,
-    this.snackbarWidth,
-    this.snackbarInnerPadding = 16.0,
-    this.snackbarBehavior = SnackBarBehavior.fixed,
-    this.snackbarDefaultDuration = 2500,
-    super.key,
-  });
-
+class const NotificationDispatcher({
   /// Pass-through widget that is rendered as is
-  final Widget? child;
+  required final Widget? child,
 
   /// The global key used for looking up the [Scaffold] reference
   /// If not specified explicitly, falls back `ScaffoldMessenger.of(context)`
   /// to look up the closest instance of [ScaffoldMessengerState]
-  final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
+  final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey,
 
   /// The global key used for looking up the [Navigator] reference
   /// If not specified explicitly, falls back `Navigator.of(context)`
   /// to look up the closest instance of [NavigatorState]
-  final GlobalKey<NavigatorState>? navigatorKey;
-
-  final double snackbarInnerPadding;
-  final double? snackbarWidth;
-  final SnackBarBehavior snackbarBehavior;
-  final int snackbarDefaultDuration;
-
+  final GlobalKey<NavigatorState>? navigatorKey,
+  final double? snackbarWidth,
+  final double snackbarInnerPadding = 16.0,
+  final SnackBarBehavior snackbarBehavior = SnackBarBehavior.fixed,
+  final int snackbarDefaultDuration = 2500,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _NotificationDispatcherState();
 }
 
-class _NotificationDispatcherState
+class _NotificationDispatcherState()
     extends ConsumerState<NotificationDispatcher> {
   /// Subscription to a stream of [NotificationIntent]s to be dispatched
   late final StreamSubscription<NotificationIntent> _subscription;

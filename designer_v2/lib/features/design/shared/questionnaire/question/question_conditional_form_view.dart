@@ -13,12 +13,12 @@ import 'package:studyu_designer_v2/features/design/shared/questionnaire/question
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class ConditionalQuestionFormView extends FormConsumerWidget {
-  ConditionalQuestionFormView({
-    required this.formViewModel,
-    required this.allQuestions,
-    super.key,
-  }) {
+class ConditionalQuestionFormView({
+  required final IConditionalQuestionProperties formViewModel,
+  required final List<Question> allQuestions,
+  super.key,
+}) extends FormConsumerWidget {
+  this {
     final newAvailableQuestions = availableQuestions;
     final oldAvailableQuestions = ConditionRowFormViewModel.availableQuestions;
 
@@ -38,9 +38,6 @@ class ConditionalQuestionFormView extends FormConsumerWidget {
       formViewModel.initializeDeferredConditions();
     }
   }
-
-  final IConditionalQuestionProperties formViewModel;
-  final List<Question> allQuestions;
 
   static const List<String> ignoredQuestionTypes = [
     ImageCapturingQuestion.questionType,

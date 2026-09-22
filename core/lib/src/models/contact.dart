@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'contact.g.dart';
 
 @JsonSerializable()
-class Contact {
+class Contact() {
   String organization = '';
   String? institutionalReviewBoard = '';
   String? institutionalReviewBoardNumber = '';
@@ -13,10 +13,7 @@ class Contact {
   String phone = '';
   String? additionalInfo;
 
-  Contact();
-
-  factory Contact.fromJson(Map<String, dynamic> json) =>
-      _$ContactFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$ContactFromJson(json);
 
   Map<String, dynamic> toJson() => _$ContactToJson(this);
 

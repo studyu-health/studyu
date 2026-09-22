@@ -5,30 +5,22 @@ import 'package:studyu_designer_v2/common_views/confirmation_dialog.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
 typedef ModelActionHandler = FutureOr<void> Function();
-typedef ModelActionConfirmationDialogBuilder =
-    Widget Function(BuildContext dialogContext, ModelAction action);
+typedef ModelActionConfirmationDialogBuilder = Widget Function(
+  BuildContext dialogContext,
+  ModelAction action,
+);
 
-class ModelActionConfirmation {
-  const ModelActionConfirmation({
-    required this.title,
-    this.message,
-    this.confirmLabel,
-    this.cancelLabel,
-    this.icon,
-    this.customContent,
-    this.dialogBuilder,
-  });
+class const ModelActionConfirmation({
+  required final String title,
+  final String? message,
+  final String? confirmLabel,
+  final String? cancelLabel,
+  final IconData? icon,
+  final Widget? customContent,
+  final ModelActionConfirmationDialogBuilder? dialogBuilder,
+});
 
-  final String title;
-  final String? message;
-  final String? confirmLabel;
-  final String? cancelLabel;
-  final IconData? icon;
-  final Widget? customContent;
-  final ModelActionConfirmationDialogBuilder? dialogBuilder;
-}
-
-class ModelActionConfirmations {
+class ModelActionConfirmations() {
   static ModelActionConfirmation delete({
     required String subject,
     String? title,
@@ -56,37 +48,21 @@ class ModelActionConfirmations {
   }
 }
 
-class ModelAction<T> {
-  final T type;
-  final String label;
-  IconData? icon;
-  final String? tooltip;
-  final ModelActionHandler onExecute;
-  final dynamic Function(BuildContext context)? onExecuteWithContext;
-  final ModelActionConfirmation? confirmation;
-  final bool isHeader;
-  final bool isSeparator;
-  final bool isAvailable;
-  final bool isDestructive;
-  final bool isChecked;
-  final bool showBadge;
-
-  ModelAction({
-    required this.type,
-    required this.label,
-    required this.onExecute,
-    this.onExecuteWithContext,
-    this.confirmation,
-    this.isSeparator = false,
-    this.isHeader = false,
-    this.isAvailable = true,
-    this.isDestructive = false,
-    this.icon,
-    this.tooltip,
-    this.isChecked = false,
-    this.showBadge = false,
-  });
-
+class ModelAction<T>({
+  required final T type,
+  required final String label,
+  required final ModelActionHandler onExecute,
+  final dynamic Function(BuildContext context)? onExecuteWithContext,
+  final ModelActionConfirmation? confirmation,
+  final bool isSeparator = false,
+  final bool isHeader = false,
+  final bool isAvailable = true,
+  final bool isDestructive = false,
+  var IconData? icon,
+  final String? tooltip,
+  final bool isChecked = false,
+  final bool showBadge = false,
+}) {
   static ModelAction addSeparator() {
     return ModelAction(
       type: null,
@@ -149,16 +125,16 @@ class ModelAction<T> {
   }
 }
 
-abstract class IModelActionProvider<V> {
+abstract class IModelActionProvider<V>() {
   List<ModelAction> availableActions(V model);
 }
 
-abstract class IListActionProvider<V> extends IModelActionProvider<V> {
+abstract class IListActionProvider<V>() extends IModelActionProvider<V> {
   void onSelectItem(V item);
   void onNewItem();
 }
 
-enum ModelActionType {
+enum ModelActionType() {
   edit,
   delete,
   remove, // same semantics as delete

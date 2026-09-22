@@ -5,8 +5,8 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/features/study/study_base_controller.dart';
 import 'package:studyu_designer_v2/features/study/study_controller_state.dart';
+import 'package:studyu_designer_v2/repositories/api_client.dart';
 import 'package:studyu_designer_v2/repositories/auth_repository.dart';
-import 'package:studyu_designer_v2/repositories/invite_code_repository.dart';
 import 'package:studyu_designer_v2/repositories/model_repository_events.dart';
 import 'package:studyu_designer_v2/repositories/study_repository.dart';
 import 'package:studyu_designer_v2/routing/router.dart';
@@ -15,7 +15,7 @@ import 'package:studyu_designer_v2/routing/router_intent.dart';
 part 'study_controller.g.dart';
 
 @riverpod
-class StudyController extends _$StudyController {
+class StudyController() extends _$StudyController {
   @override
   StudyControllerState build(StudyID studyId) {
     state = StudyControllerState(
@@ -56,23 +56,16 @@ class StudyController extends _$StudyController {
         });
   }
 
-  Future publishStudy({bool toRegistry = false}) {
+  Future<void> publishStudy({bool toRegistry = false}) async {
     final study = state.studyValueRequired;
     study.registryPublished = toRegistry;
 
     // Remove all invites if study is open
-    if (study.participation == Participation.open && study.invites != null) {
-      final codeRepository = ref
-          .watch(inviteCodeRepositoryProvider(study.id))
-          .delegate;
-
-      // Create a copy of the invites list to avoid errors during deletion as the original study.invites list is modified within the loop
-      for (final StudyInvite invite in List.from(study.invites!)) {
-        codeRepository.delete(invite);
-      }
+    if (study.participation == Participation.open) {
+      await ref.read(apiClientProvider).deleteStudyInvites(study.id);
     }
 
-    return state.studyRepository.launch(study);
+    await state.studyRepository.launch(study);
   }
 
   Future closeStudy() {

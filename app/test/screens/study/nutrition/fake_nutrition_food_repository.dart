@@ -1,12 +1,10 @@
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_core/core.dart';
 
-class FakeNutritionFoodRepository extends NutritionFoodRepository {
-  FakeNutritionFoodRepository([
-    Iterable<SavedFoodTemplate> templates = const [],
-  ]) : _templates = List.of(templates);
-
-  final List<SavedFoodTemplate> _templates;
+class FakeNutritionFoodRepository([
+  Iterable<SavedFoodTemplate> templates = const [],
+]) extends NutritionFoodRepository {
+  final List<SavedFoodTemplate> _templates = List.of(templates);
   int loadCalls = 0;
 
   @override

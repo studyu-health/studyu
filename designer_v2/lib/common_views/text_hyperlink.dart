@@ -3,47 +3,33 @@ import 'package:studyu_designer_v2/common_views/mouse_events.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Hyperlink extends StatefulWidget {
-  const Hyperlink({
-    required this.text,
-    this.url,
-    this.onClick,
-    this.linkColor = const Color(0xFF0000EE),
-    this.hoverColor,
-    this.visitedColor = const Color(0xFF551A8B),
-    this.style,
-    this.hoverStyle = const TextStyle(
-      decoration: TextDecoration.none, // alternative: TextDecoration.underline
-    ),
-    this.visitedStyle,
-    this.icon,
-    this.iconSize,
-    super.key,
-  }) : assert(
-         (url != null && onClick == null) || (url == null && onClick != null),
-         "Must provide either url or onClick handler",
-       );
-
-  final String text;
-  final String? url;
-  final VoidCallback? onClick;
-
-  final Color linkColor;
-  final Color? hoverColor;
-  final Color? visitedColor;
-
-  final TextStyle? style;
-  final TextStyle? hoverStyle;
-  final TextStyle? visitedStyle;
-
-  final IconData? icon;
-  final double? iconSize;
+class const Hyperlink({
+  required final String text,
+  final String? url,
+  final VoidCallback? onClick,
+  final Color linkColor = const Color(0xFF0000EE),
+  final Color? hoverColor,
+  final Color? visitedColor = const Color(0xFF551A8B),
+  final TextStyle? style,
+  final TextStyle? hoverStyle = const TextStyle(
+    decoration: TextDecoration.none, // alternative: TextDecoration.underline
+  ),
+  final TextStyle? visitedStyle,
+  final IconData? icon,
+  final double? iconSize,
+  super.key,
+}) extends StatefulWidget {
+  this
+    : assert(
+        (url != null && onClick == null) || (url == null && onClick != null),
+        "Must provide either url or onClick handler",
+      );
 
   @override
   State<Hyperlink> createState() => _HyperlinkState();
 }
 
-class _HyperlinkState extends State<Hyperlink> {
+class _HyperlinkState() extends State<Hyperlink> {
   bool isVisited = false;
 
   @override

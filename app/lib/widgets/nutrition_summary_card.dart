@@ -3,22 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_core/core.dart';
 
-class NutritionMacroDistributionBar extends StatelessWidget {
-  final double carbs;
-  final double protein;
-  final double fat;
-  final Set<String> unavailableNutrients;
-  final String Function(double)? formatGrams;
-
-  const NutritionMacroDistributionBar({
-    required this.carbs,
-    required this.protein,
-    required this.fat,
-    this.unavailableNutrients = const {},
-    this.formatGrams,
-    super.key,
-  });
-
+class const NutritionMacroDistributionBar({
+  required final double carbs,
+  required final double protein,
+  required final double fat,
+  final Set<String> unavailableNutrients = const {},
+  final String Function(double)? formatGrams,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -167,42 +159,24 @@ class NutritionMacroDistributionBar extends StatelessWidget {
   }
 }
 
-class _NutritionMacroData {
-  final String label;
-  final double grams;
-  final double percent;
-  final Color color;
+class const _NutritionMacroData({
+  required final String label,
+  required final double grams,
+  required final double percent,
+  required final Color color,
+});
 
-  const _NutritionMacroData({
-    required this.label,
-    required this.grams,
-    required this.percent,
-    required this.color,
-  });
-}
-
-class NutritionSummaryView extends StatelessWidget {
-  final double? energyKcal;
-  final double? carbs;
-  final double? protein;
-  final double? fat;
-  final Set<String> unavailableNutrients;
-  final bool energyUnavailable;
-  final String Function(double)? formatEnergy;
-  final String Function(double)? formatGrams;
-
-  const NutritionSummaryView({
-    required this.energyKcal,
-    required this.carbs,
-    required this.protein,
-    required this.fat,
-    this.unavailableNutrients = const {},
-    this.energyUnavailable = false,
-    this.formatEnergy,
-    this.formatGrams,
-    super.key,
-  });
-
+class const NutritionSummaryView({
+  required final double? energyKcal,
+  required final double? carbs,
+  required final double? protein,
+  required final double? fat,
+  final Set<String> unavailableNutrients = const {},
+  final bool energyUnavailable = false,
+  final String Function(double)? formatEnergy,
+  final String Function(double)? formatGrams,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -325,27 +299,19 @@ class NutritionSummaryView extends StatelessWidget {
   }
 }
 
-class NutritionSummaryCard extends StatefulWidget {
-  final NutritionProfile nutrition;
-  final String? title;
-  final String? subtitle;
-  final bool inCard;
-  final bool showTitle;
-
-  const NutritionSummaryCard({
-    required this.nutrition,
-    this.title,
-    this.subtitle,
-    this.inCard = false,
-    this.showTitle = true,
-    super.key,
-  });
-
+class const NutritionSummaryCard({
+  required final NutritionProfile nutrition,
+  final String? title,
+  final String? subtitle,
+  final bool inCard = false,
+  final bool showTitle = true,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<NutritionSummaryCard> createState() => _NutritionSummaryCardState();
 }
 
-class _NutritionSummaryCardState extends State<NutritionSummaryCard> {
+class _NutritionSummaryCardState() extends State<NutritionSummaryCard> {
   bool _detailsExpanded = false;
 
   @override
@@ -542,16 +508,11 @@ Widget _nutritionIconBadge({
   ),
 );
 
-class DailyNutritionSummaryCard extends StatelessWidget {
-  final DailyRecall dailyRecall;
-  final bool showTitle;
-
-  const DailyNutritionSummaryCard({
-    required this.dailyRecall,
-    this.showTitle = true,
-    super.key,
-  });
-
+class const DailyNutritionSummaryCard({
+  required final DailyRecall dailyRecall,
+  final bool showTitle = true,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => NutritionSummaryCard(
     nutrition: sumNutritionFoods([
@@ -564,10 +525,8 @@ class DailyNutritionSummaryCard extends StatelessWidget {
   );
 }
 
-class MealNutritionSummaryCard extends StatelessWidget {
-  final MealLog meal;
-  const MealNutritionSummaryCard({required this.meal, super.key});
-
+class const MealNutritionSummaryCard({required final MealLog meal, super.key})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) => NutritionSummaryCard(
     nutrition: sumNutritionFoods(meal.foods),

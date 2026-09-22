@@ -6,10 +6,8 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/report/generic_section.dart';
 import 'package:studyu_core/core.dart';
 
-class PerformanceSection extends GenericSection {
-  const PerformanceSection(super.subject, {super.key, super.onTap});
-
-  // TODO move to model
+class const PerformanceSection(super.subject, {super.key, super.onTap})
+    extends GenericSection {
   double get minimumRatio => 0.1;
 
   double get maximum => 100;
@@ -133,12 +131,11 @@ class PerformanceSection extends GenericSection {
   }
 }
 
-class PerformanceBar extends StatelessWidget {
-  final double progress;
-  final double? minimum;
-
-  const PerformanceBar({required this.progress, this.minimum, super.key});
-
+class const PerformanceBar({
+  required final double progress,
+  final double? minimum,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rainbow = Rainbow(

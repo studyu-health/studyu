@@ -3,24 +3,18 @@ import 'package:studyu_app/widgets/questionnaire/custom_slider.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class AnnotatedScaleQuestionWidget extends QuestionWidget {
-  final AnnotatedScaleQuestion question;
-  final Function(Answer)? onDone;
-  final Answer<num>? initialAnswer;
-
-  const AnnotatedScaleQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-    this.initialAnswer,
-  });
-
+class const AnnotatedScaleQuestionWidget({
+  super.key,
+  required final AnnotatedScaleQuestion question,
+  final Function(Answer)? onDone,
+  final Answer<num>? initialAnswer,
+}) extends QuestionWidget {
   @override
   State<AnnotatedScaleQuestionWidget> createState() =>
       _AnnotatedScaleQuestionWidgetState();
 }
 
-class _AnnotatedScaleQuestionWidgetState
+class _AnnotatedScaleQuestionWidgetState()
     extends State<AnnotatedScaleQuestionWidget> {
   double? value;
 

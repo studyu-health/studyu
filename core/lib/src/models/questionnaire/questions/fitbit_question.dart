@@ -10,13 +10,12 @@ class FitbitQuestion extends Question<FitbitQuestion> {
   @JsonKey(name: 'types')
   List<FitbitQuestionType> types;
 
-  FitbitQuestion({required this.types}) : super(questionType);
+  new({required this.types}) : super(questionType);
 
-  FitbitQuestion.withId({required String questionType, required this.types})
+  new withId({required String questionType, required this.types})
     : super.withId(questionType);
 
-  factory FitbitQuestion.fromJson(Map<String, dynamic> json) =>
-      _$FitbitQuestionFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$FitbitQuestionFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$FitbitQuestionToJson(this);
@@ -25,7 +24,7 @@ class FitbitQuestion extends Question<FitbitQuestion> {
       Answer.forQuestion(this, data);
 }
 
-enum FitbitQuestionType {
+enum FitbitQuestionType() {
   heartrate,
   sleep,
   steps;

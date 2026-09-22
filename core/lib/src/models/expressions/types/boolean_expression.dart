@@ -5,12 +5,12 @@ import 'package:studyu_core/src/models/expressions/types/value_expression.dart';
 part 'boolean_expression.g.dart';
 
 @JsonSerializable()
-class BooleanExpression extends ValueExpression<bool> {
+class BooleanExpression() extends ValueExpression<bool> {
   static const String expressionType = 'boolean';
 
-  BooleanExpression() : super(expressionType);
+  this : super(expressionType);
 
-  factory BooleanExpression.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$BooleanExpressionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$BooleanExpressionToJson(this);

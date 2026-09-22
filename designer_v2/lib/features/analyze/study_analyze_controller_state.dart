@@ -3,15 +3,13 @@ import 'package:studyu_designer_v2/features/analyze/study_export_zip.dart';
 import 'package:studyu_designer_v2/features/study/study_base_state.dart';
 import 'package:studyu_designer_v2/repositories/model_repository.dart';
 
-class StudyAnalyzeControllerState extends StudyControllerBaseState {
-  const StudyAnalyzeControllerState({
-    required super.studyId,
-    required super.studyRepository,
-    required super.router,
-    required super.currentUser,
-    required super.studyWithMetadata,
-  });
-
+class const StudyAnalyzeControllerState({
+  required super.studyId,
+  required super.studyRepository,
+  required super.router,
+  required super.currentUser,
+  required super.studyWithMetadata,
+}) extends StudyControllerBaseState {
   bool get canExport => studyValue?.canExport(currentUser!) ?? false;
 
   String get exportDisabledReason =>

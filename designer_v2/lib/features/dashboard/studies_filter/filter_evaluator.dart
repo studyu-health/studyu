@@ -2,7 +2,7 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_types.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
-class FilterEvaluator {
+class FilterEvaluator() {
   static bool evaluate(FilterGroup group, Study study, supabase.User user) {
     if (group.children.isEmpty) return true;
 
@@ -58,12 +58,7 @@ class FilterEvaluator {
       case StudyProperty.endedCount:
         return study.endedCount;
       case StudyProperty.missedDays:
-        // This is a list, might need special handling or aggregation
-        // For now, let's assume we filter on *any* missed day or *total* missed days?
-        // The spec mentions "TotalMissedDays > threshold".
-        // Let's sum them up or use a specific aggregate if available.
-        // Study model has `List<int> missedDays`.
-        return study.missedDays.fold(0, (sum, e) => sum + e);
+        return study.missedDays.fold(0, (sum, days) => sum + days);
       case StudyProperty.resultSharing:
         return study.resultSharing.name;
       case StudyProperty.registryPublished:

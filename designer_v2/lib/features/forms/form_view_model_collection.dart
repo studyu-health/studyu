@@ -3,20 +3,19 @@ import 'package:studyu_designer_v2/features/forms/form_data.dart';
 import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 
 /// Parent class for [FormViewModel]s that are managed in a [FormViewModelCollection]
-abstract class ManagedFormViewModel<T> extends FormViewModel<T> {
-  ManagedFormViewModel({
-    super.delegate,
-    super.formData,
-    super.autosave,
-    super.validationSet,
-  });
+abstract class ManagedFormViewModel<T>({
+  super.delegate,
+  super.formData,
+  super.autosave,
+  super.validationSet,
+}) extends FormViewModel<T> {
   ManagedFormViewModel<T> createDuplicate();
 }
 
 typedef FormViewModelCollectionIterablePredicate<T extends FormViewModel> =
     bool Function(T formViewModel);
 
-class FormViewModelNotFoundException implements Exception {}
+class FormViewModelNotFoundException() implements Exception;
 
 /// Wrapper around a list of [ManagedFormViewModel]s where each [FormViewModel.form]
 /// corresponds to a [FormGroup] in a [FormArray] and is automatically synchronized
@@ -26,12 +25,7 @@ class FormViewModelNotFoundException implements Exception {}
 class FormViewModelCollection<
   T extends ManagedFormViewModel<D>,
   D extends IFormData
-> {
-  FormViewModelCollection(this.formViewModels, this.formArray);
-
-  List<T> formViewModels;
-  FormArray formArray;
-
+>(var List<T> formViewModels, var FormArray formArray) {
   /// Staged [FormViewModel]s can be retrieved from the collection using
   /// [findWhere], but are not represented in [formArray] or [formData]
   /// until [commit]ed

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SplashPage extends StatelessWidget {
-  const SplashPage({super.key});
-
+class const SplashPage({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SizedBox();

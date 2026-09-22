@@ -10,16 +10,15 @@ part 'boolean_question.g.dart';
 class BooleanQuestion extends Question<bool> {
   static const String questionType = 'boolean';
 
-  BooleanQuestion() : super(questionType);
+  new() : super(questionType);
 
-  BooleanQuestion.withId() : super.withId(questionType);
+  new withId() : super.withId(questionType);
 
-  factory BooleanQuestion.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$BooleanQuestionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$BooleanQuestionToJson(this);
 
-  // ignore: avoid_positional_boolean_parameters
   Answer<bool> constructAnswer(bool response) =>
       Answer.forQuestion(this, response);
 }

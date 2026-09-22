@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/common_views/dialog.dart';
 import 'package:studyu_designer_v2/common_views/form_buttons.dart';
 import 'package:studyu_designer_v2/common_views/form_table_layout.dart';
@@ -13,25 +14,128 @@ import 'package:studyu_designer_v2/features/auth/auth_form_controller.dart';
 import 'package:studyu_designer_v2/features/auth/auth_form_fields.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/localization/language_picker.dart';
+import 'package:studyu_designer_v2/repositories/user_repository.dart';
 import 'package:studyu_designer_v2/services/notification_service.dart';
 import 'package:studyu_designer_v2/services/notifications.dart';
 
-class AccountSettingsDialog extends ConsumerStatefulWidget {
-  const AccountSettingsDialog({super.key});
-
+class const AccountSettingsDialog({super.key}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<AccountSettingsDialog> createState() =>
       _AccountSettingsDialogState();
 }
 
-class _AccountSettingsDialogState extends ConsumerState<AccountSettingsDialog> {
+class _AccountSettingsDialogState()
+    extends ConsumerState<AccountSettingsDialog> {
   bool _isImported = false;
+
+  Widget _buildDateTimePreferences(StudyUUser user) {
+    final container = ProviderScope.containerOf(context);
+    final repository = container.read(userRepositoryProvider);
+    return FormTableLayout(
+      rowSpacing: 24.0,
+      rows: [
+        FormTableRow(
+          label: tr.date_format,
+          input: Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              width: 250,
+              child: DropdownButton<DateFormatPreference?>(
+                isExpanded: true,
+                value: user.preferences.dateFormat,
+                items: [
+                  DropdownMenuItem<DateFormatPreference?>(
+                    child: Text(tr.system),
+                  ),
+                  ...DateFormatPreference.values.map(
+                    (format) => DropdownMenuItem(
+                      value: format,
+                      child: Text(_dateFormatLabel(format)),
+                    ),
+                  ),
+                ],
+                onChanged: (value) async {
+                  final currentContext = context;
+                  try {
+                    final savedUser = await repository.updateDateFormat(value);
+                    container
+                        .read(userStateProvider.notifier)
+                        .setUser(savedUser);
+                  } catch (error) {
+                    debugPrint('Could not save date format preference: $error');
+                    if (!currentContext.mounted) return;
+                    ScaffoldMessenger.of(currentContext)
+                        .showSnackBar(SnackBar(content: Text(tr.sync_failed)));
+                  }
+                },
+              ),
+            ),
+          ),
+        ),
+        FormTableRow(
+          label: tr.time_format,
+          input: Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              width: 250,
+              child: DropdownButton<TimeFormatPreference?>(
+                isExpanded: true,
+                value: user.preferences.timeFormat,
+                items: [
+                  DropdownMenuItem<TimeFormatPreference?>(
+                    child: Text(tr.system),
+                  ),
+                  ...TimeFormatPreference.values.map(
+                    (format) => DropdownMenuItem(
+                      value: format,
+                      child: Text(_timeFormatLabel(format)),
+                    ),
+                  ),
+                ],
+                onChanged: (value) async {
+                  final currentContext = context;
+                  try {
+                    final savedUser = await repository.updateTimeFormat(value);
+                    container
+                        .read(userStateProvider.notifier)
+                        .setUser(savedUser);
+                  } catch (error) {
+                    debugPrint('Could not save time format preference: $error');
+                    if (!currentContext.mounted) return;
+                    ScaffoldMessenger.of(currentContext)
+                        .showSnackBar(SnackBar(content: Text(tr.sync_failed)));
+                  }
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _dateFormatLabel(DateFormatPreference format) {
+    return switch (format) {
+      DateFormatPreference.iso => tr.date_format_iso,
+      DateFormatPreference.european => tr.date_format_european,
+      DateFormatPreference.us => tr.date_format_us,
+      DateFormatPreference.german => tr.date_format_german,
+    };
+  }
+
+  String _timeFormatLabel(TimeFormatPreference format) {
+    return switch (format) {
+      TimeFormatPreference.h12 => tr.time_format_12_hour,
+      TimeFormatPreference.h24 => tr.time_format_24_hour,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     const formKey = AuthFormKey.passwordReset;
     final state = ref.watch(authFormControllerProvider(formKey));
     final controller = ref.watch(authFormControllerProvider(formKey).notifier);
+    final userState = ref.watch(userStateProvider);
 
     return PointerInterceptor(
       child: SelectionArea(
@@ -79,6 +183,12 @@ class _AccountSettingsDialogState extends ConsumerState<AccountSettingsDialog> {
                 ],
               ),
               const SizedBox(height: 16.0),
+              userState.when(
+                data: _buildDateTimePreferences,
+                error: (error, stackTrace) => Text(tr.sync_failed),
+                loading: () => const Center(child: CircularProgressIndicator()),
+              ),
+              const SizedBox(height: 16.0),
               ReactiveFormConfig(
                 validationMessages: AuthFormController.authValidationMessages,
                 child: ReactiveForm(
@@ -123,9 +233,8 @@ class _AccountSettingsDialogState extends ConsumerState<AccountSettingsDialog> {
                                   isLoading: state.isLoading,
                                   onPressedFuture: () async {
                                     final controller = ref.read(
-                                      authFormControllerProvider(
-                                        formKey,
-                                      ).notifier,
+                                      authFormControllerProvider(formKey)
+                                          .notifier,
                                     );
 
                                     final result = await controller

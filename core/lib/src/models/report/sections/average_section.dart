@@ -13,12 +13,11 @@ class AverageSection extends ReportSection {
   TemporalAggregation? aggregate;
   DataReference<num>? resultProperty;
 
-  AverageSection() : super(sectionType);
+  new() : super(sectionType);
 
-  AverageSection.withId() : super.withId(sectionType);
+  new withId() : super.withId(sectionType);
 
-  factory AverageSection.fromJson(Map<String, dynamic> json) =>
-      _$AverageSectionFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$AverageSectionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$AverageSectionToJson(this);
 }

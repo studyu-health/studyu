@@ -7,12 +7,11 @@ part 'pain_question.g.dart';
 class PainQuestion extends Question<List<BodyPart>> {
   static const String questionType = 'pain';
 
-  PainQuestion() : super(questionType);
+  new() : super(questionType);
 
-  PainQuestion.withId() : super.withId(questionType);
+  new withId() : super.withId(questionType);
 
-  factory PainQuestion.fromJson(Map<String, dynamic> json) =>
-      _$PainQuestionFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$PainQuestionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$PainQuestionToJson(this);
 

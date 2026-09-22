@@ -5,10 +5,7 @@ import 'package:statistics/statistics.dart';
 /// A class implementing Welch's two-sample t-test for comparing means of two populations
 /// with potentially different sizes and variances.
 /// Based on the formula described at https://en.wikipedia.org/wiki/Student%27s_t-test
-class TTest {
-  final List<num> sampleA;
-  final List<num> sampleB;
-
+class TTest(final List<num> sampleA, final List<num> sampleB) {
   // Cached calculation results
   num? _meanA;
   num? _meanB;
@@ -19,7 +16,7 @@ class TTest {
   double? _pValue;
 
   /// Creates a new TTest with two samples to compare
-  TTest(this.sampleA, this.sampleB) {
+  this {
     // Validate input data
     if (sampleA.isEmpty || sampleB.isEmpty) {
       throw ArgumentError('Samples cannot be empty');

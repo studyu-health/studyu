@@ -4,7 +4,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_core/core.dart';
 
-enum FoodQuantityAction {
+enum FoodQuantityAction() {
   /// Legacy actions retained for source compatibility.
   existingMeal,
   addToSelection,
@@ -14,32 +14,19 @@ enum FoodQuantityAction {
   update,
 }
 
-class FoodQuantitySheet extends StatefulWidget {
-  final FoodEntry food;
-  final FoodEntry? baselineFood;
-  final String? mealLabel;
-  final FoodQuantityAction action;
-  final double? initialAmount;
-  final bool caloriesKnown;
-  final bool gramsKnown;
-  final bool? baselineGramsKnown;
-  final ValueChanged<FoodEntry>? onConfirmed;
-  final VoidCallback? onClose;
-
-  const FoodQuantitySheet({
-    required this.food,
-    this.baselineFood,
-    this.mealLabel,
-    this.action = FoodQuantityAction.existingMeal,
-    this.initialAmount,
-    this.caloriesKnown = true,
-    this.gramsKnown = true,
-    this.baselineGramsKnown,
-    this.onConfirmed,
-    this.onClose,
-    super.key,
-  });
-
+class const FoodQuantitySheet({
+  required final FoodEntry food,
+  final FoodEntry? baselineFood,
+  final String? mealLabel,
+  final FoodQuantityAction action = FoodQuantityAction.existingMeal,
+  final double? initialAmount,
+  final bool caloriesKnown = true,
+  final bool gramsKnown = true,
+  final bool? baselineGramsKnown,
+  final ValueChanged<FoodEntry>? onConfirmed,
+  final VoidCallback? onClose,
+  super.key,
+}) extends StatefulWidget {
   static Future<FoodEntry?> show(
     BuildContext context, {
     required FoodEntry food,
@@ -71,7 +58,7 @@ class FoodQuantitySheet extends StatefulWidget {
   State<FoodQuantitySheet> createState() => _FoodQuantitySheetState();
 }
 
-class _FoodQuantitySheetState extends State<FoodQuantitySheet> {
+class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
   late final TextEditingController _amountController;
   late final TextEditingController _servingWeightController;
   FoodEntry? _scaledFood;
@@ -668,12 +655,10 @@ class _FoodQuantitySheetState extends State<FoodQuantitySheet> {
   }
 }
 
-class _FoodImageFallback extends StatelessWidget {
-  final ThemeData theme;
-  final String semanticLabel;
-
-  const _FoodImageFallback({required this.theme, required this.semanticLabel});
-
+class const _FoodImageFallback({
+  required final ThemeData theme,
+  required final String semanticLabel,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
@@ -688,11 +673,8 @@ class _FoodImageFallback extends StatelessWidget {
   );
 }
 
-class _NutrientGrid extends StatelessWidget {
-  final List<(String, String)> nutrients;
-
-  const _NutrientGrid({required this.nutrients});
-
+class const _NutrientGrid({required final List<(String, String)> nutrients})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
@@ -719,12 +701,10 @@ class _NutrientGrid extends StatelessWidget {
   );
 }
 
-class _NutrientValue extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _NutrientValue({required this.label, required this.value});
-
+class const _NutrientValue({
+  required final String label,
+  required final String value,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     label: '$label: $value',
@@ -734,9 +714,8 @@ class _NutrientValue extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         Text(value, style: Theme.of(context).textTheme.bodyMedium),
       ],

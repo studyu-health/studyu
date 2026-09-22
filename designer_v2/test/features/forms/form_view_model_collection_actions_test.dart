@@ -12,21 +12,19 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:test/test.dart';
 
-class _TestFormData implements IFormData {
-  _TestFormData({required this.id, required this.value});
-
-  @override
-  final String id;
-  final String value;
-
+class _TestFormData({
+  @override required final String id,
+  required final String value,
+}) implements IFormData {
   @override
   _TestFormData copy() => _TestFormData(id: '${id}_copy', value: value);
 }
 
-class _TestFormViewModel extends ManagedFormViewModel<_TestFormData> {
-  _TestFormViewModel({super.formData, super.delegate, this.duplicate});
-
-  final _TestFormViewModel? duplicate;
+class _TestFormViewModel({
+  super.formData,
+  super.delegate,
+  final _TestFormViewModel? duplicate,
+}) extends ManagedFormViewModel<_TestFormData> {
   final FormControl<String> valueControl = FormControl<String>(value: '');
   int saveCount = 0;
 
@@ -58,7 +56,7 @@ class _TestFormViewModel extends ManagedFormViewModel<_TestFormData> {
   }
 }
 
-class _TestDelegate implements IFormViewModelDelegate<_TestFormViewModel> {
+class _TestDelegate() implements IFormViewModelDelegate<_TestFormViewModel> {
   final saveCompleter = Completer<void>();
 
   @override

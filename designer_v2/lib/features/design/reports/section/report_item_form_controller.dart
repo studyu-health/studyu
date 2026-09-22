@@ -12,13 +12,12 @@ import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dar
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:uuid/uuid.dart';
 
-class ReportItemFormViewModel extends ManagedFormViewModel<ReportItemFormData> {
+class ReportItemFormViewModel({
+  super.formData,
+  super.delegate,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends ManagedFormViewModel<ReportItemFormData> {
   static const defaultSectionType = ReportSectionType.average;
-  ReportItemFormViewModel({
-    super.formData,
-    super.delegate,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
 
   // - Form fields (any section type)
 
@@ -215,8 +214,7 @@ class ReportItemFormViewModel extends ManagedFormViewModel<ReportItemFormData> {
   FormControlValidation get alphaConfidenceRequired => FormControlValidation(
     control: alphaControl,
     validators: [
-      Validators
-          .required, // todo numeric but also support decimal numbers e.g. 0.2 or 0,2
+      Validators.required, // todo numeric but also support decimal numbers e.g. 0.2 or 0,2
     ],
     validationMessages: {
       ValidationMessage.number: (error) =>

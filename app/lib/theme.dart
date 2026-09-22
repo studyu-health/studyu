@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 const primaryColor = Colors.blue;
 const accentColor = Colors.orange;
 
-class ThemeConfig {
+class ThemeConfig() {
   static SliderThemeData coloredSliderTheme(ThemeData theme) => SliderThemeData(
     activeTrackColor: Colors.white.withValues(alpha: 0.4),
     inactiveTrackColor: Colors.white.withValues(alpha: 0),

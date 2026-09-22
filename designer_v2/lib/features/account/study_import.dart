@@ -8,7 +8,7 @@ import 'package:studyu_designer_v2/repositories/auth_repository.dart';
 import 'package:studyu_designer_v2/repositories/study_repository.dart';
 import 'package:web/web.dart' as web;
 
-class StudyImport {
+class StudyImport() {
   static Future<bool> importStudy(WidgetRef ref) async {
     final uploadInput = web.HTMLInputElement()
       ..type = 'file'
@@ -42,7 +42,6 @@ class StudyImport {
       await ref.read(studyRepositoryProvider).save(newDraft);
       return true;
     } catch (e) {
-      // ignore: avoid_print
       print('Failed to import study: $e');
       return false;
     }

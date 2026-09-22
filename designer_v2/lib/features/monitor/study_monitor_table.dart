@@ -5,21 +5,16 @@ import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
 import 'package:studyu_designer_v2/domain/study_monitoring.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/localization/locale_providers.dart';
+import 'package:studyu_designer_v2/repositories/user_repository.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
-class StudyMonitorTable extends ConsumerWidget {
-  final WidgetRef ref;
-  final List<StudyMonitorItem> studyMonitorItems;
-  final OnSelectHandler<StudyMonitorItem> onSelectItem;
-
-  const StudyMonitorTable({
-    required this.ref,
-    required this.studyMonitorItems,
-    required this.onSelectItem,
-    super.key,
-  });
-
+class const StudyMonitorTable({
+  required final WidgetRef ref,
+  required final List<StudyMonitorItem> studyMonitorItems,
+  required final OnSelectHandler<StudyMonitorItem> onSelectItem,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StandardTable<StudyMonitorItem>(
@@ -110,7 +105,8 @@ class StudyMonitorTable extends ConsumerWidget {
     int rowIdx,
     Set<WidgetState> states,
   ) {
-    final languageCode = ref.watch(localeProvider).languageCode;
+    final locale = ref.watch(localeProvider).toLanguageTag();
+    final preferences = ref.watch(userStateProvider).value?.preferences;
     final theme = Theme.of(context);
     return [
       Tooltip(
@@ -126,13 +122,18 @@ class StudyMonitorTable extends ConsumerWidget {
         ),
       Tooltip(
         message: item.startedAt.toLocalizedString(
-          locale: languageCode,
+          locale: locale,
           showTime: false,
+          datePreference: preferences?.dateFormat,
         ),
         child: Text(item.startedAt.toTimeAgoString()),
       ),
       Tooltip(
-        message: item.lastActivityAt.toLocalizedString(locale: languageCode),
+        message: item.lastActivityAt.toLocalizedString(
+          locale: locale,
+          datePreference: preferences?.dateFormat,
+          timePreference: preferences?.timeFormat,
+        ),
         child: Row(
           children: [
             Flexible(child: Text(item.lastActivityAt.toTimeAgoString())),

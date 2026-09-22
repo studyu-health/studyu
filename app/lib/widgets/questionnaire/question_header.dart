@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 
-class QuestionHeader extends StatelessWidget {
-  final String? prompt;
-  final String? subtitle;
-  final String? rationale;
-
-  const QuestionHeader({super.key, this.prompt, this.subtitle, this.rationale});
-
+class const QuestionHeader({
+  super.key,
+  final String? prompt,
+  final String? subtitle,
+  final String? rationale,
+}) extends StatelessWidget {
   List<Widget> _buildSubtitle(BuildContext context) {
     if (subtitle == null || subtitle!.isEmpty) return [];
     return [

@@ -42,22 +42,16 @@ Widget nutritionTaskApp(
   ),
 );
 
-class _NutritionLauncher extends StatefulWidget {
-  const _NutritionLauncher({
-    required this.task,
-    required this.onResult,
-    this.existingRecall,
-  });
-
-  final NutritionTask task;
-  final DailyRecall? existingRecall;
-  final ValueChanged<DailyRecall?> onResult;
-
+class const _NutritionLauncher({
+  required final NutritionTask task,
+  required final ValueChanged<DailyRecall?> onResult,
+  final DailyRecall? existingRecall,
+}) extends StatefulWidget {
   @override
   State<_NutritionLauncher> createState() => _NutritionLauncherState();
 }
 
-class _NutritionLauncherState extends State<_NutritionLauncher> {
+class _NutritionLauncherState() extends State<_NutritionLauncher> {
   @override
   void initState() {
     super.initState();

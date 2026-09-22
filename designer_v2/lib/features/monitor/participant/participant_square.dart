@@ -4,24 +4,15 @@ import 'package:studyu_designer_v2/common_views/striped_gradient.dart';
 import 'package:studyu_designer_v2/domain/study_monitoring.dart';
 import 'package:studyu_designer_v2/features/monitor/participant/colors.dart';
 
-class ParticipantSquare extends StatelessWidget {
-  final int index;
-  final Set<String> missed;
-  final Set<String> completed;
-  final int numberOfTheDay;
-  final StudyMonitorItem monitorItem;
-  final Study study;
-
-  const ParticipantSquare({
-    super.key,
-    required this.index,
-    required this.missed,
-    required this.completed,
-    required this.numberOfTheDay,
-    required this.monitorItem,
-    required this.study,
-  });
-
+class const ParticipantSquare({
+  super.key,
+  required final int index,
+  required final Set<String> missed,
+  required final Set<String> completed,
+  required final int numberOfTheDay,
+  required final StudyMonitorItem monitorItem,
+  required final Study study,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(

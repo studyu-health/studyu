@@ -2,12 +2,10 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/forms/form_data.dart';
 import 'package:uuid/uuid.dart';
 
-class ReportItemFormData extends IFormData {
-  ReportItemFormData({required this.isPrimary, required this.section});
-
-  late bool isPrimary;
-  final ReportSection section;
-
+class ReportItemFormData({
+  required var bool isPrimary,
+  required final ReportSection section,
+}) extends IFormData {
   @override
   String get id => section.id;
 

@@ -4,21 +4,16 @@ import 'package:studyu_core/src/models/unknown_json_type_error.dart';
 
 typedef ExpressionParser = Expression Function(Map<String, dynamic> data);
 
-abstract class Expression {
+abstract class Expression(var String? type) {
   static const String keyType = 'type';
-  String? type;
-
-  Expression(this.type);
-
-  factory Expression.fromJson(Map<String, dynamic> data) =>
-      switch (data[keyType]) {
-        BooleanExpression.expressionType => BooleanExpression.fromJson(data),
-        ChoiceExpression.expressionType => ChoiceExpression.fromJson(data),
-        NotExpression.expressionType => NotExpression.fromJson(data),
-        NumericExpression.expressionType => NumericExpression.fromJson(data),
-        TextExpression.expressionType => TextExpression.fromJson(data),
-        _ => throw UnknownJsonTypeError(data[keyType]),
-      };
+  factory fromJson(Map<String, dynamic> data) => switch (data[keyType]) {
+    BooleanExpression.expressionType => BooleanExpression.fromJson(data),
+    ChoiceExpression.expressionType => ChoiceExpression.fromJson(data),
+    NotExpression.expressionType => NotExpression.fromJson(data),
+    NumericExpression.expressionType => NumericExpression.fromJson(data),
+    TextExpression.expressionType => TextExpression.fromJson(data),
+    _ => throw UnknownJsonTypeError(data[keyType]),
+  };
 
   Map<String, dynamic> toJson();
 

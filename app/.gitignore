@@ -141,6 +141,9 @@ app.*.symbols
 
 !*.lock
 
+# Fastlane lockfile is intentionally not tracked
+ios/Gemfile.lock
+
 # Android Studio will place build artifacts here
 #/android/app/debug
 #/android/app/profile

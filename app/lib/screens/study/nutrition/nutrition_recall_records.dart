@@ -5,23 +5,14 @@ import 'package:studyu_core/core.dart';
 export 'package:studyu_app/util/study_subject_extension.dart'
     show nutritionStudyDayFor;
 
-class NutritionRecallRecord {
-  final DailyRecall recall;
-  final String taskId;
-  final String? periodId;
-  final String interventionId;
-  final int studyDaySnapshot;
-  final SubjectProgress? progress;
-
-  const NutritionRecallRecord({
-    required this.recall,
-    required this.taskId,
-    required this.periodId,
-    required this.interventionId,
-    required this.studyDaySnapshot,
-    this.progress,
-  });
-
+class const NutritionRecallRecord({
+  required final DailyRecall recall,
+  required final String taskId,
+  required final String? periodId,
+  required final String interventionId,
+  required final int studyDaySnapshot,
+  final SubjectProgress? progress,
+}) {
   NutritionRecallPersistenceTarget? get persistenceTarget {
     final completedAt = progress?.completedAt;
     if (periodId == null || completedAt == null) return null;

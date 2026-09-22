@@ -19,19 +19,19 @@ class FreeTextQuestion extends Question<String> {
   @JsonKey(name: 'customTypeExpression')
   String? customTypeExpression;
 
-  FreeTextQuestion({
+  new({
     required this.textType,
     required this.lengthRange,
     this.customTypeExpression,
   }) : super(questionType);
 
-  FreeTextQuestion.withId({
+  new withId({
     required this.textType,
     required this.lengthRange,
     this.customTypeExpression,
   }) : super.withId(questionType);
 
-  factory FreeTextQuestion.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$FreeTextQuestionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$FreeTextQuestionToJson(this);
@@ -40,7 +40,7 @@ class FreeTextQuestion extends Question<String> {
       Answer.forQuestion(this, response);
 }
 
-enum FreeTextQuestionType {
+enum FreeTextQuestionType() {
   any,
   alphanumeric,
   numeric,
@@ -52,7 +52,7 @@ enum FreeTextQuestionType {
 
 const alphanumericPattern = r'^[a-zA-Z0-9]*$';
 
-enum FreeTextValidationError {
+enum FreeTextValidationError() {
   tooShort,
   tooLong,
   notAlphanumeric,

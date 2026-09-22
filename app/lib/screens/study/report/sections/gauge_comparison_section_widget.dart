@@ -5,29 +5,27 @@ import 'package:studyu_app/screens/study/report/util/report_utilities.dart';
 import 'package:studyu_app/widgets/report/gauges_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class GaugeComparisonSectionWidget extends ReportSectionWidget {
-  final GaugeComparisonSection section;
-
-  const GaugeComparisonSectionWidget(super.subject, this.section, {super.key});
-
+class const GaugeComparisonSectionWidget(
+  super.subject,
+  final GaugeComparisonSection section, {
+  super.key,
+}) extends ReportSectionWidget {
   @override
   Widget build(BuildContext context) {
     return _GaugeComparisonSectionStatefulWidget(subject, section);
   }
 }
 
-class _GaugeComparisonSectionStatefulWidget extends StatefulWidget {
-  final StudySubject subject;
-  final GaugeComparisonSection section;
-
-  const _GaugeComparisonSectionStatefulWidget(this.subject, this.section);
-
+class const _GaugeComparisonSectionStatefulWidget(
+  final StudySubject subject,
+  final GaugeComparisonSection section,
+) extends StatefulWidget {
   @override
   State<_GaugeComparisonSectionStatefulWidget> createState() =>
       _GaugeComparisonSectionState();
 }
 
-class _GaugeComparisonSectionState
+class _GaugeComparisonSectionState()
     extends State<_GaugeComparisonSectionStatefulWidget> {
   bool _isLoading = true;
   bool showColorlessGauges = false;

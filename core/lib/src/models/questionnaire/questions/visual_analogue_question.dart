@@ -15,11 +15,11 @@ class VisualAnalogueQuestion extends SliderQuestion {
   String minimumAnnotation = '';
   String maximumAnnotation = '';
 
-  VisualAnalogueQuestion() : super(questionType);
+  new() : super(questionType);
 
-  VisualAnalogueQuestion.withId() : super.withId(questionType);
+  new withId() : super.withId(questionType);
 
-  factory VisualAnalogueQuestion.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$VisualAnalogueQuestionFromJson(json);
 
   @override

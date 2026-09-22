@@ -8,6 +8,8 @@ import 'package:studyu_app/screens/app_onboarding/app_error_screen.dart';
 import 'package:studyu_app/screens/app_onboarding/app_outdated_screen.dart';
 import 'package:studyu_app/screens/app_onboarding/loading_screen.dart';
 import 'package:studyu_app/screens/app_onboarding/onboarding_screen.dart';
+import 'package:studyu_app/screens/app_onboarding/recovery_phrase_screen.dart';
+import 'package:studyu_app/screens/app_onboarding/restore_account_screen.dart';
 import 'package:studyu_app/screens/app_onboarding/study_unavailable_screen.dart';
 import 'package:studyu_app/screens/app_onboarding/terms.dart';
 import 'package:studyu_app/screens/app_onboarding/welcome.dart';
@@ -15,22 +17,22 @@ import 'package:studyu_app/screens/study/dashboard/contact_tab/contact_screen.da
 import 'package:studyu_app/screens/study/dashboard/contact_tab/faq.dart';
 import 'package:studyu_app/screens/study/dashboard/dashboard.dart';
 import 'package:studyu_app/screens/study/dashboard/settings.dart';
+import 'package:studyu_app/screens/study/dashboard/study_information.dart';
 import 'package:studyu_app/screens/study/multimodal/capture_picture_screen.dart';
 import 'package:studyu_app/screens/study/onboarding/consent.dart';
 import 'package:studyu_app/screens/study/onboarding/eligibility_screen.dart';
 import 'package:studyu_app/screens/study/onboarding/intervention_selection.dart';
 import 'package:studyu_app/screens/study/onboarding/journey_overview.dart';
-import 'package:studyu_app/screens/study/onboarding/kickoff.dart';
 import 'package:studyu_app/screens/study/onboarding/study_overview.dart';
 import 'package:studyu_app/screens/study/onboarding/study_selection.dart';
 import 'package:studyu_app/screens/study/report/report_details.dart';
 import 'package:studyu_app/screens/study/report/report_history.dart';
 import 'package:studyu_app/screens/study/tasks/task_screen.dart';
+import 'package:studyu_app/widgets/onboarding_shell.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_core/env.dart';
 
 /// Route name constants
-class RouteNames {
+class RouteNames() {
   static const String loading = 'loading';
   static const String preview = 'preview';
   static const String appOutdated = 'appOutdated';
@@ -39,15 +41,17 @@ class RouteNames {
   static const String dashboard = 'dashboard';
   static const String welcome = 'welcome';
   static const String onboarding = 'onboarding';
-  static const String about = 'about';
   static const String terms = 'terms';
+  static const String recoveryPhrase = 'recoveryPhrase';
+  static const String restoreAccount = 'restoreAccount';
+  static const String about = 'about';
   static const String studySelection = 'studySelection';
   static const String studyOverview = 'studyOverview';
   static const String interventionSelection = 'interventionSelection';
   static const String journey = 'journey';
   static const String consent = 'consent';
-  static const String kickoff = 'kickoff';
   static const String contact = 'contact';
+  static const String studyInformation = 'studyInformation';
   static const String faq = 'faq';
   static const String appSettings = 'settings';
   static const String questionnaire = 'questionnaire';
@@ -56,6 +60,7 @@ class RouteNames {
   static const String performanceDetails = 'performanceDetails';
   static const String task = 'task';
   static const String eligibilityCheck = 'eligibilityCheck';
+  static const String kickoff = 'kickoff';
   static const String capturePicture = 'capturePicture';
   static const String invite = 'invite';
   static const String study = 'study';
@@ -63,6 +68,139 @@ class RouteNames {
 
 bool isStudyAvailableForTesting(Study study) =>
     study.interventions.length >= StudySchedule.numberOfInterventions;
+
+/// Enrollment routes a started participant must not re-enter. `/terms`
+/// stays readable as an informational document.
+const Set<String> _enrollmentRoutePaths = <String>{
+  '/${RouteNames.welcome}',
+  '/${RouteNames.studySelection}',
+  '/${RouteNames.studyOverview}',
+  '/${RouteNames.interventionSelection}',
+  '/${RouteNames.eligibilityCheck}',
+  '/${RouteNames.journey}',
+  '/${RouteNames.consent}',
+  '/${RouteNames.kickoff}',
+};
+
+/// Phase guarded by each study onboarding route.
+StudyOnboardingPhase? _phaseForRoute(String path) => switch (path) {
+  '/${RouteNames.studyOverview}' => StudyOnboardingPhase.overview,
+  '/${RouteNames.terms}' => StudyOnboardingPhase.terms,
+  '/${RouteNames.eligibilityCheck}' => StudyOnboardingPhase.eligibility,
+  '/${RouteNames.interventionSelection}' =>
+    StudyOnboardingPhase.interventionSelection,
+  '/${RouteNames.journey}' => StudyOnboardingPhase.journey,
+  '/${RouteNames.consent}' => StudyOnboardingPhase.consent,
+  _ => null,
+};
+
+/// Canonical route for each onboarding phase.
+String onboardingStepRoute(StudyOnboardingPhase? phase) => switch (phase) {
+  StudyOnboardingPhase.overview => '/${RouteNames.studyOverview}',
+  StudyOnboardingPhase.terms => '/${RouteNames.terms}',
+  StudyOnboardingPhase.eligibility => '/${RouteNames.eligibilityCheck}',
+  StudyOnboardingPhase.interventionSelection =>
+    '/${RouteNames.interventionSelection}',
+  StudyOnboardingPhase.journey => '/${RouteNames.journey}',
+  StudyOnboardingPhase.consent => '/${RouteNames.consent}',
+  StudyOnboardingPhase.complete => '/${RouteNames.dashboard}',
+  null => '/${RouteNames.loading}',
+};
+
+String? routePrerequisiteRedirect(
+  String path,
+  Object? extra,
+  AppState appState,
+) {
+  final activeSubject = appState.activeSubject;
+  final started = activeSubject?.startedAt != null;
+
+  // Enrollment-phase restrictions apply only to the non-preview flow;
+  // preview mode intentionally retains direct access to onboarding routes.
+  if (!appState.isPreview) {
+    // A started participant must not re-enter any enrollment route.
+    if (started && _enrollmentRoutePaths.contains(path)) {
+      return '/${RouteNames.dashboard}';
+    }
+
+    final phase = appState.effectiveOnboardingPhase;
+    if (phase != null) {
+      // `/welcome` must not stay open once a participant has an active
+      // subject: the entry hub must not abandon or replace an in-progress
+      // enrollment. A pending invite deep link has no subject yet and
+      // still enters through the welcome dialog.
+      if (path == '/${RouteNames.welcome}' && activeSubject != null) {
+        return onboardingStepRoute(phase);
+      }
+
+      // An enrolling participant may open the current phase route and
+      // navigate back to an earlier phase; every forward jump redirects
+      // to the canonical current step.
+      final routePhase = _phaseForRoute(path);
+      if (routePhase != null && routePhase.index > phase.index) {
+        return onboardingStepRoute(phase);
+      }
+    }
+  }
+
+  final hasPrerequisite = switch (path) {
+    '/${RouteNames.studyOverview}' ||
+    '/${RouteNames.interventionSelection}' => appState.selectedStudy != null,
+    '/${RouteNames.eligibilityCheck}' =>
+      appState.selectedStudy != null ||
+          extra is Study ||
+          extra is EligibilityScreenArguments && extra.study != null,
+    '/${RouteNames.journey}' ||
+    '/${RouteNames.consent}' => appState.activeSubject != null,
+    '/${RouteNames.dashboard}' ||
+    '/${RouteNames.appSettings}' ||
+    '/${RouteNames.studyInformation}' ||
+    '/${RouteNames.reportHistory}' => appState.activeSubject?.startedAt != null,
+    // Route extras cannot be supplied through a URL, so a missing or
+    // mismatched extra means the route was opened outside the app flow.
+    '/${RouteNames.task}' => extra is TaskInstance,
+    '/${RouteNames.reportDetails}' =>
+      // Historical reports are loaded per user id
+      // (StudySubject.getStudyHistory), so matching the signed-in
+      // participant's user id is the trustworthy ownership invariant.
+      appState.activeSubject?.startedAt != null &&
+          extra is StudySubject &&
+          extra.userId == appState.activeSubject!.userId,
+    '/${RouteNames.capturePicture}' =>
+      appState.activeSubject?.startedAt != null &&
+          extra is Map<String, String> &&
+          extra['studyId'] == appState.activeSubject!.studyId &&
+          extra['userId'] == appState.activeSubject!.userId,
+    _ => true,
+  };
+
+  return hasPrerequisite
+      ? null
+      : appState.activeSubject?.startedAt != null
+      ? '/${RouteNames.dashboard}'
+      : '/${RouteNames.loading}';
+}
+
+String initialRouteFromPlatformRoute(String platformRoute) {
+  final uri = Uri.tryParse(platformRoute);
+  if (uri == null) return '/${RouteNames.loading}';
+
+  final isWebEntryRoute = switch (uri.pathSegments) {
+    [RouteNames.preview] => true,
+    [RouteNames.invite, final code] ||
+    [RouteNames.study, final code] when code.isNotEmpty => true,
+    _ => false,
+  };
+  final isAppLink =
+      uri.scheme == appScheme &&
+      (uri.host == RouteNames.invite || uri.host == RouteNames.study) &&
+      uri.pathSegments.length == 1 &&
+      uri.pathSegments.first.isNotEmpty;
+
+  return isWebEntryRoute || isAppLink
+      ? platformRoute
+      : '/${RouteNames.loading}';
+}
 
 /// Creates and configures the GoRouter instance for the app
 GoRouter createAppRouter({
@@ -73,6 +211,12 @@ GoRouter createAppRouter({
   return GoRouter(
     navigatorKey: navigatorKey,
     initialLocation: initialLocation,
+    errorBuilder: (context, state) {
+      // Unknown routes restart through the loading flow so the canonical
+      // router (with its availability and prerequisite guards) decides
+      // the next screen instead of stranding the user on an error page.
+      return const LoadingScreen();
+    },
     redirect: (context, state) {
       if (state.uri.scheme == appScheme) {
         if (state.uri.host == 'invite') {
@@ -80,7 +224,7 @@ GoRouter createAppRouter({
               ? state.uri.pathSegments.first
               : '';
           if (code.isNotEmpty) {
-            return '/${RouteNames.invite}/$code';
+            return '/${RouteNames.invite}/${Uri.encodeComponent(code)}';
           }
         }
 
@@ -101,14 +245,23 @@ GoRouter createAppRouter({
         '/${RouteNames.eligibilityCheck}' => appState.selectedStudy,
         '/${RouteNames.journey}' ||
         '/${RouteNames.consent}' ||
-        '/${RouteNames.kickoff}' ||
-        '/${RouteNames.dashboard}' =>
+        '/${RouteNames.dashboard}' ||
+        '/${RouteNames.appSettings}' ||
+        '/${RouteNames.studyInformation}' ||
+        '/${RouteNames.reportHistory}' =>
           appState.activeSubject?.study ?? appState.selectedStudy,
         _ => null,
       };
       if (study != null && !isStudyAvailableForTesting(study)) {
         return '/${RouteNames.studyUnavailable}';
       }
+
+      final prerequisiteRedirect = routePrerequisiteRedirect(
+        state.uri.path,
+        state.extra,
+        appState,
+      );
+      if (prerequisiteRedirect != null) return prerequisiteRedirect;
 
       // Remove splash screen when navigating away from loading screen
       if (state.uri.path != '/${RouteNames.loading}') {
@@ -178,45 +331,102 @@ GoRouter createAppRouter({
         name: RouteNames.about,
         builder: (context, state) => const AboutScreen(),
       ),
+
       GoRoute(
-        path: '/${RouteNames.terms}',
-        name: RouteNames.terms,
-        builder: (context, state) => const TermsScreen(),
+        path: '/${RouteNames.restoreAccount}',
+        name: RouteNames.restoreAccount,
+        builder: (context, state) => const RestoreAccountScreen(),
       ),
-      GoRoute(
-        path: '/${RouteNames.studySelection}',
-        name: RouteNames.studySelection,
-        builder: (context, state) => const StudySelectionScreen(),
-      ),
-      GoRoute(
-        path: '/${RouteNames.studyOverview}',
-        name: RouteNames.studyOverview,
-        builder: (context, state) => const StudyOverviewScreen(),
-      ),
-      GoRoute(
-        path: '/${RouteNames.interventionSelection}',
-        name: RouteNames.interventionSelection,
-        builder: (context, state) => const InterventionSelectionScreen(),
-      ),
-      GoRoute(
-        path: '/${RouteNames.journey}',
-        name: RouteNames.journey,
-        builder: (context, state) => const JourneyOverviewScreen(),
-      ),
-      GoRoute(
-        path: '/${RouteNames.consent}',
-        name: RouteNames.consent,
-        builder: (context, state) => const ConsentScreen(),
-      ),
-      GoRoute(
-        path: '/${RouteNames.kickoff}',
-        name: RouteNames.kickoff,
-        builder: (context, state) => const KickoffScreen(),
+      // Persistent onboarding shell: BottomOnboardingNavigation stays mounted
+      // while only the child page changes during the study-onboarding flow.
+      // Keep selection here so its study-tile Hero shares this navigator.
+      ShellRoute(
+        builder: (context, state, child) => OnboardingShell(
+          routePath: state.uri.path,
+          hideNavigation: state.uri.path == '/${RouteNames.studySelection}',
+          child: child,
+        ),
+        routes: [
+          GoRoute(
+            path: '/${RouteNames.studySelection}',
+            name: RouteNames.studySelection,
+            builder: (context, state) => const StudySelectionScreen(),
+          ),
+          GoRoute(
+            path: '/${RouteNames.studyOverview}',
+            name: RouteNames.studyOverview,
+            builder: (context, state) => const StudyOverviewScreen(),
+          ),
+          GoRoute(
+            path: '/${RouteNames.terms}',
+            name: RouteNames.terms,
+            builder: (context, state) {
+              final arguments = state.extra;
+              return TermsScreen(
+                isPushed: arguments == true || arguments is TermsScreenArguments
+                    ? true
+                    : null,
+                onAccepted: arguments is TermsScreenArguments
+                    ? arguments.onAccepted
+                    : null,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/${RouteNames.eligibilityCheck}',
+            name: RouteNames.eligibilityCheck,
+            builder: (context, state) {
+              final extra = state.extra;
+              final selectedStudy = context.read<AppState>().selectedStudy;
+              if (extra is EligibilityScreenArguments) {
+                return EligibilityScreen(
+                  study: extra.study ?? selectedStudy,
+                  onEligible: extra.onEligible,
+                );
+              }
+              return EligibilityScreen(study: extra as Study? ?? selectedStudy);
+            },
+          ),
+          GoRoute(
+            path: '/${RouteNames.interventionSelection}',
+            name: RouteNames.interventionSelection,
+            builder: (context, state) => const InterventionSelectionScreen(),
+          ),
+          GoRoute(
+            path: '/${RouteNames.journey}',
+            name: RouteNames.journey,
+            builder: (context, state) => const JourneyOverviewScreen(),
+          ),
+          GoRoute(
+            path: '/${RouteNames.consent}',
+            name: RouteNames.consent,
+            builder: (context, state) => const ConsentScreen(),
+          ),
+          GoRoute(
+            path: '/${RouteNames.recoveryPhrase}',
+            name: RouteNames.recoveryPhrase,
+            builder: (context, state) => RecoveryPhraseScreen(
+              continueToDashboard:
+                  state.uri.queryParameters['next'] == RouteNames.dashboard,
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: '/${RouteNames.contact}',
         name: RouteNames.contact,
         builder: (context, state) => const ContactScreen(),
+      ),
+      GoRoute(
+        path: '/${RouteNames.studyInformation}',
+        name: RouteNames.studyInformation,
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          name: state.uri.path,
+          transitionsBuilder: (_, animation, _, child) =>
+              FadeTransition(opacity: animation, child: child),
+          child: const StudyInformationScreen(),
+        ),
       ),
       GoRoute(
         path: '/${RouteNames.faq}',
@@ -248,14 +458,7 @@ GoRouter createAppRouter({
           return TaskScreen(taskInstance: taskInstance);
         },
       ),
-      GoRoute(
-        path: '/${RouteNames.eligibilityCheck}',
-        name: RouteNames.eligibilityCheck,
-        builder: (context, state) {
-          final study = state.extra as Study?;
-          return EligibilityScreen(study: study);
-        },
-      ),
+
       GoRoute(
         path: '/${RouteNames.reportDetails}',
         name: RouteNames.reportDetails,

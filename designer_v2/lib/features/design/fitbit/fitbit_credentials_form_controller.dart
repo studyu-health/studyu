@@ -12,20 +12,14 @@ import 'package:studyu_designer_v2/repositories/fitbit_credentials_repository.da
 part 'fitbit_credentials_form_controller.g.dart';
 
 //TODO: right now FitbitCredentials is part of Study form controller, this is not an issue it still works but I think I need to refactor it.
-class FitbitCredentialsFormViewModel
-    extends FormViewModel<StudyFitbitCredentials> {
-  FitbitCredentialsFormViewModel({
-    required this.study,
-    required this.fitbitCredentialsRepository,
-    super.delegate,
-    super.formData,
-    super.autosave = true,
-    super.validationSet,
-  });
-
-  final Study study;
-  final IFitbitCredentialsRepository fitbitCredentialsRepository;
-
+class FitbitCredentialsFormViewModel({
+  required final Study study,
+  required final IFitbitCredentialsRepository fitbitCredentialsRepository,
+  super.delegate,
+  super.formData,
+  super.autosave = true,
+  super.validationSet,
+}) extends FormViewModel<StudyFitbitCredentials> {
   // - Form fields
 
   final FormControl<String> clientIdControl = FormControl();

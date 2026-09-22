@@ -20,9 +20,11 @@ void main() {
     final local = _food('local', 'Local Apple');
     final repository = _ExternalLibraryRepository([_template(local)]);
     final search = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch:
           ({required query, required page, required pageSize}) async =>
               UsdaSearchResponse(
@@ -58,9 +60,11 @@ void main() {
   ) async {
     final repository = _ExternalLibraryRepository(const []);
     final search = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch:
           ({required query, required page, required pageSize}) async =>
               UsdaSearchResponse(
@@ -90,12 +94,16 @@ void main() {
     final local = _food('local', 'Local Apple');
     final repository = _ExternalLibraryRepository([_template(local)]);
     final search = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              throw StateError('offline'),
-      usdaFoodSearch:
-          ({required query, required page, required pageSize}) async =>
-              throw StateError('offline'),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => throw StateError('offline'),
+      usdaFoodSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => throw StateError('offline'),
     );
     final viewModel = TemplateViewModel(
       userId: 'subject',
@@ -118,9 +126,11 @@ void main() {
   ) async {
     final repository = _ExternalLibraryRepository(const []);
     final search = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch:
           ({required query, required page, required pageSize}) async =>
               UsdaSearchResponse(
@@ -154,9 +164,11 @@ void main() {
     final meal = _food('meal', 'Fruit bowl')..entryType = FoodEntryType.meal;
     final repository = _ExternalLibraryRepository([_template(meal)]);
     final search = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch: ({required query, required page, required pageSize}) {
         requests++;
         return response.future;
@@ -195,9 +207,11 @@ void main() {
   ) async {
     final repository = _ExternalLibraryRepository(const []);
     final search = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch:
           ({required query, required page, required pageSize}) async =>
               UsdaSearchResponse(
@@ -239,9 +253,11 @@ void main() {
   ) async {
     final repository = _ExternalLibraryRepository(const []);
     final search = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch:
           ({required query, required page, required pageSize}) async =>
               UsdaSearchResponse(
@@ -285,9 +301,11 @@ void main() {
     final repository = _ExternalLibraryRepository(const [])
       ..failuresRemaining = 1;
     final search = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch:
           ({required query, required page, required pageSize}) async =>
               UsdaSearchResponse(
@@ -535,10 +553,8 @@ UsdaFoodItem _externalFood() => UsdaFoodItem(
   foodNutrients: [UsdaFoodNutrient(nutrientId: 1008, value: 52)],
 );
 
-class _ExternalLibraryRepository extends NutritionFoodRepository {
-  _ExternalLibraryRepository(this.templates);
-
-  final List<SavedFoodTemplate> templates;
+class _ExternalLibraryRepository(final List<SavedFoodTemplate> templates)
+    extends NutritionFoodRepository {
   FoodEntry? saved;
   int saveCount = 0;
   int saveAttempts = 0;
@@ -574,10 +590,8 @@ class _ExternalLibraryRepository extends NutritionFoodRepository {
   }
 }
 
-class _LibraryRepository extends NutritionFoodRepository {
-  _LibraryRepository(this.template);
-
-  final SavedFoodTemplate template;
+class _LibraryRepository(final SavedFoodTemplate template)
+    extends NutritionFoodRepository {
   FoodEntry? saved;
   String? expectedVersionId;
 

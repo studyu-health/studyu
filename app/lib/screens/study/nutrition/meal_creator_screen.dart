@@ -15,30 +15,18 @@ import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
 import 'package:studyu_core/core.dart';
 
-class MealCreatorScreen extends StatefulWidget {
-  final FoodEntry? existingMeal;
-  final List<FoodEntry> initialFoods;
-  final String? initialName;
-  final bool showCurrentDayPropagationOption;
-  final bool showCurrentMealOnlyNotice;
-  final bool showExpansionNotice;
-  final ValueChanged<bool>? onCurrentDayPropagationChanged;
-  final TemplateViewModel? templateViewModel;
-  final void Function(FoodEntry food, Offset? source)? onSavedToSelection;
-
-  const MealCreatorScreen({
-    this.existingMeal,
-    this.initialFoods = const [],
-    this.initialName,
-    this.showCurrentDayPropagationOption = false,
-    this.showCurrentMealOnlyNotice = false,
-    this.showExpansionNotice = false,
-    this.onCurrentDayPropagationChanged,
-    this.templateViewModel,
-    this.onSavedToSelection,
-    super.key,
-  });
-
+class const MealCreatorScreen({
+  final FoodEntry? existingMeal,
+  final List<FoodEntry> initialFoods = const [],
+  final String? initialName,
+  final bool showCurrentDayPropagationOption = false,
+  final bool showCurrentMealOnlyNotice = false,
+  final bool showExpansionNotice = false,
+  final ValueChanged<bool>? onCurrentDayPropagationChanged,
+  final TemplateViewModel? templateViewModel,
+  final void Function(FoodEntry food, Offset? source)? onSavedToSelection,
+  super.key,
+}) extends StatefulWidget {
   static MaterialPageRoute<FoodEntry> route({
     FoodEntry? existingMeal,
     List<FoodEntry> initialFoods = const [],
@@ -67,7 +55,7 @@ class MealCreatorScreen extends StatefulWidget {
   State<MealCreatorScreen> createState() => _MealCreatorScreenState();
 }
 
-class _MealCreatorScreenState extends State<MealCreatorScreen> {
+class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
@@ -625,9 +613,8 @@ class _MealCreatorScreenState extends State<MealCreatorScreen> {
           tags: result.tags,
         );
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.template_saved)));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
         }
       } catch (error, stackTrace) {
         StudyULogger.error('Failed to save meal template: $error\n$stackTrace');
@@ -846,21 +833,13 @@ class _MealCreatorScreenState extends State<MealCreatorScreen> {
 // WIDGETS
 // ============================================================
 
-class _MealInfoCard extends StatelessWidget {
-  final TextEditingController nameController;
-  final TextEditingController descriptionController;
-  final TextEditingController servingsController;
-  final ThemeData theme;
-  final AppLocalizations l10n;
-
-  const _MealInfoCard({
-    required this.nameController,
-    required this.descriptionController,
-    required this.servingsController,
-    required this.theme,
-    required this.l10n,
-  });
-
+class const _MealInfoCard({
+  required final TextEditingController nameController,
+  required final TextEditingController descriptionController,
+  required final TextEditingController servingsController,
+  required final ThemeData theme,
+  required final AppLocalizations l10n,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -958,17 +937,11 @@ class _MealInfoCard extends StatelessWidget {
   }
 }
 
-class _PreparationDetailsCard extends StatelessWidget {
-  final TextEditingController rawWeightController;
-  final TextEditingController cookedWeightController;
-  final TextEditingController preparationMethodController;
-
-  const _PreparationDetailsCard({
-    required this.rawWeightController,
-    required this.cookedWeightController,
-    required this.preparationMethodController,
-  });
-
+class const _PreparationDetailsCard({
+  required final TextEditingController rawWeightController,
+  required final TextEditingController cookedWeightController,
+  required final TextEditingController preparationMethodController,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1034,21 +1007,13 @@ class _PreparationDetailsCard extends StatelessWidget {
   }
 }
 
-class _FoodsSectionHeader extends StatelessWidget {
-  final int foodCount;
-  final ThemeData theme;
-  final VoidCallback onAddFood;
-  final VoidCallback onToggleQuickAdd;
-  final bool showQuickAdd;
-
-  const _FoodsSectionHeader({
-    required this.foodCount,
-    required this.theme,
-    required this.onAddFood,
-    required this.onToggleQuickAdd,
-    required this.showQuickAdd,
-  });
-
+class const _FoodsSectionHeader({
+  required final int foodCount,
+  required final ThemeData theme,
+  required final VoidCallback onAddFood,
+  required final VoidCallback onToggleQuickAdd,
+  required final bool showQuickAdd,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1097,26 +1062,18 @@ class _FoodsSectionHeader extends StatelessWidget {
   }
 }
 
-class _QuickAddForm extends StatefulWidget {
-  final TextEditingController nameController;
-  final TextEditingController amountController;
-  final TextEditingController caloriesController;
-  final VoidCallback onAdd;
-  final ThemeData theme;
-
-  const _QuickAddForm({
-    required this.nameController,
-    required this.amountController,
-    required this.caloriesController,
-    required this.onAdd,
-    required this.theme,
-  });
-
+class const _QuickAddForm({
+  required final TextEditingController nameController,
+  required final TextEditingController amountController,
+  required final TextEditingController caloriesController,
+  required final VoidCallback onAdd,
+  required final ThemeData theme,
+}) extends StatefulWidget {
   @override
   State<_QuickAddForm> createState() => _QuickAddFormState();
 }
 
-class _QuickAddFormState extends State<_QuickAddForm> {
+class _QuickAddFormState() extends State<_QuickAddForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1213,11 +1170,8 @@ class _QuickAddFormState extends State<_QuickAddForm> {
   }
 }
 
-class _EmptyFoodsState extends StatelessWidget {
-  final ThemeData theme;
-
-  const _EmptyFoodsState({required this.theme});
-
+class const _EmptyFoodsState({required final ThemeData theme})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1258,21 +1212,13 @@ class _EmptyFoodsState extends StatelessWidget {
   }
 }
 
-class _FoodCard extends StatelessWidget {
-  final FoodEntry food;
-  final FoodComposition composition;
-  final ThemeData theme;
-  final VoidCallback onRemove;
-  final Function(double amount, String unit) onUpdateAmount;
-
-  const _FoodCard({
-    required this.food,
-    required this.composition,
-    required this.theme,
-    required this.onRemove,
-    required this.onUpdateAmount,
-  });
-
+class const _FoodCard({
+  required final FoodEntry food,
+  required final FoodComposition composition,
+  required final ThemeData theme,
+  required final VoidCallback onRemove,
+  required final Function(double amount, String unit) onUpdateAmount,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

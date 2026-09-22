@@ -20,7 +20,7 @@ import 'package:studyu_designer_v2/repositories/model_repository.dart';
 import 'package:studyu_designer_v2/repositories/study_repository.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 
-class _MockStudyRepository extends Mock implements IStudyRepository {}
+class _MockStudyRepository() extends Mock implements IStudyRepository;
 
 void main() {
   setUpAll(() => AppTranslation.setForTesting(AppLocalizationsEn()));
@@ -31,7 +31,9 @@ void main() {
     final fixture = _fixture();
     addTearDown(fixture.router.dispose);
 
-    await tester.pumpWidget(fixture.app);
+    await tester.pumpWidget(
+      ProviderScope(overrides: fixture.overrides.cast(), child: fixture.app),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('New survey'));
     await tester.pumpAndSettle();
@@ -52,7 +54,9 @@ void main() {
     final fixture = _fixture(initialMeasurementId: 'missing-survey');
     addTearDown(fixture.router.dispose);
 
-    await tester.pumpWidget(fixture.app);
+    await tester.pumpWidget(
+      ProviderScope(overrides: fixture.overrides.cast(), child: fixture.app),
+    );
     await tester.pumpAndSettle();
 
     final exception = tester.takeException();
@@ -65,7 +69,12 @@ void main() {
   });
 }
 
-({Widget app, MeasurementsFormViewModel measurements, GoRouter router})
+({
+  Widget app,
+  List<dynamic> overrides,
+  MeasurementsFormViewModel measurements,
+  GoRouter router,
+})
 _fixture({String? initialMeasurementId}) {
   final study = Study.withId('study-1');
   late final MeasurementsFormViewModel measurements;
@@ -133,15 +142,12 @@ _fixture({String? initialMeasurementId}) {
   );
 
   return (
-    app: ProviderScope(
-      overrides: [
-        studyControllerProvider(study.id).overrideWithValue(state),
-        measurementsFormViewModelProvider(
-          study.id,
-        ).overrideWithValue(measurements),
-      ],
-      child: MaterialApp.router(routerConfig: router),
-    ),
+    app: MaterialApp.router(routerConfig: router),
+    overrides: [
+      studyControllerProvider(study.id).overrideWithValue(state),
+      measurementsFormViewModelProvider(study.id)
+          .overrideWithValue(measurements),
+    ],
     measurements: measurements,
     router: router,
   );

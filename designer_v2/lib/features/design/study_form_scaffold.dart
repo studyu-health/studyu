@@ -6,18 +6,12 @@ import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 import 'package:studyu_designer_v2/features/study/study_controller.dart';
 
-class StudyFormScaffold<T extends FormViewModel> extends ConsumerWidget {
-  const StudyFormScaffold({
-    required this.studyId,
-    required this.formViewModelBuilder,
-    required this.formViewBuilder,
-    super.key,
-  });
-
-  final StudyID studyId;
-  final FormViewModelBuilder<T> formViewModelBuilder;
-  final FormViewBuilder<T> formViewBuilder;
-
+class const StudyFormScaffold<T extends FormViewModel>({
+  required final StudyID studyId,
+  required final FormViewModelBuilder<T> formViewModelBuilder,
+  required final FormViewBuilder<T> formViewBuilder,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyControllerProvider(studyId));

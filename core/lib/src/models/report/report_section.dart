@@ -10,13 +10,11 @@ abstract class ReportSection {
   String? title;
   String? description;
 
-  ReportSection(this.type);
+  new(this.type);
 
-  ReportSection.withId(this.type) : id = const Uuid().v4();
+  new withId(this.type) : id = const Uuid().v4();
 
-  factory ReportSection.fromJson(
-    Map<String, dynamic> data,
-  ) => switch (data[keyType]) {
+  factory fromJson(Map<String, dynamic> data) => switch (data[keyType]) {
     AverageSection.sectionType => AverageSection.fromJson(data),
     LinearRegressionSection.sectionType => LinearRegressionSection.fromJson(
       data,

@@ -3,18 +3,14 @@ import 'package:studyu_designer_v2/assets.dart';
 import 'package:studyu_designer_v2/common_views/layout_two_column.dart';
 import 'package:studyu_designer_v2/features/app_drawer.dart';
 
-class DashboardScaffold extends StatelessWidget {
+class const DashboardScaffold({
+  required final Widget body,
+  final Widget? overlay,
+  final Widget? endDrawer,
+  final Key? scaffoldKey,
+  super.key,
+}) extends StatelessWidget {
   static const double compactWidthThreshold = 900;
-  const DashboardScaffold({
-    required this.body,
-    this.endDrawer,
-    this.scaffoldKey,
-    super.key,
-  });
-
-  final Widget body;
-  final Widget? endDrawer;
-  final Key? scaffoldKey;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +27,18 @@ class DashboardScaffold extends StatelessWidget {
         leftWidget: isCompact
             ? const SizedBox.shrink()
             : const AppDrawer(autoCloseDrawer: false),
-        rightWidget: body,
-        dividerWidget: const VerticalDivider(width: 1, thickness: 0.3),
+        rightWidget: overlay == null
+            ? body
+            : Stack(
+                fit: StackFit.expand,
+                children: [
+                  body,
+                  Positioned.fill(child: overlay!),
+                ],
+              ),
+        dividerWidget: null,
         scrollLeft: false,
+        scrollRight: false,
         paddingLeft: null,
       ),
     );

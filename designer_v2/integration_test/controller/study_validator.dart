@@ -2,11 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:json_diff/json_diff.dart';
 import 'package:studyu_core/core.dart';
 
-class StudyValidator {
-  final String userID;
-
-  StudyValidator(this.userID);
-
+class StudyValidator(final String userID) {
   Future<Study> _fetchCurrentStudy() async {
     final studies = await SupabaseQuery.getAll<Study>(selectedColumns: ['*']);
     studies.removeWhere((Study s) => s.userId != userID);

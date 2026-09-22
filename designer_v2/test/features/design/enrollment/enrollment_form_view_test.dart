@@ -17,7 +17,7 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/repositories/model_repository.dart';
 import 'package:studyu_designer_v2/repositories/study_repository.dart';
 
-class _MockStudyRepository extends Mock implements IStudyRepository {}
+class _MockStudyRepository() extends Mock implements IStudyRepository;
 
 void main() {
   setUpAll(() => AppTranslation.setForTesting(AppLocalizationsEn()));
@@ -47,9 +47,8 @@ void main() {
       ProviderScope(
         overrides: [
           studyControllerProvider(study.id).overrideWithValue(state),
-          enrollmentFormViewModelProvider(
-            study.id,
-          ).overrideWithValue(formViewModel),
+          enrollmentFormViewModelProvider(study.id)
+              .overrideWithValue(formViewModel),
         ],
         child: MaterialApp(
           home: Scaffold(

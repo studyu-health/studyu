@@ -11,7 +11,7 @@ extension on JSObject {
   external String get language;
 }
 
-class PlatformLocaleWeb implements PlatformLocale {
+class PlatformLocaleWeb() implements PlatformLocale {
   @override
   Locale getPlatformLocale() {
     final platformLocaleName = _navigator.language;

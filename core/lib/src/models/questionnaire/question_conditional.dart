@@ -11,12 +11,11 @@ class QuestionConditional<V> {
 
   late CompositeExpression condition;
 
-  QuestionConditional();
+  new();
 
-  QuestionConditional.withCondition(this.condition, {this.defaultValue});
+  new withCondition(this.condition, {this.defaultValue});
 
-  factory QuestionConditional.fromJson(Map<String, dynamic> json) =>
-      _fromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _fromJson(json);
 
   static QuestionConditional<V> _fromJson<K, V>(Map<String, dynamic> json) {
     final instance = _$QuestionConditionalFromJson<V>(json)

@@ -85,12 +85,16 @@ void main() {
 
     await tester.enterText(
       find.byKey(const ValueKey('study_delete_name_confirmation_field')),
-      'Hypertension Study',
+      '  Hypertension Study  ',
     );
     await tester.pump();
     expect(
       tester.widget<ElevatedButton>(deleteButtonFinder).onPressed,
       isNotNull,
     );
+
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    expect(find.text('Permanently delete?'), findsNothing);
   });
 }

@@ -1,18 +1,11 @@
 part of '../food_search_screen.dart';
 
-class _QuickSectionTabs extends StatelessWidget {
-  final List<_FoodSearchSection> sections;
-  final _FoodSearchSection selectedSection;
-  final ValueChanged<_FoodSearchSection> onChanged;
-  final AppLocalizations l10n;
-
-  const _QuickSectionTabs({
-    required this.sections,
-    required this.selectedSection,
-    required this.onChanged,
-    required this.l10n,
-  });
-
+class const _QuickSectionTabs({
+  required final List<_FoodSearchSection> sections,
+  required final _FoodSearchSection selectedSection,
+  required final ValueChanged<_FoodSearchSection> onChanged,
+  required final AppLocalizations l10n,
+}) extends StatelessWidget {
   String label(_FoodSearchSection section) {
     return switch (section) {
       _FoodSearchSection.recent => l10n.recent_foods,
@@ -55,17 +48,11 @@ class _QuickSectionTabs extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color iconColor;
-
-  const _SectionHeader({
-    required this.icon,
-    required this.title,
-    required this.iconColor,
-  });
-
+class const _SectionHeader({
+  required final IconData icon,
+  required final String title,
+  required final Color iconColor,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -87,25 +74,15 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _HistoryFoodCard extends StatelessWidget {
-  final FoodSearchHistoryItem item;
-  final VoidCallback onTap;
-  final ValueChanged<Offset?> onAdd;
-  final ThemeData theme;
-  final FoodSelectionStore? selectionStore;
-  final ValueChanged<Offset?>? onIncrement;
-  final VoidCallback? onDecrement;
-
-  const _HistoryFoodCard({
-    required this.item,
-    required this.onTap,
-    required this.onAdd,
-    required this.theme,
-    this.selectionStore,
-    this.onIncrement,
-    this.onDecrement,
-  });
-
+class const _HistoryFoodCard({
+  required final FoodSearchHistoryItem item,
+  required final VoidCallback onTap,
+  required final ValueChanged<Offset?> onAdd,
+  required final ThemeData theme,
+  final FoodSelectionStore? selectionStore,
+  final ValueChanged<Offset?>? onIncrement,
+  final VoidCallback? onDecrement,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final food = item.food;
@@ -179,9 +156,8 @@ class _HistoryFoodCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style:
-                                      ListTileTheme.of(
-                                        context,
-                                      ).titleTextStyle ??
+                                      ListTileTheme.of(context)
+                                          .titleTextStyle ??
                                       theme.textTheme.bodyLarge,
                                 ),
                                 const SizedBox(height: 2),
@@ -233,27 +209,16 @@ class _HistoryFoodCard extends StatelessWidget {
   }
 }
 
-class _FoodResultCard extends StatelessWidget {
-  final UnifiedFoodResult result;
-  final VoidCallback onTap;
-  final ValueChanged<Offset?> onAdd;
-  final ThemeData theme;
-  final FoodSelectionStore? selectionStore;
-  final String? selectionKey;
-  final ValueChanged<Offset?>? onIncrement;
-  final VoidCallback? onDecrement;
-
-  const _FoodResultCard({
-    required this.result,
-    required this.onTap,
-    required this.onAdd,
-    required this.theme,
-    this.selectionStore,
-    this.selectionKey,
-    this.onIncrement,
-    this.onDecrement,
-  });
-
+class const _FoodResultCard({
+  required final UnifiedFoodResult result,
+  required final VoidCallback onTap,
+  required final ValueChanged<Offset?> onAdd,
+  required final ThemeData theme,
+  final FoodSelectionStore? selectionStore,
+  final String? selectionKey,
+  final ValueChanged<Offset?>? onIncrement,
+  final VoidCallback? onDecrement,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -382,12 +347,10 @@ class _FoodResultCard extends StatelessWidget {
   }
 }
 
-class _ErrorMessage extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorMessage({required this.message, required this.onRetry});
-
+class const _ErrorMessage({
+  required final String message,
+  required final VoidCallback onRetry,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -411,11 +374,8 @@ class _ErrorMessage extends StatelessWidget {
   }
 }
 
-class _EmptySectionMessage extends StatelessWidget {
-  final String message;
-
-  const _EmptySectionMessage({required this.message});
-
+class const _EmptySectionMessage({required final String message})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -429,11 +389,8 @@ class _EmptySectionMessage extends StatelessWidget {
   }
 }
 
-class _NoResultsState extends StatelessWidget {
-  final String query;
-
-  const _NoResultsState({required this.query});
-
+class const _NoResultsState({required final String query})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -446,12 +403,10 @@ class _NoResultsState extends StatelessWidget {
   }
 }
 
-class _SearchFallback extends StatelessWidget {
-  final String query;
-  final VoidCallback onAddManually;
-
-  const _SearchFallback({required this.query, required this.onAddManually});
-
+class const _SearchFallback({
+  required final String query,
+  required final VoidCallback onAddManually,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -489,92 +444,55 @@ class _SearchFallback extends StatelessWidget {
   }
 }
 
-class _ServingHint extends StatelessWidget {
-  final AppLocalizations l10n;
-
-  const _ServingHint({required this.l10n});
-
+class const _ServingHint({required final AppLocalizations l10n})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         l10n.tap_item_to_choose_serving,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        style: Theme.of(context).textTheme.bodySmall
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }
 }
 
-class _FoodSearchListView extends StatelessWidget {
-  final ScrollController scrollController;
-  final AppLocalizations l10n;
-  final ThemeData theme;
-  final TemplateViewModel templateViewModel;
-  final TextEditingController searchController;
-  final bool isInitialLoading;
-  final bool isLoadingMore;
-  final bool hasSearched;
-  final bool offSearched;
-  final bool usdaSearched;
-  final bool offHasMore;
-  final bool usdaHasMore;
-  final String? errorMessage;
-  final List<UnifiedFoodResult> combinedResults;
-  final FoodSearchHistory history;
-  final _FoodSearchSection selectedSection;
-  final ValueChanged<_FoodSearchSection> onSectionChanged;
-  final _FoodSearchFilter selectedFilter;
-  final ValueChanged<_FoodSearchFilter> onFilterChanged;
-  final void Function(FoodSearchHistoryItem) onSelectHistory;
-  final void Function(FoodSearchHistoryItem, Offset? source) onAddHistory;
-  final void Function(studyu.SavedFoodTemplate) onSelectFoodTemplate;
-  final FoodLibrarySelectionAction onAddFoodTemplate;
-  final void Function(UnifiedFoodResult) onSelectResult;
-  final void Function(UnifiedFoodResult, Offset? source) onAddResult;
-  final VoidCallback onRetry;
-  final bool allowMeals;
-  final bool showServingHint;
-  final FoodSelectionStore? selectionStore;
-  final String Function(UnifiedFoodResult)? selectionKeyForResult;
-  final ValueChanged<String> onDecrementSelection;
-
-  const _FoodSearchListView({
-    required this.scrollController,
-    required this.l10n,
-    required this.theme,
-    required this.templateViewModel,
-    required this.searchController,
-    required this.isInitialLoading,
-    required this.isLoadingMore,
-    required this.hasSearched,
-    required this.offSearched,
-    required this.usdaSearched,
-    required this.offHasMore,
-    required this.usdaHasMore,
-    required this.errorMessage,
-    required this.combinedResults,
-    required this.history,
-    required this.selectedSection,
-    required this.onSectionChanged,
-    required this.selectedFilter,
-    required this.onFilterChanged,
-    required this.onSelectHistory,
-    required this.onAddHistory,
-    required this.onSelectFoodTemplate,
-    required this.onAddFoodTemplate,
-    required this.onSelectResult,
-    required this.onAddResult,
-    required this.onRetry,
-    this.allowMeals = true,
-    required this.showServingHint,
-    this.selectionStore,
-    this.selectionKeyForResult,
-    required this.onDecrementSelection,
-  });
-
+class const _FoodSearchListView({
+  required final ScrollController scrollController,
+  required final AppLocalizations l10n,
+  required final ThemeData theme,
+  required final TemplateViewModel templateViewModel,
+  required final TextEditingController searchController,
+  required final bool isInitialLoading,
+  required final bool isLoadingMore,
+  required final bool hasSearched,
+  required final bool offSearched,
+  required final bool usdaSearched,
+  required final bool offHasMore,
+  required final bool usdaHasMore,
+  required final String? errorMessage,
+  required final List<UnifiedFoodResult> combinedResults,
+  required final FoodSearchHistory history,
+  required final _FoodSearchSection selectedSection,
+  required final ValueChanged<_FoodSearchSection> onSectionChanged,
+  required final _FoodSearchFilter selectedFilter,
+  required final ValueChanged<_FoodSearchFilter> onFilterChanged,
+  required final void Function(FoodSearchHistoryItem) onSelectHistory,
+  required final void Function(FoodSearchHistoryItem, Offset? source)
+  onAddHistory,
+  required final void Function(studyu.SavedFoodTemplate) onSelectFoodTemplate,
+  required final FoodLibrarySelectionAction onAddFoodTemplate,
+  required final void Function(UnifiedFoodResult) onSelectResult,
+  required final void Function(UnifiedFoodResult, Offset? source) onAddResult,
+  required final VoidCallback onRetry,
+  final bool allowMeals = true,
+  required final bool showServingHint,
+  final FoodSelectionStore? selectionStore,
+  final String Function(UnifiedFoodResult)? selectionKeyForResult,
+  required final ValueChanged<String> onDecrementSelection,
+}) extends StatelessWidget {
   bool isAllowedTemplate(studyu.SavedFoodTemplate template) {
     return allowMeals ||
         template.prototype.entryType != studyu.FoodEntryType.meal;
@@ -868,17 +786,11 @@ class _FoodSearchListView extends StatelessWidget {
   }
 }
 
-class _SearchFilterChips extends StatelessWidget {
-  final _FoodSearchFilter selectedFilter;
-  final ValueChanged<_FoodSearchFilter> onChanged;
-  final AppLocalizations l10n;
-
-  const _SearchFilterChips({
-    required this.selectedFilter,
-    required this.onChanged,
-    required this.l10n,
-  });
-
+class const _SearchFilterChips({
+  required final _FoodSearchFilter selectedFilter,
+  required final ValueChanged<_FoodSearchFilter> onChanged,
+  required final AppLocalizations l10n,
+}) extends StatelessWidget {
   String label(_FoodSearchFilter filter) => switch (filter) {
     _FoodSearchFilter.all => l10n.filter_all,
     _FoodSearchFilter.myItems => l10n.my_saved_items,

@@ -7,9 +7,8 @@ import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/localization/string_hardcoded.dart';
 
-class CloseSuccessDialog extends StudyPageWidget {
-  const CloseSuccessDialog(super.studyId, {super.key});
-
+class const CloseSuccessDialog(super.studyId, {super.key})
+    extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);

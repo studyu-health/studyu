@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       # Remove workspace resolution lines from packages, until k-paxian/dart-package-publisher supports them
       - name: Remove workspace resolution
@@ -38,7 +38,7 @@ jobs:
           sed -i '/- core/d' pubspec.yaml
 
       - name: '>> Dart package core <<'
-        uses: k-paxian/dart-package-publisher@master
+        uses: k-paxian/dart-package-publisher@v.1.6.2
         with:
           accessToken: ${{ secrets.OAUTH_ACCESS_TOKEN }}
           refreshToken: ${{ secrets.OAUTH_REFRESH_TOKEN }}
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       # Remove workspace resolution lines from packages, until k-paxian/dart-package-publisher supports them
       - name: Remove workspace resolution
@@ -63,7 +63,7 @@ jobs:
           sed -i '/- flutter_common/d' pubspec.yaml
 
       - name: '>> Dart package flutter_common <<'
-        uses: k-paxian/dart-package-publisher@master
+        uses: k-paxian/dart-package-publisher@v.1.6.2
         with:
           accessToken: ${{ secrets.OAUTH_ACCESS_TOKEN }}
           refreshToken: ${{ secrets.OAUTH_REFRESH_TOKEN }}

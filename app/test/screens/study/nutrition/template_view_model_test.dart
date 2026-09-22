@@ -8,7 +8,10 @@ import 'fake_nutrition_food_repository.dart';
 
 void main() {
   setUpAll(() => SharedPreferences.setMockInitialValues({}));
-  setUp(() async => (await SharedPreferences.getInstance()).clear());
+  setUp(() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.clear();
+  });
 
   test(
     'custom food and saved meal templates round-trip across managers',
@@ -327,7 +330,7 @@ SavedFoodTemplate _template({
   prototype: prototype,
 );
 
-class _RefreshFailureRepository extends FakeNutritionFoodRepository {
+class _RefreshFailureRepository() extends FakeNutritionFoodRepository {
   bool failLoads = false;
 
   @override

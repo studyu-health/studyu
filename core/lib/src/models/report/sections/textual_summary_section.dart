@@ -9,11 +9,11 @@ class TextualSummarySection extends ReportSection {
 
   DataReference<num>? resultProperty;
 
-  TextualSummarySection() : super(sectionType);
+  new() : super(sectionType);
 
-  TextualSummarySection.withId() : super.withId(sectionType);
+  new withId() : super.withId(sectionType);
 
-  factory TextualSummarySection.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$TextualSummarySectionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$TextualSummarySectionToJson(this);

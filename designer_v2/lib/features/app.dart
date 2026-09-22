@@ -13,28 +13,24 @@ import 'package:studyu_designer_v2/theme.dart';
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey();
 
 /// Entry widget of the app.
-class App extends StatefulWidget {
-  const App({super.key});
-
+class const App({super.key}) extends StatefulWidget {
   @override
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
+class _AppState() extends State<App> {
   @override
   Widget build(BuildContext context) {
     return const AppContent();
   }
 }
 
-class AppContent extends ConsumerStatefulWidget {
-  const AppContent({super.key});
-
+class const AppContent({super.key}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<AppContent> createState() => _AppContentState();
 }
 
-class _AppContentState extends ConsumerState<AppContent> {
+class _AppContentState() extends ConsumerState<AppContent> {
   final settings = ValueNotifier(
     ThemeSettings(
       //sourceColor: Color(0xff2a4fda),

@@ -1,1 +1,4 @@
-enum ActionMenuType { inline, popup }
+enum ActionMenuType() {
+  inline,
+  popup,
+}

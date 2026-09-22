@@ -11,15 +11,14 @@ import 'package:studyu_designer_v2/features/design/shared/questionnaire/question
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-abstract class IScreenerQuestionLogicFormViewModel {
+abstract class IScreenerQuestionLogicFormViewModel() {
   bool get isDirtyOptionsBannerVisible;
 }
 
-class ScreenerQuestionLogicFormView extends FormConsumerWidget {
-  const ScreenerQuestionLogicFormView({required this.formViewModel, super.key});
-
-  final ScreenerQuestionFormViewModel formViewModel;
-
+class const ScreenerQuestionLogicFormView({
+  required final ScreenerQuestionFormViewModel formViewModel,
+  super.key,
+}) extends FormConsumerWidget {
   @override
   Widget build(BuildContext context, FormGroup form) {
     final theme = Theme.of(context);

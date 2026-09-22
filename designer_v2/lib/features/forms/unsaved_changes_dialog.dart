@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/common_views/confirmation_dialog.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class UnsavedChangesDialog extends StatelessWidget {
-  const UnsavedChangesDialog({super.key});
-
+class const UnsavedChangesDialog({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StandardConfirmationDialog(

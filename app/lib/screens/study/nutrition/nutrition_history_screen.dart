@@ -3,21 +3,17 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_core/core.dart';
 
-typedef NutritionRecallOpener =
-    Future<void> Function(NutritionRecallRecord record, bool editable);
+typedef NutritionRecallOpener = Future<void> Function(
+  NutritionRecallRecord record,
+  bool editable,
+);
 
-class NutritionHistoryScreen extends StatefulWidget {
-  final StudySubject subject;
-  final NutritionTask task;
-  final NutritionRecallOpener onOpenRecall;
-
-  const NutritionHistoryScreen({
-    required this.subject,
-    required this.task,
-    required this.onOpenRecall,
-    super.key,
-  });
-
+class const NutritionHistoryScreen({
+  required final StudySubject subject,
+  required final NutritionTask task,
+  required final NutritionRecallOpener onOpenRecall,
+  super.key,
+}) extends StatefulWidget {
   static MaterialPageRoute<void> route({
     required StudySubject subject,
     required NutritionTask task,
@@ -34,7 +30,7 @@ class NutritionHistoryScreen extends StatefulWidget {
   State<NutritionHistoryScreen> createState() => _NutritionHistoryScreenState();
 }
 
-class _NutritionHistoryScreenState extends State<NutritionHistoryScreen> {
+class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
   late Future<List<NutritionRecallRecord>> _records;
 
   @override
@@ -153,9 +149,8 @@ class _NutritionHistoryScreenState extends State<NutritionHistoryScreen> {
           });
         },
         title: Text(
-          MaterialLocalizations.of(
-            context,
-          ).formatMediumDate(record.recall.date),
+          MaterialLocalizations.of(context)
+              .formatMediumDate(record.recall.date),
         ),
         subtitle: foodNames.isEmpty
             ? Text(l10n.nutrition_history_no_foods_logged)

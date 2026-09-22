@@ -35,16 +35,13 @@ class ScaleQuestion extends SliderQuestion
   @JsonKey(includeToJson: false, includeFromJson: false)
   int get autostep => getAutostepSize(scaleMaxValue: maximum.toInt());
 
-  ScaleQuestion() : super(questionType);
+  new() : super(questionType);
 
-  ScaleQuestion.withId() : super.withId(questionType);
+  new withId() : super.withId(questionType);
 
-  factory ScaleQuestion.fromJson(Map<String, dynamic> json) =>
-      _$ScaleQuestionFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$ScaleQuestionFromJson(json);
 
-  factory ScaleQuestion.fromAnnotatedScaleQuestion(
-    AnnotatedScaleQuestion question,
-  ) {
+  factory fromAnnotatedScaleQuestion(AnnotatedScaleQuestion question) {
     final result = ScaleQuestion()
       ..id = question.id
       ..prompt = question.prompt
@@ -58,9 +55,7 @@ class ScaleQuestion extends SliderQuestion
     return result;
   }
 
-  factory ScaleQuestion.fromVisualAnalogueQuestion(
-    VisualAnalogueQuestion question,
-  ) {
+  factory fromVisualAnalogueQuestion(VisualAnalogueQuestion question) {
     final result = ScaleQuestion()
       ..id = question.id
       ..prompt = question.prompt

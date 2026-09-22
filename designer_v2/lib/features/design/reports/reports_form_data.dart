@@ -3,12 +3,9 @@ import 'package:studyu_designer_v2/features/design/reports/section/report_item_f
 import 'package:studyu_designer_v2/features/design/study_form_data.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class ReportsFormData implements IStudyFormData {
-  ReportsFormData({required this.reportItems});
-
-  final List<ReportItemFormData> reportItems;
-
-  factory ReportsFormData.fromStudy(Study study) {
+class ReportsFormData({required final List<ReportItemFormData> reportItems})
+    implements IStudyFormData {
+  factory fromStudy(Study study) {
     return ReportsFormData(
       reportItems: ReportItemFormData.fromDomainModel(
         study.reportSpecification,
@@ -43,7 +40,7 @@ class ReportsFormData implements IStudyFormData {
   }
 }
 
-enum ReportStatus {
+enum ReportStatus() {
   primary,
   secondary;
 

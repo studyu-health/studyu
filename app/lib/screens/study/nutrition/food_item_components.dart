@@ -17,16 +17,11 @@ Offset? globalCenter(BuildContext context) {
   return renderObject.localToGlobal(renderObject.size.center(Offset.zero));
 }
 
-class SelectionFeedbackCard extends StatelessWidget {
-  final bool selected;
-  final Widget child;
-
-  const SelectionFeedbackCard({
-    required this.selected,
-    required this.child,
-    super.key,
-  });
-
+class const SelectionFeedbackCard({
+  required final bool selected,
+  required final Widget child,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -50,17 +45,16 @@ class SelectionFeedbackCard extends StatelessWidget {
   }
 }
 
-class SelectionQuantityText extends StatefulWidget {
-  final int quantity;
-  final TextStyle? style;
-
-  const SelectionQuantityText({required this.quantity, this.style, super.key});
-
+class const SelectionQuantityText({
+  required final int quantity,
+  final TextStyle? style,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<SelectionQuantityText> createState() => _SelectionQuantityTextState();
 }
 
-class _SelectionQuantityTextState extends State<SelectionQuantityText> {
+class _SelectionQuantityTextState() extends State<SelectionQuantityText> {
   int _direction = 1;
 
   @override
@@ -103,26 +97,19 @@ class _SelectionQuantityTextState extends State<SelectionQuantityText> {
   }
 }
 
-class SelectionQuantityButton extends StatefulWidget {
-  final String tooltip;
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final VisualDensity? visualDensity;
-
-  const SelectionQuantityButton({
-    required this.tooltip,
-    required this.icon,
-    required this.onPressed,
-    this.visualDensity,
-    super.key,
-  });
-
+class const SelectionQuantityButton({
+  required final String tooltip,
+  required final IconData icon,
+  required final VoidCallback? onPressed,
+  final VisualDensity? visualDensity,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<SelectionQuantityButton> createState() =>
       _SelectionQuantityButtonState();
 }
 
-class _SelectionQuantityButtonState extends State<SelectionQuantityButton> {
+class _SelectionQuantityButtonState() extends State<SelectionQuantityButton> {
   bool _pressed = false;
   bool _pointerInteraction = false;
   int _releaseGeneration = 0;
@@ -197,24 +184,15 @@ class _SelectionQuantityButtonState extends State<SelectionQuantityButton> {
   }
 }
 
-class SelectionQuantityControl extends StatelessWidget {
-  final String name;
-  final int quantity;
-  final ValueChanged<Offset?> onIncrement;
-  final VoidCallback onDecrement;
-  final GlobalKey? quantityAnchorKey;
-  final TextStyle? quantityStyle;
-
-  const SelectionQuantityControl({
-    required this.name,
-    required this.quantity,
-    required this.onIncrement,
-    required this.onDecrement,
-    this.quantityAnchorKey,
-    this.quantityStyle,
-    super.key,
-  });
-
+class const SelectionQuantityControl({
+  required final String name,
+  required final int quantity,
+  required final ValueChanged<Offset?> onIncrement,
+  required final VoidCallback onDecrement,
+  final GlobalKey? quantityAnchorKey,
+  final TextStyle? quantityStyle,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -316,9 +294,7 @@ String? foodImageUrl(studyu.FoodEntry food) {
   return null;
 }
 
-class FoodDetailsAffordance extends StatelessWidget {
-  const FoodDetailsAffordance({super.key});
-
+class const FoodDetailsAffordance({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Tooltip(
     message: AppLocalizations.of(context)!.details,

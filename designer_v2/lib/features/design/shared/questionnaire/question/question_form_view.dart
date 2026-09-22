@@ -23,24 +23,18 @@ import 'package:studyu_designer_v2/theme.dart';
 
 /// Wrapper that dispatches to the appropriate widget for the corresponding
 /// [SurveyQuestionType] as given by [formViewModel.questionType]
-class SurveyQuestionFormView extends ConsumerStatefulWidget {
-  const SurveyQuestionFormView({
-    required this.formViewModel,
-    required this.studyId,
-    this.isHtmlStyleable = true,
-    super.key,
-  });
-
-  final QuestionFormViewModel formViewModel;
-  final String studyId;
-  final bool isHtmlStyleable;
-
+class const SurveyQuestionFormView({
+  required final QuestionFormViewModel formViewModel,
+  required final String studyId,
+  final bool isHtmlStyleable = true,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<SurveyQuestionFormView> createState() =>
       _SurveyQuestionFormViewState();
 }
 
-class _SurveyQuestionFormViewState
+class _SurveyQuestionFormViewState()
     extends ConsumerState<SurveyQuestionFormView> {
   QuestionFormViewModel get formViewModel => widget.formViewModel;
 

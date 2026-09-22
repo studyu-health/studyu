@@ -4,6 +4,6 @@ import 'package:flutter/material.dart';
 ///
 /// This prevents the height of the widget it is applied to from changing,
 /// otherwise [TextField] will grow in height when displaying an error text.
-class NullHelperDecoration extends InputDecoration {
-  const NullHelperDecoration() : super(helperText: "");
+class const NullHelperDecoration() extends InputDecoration {
+  this : super(helperText: "");
 }

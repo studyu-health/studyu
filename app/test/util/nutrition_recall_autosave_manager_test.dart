@@ -220,9 +220,9 @@ void main() {
       viewModel.addMeal(_meal('new'));
       await viewModel.flushPendingAutoSave();
       expect(
-        (await manager.scanPendingRecalls(
-          subject.id,
-        )).single.progressCompletedAt,
+        (await manager.scanPendingRecalls(subject.id))
+            .single
+            .progressCompletedAt,
         completedAt,
       );
       viewModel.dispose();
@@ -660,9 +660,14 @@ void main() {
           viewModel.onAppLifecycleStateChanged(AppLifecycleState.paused);
           await viewModel.flushPendingAutoSave();
           expect(
-            (await manager.scanPendingRecalls(
-              subject.id,
-            )).single.recall.meals.single.foods.single.foodVersionId,
+            (await manager.scanPendingRecalls(subject.id))
+                .single
+                .recall
+                .meals
+                .single
+                .foods
+                .single
+                .foodVersionId,
             'version-2',
           );
           await viewModel.reloadCanonicalRecall();
@@ -732,14 +737,13 @@ void main() {
       persistenceTarget: target,
       historicalMode: true,
       autoSaveManager: manager,
-      remoteSaver:
-          ({
-            required taskId,
-            required periodId,
-            required recall,
-            required persistenceTarget,
-            interventionIdOverride,
-          }) async => throw StateError('remote flush failed'),
+      remoteSaver: ({
+        required taskId,
+        required periodId,
+        required recall,
+        required persistenceTarget,
+        interventionIdOverride,
+      }) async => throw StateError('remote flush failed'),
     );
     await Future<void>.delayed(Duration.zero);
 
@@ -793,9 +797,12 @@ void main() {
         entryId: selected.id,
       );
 
-      final foods = (await manager.scanPendingRecalls(
-        'subject',
-      )).single.recall.meals.single.foods;
+      final foods = (await manager.scanPendingRecalls('subject'))
+          .single
+          .recall
+          .meals
+          .single
+          .foods;
       expect(foods.singleWhere((food) => food.id == selected.id).name, 'new');
       expect(
         foods.singleWhere((food) => food.id == sibling.id).name,
@@ -969,12 +976,12 @@ MealLog _meal(String id) => MealLog(
   foods: [],
 );
 
-class _DelayedRecallLoadManager extends NutritionRecallAutoSaveManager {
+class _DelayedRecallLoadManager({required SharedPreferences preferences})
+    extends NutritionRecallAutoSaveManager {
   final _loadStarted = Completer<void>();
   final _pending = Completer<PendingRecall?>();
 
-  _DelayedRecallLoadManager({required SharedPreferences preferences})
-    : super(preferences: preferences);
+  this : super(preferences: preferences);
 
   Future<void> get loadStarted => _loadStarted.future;
 
@@ -992,11 +999,9 @@ class _DelayedRecallLoadManager extends NutritionRecallAutoSaveManager {
   }
 }
 
-class _DivergentStudyDaySubject extends StudySubject {
-  _DivergentStudyDaySubject({required this.localStudyDay})
-    : super('subject', 'study', 'user', []);
-
-  final int localStudyDay;
+class _DivergentStudyDaySubject({required final int localStudyDay})
+    extends StudySubject {
+  this : super('subject', 'study', 'user', []);
 
   @override
   int getDayOfStudyFor(DateTime date) => localStudyDay;

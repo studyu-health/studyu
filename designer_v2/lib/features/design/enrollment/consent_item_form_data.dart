@@ -3,23 +3,16 @@ import 'package:studyu_designer_v2/features/forms/form_data.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:uuid/uuid.dart';
 
-class ConsentItemFormData extends IFormData {
-  ConsentItemFormData({
-    required this.consentId,
-    required this.title,
-    required this.description,
-    this.iconName,
-  });
-
-  final String consentId;
-  final String title;
-  final String description;
-  final String? iconName;
-
+class ConsentItemFormData({
+  required final String consentId,
+  required final String title,
+  required final String description,
+  final String? iconName,
+}) extends IFormData {
   @override
   String get id => consentId;
 
-  factory ConsentItemFormData.fromDomainModel(ConsentItem consentItem) {
+  factory fromDomainModel(ConsentItem consentItem) {
     return ConsentItemFormData(
       consentId: consentItem.id,
       title: consentItem.title ?? '',

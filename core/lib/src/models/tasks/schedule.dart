@@ -6,7 +6,7 @@ part 'schedule.g.dart';
 typedef ScheduleParser = Schedule Function(Map<String, dynamic> data);
 
 @JsonSerializable()
-class Schedule {
+class Schedule() {
   List<CompletionPeriod> completionPeriods = [
     CompletionPeriod.noId(
       unlockTime: StudyUTimeOfDay(hour: 8),
@@ -15,10 +15,7 @@ class Schedule {
   ];
   List<StudyUTimeOfDay> reminders = [];
 
-  Schedule();
-
-  factory Schedule.fromJson(Map<String, dynamic> json) =>
-      _$ScheduleFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$ScheduleFromJson(json);
 
   Map<String, dynamic> toJson() => _$ScheduleToJson(this);
 
@@ -34,16 +31,12 @@ class CompletionPeriod {
   final StudyUTimeOfDay unlockTime;
   final StudyUTimeOfDay lockTime;
 
-  CompletionPeriod({
-    required this.id,
-    required this.unlockTime,
-    required this.lockTime,
-  });
+  new({required this.id, required this.unlockTime, required this.lockTime});
 
-  CompletionPeriod.noId({required this.unlockTime, required this.lockTime})
+  new noId({required this.unlockTime, required this.lockTime})
     : id = const Uuid().v4();
 
-  factory CompletionPeriod.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$CompletionPeriodFromJson(json);
 
   Map<String, dynamic> toJson() => _$CompletionPeriodToJson(this);
@@ -62,20 +55,20 @@ class StudyUTimeOfDay {
   int hour = 0;
   int minute = 0;
 
-  StudyUTimeOfDay({this.hour = 0, this.minute = 0}) : super();
+  new({this.hour = 0, this.minute = 0}) : super();
 
-  StudyUTimeOfDay.fromDateTime(DateTime date) {
+  new fromDateTime(DateTime date) {
     hour = date.toLocal().hour;
     minute = date.toLocal().minute;
   }
 
-  StudyUTimeOfDay.now() {
+  new now() {
     final now = StudyUTimeOfDay.fromDateTime(DateTime.now());
     hour = now.hour;
     minute = now.minute;
   }
 
-  StudyUTimeOfDay.fromJson(String value) {
+  new fromJson(String value) {
     final elements = value.split(':').map(int.parse);
     hour = elements.elementAt(0);
     minute = elements.elementAt(1);

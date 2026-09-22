@@ -2,7 +2,7 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/forms/form_data.dart';
 
 abstract class IStudyFormData implements IFormData {
-  factory IStudyFormData.fromStudy() {
+  factory fromStudy() {
     throw UnimplementedError("Subclass responsibility");
   }
 

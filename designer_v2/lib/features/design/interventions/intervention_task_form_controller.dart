@@ -12,14 +12,13 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/performance.dart';
 import 'package:uuid/uuid.dart';
 
-class InterventionTaskFormViewModel
-    extends ManagedFormViewModel<InterventionTaskFormData>
+class InterventionTaskFormViewModel({
+  super.formData,
+  super.delegate,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends ManagedFormViewModel<InterventionTaskFormData>
     with WithScheduleControls {
-  InterventionTaskFormViewModel({
-    super.formData,
-    super.delegate,
-    super.validationSet = StudyFormValidationSet.draft,
-  }) {
+  this {
     runAsync(
       () => markAsCompletedControl.markAsDisabled(),
     ); // TODO not yet supported

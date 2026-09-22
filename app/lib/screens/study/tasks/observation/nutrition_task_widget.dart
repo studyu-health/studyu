@@ -20,28 +20,17 @@ import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_core/core.dart';
 
-class NutritionTaskWidget extends StatefulWidget {
-  final DailyRecall? existingRecall;
-  final NutritionTask? task;
-  final CompletionPeriod? completionPeriod;
-  final NutritionRecallPersistenceTarget? persistenceTarget;
-  final DateTime? historicalDate;
-  final String? interventionId;
-  final bool readOnly;
-  final NutritionFoodRepository? foodRepository;
-
-  const NutritionTaskWidget({
-    this.existingRecall,
-    this.task,
-    this.completionPeriod,
-    this.persistenceTarget,
-    this.historicalDate,
-    this.interventionId,
-    this.readOnly = false,
-    this.foodRepository,
-    super.key,
-  });
-
+class const NutritionTaskWidget({
+  final DailyRecall? existingRecall,
+  final NutritionTask? task,
+  final CompletionPeriod? completionPeriod,
+  final NutritionRecallPersistenceTarget? persistenceTarget,
+  final DateTime? historicalDate,
+  final String? interventionId,
+  final bool readOnly = false,
+  final NutritionFoodRepository? foodRepository,
+  super.key,
+}) extends StatefulWidget {
   static MaterialPageRoute<DailyRecall> route({
     DailyRecall? existingRecall,
     NutritionTask? task,
@@ -68,7 +57,8 @@ class NutritionTaskWidget extends StatefulWidget {
   State<NutritionTaskWidget> createState() => _NutritionTaskWidgetState();
 }
 
-class _NutritionTaskWidgetState extends State<NutritionTaskWidget>
+class _NutritionTaskWidgetState()
+    extends State<NutritionTaskWidget>
     with WidgetsBindingObserver {
   DailyRecallEntryViewModel? _viewModel;
   TemplateViewModel? _templateViewModel;
@@ -302,17 +292,15 @@ class _NutritionTaskWidgetState extends State<NutritionTaskWidget>
       if (historicalRoute == null) return;
       final navigator = Navigator.of(context);
       navigator.popUntil((route) => route == historicalRoute);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.historical_edit_expired)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.historical_edit_expired)));
       navigator.maybePop();
     });
   }
 
   String _historicalDateTitle(BuildContext context, AppLocalizations l10n) {
-    final date = MaterialLocalizations.of(
-      context,
-    ).formatMediumDate(widget.historicalDate!);
+    final date = MaterialLocalizations.of(context)
+        .formatMediumDate(widget.historicalDate!);
     return widget.readOnly ? date : l10n.historical_editing_date(date);
   }
 
@@ -369,9 +357,8 @@ class _NutritionTaskWidgetState extends State<NutritionTaskWidget>
                           ],
                         ),
                       )
-                    : () => Navigator.of(
-                        context,
-                      ).push(NutritionHelpScreen.route(task: widget.task!)),
+                    : () => Navigator.of(context)
+                          .push(NutritionHelpScreen.route(task: widget.task!)),
               ),
           ],
   );
@@ -864,44 +851,28 @@ class _NutritionTaskWidgetState extends State<NutritionTaskWidget>
       repository: widget.foodRepository,
     ).saveMealAsTemplate(name: result.name, meal: meal, tags: result.tags);
     if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.template_saved)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
     }
   }
 }
 
-class _MealTimelineCategory {
-  final String key;
-  final IconData icon;
-  final Color color;
-  final String label;
+class const _MealTimelineCategory({
+  required final String key,
+  required final IconData icon,
+  required final Color color,
+  required final String label,
+});
 
-  const _MealTimelineCategory({
-    required this.key,
-    required this.icon,
-    required this.color,
-    required this.label,
-  });
-}
+class _MealTimelineGroup({
+  required final _MealTimelineCategory category,
+  required final bool isUnknown,
+  required final List<({int index, MealLog meal})> entries,
+});
 
-class _MealTimelineGroup {
-  final _MealTimelineCategory category;
-  final bool isUnknown;
-  final List<({int index, MealLog meal})> entries;
-
-  _MealTimelineGroup({
-    required this.category,
-    required this.isUnknown,
-    required this.entries,
-  });
-}
-
-class _MealTimelineGroupHeader extends StatelessWidget {
-  final _MealTimelineCategory category;
-
-  const _MealTimelineGroupHeader({required this.category});
-
+class const _MealTimelineGroupHeader({
+  required final _MealTimelineCategory category,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
@@ -924,9 +895,8 @@ class _MealTimelineGroupHeader extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 category.label,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -936,22 +906,14 @@ class _MealTimelineGroupHeader extends StatelessWidget {
   }
 }
 
-class _MealTimelineCard extends StatelessWidget {
-  final MealLog meal;
-  final String categoryLabel;
-  final VoidCallback? onTap;
-  final VoidCallback? onSaveTemplate;
-  final VoidCallback? onDelete;
-
-  const _MealTimelineCard({
-    super.key,
-    required this.meal,
-    required this.categoryLabel,
-    this.onTap,
-    this.onSaveTemplate,
-    this.onDelete,
-  });
-
+class const _MealTimelineCard({
+  super.key,
+  required final MealLog meal,
+  required final String categoryLabel,
+  final VoidCallback? onTap,
+  final VoidCallback? onSaveTemplate,
+  final VoidCallback? onDelete,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -967,13 +929,11 @@ class _MealTimelineCard extends StatelessWidget {
         ? l10n.time_not_remembered
         : meal.timePrecision == MealOccurrenceTimePrecision.approximate
         ? l10n.about_time(
-            MaterialLocalizations.of(
-              context,
-            ).formatTimeOfDay(TimeOfDay.fromDateTime(meal.timestamp!)),
+            MaterialLocalizations.of(context)
+                .formatTimeOfDay(TimeOfDay.fromDateTime(meal.timestamp!)),
           )
-        : MaterialLocalizations.of(
-            context,
-          ).formatTimeOfDay(TimeOfDay.fromDateTime(meal.timestamp!));
+        : MaterialLocalizations.of(context)
+              .formatTimeOfDay(TimeOfDay.fromDateTime(meal.timestamp!));
 
     return Semantics(
       container: true,
@@ -1073,17 +1033,11 @@ class _MealTimelineCard extends StatelessWidget {
   }
 }
 
-class _PopupMenuItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isDestructive;
-
-  const _PopupMenuItem({
-    required this.icon,
-    required this.label,
-    this.isDestructive = false,
-  });
-
+class const _PopupMenuItem({
+  required final IconData icon,
+  required final String label,
+  final bool isDestructive = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isDestructive
@@ -1099,17 +1053,11 @@ class _PopupMenuItem extends StatelessWidget {
   }
 }
 
-class _MinMealsProgressChip extends StatelessWidget {
-  final int current;
-  final int minimum;
-  final ThemeData theme;
-
-  const _MinMealsProgressChip({
-    required this.current,
-    required this.minimum,
-    required this.theme,
-  });
-
+class const _MinMealsProgressChip({
+  required final int current,
+  required final int minimum,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final met = current >= minimum;

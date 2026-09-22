@@ -2,24 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/widgets/filter_item.dart';
 import 'package:studyu_designer_v2/localization/app_localizations.dart';
 
-class DateRangeFilter extends StatelessWidget {
-  final DateTime? start;
-  final DateTime? end;
-  final ValueChanged<DateTime?> onStartChanged;
-  final ValueChanged<DateTime?> onEndChanged;
-  final bool isExpanded;
-  final ValueChanged<bool> onExpansionChanged;
-
-  const DateRangeFilter({
-    required this.start,
-    required this.end,
-    required this.onStartChanged,
-    required this.onEndChanged,
-    required this.isExpanded,
-    required this.onExpansionChanged,
-    super.key,
-  });
-
+class const DateRangeFilter({
+  required final DateTime? start,
+  required final DateTime? end,
+  required final ValueChanged<DateTime?> onStartChanged,
+  required final ValueChanged<DateTime?> onEndChanged,
+  required final bool isExpanded,
+  required final ValueChanged<bool> onExpansionChanged,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasValue = start != null || end != null;

@@ -10,7 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_repository.g.dart';
 
-abstract class IAuthRepository extends IAppDelegate {
+abstract class IAuthRepository() extends IAppDelegate {
   // - Authentication
   User? get currentUser;
   bool get isLoggedIn;
@@ -33,10 +33,10 @@ abstract class IAuthRepository extends IAppDelegate {
   void dispose();
 }
 
-class AuthRepository implements IAuthRepository {
+class AuthRepository({
   /// Reference to the Supabase API client injected via Riverpod
-  final SupabaseClient supabaseClient;
-
+  required final SupabaseClient supabaseClient,
+}) implements IAuthRepository {
   /// A stream controller for broadcasting the currently logged in user
   /// Broadcasts null if the user is logged out
   final BehaviorSubject<User?> _authStateStreamController =
@@ -53,7 +53,7 @@ class AuthRepository implements IAuthRepository {
   @override
   Session? get session => authClient.currentSession;
 
-  AuthRepository({required this.supabaseClient}) {
+  this {
     _registerAuthListener();
   }
 

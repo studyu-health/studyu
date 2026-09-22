@@ -11,9 +11,14 @@ import 'package:studyu_designer_v2/features/design/measurements/measurements_for
 import 'package:studyu_designer_v2/features/design/measurements/survey_template_providers.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-enum MeasurementSelection { blankSurvey }
+enum MeasurementSelection() {
+  blankSurvey,
+}
 
-enum _MeasurementCategory { all, nutrition }
+enum _MeasurementCategory() {
+  all,
+  nutrition,
+}
 
 extension on _MeasurementCategory {
   String get label => switch (this) {
@@ -44,22 +49,17 @@ extension on _MeasurementCategory {
 }
 
 /// Lets researchers create a custom survey or browse predefined measurements.
-class MeasurementPickerDialog extends ConsumerStatefulWidget {
-  const MeasurementPickerDialog({
-    required this.formViewModel,
-    required this.canAddNutrition,
-    super.key,
-  });
-
-  final MeasurementsFormViewModel formViewModel;
-  final bool canAddNutrition;
-
+class const MeasurementPickerDialog({
+  required final MeasurementsFormViewModel formViewModel,
+  required final bool canAddNutrition,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<MeasurementPickerDialog> createState() =>
       _MeasurementPickerDialogState();
 }
 
-class _MeasurementPickerDialogState
+class _MeasurementPickerDialogState()
     extends ConsumerState<MeasurementPickerDialog> {
   late final Future<List<SurveyTemplate>> _templates;
   _MeasurementCategory _category = _MeasurementCategory.all;
@@ -113,9 +113,9 @@ class _MeasurementPickerDialogState
                 _PickerHeader(
                   onCreateSurvey: _isSubmitting
                       ? null
-                      : () => Navigator.of(
-                          context,
-                        ).pop(MeasurementSelection.blankSurvey),
+                      : () =>
+                            Navigator.of(context)
+                                .pop(MeasurementSelection.blankSurvey),
                 ),
                 const SizedBox(height: 16),
                 Expanded(
@@ -245,36 +245,21 @@ class _MeasurementPickerDialogState
   }
 }
 
-class _WidePicker extends StatelessWidget {
-  const _WidePicker({
-    required this.category,
-    required this.templates,
-    required this.canAddNutrition,
-    required this.formViewModel,
-    required this.nutritionSelected,
-    required this.selectedTemplates,
-    required this.selectedDayEntries,
-    required this.onCategorySelected,
-    required this.onNutritionChanged,
-    required this.onTemplateChanged,
-    required this.onDayEntryChanged,
-    required this.onDayEntriesChanged,
-  });
-
-  final _MeasurementCategory category;
-  final List<SurveyTemplate> templates;
-  final bool canAddNutrition;
-  final MeasurementsFormViewModel formViewModel;
-  final bool nutritionSelected;
-  final Set<SurveyTemplate> selectedTemplates;
-  final Set<SurveyTemplateDayEntry> selectedDayEntries;
-  final ValueChanged<_MeasurementCategory> onCategorySelected;
-  final ValueChanged<bool> onNutritionChanged;
-  final void Function(SurveyTemplate, bool) onTemplateChanged;
-  final void Function(SurveyTemplateDayEntry, bool) onDayEntryChanged;
-  final void Function(Iterable<SurveyTemplateDayEntry>, bool)
-  onDayEntriesChanged;
-
+class const _WidePicker({
+  required final _MeasurementCategory category,
+  required final List<SurveyTemplate> templates,
+  required final bool canAddNutrition,
+  required final MeasurementsFormViewModel formViewModel,
+  required final bool nutritionSelected,
+  required final Set<SurveyTemplate> selectedTemplates,
+  required final Set<SurveyTemplateDayEntry> selectedDayEntries,
+  required final ValueChanged<_MeasurementCategory> onCategorySelected,
+  required final ValueChanged<bool> onNutritionChanged,
+  required final void Function(SurveyTemplate, bool) onTemplateChanged,
+  required final void Function(SurveyTemplateDayEntry, bool) onDayEntryChanged,
+  required final void Function(Iterable<SurveyTemplateDayEntry>, bool)
+  onDayEntriesChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -304,9 +289,9 @@ class _WidePicker extends StatelessWidget {
                             '${item.measurementCount(templates)}',
                             style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                           ),
                           shape: RoundedRectangleBorder(
@@ -342,36 +327,21 @@ class _WidePicker extends StatelessWidget {
   }
 }
 
-class _NarrowPicker extends StatelessWidget {
-  const _NarrowPicker({
-    required this.category,
-    required this.templates,
-    required this.canAddNutrition,
-    required this.formViewModel,
-    required this.nutritionSelected,
-    required this.selectedTemplates,
-    required this.selectedDayEntries,
-    required this.onCategorySelected,
-    required this.onNutritionChanged,
-    required this.onTemplateChanged,
-    required this.onDayEntryChanged,
-    required this.onDayEntriesChanged,
-  });
-
-  final _MeasurementCategory category;
-  final List<SurveyTemplate> templates;
-  final bool canAddNutrition;
-  final MeasurementsFormViewModel formViewModel;
-  final bool nutritionSelected;
-  final Set<SurveyTemplate> selectedTemplates;
-  final Set<SurveyTemplateDayEntry> selectedDayEntries;
-  final ValueChanged<_MeasurementCategory> onCategorySelected;
-  final ValueChanged<bool> onNutritionChanged;
-  final void Function(SurveyTemplate, bool) onTemplateChanged;
-  final void Function(SurveyTemplateDayEntry, bool) onDayEntryChanged;
-  final void Function(Iterable<SurveyTemplateDayEntry>, bool)
-  onDayEntriesChanged;
-
+class const _NarrowPicker({
+  required final _MeasurementCategory category,
+  required final List<SurveyTemplate> templates,
+  required final bool canAddNutrition,
+  required final MeasurementsFormViewModel formViewModel,
+  required final bool nutritionSelected,
+  required final Set<SurveyTemplate> selectedTemplates,
+  required final Set<SurveyTemplateDayEntry> selectedDayEntries,
+  required final ValueChanged<_MeasurementCategory> onCategorySelected,
+  required final ValueChanged<bool> onNutritionChanged,
+  required final void Function(SurveyTemplate, bool) onTemplateChanged,
+  required final void Function(SurveyTemplateDayEntry, bool) onDayEntryChanged,
+  required final void Function(Iterable<SurveyTemplateDayEntry>, bool)
+  onDayEntriesChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -421,23 +391,14 @@ class _NarrowPicker extends StatelessWidget {
   }
 }
 
-class _MeasurementCard extends StatelessWidget {
-  const _MeasurementCard({
-    required this.child,
-    this.onTap,
-    this.selected = false,
-    this.added = false,
-    this.enabled = true,
-    this.clipBehavior = Clip.none,
-  });
-
-  final Widget child;
-  final VoidCallback? onTap;
-  final bool selected;
-  final bool added;
-  final bool enabled;
-  final Clip clipBehavior;
-
+class const _MeasurementCard({
+  required final Widget child,
+  final VoidCallback? onTap,
+  final bool selected = false,
+  final bool added = false,
+  final bool enabled = true,
+  final Clip clipBehavior = Clip.none,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -476,11 +437,7 @@ class _MeasurementCard extends StatelessWidget {
   }
 }
 
-class _AddedBadge extends StatelessWidget {
-  const _AddedBadge({this.text});
-
-  final String? text;
-
+class const _AddedBadge({final String? text}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -505,11 +462,8 @@ class _AddedBadge extends StatelessWidget {
   }
 }
 
-class _MetadataBadge extends StatelessWidget {
-  const _MetadataBadge({required this.text});
-
-  final String text;
-
+class const _MetadataBadge({required final String text})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -533,11 +487,8 @@ class _MetadataBadge extends StatelessWidget {
   }
 }
 
-class _PickerHeader extends StatelessWidget {
-  const _PickerHeader({required this.onCreateSurvey});
-
-  final VoidCallback? onCreateSurvey;
-
+class const _PickerHeader({required final VoidCallback? onCreateSurvey})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -571,36 +522,21 @@ class _PickerHeader extends StatelessWidget {
   }
 }
 
-class _PredefinedMeasurementsList extends StatelessWidget {
-  const _PredefinedMeasurementsList({
-    required this.category,
-    required this.templates,
-    required this.canAddNutrition,
-    required this.formViewModel,
-    required this.nutritionSelected,
-    required this.selectedTemplates,
-    required this.selectedDayEntries,
-    required this.onNutritionChanged,
-    required this.onTemplateChanged,
-    required this.onDayEntryChanged,
-    required this.onDayEntriesChanged,
-    this.showHeading = true,
-  });
-
-  final _MeasurementCategory category;
-  final List<SurveyTemplate> templates;
-  final bool canAddNutrition;
-  final MeasurementsFormViewModel formViewModel;
-  final bool nutritionSelected;
-  final Set<SurveyTemplate> selectedTemplates;
-  final Set<SurveyTemplateDayEntry> selectedDayEntries;
-  final ValueChanged<bool> onNutritionChanged;
-  final void Function(SurveyTemplate, bool) onTemplateChanged;
-  final void Function(SurveyTemplateDayEntry, bool) onDayEntryChanged;
-  final void Function(Iterable<SurveyTemplateDayEntry>, bool)
-  onDayEntriesChanged;
-  final bool showHeading;
-
+class const _PredefinedMeasurementsList({
+  required final _MeasurementCategory category,
+  required final List<SurveyTemplate> templates,
+  required final bool canAddNutrition,
+  required final MeasurementsFormViewModel formViewModel,
+  required final bool nutritionSelected,
+  required final Set<SurveyTemplate> selectedTemplates,
+  required final Set<SurveyTemplateDayEntry> selectedDayEntries,
+  required final ValueChanged<bool> onNutritionChanged,
+  required final void Function(SurveyTemplate, bool) onTemplateChanged,
+  required final void Function(SurveyTemplateDayEntry, bool) onDayEntryChanged,
+  required final void Function(Iterable<SurveyTemplateDayEntry>, bool)
+  onDayEntriesChanged,
+  final bool showHeading = true,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visibleTemplates = templates.where(category.includes).toList();
@@ -624,9 +560,8 @@ class _PredefinedMeasurementsList extends StatelessWidget {
                   Expanded(
                     child: Text(
                       '${category.heading} · $itemCount',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -679,17 +614,11 @@ class _PredefinedMeasurementsList extends StatelessWidget {
   }
 }
 
-class _NutritionTemplateItem extends StatelessWidget {
-  const _NutritionTemplateItem({
-    required this.canAdd,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final bool canAdd;
-  final bool selected;
-  final ValueChanged<bool> onChanged;
-
+class const _NutritionTemplateItem({
+  required final bool canAdd,
+  required final bool selected,
+  required final ValueChanged<bool> onChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -742,31 +671,21 @@ class _NutritionTemplateItem extends StatelessWidget {
   }
 }
 
-class _TemplateItem extends StatefulWidget {
-  const _TemplateItem({
-    required this.template,
-    required this.formViewModel,
-    required this.selected,
-    required this.selectedDayEntries,
-    required this.onChanged,
-    required this.onDayEntryChanged,
-    required this.onDayEntriesChanged,
-  });
-
-  final SurveyTemplate template;
-  final MeasurementsFormViewModel formViewModel;
-  final bool selected;
-  final Set<SurveyTemplateDayEntry> selectedDayEntries;
-  final void Function(SurveyTemplate, bool) onChanged;
-  final void Function(SurveyTemplateDayEntry, bool) onDayEntryChanged;
-  final void Function(Iterable<SurveyTemplateDayEntry>, bool)
-  onDayEntriesChanged;
-
+class const _TemplateItem({
+  required final SurveyTemplate template,
+  required final MeasurementsFormViewModel formViewModel,
+  required final bool selected,
+  required final Set<SurveyTemplateDayEntry> selectedDayEntries,
+  required final void Function(SurveyTemplate, bool) onChanged,
+  required final void Function(SurveyTemplateDayEntry, bool) onDayEntryChanged,
+  required final void Function(Iterable<SurveyTemplateDayEntry>, bool)
+  onDayEntriesChanged,
+}) extends StatefulWidget {
   @override
   State<_TemplateItem> createState() => _TemplateItemState();
 }
 
-class _TemplateItemState extends State<_TemplateItem> {
+class _TemplateItemState() extends State<_TemplateItem> {
   bool _expanded = false;
 
   bool get _isAlreadyAdded =>
@@ -943,19 +862,12 @@ class _TemplateItemState extends State<_TemplateItem> {
   }
 }
 
-class _DayEntryTile extends StatelessWidget {
-  const _DayEntryTile({
-    required this.entry,
-    required this.selected,
-    required this.enabled,
-    required this.onChanged,
-  });
-
-  final SurveyTemplateDayEntry entry;
-  final bool selected;
-  final bool enabled;
-  final void Function(SurveyTemplateDayEntry, bool) onChanged;
-
+class const _DayEntryTile({
+  required final SurveyTemplateDayEntry entry,
+  required final bool selected,
+  required final bool enabled,
+  required final void Function(SurveyTemplateDayEntry, bool) onChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

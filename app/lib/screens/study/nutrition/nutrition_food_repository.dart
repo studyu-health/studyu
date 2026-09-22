@@ -4,10 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 /// The server is the authoritative library; snapshots in recalls stay immutable.
-class NutritionFoodRepository {
-  NutritionFoodRepository({SupabaseClient? client}) : _client = client;
-
-  final SupabaseClient? _client;
+class NutritionFoodRepository({final SupabaseClient? _client}) {
   SupabaseClient get _supabase => _client ?? Supabase.instance.client;
 
   Future<List<SavedFoodTemplate>> loadTemplates(String subjectId) async {

@@ -11,11 +11,11 @@ class QuestionnaireTask extends Observation {
 
   StudyUQuestionnaire questions = StudyUQuestionnaire();
 
-  QuestionnaireTask() : super(taskType);
+  new() : super(taskType);
 
-  QuestionnaireTask.withId() : super.withId(taskType);
+  new withId() : super.withId(taskType);
 
-  factory QuestionnaireTask.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$QuestionnaireTaskFromJson(json);
 
   @override

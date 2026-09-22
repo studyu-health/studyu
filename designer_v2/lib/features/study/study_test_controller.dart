@@ -13,7 +13,7 @@ import 'package:studyu_designer_v2/routing/router.dart';
 part 'study_test_controller.g.dart';
 
 @riverpod
-class StudyTestController extends _$StudyTestController {
+class StudyTestController() extends _$StudyTestController {
   @override
   StudyTestControllerState build(StudyID studyId) {
     final studyRepo = ref.watch(studyRepositoryProvider);
@@ -38,8 +38,9 @@ class StudyTestController extends _$StudyTestController {
           .studyWithMetadata,
       router: ref.watch(routerProvider),
       currentUser: ref.watch(authRepositoryProvider).currentUser,
-      serializedSession:
-          ref.watch(authRepositoryProvider).serializedSession ?? '',
+      hasSession:
+          ref.watch(authRepositoryProvider).serializedSession?.isNotEmpty ??
+          false,
       languageCode: ref.watch(localeProvider).languageCode,
     );
   }
@@ -57,7 +58,12 @@ PlatformController studyTestPlatformController(Ref ref, StudyID studyId) {
     );
   } else {
     // Desktop and Web
-    platformController = WebController(state.appUrl, studyId);
+    platformController = WebController(
+      state.appUrl,
+      studyId,
+      ref.watch(authRepositoryProvider).serializedSession ?? '',
+    );
   }
+  ref.onDispose(platformController.dispose);
   return platformController;
 }

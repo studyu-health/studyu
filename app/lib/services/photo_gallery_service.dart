@@ -5,7 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:studyu_app/models/photo_reference.dart';
 
 /// Service for querying device photo gallery.
-class PhotoGalleryService {
+class PhotoGalleryService() {
   /// Local midnight boundaries for the calendar date containing [date].
   static ({DateTime start, DateTime end}) localDayRange(DateTime date) => (
     start: DateTime(date.year, date.month, date.day),

@@ -20,7 +20,14 @@ import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/riverpod.dart';
 
-class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
+class InterventionsFormViewModel({
+  required final Study study,
+  required final GoRouter router,
+  super.delegate,
+  super.formData,
+  super.autosave = true,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends FormViewModel<InterventionsFormData>
     with StudyScheduleControls
     implements
         IFormViewModelDelegate<InterventionFormViewModel>,
@@ -29,18 +36,6 @@ class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
           InterventionFormViewModel,
           InterventionFormRouteArgs
         > {
-  InterventionsFormViewModel({
-    required this.study,
-    required this.router,
-    super.delegate,
-    super.formData,
-    super.autosave = true,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  final Study study;
-  final GoRouter router;
-
   // - Form fields
 
   final FormArray interventionsArray = FormArray([]);

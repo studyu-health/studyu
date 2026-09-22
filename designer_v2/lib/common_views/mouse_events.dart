@@ -1,37 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-typedef MouseEventsRegionBuilder =
-    Widget Function(BuildContext context, Set<WidgetState> state);
+typedef MouseEventsRegionBuilder = Widget Function(
+  BuildContext context,
+  Set<WidgetState> state,
+);
 
 typedef MaterialStatesChangedCallback = void Function(Set<WidgetState> state);
 
 /// Helper widget that allows specifying both [onHover] and [onTap] callbacks
 /// for the widget it contains while exposing the current interaction state
 /// as a [WidgetInteractionState] to the child widget [builder]
-class MouseEventsRegion extends StatefulWidget {
-  const MouseEventsRegion({
-    required this.builder,
-    this.onStateChanged,
-    this.onHover,
-    this.onTap,
-    this.onEnter,
-    this.onExit,
-    this.cursor = defaultCursor,
-    this.autoselectCursor = true,
-    super.key,
-  });
-
-  final MouseEventsRegionBuilder builder;
-  final MaterialStatesChangedCallback? onStateChanged;
-
-  final GestureTapCallback? onTap;
-  final PointerHoverEventListener? onHover;
-  final PointerEnterEventListener? onEnter;
-  final PointerExitEventListener? onExit;
-
-  final bool autoselectCursor;
-  final SystemMouseCursor cursor;
+class const MouseEventsRegion({
+  required final MouseEventsRegionBuilder builder,
+  final MaterialStatesChangedCallback? onStateChanged,
+  final PointerHoverEventListener? onHover,
+  final GestureTapCallback? onTap,
+  final PointerEnterEventListener? onEnter,
+  final PointerExitEventListener? onExit,
+  final SystemMouseCursor cursor = defaultCursor,
+  final bool autoselectCursor = true,
+  super.key,
+}) extends StatefulWidget {
   static const defaultCursor = SystemMouseCursors.basic;
 
   SystemMouseCursor get autoCursor {
@@ -48,7 +38,7 @@ class MouseEventsRegion extends StatefulWidget {
   State<MouseEventsRegion> createState() => _MouseEventsRegionState();
 }
 
-class _MouseEventsRegionState extends State<MouseEventsRegion> {
+class _MouseEventsRegionState() extends State<MouseEventsRegion> {
   late final WidgetStatesController statesController;
 
   void handleStatesControllerChange() {

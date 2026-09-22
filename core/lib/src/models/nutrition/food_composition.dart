@@ -12,7 +12,7 @@ class FoodComposition {
   String unit;
   int? sortOrder;
 
-  FoodComposition({
+  new({
     required this.id,
     required this.parentEntryId,
     required this.foodId,
@@ -21,7 +21,7 @@ class FoodComposition {
     this.sortOrder,
   });
 
-  FoodComposition.withId({
+  new withId({
     required this.parentEntryId,
     required this.foodId,
     required this.amount,
@@ -29,7 +29,7 @@ class FoodComposition {
     this.sortOrder,
   }) : id = const Uuid().v4();
 
-  factory FoodComposition.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$FoodCompositionFromJson(json);
 
   Map<String, dynamic> toJson() => _$FoodCompositionToJson(this);

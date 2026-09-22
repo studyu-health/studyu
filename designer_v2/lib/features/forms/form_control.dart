@@ -4,18 +4,18 @@ import 'package:studyu_designer_v2/utils/performance.dart';
 
 typedef ValueCallback<T> = void Function(T value);
 
-class CustomFormControl<T> extends FormControl<T> {
-  CustomFormControl({
-    super.value,
-    super.validators = const [],
-    super.asyncValidators = const [],
-    super.touched = false,
-    super.disabled = false,
-    this.onValueChanged,
-    this.onStatusChanged,
-    this.onValueChangedDebounceTime,
-    this.onStatusChangedDebounceTime,
-  }) : super() {
+class CustomFormControl<T>({
+  super.value,
+  super.validators = const [],
+  super.asyncValidators = const [],
+  super.touched = false,
+  super.disabled = false,
+  final ValueCallback<T?>? onValueChanged,
+  final ValueCallback<ControlStatus>? onStatusChanged,
+  final int? onValueChangedDebounceTime,
+  final int? onStatusChangedDebounceTime,
+}) extends FormControl<T> {
+  this : super() {
     if (onValueChanged != null) {
       final callback = (_onValueChangedDebouncer != null)
           ? (T? value) => _onValueChangedDebouncer.call(
@@ -52,11 +52,6 @@ class CustomFormControl<T> extends FormControl<T> {
     _onStatusChangedDebouncer?.dispose();
     super.dispose();
   }
-
-  final ValueCallback<T?>? onValueChanged;
-  final ValueCallback<ControlStatus>? onStatusChanged;
-  final int? onStatusChangedDebounceTime;
-  final int? onValueChangedDebounceTime;
 }
 
 typedef AbstractControlChangedCallback = void Function(AbstractControl control);

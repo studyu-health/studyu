@@ -64,32 +64,32 @@ Offset _quadraticPoint(
       end * (progress * progress);
 }
 
-enum _FoodSearchSection { recent, myItems }
+enum _FoodSearchSection() {
+  recent,
+  myItems,
+}
 
-enum _FoodSearchFilter { all, myItems, database }
+enum _FoodSearchFilter() {
+  all,
+  myItems,
+  database,
+}
 
-enum _FoodSearchAction { food, meal }
+enum _FoodSearchAction() {
+  food,
+  meal,
+}
 
-class FoodSearchScreen extends StatelessWidget {
-  final bool allowMeals;
-  final String? mealLabel;
-  final OpenFoodFactsSearch? openFoodFactsSearch;
-  final UsdaFoodSearch? usdaFoodSearch;
-  final NutritionFoodRepository? repository;
-  final TemplateViewModel? templateViewModel;
-  final bool historicalMode;
-
-  const FoodSearchScreen({
-    this.allowMeals = true,
-    this.mealLabel,
-    this.openFoodFactsSearch,
-    this.usdaFoodSearch,
-    this.repository,
-    this.templateViewModel,
-    this.historicalMode = false,
-    super.key,
-  });
-
+class const FoodSearchScreen({
+  final bool allowMeals = true,
+  final String? mealLabel,
+  final OpenFoodFactsSearch? openFoodFactsSearch,
+  final UsdaFoodSearch? usdaFoodSearch,
+  final NutritionFoodRepository? repository,
+  final TemplateViewModel? templateViewModel,
+  final bool historicalMode = false,
+  super.key,
+}) extends StatelessWidget {
   static MaterialPageRoute<studyu.FoodEntry> route({
     bool allowMeals = true,
     bool historicalMode = false,
@@ -163,29 +163,21 @@ class FoodSearchScreen extends StatelessWidget {
   }
 }
 
-class _FoodSearchScreenContent extends StatefulWidget {
-  final bool allowMeals;
-  final String? mealLabel;
-  final OpenFoodFactsSearch? openFoodFactsSearch;
-  final UsdaFoodSearch? usdaFoodSearch;
-  final bool historicalMode;
-  final FoodSearchHistory history;
-
-  const _FoodSearchScreenContent({
-    this.allowMeals = true,
-    this.mealLabel,
-    this.openFoodFactsSearch,
-    this.usdaFoodSearch,
-    required this.historicalMode,
-    required this.history,
-  });
-
+class const _FoodSearchScreenContent({
+  final bool allowMeals = true,
+  final String? mealLabel,
+  final OpenFoodFactsSearch? openFoodFactsSearch,
+  final UsdaFoodSearch? usdaFoodSearch,
+  required final bool historicalMode,
+  required final FoodSearchHistory history,
+}) extends StatefulWidget {
   @override
   State<_FoodSearchScreenContent> createState() =>
       _FoodSearchScreenContentState();
 }
 
-class _FoodSearchScreenContentState extends State<_FoodSearchScreenContent>
+class _FoodSearchScreenContentState()
+    extends State<_FoodSearchScreenContent>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   late final FoodSelectionStore? _selectionStore = widget.mealLabel == null

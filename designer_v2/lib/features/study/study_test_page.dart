@@ -17,11 +17,11 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class StudyTestScreen extends StudyPageWidget {
-  const StudyTestScreen(super.studyId, {this.previewRoute, super.key});
-
-  final String? previewRoute;
-
+class const StudyTestScreen(
+  super.studyId, {
+  final String? previewRoute,
+  super.key,
+}) extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formViewModel = ref.watch(studyTestValidatorProvider(studyId));

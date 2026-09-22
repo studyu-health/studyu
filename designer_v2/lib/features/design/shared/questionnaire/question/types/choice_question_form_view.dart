@@ -9,25 +9,39 @@ import 'package:studyu_designer_v2/features/design/shared/questionnaire/question
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class ChoiceQuestionFormView extends ConsumerWidget {
-  const ChoiceQuestionFormView({required this.formViewModel, super.key});
-
-  final QuestionFormViewModel formViewModel;
-
+class const ChoiceQuestionFormView({
+  required final QuestionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        FormTableLayout(
-          rows: [
-            FormTableRow(
-              label: tr.form_field_response_choice_multiple,
-              labelHelpText: tr.form_field_response_choice_multiple_tooltip,
-              input: ReactiveSwitch(
-                formControl: formViewModel.isMultipleChoiceControl,
+        ReactiveValueListenableBuilder<bool>(
+          formControl: formViewModel.isMultipleChoiceControl,
+          builder: (context, control, _) => FormTableLayout(
+            columnWidths: const {
+              0: IntrinsicColumnWidth(),
+              1: FlexColumnWidth(),
+            },
+            rows: [
+              FormTableRow(
+                label: tr.form_field_response_choice_multiple,
+                labelHelpText: tr.form_field_response_choice_multiple_tooltip,
+                input: ReactiveSwitch(
+                  formControl: formViewModel.isMultipleChoiceControl,
+                ),
               ),
-            ),
-          ],
+              if (control.value == true)
+                FormTableRow(
+                  label: tr.form_field_response_choice_required,
+                  labelHelpText: tr.form_field_response_choice_required_tooltip,
+                  input: ReactiveSwitch(
+                    formControl: formViewModel.isSelectionRequiredControl,
+                  ),
+                ),
+            ],
+          ),
         ),
         const SizedBox(height: 12.0),
         ReactiveFormArray(
@@ -115,11 +129,8 @@ List<Widget> buildChoiceOptionRow(
   ];
 }
 
-class ChoiceValueAccessor extends ControlValueAccessor<Choice, String> {
-  final FormControl<Choice>? _control;
-
-  ChoiceValueAccessor([this._control]);
-
+class ChoiceValueAccessor([final FormControl<Choice>? _control])
+    extends ControlValueAccessor<Choice, String> {
   @override
   String? modelToViewValue(Choice? modelValue) {
     return modelValue?.text;

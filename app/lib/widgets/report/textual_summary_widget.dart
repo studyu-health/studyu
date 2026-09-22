@@ -6,24 +6,15 @@ import 'package:studyu_app/screens/study/report/sections/t_test.dart';
 import 'package:studyu_app/util/string_extensions.dart';
 import 'package:studyu_core/core.dart';
 
-class TextualSummaryWidget extends StatelessWidget {
-  final List<num> valuesInterventionA;
-  final List<num> valuesInterventionB;
-  final String nameInterventionA;
-  final String nameInterventionB;
-  final StudySubject subject;
-  final ReportSection section;
-
-  const TextualSummaryWidget(
-    this.nameInterventionA,
-    this.nameInterventionB,
-    this.valuesInterventionA,
-    this.valuesInterventionB,
-    this.subject,
-    this.section, {
-    super.key,
-  });
-
+class const TextualSummaryWidget(
+  final String nameInterventionA,
+  final String nameInterventionB,
+  final List<num> valuesInterventionA,
+  final List<num> valuesInterventionB,
+  final StudySubject subject,
+  final ReportSection section, {
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (valuesInterventionA.length < 2 || valuesInterventionB.length < 2) {
@@ -63,9 +54,8 @@ class TextualSummaryWidget extends StatelessWidget {
                         ),
                         IconButton(
                           icon: const Icon(Icons.info_outline),
-                          tooltip: AppLocalizations.of(
-                            context,
-                          )!.significance_level_and_p_value,
+                          tooltip: AppLocalizations.of(context)!
+                              .significance_level_and_p_value,
                           onPressed: () =>
                               _showStatisticalInfoDialog(context, tTest),
                         ),

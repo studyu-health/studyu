@@ -18,7 +18,7 @@ class DailyRecall {
   int? studyDaySnapshot;
   DateTime? lastAutoSavedAt;
 
-  DailyRecall({
+  new({
     required this.id,
     required this.date,
     this.isUsualIntakeDay,
@@ -31,7 +31,7 @@ class DailyRecall {
     this.lastAutoSavedAt,
   });
 
-  DailyRecall.withId({
+  new withId({
     required this.date,
     this.isUsualIntakeDay,
     this.specialOccasion,
@@ -43,8 +43,7 @@ class DailyRecall {
     this.lastAutoSavedAt,
   }) : id = const Uuid().v4();
 
-  factory DailyRecall.fromJson(Map<String, dynamic> json) =>
-      _$DailyRecallFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$DailyRecallFromJson(json);
 
   Map<String, dynamic> toJson() => _$DailyRecallToJson(this);
 

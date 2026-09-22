@@ -148,16 +148,11 @@ Future<void> openMealEntry(
   await tester.pumpAndSettle();
 }
 
-class _TrackingNutritionFoodRepository extends FakeNutritionFoodRepository {
-  _TrackingNutritionFoodRepository({
-    required this.todayUpdateCount,
-    this.failuresBeforeSuccess = 0,
-    this.failTemplateSave = false,
-  });
-
-  final int todayUpdateCount;
-  final int failuresBeforeSuccess;
-  final bool failTemplateSave;
+class _TrackingNutritionFoodRepository({
+  required final int todayUpdateCount,
+  final int failuresBeforeSuccess = 0,
+  final bool failTemplateSave = false,
+}) extends FakeNutritionFoodRepository {
   int mutationCalls = 0;
   final List<String?> mutationIds = [];
   final List<int?> propagatedStudyDays = [];
@@ -1301,9 +1296,9 @@ void main() {
         remoteRecall.meals.single.foods.last.componentSnapshots!.single.name,
         'Apple',
       );
-      final draftRecall = (await autoSaveManager.scanPendingRecalls(
-        subject.id,
-      )).single.recall;
+      final draftRecall = (await autoSaveManager.scanPendingRecalls(subject.id))
+          .single
+          .recall;
       expect(draftRecall.meals.single.foods.first.name, 'Apple');
       expect(
         draftRecall.meals.single.foods.last.componentSnapshots!.single.name,
@@ -1384,9 +1379,9 @@ void main() {
         remoteRecall.meals.single.foods.last.componentSnapshots!.single.name,
         'Apple',
       );
-      final draftRecall = (await autoSaveManager.scanPendingRecalls(
-        subject.id,
-      )).single.recall;
+      final draftRecall = (await autoSaveManager.scanPendingRecalls(subject.id))
+          .single
+          .recall;
       expect(draftRecall.meals.single.foods.first.name, 'Updated apple');
       expect(
         draftRecall.meals.single.foods.last.componentSnapshots!.single.name,
@@ -1395,47 +1390,48 @@ void main() {
     },
   );
 
-  testWidgets('draft-only reusable food opt-in reports current-day propagation', (
-    tester,
-  ) async {
-    final setup = _historicalEditingSetup();
-    final subject = setup.appState.activeSubject!;
-    final currentStudyDay = nutritionStudyDayFor(subject, DateTime.now());
-    await NutritionRecallAutoSaveManager().saveRecall(
-      recall: _recallWithFoods([testFood()], studyDay: currentStudyDay),
-      subjectId: subject.id,
-      taskId: 'other-task',
-      interventionId: 'other-intervention',
-      periodId: 'other-period',
-      studyDaySnapshot: currentStudyDay,
-    );
-    final repository = _TrackingNutritionFoodRepository(todayUpdateCount: 0);
+  testWidgets(
+    'draft-only reusable food opt-in reports current-day propagation',
+    (tester) async {
+      final setup = _historicalEditingSetup();
+      final subject = setup.appState.activeSubject!;
+      final currentStudyDay = nutritionStudyDayFor(subject, DateTime.now());
+      await NutritionRecallAutoSaveManager().saveRecall(
+        recall: _recallWithFoods([testFood()], studyDay: currentStudyDay),
+        subjectId: subject.id,
+        taskId: 'other-task',
+        interventionId: 'other-intervention',
+        periodId: 'other-period',
+        studyDaySnapshot: currentStudyDay,
+      );
+      final repository = _TrackingNutritionFoodRepository(todayUpdateCount: 0);
 
-    await openMealEntry(
-      tester,
-      editableMeal(),
-      historicalTarget: setup.target,
-      foodRepository: repository,
-      appState: setup.appState,
-    );
-    await tester.tap(find.byTooltip('More options'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit reusable food'));
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.text('Also update matching entries in current study day'),
-    );
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-    await tester.pumpAndSettle();
+      await openMealEntry(
+        tester,
+        editableMeal(),
+        historicalTarget: setup.target,
+        foodRepository: repository,
+        appState: setup.appState,
+      );
+      await tester.tap(find.byTooltip('More options'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Edit reusable food'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.text('Also update matching entries in current study day'),
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
 
-    expect(repository.propagatedStudyDays, [currentStudyDay]);
-    expect(
-      find.text(
-        'Reusable item updated. Matching entries in the current study day were also updated.',
-      ),
-      findsOneWidget,
-    );
-  });
+      expect(repository.propagatedStudyDays, [currentStudyDay]);
+      expect(
+        find.text(
+          'Reusable item updated. Matching entries in the current study day were also updated.',
+        ),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets(
     'nested and legacy current-day records do not show propagation option',

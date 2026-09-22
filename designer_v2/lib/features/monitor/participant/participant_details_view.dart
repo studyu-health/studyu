@@ -8,16 +8,11 @@ import 'package:studyu_designer_v2/features/monitor/participant/participant_lege
 import 'package:studyu_designer_v2/features/monitor/participant/participant_squares.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class ParticipantDetailsView extends StatelessWidget {
-  const ParticipantDetailsView({
-    required this.monitorItem,
-    required this.study,
-    super.key,
-  });
-
-  final StudyMonitorItem monitorItem;
-  final Study study;
-
+class const ParticipantDetailsView({
+  required final StudyMonitorItem monitorItem,
+  required final Study study,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(

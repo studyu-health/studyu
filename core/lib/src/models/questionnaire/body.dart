@@ -4,17 +4,14 @@ import 'package:studyu_core/core.dart';
 part 'body.g.dart';
 
 @JsonSerializable()
-class Body {
-  @JsonKey(name: 'parts')
-  final List<BodyPart> parts;
-
+class const Body({
+  @JsonKey(name: 'parts') final List<BodyPart> parts = const [],
+}) {
   /// The maximum pain level that can be assigned to a body part.
   static const maxPainLevel = 10;
 
-  const Body({this.parts = const []});
-
   /// Creates a default body structure.
-  factory Body.initial() {
+  factory initial() {
     return const Body(
       parts: [
         BodyPart(
@@ -121,7 +118,7 @@ class Body {
   }
 
   /// Deserializes a JSON map into a [Body] object.
-  factory Body.fromJson(Map<String, dynamic> json) => _$BodyFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$BodyFromJson(json);
 
   /// Serializes this [Body] object into a JSON map.
   Map<String, dynamic> toJson() => _$BodyToJson(this);
@@ -184,7 +181,7 @@ class Body {
   }
 }
 
-enum BodySide {
+enum BodySide() {
   /// The front (ventral) side of the body.
   front,
 

@@ -5,15 +5,10 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:studyu_core/core.dart';
 
-class TemporaryStorageHandler {
+class TemporaryStorageHandler(final String _studyId, final String _userId) {
   static const String _stagingBaseNamePrefix = 'staging_';
   static const String _audioFileType = ".m4a";
   static const String _imageFileType = ".jpg";
-
-  final String _userId;
-  final String _studyId;
-
-  TemporaryStorageHandler(this._studyId, this._userId);
 
   // a file name does not include the file suffix/type, like .png
   String _buildFileName() {

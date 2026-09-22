@@ -1,6 +1,9 @@
-import 'package:intl/intl.dart';
+import 'dart:ui';
+
+import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/constants.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 extension EnumX on Enum {
   String toShortString() {
@@ -112,13 +115,31 @@ extension DateTimeAgoX on DateTime {
     return _timeAgoFormatted();
   }
 
-  String toLocalizedString({required String locale, bool showTime = true}) {
+  String toLocalizedString({
+    required String locale,
+    bool showTime = true,
+    DateFormatPreference? datePreference,
+    TimeFormatPreference? timePreference,
+  }) {
+    final parsedLocale = locale.replaceAll('-', '_').split('_');
+    final localeValue = Locale(
+      parsedLocale.first,
+      parsedLocale.length > 1 ? parsedLocale[1] : null,
+    );
     final time = toLocal();
-    final formatter = DateFormat.yMMMMd(locale);
     if (showTime) {
-      return formatter.add_Hm().format(time);
+      return DateTimeFormat.formatDateTimeForLocale(
+        localeValue,
+        time,
+        datePreference: datePreference,
+        timePreference: timePreference,
+      );
     }
-    return formatter.format(time);
+    return DateTimeFormat.formatDateForLocale(
+      localeValue,
+      time,
+      preference: datePreference,
+    );
   }
 }
 

@@ -146,7 +146,7 @@ Finder decoratorWithLabel(String label) => find.byWidgetPredicate(
       widget.decoration.labelText?.contains(label) == true,
 );
 
-class _TrackingTemplateRepository extends FakeNutritionFoodRepository {
+class _TrackingTemplateRepository() extends FakeNutritionFoodRepository {
   int saveCalls = 0;
 
   @override
@@ -361,6 +361,7 @@ void main() {
     final originalValues = <String, dynamic>{
       'image_front_small_url': imageUrl,
       'source_name': 'Open Food Facts',
+      'nested': {'value': 'keep'},
     };
     final existingFood = existingOffFood(originalValues);
     FoodEntry? result;
@@ -386,14 +387,36 @@ void main() {
     expect(result!.source, existingFood.source);
     expect(result!.confidenceScore, existingFood.confidenceScore);
     expect(result!.templateId, existingFood.templateId);
-    expect(result!.originalValues, same(originalValues));
+    expect(result!.originalValues, equals(originalValues));
     expect(result!.parentEntryId, existingFood.parentEntryId);
-    expect(result!.preparationDetails, same(existingFood.preparationDetails));
-    expect(result!.componentFoods, same(existingFood.componentFoods));
+    expect(
+      result!.preparationDetails?.toJson(),
+      equals(existingFood.preparationDetails?.toJson()),
+    );
+    expect(
+      result!.componentFoods?.map((food) => food.toJson()).toList(),
+      equals(
+        existingFood.componentFoods?.map((food) => food.toJson()).toList(),
+      ),
+    );
     expect(result!.nutrition.transFat, existingFood.nutrition.transFat);
     expect(result!.nutrition.cholesterol, existingFood.nutrition.cholesterol);
     expect(result!.nutrition.waterContent, existingFood.nutrition.waterContent);
-    expect(result!.nutrition.micros, same(existingFood.nutrition.micros));
+    expect(result!.nutrition.micros, equals(existingFood.nutrition.micros));
+
+    (result!.originalValues['nested'] as Map<String, dynamic>)['value'] =
+        'changed';
+    result!.preparationDetails!.retentionFactors['protein'] = 0.1;
+    result!.componentFoods!.single.amount = 2;
+    result!.nutrition.micros['iron'] = 1;
+
+    expect(
+      (existingFood.originalValues['nested'] as Map<String, dynamic>)['value'],
+      'keep',
+    );
+    expect(existingFood.preparationDetails!.retentionFactors['protein'], 0.9);
+    expect(existingFood.componentFoods!.single.amount, 1);
+    expect(existingFood.nutrition.micros['iron'], 2);
   });
 
   testWidgets('missing or malformed image values render no product image', (

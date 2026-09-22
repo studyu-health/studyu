@@ -5,16 +5,11 @@ import 'package:studyu_designer_v2/common_views/utils.dart';
 import 'package:studyu_designer_v2/domain/study_monitoring.dart';
 import 'package:studyu_designer_v2/features/monitor/participant/participant_square.dart';
 
-class ParticipantSquares extends StatelessWidget {
-  const ParticipantSquares({
-    required this.monitorItem,
-    required this.study,
-    super.key,
-  });
-
-  final StudyMonitorItem monitorItem;
-  final Study study;
-
+class const ParticipantSquares({
+  required final StudyMonitorItem monitorItem,
+  required final Study study,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -137,14 +132,8 @@ class ParticipantSquares extends StatelessWidget {
   }
 }
 
-class StudyPhase {
-  final Intervention intervention;
-  final List<Set<String>> missedTasksPerDay;
-  final List<Set<String>> completedTasksPerDay;
-
-  StudyPhase({
-    required this.intervention,
-    required this.missedTasksPerDay,
-    required this.completedTasksPerDay,
-  });
-}
+class StudyPhase({
+  required final Intervention intervention,
+  required final List<Set<String>> missedTasksPerDay,
+  required final List<Set<String>> completedTasksPerDay,
+});

@@ -47,7 +47,7 @@ class FoodEntry {
   /// Ordered, immutable component snapshots for a saved meal definition.
   List<FoodEntry>? componentSnapshots;
 
-  FoodEntry({
+  new({
     required this.id,
     required this.foodId,
     required this.foodVersionId,
@@ -78,7 +78,7 @@ class FoodEntry {
     this.componentSnapshots,
   });
 
-  FoodEntry.withId({
+  new withId({
     String? foodId,
     String? foodVersionId,
     required this.entryType,
@@ -110,7 +110,7 @@ class FoodEntry {
        foodVersionId = foodVersionId ?? const Uuid().v4(),
        createdAt = DateTime.now();
 
-  factory FoodEntry.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     if (json.containsKey('foodId') && json.containsKey('foodVersionId')) {
       return _$FoodEntryFromJson(json);
     }

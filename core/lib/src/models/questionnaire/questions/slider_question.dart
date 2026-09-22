@@ -15,9 +15,9 @@ abstract class SliderQuestion extends Question<num> {
     _initial = value ?? _initial;
   }
 
-  SliderQuestion(super.type);
+  new(super.type);
 
-  SliderQuestion.withId(super.type) : super.withId();
+  new withId(super.type) : super.withId();
 
   Answer<num> constructAnswer(double response) =>
       Answer.forQuestion(this, response);

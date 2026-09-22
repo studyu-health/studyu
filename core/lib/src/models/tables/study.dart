@@ -8,7 +8,7 @@ import 'package:uuid/uuid.dart';
 
 part 'study.g.dart';
 
-enum StudyStatus {
+enum StudyStatus() {
   draft,
   running,
   closed;
@@ -18,7 +18,7 @@ enum StudyStatus {
   static StudyStatus fromJson(String json) => values.byName(json);
 }
 
-enum Participation {
+enum Participation() {
   open,
   invite;
 
@@ -27,7 +27,7 @@ enum Participation {
   static Participation fromJson(String json) => values.byName(json);
 }
 
-enum ResultSharing {
+enum ResultSharing() {
   public,
   private,
   organization;
@@ -110,9 +110,9 @@ class Study extends SupabaseObjectFunctions<Study>
   @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime? createdAt;
 
-  Study(this.id, this.userId);
+  new(this.id, this.userId);
 
-  Study.withId(this.userId) : id = const Uuid().v4();
+  new withId(this.userId) : id = const Uuid().v4();
 
   static List<EligibilityCriterion> _eligibilityCriteriaFromJson(dynamic json) {
     if (json == null) {
@@ -151,7 +151,7 @@ class Study extends SupabaseObjectFunctions<Study>
     return ReportSpecification();
   }
 
-  factory Study.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     final study = _$StudyFromJson(json);
 
     //fitbitCredentials
@@ -288,8 +288,16 @@ class Study extends SupabaseObjectFunctions<Study>
   }
 
   /// Fetches a study by invite code using the RPC function.
+  ///
+  /// The RPC is SECURITY DEFINER and returns the full study row plus the
+  /// matched invite's preselected_intervention_ids as a single jsonb object,
+  /// so anon deep-link callers can resolve both in one call without needing
+  /// SELECT access to study_invite (RLS blocks non-editors).
   /// Returns the Study and StudyInvite, or nulls if not found.
-  static Future<(StudyInvite?, Study?)> fetchByInviteCode(String code) async {
+  static Future<(StudyInvite?, Study?)> fetchByInviteCode(
+    String code, {
+    bool previewOnly = false,
+  }) async {
     final cleanCode = code.trim().toLowerCase();
     try {
       final studyResult = await env.client
@@ -303,22 +311,14 @@ class Study extends SupabaseObjectFunctions<Study>
         return (null, null);
       }
 
-      final study = Study.fromJson(studyResult);
-
-      // Fetch preselected_intervention_ids from study_invite table
-      final inviteResult = await env.client
-          .from(StudyInvite.tableName)
-          .select('preselected_intervention_ids')
-          .eq('code', cleanCode)
-          .maybeSingle();
+      final study = previewOnly
+          ? Study.fromInvitePreviewJson(studyResult)
+          : Study.fromJson(studyResult);
 
       List<String>? preselectedIds;
-      if (inviteResult != null &&
-          inviteResult.containsKey('preselected_intervention_ids') &&
-          inviteResult['preselected_intervention_ids'] != null) {
-        preselectedIds = List<String>.from(
-          inviteResult['preselected_intervention_ids'] as List,
-        );
+      final preselected = studyResult['preselected_intervention_ids'];
+      if (preselected != null) {
+        preselectedIds = List<String>.from(preselected as List);
       }
 
       final invite = StudyInvite(cleanCode, study.id)
@@ -329,6 +329,24 @@ class Study extends SupabaseObjectFunctions<Study>
       SupabaseQuery.catchSupabaseException(error, stacktrace);
       rethrow;
     }
+  }
+
+  /// Creates the metadata needed to display an invite before the study is
+  /// configured for enrollment.
+  factory fromInvitePreviewJson(Map<String, dynamic> json) {
+    final study = Study(json['id'] as String, json['user_id'] as String? ?? '')
+      ..title = json['title'] as String?
+      ..description = json['description'] as String?
+      ..iconName = json['icon_name'] as String? ?? 'accountHeart';
+
+    final status = json['status'];
+    if (status is String) {
+      study.status = StudyStatus.values.firstWhere(
+        (value) => value.name == status,
+        orElse: () => StudyStatus.draft,
+      );
+    }
+    return study;
   }
 
   bool isOwner(User? user) => user != null && userId == user.id;

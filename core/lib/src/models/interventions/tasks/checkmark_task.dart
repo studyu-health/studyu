@@ -10,12 +10,11 @@ part 'checkmark_task.g.dart';
 class CheckmarkTask extends InterventionTask {
   static const String taskType = 'checkmark';
 
-  CheckmarkTask() : super(taskType);
+  new() : super(taskType);
 
-  CheckmarkTask.withId() : super.withId(taskType);
+  new withId() : super.withId(taskType);
 
-  factory CheckmarkTask.fromJson(Map<String, dynamic> json) =>
-      _$CheckmarkTaskFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$CheckmarkTaskFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$CheckmarkTaskToJson(this);

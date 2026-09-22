@@ -3,28 +3,19 @@ import 'package:studyu_core/core.dart';
 
 const _historySectionLimit = 5;
 
-final class FoodSearchHistory {
-  final List<FoodSearchHistoryItem> recent;
-  final List<FoodSearchHistoryItem> frequentlyUsed;
-
-  const FoodSearchHistory({required this.recent, required this.frequentlyUsed});
-
+final class const FoodSearchHistory({
+  required final List<FoodSearchHistoryItem> recent,
+  required final List<FoodSearchHistoryItem> frequentlyUsed,
+}) {
   static const empty = FoodSearchHistory(recent: [], frequentlyUsed: []);
 }
 
-final class FoodSearchHistoryItem {
-  final String identity;
-  final FoodEntry food;
-  final int useCount;
-  final DateTime lastUsedAt;
-
-  const FoodSearchHistoryItem({
-    required this.identity,
-    required this.food,
-    required this.useCount,
-    required this.lastUsedAt,
-  });
-
+final class const FoodSearchHistoryItem({
+  required final String identity,
+  required final FoodEntry food,
+  required final int useCount,
+  required final DateTime lastUsedAt,
+}) {
   FoodEntry createSelection() => duplicateFoodEntry(food);
 }
 
@@ -118,14 +109,8 @@ int _compareRecent(FoodSearchHistoryItem left, FoodSearchHistoryItem right) {
   return left.identity.compareTo(right.identity);
 }
 
-final class _HistoryAccumulator {
-  FoodEntry food;
-  int useCount;
-  DateTime lastUsedAt;
-
-  _HistoryAccumulator({
-    required this.food,
-    required this.useCount,
-    required this.lastUsedAt,
-  });
-}
+final class _HistoryAccumulator({
+  required var FoodEntry food,
+  required var int useCount,
+  required var DateTime lastUsedAt,
+});

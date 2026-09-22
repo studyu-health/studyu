@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class OpenFoodFactsAttribution extends StatelessWidget {
-  const OpenFoodFactsAttribution({super.key});
-
+class const OpenFoodFactsAttribution({super.key}) extends StatelessWidget {
   static final _termsUri = Uri.parse(
     'https://world.openfoodfacts.org/terms-of-use',
   );
@@ -26,9 +24,8 @@ class OpenFoodFactsAttribution extends StatelessWidget {
         content: Semantics(
           liveRegion: true,
           child: Text(
-            AppLocalizations.of(
-              context,
-            )!.open_food_facts_attribution_launch_error,
+            AppLocalizations.of(context)!
+                .open_food_facts_attribution_launch_error,
           ),
         ),
       ),

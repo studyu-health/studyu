@@ -10,22 +10,18 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dar
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_core/core.dart';
 
-enum _NewItemType { food, meal }
+enum _NewItemType() {
+  food,
+  meal,
+}
 
-class FoodLibraryScreen extends StatelessWidget {
-  final bool embedded;
-  final OpenFoodFactsSearch? openFoodFactsSearch;
-  final UsdaFoodSearch? usdaFoodSearch;
-  final NutritionFoodRepository? repository;
-
-  const FoodLibraryScreen({
-    this.embedded = false,
-    this.openFoodFactsSearch,
-    this.usdaFoodSearch,
-    this.repository,
-    super.key,
-  });
-
+class const FoodLibraryScreen({
+  final bool embedded = false,
+  final OpenFoodFactsSearch? openFoodFactsSearch,
+  final UsdaFoodSearch? usdaFoodSearch,
+  final NutritionFoodRepository? repository,
+  super.key,
+}) extends StatelessWidget {
   static MaterialPageRoute<void> route({
     OpenFoodFactsSearch? openFoodFactsSearch,
     UsdaFoodSearch? usdaFoodSearch,
@@ -137,11 +133,8 @@ class FoodLibraryScreen extends StatelessWidget {
   }
 }
 
-class _FoodLibraryScreenContent extends StatelessWidget {
-  final bool embedded;
-
-  const _FoodLibraryScreenContent({required this.embedded});
-
+class const _FoodLibraryScreenContent({required final bool embedded})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

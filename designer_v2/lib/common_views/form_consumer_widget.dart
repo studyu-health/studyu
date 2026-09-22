@@ -17,16 +17,14 @@ import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 /// Note: If rebuilding the whole form view results in poor performance,
 /// consider using [ReactiveFormConsumer] selectively.
 ///
-abstract class FormConsumerWidget extends StatefulWidget {
-  const FormConsumerWidget({super.key});
-
+abstract class const FormConsumerWidget({super.key}) extends StatefulWidget {
   Widget build(BuildContext context, FormGroup form);
 
   @override
   State<FormConsumerWidget> createState() => _FormConsumerWidgetState();
 }
 
-class _FormConsumerWidgetState extends State<FormConsumerWidget> {
+class _FormConsumerWidgetState() extends State<FormConsumerWidget> {
   @override
   Widget build(BuildContext context) {
     return ReactiveFormConsumer(
@@ -39,9 +37,8 @@ class _FormConsumerWidgetState extends State<FormConsumerWidget> {
 
 /// Utility widget that combines Riverpod's [ConsumerStatefulWidget] with
 /// our reactive forms [FormConsumerWidget] helper
-abstract class FormConsumerRefWidget extends ConsumerStatefulWidget {
-  const FormConsumerRefWidget({super.key});
-
+abstract class const FormConsumerRefWidget({super.key})
+    extends ConsumerStatefulWidget {
   Widget build(BuildContext context, FormGroup form, WidgetRef ref);
 
   @override
@@ -49,7 +46,8 @@ abstract class FormConsumerRefWidget extends ConsumerStatefulWidget {
       _FormConsumerRefWidgetState();
 }
 
-class _FormConsumerRefWidgetState extends ConsumerState<FormConsumerRefWidget> {
+class _FormConsumerRefWidgetState()
+    extends ConsumerState<FormConsumerRefWidget> {
   @override
   Widget build(BuildContext context) {
     return ReactiveFormConsumer(

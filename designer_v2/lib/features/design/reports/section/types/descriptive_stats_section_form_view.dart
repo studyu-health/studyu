@@ -7,18 +7,12 @@ import 'package:studyu_designer_v2/features/design/reports/section/report_item_f
 import 'package:studyu_designer_v2/features/design/reports/section/types/data_reference_editor.dart';
 import 'package:studyu_designer_v2/features/study/study_controller.dart';
 
-class DescriptiveStatsSectionFormView extends ConsumerWidget {
-  const DescriptiveStatsSectionFormView({
-    required this.formViewModel,
-    required this.studyId,
-    required this.reportSectionColumnWidth,
-    super.key,
-  });
-
-  final ReportItemFormViewModel formViewModel;
-  final StudyID studyId;
-  final Map<int, TableColumnWidth> reportSectionColumnWidth;
-
+class const DescriptiveStatsSectionFormView({
+  required final ReportItemFormViewModel formViewModel,
+  required final StudyID studyId,
+  required final Map<int, TableColumnWidth> reportSectionColumnWidth,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);

@@ -7,10 +7,7 @@ import 'package:rxdart/subjects.dart';
 /// This class wraps a [BehaviorSubject] and suppresses the initial event
 /// that is emitted upon subscription. All subsequent events are emitted
 /// as usual.
-class SuppressedBehaviorSubject<T> {
-  SuppressedBehaviorSubject(this.subject);
-
-  final BehaviorSubject<T> subject;
+class SuppressedBehaviorSubject<T>(final BehaviorSubject<T> subject) {
   bool didSuppressInitialEvent = false;
 
   late final StreamController<T> _controller = _buildDerivedController();

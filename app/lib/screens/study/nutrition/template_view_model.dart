@@ -6,12 +6,18 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dar
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
 
-enum TemplateFilter { all, foods, meals }
+enum TemplateFilter() {
+  all,
+  foods,
+  meals,
+}
 
-class TemplateViewModel extends ChangeNotifier {
-  final NutritionFoodRepository _repository;
-  final String userId;
-
+class TemplateViewModel({
+  required final String userId,
+  NutritionFoodRepository? repository,
+}) extends ChangeNotifier {
+  final NutritionFoodRepository _repository =
+      repository ?? NutritionFoodRepository();
   List<SavedFoodTemplate> _foodTemplates = [];
 
   bool _isLoading = false;
@@ -19,8 +25,7 @@ class TemplateViewModel extends ChangeNotifier {
   TemplateFilter _currentFilter = TemplateFilter.all;
   String _searchQuery = '';
 
-  TemplateViewModel({required this.userId, NutritionFoodRepository? repository})
-    : _repository = repository ?? NutritionFoodRepository() {
+  this {
     loadAllTemplates();
   }
 
@@ -177,9 +182,9 @@ class TemplateViewModel extends ChangeNotifier {
   FoodEntry _createFoodFromPrototype(FoodEntry prototype, String templateId) {
     final food = _cloneFoodEntry(prototype)
       ..id = const Uuid().v4()
-      ..originalValues =
-          jsonDecode(jsonEncode(prototype.originalValues))
-              as Map<String, dynamic>
+      ..originalValues = jsonDecode(
+        jsonEncode(prototype.originalValues),
+      ) as Map<String, dynamic>
       ..templateId = templateId
       ..createdAt = DateTime.now()
       ..modifiedAt = null

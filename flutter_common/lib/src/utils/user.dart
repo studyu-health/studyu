@@ -41,7 +41,7 @@ Future<bool> ensureParticipantSignedIn({
 }) async {
   if ((isSignedIn ?? isUserLoggedIn)()) return true;
   if (await (signIn ?? signInParticipant)()) return true;
-  return (signUp ?? anonymousSignUp)();
+  return await (signUp ?? anonymousSignUp)();
 }
 
 // Using a fake user email to enable anonymous users, while working with row-level security on postgres

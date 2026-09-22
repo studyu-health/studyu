@@ -17,41 +17,28 @@ import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
 
-class FoodEntryScreen extends StatefulWidget {
-  final FoodEntry? existingFood;
+class const FoodEntryScreen({
+  final FoodEntry? existingFood,
 
   /// Confidence score from AI analysis (0.0 to 1.0).
   /// If provided, shows a banner indicating AI-estimated values.
-  final double? confidenceScore;
-  final bool showSearchAction;
-  final String? mealLabel;
-  final bool historicalMode;
-  final NutritionRecallPersistenceTarget? historicalTarget;
-  final bool editReusableDefinition;
-  final bool hasCurrentStudyDayMatches;
-  final bool showCurrentMealOnlyNotice;
-  final bool isExternalLibraryCopy;
-  final NutritionFoodRepository? repository;
-  final TemplateViewModel? templateViewModel;
-  final void Function(FoodEntry food, Offset? source)? onSavedToSelection;
-
-  const FoodEntryScreen({
-    this.existingFood,
-    this.confidenceScore,
-    this.showSearchAction = true,
-    this.mealLabel,
-    this.historicalMode = false,
-    this.historicalTarget,
-    this.editReusableDefinition = false,
-    this.hasCurrentStudyDayMatches = false,
-    this.showCurrentMealOnlyNotice = false,
-    this.isExternalLibraryCopy = false,
-    this.repository,
-    this.templateViewModel,
-    this.onSavedToSelection,
-    super.key,
-  }) : assert(!editReusableDefinition || historicalTarget != null),
-       assert(!isExternalLibraryCopy || existingFood != null);
+  final double? confidenceScore,
+  final bool showSearchAction = true,
+  final String? mealLabel,
+  final bool historicalMode = false,
+  final NutritionRecallPersistenceTarget? historicalTarget,
+  final bool editReusableDefinition = false,
+  final bool hasCurrentStudyDayMatches = false,
+  final bool showCurrentMealOnlyNotice = false,
+  final bool isExternalLibraryCopy = false,
+  final NutritionFoodRepository? repository,
+  final TemplateViewModel? templateViewModel,
+  final void Function(FoodEntry food, Offset? source)? onSavedToSelection,
+  super.key,
+}) extends StatefulWidget {
+  this
+    : assert(!editReusableDefinition || historicalTarget != null),
+      assert(!isExternalLibraryCopy || existingFood != null);
 
   static MaterialPageRoute<FoodEntry> route({
     FoodEntry? existingFood,
@@ -89,7 +76,7 @@ class FoodEntryScreen extends StatefulWidget {
   State<FoodEntryScreen> createState() => _FoodEntryScreenState();
 }
 
-class _FoodEntryScreenState extends State<FoodEntryScreen> {
+class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _brandController;
@@ -303,9 +290,8 @@ class _FoodEntryScreenState extends State<FoodEntryScreen> {
           final message = _propagateToCurrentStudyDay
               ? l10n.food_definition_updated_current_day_opt_in
               : l10n.food_definition_updated_current_day_opt_out;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(message)));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(message)));
         }
       } catch (error, stackTrace) {
         StudyULogger.error(
@@ -429,7 +415,7 @@ class _FoodEntryScreenState extends State<FoodEntryScreen> {
       cholesterol: existingNutrition?.cholesterol ?? 0,
       sodium: double.tryParse(_sodiumController.text) ?? 0,
       waterContent: existingNutrition?.waterContent ?? 0,
-      micros: existingNutrition?.micros ?? {},
+      micros: Map.of(existingNutrition?.micros ?? const {}),
     );
 
     final existingFood = widget.existingFood;
@@ -462,44 +448,33 @@ class _FoodEntryScreenState extends State<FoodEntryScreen> {
       );
     }
 
-    return FoodEntry(
-      id: existingFood.id,
-      foodId: existingFood.foodId,
-      foodVersionId: existingFood.foodVersionId,
-      entryType: _entryType,
-      name: _nameController.text,
-      brandName: _brandController.text.isEmpty ? null : _brandController.text,
-      description: _descriptionController.text.isEmpty
-          ? null
-          : _descriptionController.text,
-      amount: double.parse(_amountController.text),
-      unit: _unitController.text,
-      servingSizeGrams: double.parse(_servingSizeController.text),
-      portionReference: _portionReferenceController.text.isEmpty
-          ? null
-          : _portionReferenceController.text,
-      portionEstimationMethod: _portionMethod,
-      portionState: _portionState,
-      yieldFactor: _yieldFactorController.text.isEmpty
-          ? null
-          : double.tryParse(_yieldFactorController.text),
-      ediblePortion: _ediblePortionController.text.isEmpty
-          ? null
-          : double.tryParse(_ediblePortionController.text),
-      nutrition: nutrition,
-      foodCode: existingFood.foodCode,
-      externalId: existingFood.externalId,
-      source: existingFood.source,
-      confidenceScore: existingFood.confidenceScore,
-      templateId: existingFood.templateId,
-      createdAt: existingFood.createdAt,
-      modifiedAt: DateTime.now(),
-      originalValues: existingFood.originalValues,
-      parentEntryId: existingFood.parentEntryId,
-      preparationDetails: existingFood.preparationDetails,
-      componentFoods: existingFood.componentFoods,
-      componentSnapshots: existingFood.componentSnapshots,
+    final copiedExisting = FoodEntry.fromJson(
+      jsonDecode(jsonEncode(existingFood.toJson())) as Map<String, dynamic>,
     );
+
+    return copiedExisting
+      ..entryType = _entryType
+      ..name = _nameController.text
+      ..brandName = _brandController.text.isEmpty ? null : _brandController.text
+      ..description = _descriptionController.text.isEmpty
+          ? null
+          : _descriptionController.text
+      ..amount = double.parse(_amountController.text)
+      ..unit = _unitController.text
+      ..servingSizeGrams = double.parse(_servingSizeController.text)
+      ..portionReference = _portionReferenceController.text.isEmpty
+          ? null
+          : _portionReferenceController.text
+      ..portionEstimationMethod = _portionMethod
+      ..portionState = _portionState
+      ..yieldFactor = _yieldFactorController.text.isEmpty
+          ? null
+          : double.tryParse(_yieldFactorController.text)
+      ..ediblePortion = _ediblePortionController.text.isEmpty
+          ? null
+          : double.tryParse(_ediblePortionController.text)
+      ..nutrition = nutrition
+      ..modifiedAt = DateTime.now();
   }
 
   String get _snapshot => jsonEncode({
@@ -748,12 +723,10 @@ class _FoodEntryScreenState extends State<FoodEntryScreen> {
 // WIDGETS
 // ============================================================
 
-class _ExternalCopyNotice extends StatelessWidget {
-  final ThemeData theme;
-  final AppLocalizations l10n;
-
-  const _ExternalCopyNotice({required this.theme, required this.l10n});
-
+class const _ExternalCopyNotice({
+  required final ThemeData theme,
+  required final AppLocalizations l10n,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
@@ -788,19 +761,12 @@ class _ExternalCopyNotice extends StatelessWidget {
 }
 
 /// Banner displayed when food entry data comes from AI analysis.
-class _AiEstimationBanner extends StatelessWidget {
-  final double confidenceScore;
-  final bool isLowConfidence;
-  final AppLocalizations l10n;
-  final ThemeData theme;
-
-  const _AiEstimationBanner({
-    required this.confidenceScore,
-    required this.isLowConfidence,
-    required this.l10n,
-    required this.theme,
-  });
-
+class const _AiEstimationBanner({
+  required final double confidenceScore,
+  required final bool isLowConfidence,
+  required final AppLocalizations l10n,
+  required final ThemeData theme,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -861,29 +827,17 @@ class _AiEstimationBanner extends StatelessWidget {
   }
 }
 
-class _EssentialFieldsCard extends StatelessWidget {
-  final TextEditingController nameController;
-  final TextEditingController servingSizeController;
-  final TextEditingController energyController;
-  final TextEditingController proteinController;
-  final TextEditingController carbsController;
-  final TextEditingController fatController;
-  final AppLocalizations l10n;
-  final ThemeData theme;
-  final bool isEditing;
-
-  const _EssentialFieldsCard({
-    required this.nameController,
-    required this.servingSizeController,
-    required this.energyController,
-    required this.proteinController,
-    required this.carbsController,
-    required this.fatController,
-    required this.l10n,
-    required this.theme,
-    required this.isEditing,
-  });
-
+class const _EssentialFieldsCard({
+  required final TextEditingController nameController,
+  required final TextEditingController servingSizeController,
+  required final TextEditingController energyController,
+  required final TextEditingController proteinController,
+  required final TextEditingController carbsController,
+  required final TextEditingController fatController,
+  required final AppLocalizations l10n,
+  required final ThemeData theme,
+  required final bool isEditing,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -1083,26 +1037,18 @@ class _EssentialFieldsCard extends StatelessWidget {
   }
 }
 
-class _DetailedNutritionCard extends StatefulWidget {
-  final TextEditingController fiberController;
-  final TextEditingController sugarsController;
-  final TextEditingController saturatedFatController;
-  final TextEditingController sodiumController;
-  final AppLocalizations l10n;
-
-  const _DetailedNutritionCard({
-    required this.fiberController,
-    required this.sugarsController,
-    required this.saturatedFatController,
-    required this.sodiumController,
-    required this.l10n,
-  });
-
+class const _DetailedNutritionCard({
+  required final TextEditingController fiberController,
+  required final TextEditingController sugarsController,
+  required final TextEditingController saturatedFatController,
+  required final TextEditingController sodiumController,
+  required final AppLocalizations l10n,
+}) extends StatefulWidget {
   @override
   State<_DetailedNutritionCard> createState() => _DetailedNutritionCardState();
 }
 
-class _DetailedNutritionCardState extends State<_DetailedNutritionCard> {
+class _DetailedNutritionCardState() extends State<_DetailedNutritionCard> {
   bool _isExpanded = false;
 
   @override
@@ -1268,40 +1214,25 @@ class _DetailedNutritionCardState extends State<_DetailedNutritionCard> {
   }
 }
 
-class _AdvancedOptionsCard extends StatefulWidget {
-  final FoodEntryType entryType;
-  final TextEditingController brandController;
-  final TextEditingController descriptionController;
-  final TextEditingController portionReferenceController;
-  final PortionEstimationMethod portionMethod;
-  final PortionState portionState;
-  final TextEditingController yieldFactorController;
-  final TextEditingController ediblePortionController;
-  final AppLocalizations l10n;
-  final ValueChanged<FoodEntryType?> onEntryTypeChanged;
-  final ValueChanged<PortionEstimationMethod?> onPortionMethodChanged;
-  final ValueChanged<PortionState?> onPortionStateChanged;
-
-  const _AdvancedOptionsCard({
-    required this.entryType,
-    required this.brandController,
-    required this.descriptionController,
-    required this.portionReferenceController,
-    required this.portionMethod,
-    required this.portionState,
-    required this.yieldFactorController,
-    required this.ediblePortionController,
-    required this.l10n,
-    required this.onEntryTypeChanged,
-    required this.onPortionMethodChanged,
-    required this.onPortionStateChanged,
-  });
-
+class const _AdvancedOptionsCard({
+  required final FoodEntryType entryType,
+  required final TextEditingController brandController,
+  required final TextEditingController descriptionController,
+  required final TextEditingController portionReferenceController,
+  required final PortionEstimationMethod portionMethod,
+  required final PortionState portionState,
+  required final TextEditingController yieldFactorController,
+  required final TextEditingController ediblePortionController,
+  required final AppLocalizations l10n,
+  required final ValueChanged<FoodEntryType?> onEntryTypeChanged,
+  required final ValueChanged<PortionEstimationMethod?> onPortionMethodChanged,
+  required final ValueChanged<PortionState?> onPortionStateChanged,
+}) extends StatefulWidget {
   @override
   State<_AdvancedOptionsCard> createState() => _AdvancedOptionsCardState();
 }
 
-class _AdvancedOptionsCardState extends State<_AdvancedOptionsCard> {
+class _AdvancedOptionsCardState() extends State<_AdvancedOptionsCard> {
   bool _isExpanded = false;
 
   @override

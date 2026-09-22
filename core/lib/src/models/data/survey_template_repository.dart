@@ -5,7 +5,7 @@ import 'package:studyu_core/core.dart';
 /// Implementations can source templates from different backends:
 /// - [BuiltInSurveyTemplateRepository]: static system presets
 /// - Future: SupabaseSurveyTemplateRepository for user-created/shared templates
-abstract class SurveyTemplateRepository {
+abstract class SurveyTemplateRepository() {
   /// Get all available templates, optionally filtered by [source].
   Future<List<SurveyTemplate>> getTemplates({SurveyTemplateSource? source});
 
@@ -18,7 +18,7 @@ abstract class SurveyTemplateRepository {
 
 /// Repository that returns only the built-in system templates.
 /// Save and delete operations are not supported.
-class BuiltInSurveyTemplateRepository implements SurveyTemplateRepository {
+class BuiltInSurveyTemplateRepository() implements SurveyTemplateRepository {
   @override
   Future<List<SurveyTemplate>> getTemplates({
     SurveyTemplateSource? source,

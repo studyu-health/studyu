@@ -6,15 +6,10 @@ import 'package:studyu_designer_v2/features/design/reports/section/types/data_re
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class DataReferenceEditor<T> {
-  const DataReferenceEditor({
-    required this.formControl,
-    required this.availableTasks,
-  });
-
-  final FormControl<DataReferenceIdentifier<T>> formControl;
-  final List<Task> availableTasks;
-
+class const DataReferenceEditor<T>({
+  required final FormControl<DataReferenceIdentifier<T>> formControl,
+  required final List<Task> availableTasks,
+}) {
   ReactiveDropdownField get buildReactiveDropdownField {
     final items = _dataReferenceItems();
     return ReactiveDropdownField<DataReferenceIdentifier>(
@@ -22,8 +17,8 @@ class DataReferenceEditor<T> {
       items: items,
       isExpanded: true,
       hint: items.isNotEmpty
-          ? const Text("Select a data source")
-          : const Text("No scale survey question defined"),
+          ? Text(tr.form_field_report_data_source_hint)
+          : Text(tr.form_field_report_data_source_empty),
     );
   }
 

@@ -3,18 +3,14 @@ import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart'
 import 'package:studyu_core/core.dart';
 
 @Deprecated('Use [AnnotatedScaleQuestionWidget]')
-class VisualAnalogueQuestionWidget extends QuestionWidget {
-  final VisualAnalogueQuestion question;
-  final Function(Answer)? onDone;
-  final Answer<num>? initialAnswer;
-
+class const VisualAnalogueQuestionWidget({
+  super.key,
+  required final VisualAnalogueQuestion question,
+  final Function(Answer)? onDone,
+  final Answer<num>? initialAnswer,
+}) extends QuestionWidget {
   @Deprecated('Use [AnnotatedScaleQuestionWidget]')
-  const VisualAnalogueQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-    this.initialAnswer,
-  });
+  this;
 
   @override
   State<VisualAnalogueQuestionWidget> createState() =>
@@ -22,8 +18,11 @@ class VisualAnalogueQuestionWidget extends QuestionWidget {
 }
 
 @Deprecated('Use [_AnnotatedScaleQuestionWidgetState]')
-class _VisualAnalogueQuestionWidgetState
+class _VisualAnalogueQuestionWidgetState()
     extends State<VisualAnalogueQuestionWidget> {
+  @Deprecated('Use [_AnnotatedScaleQuestionWidgetState]')
+  this;
+
   late double value;
 
   @override

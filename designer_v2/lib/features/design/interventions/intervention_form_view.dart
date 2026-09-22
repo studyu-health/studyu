@@ -17,17 +17,16 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class InterventionFormView extends ConsumerStatefulWidget {
-  const InterventionFormView({required this.formViewModel, super.key});
-
-  final InterventionFormViewModel formViewModel;
-
+class const InterventionFormView({
+  required final InterventionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<InterventionFormView> createState() =>
       _InterventionFormViewState();
 }
 
-class _InterventionFormViewState extends ConsumerState<InterventionFormView> {
+class _InterventionFormViewState() extends ConsumerState<InterventionFormView> {
   bool isStylingInformationDismissed = true;
 
   void onDismissedCallback() => setState(() {

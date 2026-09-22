@@ -13,12 +13,11 @@ class Intervention {
 
   List<InterventionTask> tasks = [];
 
-  Intervention(this.id, this.name);
+  new(this.id, this.name);
 
-  Intervention.withId() : id = const Uuid().v4();
+  new withId() : id = const Uuid().v4();
 
-  factory Intervention.fromJson(Map<String, dynamic> data) =>
-      _$InterventionFromJson(data);
+  factory fromJson(Map<String, dynamic> data) => _$InterventionFromJson(data);
 
   Map<String, dynamic> toJson() => _$InterventionToJson(this);
 

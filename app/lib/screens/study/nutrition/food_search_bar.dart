@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
 
-class FoodSearchBar extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode? focusNode;
-  final String hintText;
-  final ValueChanged<String> onChanged;
-  final VoidCallback? onScanBarcode;
-  final String? barcodeTooltip;
-
-  const FoodSearchBar({
-    required this.controller,
-    required this.hintText,
-    required this.onChanged,
-    this.focusNode,
-    this.onScanBarcode,
-    this.barcodeTooltip,
-    super.key,
-  });
-
+class const FoodSearchBar({
+  required final TextEditingController controller,
+  required final String hintText,
+  required final ValueChanged<String> onChanged,
+  final FocusNode? focusNode,
+  final VoidCallback? onScanBarcode,
+  final String? barcodeTooltip,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

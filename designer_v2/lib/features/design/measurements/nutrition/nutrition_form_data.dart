@@ -7,39 +7,29 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:uuid/uuid.dart';
 
-class NutritionFormData extends IFormDataWithSchedule {
+class NutritionFormData({
+  required final MeasurementID measurementId,
+  required super.instanceId,
+  required final String title,
+  final String? instructions,
+  required super.isTimeLocked,
+  super.timeLockStart,
+  super.timeLockEnd,
+  required super.hasReminder,
+  super.reminderTime,
+  final bool collectMealContext = true,
+  final bool allowMeals = true,
+  final bool requireDailyCompletionConfirmation = false,
+  final int? minimumMealsRequired,
+  final List<String>? customMealTypes,
+  final TaskScheduleRule? scheduleRule,
+}) extends IFormDataWithSchedule {
   static String get kDefaultTitle => tr.form_field_nutrition_default_title;
-
-  NutritionFormData({
-    required this.measurementId,
-    required super.instanceId,
-    required this.title,
-    this.instructions,
-    required super.isTimeLocked,
-    super.timeLockStart,
-    super.timeLockEnd,
-    required super.hasReminder,
-    super.reminderTime,
-    this.collectMealContext = true,
-    this.allowMeals = true,
-    this.requireDailyCompletionConfirmation = false,
-    this.minimumMealsRequired,
-    this.customMealTypes,
-  });
-
-  final MeasurementID measurementId;
-  final String title;
-  final String? instructions;
-  final bool collectMealContext;
-  final bool allowMeals;
-  final bool requireDailyCompletionConfirmation;
-  final int? minimumMealsRequired;
-  final List<String>? customMealTypes;
 
   @override
   FormDataID get id => measurementId;
 
-  factory NutritionFormData.fromDomainModel(NutritionTask nutritionTask) {
+  factory fromDomainModel(NutritionTask nutritionTask) {
     return NutritionFormData(
       measurementId: nutritionTask.id,
       title: nutritionTask.title ?? '',
@@ -56,6 +46,7 @@ class NutritionFormData extends IFormDataWithSchedule {
           nutritionTask.requireDailyCompletionConfirmation,
       minimumMealsRequired: nutritionTask.minimumMealsRequired,
       customMealTypes: nutritionTask.customMealTypes,
+      scheduleRule: nutritionTask.scheduleRule,
     );
   }
 
@@ -71,6 +62,7 @@ class NutritionFormData extends IFormDataWithSchedule {
         requireDailyCompletionConfirmation;
     nutritionTask.minimumMealsRequired = minimumMealsRequired;
     nutritionTask.customMealTypes = customMealTypes;
+    nutritionTask.scheduleRule = scheduleRule;
     return nutritionTask;
   }
 
@@ -93,6 +85,7 @@ class NutritionFormData extends IFormDataWithSchedule {
       customMealTypes: customMealTypes != null
           ? List.from(customMealTypes!)
           : null,
+      scheduleRule: scheduleRule,
     );
   }
 }

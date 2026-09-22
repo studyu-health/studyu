@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-enum UnsavedChangesAction { discard }
+enum UnsavedChangesAction() {
+  discard,
+}
 
 Future<UnsavedChangesAction?> showUnsavedChangesDialog(
   BuildContext context, {

@@ -11,11 +11,8 @@ String nutritionInstructionsText(BuildContext context, NutritionTask task) {
       : AppLocalizations.of(context)!.nutrition_instructions_default;
 }
 
-class NutritionHelpScreen extends StatelessWidget {
-  final NutritionTask task;
-
-  const NutritionHelpScreen({required this.task, super.key});
-
+class const NutritionHelpScreen({required final NutritionTask task, super.key})
+    extends StatelessWidget {
   static MaterialPageRoute<void> route({required NutritionTask task}) =>
       MaterialPageRoute(builder: (_) => NutritionHelpScreen(task: task));
 

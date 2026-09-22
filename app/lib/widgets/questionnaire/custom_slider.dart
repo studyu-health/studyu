@@ -2,49 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:studyu_app/theme.dart';
 import 'package:studyu_core/core.dart';
 
-class CustomSlider extends StatelessWidget {
-  final double? value;
-  final double? minValue;
-  final double? maxValue;
-
+class const CustomSlider({
+  super.key,
+  // required
+  final double? value,
+  final double? minValue,
+  final double? maxValue,
+  //this.majorTick,
+  final int? minorTick,
+  final Function(double)? onChanged,
+  final Function(double)? onChangeEnd,
+  // not required
+  final Color? activeColor,
+  final Color? inactiveColor,
+  final Color? minColor,
+  final Color? maxColor,
+  final Color? thumbColor,
+  final bool isColored = false,
+  final int labelValuePrecision = 2,
+  final int tickValuePrecision = 1,
+  final bool linearStep = true,
+  final AnnotatedScaleQuestion? steps,
+}) extends StatelessWidget {
   //final int majorTick;
-  final int? minorTick;
-  final Function(double)? onChanged; // nullable
-  final Function(double)? onChangeEnd; // nullable
-  final Color? activeColor; // nullable
-  final Color? inactiveColor; // nullable
-  final Color? minColor;
-  final Color? maxColor;
-  final Color? thumbColor;
-  final bool isColored;
-  final int labelValuePrecision;
-  final int tickValuePrecision;
-  final bool linearStep;
-  final AnnotatedScaleQuestion? steps; // nullable
-
-  const CustomSlider({
-    super.key,
-    // required
-    this.value,
-    this.minValue,
-    this.maxValue,
-    //this.majorTick,
-    this.minorTick,
-    this.onChanged,
-    this.onChangeEnd,
-    // not required
-    this.activeColor,
-    this.inactiveColor,
-    this.minColor,
-    this.maxColor,
-    this.thumbColor,
-    this.isColored = false,
-    this.labelValuePrecision = 2,
-    this.tickValuePrecision = 1,
-    this.linearStep = true,
-    this.steps,
-  });
-
+  // nullable
+  // nullable
+  // nullable
+  // nullable
   @override
   Widget build(BuildContext context) {
     final allocatedHeight = MediaQuery.of(context).size.height;
@@ -198,7 +182,7 @@ class CustomSlider extends StatelessWidget {
   }
 }
 
-class CustomTrackShape extends RoundedRectSliderTrackShape {
+class CustomTrackShape() extends RoundedRectSliderTrackShape {
   @override
   Rect getPreferredRect({
     required RenderBox parentBox,

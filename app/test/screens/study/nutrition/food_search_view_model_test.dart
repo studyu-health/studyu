@@ -12,9 +12,11 @@ void main() {
     'retry keeps successful provider results when the other fails',
     () async {
       final viewModel = FoodSearchViewModel(
-        openFoodFactsSearch:
-            ({required query, required page, required pageSize}) async =>
-                throw StateError('offline'),
+        openFoodFactsSearch: ({
+          required query,
+          required page,
+          required pageSize,
+        }) async => throw StateError('offline'),
         usdaFoodSearch:
             ({required query, required page, required pageSize}) async =>
                 UsdaSearchResponse(
@@ -38,9 +40,11 @@ void main() {
   test('stale provider responses do not replace a newer search', () async {
     final firstResponse = Completer<UsdaSearchResponse>();
     final viewModel = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch: ({required query, required page, required pageSize}) =>
           query == 'first'
           ? firstResponse.future
@@ -76,9 +80,11 @@ void main() {
     () async {
       final requestedPages = <int>[];
       final viewModel = FoodSearchViewModel(
-        openFoodFactsSearch:
-            ({required query, required page, required pageSize}) async =>
-                const SearchResult(products: []),
+        openFoodFactsSearch: ({
+          required query,
+          required page,
+          required pageSize,
+        }) async => const SearchResult(products: []),
         usdaFoodSearch:
             ({required query, required page, required pageSize}) async {
               requestedPages.add(page);
@@ -110,9 +116,11 @@ void main() {
   test('clearing a query ignores pending results from the old query', () async {
     final response = Completer<UsdaSearchResponse>();
     final viewModel = FoodSearchViewModel(
-      openFoodFactsSearch:
-          ({required query, required page, required pageSize}) async =>
-              const SearchResult(products: []),
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
       usdaFoodSearch: ({required query, required page, required pageSize}) =>
           response.future,
     );

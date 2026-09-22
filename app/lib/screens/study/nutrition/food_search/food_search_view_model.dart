@@ -7,34 +7,24 @@ import 'package:studyu_app/models/usda_models.dart';
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
-typedef OpenFoodFactsSearch =
-    Future<SearchResult> Function({
-      required String query,
-      required int page,
-      required int pageSize,
-    });
-typedef UsdaFoodSearch =
-    Future<UsdaSearchResponse> Function({
-      required String query,
-      required int page,
-      required int pageSize,
-    });
+typedef OpenFoodFactsSearch = Future<SearchResult> Function({
+  required String query,
+  required int page,
+  required int pageSize,
+});
+typedef UsdaFoodSearch = Future<UsdaSearchResponse> Function({
+  required String query,
+  required int page,
+  required int pageSize,
+});
 
-final class FoodSearchViewModel extends ChangeNotifier {
-  FoodSearchViewModel({
-    OpenFoodFactsSearch? openFoodFactsSearch,
-    UsdaFoodSearch? usdaFoodSearch,
-    bool? usdaConfigured,
-  }) : _openFoodFactsSearch = openFoodFactsSearch,
-       _usdaFoodSearch = usdaFoodSearch,
-       _usdaConfigured = usdaConfigured;
-
+final class FoodSearchViewModel({
+  final OpenFoodFactsSearch? _openFoodFactsSearch,
+  final UsdaFoodSearch? _usdaFoodSearch,
+  final bool? _usdaConfigured,
+}) extends ChangeNotifier {
   static const _debounceDuration = Duration(milliseconds: 400);
   static const _pageSize = 20;
-
-  final OpenFoodFactsSearch? _openFoodFactsSearch;
-  final UsdaFoodSearch? _usdaFoodSearch;
-  final bool? _usdaConfigured;
 
   Timer? _debounceTimer;
   final List<UnifiedFoodResult> _results = [];
@@ -480,9 +470,8 @@ studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
   };
   double servingSizeGrams = 100.0;
   if (product.servingSize != null) {
-    final match = RegExp(
-      r'(\d+(?:\.\d+)?)\s*g',
-    ).firstMatch(product.servingSize!);
+    final match = RegExp(r'(\d+(?:\.\d+)?)\s*g')
+        .firstMatch(product.servingSize!);
     if (match != null) {
       servingSizeGrams = double.tryParse(match.group(1)!) ?? 100.0;
     }

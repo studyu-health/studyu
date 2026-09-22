@@ -4,28 +4,27 @@ import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart'
 import 'package:studyu_app/widgets/selectable_button.dart';
 import 'package:studyu_core/core.dart';
 
-class ChoiceQuestionWidget extends QuestionWidget {
-  final ChoiceQuestion question;
-  final Function(Answer) onDone;
-  final String multiSelectionText;
-  final Answer<List<String>>? initialAnswer;
-
-  const ChoiceQuestionWidget({
-    super.key,
-    required this.question,
-    required this.onDone,
-    required this.multiSelectionText,
-    this.initialAnswer,
-  });
-
+class const ChoiceQuestionWidget({
+  super.key,
+  required final ChoiceQuestion question,
+  required final Function(Answer) onDone,
+  required final String multiSelectionText,
+  required final String requiredMultiSelectionText,
+  final Answer<List<String>>? initialAnswer,
+  final VoidCallback? onCleared,
+}) extends QuestionWidget {
   @override
   State<ChoiceQuestionWidget> createState() => _ChoiceQuestionWidgetState();
 
   @override
-  String? get subtitle => question.multiple ? multiSelectionText : null;
+  String? get subtitle => question.multiple
+      ? question.selectionRequired
+            ? requiredMultiSelectionText
+            : multiSelectionText
+      : null;
 }
 
-class _ChoiceQuestionWidgetState extends State<ChoiceQuestionWidget> {
+class _ChoiceQuestionWidgetState() extends State<ChoiceQuestionWidget> {
   late List<Choice> selected;
   late bool confirmButtonTouched;
 
@@ -40,6 +39,7 @@ class _ChoiceQuestionWidgetState extends State<ChoiceQuestionWidget> {
   }
 
   void tapped(Choice choice) {
+    final wasConfirmed = confirmButtonTouched;
     setState(() {
       if (!widget.question.multiple) selected.clear();
       if (selected.contains(choice)) {
@@ -47,7 +47,13 @@ class _ChoiceQuestionWidgetState extends State<ChoiceQuestionWidget> {
       } else {
         selected.add(choice);
       }
+      if (selected.isEmpty) confirmButtonTouched = false;
     });
+
+    if (selected.isEmpty) {
+      if (wasConfirmed) widget.onCleared?.call();
+      return;
+    }
 
     // Auto-submit for single choice questions or multi-choice on subsequent answers
     if (!widget.question.multiple || confirmButtonTouched) {
@@ -56,6 +62,8 @@ class _ChoiceQuestionWidgetState extends State<ChoiceQuestionWidget> {
   }
 
   void confirm() {
+    if (widget.question.selectionRequired && selected.isEmpty) return;
+
     setState(() {
       confirmButtonTouched = true;
     });
@@ -64,6 +72,7 @@ class _ChoiceQuestionWidgetState extends State<ChoiceQuestionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final choiceWidgets = widget.question.choices
         .map<Widget>(
           (choice) => SelectableButton(
@@ -81,12 +90,14 @@ class _ChoiceQuestionWidgetState extends State<ChoiceQuestionWidget> {
     if (widget.question.multiple && !confirmButtonTouched) {
       choiceWidgets.add(
         OutlinedButton(
-          onPressed: confirm,
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all<Color>(
-              Theme.of(context).colorScheme.secondary,
-            ),
-            foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+          onPressed: widget.question.selectionRequired && selected.isEmpty
+              ? null
+              : confirm,
+          style: OutlinedButton.styleFrom(
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: Colors.white,
+            disabledBackgroundColor: colorScheme.surfaceContainerHighest,
+            disabledForegroundColor: colorScheme.onSurfaceVariant,
           ),
           child: Text(AppLocalizations.of(context)!.confirm),
         ),

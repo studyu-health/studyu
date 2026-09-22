@@ -12,12 +12,11 @@ class NumericResult extends StudyResult {
 
   late DataReference<num> resultProperty;
 
-  NumericResult() : super(studyResultType);
+  new() : super(studyResultType);
 
-  NumericResult.withId() : super.withId(studyResultType);
+  new withId() : super.withId(studyResultType);
 
-  factory NumericResult.fromJson(Map<String, dynamic> json) =>
-      _$NumericResultFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$NumericResultFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$NumericResultToJson(this);
@@ -26,9 +25,9 @@ class NumericResult extends StudyResult {
   List<String> getHeaders(Study studySpec) {
     final schedule = studySpec.schedule;
     final numberOfDays = schedule.getNumberOfPhases() * schedule.phaseDuration;
-    return Iterable<int>.generate(
-      numberOfDays,
-    ).map((e) => e.toString()).toList();
+    return Iterable<int>.generate(numberOfDays)
+        .map((e) => e.toString())
+        .toList();
   }
 
   @override
@@ -41,8 +40,8 @@ class NumericResult extends StudyResult {
     final numberOfDays =
         subject.study.schedule.getNumberOfPhases() *
         subject.study.schedule.phaseDuration;
-    return Iterable<int>.generate(
-      numberOfDays,
-    ).map((day) => resultSet[day]).toList();
+    return Iterable<int>.generate(numberOfDays)
+        .map((day) => resultSet[day])
+        .toList();
   }
 }

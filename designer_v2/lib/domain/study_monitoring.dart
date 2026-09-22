@@ -5,43 +5,27 @@ import 'package:equatable/equatable.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/constants.dart';
 
-class StudyMonitorItem extends Equatable {
-  final StudySubject studySubject;
-  final String participantId;
-  final String? inviteCode;
-  final DateTime startedAt;
-  final DateTime lastActivityAt;
-  final int currentDayOfStudy;
-  final int studyDurationInDays;
-  final int completedInterventions;
-  final int missedInterventions;
-  final int completedSurveys;
-  final int missedSurveys;
-  final bool droppedOut;
-  final List<Set<String>> missedTasksPerDay;
-  final List<Set<String>> completedTasksPerDay;
-  final int totalInterventionTasks;
-  final int totalSurveyTasks;
-
-  const StudyMonitorItem({
-    required this.studySubject,
-    required this.participantId,
-    required this.inviteCode,
-    required this.startedAt,
-    required this.lastActivityAt,
-    required this.currentDayOfStudy,
-    required this.studyDurationInDays,
-    required this.completedInterventions,
-    required this.missedInterventions,
-    required this.completedSurveys,
-    required this.missedSurveys,
-    required this.droppedOut,
-    required this.missedTasksPerDay,
-    required this.completedTasksPerDay,
-    required this.totalInterventionTasks,
-    required this.totalSurveyTasks,
-  }) : assert(missedTasksPerDay.length == currentDayOfStudy),
-       assert(completedTasksPerDay.length == currentDayOfStudy);
+class const StudyMonitorItem({
+  required final StudySubject studySubject,
+  required final String participantId,
+  required final String? inviteCode,
+  required final DateTime startedAt,
+  required final DateTime lastActivityAt,
+  required final int currentDayOfStudy,
+  required final int studyDurationInDays,
+  required final int completedInterventions,
+  required final int missedInterventions,
+  required final int completedSurveys,
+  required final int missedSurveys,
+  required final bool droppedOut,
+  required final List<Set<String>> missedTasksPerDay,
+  required final List<Set<String>> completedTasksPerDay,
+  required final int totalInterventionTasks,
+  required final int totalSurveyTasks,
+}) extends Equatable {
+  this
+    : assert(missedTasksPerDay.length == currentDayOfStudy),
+      assert(completedTasksPerDay.length == currentDayOfStudy);
 
   @override
   List<Object?> get props => [participantId];

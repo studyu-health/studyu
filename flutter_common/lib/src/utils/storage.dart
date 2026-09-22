@@ -7,7 +7,7 @@ import 'package:synchronized/synchronized.dart';
 
 final storageLock = Lock();
 
-class SupabaseStorage extends LocalStorage {
+class SupabaseStorage() extends LocalStorage {
   @override
   Future<void> initialize() async {}
 
@@ -35,7 +35,7 @@ class SupabaseStorage extends LocalStorage {
   }
 }
 
-class SecureStorage {
+class SecureStorage() {
   static const storage = FlutterSecureStorage();
 
   static Future<bool> containsKey(String key) async {

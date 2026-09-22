@@ -5,13 +5,11 @@ import 'package:studyu_core/src/models/report/report_section.dart';
 part 'report_specification.g.dart';
 
 @JsonSerializable()
-class ReportSpecification {
+class ReportSpecification() {
   ReportSection? primary;
   late List<ReportSection> secondary = [];
 
-  ReportSpecification();
-
-  factory ReportSpecification.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$ReportSpecificationFromJson(json);
   Map<String, dynamic> toJson() => _$ReportSpecificationToJson(this);
 

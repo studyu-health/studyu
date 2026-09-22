@@ -49,4 +49,4 @@ void main() {
   });
 }
 
-class _StudyScheduleTestControls with StudyScheduleControls {}
+class _StudyScheduleTestControls() with StudyScheduleControls;

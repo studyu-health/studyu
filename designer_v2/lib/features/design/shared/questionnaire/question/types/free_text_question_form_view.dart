@@ -12,11 +12,10 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/input_formatter.dart';
 
-class FreeTextQuestionFormView extends ConsumerWidget {
-  const FreeTextQuestionFormView({required this.formViewModel, super.key});
-
-  final QuestionFormViewModel formViewModel;
-
+class const FreeTextQuestionFormView({
+  required final QuestionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
