@@ -1,0 +1,32 @@
+{
+  "id": "test-id",
+  "user_id": "user-id",
+  "title": "Fixture Study",
+  "status": "draft",
+  "participation": "invite",
+  "result_sharing": "private",
+  "contact": {
+    "organization": "Test Org",
+    "email": "test@example.com",
+    "website": "",
+    "phone": ""
+  },
+  "icon_name": "accountHeart",
+  "published": false,
+  "questionnaire": [],
+  "eligibility_criteria": [],
+  "consent": [],
+  "interventions": [],
+  "observations": [],
+  "schedule": {
+    "phaseDuration": 7,
+    "numberOfCycles": 2,
+    "includeBaseline": false,
+    "sequence": "alternating",
+    "sequenceCustom": "ABAB"
+  },
+  "report_specification": {
+    "secondary": []
+  },
+  "results": []
+}

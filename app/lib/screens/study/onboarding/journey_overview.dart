@@ -96,6 +96,7 @@ class _JourneyOverviewScreen() extends State<JourneyOverviewScreen> {
   @override
   Widget build(BuildContext context) {
     final nav = BottomOnboardingNavigation(
+      nextButtonKey: const ValueKey('journey_overview_next'),
       onBack: context.canPop() ? _goBack : null,
       onNext: () => getConsentAndNavigateToDashboard(context),
       progress: OnboardingProgress.forPage(
@@ -117,6 +118,7 @@ class _JourneyOverviewScreen() extends State<JourneyOverviewScreen> {
     );
 
     final scaffold = Scaffold(
+      key: const ValueKey('journey_overview_screen'),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
@@ -154,12 +156,14 @@ class const Timeline({required final StudySubject? subject, super.key})
     final interventionsInOrder = subject!.getInterventionsInOrder();
     final now = DateTime.now();
     return Column(
+      key: const ValueKey('journey_timeline'),
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         ...interventionsInOrder.asMap().entries.map((entry) {
           final index = entry.key;
           final intervention = entry.value;
           return InterventionTile(
+            key: ValueKey('journey_intervention_tile_$index'),
             title: intervention.name,
             iconName: intervention.icon,
             color: intervention.isBaseline()
@@ -172,6 +176,7 @@ class const Timeline({required final StudySubject? subject, super.key})
           );
         }),
         InterventionTile(
+          key: const ValueKey('journey_results_tile'),
           title: AppLocalizations.of(context)!.journey_results_available,
           iconName: 'flagCheckered',
           color: Colors.green,

@@ -8,6 +8,9 @@ workspace:
   - flutter_common
   - app
   - designer_v2
+  - tools/studyu_validator
+  - tools/study_data_docs
+  - tools/studyu_mcp
 dev_dependencies:
   melos: ^8.7.0
 
@@ -84,6 +87,16 @@ melos:
           "${rtk_prefix}dart run build_runner build"
       description: Generate files with build_runner
 
+    docs:study-data:write:
+      run: |
+        dart run tools/study_data_docs/bin/study_data_docs.dart --write
+      description: Regenerates StudyU core study-data markdown docs
+
+    docs:study-data:check:
+      run: |
+        dart run tools/study_data_docs/bin/study_data_docs.dart --check
+      description: Checks StudyU core study-data markdown docs are up to date
+
     qualitycheck:
       run: |
         set -e
@@ -154,6 +167,19 @@ melos:
         scope: studyu_app
       description: Runs StudyU App with local environment
 
+    local:app:driver:
+      run: |
+        melos exec -c 1 -- \
+          "flutter run -d chrome --web-port 8080 -t lib/driver_main.dart --dart-define=STUDYU_ENV=.env.local"
+      packageFilters:
+        scope: studyu_app
+      description: Runs StudyU App with local environment and Flutter Driver enabled
+
+    mcp:studyu:
+      run: |
+        cd tools/studyu_mcp && fvm dart run bin/studyu_mcp.dart
+      description: Runs the StudyU MCP server
+
     local:designer_v2:
       run: |
         dart run melos exec -c 1 -- \
@@ -165,6 +191,19 @@ melos:
       packageFilters:
         scope: studyu_designer_v2
       description: Runs StudyU Designer with local environment
+
+    local:designer_v2:driver:
+      run: |
+        melos exec -c 1 -- \
+          "flutter run -d chrome --web-port 8081 \
+           -t lib/driver_main.dart \
+           --dart-define=STUDYU_ENV=.env.local \
+           --dart-define=EMAIL=user1@studyu.health \
+           --dart-define=PASSWORD=user1pass \
+           --dart-define=AUTO_LOGIN=false"
+      packageFilters:
+        scope: studyu_designer_v2
+      description: Runs StudyU Designer with local environment and Flutter Driver enabled
 
     build:android:
       run: |

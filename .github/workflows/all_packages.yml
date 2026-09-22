@@ -7,6 +7,9 @@ on:
       - "core/**"
       - "designer_v2/**"
       - "flutter_common/**"
+      - "tools/study_data_docs/**"
+      - "tools/studyu_mcp/**"
+      - "tools/studyu_validator/**"
       - '*.gitignore'
       - 'pubspec.yaml'
       - 'pubspec.lock'

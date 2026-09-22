@@ -1,0 +1,17 @@
+name: studyu_validator
+description: CLI tool for StudyU study JSON validation
+version: 1.0.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+
+dependencies:
+  args: ^2.5.0
+  json_schema: ^5.2.2
+  studyu_core:
+    path: ../../core
+
+dev_dependencies:
+  test: ^1.25.15
