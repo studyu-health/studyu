@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +6,7 @@ import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
 import 'package:studyu_app/widgets/onboarding_shell.dart';
 import 'package:studyu_app/widgets/study_onboarding_description.dart';
@@ -35,8 +35,8 @@ String? routeAfterTerms(AppState state, {required bool canPop}) {
 }
 
 class _TermsScreenState() extends State<TermsScreen> {
-  bool _acceptedTerms = kDebugMode;
-  bool _acceptedPrivacy = kDebugMode;
+  bool _acceptedTerms = isDebugMode;
+  bool _acceptedPrivacy = isDebugMode;
   bool _participantReady = false;
 
   bool userCanContinue() {

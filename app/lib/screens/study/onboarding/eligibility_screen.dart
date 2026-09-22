@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +7,7 @@ import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
 import 'package:studyu_app/widgets/onboarding_shell.dart';
 import 'package:studyu_app/widgets/questionnaire/questionnaire_widget.dart';
@@ -168,7 +168,7 @@ class _EligibilityScreenState() extends State<EligibilityScreen> {
   }*/
 
   Future<void> _finish() async {
-    final result = kDebugMode && activeResult?.eligible != true
+    final result = isDebugMode && activeResult?.eligible != true
         ? EligibilityResult(
             activeResult?.answers ?? QuestionnaireState(),
             eligible: true,
@@ -240,7 +240,7 @@ class _EligibilityScreenState() extends State<EligibilityScreen> {
     final nav = BottomOnboardingNavigation(
       onBack: context.canPop() ? () => context.pop() : null,
       nextButtonKey: const ValueKey('eligibility_continue'),
-      onNext: activeResult?.eligible == true || kDebugMode ? _finish : null,
+      onNext: activeResult?.eligible == true || isDebugMode ? _finish : null,
       progress: OnboardingProgress.forPage(
         context.read<AppState>(),
         OnboardingStep.eligibility,

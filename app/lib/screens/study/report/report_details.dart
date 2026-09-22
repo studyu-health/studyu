@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/report/disclaimer_section.dart';
 import 'package:studyu_app/screens/study/report/general_details_section.dart';
 import 'package:studyu_app/screens/study/report/report_section_container.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_core/core.dart';
 
 class const ReportDetailsScreen(final StudySubject subject, {super.key})
@@ -41,14 +41,14 @@ class const ReportDetailsScreen(final StudySubject subject, {super.key})
             //  ),
             //),
             if (subject.study.reportSpecification.primary != null &&
-                (subject.completedStudy || kDebugMode))
+                (subject.completedStudy || isDebugMode))
               ReportSectionContainer(
                 subject.study.reportSpecification.primary!,
                 subject: subject,
                 primary: true,
               ),
             if (subject.study.reportSpecification.secondary.isNotEmpty &&
-                (subject.completedStudy || kDebugMode))
+                (subject.completedStudy || isDebugMode))
               ...subject.study.reportSpecification.secondary.map(
                 (section) => ReportSectionContainer(section, subject: subject),
               ),
