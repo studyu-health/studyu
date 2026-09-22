@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -216,7 +218,11 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       );
     }
 
-    return FoodEntry.fromJson(existing.toJson())
+    final copiedExisting = FoodEntry.fromJson(
+      jsonDecode(jsonEncode(existing.toJson())) as Map<String, dynamic>,
+    );
+
+    return copiedExisting
       ..entryType = _entryType
       ..name = _nameController.text
       ..brandName = _brandController.text.isEmpty ? null : _brandController.text

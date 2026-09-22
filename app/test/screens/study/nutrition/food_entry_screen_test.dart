@@ -48,7 +48,10 @@ void main() {
       templateId: 'template-id',
       createdAt: createdAt,
       modifiedAt: modifiedAt,
-      originalValues: const {'source': 'original'},
+      originalValues: {
+        'source': 'original',
+        'nested': {'value': 'keep'},
+      },
       parentRecipeId: 'parent-recipe-id',
       recipeMetadata: RecipeMetadata(
         rawWeight: 1000,
@@ -91,10 +94,13 @@ void main() {
 
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, 'Edited Recipe');
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
     expect(saved, isNotNull);
+    expect(saved!.name, 'Edited Recipe');
+    expect(existing.name, 'Recipe');
     expect(saved!.id, existing.id);
     expect(saved!.createdAt, createdAt);
     expect(saved!.modifiedAt, modifiedAt);
@@ -114,5 +120,21 @@ void main() {
     expect(saved!.nutrition.cholesterol, existing.nutrition.cholesterol);
     expect(saved!.nutrition.waterContent, existing.nutrition.waterContent);
     expect(saved!.nutrition.micros, existing.nutrition.micros);
+
+    (saved!.originalValues['nested'] as Map<String, dynamic>)['value'] =
+        'changed';
+    saved!.recipeMetadata!.retentionFactors['protein'] = 0.1;
+    saved!.recipeIngredients!.single.amount = 4;
+    saved!.recipeIngredients!.clear();
+    saved!.nutrition.micros['iron'] = 1;
+
+    expect(
+      (existing.originalValues['nested'] as Map<String, dynamic>)['value'],
+      'keep',
+    );
+    expect(existing.recipeMetadata!.retentionFactors['protein'], 0.9);
+    expect(existing.recipeIngredients, hasLength(1));
+    expect(existing.recipeIngredients!.single.amount, 2);
+    expect(existing.nutrition.micros['iron'], 10);
   });
 }
