@@ -4,27 +4,19 @@ import 'package:studyu_designer_v2/common_views/badge.dart' as studybadge;
 import 'package:studyu_designer_v2/domain/participation.dart';
 import 'package:studyu_designer_v2/domain/study.dart';
 
-abstract class IStudyStatusBadgeViewModel {
+abstract class IStudyStatusBadgeViewModel() {
   Participation? get studyParticipation;
   StudyStatus? get studyStatus;
 }
 
-class StudyStatusBadge extends StatelessWidget {
-  const StudyStatusBadge({
-    required this.status,
-    this.participation,
-    this.type = studybadge.BadgeType.outlineFill,
-    this.showPrefixIcon = true,
-    this.showTooltip = true,
-    super.key,
-  });
-
-  final Participation? participation;
-  final StudyStatus? status;
-  final studybadge.BadgeType type;
-  final bool showPrefixIcon;
-  final bool showTooltip;
-
+class const StudyStatusBadge({
+  required final StudyStatus? status,
+  final Participation? participation,
+  final studybadge.BadgeType type = studybadge.BadgeType.outlineFill,
+  final bool showPrefixIcon = true,
+  final bool showTooltip = true,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

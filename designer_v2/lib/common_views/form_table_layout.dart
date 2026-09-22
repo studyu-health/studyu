@@ -2,48 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:studyu_designer_v2/common_views/icons.dart';
 
-enum FormTableRowLayout { vertical, horizontal }
-
-class FormTableRow {
-  FormTableRow({
-    this.label,
-    this.labelBuilder,
-    required this.input,
-    this.labelStyle,
-    this.labelHelpText,
-    this.control,
-    this.layout,
-  });
-
-  final String? label;
-  final WidgetBuilder? labelBuilder;
-  final TextStyle? labelStyle;
-  final String? labelHelpText;
-  final Widget input;
-  final AbstractControl? control;
-  final FormTableRowLayout? layout;
+enum FormTableRowLayout() {
+  vertical,
+  horizontal,
 }
 
+class FormTableRow({
+  final String? label,
+  final WidgetBuilder? labelBuilder,
+  required final Widget input,
+  final TextStyle? labelStyle,
+  final String? labelHelpText,
+  final AbstractControl? control,
+  final FormTableRowLayout? layout,
+});
+
 /// Renders a list of [FormTableRow]s in a two-column tabular layout
-class FormTableLayout extends StatelessWidget {
-  const FormTableLayout({
-    required this.rows,
-    this.columnWidths = const {
-      0: FixedColumnWidth(160.0),
-      1: FlexColumnWidth(),
-    },
-    this.rowDivider,
-    this.rowLayout = FormTableRowLayout.horizontal,
-    this.rowLabelStyle,
-    super.key,
-  });
-
-  final List<FormTableRow> rows;
-  final Map<int, TableColumnWidth> columnWidths;
-  final Widget? rowDivider;
-  final FormTableRowLayout? rowLayout;
-  final TextStyle? rowLabelStyle;
-
+class const FormTableLayout({
+  required final List<FormTableRow> rows,
+  final Map<int, TableColumnWidth> columnWidths = const {
+    0: FixedColumnWidth(160.0),
+    1: FlexColumnWidth(),
+  },
+  final Widget? rowDivider,
+  final FormTableRowLayout? rowLayout = FormTableRowLayout.horizontal,
+  final TextStyle? rowLabelStyle,
+  final double rowSpacing = 10.0,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -56,7 +42,7 @@ class FormTableLayout extends StatelessWidget {
       final row = rows[i];
       final isTrailing = i == rows.length - 1;
 
-      final bottomSpacing = (!isTrailing) ? 10.0 : 0.0;
+      final bottomSpacing = (!isTrailing) ? rowSpacing : 0.0;
       final stateColorStyle = (row.control != null && row.control!.disabled)
           ? TextStyle(color: theme.disabledColor)
           : null;
@@ -153,22 +139,14 @@ class FormTableLayout extends StatelessWidget {
   }
 }
 
-class FormSectionHeader extends StatelessWidget {
-  const FormSectionHeader({
-    required this.title,
-    this.helpText,
-    this.helpTextDisabled = false,
-    this.titleTextStyle,
-    this.divider = true,
-    super.key,
-  });
-
-  final String title;
-  final TextStyle? titleTextStyle;
-  final String? helpText;
-  final bool divider;
-  final bool helpTextDisabled;
-
+class const FormSectionHeader({
+  required final String title,
+  final String? helpText,
+  final bool helpTextDisabled = false,
+  final TextStyle? titleTextStyle,
+  final bool divider = true,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final titleStyle = Theme.of(context).textTheme.titleLarge!;
@@ -192,20 +170,13 @@ class FormSectionHeader extends StatelessWidget {
   }
 }
 
-class FormLabel extends StatelessWidget {
-  const FormLabel({
-    this.labelText,
-    this.helpText,
-    this.labelTextStyle,
-    this.layout = FormTableRowLayout.vertical,
-    super.key,
-  });
-
-  final String? labelText;
-  final String? helpText;
-  final TextStyle? labelTextStyle;
-  final FormTableRowLayout? layout;
-
+class const FormLabel({
+  final String? labelText,
+  final String? helpText,
+  final TextStyle? labelTextStyle,
+  final FormTableRowLayout? layout = FormTableRowLayout.vertical,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(

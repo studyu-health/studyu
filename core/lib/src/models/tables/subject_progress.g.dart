@@ -22,10 +22,10 @@ SubjectProgress _$SubjectProgressFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$SubjectProgressToJson(SubjectProgress instance) =>
     <String, dynamic>{
-      'completed_at': ?instance.completedAt?.toIso8601String(),
       'subject_id': instance.subjectId,
       'intervention_id': instance.interventionId,
       'task_id': instance.taskId,
       'result_type': instance.resultType,
       'result': instance.result.toJson(),
+      'completed_at': ?instance.completedAt?.toIso8601String(),
     };

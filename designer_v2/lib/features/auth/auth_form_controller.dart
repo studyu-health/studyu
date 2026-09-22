@@ -14,7 +14,7 @@ import 'package:supabase/supabase.dart';
 
 part 'auth_form_controller.g.dart';
 
-enum AuthFormKey {
+enum AuthFormKey() {
   login,
   signup,
   passwordForgot,
@@ -57,7 +57,7 @@ enum AuthFormKey {
 }
 
 @riverpod
-class AuthFormController extends _$AuthFormController {
+class AuthFormController() extends _$AuthFormController {
   @override
   AsyncValue<void> build(AuthFormKey formKeyArg) {
     _authRepository = ref.watch(authRepositoryProvider);
@@ -270,7 +270,7 @@ class AuthFormController extends _$AuthFormController {
     _forceValidationMessages(AuthFormKey._loginSubmit);
     final currentForm = getForm();
     if (currentForm == null || !currentForm.valid) {
-      return Future.value(AuthResponse());
+      return await Future.value(AuthResponse());
     }
     try {
       state = const AsyncValue.loading();
@@ -290,7 +290,7 @@ class AuthFormController extends _$AuthFormController {
         !currentForm.valid ||
         getEmailControl().isNullOrEmpty ||
         getPasswordControl().isNullOrEmpty) {
-      return Future.value(AuthResponse());
+      return await Future.value(AuthResponse());
     }
     return await _signInWith(
       getEmailControl().value!,
@@ -311,7 +311,7 @@ class AuthFormController extends _$AuthFormController {
     } finally {
       state = const AsyncValue.data(null);
     }
-    return Future.value(AuthResponse());
+    return await Future.value(AuthResponse());
   }
 
   Future<void> signOut() async {
@@ -341,9 +341,8 @@ class AuthFormController extends _$AuthFormController {
     if (currentForm == null || !currentForm.valid) {
       return Future.value();
     }
-    return resetPasswordForEmail(
-      getEmailControl().value!,
-    ).then((_) => _notificationService.show(Notifications.passwordReset));
+    return resetPasswordForEmail(getEmailControl().value!)
+        .then((_) => _notificationService.show(Notifications.passwordReset));
   }
 
   Future<void> recoverPassword() {
@@ -372,15 +371,14 @@ class AuthFormController extends _$AuthFormController {
       return false;
     }
 
-    return updateUser(getPasswordControl().value!);
+    return await updateUser(getPasswordControl().value!);
   }
 
   Future<bool> updateUser(String newPassword) async {
     try {
       state = const AsyncValue.loading();
-      return (await _authRepository.updateUser(
-            newPassword: newPassword,
-          )).user !=
+      return (await _authRepository.updateUser(newPassword: newPassword))
+              .user !=
           null;
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
@@ -412,7 +410,7 @@ class AuthFormController extends _$AuthFormController {
   }
 
   Future<void> _readDebugUser() async {
-    if (!kDebugMode) return;
+    if (!kDebugMode || getFormKey() != AuthFormKey.login) return;
     const email = String.fromEnvironment('EMAIL');
     const password = String.fromEnvironment('PASSWORD');
     const autoLogin = bool.fromEnvironment('AUTO_LOGIN');

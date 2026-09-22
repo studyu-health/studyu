@@ -1,14 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
-import 'package:studyu_app/routes.dart';
-import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
+import 'package:studyu_app/screens/study/onboarding/invite_qr_scanner.dart';
+import 'package:studyu_app/widgets/study_onboarding_description.dart';
 import 'package:studyu_app/widgets/study_tile.dart';
+import 'package:studyu_app/widgets/why_dialog.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -19,10 +21,18 @@ Future<void> navigateToStudyOverview(
   String? inviteCode,
   List<String>? preselectedIds,
 }) async {
-  context.read<AppState>().preselectedInterventionIds = preselectedIds;
-  context.read<AppState>().inviteCode = inviteCode;
-  context.read<AppState>().selectedStudy = study;
-  Navigator.pushNamed(context, Routes.studyOverview);
+  final state = context.read<AppState>()
+    ..preselectedInterventionIds = preselectedIds
+    ..inviteCode = inviteCode
+    ..selectedStudy = study
+    // Reset any state left over from an abandoned enrollment.
+    ..onboardingPhase = null;
+  // Selecting a different study abandons a draft (un-started) subject;
+  // a started subject can never reach this flow.
+  if (!state.isPreview && state.activeSubject?.startedAt == null) {
+    state.activeSubject = null;
+  }
+  context.push('/${RouteNames.studyOverview}');
 }
 
 Future<void> showAppOutdatedDialog(BuildContext context) async {
@@ -35,8 +45,9 @@ Future<void> showAppOutdatedDialog(BuildContext context) async {
       content: Text(AppLocalizations.of(context)!.study_selection_unsupported),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("OK"),
+          key: const ValueKey('dialog_ok'),
+          onPressed: () => context.pop(),
+          child: Text(AppLocalizations.of(context)!.ok),
         ),
       ],
     ),
@@ -47,186 +58,211 @@ Future<void> showStudyClosedDialog(BuildContext context) async {
   await showDialog(
     context: context,
     builder: (context) => AlertDialog(
+      key: const ValueKey('study_closed_dialog'),
       title: Text(AppLocalizations.of(context)!.study_selection_closed_title),
       content: Text(AppLocalizations.of(context)!.study_selection_closed),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("OK"),
+          key: const ValueKey('dialog_ok'),
+          onPressed: () => context.pop(),
+          child: Text(AppLocalizations.of(context)!.ok),
         ),
       ],
     ),
   );
 }
 
-class StudySelectionScreen extends StatefulWidget {
-  const StudySelectionScreen({super.key});
-
+class const StudySelectionScreen({
+  super.key,
+  final Future<ExtractionResult<Study>>? publicStudies,
+}) extends StatefulWidget {
   @override
   State<StudySelectionScreen> createState() => _StudySelectionScreenState();
 }
 
-class _StudySelectionScreenState extends State<StudySelectionScreen> {
+class _StudySelectionScreenState() extends State<StudySelectionScreen> {
   bool _hiddenStudies = false;
-  final publishedStudies = Study.publishedPublicStudies();
+
+  Future<ExtractionResult<Study>> get publishedStudies =>
+      widget.publicStudies ?? Study.publishedPublicStudies();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        leading: BackButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.goNamed(RouteNames.welcome);
+            }
+          },
+        ),
+        title: Text(AppLocalizations.of(context)!.browse_public_studies),
+      ),
       body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.study_selection_description,
-                      style: theme.textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: AppLocalizations.of(
-                              context,
-                            )!.study_selection_single,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          TextSpan(
-                            text: ' ',
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          TextSpan(
-                            text: AppLocalizations.of(
-                              context,
-                            )!.study_selection_single_why,
-                            style: theme.textTheme.titleSmall!.copyWith(
-                              color: theme.primaryColor,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => showDialog(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 700),
+            child: RetryFutureBuilder<ExtractionResult<Study>>(
+              tryFunction: () => publishedStudies,
+              successBuilder:
+                  (
+                    BuildContext context,
+                    ExtractionResult<Study>? extractionResult,
+                  ) {
+                    final studies = extractionResult!.extracted;
+                    if (extractionResult is ExtractionFailedException<Study>) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (_hiddenStudies) return;
+                        debugPrint(
+                          '${extractionResult.notExtracted.length} studies could not be extracted.',
+                        );
+                        setState(() {
+                          _hiddenStudies = true;
+                        });
+                      });
+                    }
+
+                    return CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          sliver: SliverToBoxAdapter(
+                            child: StudyOnboardingDescription(
+                              text: AppLocalizations.of(context)!
+                                  .study_selection_single,
+                              actionLabel: AppLocalizations.of(context)!
+                                  .study_selection_single_why,
+                              onAction: () => showDialog(
                                 context: context,
-                                builder: (context) => AlertDialog(
-                                  content: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.study_selection_single_reason,
-                                  ),
+                                builder: (context) => WhyDialog(
+                                  content: AppLocalizations.of(context)!
+                                      .study_selection_single_reason,
                                 ),
                               ),
+                            ),
                           ),
+                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                        if (_hiddenStudies) ...[
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            sliver: SliverToBoxAdapter(
+                              child: MaterialBanner(
+                                padding: const EdgeInsets.all(8),
+                                leading: const Icon(
+                                  MdiIcons.exclamationThick,
+                                  color: Colors.orange,
+                                  size: 32,
+                                ),
+                                content: Text(
+                                  AppLocalizations.of(context)!
+                                      .study_selection_hidden_studies,
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                                actions: const [SizedBox.shrink()],
+                                backgroundColor: Colors.yellow[100],
+                              ),
+                            ),
+                          ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 16)),
                         ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (_hiddenStudies)
-                Column(
-                  children: [
-                    MaterialBanner(
-                      padding: const EdgeInsets.all(8),
-                      leading: Icon(
-                        MdiIcons.exclamationThick,
-                        color: Colors.orange,
-                        size: 32,
-                      ),
-                      content: Text(
-                        AppLocalizations.of(
-                          context,
-                        )!.study_selection_hidden_studies,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      actions: const [SizedBox.shrink()],
-                      backgroundColor: Colors.yellow[100],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                )
-              else
-                const SizedBox.shrink(),
-              Expanded(
-                child: RetryFutureBuilder<ExtractionResult<Study>>(
-                  tryFunction: () => publishedStudies,
-                  successBuilder:
-                      (
-                        BuildContext context,
-                        ExtractionResult<Study>? extractionResult,
-                      ) {
-                        final studies = extractionResult!.extracted;
-                        if (extractionResult
-                            is ExtractionFailedException<Study>) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (_hiddenStudies) return;
-                            debugPrint(
-                              '${extractionResult.notExtracted.length} studies could not be extracted.',
-                            );
-                            setState(() {
-                              _hiddenStudies = true;
-                            });
-                          });
-                        }
-                        return ListView.builder(
-                          itemCount: studies.length,
-                          itemBuilder: (context, index) {
-                            final study = studies[index];
-                            return Hero(
-                              tag: 'study_tile_${studies[index].id}',
-                              child: Material(
-                                child: StudyTile.fromStudy(
-                                  study: study,
-                                  onTap: () async {
-                                    await navigateToStudyOverview(
-                                      context,
-                                      study,
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                          sliver: studies.isEmpty
+                              ? const SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: NoPublicStudiesWidget(),
+                                )
+                              : SliverList.builder(
+                                  itemCount: studies.length,
+                                  itemBuilder: (context, index) {
+                                    final study = studies[index];
+                                    return Material(
+                                      child: InkWell(
+                                        onTap: () {
+                                          unawaited(
+                                            navigateToStudyOverview(
+                                              context,
+                                              study,
+                                            ),
+                                          );
+                                        },
+                                        child: Hero(
+                                          tag: 'study_tile_${study.id}',
+                                          child: Material(
+                                            type: MaterialType.transparency,
+                                            child: StudyTile.fromStudy(
+                                              study: study,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     );
                                   },
                                 ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: OutlinedButton.icon(
-                  icon: Icon(MdiIcons.key),
-                  onPressed: () async {
-                    await showDialog(
-                      context: context,
-                      builder: (_) => const InviteCodeDialog(),
+                        ),
+                      ],
                     );
                   },
-                  label: Text(AppLocalizations.of(context)!.invite_code_button),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
-      bottomNavigationBar: const BottomOnboardingNavigation(hideNext: true),
     );
   }
 }
 
-class InviteCodeDialog extends StatefulWidget {
-  const InviteCodeDialog({super.key});
+class const NoPublicStudiesWidget({super.key}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.search_off, size: 48, color: theme.colorScheme.primary),
+            const SizedBox(height: 16),
+            Text(
+              l10n.study_selection_no_public_studies,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class const InviteCodeDialog({super.key}) extends StatefulWidget {
   @override
   State<InviteCodeDialog> createState() => _InviteCodeDialogState();
 }
 
-class _InviteCodeDialogState extends State<InviteCodeDialog> {
+class _InviteCodeDialogState() extends State<InviteCodeDialog> {
   final _controller = TextEditingController();
   String? _errorMessage;
 
-  _InviteCodeDialogState();
+  Future<void> _scanInviteCode() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const InviteQrScannerScreen()),
+    );
+    if (!mounted || code == null) return;
+
+    _controller
+      ..text = code
+      ..selection = TextSelection.collapsed(offset: code.length);
+    await _submitInviteCode();
+  }
 
   @override
   void dispose() {
@@ -234,89 +270,97 @@ class _InviteCodeDialogState extends State<InviteCodeDialog> {
     super.dispose();
   }
 
+  Future<void> _submitInviteCode() async {
+    final code = _controller.text.trim();
+    try {
+      final (invite, study) = await Study.fetchByInviteCode(code);
+
+      if (!mounted) return;
+
+      if (study == null) {
+        setState(() {
+          _errorMessage = AppLocalizations.of(context)!.invalid_invite_code;
+        });
+        return;
+      }
+
+      setState(() {
+        _errorMessage = null;
+      });
+
+      if (study.isClosed) {
+        if (!context.mounted) return;
+        context.pop();
+        await showStudyClosedDialog(context);
+        return;
+      }
+
+      if (!context.mounted) return;
+      context.pop();
+
+      await navigateToStudyOverview(
+        context,
+        study,
+        inviteCode: code,
+        preselectedIds: invite?.preselectedInterventionIds,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      if (e is ArgumentError) {
+        // A newer study schema requires an app update.
+        setState(() => _errorMessage = null);
+        context.pop();
+        await showAppOutdatedDialog(context);
+      } else if (e is PostgrestException) {
+        setState(
+          () =>
+              _errorMessage = AppLocalizations.of(context)!
+                  .error_occurred_with_message(e.message),
+        );
+      } else {
+        setState(
+          () =>
+              _errorMessage = AppLocalizations.of(context)!.invalid_invite_code,
+        );
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: Text(AppLocalizations.of(context)!.private_study_invite_code),
-    content: TextFormField(
-      controller: _controller,
-      validator: (_) => _errorMessage,
-      autovalidateMode: AutovalidateMode.always,
-      decoration: InputDecoration(
-        labelText: AppLocalizations.of(context)!.invite_code,
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.private_study_invite_code),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l10n.private_study_invite_code_description),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _controller,
+            autofocus: true,
+            validator: (_) => _errorMessage,
+            autovalidateMode: AutovalidateMode.always,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => unawaited(_submitInviteCode()),
+            decoration: InputDecoration(
+              labelText: l10n.invite_code,
+              suffixIcon: IconButton(
+                tooltip: l10n.scan_invite_code,
+                onPressed: _scanInviteCode,
+                icon: const Icon(Icons.qr_code_scanner),
+              ),
+            ),
+          ),
+        ],
       ),
-    ),
-    actions: [
-      OutlinedButton.icon(
-        icon: const Icon(Icons.arrow_forward),
-        label: Text(AppLocalizations.of(context)!.next),
-        onPressed: () async {
-          final inviteCode = _controller.text;
-          Map<String, dynamic>? studyResult;
-          try {
-            studyResult = await Supabase.instance.client
-                .rpc(
-                  'get_study_record_from_invite',
-                  params: {'invite_code': inviteCode},
-                )
-                .single();
-          } on PostgrestException catch (error) {
-            print(error.message);
-            if (!mounted) return;
-            setState(() {
-              _errorMessage = error.message;
-            });
-            return;
-          }
-          if (!mounted) return;
-          if (studyResult['id'] == null) {
-            setState(() {
-              _errorMessage = AppLocalizations.of(context)!.invalid_invite_code;
-            });
-          } else {
-            setState(() {
-              _errorMessage = null;
-            });
-
-            Study study;
-            try {
-              study = Study.fromJson(studyResult);
-              // ignore: avoid_catching_errors
-            } on ArgumentError catch (error) {
-              debugPrint('Study selection from invite failed: $error');
-              if (!context.mounted) return;
-              Navigator.pop(context);
-              await showAppOutdatedDialog(context);
-              return;
-            }
-
-            if (study.isClosed) {
-              if (!context.mounted) return;
-              Navigator.pop(context);
-              await showStudyClosedDialog(context);
-              return;
-            }
-
-            final inviteResult = await Supabase.instance.client
-                .from('study_invite')
-                .select('preselected_intervention_ids')
-                .eq('code', inviteCode)
-                .maybeSingle();
-            if (!context.mounted) return;
-
-            final preselectedInterventionIds =
-                inviteResult?['preselected_intervention_ids'];
-            final appState = context.read<AppState>();
-            appState.preselectedInterventionIds =
-                preselectedInterventionIds == null
-                ? null
-                : List<String>.from(preselectedInterventionIds as List);
-            appState.inviteCode = inviteCode;
-            appState.selectedStudy = study;
-            // Replace (not push) so accepting an invite can't be undone via back button.
-            Navigator.pushReplacementNamed(context, Routes.studyOverview);
-          }
-        },
-      ),
-    ],
-  );
+      actions: [
+        FilledButton(
+          onPressed: _submitInviteCode,
+          child: Text(l10n.continue_label),
+        ),
+      ],
+    );
+  }
 }

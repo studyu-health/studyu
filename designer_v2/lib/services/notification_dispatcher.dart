@@ -1,50 +1,38 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:studyu_designer_v2/localization/string_hardcoded.dart';
+import 'package:studyu_designer_v2/common_views/confirmation_dialog.dart';
 import 'package:studyu_designer_v2/services/notification_service.dart';
 import 'package:studyu_designer_v2/services/notification_types.dart';
 
 /// A wrapper widgets that is subscribed to the [NotificationService] and
 /// automatically dispatches its [NotificationIntent]s to show a Snackbar.
-class NotificationDispatcher extends ConsumerStatefulWidget {
-  const NotificationDispatcher({
-    required this.child,
-    this.scaffoldMessengerKey,
-    this.navigatorKey,
-    this.snackbarWidth,
-    this.snackbarInnerPadding = 16.0,
-    this.snackbarBehavior = SnackBarBehavior.fixed,
-    this.snackbarDefaultDuration = 2500,
-    super.key,
-  });
-
+class const NotificationDispatcher({
   /// Pass-through widget that is rendered as is
-  final Widget? child;
+  required final Widget? child,
 
   /// The global key used for looking up the [Scaffold] reference
   /// If not specified explicitly, falls back `ScaffoldMessenger.of(context)`
   /// to look up the closest instance of [ScaffoldMessengerState]
-  final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
+  final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey,
 
   /// The global key used for looking up the [Navigator] reference
   /// If not specified explicitly, falls back `Navigator.of(context)`
   /// to look up the closest instance of [NavigatorState]
-  final GlobalKey<NavigatorState>? navigatorKey;
-
-  final double snackbarInnerPadding;
-  final double? snackbarWidth;
-  final SnackBarBehavior snackbarBehavior;
-  final int snackbarDefaultDuration;
-
+  final GlobalKey<NavigatorState>? navigatorKey,
+  final double? snackbarWidth,
+  final double snackbarInnerPadding = 16.0,
+  final SnackBarBehavior snackbarBehavior = SnackBarBehavior.fixed,
+  final int snackbarDefaultDuration = 2500,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _NotificationDispatcherState();
 }
 
-class _NotificationDispatcherState
+class _NotificationDispatcherState()
     extends ConsumerState<NotificationDispatcher> {
   /// Subscription to a stream of [NotificationIntent]s to be dispatched
   late final StreamSubscription<NotificationIntent> _subscription;
@@ -109,7 +97,14 @@ class _NotificationDispatcherState
           _buildSnackbar(notification as SnackbarIntent, messengerState),
         );
       case NotificationType.alert:
-        final navigatorState = _getNavigatorState()!;
+        final navigatorState = _getNavigatorState();
+        if (navigatorState == null) {
+          throw Exception(
+            "NotificationDispatcher could not obtain reference to NavigatorState "
+            "for alert notification. Make sure the widget is placed below a Navigator "
+            "in the widget tree, or provide a reference via the navigatorKey global key.",
+          );
+        }
         showDialog(
           context: navigatorState.context,
           builder: (BuildContext context) =>
@@ -122,17 +117,17 @@ class _NotificationDispatcherState
     }
   }
 
-  AlertDialog _buildAlertDialog(
+  Widget _buildAlertDialog(
     AlertIntent notification,
     NavigatorState navigatorState,
   ) {
-    final textTheme = Theme.of(context).textTheme;
-
-    final List<Widget> actions = [];
+    final List<ConfirmationDialogAction> actions = [];
     if (notification.actions != null) {
       for (final action in notification.actions!) {
         actions.add(
-          TextButton(
+          ConfirmationDialogAction(
+            label: action.label,
+            isDestructive: action.isDestructive,
             onPressed: () {
               if (notification.dismissOnAction) {
                 // always pop & don't wait for [action.onSelect]
@@ -140,51 +135,18 @@ class _NotificationDispatcherState
               }
               action.onSelect();
             },
-            child: Text(
-              action.label,
-              style: (action.isDestructive)
-                  ? textTheme.labelLarge!.copyWith(color: Colors.redAccent)
-                  : textTheme.labelLarge!,
-            ),
           ),
         );
       }
     }
 
-    return AlertDialog(
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(notification.icon),
-          Text("️ ${notification.title}", style: textTheme.displaySmall),
-        ],
-      ),
-      content: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: 300,
-          maxWidth: math.max(300, MediaQuery.of(context).size.width * 0.33),
-        ),
-        child: Row(
-          children: [
-            Flexible(
-              child: notificationContent(
-                notification.message,
-                notification.customContent,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return StandardConfirmationDialog(
+      title: notification.title,
+      message: notification.message,
+      customContent: notification.customContent,
+      icon: notification.icon,
       actions: actions,
     );
-  }
-
-  Widget notificationContent(String? message, Widget? customContent) {
-    if (customContent != null) {
-      return customContent;
-    } else {
-      return Text(message!);
-    }
   }
 
   SnackBar _buildSnackbar(
@@ -221,6 +183,9 @@ class _NotificationDispatcherState
       duration: Duration(
         milliseconds: notification.duration ?? widget.snackbarDefaultDuration,
       ),
+      // Keep actionable snackbars auto-dismissing; Flutter now defaults
+      // `persist` to true when an action is present.
+      persist: false,
       padding: EdgeInsets.fromLTRB(
         2.5 * widget.snackbarInnerPadding,
         widget.snackbarInnerPadding,
@@ -228,12 +193,8 @@ class _NotificationDispatcherState
         widget.snackbarInnerPadding,
       ),
       behavior: widget.snackbarBehavior,
-      action: SnackBarAction(
-        label: "X".hardcoded,
-        onPressed: () {
-          messengerState.hideCurrentSnackBar();
-        },
-      ),
+      showCloseIcon: true,
+      closeIconColor: theme.colorScheme.onPrimary,
     );
   }
 

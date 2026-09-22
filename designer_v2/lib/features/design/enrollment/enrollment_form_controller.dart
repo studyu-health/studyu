@@ -24,7 +24,14 @@ import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/riverpod.dart';
 
-class EnrollmentFormViewModel extends FormViewModel<EnrollmentFormData>
+class EnrollmentFormViewModel({
+  required final Study study,
+  required final GoRouter router,
+  super.delegate,
+  super.formData,
+  super.autosave = true,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends FormViewModel<EnrollmentFormData>
     with
         WithQuestionnaireControls<
           EnrollmentFormData,
@@ -37,20 +44,10 @@ class EnrollmentFormViewModel extends FormViewModel<EnrollmentFormData>
           ScreenerQuestionFormViewModel,
           QuestionFormRouteArgs
         > {
-  EnrollmentFormViewModel({
-    required this.study,
-    required this.router,
-    super.delegate,
-    super.formData,
-    super.autosave = true,
-    super.validationSet = StudyFormValidationSet.draft,
-  }) {
+  this {
     // automatically save when a managed child view model is saved
     propagateOnSave = true;
   }
-
-  final Study study;
-  final GoRouter router;
 
   late final consentItemDelegate = EnrollmentFormConsentItemDelegate(
     formViewModels: consentItemFormViewModels,
@@ -142,6 +139,7 @@ class EnrollmentFormViewModel extends FormViewModel<EnrollmentFormData>
     final actions = questionFormViewModels.availableActions(
       model,
       onEdit: onSelectItem,
+      confirmationSubject: tr.dialog_subject_screener_question,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);
@@ -150,6 +148,7 @@ class EnrollmentFormViewModel extends FormViewModel<EnrollmentFormData>
   List<ModelAction> availablePopupActions(ScreenerQuestionFormViewModel model) {
     final actions = questionFormViewModels.availablePopupActions(
       model,
+      confirmationSubject: tr.dialog_subject_screener_question,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);
@@ -160,6 +159,7 @@ class EnrollmentFormViewModel extends FormViewModel<EnrollmentFormData>
   ) {
     final actions = questionFormViewModels.availableInlineActions(
       model,
+      confirmationSubject: tr.dialog_subject_screener_question,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);
@@ -247,27 +247,19 @@ class EnrollmentFormViewModel extends FormViewModel<EnrollmentFormData>
   }
 }
 
-class EnrollmentFormConsentItemDelegate
-    implements
-        IFormViewModelDelegate<ConsentItemFormViewModel>,
-        IListActionProvider<ConsentItemFormViewModel>,
-        IProviderArgsResolver<
-          ConsentItemFormViewModel,
-          ConsentItemFormRouteArgs
-        > {
-  EnrollmentFormConsentItemDelegate({
-    required this.formViewModels,
-    required this.owner,
-    this.validationSet,
-    this.propagateOnSave = true,
-  });
-
-  final FormViewModelCollection<ConsentItemFormViewModel, ConsentItemFormData>
-  formViewModels;
-  final EnrollmentFormViewModel owner;
-  final bool propagateOnSave;
-  final FormValidationSetEnum? validationSet;
-
+class EnrollmentFormConsentItemDelegate({
+  required final FormViewModelCollection<
+    ConsentItemFormViewModel,
+    ConsentItemFormData
+  >
+  formViewModels,
+  required final EnrollmentFormViewModel owner,
+  final FormValidationSetEnum? validationSet,
+  final bool propagateOnSave = true,
+}) implements
+    IFormViewModelDelegate<ConsentItemFormViewModel>,
+    IListActionProvider<ConsentItemFormViewModel>,
+    IProviderArgsResolver<ConsentItemFormViewModel, ConsentItemFormRouteArgs> {
   @override
   void onCancel(ConsentItemFormViewModel formViewModel, FormMode prevFormMode) {
     return; // no-op
@@ -317,6 +309,7 @@ class EnrollmentFormConsentItemDelegate
   List<ModelAction> availableActions(ConsentItemFormViewModel model) {
     final actions = formViewModels.availablePopupActions(
       model,
+      confirmationSubject: tr.dialog_subject_consent_item,
       isReadOnly: owner.isReadonly,
     );
     return withIcons(actions, modelActionIcons);

@@ -27,4 +27,10 @@ const _$TextComparatorEnumMap = {
   TextComparator.notEqual: '!=',
   TextComparator.contains: 'contains',
   TextComparator.doesNotContain: 'does_not_contain',
+  TextComparator.lengthGreaterThan: 'length_greater_than',
+  TextComparator.lengthLessThan: 'length_less_than',
+  TextComparator.lengthGreaterThanOrEqual: 'length_greater_than_or_equal',
+  TextComparator.lengthLessThanOrEqual: 'length_less_than_or_equal',
+  TextComparator.lengthEqual: 'length_equal',
+  TextComparator.lengthNotEqual: 'length_not_equal',
 };

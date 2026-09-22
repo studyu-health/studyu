@@ -21,4 +21,5 @@
 
 # Files that should be ignored for the repository's language statistics and hidden by default in diffs.
 docs/database/** linguist-generated=true
-docs/uml/** linguist-generated=true
+
+.github/workflows/*.lock.yml linguist-generated=true

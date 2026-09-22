@@ -13,16 +13,15 @@ abstract class StudyResult {
   late String id;
   String filename = 'results.csv';
 
-  StudyResult(this.type);
+  new(this.type);
 
-  StudyResult.withId(this.type) : id = const Uuid().v4();
+  new withId(this.type) : id = const Uuid().v4();
 
-  factory StudyResult.fromJson(Map<String, dynamic> data) =>
-      switch (data[keyType]) {
-        InterventionResult.studyResultType => InterventionResult.fromJson(data),
-        NumericResult.studyResultType => NumericResult.fromJson(data),
-        _ => throw UnknownJsonTypeError(data[keyType]),
-      };
+  factory fromJson(Map<String, dynamic> data) => switch (data[keyType]) {
+    InterventionResult.studyResultType => InterventionResult.fromJson(data),
+    NumericResult.studyResultType => NumericResult.fromJson(data),
+    _ => throw UnknownJsonTypeError(data[keyType]),
+  };
 
   Map<String, dynamic> toJson();
 

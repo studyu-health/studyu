@@ -11,37 +11,37 @@ import 'package:studyu_designer_v2/utils/performance.dart';
 import 'package:studyu_designer_v2/utils/tuple.dart';
 import 'package:studyu_designer_v2/utils/typings.dart';
 
-enum FormMode { create, readonly, edit }
-
-class FormInvalidException implements Exception {}
-
-class FormConfigException implements Exception {
-  FormConfigException([this.message]);
-  final String? message;
+enum FormMode() {
+  create,
+  readonly,
+  edit,
 }
 
-abstract class IFormViewModelDelegate<T extends FormViewModel> {
+class FormInvalidException() implements Exception;
+
+class FormConfigException([final String? message]) implements Exception;
+
+abstract class IFormViewModelDelegate<T extends FormViewModel>() {
   Future onSave(T formViewModel, FormMode prevFormMode);
   void onCancel(T formViewModel, FormMode prevFormMode);
 }
 
-abstract class IFormGroupController {
+abstract class IFormGroupController() {
   FormGroup get form;
 }
 
-class FormControlOption<T> extends Equatable {
-  const FormControlOption(this.value, this.label, {this.description});
-
-  final T value;
-  final String label;
-  final String? description;
-
+class const FormControlOption<T>(
+  final T value,
+  final String label, {
+  final String? description,
+}) extends Equatable {
   @override
   List<Object?> get props => [value, label, description];
 }
 
-typedef FormControlUpdateFutureBuilder =
-    Future Function(AbstractControl control);
+typedef FormControlUpdateFutureBuilder = Future Function(
+  AbstractControl control,
+);
 
 /// This class represents a form view model.
 ///
@@ -51,20 +51,21 @@ typedef FormControlUpdateFutureBuilder =
 ///
 /// This class is designed to be extended by other classes that provide
 /// specific implementations for different types of forms.
-abstract class FormViewModel<T> implements IFormGroupController {
-  FormViewModel({
-    T? formData,
-    this.delegate,
-    FormValidationSetEnum? validationSet,
-    this.autosave = false,
-  }) : _validationSet = validationSet,
-       _formData = formData,
-       _formMode = (formData != null) ? FormMode.edit : FormMode.create {
-    _setFormData(formData);
+abstract class FormViewModel<T>({
+  var T? _formData,
+  final IFormViewModelDelegate<FormViewModel<dynamic>>? delegate,
+  var FormValidationSetEnum? _validationSet,
+  final bool autosave = false,
+}) implements IFormGroupController {
+  this {
+    _setFormData(_formData);
     initControls();
     _restoreControlsFromFormData();
     _formModeUpdated();
-    _applyValidationSet(validationSet);
+    _applyValidationSet(_validationSet);
+    Future.microtask(() {
+      finalizeInitializationBaseline();
+    });
 
     if (autosave) {
       // Push to event queue to avoid listening to update events
@@ -73,17 +74,20 @@ abstract class FormViewModel<T> implements IFormGroupController {
     }
   }
 
+  void finalizeInitializationBaseline() {
+    prevFormValue = _getFullFormValue();
+    form.markAsPristine();
+  }
+
   T? get formData => _formData;
   set formData(T? formData) => _setFormData(formData);
-  T? _formData;
-
   FormMode get formMode => _formMode;
   set formMode(FormMode mode) {
     _formMode = mode;
     _formModeUpdated();
   }
 
-  FormMode _formMode;
+  FormMode _formMode = (_formData != null) ? FormMode.edit : FormMode.create;
 
   bool get isReadonly => formMode == FormMode.readonly;
 
@@ -94,15 +98,10 @@ abstract class FormViewModel<T> implements IFormGroupController {
   /// using their default configuration. Otherwise, the default configuration
   /// is discarded and replaced by the respective [FormValidationConfig].
   FormValidationSetEnum? get validationSet => _validationSet;
-  FormValidationSetEnum? _validationSet;
   set validationSet(FormValidationSetEnum? validationSet) {
     _validationSet = validationSet;
     _applyValidationSet(validationSet);
   }
-
-  final IFormViewModelDelegate<FormViewModel<dynamic>>? delegate;
-
-  final bool autosave;
 
   final List<StreamSubscription> _immediateFormChildrenSubscriptions = [];
   Debouncer? _immediateFormChildrenListenerDebouncer;
@@ -133,19 +132,36 @@ abstract class FormViewModel<T> implements IFormGroupController {
   /// values are initialized in [setControlsFrom] (controls that are set
   /// programmatically are incorrectly marked as dirty without any user input).
   bool get isDirty {
-    _rememberDefaultControlStates();
+    if (prevFormValue == null) return false;
 
-    for (final control in form.controls.values) {
-      control.markAsEnabled(emitEvent: false, updateParent: false);
-    }
-    final isEqual = jsonEncode(prevFormValue) == jsonEncode(form.value);
-
-    for (final control in form.controls.values) {
-      control.markAsEnabled(emitEvent: false, updateParent: false);
-    }
-    _restoreControlStates(emitEvent: false, updateParent: false);
+    final isEqual =
+        jsonEncode(prevFormValue, toEncodable: _jsonEncodable) ==
+        jsonEncode(_getFullFormValue(), toEncodable: _jsonEncodable);
 
     return !isEqual;
+  }
+
+  static Object? _jsonEncodable(Object? value) {
+    if (value is DateTime) {
+      return value.toIso8601String();
+    }
+    if (value is Enum) {
+      return value.name;
+    }
+    if (value is Map) {
+      final result = <String, dynamic>{};
+      for (final entry in value.entries) {
+        result[entry.key.toString()] = _jsonEncodable(entry.value);
+      }
+      return result;
+    }
+    if (value is Iterable) {
+      return value.map(_jsonEncodable).toList();
+    }
+    if (value is num || value is bool || value is String) {
+      return value;
+    }
+    return value?.toString();
   }
 
   /// The [form]'s JSON value after initializing the controls with [formData]
@@ -169,10 +185,31 @@ abstract class FormViewModel<T> implements IFormGroupController {
   void _setFormData(T? formData) {
     _formData = formData;
     if (formData != null) {
-      setControlsFrom(formData); // update [form] controls automatically
+      setControlsFrom(formData);
     }
-    prevFormValue = {...form.value};
-    form.updateValueAndValidity();
+    finalizeInitializationBaseline();
+  }
+
+  JsonMap _getFullFormValue() {
+    _rememberDefaultControlStates();
+
+    // 1. Temporarily enable all controls
+    for (final control in form.controls.values) {
+      control.markAsEnabled(emitEvent: false, updateParent: false);
+    }
+    // 2. CRITICAL: Force the FormGroup to rebuild its value cache!
+    form.updateValueAndValidity(updateParent: false, emitEvent: false);
+
+    // 3. Deep copy the full value
+    final fullValue = jsonDecode(
+      jsonEncode(form.value, toEncodable: _jsonEncodable),
+    ) as JsonMap;
+
+    // 4. Restore original states and rebuild the cache again
+    _restoreControlStates(emitEvent: false, updateParent: false);
+    form.updateValueAndValidity(updateParent: false, emitEvent: false);
+
+    return fullValue;
   }
 
   void _rememberDefaultControlStates() {
@@ -389,7 +426,7 @@ abstract class FormViewModel<T> implements IFormGroupController {
       // re-initialized, which re-triggers the valueChanges stream subscription
       // used for auto-saving (entering the infinite loop)
     }
-    delegate?.onSave(this, prevFormMode);
+    await delegate?.onSave(this, prevFormMode);
 
     // Put form into edit mode with saved data
     if (prevFormMode == FormMode.create) {

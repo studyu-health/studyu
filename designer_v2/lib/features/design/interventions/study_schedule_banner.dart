@@ -2,16 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/common_views/reusable_banner.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyScheduleBanner extends StatelessWidget {
-  const StudyScheduleBanner({
-    this.isDismissed = false,
-    this.onDismissed,
-    super.key,
-  });
-
-  final bool isDismissed;
-  final Function()? onDismissed;
-
+class const StudyScheduleBanner({
+  final bool isDismissed = false,
+  final Function()? onDismissed,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ReusableBanner(
@@ -20,7 +15,7 @@ class StudyScheduleBanner extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tr.study_schedule_banner_explanation),
+          SelectableText(tr.study_schedule_banner_explanation),
           const SizedBox(height: 12.0),
         ],
       ),

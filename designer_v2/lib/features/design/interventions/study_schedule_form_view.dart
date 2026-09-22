@@ -8,19 +8,17 @@ import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
 import 'package:studyu_designer_v2/features/design/interventions/study_schedule_banner.dart';
 import 'package:studyu_designer_v2/features/design/interventions/study_schedule_form_controller_mixin.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
-import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/input_formatter.dart';
 
-class StudyScheduleFormView extends StatefulWidget {
-  const StudyScheduleFormView({required this.formViewModel, super.key});
-
-  final StudyScheduleControls formViewModel;
-
+class const StudyScheduleFormView({
+  required final StudyScheduleControls formViewModel,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<StudyScheduleFormView> createState() => _StudyScheduleFormViewState();
 }
 
-class _StudyScheduleFormViewState extends State<StudyScheduleFormView> {
+class _StudyScheduleFormViewState() extends State<StudyScheduleFormView> {
   bool _isBannerDismissed = true;
 
   FormTableRow _renderCustomSequence() {
@@ -49,8 +47,8 @@ class _StudyScheduleFormViewState extends State<StudyScheduleFormView> {
           keyboardType: TextInputType.text,
           inputFormatters: <TextInputFormatter>[
             FilteringTextInputFormatter.singleLineFormatter,
-            LengthLimitingTextInputFormatter(10),
             StudySequenceFormatter(),
+            LengthLimitingTextInputFormatter(10),
           ],
           //validationMessages: widget.formViewModel.sequenceTypeCustomControl.validationMessages,
         ),
@@ -75,9 +73,14 @@ class _StudyScheduleFormViewState extends State<StudyScheduleFormView> {
                 //formControl: widget.formViewModel.sequenceTypeControl,
                 onChanged: widget.formViewModel.sequenceTypeControl.disabled
                     ? null
-                    : (PhaseSequence? value) =>
+                    : (PhaseSequence? value) {
+                        setState(() {
                           widget.formViewModel.sequenceTypeControl.value =
-                              value,
+                              value;
+                          widget.formViewModel.sequenceTypeCustomControl
+                              .updateValueAndValidity();
+                        });
+                      },
                 initialValue: widget.formViewModel.sequenceTypeControl.value,
                 decoration: InputDecoration(
                   helperText:
@@ -122,9 +125,13 @@ class _StudyScheduleFormViewState extends State<StudyScheduleFormView> {
                           ),
                         ),
                       //formControl: widget.formViewModel.phaseDurationControl,
-                      onChanged: (value) =>
+                      onChanged: (value) {
+                        final phaseDuration = int.tryParse(value);
+                        if (phaseDuration != null) {
                           widget.formViewModel.phaseDurationControl.value =
-                              int.parse(value),
+                              phaseDuration;
+                        }
+                      },
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.digitsOnly,
@@ -152,34 +159,28 @@ class _StudyScheduleFormViewState extends State<StudyScheduleFormView> {
                   tr.form_field_crossover_schedule_num_cycles_tooltip,
               input: Row(
                 children: [
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 70),
-                    child: TextField(
-                      readOnly: widget.formViewModel.numCyclesControl.disabled,
-                      //formControl: widget.formViewModel.numCyclesControl,
-                      onChanged: (value) =>
-                          widget.formViewModel.numCyclesControl.value =
-                              int.parse(value),
-                      controller: TextEditingController()
-                        ..value = TextEditingValue(
-                          text: widget.formViewModel.numCyclesControl.value
-                              .toString(),
-                          selection: TextSelection.collapsed(
-                            offset: widget.formViewModel.numCyclesControl.value
-                                .toString()
-                                .length,
-                          ),
-                        ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(2),
-                        NumericalRangeFormatter(
-                          min: StudyScheduleControls.kNumCyclesMin,
-                          max: StudyScheduleControls.kNumCyclesMax,
-                        ),
+                  SizedBox(
+                    width: 70,
+                    child: DropdownButtonFormField<int>(
+                      initialValue: widget.formViewModel.numCyclesControl.value,
+                      isExpanded: true,
+                      alignment: Alignment.centerLeft,
+                      onChanged: widget.formViewModel.numCyclesControl.disabled
+                          ? null
+                          : (value) {
+                              if (value != null) {
+                                widget.formViewModel.numCyclesControl.value =
+                                    value;
+                              }
+                            },
+                      items: [
+                        for (
+                          var value = StudyScheduleControls.kNumCyclesMin;
+                          value <= StudyScheduleControls.kNumCyclesMax;
+                          value++
+                        )
+                          DropdownMenuItem(value: value, child: Text('$value')),
                       ],
-                      //validationMessages: widget.formViewModel.numCyclesControl.validationMessages,
                     ),
                   ),
                   const SizedBox(width: 8.0),
@@ -238,10 +239,7 @@ class _StudyScheduleFormViewState extends State<StudyScheduleFormView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextParagraph(
-          text: tr.study_schedule_banner_description,
-          style: ThemeConfig.bodyTextMuted(theme),
-        ),
+        TextParagraph(text: tr.study_schedule_banner_description),
         const SizedBox(height: 16.0),
         _buildSequenceTypeInfo(
           theme,
@@ -290,12 +288,7 @@ class _StudyScheduleFormViewState extends State<StudyScheduleFormView> {
             shape: BoxShape.circle,
           ),
         ),
-        Expanded(
-          child: TextParagraph(
-            text: description,
-            style: ThemeConfig.bodyTextMuted(theme),
-          ),
-        ),
+        Expanded(child: TextParagraph(text: description)),
       ],
     );
   }

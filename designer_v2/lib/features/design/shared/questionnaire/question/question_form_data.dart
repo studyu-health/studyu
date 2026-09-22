@@ -7,13 +7,18 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:uuid/uuid.dart';
 
-typedef SurveyQuestionFormDataFactory =
-    QuestionFormData Function(
-      Question question,
-      List<EligibilityCriterion> eligibilityCriteria,
-    );
+typedef SurveyQuestionFormDataFactory = QuestionFormData Function(
+  Question question,
+  List<EligibilityCriterion> eligibilityCriteria,
+);
 
-abstract class QuestionFormData implements IFormData {
+abstract class QuestionFormData({
+  required final QuestionID questionId,
+  required final String questionText,
+  required final SurveyQuestionType questionType,
+  final String? questionInfoText,
+  final QuestionConditional? conditional,
+}) implements IFormData {
   static Map<SurveyQuestionType, SurveyQuestionFormDataFactory>
   questionTypeFormDataFactories = {
     SurveyQuestionType.scale: (question, eligibilityCriteria) {
@@ -77,31 +82,22 @@ abstract class QuestionFormData implements IFormData {
           question as PainQuestion,
           eligibilityCriteria,
         ),
+    SurveyQuestionType.date: (question, eligibilityCriteria) =>
+        DateQuestionFormData.fromDomainModel(
+          question as DateQuestion,
+          eligibilityCriteria,
+        ),
   };
 
-  QuestionFormData({
-    required this.questionId,
-    required this.questionText,
-    required this.questionType,
-    this.questionInfoText,
-    this.conditional,
-  });
-
-  final QuestionID questionId;
-  final String questionText;
-  final String? questionInfoText;
-  final SurveyQuestionType questionType;
-  final QuestionConditional? conditional;
-
   /// Mapping from response option => qualifying/disqualifying
-  late final Map<dynamic, bool> responseOptionsValidity;
+  Map<dynamic, bool> responseOptionsValidity = {};
 
   List<dynamic> get responseOptions; // subclass responsibility
 
   @override
   String get id => questionId;
 
-  factory QuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     Question question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -120,7 +116,9 @@ abstract class QuestionFormData implements IFormData {
 
   Question toQuestion(); // subclass responsibility
 
-  EligibilityCriterion toEligibilityCriterion() {
+  EligibilityCriterion? toEligibilityCriterion() {
+    if (responseOptions.isEmpty) return null;
+
     final criterion = EligibilityCriterion.withId();
     // todo implement other expression types
     final expression = ChoiceExpression()..target = questionId;
@@ -176,24 +174,20 @@ abstract class QuestionFormData implements IFormData {
   QuestionFormData copy(); // subclass responsibility
 }
 
-class ChoiceQuestionFormData extends QuestionFormData {
-  ChoiceQuestionFormData({
-    required super.questionId,
-    required super.questionText,
-    required super.questionType,
-    super.questionInfoText,
-    super.conditional,
-    this.isMultipleChoice = false,
-    required this.answerOptions,
-  });
-
-  final bool isMultipleChoice;
-  final List<Choice> answerOptions;
-
+class ChoiceQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  super.questionInfoText,
+  super.conditional,
+  final bool isMultipleChoice = false,
+  final bool isSelectionRequired = false,
+  required final List<Choice> answerOptions,
+}) extends QuestionFormData {
   @override
   List<Choice> get responseOptions => answerOptions;
 
-  factory ChoiceQuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     ChoiceQuestion question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -203,6 +197,7 @@ class ChoiceQuestionFormData extends QuestionFormData {
       questionText: question.prompt ?? '',
       questionInfoText: question.rationale ?? '',
       isMultipleChoice: question.multiple,
+      isSelectionRequired: question.selectionRequired,
       answerOptions: question.choices,
       conditional: question.conditional,
     );
@@ -217,6 +212,7 @@ class ChoiceQuestionFormData extends QuestionFormData {
     question.prompt = questionText;
     question.rationale = questionInfoText;
     question.multiple = isMultipleChoice;
+    question.selectionRequired = isSelectionRequired;
     question.choices = answerOptions;
     question.conditional = conditional == null
         ? null
@@ -236,10 +232,11 @@ class ChoiceQuestionFormData extends QuestionFormData {
       questionText: questionText.withDuplicateLabel(),
       questionInfoText: questionInfoText,
       isMultipleChoice: isMultipleChoice,
+      isSelectionRequired: isSelectionRequired,
       answerOptions: [...answerOptions],
       conditional: conditional?.deepCopy(),
     );
-    data.responseOptionsValidity = responseOptionsValidity;
+    data.responseOptionsValidity = {...responseOptionsValidity};
     return data;
   }
 
@@ -251,15 +248,13 @@ class ChoiceQuestionFormData extends QuestionFormData {
   }
 }
 
-class BoolQuestionFormData extends QuestionFormData {
-  BoolQuestionFormData({
-    required super.questionId,
-    required super.questionText,
-    required super.questionType,
-    super.questionInfoText,
-    super.conditional,
-  });
-
+class BoolQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  super.questionInfoText,
+  super.conditional,
+}) extends QuestionFormData {
   static Map<String, bool> get kResponseOptions => {
     tr.form_array_response_options_bool_yes: true,
     tr.form_array_response_options_bool_no: false,
@@ -268,7 +263,7 @@ class BoolQuestionFormData extends QuestionFormData {
   @override
   List<String> get responseOptions => kResponseOptions.keys.toList();
 
-  factory BoolQuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     BooleanQuestion question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -307,7 +302,7 @@ class BoolQuestionFormData extends QuestionFormData {
       questionInfoText: questionInfoText,
       conditional: conditional?.deepCopy(),
     );
-    data.responseOptionsValidity = responseOptionsValidity;
+    data.responseOptionsValidity = {...responseOptionsValidity};
     return data;
   }
 
@@ -319,15 +314,13 @@ class BoolQuestionFormData extends QuestionFormData {
   }
 }
 
-class ImageQuestionFormData extends QuestionFormData {
-  ImageQuestionFormData({
-    required super.questionId,
-    required super.questionText,
-    required super.questionType,
-    super.conditional,
-    super.questionInfoText,
-  });
-
+class ImageQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  super.conditional,
+  super.questionInfoText,
+}) extends QuestionFormData {
   static Map<String, FutureBlobFile> get kResponseOptions => {
     tr.form_field_response_image: FutureBlobFile("image", "image"),
   };
@@ -335,7 +328,7 @@ class ImageQuestionFormData extends QuestionFormData {
   @override
   List<String> get responseOptions => kResponseOptions.keys.toList();
 
-  factory ImageQuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     ImageCapturingQuestion question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -374,7 +367,7 @@ class ImageQuestionFormData extends QuestionFormData {
       questionInfoText: questionInfoText,
       conditional: conditional?.deepCopy(),
     );
-    data.responseOptionsValidity = responseOptionsValidity;
+    data.responseOptionsValidity = {...responseOptionsValidity};
     return data;
   }
 
@@ -386,18 +379,14 @@ class ImageQuestionFormData extends QuestionFormData {
   }
 }
 
-class AudioQuestionFormData extends QuestionFormData {
-  AudioQuestionFormData({
-    required super.questionId,
-    required super.questionText,
-    required super.questionType,
-    super.questionInfoText,
-    super.conditional,
-    required this.maxRecordingDurationSeconds,
-  });
-
-  final int maxRecordingDurationSeconds;
-
+class AudioQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  super.questionInfoText,
+  super.conditional,
+  required final int maxRecordingDurationSeconds,
+}) extends QuestionFormData {
   static Map<String, FutureBlobFile> get kResponseOptions => {
     tr.form_field_response_audio: FutureBlobFile("audio", "audio"),
   };
@@ -405,7 +394,7 @@ class AudioQuestionFormData extends QuestionFormData {
   @override
   List<String> get responseOptions => kResponseOptions.keys.toList();
 
-  factory AudioQuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     AudioRecordingQuestion question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -448,7 +437,7 @@ class AudioQuestionFormData extends QuestionFormData {
       conditional: conditional?.deepCopy(),
       maxRecordingDurationSeconds: maxRecordingDurationSeconds,
     );
-    data.responseOptionsValidity = responseOptionsValidity;
+    data.responseOptionsValidity = {...responseOptionsValidity};
     return data;
   }
 
@@ -460,38 +449,28 @@ class AudioQuestionFormData extends QuestionFormData {
   }
 }
 
-class ScaleQuestionFormData extends QuestionFormData {
-  ScaleQuestionFormData({
-    required super.questionId,
-    required super.questionText,
-    required super.questionType,
-    super.questionInfoText,
-    super.conditional,
-    required this.minValue,
-    this.minLabel,
-    required this.maxValue,
-    this.maxLabel,
-    required this.midValues,
-    required this.midLabels,
-    this.initialValue,
-    this.stepSize = 0,
-    this.minColor,
-    this.maxColor,
-  }) : assert(
-         midValues.length == midLabels.length,
-         "midValues.length and midLabels.length must be equal",
-       );
-
-  final double minValue;
-  final double maxValue;
-  final String? minLabel;
-  final String? maxLabel;
-  final List<double?> midValues;
-  final List<String?> midLabels;
-  final double stepSize;
-  final double? initialValue;
-  final Color? minColor;
-  final Color? maxColor;
+class ScaleQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  super.questionInfoText,
+  super.conditional,
+  required final double minValue,
+  final String? minLabel,
+  required final double maxValue,
+  final String? maxLabel,
+  required final List<double?> midValues,
+  required final List<String?> midLabels,
+  final double? initialValue,
+  final double stepSize = 0,
+  final Color? minColor,
+  final Color? maxColor,
+}) extends QuestionFormData {
+  this
+    : assert(
+        midValues.length == midLabels.length,
+        "midValues.length and midLabels.length must be equal",
+      );
 
   @override
   List<double> get responseOptions => toQuestion().values;
@@ -511,7 +490,7 @@ class ScaleQuestionFormData extends QuestionFormData {
     return midAnnotations;
   }
 
-  factory ScaleQuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     ScaleQuestion question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -585,7 +564,7 @@ class ScaleQuestionFormData extends QuestionFormData {
       midValues: midValues,
       conditional: conditional?.deepCopy(),
     );
-    data.responseOptionsValidity = responseOptionsValidity;
+    data.responseOptionsValidity = {...responseOptionsValidity};
     return data;
   }
 
@@ -596,26 +575,20 @@ class ScaleQuestionFormData extends QuestionFormData {
   }
 }
 
-class FreeTextQuestionFormData extends QuestionFormData {
-  FreeTextQuestionFormData({
-    required super.questionId,
-    required super.questionText,
-    required super.questionType,
-    super.questionInfoText,
-    super.conditional,
-    required this.textLengthRange,
-    required this.textType,
-    required this.textTypeExpression,
-  });
-
-  List<int> textLengthRange;
-  FreeTextQuestionType textType;
-  String? textTypeExpression;
-
+class FreeTextQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  super.questionInfoText,
+  super.conditional,
+  required var List<int> textLengthRange,
+  required var FreeTextQuestionType textType,
+  required var String? textTypeExpression,
+}) extends QuestionFormData {
   @override
   List<String> get responseOptions => [];
 
-  factory FreeTextQuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     FreeTextQuestion question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -664,7 +637,7 @@ class FreeTextQuestionFormData extends QuestionFormData {
       textTypeExpression: textTypeExpression,
       conditional: conditional?.deepCopy(),
     );
-    data.responseOptionsValidity = responseOptionsValidity;
+    data.responseOptionsValidity = {...responseOptionsValidity};
     return data;
   }
 
@@ -676,23 +649,19 @@ class FreeTextQuestionFormData extends QuestionFormData {
   }
 }
 
-class FitbitQuestionFormData extends QuestionFormData {
-  FitbitQuestionFormData({
-    required super.questionId,
-    required super.questionText,
-    required super.questionType,
-    required this.types,
-    super.conditional,
-    super.questionInfoText,
-  });
-
-  List<FitbitQuestionType> types;
-
+class FitbitQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  required var List<FitbitQuestionType> types,
+  super.conditional,
+  super.questionInfoText,
+}) extends QuestionFormData {
   @override
   List<String> get responseOptions =>
       FitbitQuestionType.values.map((type) => type.toJson()).toList();
 
-  factory FitbitQuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     FitbitQuestion question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -733,7 +702,7 @@ class FitbitQuestionFormData extends QuestionFormData {
       types: types,
       conditional: conditional?.deepCopy(),
     );
-    data.responseOptionsValidity = responseOptionsValidity;
+    data.responseOptionsValidity = {...responseOptionsValidity};
     return data;
   }
 
@@ -759,15 +728,13 @@ class FitbitQuestionFormData extends QuestionFormData {
   }
 }
 
-class PainQuestionFormData extends QuestionFormData {
-  PainQuestionFormData({
-    required super.questionId,
-    required super.questionText,
-    required super.questionType,
-    super.questionInfoText,
-    super.conditional,
-  });
-
+class PainQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  super.questionInfoText,
+  super.conditional,
+}) extends QuestionFormData {
   static Map<String, Body> get kResponseOptions => {
     tr.form_field_response_pain: const Body(),
   };
@@ -775,7 +742,7 @@ class PainQuestionFormData extends QuestionFormData {
   @override
   List<String> get responseOptions => kResponseOptions.keys.toList();
 
-  factory PainQuestionFormData.fromDomainModel(
+  factory fromDomainModel(
     PainQuestion question,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -814,7 +781,7 @@ class PainQuestionFormData extends QuestionFormData {
       questionInfoText: questionInfoText,
       conditional: conditional?.deepCopy(),
     );
-    data.responseOptionsValidity = responseOptionsValidity;
+    data.responseOptionsValidity = {...responseOptionsValidity};
     return data;
   }
 
@@ -823,5 +790,120 @@ class PainQuestionFormData extends QuestionFormData {
     final question = toQuestion() as PainQuestion;
     final value = kResponseOptions[responseOption];
     return question.constructAnswer(value!);
+  }
+}
+
+class DateQuestionFormData({
+  required super.questionId,
+  required super.questionText,
+  required super.questionType,
+  super.questionInfoText,
+  super.conditional,
+  final DateInputType inputType = DateInputType.date,
+  final DateTime? minDate,
+  final DateTime? maxDate,
+  final String? minTime,
+  final String? maxTime,
+  final DefaultDateOption defaultOption = DefaultDateOption.none,
+  final DateTime? defaultSpecificDate,
+  final String? defaultSpecificTime,
+}) extends QuestionFormData {
+  @override
+  List<String> get responseOptions => []; // Date questions don't have fixed response options
+
+  factory fromDomainModel(
+    DateQuestion question,
+    List<EligibilityCriterion> eligibilityCriteria,
+  ) {
+    final data = DateQuestionFormData(
+      questionId: question.id,
+      questionType: SurveyQuestionType.date,
+      questionText: question.prompt ?? '',
+      questionInfoText: question.rationale ?? '',
+      inputType: question.inputType,
+      minDate: question.minDate,
+      maxDate: question.maxDate,
+      minTime: question.minTime,
+      maxTime: question.maxTime,
+      defaultOption: question.defaultOption,
+      defaultSpecificDate: question.defaultSpecificDate,
+      defaultSpecificTime: question.defaultSpecificTime,
+      conditional: question.conditional,
+    );
+    data.setResponseOptionsValidityFrom(eligibilityCriteria);
+    return data;
+  }
+
+  @override
+  Question toQuestion() {
+    final question = DateQuestion(
+      inputType: inputType,
+      minDate: minDate,
+      maxDate: maxDate,
+      minTime: minTime,
+      maxTime: maxTime,
+      defaultOption: defaultOption,
+      defaultSpecificDate: defaultSpecificDate,
+      defaultSpecificTime: defaultSpecificTime,
+    );
+    question.id = questionId;
+    question.prompt = questionText;
+    question.rationale = questionInfoText;
+    question.conditional = conditional == null
+        ? null
+        : QuestionConditional<DateTime>.withCondition(
+            conditional!.condition,
+            defaultValue: conditional?.defaultValue as DateTime?,
+          );
+    return question;
+  }
+
+  @override
+  DateQuestionFormData copy() {
+    final data = DateQuestionFormData(
+      questionId: const Uuid().v4(),
+      questionType: questionType,
+      questionText: questionText.withDuplicateLabel(),
+      questionInfoText: questionInfoText,
+      inputType: inputType,
+      minDate: minDate,
+      maxDate: maxDate,
+      minTime: minTime,
+      maxTime: maxTime,
+      defaultOption: defaultOption,
+      defaultSpecificDate: defaultSpecificDate,
+      defaultSpecificTime: defaultSpecificTime,
+      conditional: conditional?.deepCopy(),
+    );
+    data.responseOptionsValidity = responseOptionsValidity;
+    return data;
+  }
+
+  @override
+  Answer constructAnswerFor(dynamic responseOption) {
+    final question = toQuestion() as DateQuestion;
+    // For date questions, eligibility criteria aren't typically used
+    // Return a default date for validation purposes
+    return question.constructAnswer(DateTime.now());
+  }
+
+  /// Converts the date question form data to a JSON-serializable map
+  Map<String, dynamic> toJson() {
+    return {
+      'questionId': questionId,
+      'questionText': questionText,
+      'questionType': questionType.name,
+      'questionInfoText': questionInfoText,
+      'inputType': inputType.name,
+      'minDate': minDate?.toIso8601String(),
+      'maxDate': maxDate?.toIso8601String(),
+      'minTime': minTime,
+      'maxTime': maxTime,
+      'defaultOption': defaultOption.name,
+      'defaultSpecificDate': defaultSpecificDate?.toIso8601String(),
+      'defaultSpecificTime': defaultSpecificTime,
+      'conditional': conditional?.toString(),
+      'responseOptions': responseOptions,
+    };
   }
 }

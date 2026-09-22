@@ -8,21 +8,18 @@ import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_core/core.dart';
 
-class TaskScreen extends StatefulWidget {
-  final TaskInstance taskInstance;
-
+class const TaskScreen({required final TaskInstance taskInstance, super.key})
+    extends StatefulWidget {
   static MaterialPageRoute<bool> routeFor({
     required TaskInstance taskInstance,
   }) =>
       MaterialPageRoute(builder: (_) => TaskScreen(taskInstance: taskInstance));
 
-  const TaskScreen({required this.taskInstance, super.key});
-
   @override
   State<TaskScreen> createState() => _TaskScreenState();
 }
 
-class _TaskScreenState extends State<TaskScreen> {
+class _TaskScreenState() extends State<TaskScreen> {
   late TaskInstance taskInstance;
   StudySubject? subject;
 

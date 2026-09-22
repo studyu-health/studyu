@@ -1,15 +1,32 @@
 #!/bin/bash
+set -e
 
-# 4. Install Melos
-echo "Installing Melos..."
-dart pub global activate melos
+# Use the FVM-pinned Dart SDK so the setup honors .fvmrc.
+if ! command -v fvm >/dev/null 2>&1; then
+  echo "fvm not found on PATH. Install FVM and run './setup.sh' again." >&2
+  exit 1
+fi
 
-# 5. Run melos bootstrap
-echo "Bootstrapping Melos packages..."
-melos bootstrap
+# Install the Flutter SDK pinned in .fvmrc.
+echo "Installing the Flutter SDK via fvm..."
+fvm install
 
-# 6. Run dart pub get for root project
-echo "Running dart pub get in root project..."
-dart pub get
+# Create the local environment file without overwriting developer changes.
+env_example="flutter_common/lib/envs/.env.local.example"
+env_local="flutter_common/lib/envs/.env.local"
+[ -e "$env_local" ] || cp "$env_example" "$env_local"
+
+# Resolve root dependencies via the pinned SDK. This also resolves the
+# workspace-local Melos package from the lockfile.
+echo "Running fvm dart pub get in root project..."
+fvm dart pub get
+
+# Bootstrap Melos packages via the lockfile-resolved package.
+echo "Bootstrapping Melos packages via fvm dart run melos..."
+fvm dart run melos bootstrap
+
+# Configure Git to use the tracked hooks.
+echo "Configuring Git hooks via fvm dart run melos..."
+fvm dart run melos setup
 
 echo "Setup complete!"

@@ -1,65 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/utils/typings.dart';
 
-class PrimaryButton extends StatefulWidget {
-  const PrimaryButton({
-    required this.text,
-    this.icon = Icons.add,
-    this.tooltip = "",
-    this.tooltipDisabled = "",
-    this.isLoading = false,
-    this.onPressed,
-    this.onPressedFuture,
-    this.enabled = true,
-    this.showLoadingEarliestAfterMs = 100,
-    this.innerPadding = const EdgeInsets.symmetric(
-      horizontal: 4.0,
-      vertical: 8.0,
-    ),
-    this.minimumSize,
-    super.key,
-  });
-
+class const PrimaryButton({
   /// The text displayed as the button label
-  final String text;
+  required final String text,
 
   /// The icon displayed to the left of the label
-  final IconData? icon;
+  final IconData? icon = Icons.add,
+  final String tooltip = "",
+  final String tooltipDisabled = "",
 
   /// If true, a loading indicator is displayed instead of the text
-  final bool isLoading;
-  final int showLoadingEarliestAfterMs;
+  final bool isLoading = false,
 
   /// Callback to be called when the button is pressed
-  final VoidCallback? onPressed;
-
-  final String tooltip;
-  final String tooltipDisabled;
-
-  final bool enabled;
-
-  final FutureFactory? onPressedFuture;
-
-  final EdgeInsets innerPadding;
-
+  final VoidCallback? onPressed,
+  final FutureFactory? onPressedFuture,
+  final bool enabled = true,
+  final int showLoadingEarliestAfterMs = 100,
+  final EdgeInsets innerPadding = const EdgeInsets.symmetric(
+    horizontal: 4.0,
+    vertical: 8.0,
+  ),
+  final Size? minimumSize,
+  final Color? backgroundColor,
+  final Color? foregroundColor,
+  super.key,
+}) extends StatefulWidget {
   bool get isDisabled =>
       !enabled || (onPressed == null && onPressedFuture == null);
-
-  final Size? minimumSize;
 
   @override
   State<PrimaryButton> createState() => _PrimaryButtonState();
 }
 
-class _PrimaryButtonState extends State<PrimaryButton> {
+class _PrimaryButtonState() extends State<PrimaryButton> {
   Future trackedFuture = Future.value();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryStyle = ElevatedButton.styleFrom(
-      foregroundColor: theme.colorScheme.onPrimary,
-      backgroundColor: theme.colorScheme.primary,
+      foregroundColor: widget.foregroundColor ?? theme.colorScheme.onPrimary,
+      backgroundColor: widget.backgroundColor ?? theme.colorScheme.primary,
       minimumSize: widget.minimumSize,
     ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0));
 

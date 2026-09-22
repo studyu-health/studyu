@@ -18,22 +18,17 @@ import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-class MeasurementSurveyFormViewModel
-    extends ManagedFormViewModel<MeasurementSurveyFormData>
+class MeasurementSurveyFormViewModel({
+  required final Study study,
+  super.delegate,
+  super.formData,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends ManagedFormViewModel<MeasurementSurveyFormData>
     with WithQuestionnaireControls, WithScheduleControls
     implements
         IFormViewModelDelegate<QuestionFormViewModel>,
         IListActionProvider<QuestionFormViewModel>,
         IProviderArgsResolver<QuestionFormViewModel, QuestionFormRouteArgs> {
-  MeasurementSurveyFormViewModel({
-    required this.study,
-    super.delegate,
-    super.formData,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  final Study study;
-
   // - Form fields
 
   final FormControl<MeasurementID> measurementIdControl = FormControl(
@@ -140,6 +135,7 @@ class MeasurementSurveyFormViewModel
     final actions = questionFormViewModels.availableActions(
       model,
       onEdit: onSelectItem,
+      confirmationSubject: tr.dialog_subject_question,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);
@@ -148,6 +144,7 @@ class MeasurementSurveyFormViewModel
   List<ModelAction> availablePopupActions(QuestionFormViewModel model) {
     final actions = questionFormViewModels.availablePopupActions(
       model,
+      confirmationSubject: tr.dialog_subject_question,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);
@@ -156,6 +153,7 @@ class MeasurementSurveyFormViewModel
   List<ModelAction> availableInlineActions(QuestionFormViewModel model) {
     final actions = questionFormViewModels.availableInlineActions(
       model,
+      confirmationSubject: tr.dialog_subject_question,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);

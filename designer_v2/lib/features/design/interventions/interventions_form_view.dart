@@ -15,9 +15,8 @@ import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class StudyDesignInterventionsFormView extends StudyDesignPageWidget {
-  const StudyDesignInterventionsFormView(super.studyId, {super.key});
-
+class const StudyDesignInterventionsFormView(super.studyId, {super.key})
+    extends StudyDesignPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyControllerProvider(studyId));
@@ -74,19 +73,20 @@ class StudyDesignInterventionsFormView extends StudyDesignPageWidget {
                             interventionPrefix(rowIdx, theme),
                         reorderable: !formViewModel.isReadonly,
                         onReorder: (oldIndex, newIndex) {
-                          if (newIndex > oldIndex) {
-                            newIndex -= 1;
+                          var effectiveNewIndex = newIndex;
+                          if (effectiveNewIndex > oldIndex) {
+                            effectiveNewIndex -= 1;
                           }
                           final item = formViewModel
                               .interventionsCollection
                               .formViewModels
                               .removeAt(oldIndex);
                           formViewModel.interventionsCollection.formViewModels
-                              .insert(newIndex, item);
+                              .insert(effectiveNewIndex, item);
                           final controlItem = formViewModel.interventionsArray
                               .removeAt(oldIndex);
                           formViewModel.interventionsArray.insert(
-                            newIndex,
+                            effectiveNewIndex,
                             controlItem,
                           );
                           formViewModel.save();

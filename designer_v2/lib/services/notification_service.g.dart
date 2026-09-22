@@ -10,7 +10,7 @@ part of 'notification_service.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(notificationService)
-const notificationServiceProvider = NotificationServiceProvider._();
+final notificationServiceProvider = NotificationServiceProvider._();
 
 final class NotificationServiceProvider
     extends
@@ -20,7 +20,7 @@ final class NotificationServiceProvider
           NotificationService
         >
     with $Provider<NotificationService> {
-  const NotificationServiceProvider._()
+  NotificationServiceProvider._()
     : super(
         from: null,
         argument: null,

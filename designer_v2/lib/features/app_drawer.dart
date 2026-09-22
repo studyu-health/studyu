@@ -12,23 +12,14 @@ import 'package:studyu_designer_v2/routing/router_utils.dart';
 
 typedef OnEntrySelectedCallback = void Function(BuildContext, WidgetRef);
 
-class DrawerEntry {
-  const DrawerEntry({
-    required this.localizedTitle,
-    required this.autoCloseDrawer,
-    this.icon,
-    this.onSelected,
-    this.localizedHelpText,
-    this.enabled = true,
-  });
-
-  final LocalizedStringResolver localizedTitle;
-  final IconData? icon;
-  final LocalizedStringResolver? localizedHelpText;
-  final bool enabled;
-  final OnEntrySelectedCallback? onSelected;
-  final bool autoCloseDrawer;
-
+class const DrawerEntry({
+  required final LocalizedStringResolver localizedTitle,
+  required final bool autoCloseDrawer,
+  final IconData? icon,
+  final OnEntrySelectedCallback? onSelected,
+  final LocalizedStringResolver? localizedHelpText,
+  final bool enabled = true,
+}) {
   String get title => localizedTitle();
   String? get helpText => localizedHelpText?.call();
 
@@ -40,20 +31,15 @@ class DrawerEntry {
   }
 }
 
-class GoRouterDrawerEntry extends DrawerEntry {
-  const GoRouterDrawerEntry({
-    required super.localizedTitle,
-    required super.autoCloseDrawer,
-    super.icon,
-    super.localizedHelpText,
-    super.enabled,
-    required this.intent,
-    this.onNavigated,
-  });
-
-  final RoutingIntent intent;
-  final void Function()? onNavigated;
-
+class const GoRouterDrawerEntry({
+  required super.localizedTitle,
+  required super.autoCloseDrawer,
+  super.icon,
+  super.localizedHelpText,
+  super.enabled,
+  required final RoutingIntent intent,
+  final void Function()? onNavigated,
+}) extends DrawerEntry {
   @override
   void onClick(BuildContext context, WidgetRef ref) {
     super.onClick(context, ref);
@@ -62,33 +48,22 @@ class GoRouterDrawerEntry extends DrawerEntry {
   }
 }
 
-class AppDrawer extends ConsumerStatefulWidget {
-  const AppDrawer({
-    this.width = 250,
-    this.autoCloseDrawer = true,
-    this.leftPaddingEntries = 28.0,
-    this.logoPaddingVertical = 24.0,
-    this.logoPaddingHorizontal = 48.0,
-    this.logoMaxHeight = 30,
-    this.logoSectionMinHeight = 110,
-    this.logoSectionMaxHeight = double.infinity,
-    super.key,
-  });
-
-  final int width;
-  final bool autoCloseDrawer;
-  final double leftPaddingEntries;
-  final double logoPaddingVertical;
-  final double logoPaddingHorizontal;
-  final double logoMaxHeight;
-  final double logoSectionMinHeight;
-  final double logoSectionMaxHeight;
-
+class const AppDrawer({
+  final int width = 250,
+  final bool autoCloseDrawer = true,
+  final double leftPaddingEntries = 28.0,
+  final double logoPaddingVertical = 24.0,
+  final double logoPaddingHorizontal = 48.0,
+  final double logoMaxHeight = 30,
+  final double logoSectionMinHeight = 110,
+  final double logoSectionMaxHeight = double.infinity,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<AppDrawer> createState() => _AppDrawerState();
 }
 
-class _AppDrawerState extends ConsumerState<AppDrawer> {
+class _AppDrawerState() extends ConsumerState<AppDrawer> {
   /// List of sections with their corresponding menu entries
   late final List<List<GoRouterDrawerEntry>> topEntries;
 
@@ -284,9 +259,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             onTap: () => ref.read(routerProvider).dispatch(RoutingIntents.root),
             child: Container(
               foregroundDecoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.4),
+                color: Theme.of(context).colorScheme.primary
+                    .withValues(alpha: 0.4),
                 backgroundBlendMode: BlendMode.color,
               ),
               child: Image.asset(Assets.logoWide, fit: BoxFit.cover),

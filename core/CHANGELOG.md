@@ -1,3 +1,63 @@
+## 4.10.0
+
+ - **REFACTOR**: Optimize widget instantiation and clean up imports in recovery flow tests.
+ - **REFACTOR**: Rename wordlist constants and export recovery utilities from the core package.
+ - **REFACTOR**(app): simplify questionnaire flow.
+ - **REFACTOR**: Update `share_plus` API usage, simplify QR scanner camera setup and color opacity, and streamline menu positioning.
+ - **REFACTOR**: centralize study fetching logic by moving `fetchById` and `fetchByInviteCode` methods to the `Study` model.
+ - **FIX**(designer): transmit preview studies outside urls.
+ - **FIX**: remove obsolete analyzer plugins.
+ - **FIX**(recovery): make account recovery retry-safe and revoke old sessions.
+ - **FIX**(designer): address invite review feedback.
+ - **FIX**(core): add flutter_test dev dependency.
+ - **FIX**(designer): restore invite code create and dismiss flow.
+ - **FIX**(deps): bump deps.
+ - **FIX**(core): correct choice visibility evaluation.
+ - **FIX**(designer): secure participant study previews.
+ - **FIX**(ci): resolve invite flow checks.
+ - **FIX**(app): resolve dev merge conflicts.
+ - **FIX**(app): show recovery phrase after dashboard opens.
+ - **FIX**(designer): preserve free text conditional semantics.
+ - **FIX**(app,core,db): address code review findings from dev merge.
+ - **FIX**: address code review findings across app, core, and designer.
+ - **FIX**(designer): support free-text length conditions.
+ - **FIX**(app): require review for restored answers.
+ - **FIX**(app): resolve questionnaire controller merge conflicts.
+ - **FIX**(deps): update flutter and deps.
+ - **FIX**(deep-links): separate web and app links.
+ - **FIX**: clear CI analysis failures.
+ - **FIX**: Update exception handling in rejoin study service and improve recovery flow tests.
+ - **FEAT**(invite-codes): make invite codes case-insensitive and space-trimmed.
+ - **FEAT**: refactor deep link generation for invite codes.
+ - **FEAT**: Enhance recovery flow with validation, constants, and integration tests.
+ - **FEAT**: Introduce QR code generation and deep link sharing for study invite codes, supported by new environment variables and localization.
+ - **FEAT**: Introduce recovery phrase and rejoin study features with new onboarding screens, core utilities, and localization.
+ - **FEAT**(app): support required choice selections.
+ - **FEAT**(app): add invite QR flow.
+ - **FEAT**: Upgrade recovery phrase system to 128-bit IDs, updating encoding logic and UI to support 13 words.
+ - **FEAT**: Update deep link handling and environment configuration for Android and iOS.
+
+## 4.9.0
+
+ - **REFACTOR**: clean up date question localization and validation messages.
+ - **FIX**: upgrade deps.
+ - **FIX**: upgrade deps.
+ - **FEAT**: Enhance Date Question Functionality with Time Input and Localization.
+ - **FEAT**: remove initial date handling from date question components.
+ - **FEAT**: enhance Answer class to support DateTime serialization in JSON.
+ - **FEAT**: add DateQuestion and DateQuestionWidget for date selection in questionnaires.
+
+## 4.8.1
+
+ - **FIX**: upgrade deps.
+ - **FIX**: upgrade deps.
+
+## 4.8.0
+
+ - **FIX**: migrate csv.
+ - **FIX**: update to flutter v3.41.5.
+ - **FEAT**: Add persistent user-defined study filters and active filter state to user preferences.
+
 ## 4.7.1
 
  - **FIX**(designer_v2): update code for Riverpod 3.x compatibility.

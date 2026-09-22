@@ -4,38 +4,39 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_core/src/env/env.dart' as env;
 import 'package:supabase/supabase.dart';
 
-abstract class SupabaseObject {
+abstract class SupabaseObject() {
   Map<String, Object> get primaryKeys;
 
   Map<String, dynamic> toJson();
 }
 
-String tableName(Type cls) => switch (cls) {
-  == Study => Study.tableName,
-  == StudySubject => StudySubject.tableName,
-  == SubjectProgress => SubjectProgress.tableName,
-  == AppConfig => AppConfig.tableName,
-  == Repo => Repo.tableName,
-  == StudyInvite => StudyInvite.tableName,
-  == StudyUUser => StudyUUser.tableName,
-  == StudyFitbitCredentials => StudyFitbitCredentials.tableName,
-  _ => throw ArgumentError('$cls is not a supported Supabase type'),
-};
+String tableName(Type cls) {
+  if (cls == Study) return Study.tableName;
+  if (cls == StudySubject) return StudySubject.tableName;
+  if (cls == SubjectProgress) return SubjectProgress.tableName;
+  if (cls == AppConfig) return AppConfig.tableName;
+  if (cls == Repo) return Repo.tableName;
+  if (cls == StudyInvite) return StudyInvite.tableName;
+  if (cls == StudyUUser) return StudyUUser.tableName;
+  if (cls == StudyFitbitCredentials) return StudyFitbitCredentials.tableName;
+  throw ArgumentError('$cls is not a supported Supabase type');
+}
 
-abstract class SupabaseObjectFunctions<T extends SupabaseObject>
+abstract class SupabaseObjectFunctions<T extends SupabaseObject>()
     implements SupabaseObject {
-  static T fromJson<T extends SupabaseObject>(Map<String, dynamic> json) =>
-      switch (T) {
-        == Study => Study.fromJson(json) as T,
-        == StudySubject => StudySubject.fromJson(json) as T,
-        == SubjectProgress => SubjectProgress.fromJson(json) as T,
-        == AppConfig => AppConfig.fromJson(json) as T,
-        == Repo => Repo.fromJson(json) as T,
-        == StudyInvite => StudyInvite.fromJson(json) as T,
-        == StudyUUser => StudyUUser.fromJson(json) as T,
-        == StudyFitbitCredentials => StudyFitbitCredentials.fromJson(json) as T,
-        _ => throw ArgumentError('$T is not a supported Supabase type'),
-      };
+  static T fromJson<T extends SupabaseObject>(Map<String, dynamic> json) {
+    if (T == Study) return Study.fromJson(json) as T;
+    if (T == StudySubject) return StudySubject.fromJson(json) as T;
+    if (T == SubjectProgress) return SubjectProgress.fromJson(json) as T;
+    if (T == AppConfig) return AppConfig.fromJson(json) as T;
+    if (T == Repo) return Repo.fromJson(json) as T;
+    if (T == StudyInvite) return StudyInvite.fromJson(json) as T;
+    if (T == StudyUUser) return StudyUUser.fromJson(json) as T;
+    if (T == StudyFitbitCredentials) {
+      return StudyFitbitCredentials.fromJson(json) as T;
+    }
+    throw ArgumentError('$T is not a supported Supabase type');
+  }
 
   Future<T> delete() async => SupabaseQuery.extractSupabaseSingleRow<T>(
     await env.client
@@ -65,7 +66,7 @@ abstract class SupabaseObjectFunctions<T extends SupabaseObject>
 }
 
 // ignore: avoid_classes_with_only_static_members
-class SupabaseQuery {
+class SupabaseQuery() {
   static Future<List<T>> getAll<T extends SupabaseObject>({
     List<String> selectedColumns = const ['*'],
     Map<String, Object>? filters,
@@ -141,8 +142,9 @@ class SupabaseQuery {
       StudyULogger.debug(
         'Not extracted records: ${notExtracted.map((e) => e.json).join(', ')}',
       );
-      StudyUDiagnostics.captureException(
-        ExtractionFailedException(extracted, notExtracted),
+      StudyULogger.error(
+        'Extraction failed for some records',
+        error: ExtractionFailedException(extracted, notExtracted),
       );
       // Only throw if we are supposed to throw for non-extracted records.
       // Otherwise, we just log the error and return the extracted records.
@@ -162,7 +164,11 @@ class SupabaseQuery {
   }
 
   static void catchSupabaseException(Object error, StackTrace stacktrace) {
-    StudyUDiagnostics.captureException(error, stackTrace: stacktrace);
+    StudyULogger.error(
+      'Caught Supabase Error: $error',
+      error: error,
+      stackTrace: stacktrace,
+    );
     if (error is PostgrestException) {
       StudyULogger.fatal(
         'Caught Postgrest Error: $error\nStacktrace: $stacktrace',
@@ -188,22 +194,14 @@ extension PrimaryKeyFilterBuilder on PostgrestFilterBuilder {
   }
 }
 
-sealed class ExtractionResult<T> {
-  final List<T> extracted;
+sealed class ExtractionResult<T>(final List<T> extracted);
 
-  ExtractionResult(this.extracted);
-}
+class ExtractionSuccess<T>(super.extracted) extends ExtractionResult<T>;
 
-class ExtractionSuccess<T> extends ExtractionResult<T> {
-  ExtractionSuccess(super.extracted);
-}
-
-class ExtractionFailedException<T> extends ExtractionResult<T>
-    implements Exception {
-  final List<JsonWithError> notExtracted;
-
-  ExtractionFailedException(super.extracted, this.notExtracted);
-
+class ExtractionFailedException<T>(
+  super.extracted,
+  final List<JsonWithError> notExtracted,
+) extends ExtractionResult<T> implements Exception {
   @override
   String toString() =>
       'ExtractionFailedException: ${notExtracted.length} records failed to extract.\n'
@@ -211,9 +209,4 @@ class ExtractionFailedException<T> extends ExtractionResult<T>
       'Not Extracted: ${notExtracted.map((e) => 'json: ${e.json}, error: ${e.error}').join('; ')}';
 }
 
-class JsonWithError {
-  final Map<String, dynamic> json;
-  final Object error;
-
-  JsonWithError(this.json, this.error);
-}
+class JsonWithError(final Map<String, dynamic> json, final Object error);

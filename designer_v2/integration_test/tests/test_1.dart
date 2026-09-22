@@ -1,84 +1,139 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/src/custom_finders/patrol_tester.dart';
 import 'package:studyu_core/src/env/env.dart' as env;
 
 import '../mockup/mockup_studies.dart';
+import '../test_log.dart';
 import 'study_base_test.dart';
 
-class Test1 extends StudyBaseTest {
-  Test1.go(PatrolTester $) : super.go($, MockupStudies.study1);
+class Test1.go(PatrolTester $) extends StudyBaseTest {
+  this : super.go($, MockupStudies.study1);
 
   @override
   Future<void> execute(String email, String password) async {
     if (randomTest) {
-      // START SIGN UP
-      await authRobot.navigateToSignUpScreen();
-      await authRobot.enterEmail(email);
-      await authRobot.enterPassword(password);
-      await authRobot.enterPasswordConfirmation(password);
-      await authRobot.tapTermsCheckbox();
-      await authRobot.tapSignUpButton();
-      await studiesRobot.tapSignOutButton();
-      // FINISH SIGN UP
+      await _step(
+        'sign up: navigate',
+        () => authRobot.navigateToSignUpScreen(),
+      );
+      await _step('sign up: enter email', () => authRobot.enterEmail(email));
+      await _step(
+        'sign up: enter password',
+        () => authRobot.enterPassword(password),
+      );
+      await _step(
+        'sign up: confirm password',
+        () => authRobot.enterPasswordConfirmation(password),
+      );
+      await _step('sign up: accept terms', authRobot.tapTermsCheckbox);
+      await _step('sign up: submit', authRobot.tapSignUpButton);
+      await _step('sign up: sign out', studiesRobot.tapSignOutButton);
     }
 
-    // START SIGN IN
-    await authRobot.enterEmail(email);
-    await authRobot.enterPassword(password);
-    await authRobot.tapSignInButton();
-    // FINISH SIGN IN
-
-    print('User signed in');
-
-    // UserID is only available after login
-    controller.init(env.client.auth.currentUser!.id);
-
-    print("Controller created");
-
-    // START CREATE STUDY
-    await studiesRobot.tapNewStudyButton();
-
-    await controller.fillTitle();
-
-    print("Title filled");
-
-    await studyDesignRobot.tapLeftDrawerButton();
-    await studyDesignRobot.tapMyStudiesButton();
-    // FINISH CREATE STUDY
-
-    print("Study created");
-
-    // START FILL AND PUBLISH STUDY
-    // todo specify the exact study that should be tapped by name
-    await studiesRobot.tapOnExistingStudy();
-
-    await controller.fillInfoPage();
-
-    print("Info page filled");
-
-    await studyDesignRobot.navigateToParticipationScreen();
-    // todo implement participation screen tests
-
-    await studyDesignRobot.navigateToInterventionsScreen();
-
-    // Create interventions
-    await controller.fillInterventions(
-      (interventionList) => [interventionList.first],
+    await _step('sign in: enter email', () => authRobot.enterEmail(email));
+    await _step(
+      'sign in: enter password',
+      () => authRobot.enterPassword(password),
     );
-    await controller.fillInterventions(
-      (interventionList) => [interventionList.last],
+    await _step('sign in: submit', authRobot.tapSignInButton);
+
+    await _step('init controller from current user', () async {
+      controller.init(env.client.auth.currentUser!.id);
+    });
+
+    await _step('create study: tap new study', studiesRobot.tapNewStudyButton);
+    await _step('create study: fill title', controller.fillTitle);
+    await _step(
+      'create study: open left drawer',
+      studyDesignRobot.tapLeftDrawerButton,
+    );
+    await _step(
+      'create study: return to my studies',
+      studyDesignRobot.tapMyStudiesButton,
     );
 
-    await studyDesignRobot.navigateToMeasurementsScreen();
+    await _step(
+      'draft study: open existing draft',
+      studiesRobot.tapOnExistingStudy,
+    );
+    await _step('draft study: fill info page', controller.fillInfoPage);
+    await _step(
+      'draft study: navigate participation screen',
+      studyDesignRobot.navigateToParticipationScreen,
+    );
+    await _step(
+      'draft study: navigate interventions screen',
+      studyDesignRobot.navigateToInterventionsScreen,
+    );
+    await _step(
+      'draft study: fill first intervention',
+      () => controller.fillInterventions(
+        (interventionList) => [interventionList.first],
+      ),
+    );
+    await _step(
+      'draft study: fill second intervention',
+      () => controller.fillInterventions(
+        (interventionList) => [interventionList.last],
+      ),
+    );
+    await _step(
+      'draft study: navigate measurements screen',
+      studyDesignRobot.navigateToMeasurementsScreen,
+    );
+    await _step(
+      'draft study: fill observations',
+      () => controller.fillObservations((observationList) => observationList),
+    );
 
-    await controller.fillObservations((observationList) => observationList);
+    await _step(
+      'publish study: tap publish button',
+      studyDesignRobot.tapPublishButton,
+    );
+    await _step(
+      'publish study: confirm publish',
+      studyDesignRobot.tapConfirmPublishButton,
+    );
+    await _step(
+      'publish study: skip follow-up',
+      studyDesignRobot.tapSkipForNowButton,
+    );
+    await _step(
+      'publish study: validate live status',
+      studyDesignRobot.validateStudyPublished,
+    );
+    await _step(
+      'publish study: open left drawer',
+      studyDesignRobot.tapLeftDrawerButton,
+    );
+    await _step(
+      'publish study: return to my studies',
+      studyDesignRobot.tapMyStudiesButton,
+    );
+  }
 
-    await studyDesignRobot.tapPublishButton();
-    await studyDesignRobot.tapConfirmPublishButton();
-    await studyDesignRobot.tapSkipForNowButton();
-    await studyDesignRobot.validateStudyPublished();
-    // FINISH FILL AND PUBLISH STUDY
+  Future<T> _step<T>(String name, Future<T> Function() action) async {
+    final result = await runLoggedStep(name, action);
+    _drainFrameworkExceptions(name);
+    return result;
+  }
 
-    await studyDesignRobot.tapLeftDrawerButton();
-    await studyDesignRobot.tapMyStudiesButton();
+  void _drainFrameworkExceptions(String afterStep) {
+    Object? firstException;
+    Object? exception;
+    while ((exception = $.tester.takeException()) != null) {
+      firstException ??= exception;
+      markTestStep(
+        'taken-framework-exception',
+        'after $afterStep',
+        error: exception,
+      );
+    }
+
+    if (firstException != null) {
+      throw TestFailure(
+        'Flutter framework exception after $afterStep: $firstException',
+      );
+    }
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-enum ReportSectionType {
+enum ReportSectionType() {
   average,
   linearRegression,
   textualSummary,
@@ -62,10 +62,7 @@ enum ReportSectionType {
 // toJson and fromJson do not work on extensions to be used with jsonEncode.
 // This is the reason for why the enums are encapsulated.
 // todo make generic
-class TemporalAggregationFormatted {
-  final TemporalAggregation _value;
-  const TemporalAggregationFormatted(this._value);
-
+class const TemporalAggregationFormatted(final TemporalAggregation _value) {
   static List<TemporalAggregationFormatted> get values => TemporalAggregation
       .values
       .map((e) => TemporalAggregationFormatted(e))
@@ -110,10 +107,7 @@ class TemporalAggregationFormatted {
       TemporalAggregationFormatted(TemporalAggregation.values.byName(json));
 }
 
-class ImprovementDirectionFormatted {
-  final ImprovementDirection _value;
-  const ImprovementDirectionFormatted(this._value);
-
+class const ImprovementDirectionFormatted(final ImprovementDirection _value) {
   static List<ImprovementDirectionFormatted> get values => ImprovementDirection
       .values
       .map((e) => ImprovementDirectionFormatted(e))

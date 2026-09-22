@@ -22,7 +22,6 @@ import 'package:studyu_designer_v2/features/auth/signup_form_view.dart';
 import 'package:studyu_designer_v2/features/dashboard/dashboard_page.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter.dart';
 import 'package:studyu_designer_v2/features/design/enrollment/enrollment_form_view.dart';
-import 'package:studyu_designer_v2/features/design/fitbit/fitbit_credentials_form_view.dart';
 import 'package:studyu_designer_v2/features/design/info/study_info_form_view.dart';
 import 'package:studyu_designer_v2/features/design/interventions/intervention_form_controller.dart';
 import 'package:studyu_designer_v2/features/design/interventions/intervention_form_view.dart';
@@ -44,12 +43,12 @@ import 'package:studyu_designer_v2/features/study/study_test_page.dart';
 import 'package:studyu_designer_v2/routing/router_intent.dart';
 import 'package:studyu_designer_v2/routing/router_utils.dart';
 
-class RouterKeys {
+class RouterKeys() {
   static const studyKey = ValueKey("study"); // shared key for study page tabs
   static const authKey = ValueKey("auth"); // shared key for auth pages
 }
 
-class RouteParams {
+class RouteParams() {
   static const studiesFilter = 'filter';
   static const studyId = 'studyId';
   static const measurementId = 'measurementId';
@@ -60,7 +59,7 @@ class RouteParams {
 /// The route configuration passed to [GoRouter] during instantiation.
 /// Note: Make sure to always specify [GoRoute.name] so that [RoutingIntent]s
 /// can be dispatched correctly.
-class RouterConf {
+class RouterConf() {
   static late GoRouter router;
 
   static final List<GoRoute> routes = publicRoutes + privateRoutes;
@@ -299,24 +298,6 @@ class RouterConf {
       },
     ),
     GoRoute(
-      path: "/studies/:${RouteParams.studyId}/edit/fitbitCredentials",
-      name: studyEditFitbitCredentialsRouteName,
-      pageBuilder: (context, state) {
-        final studyId = state.pathParameters[RouteParams.studyId]!;
-        return MaterialPage(
-          key: RouterKeys.studyKey,
-          child: StudyScaffold(
-            studyId: studyId,
-            tabsSubnav: StudyDesignNav.tabs(studyId),
-            selectedTab: StudyNav.edit(studyId),
-            selectedTabSubnav: StudyDesignNav.fitbitCredentials(studyId),
-            body: StudyDesignFitbitCredentialsFormView(studyId),
-            layoutType: SingleColumnLayoutType.boundedNarrow,
-          ),
-        );
-      },
-    ),
-    GoRoute(
       path: "/studies/:${RouteParams.studyId}/test",
       name: studyTestRouteName,
       pageBuilder: (context, state) {
@@ -436,73 +417,46 @@ class RouterConf {
 
 // - Route Args
 
-abstract class StudyFormRouteArgs {
-  StudyFormRouteArgs({required this.studyId});
+abstract class StudyFormRouteArgs({required final StudyID studyId});
 
-  final StudyID studyId;
-}
+abstract class QuestionFormRouteArgs({
+  required final QuestionID questionId,
+  required super.studyId,
+}) extends StudyFormRouteArgs;
 
-abstract class QuestionFormRouteArgs extends StudyFormRouteArgs {
-  QuestionFormRouteArgs({required this.questionId, required super.studyId});
+class ScreenerQuestionFormRouteArgs({
+  required super.questionId,
+  required super.studyId,
+}) extends QuestionFormRouteArgs;
 
-  final QuestionID questionId;
-}
+class ConsentItemFormRouteArgs({
+  required super.studyId,
+  required final ConsentID consentId,
+}) extends StudyFormRouteArgs;
 
-class ScreenerQuestionFormRouteArgs extends QuestionFormRouteArgs {
-  ScreenerQuestionFormRouteArgs({
-    required super.questionId,
-    required super.studyId,
-  });
-}
+class MeasurementFormRouteArgs({
+  required final MeasurementID measurementId,
+  required super.studyId,
+}) extends StudyFormRouteArgs;
 
-class ConsentItemFormRouteArgs extends StudyFormRouteArgs {
-  ConsentItemFormRouteArgs({required super.studyId, required this.consentId});
+class SurveyQuestionFormRouteArgs({
+  @override required final QuestionID questionId,
+  required super.studyId,
+  required super.measurementId,
+}) extends MeasurementFormRouteArgs implements QuestionFormRouteArgs;
 
-  final ConsentID consentId;
-}
+class InterventionFormRouteArgs({
+  required final InterventionID interventionId,
+  required super.studyId,
+}) extends StudyFormRouteArgs;
 
-class MeasurementFormRouteArgs extends StudyFormRouteArgs {
-  MeasurementFormRouteArgs({
-    required this.measurementId,
-    required super.studyId,
-  });
+class InterventionTaskFormRouteArgs({
+  required final TaskID taskId,
+  required super.studyId,
+  required super.interventionId,
+}) extends InterventionFormRouteArgs;
 
-  final MeasurementID measurementId;
-}
-
-class SurveyQuestionFormRouteArgs extends MeasurementFormRouteArgs
-    implements QuestionFormRouteArgs {
-  SurveyQuestionFormRouteArgs({
-    required this.questionId,
-    required super.studyId,
-    required super.measurementId,
-  });
-
-  @override
-  final QuestionID questionId;
-}
-
-class InterventionFormRouteArgs extends StudyFormRouteArgs {
-  InterventionFormRouteArgs({
-    required this.interventionId,
-    required super.studyId,
-  });
-
-  final InterventionID interventionId;
-}
-
-class InterventionTaskFormRouteArgs extends InterventionFormRouteArgs {
-  InterventionTaskFormRouteArgs({
-    required this.taskId,
-    required super.studyId,
-    required super.interventionId,
-  });
-
-  final TaskID taskId;
-}
-
-class ReportItemFormRouteArgs extends StudyFormRouteArgs {
-  ReportItemFormRouteArgs({required super.studyId, required this.sectionId});
-
-  final SectionID sectionId;
-}
+class ReportItemFormRouteArgs({
+  required super.studyId,
+  required final SectionID sectionId,
+}) extends StudyFormRouteArgs;

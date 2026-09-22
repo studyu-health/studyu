@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/notifications.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DebugScreen {
+class DebugScreen() {
   static Future<void> showDebugScreen(BuildContext context) async {
     final studyNotifications = context.read<AppState>().studyNotifications;
 
@@ -45,21 +48,21 @@ class DebugScreen {
   static Future<void> testNotification(BuildContext context) async {
     final studyNotifications = context.read<AppState>().studyNotifications;
     if (studyNotifications == null) {
-      Navigator.of(context).pop();
+      context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Notifications are not initialized yet. Please start a study and open this through the about section.',
+            AppLocalizations.of(context)!.debug_notifications_not_initialized,
           ),
         ),
       );
       return;
     }
     await studyNotifications.flutterLocalNotificationsPlugin.show(
-      99,
-      'StudyU Test Notification',
-      'This notification confirms that you receive StudyU notifications',
-      notificationDetails,
+      id: 99,
+      title: AppLocalizations.of(context)!.debug_test_notification_title,
+      body: AppLocalizations.of(context)!.debug_test_notification_body,
+      notificationDetails: notificationDetails,
     );
   }
 
@@ -87,11 +90,11 @@ class DebugScreen {
       await _deleteAppDir();
       await SecureStorage.deleteAll();
       if (context.mounted) {
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
+        context.pop();
+        context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('App reset successfully! Please restart the app.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.debug_reset_success),
           ),
         );
         await Future.delayed(const Duration(seconds: 1));
@@ -100,10 +103,10 @@ class DebugScreen {
     } catch (e) {
       StudyULogger.error(e);
       if (context.mounted) {
-        Navigator.of(context).pop();
+        context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error while resetting the app. Please try again.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.debug_reset_error),
           ),
         );
       }
@@ -111,24 +114,18 @@ class DebugScreen {
   }
 }
 
-class _DebugDialog extends StatefulWidget {
-  const _DebugDialog({
-    required this.studyNotifications,
-    required this.pendingNotifications,
-    required this.pendingNotificationsPlugin,
-    required this.versionString,
-  });
-
-  final StudyNotifications? studyNotifications;
-  final Future<List> pendingNotifications;
-  final Future<List<PendingNotificationRequest>> pendingNotificationsPlugin;
-  final String versionString;
-
+class const _DebugDialog({
+  required final StudyNotifications? studyNotifications,
+  required final Future<List> pendingNotifications,
+  required final Future<List<PendingNotificationRequest>>
+  pendingNotificationsPlugin,
+  required final String versionString,
+}) extends StatefulWidget {
   @override
   State<_DebugDialog> createState() => __DebugDialogState();
 }
 
-class __DebugDialogState extends State<_DebugDialog> {
+class __DebugDialogState() extends State<_DebugDialog> {
   bool? ignoreBatteryOptimizations;
   int? pendingNotificationCount;
   int? pendingNotificationsPluginCount;
@@ -136,7 +133,7 @@ class __DebugDialogState extends State<_DebugDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const SelectableText('Debug Screen'),
+      title: SelectableText(AppLocalizations.of(context)!.debug_screen_title),
       content: Column(
         children: [
           _buildVersionInfo(),
@@ -146,6 +143,10 @@ class __DebugDialogState extends State<_DebugDialog> {
           _buildTestNotificationButton(),
           const SizedBox(height: 8),
           _buildResetAppButton(),
+          if (isDebugMode) ...[
+            const SizedBox(height: 8),
+            _buildShowOnboardingButton(),
+          ],
           const SizedBox(height: 16),
           _buildPreviewModeSwitch(),
           const SizedBox(height: 16),
@@ -156,6 +157,8 @@ class __DebugDialogState extends State<_DebugDialog> {
           _buildPendingNotificationsPluginInfo(),
           const SizedBox(height: 16),
           _buildScheduledNotificationsInfo(),
+          const SizedBox(height: 16),
+          _buildReferrerDebugInfo(),
         ],
       ),
       scrollable: true,
@@ -172,7 +175,9 @@ class __DebugDialogState extends State<_DebugDialog> {
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      child: const Text('Send debug information via email'),
+      child: Text(
+        AppLocalizations.of(context)!.debug_send_information_via_email,
+      ),
     );
   }
 
@@ -186,7 +191,9 @@ class __DebugDialogState extends State<_DebugDialog> {
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.secondary,
       ),
-      child: const Text('Receive test notification'),
+      child: Text(
+        AppLocalizations.of(context)!.debug_receive_test_notification,
+      ),
     );
   }
 
@@ -196,7 +203,17 @@ class __DebugDialogState extends State<_DebugDialog> {
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.error,
       ),
-      child: const Text('Reset App'),
+      child: Text(AppLocalizations.of(context)!.reset_app),
+    );
+  }
+
+  Widget _buildShowOnboardingButton() {
+    return TextButton.icon(
+      key: const ValueKey('debug_show_onboarding'),
+      style: TextButton.styleFrom(foregroundColor: Colors.orange),
+      icon: const Icon(Icons.bug_report),
+      onPressed: () => context.go('/${RouteNames.onboarding}'),
+      label: Text(AppLocalizations.of(context)!.debug_show_onboarding),
     );
   }
 
@@ -262,6 +279,25 @@ class __DebugDialogState extends State<_DebugDialog> {
     );
   }
 
+  Widget _buildReferrerDebugInfo() {
+    return FutureBuilder<String?>(
+      future: SecureStorage.read('debug_install_referrer'),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Last Install Referrer (Debug):",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SelectableText(snapshot.data ?? 'None'),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildPreviewModeSwitch() {
     return SwitchListTile(
       title: const Text('Preview Mode'),
@@ -271,11 +307,13 @@ class __DebugDialogState extends State<_DebugDialog> {
         context.read<AppState>().updatePreviewMode(value);
 
         // Close the debug dialog and navigate back to dashboard
-        Navigator.of(context).pop(); // Close debug dialog
+        context.pop(); // Close debug dialog
 
         // If we're in settings, also close the settings screen to get back to dashboard
         // This will ensure we get back to the main dashboard which uses showNextDay
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        while (context.canPop()) {
+          context.pop();
+        }
         print('Preview mode is now ${value ? 'active' : 'inactive'}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -332,7 +370,7 @@ class __DebugDialogState extends State<_DebugDialog> {
         content: const Text('This will delete all data and reset the app.'),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => context.pop(),
             child: const Text('Cancel'),
           ),
           TextButton(

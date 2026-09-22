@@ -6,12 +6,14 @@ import 'package:studyu_designer_v2/features/design/study_form_validation.dart';
 import 'package:studyu_designer_v2/features/forms/form_validation.dart';
 import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
+import 'package:studyu_designer_v2/utils/input_formatter.dart';
 
 mixin StudyScheduleControls {
   static const defaultScheduleType = PhaseSequence.alternating;
   static const defaultScheduleTypeSequence = 'ABAB';
   static const defaultNumCycles = 2;
   static const defaultPeriodLength = 7;
+  static final RegExp customSequencePattern = RegExp(r'^[ABab]+$');
 
   final FormControl<PhaseSequence> sequenceTypeControl = FormControl(
     value: defaultScheduleType,
@@ -110,12 +112,31 @@ mixin StudyScheduleControls {
 
   FormControlValidation get customSequenceRequired => FormControlValidation(
     control: sequenceTypeCustomControl,
-    validators: [Validators.required],
+    validators: [Validators.delegate(_validateCustomSequence)],
     validationMessages: {
       ValidationMessage.required: (error) =>
           'Custom sequence needs to be specified.',
+      ValidationMessage.pattern: (error) =>
+          'Custom sequence can only contain A and B.',
     },
   );
+
+  Map<String, dynamic>? _validateCustomSequence(
+    AbstractControl<dynamic> control,
+  ) {
+    if (!isSequencingCustom()) return null;
+
+    final value = control.value as String?;
+    if (value == null || value.isEmpty) {
+      return {ValidationMessage.required: true};
+    }
+
+    if (!customSequencePattern.hasMatch(value)) {
+      return {ValidationMessage.pattern: true};
+    }
+
+    return null;
+  }
 
   void setStudyScheduleControlsFrom(StudyScheduleFormData data) {
     sequenceTypeControl.value = data.sequenceType;
@@ -128,7 +149,9 @@ mixin StudyScheduleControls {
   StudyScheduleFormData buildStudyScheduleFormData() {
     return StudyScheduleFormData(
       sequenceType: sequenceTypeControl.value!, // required
-      sequenceTypeCustom: sequenceTypeCustomControl.value!, // required
+      sequenceTypeCustom: normalizeStudySequenceInput(
+        sequenceTypeCustomControl.value!,
+      ), // required
       numCycles: numCyclesControl.value!, // required
       phaseDuration: phaseDurationControl.value!, // required
       includeBaseline: includeBaselineControl.value!, // required

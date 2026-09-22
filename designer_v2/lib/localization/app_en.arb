@@ -70,10 +70,19 @@
   "navlink_public_studies_description": "The study registry is a public collection of studies conducted on the StudyU platform. In the spirit of open science, it fosters collaboration and transparency among all researchers and clinicians on the platform.",
   "navlink_account_settings": "Settings",
   "navlink_logout": "Sign out",
+  "date_format": "Date format",
+  "time_format": "Time format",
+  "system": "System",
+  "date_format_iso": "ISO (2024-12-31)",
+  "date_format_european": "European (31/12/2024)",
+  "date_format_us": "US (12/31/2024)",
+  "date_format_german": "German (31.12.2024)",
+  "time_format_12_hour": "12-hour (2:30 PM)",
+  "time_format_24_hour": "24-hour (14:30)",
   "@__________________DOMAIN__________________": {},
   "study_status_draft": "Draft",
   "study_status_draft_description": "This study is still being drafted.",
-  "study_status_running": "Live",
+  "study_status_running": "Running",
   "study_status_running_description": "This study is currently in progress.",
   "study_status_closed": "Closed",
   "study_status_closed_description": "This study has been completed.\nNew participants can no longer enroll.",
@@ -95,9 +104,14 @@
   "form_enrollment_option_invite": "Private (Invite-only)",
   "notification_code_deleted": "Invite code deleted",
   "notification_code_clipboard": "Code copied to clipboard",
+  "notification_invite_code_copied": "Invite code copied",
+  "notification_invite_link_copied": "Invite link copied",
+  "notification_invitation_copied": "Invitation copied",
   "@__________________DASHBOARD__________________": {},
   "action_button_new_study": "New study",
+  "action_button_retry": "Retry",
   "search": "Search",
+  "navlink_all_studies": "All Studies",
   "studies_list_header_title": "Title",
   "studies_list_header_status": "Status",
   "studies_list_header_participation": "Participation",
@@ -107,8 +121,34 @@
   "studies_list_header_participants_completed": "Completed",
   "studies_not_found": "No Studies found",
   "modify_query": "Modify your query",
+  "studies_count_total": "{total, plural, =1{1 study} other{{total} studies}}",
+  "@studies_count_total": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "studies_count_filtered": "{visible} of {total, plural, =1{1 study} other{{total} studies}}",
+  "@studies_count_filtered": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "studies_filter_server_side_unsupported": "This filter can't be used here right now. Clear the filter and try again.",
   "studies_empty": "You don't have any studies yet",
   "studies_empty_description": "Build your own study from scratch or create a new draft copy from an already published study!",
+  "studies_empty_public": "No public studies found",
+  "studies_empty_public_description": "There are no studies in the public registry matching your current filters.",
+  "studies_empty_shared": "No shared studies found",
+  "studies_empty_shared_description": "No studies have been shared with you yet.",
+  "studies_end_of_list": "All studies loaded.",
+  "studies_load_failed": "Couldn't load studies. Try again.",
   "@__________________STUDYPAGE__________________": {},
   "navlink_learn": "Learn",
   "navlink_study_design": "Design",
@@ -136,7 +176,80 @@
   "dialog_study_close_title": "Close participation?",
   "dialog_study_close_description": "Are you sure that you want to stop new enrollments for this study? New participants can no longer join, but those who are already enrolled can still continue. This action cannot be undone.",
   "dialog_study_delete_title": "Permanently delete?",
-  "dialog_study_delete_description": "Are you sure you want to delete this study? You will permanently lose the study and all data that has been collected.",
+  "dialog_study_delete_description": "Deleting this study permanently removes the study setup and all stored study data.",
+  "dialog_study_delete_warning_intro": "Before deleting, save a backup and consider whether closing the study is enough.",
+  "dialog_study_delete_backup_step": "Save the study definition and collected data as a backup before deleting.",
+  "dialog_study_delete_close_step": "Stop new enrollments while keeping the study and existing data available.",
+  "dialog_study_delete_download_backup": "Download backup",
+  "dialog_study_delete_data_confirmation": "I understand that the study and all associated data will be deleted forever and cannot be retrieved again.",
+  "dialog_study_delete_participant_confirmation": "I understand that current participants will not be able to continue their study and that all data from current and past participants will be deleted for them and for me.",
+  "dialog_study_delete_irreversible_confirmation": "I understand that my decision is final and irreversible and that all data is completely deleted and cannot be restored again.",
+  "dialog_study_delete_data_confirmation_emphasis_1": "deleted forever",
+  "dialog_study_delete_data_confirmation_emphasis_2": "cannot be retrieved again",
+  "dialog_study_delete_participant_confirmation_emphasis_1": "current participants will not be able to continue",
+  "dialog_study_delete_participant_confirmation_emphasis_2": "all data from current and past participants",
+  "dialog_study_delete_irreversible_confirmation_emphasis_1": "final and irreversible",
+  "dialog_study_delete_irreversible_confirmation_emphasis_2": "cannot be restored again",
+  "dialog_study_delete_type_name_instruction": "Type the study name \"{studyName}\" to confirm deletion.",
+  "@dialog_study_delete_type_name_instruction": {
+    "placeholders": {
+      "studyName": {}
+    }
+  },
+  "dialog_study_delete_type_name_label": "Study name",
+  "dialog_study_close_type_name_instruction": "Enter the title of the study \"{studyName}\" to confirm that you want to close it:",
+  "@dialog_study_close_type_name_instruction": {
+    "placeholders": {
+      "studyName": {}
+    }
+  },
+  "dialog_study_close_type_name_label": "Title of the study to close",
+  "dialog_study_close_irreversible_confirmation": "I understand that closing participation is final and cannot be reversed.",
+  "dialog_study_delete_close_instead": "Review closing instead",
+  "dialog_study_title_mismatch": "Study title does not match",
+  "dialog_delete_title": "Delete {subject}?",
+  "@dialog_delete_title": {
+    "placeholders": {
+      "subject": {}
+    }
+  },
+  "dialog_delete_description": "Are you sure you want to delete this {subject}? This action cannot be undone.",
+  "@dialog_delete_description": {
+    "placeholders": {
+      "subject": {}
+    }
+  },
+  "dialog_remove_title": "Remove {subject}?",
+  "@dialog_remove_title": {
+    "placeholders": {
+      "subject": {}
+    }
+  },
+  "dialog_remove_description": "Are you sure you want to remove this {subject}? This action cannot be undone.",
+  "@dialog_remove_description": {
+    "placeholders": {
+      "subject": {}
+    }
+  },
+  "dialog_subject_study": "study",
+  "dialog_subject_item": "item",
+  "dialog_subject_question": "question",
+  "dialog_subject_screener_question": "screener question",
+  "dialog_subject_answer_option": "answer option",
+  "dialog_subject_intervention": "intervention",
+  "dialog_subject_intervention_task": "intervention task",
+  "dialog_subject_survey": "survey",
+  "dialog_subject_consent_item": "consent item",
+  "dialog_subject_report_section": "report section",
+  "dialog_subject_invite_code": "invite code",
+  "dialog_delete_invite_code_title": "Delete invite code?",
+  "dialog_delete_invite_code_message": "Anyone with invite code {code} will no longer be able to use it.",
+  "@dialog_delete_invite_code_message": {
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "dialog_subject_fitbit_credentials": "fitbit credentials",
   "@__________________STUDYPAGE_DESIGN_SHARED__________________": {},
   "form_question_create": "New Question",
   "form_question_edit": "Edit Question",
@@ -152,7 +265,7 @@
   "form_field_question_response_options": "Response options",
   "form_field_question_response_options_tooltip": "Define the options that participants can answer your question with",
   "form_field_question_response_options_description": "Choose the response type that best matches your question and define the response options according to the data you want to collect.",
-  "question_type_choice": "Multiple choice",
+  "question_type_choice": "Choice",
   "question_type_free_text": "Free text",
   "question_type_pain": "Pain Tracker",
   "question_type_pain_description": "Participants can select one or more body parts on a diagram and assign a pain level to each selected part using a pain scale. This is useful for tracking localized pain.",
@@ -173,8 +286,10 @@
   "form_field_response_image": "Image",
   "form_field_response_audio": "Audio",
   "form_field_response_audio_max_duration_label": "Maximum recording duration in seconds",
-  "form_field_response_choice_multiple": "Select multiple",
-  "form_field_response_choice_multiple_tooltip": "Allow the participant to select multiple response options. Otherwise only a single option can be selected.",
+  "form_field_response_choice_multiple": "Allow multiple selections",
+  "form_field_response_choice_multiple_tooltip": "Participants can select more than one answer.",
+  "form_field_response_choice_required": "Require at least one selection",
+  "form_field_response_choice_required_tooltip": "Require the participant to select at least one response option.",
   "form_array_response_options_choice_new": "Add option",
   "form_array_response_options_choice_hint": "Option",
   "form_field_response_scale_min_label": "Custom low label",
@@ -276,10 +391,75 @@
       }
     }
   },
+  "free_text_example_explanation_custom": "Inputs of type {type} will be accepted based on the regular expression pattern.",
+  "@free_text_example_explanation_custom": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
   "free_text_question_type_any_explanation": "Any input will be accepted.",
   "free_text_question_type_alphanumeric_explanation": "Alphanumeric input includes letters and numbers only.",
   "free_text_question_type_numeric_explanation": "Numeric input includes numbers without special characters.",
   "free_text_question_type_custom_explanation": "The input must match the specified regular expression.",
+  "question_type_date": "Date/Time",
+  "date_min_date_label": "Earliest date",
+  "date_min_date_label_helper": "The earliest date participants can select",
+  "date_max_date_label": "Latest date",
+  "date_max_date_label_helper": "The latest date participants can select",
+  "date_picker_hint": "Select a date",
+  "time_picker_hint": "Select a time",
+  "date_input_type_label": "Input type",
+  "date_input_type_label_helper": "Select what information to collect",
+  "date_input_type_date": "Date only",
+  "date_input_type_time": "Time only",
+  "date_input_type_datetime": "Date and time",
+  "date_default_option_label": "Default value",
+  "date_default_option_label_helper": "Select the initial value shown to participants",
+  "date_default_option_none": "No default",
+  "date_default_option_today": "Today",
+  "date_default_option_now": "Current time",
+  "date_default_option_specific": "Specific date/time",
+  "date_default_specific_date_label": "Default date",
+  "date_default_specific_date_label_helper": "The date that will be pre-selected",
+  "date_default_specific_time_label": "Default time",
+  "date_default_specific_time_label_helper": "The time that will be pre-selected",
+  "date_min_time_label": "Earliest time",
+  "date_min_time_label_helper": "The earliest time participants can select",
+  "date_max_time_label": "Latest time",
+  "date_max_time_label_helper": "The latest time participants can select",
+  "date_validation_min_greater_than_max": "Earliest date cannot be after the latest date",
+  "date_picker_button_label_datetime": "Select date",
+  "time_picker_button_label_datetime": "Select time",
+  "time_picker_button_label": "Select a time",
+  "date_picker_validation_required": "Please select a date",
+  "time_picker_validation_required": "Please select a time",
+  "datetime_picker_validation_required": "Please select both date and time",
+  "time_picker_validation_range": "Please select a time within the allowed range",
+  "time_picker_range_hint": "Select a time between {min} and {max}",
+  "@time_picker_range_hint": {
+    "placeholders": {
+      "min": {},
+      "max": {}
+    }
+  },
+  "time_picker_min_hint": "Earliest allowed time: {min}",
+  "@time_picker_min_hint": {
+    "placeholders": {
+      "min": {}
+    }
+  },
+  "time_picker_max_hint": "Latest allowed time: {max}",
+  "@time_picker_max_hint": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "date_validation_default_today_before_min": "'Today' is before the earliest allowed date",
+  "date_validation_default_today_after_max": "'Today' is after the latest allowed date",
+  "date_validation_default_specific_before_min": "Default date is before the earliest allowed date",
+  "date_validation_default_specific_after_max": "Default date is after the latest allowed date",
   "fitbit_question_title": "Fitbit",
   "fitbit_question_type_empty": "No Fitbit data available",
   "navlink_question_visibility_logic": "Visibility",
@@ -304,6 +484,16 @@
   "form_array_question_visibility_logic_is_not": "is not",
   "form_array_question_visibility_logic_contains": "contains",
   "form_array_question_visibility_logic_does_not_contain": "does not contain",
+  "form_array_question_visibility_logic_shorter_than": "shorter than",
+  "form_array_question_visibility_logic_shorter_than_or_equal_to": "shorter than or equal to",
+  "form_array_question_visibility_logic_longer_than": "longer than",
+  "form_array_question_visibility_logic_longer_than_or_equal_to": "longer than or equal to",
+  "form_array_question_visibility_logic_same_length_as": "same length as",
+  "form_array_question_visibility_logic_different_length_as": "different length as",
+  "form_array_question_visibility_logic_length_greater_than": "length >",
+  "form_array_question_visibility_logic_length_less_than": "length <",
+  "form_array_question_visibility_logic_length_greater_than_or_equal": "length >=",
+  "form_array_question_visibility_logic_length_less_than_or_equal": "length <=",
   "form_array_question_visibility_logic_not": "NOT",
   "form_array_question_visibility_logic_always_true": "always true",
   "form_array_question_visibility_logic_preview_description": "Show this question if the following conditions are met:",
@@ -577,6 +767,35 @@
   "navlink_study_test_app_dashboard": "Daily Dashboard",
   "action_button_study_test_reset": "Reset",
   "action_button_study_test_open_new_tab": "Open in new tab",
+  "preview_overlay_health_checking_title": "Checking app availability",
+  "preview_overlay_connecting_title": "Connecting to app preview",
+  "preview_overlay_loading_title": "Loading app preview",
+  "preview_overlay_health_checking_description_local": "Checking whether the StudyU app is running at {url}.",
+  "@preview_overlay_health_checking_description_local": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "preview_overlay_health_checking_description_remote": "Checking whether the participant app is reachable at {url}.",
+  "@preview_overlay_health_checking_description_remote": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "preview_overlay_connecting_description_local": "The local StudyU app is reachable. Establishing the connection now.",
+  "preview_overlay_connecting_description_remote": "The participant app is reachable. Establishing the connection now.",
+  "preview_overlay_loading_description_local": "The app preview is connected. The app is now loading inside the phone frame.",
+  "preview_overlay_loading_description_remote": "The app preview is connected. The participant app is now loading.",
+  "preview_overlay_local_unavailable_title": "Local app preview unavailable",
+  "preview_overlay_remote_unavailable_title": "App under maintenance",
+  "preview_overlay_local_unavailable_message": "The local StudyU app could not be reached.",
+  "preview_overlay_remote_unavailable_message": "The StudyU mobile app is temporarily unavailable or under maintenance. Please try again in a little while.",
+  "preview_overlay_could_not_load": "The StudyU app preview could not be loaded.",
+  "preview_overlay_preview_not_opened": "The StudyU app preview could not be opened right now.",
   "banner_study_test_unavailable": "The test mode is unavailable until you update the following information:",
   "banner_study_preview_unavailable": "The preview is unavailable until you update the following information:",
   "dialog_study_test_help_title": "Test your study!",
@@ -628,12 +847,13 @@
   "form_field_preconfigured_schedule_intervention_b": "Intervention B",
   "form_field_preconfigured_schedule_intervention_default": "Default",
   "form_field_preconfigured_schedule_intervention_hint": "Select intervention...",
-  "code_list_section_title": "Invite codes",
-  "code_public_disabled": "Invite codes disabled",
-  "code_public_disabled_description": "The invite codes are disabled for this study as it is open for public recruitment. All participants can join without an invite code.",
+  "code_list_section_title": "Invite Codes",
+  "code_public_disabled": "Public Recruitment",
+  "code_public_disabled_description": "Participants can easily join this study by using the links below, scanning the QR code, or by finding it in the app's public study list. Note that invite codes are not available here, as they are exclusively used for private studies.",
   "code_list_empty_title": "You haven't invited anyone yet",
   "code_list_empty_description": "Add participants to your study via invite codes.",
   "code_list_header_code": "Code",
+  "code_list_header_actions": "Actions",
   "action_button_code_new": "New code",
   "@__________________STUDYPAGE_MONITOR__________________": {},
   "participant_details_title": "Participant details",
@@ -651,8 +871,8 @@
   "participant_details_completed_legend_tooltip": "All intervention and survey tasks have been completed for this day",
   "participant_details_partially_completed_legend_tooltip": "Not all intervention or survey tasks have been completed for this day",
   "participant_details_incomplete_legend_tooltip": "No intervention or survey tasks have been completed for this day",
-  "participant_details_progress_empty_title":"No progress data available yet",
-  "participant_details_progress_empty_description":"Once the participant has started the study, you can monitor their progress here.",
+  "participant_details_progress_empty_title": "No progress data available yet",
+  "participant_details_progress_empty_description": "Once the participant has started the study, you can monitor their progress here.",
   "monitoring_no_participants_title": "There are no participants in this study yet",
   "monitoring_no_participants_description": "Once participants have enrolled in your study, you can monitor their progress and view their data here.",
   "monitoring_participants_title": "Participant overview",
@@ -677,13 +897,14 @@
   "monitoring_table_completed_interventions_header_tooltip": "All of intervention tasks have been completed throughout the study",
   "monitoring_table_completed_surveys_header_tooltip": "A survey is completed, if all of its tasks have been completed for that day",
   "@__________________STUDYPAGE_ANALYZE__________________": {},
+  "banner_text_study_recruit_draft": "Because this study has not been launched yet, the links on this page will not work yet.",
   "banner_text_study_analyze_draft": "Because this study has not been launched yet, this page is currently based on the data generated during study testing.\nThe data on this page will be reset once you launch the study with real participants.",
   "action_button_study_export": "Export data",
   "action_button_study_export_prompt": "Want to run your own analysis?",
   "study_export_unavailable_empty_tooltip": "There is no data available yet",
   "study_export_unavailable_no_permission_tooltip": "You do not have sufficient permission to access this study's data",
   "@__________________STUDY_LAUNCH_DIALOG__________________": {},
-  "study_launch_title": "Great work! \uD83D\uDC4F Ready to launch?",
+  "study_launch_title": "Great work! 👏 Ready to launch?",
   "study_launch_participation_intro": "The study you are creating is",
   "study_launch_participation_outro": "",
   "study_launch_post_launch_intro": "After launching your study:",
@@ -752,12 +973,22 @@
   "action_pin": "Pin",
   "action_unpin": "Remove pin",
   "action_delete": "Delete",
+  "action_delete_invite_code": "Delete invite code",
+  "action_delete_code": "Delete code",
   "action_remove": "Remove",
   "action_duplicate": "Duplicate",
   "action_clipboard": "Copy to clipboard",
+  "action_copy_invite_code": "Copy invite code",
+  "action_copy_invite_link": "Copy invite link",
+  "action_qr_code_show": "View QR code",
+  "action_qr_code_download": "Download QR code",
+  "action_share": "Share invite link",
+  "action_copy_link": "Copy link",
+  "action_copy_invitation": "Copy invitation",
   "action_reportPrimary": "Set as primary report",
   "action_study_duplicate_draft": "Copy as draft",
   "action_study_export_results": "Export results",
+  "action_export_study_definition": "Export study definition",
   "dialog_continue": "Continue",
   "dialog_close": "Close",
   "dialog_cancel": "Cancel",
@@ -771,8 +1002,8 @@
   "iconpicker_nonempty_prompt": "Change icon",
   "iconpicker_empty_prompt": "Pick an icon",
   "iconpicker_dialog_title": "Pick an icon",
-  "dialog_unsaved_changes_title": "Go back and discard changes?",
-  "dialog_unsaved_changes_description": "There are unsaved changes that will be lost when you go back. If you want to keep your changes, you need to save your work before going back.",
+  "dialog_unsaved_changes_title": "Discard unsaved changes?",
+  "dialog_unsaved_changes_description": "If you leave now, your recent changes will be permanently lost.",
   "dialog_action_unsaved_changes_stay": "Stay",
   "dialog_action_unsaved_changes_discard": "Discard changes",
   "under_construction": "Under construction",
@@ -799,6 +1030,21 @@
   "fitbit_credentials_cannot_change_description": "Fitbit credentials can't be changed while the study is not in draft mode.",
   "fitbit_only_participant_title": "If you're running this study just for yourself",
   "fitbit_only_participant_subtitle": "Since you're both creating and participating in this study, you don't need to fill out the intraday data request form. Simply follow these easy steps:",
+  "fitbit_only_participant_description": "If you're running this study just for yourself, you must use your own Fitbit account's Client ID and Client Secret on the previous page.",
+  "fitbit_multiple_participant_title": "If you're running this study for multiple participants",
+  "fitbit_multiple_participant_description": "Each participant must log in with their own Fitbit account in the StudyU app. The data will be collected separately for each participant.",
+  "study_import_title": "Import Study",
+  "study_import_description": "Import a study definition from a JSON file. This will create a new draft study.",
+  "study_import_button": "Import Study from JSON",
+  "study_import_success": "Study imported successfully",
+  "study_import_error": "Failed to import study: {error}",
+  "@study_import_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "fitbit_only_participant_step_1": "When creating your Fitbit app, choose 'Personal' as the app type.",
   "fitbit_only_participant_step_2": "When syncing data, make sure to use the same Google account that's connected to your Fitbit watch and the Fitbit app you've set up.",
   "client_id": "Client ID",
@@ -807,6 +1053,10 @@
   "client_secret": "Client Secret",
   "client_secret_label_help": "Enter the Client Secret from Fitbit Developer Portal.",
   "client_secret_hint": "Client Secret",
+  "fitbit_credentials_how_to_obtain": "How to obtain Fitbit credentials",
+  "fitbit_client_id_required": "Client ID is required",
+  "fitbit_client_secret_required": "Client secret is required",
+  "fitbit_question_type_required": "At least one Fitbit type must be selected.",
   "screenshots_for_guidance": "Screenshots for Guidance:",
   "fitbit_credentials_not_set": "Fitbit credentials are not set. Please navigate to the 'Fitbit' tab in the study designer to enter your Fitbit client ID and client secret. Once completed, return here to add Fitbit questions.",
   "fitbit_question_type_heartrate_description": "Captures heart rate measured every minute throughout the day.",
@@ -829,8 +1079,187 @@
   "study_schedule_banner_explanation": "We use the following terminology:\n\nEach trial consists of different intervention phases (= intervention periods = intervention blocks) of a certain length.\nFor example, a trial may contain 4 phases of 7 days each, and hence last for 28 days in total.\nThere may be an additional baseline phase, which is fixed to have the same length as each phase.\nThat means a trial with 4 phases of 7 days each and an additional baseline period will last for 35 days in total.\n\nThe phases may follow different sequences.\nWe consider two interventions, A and B.\nThey can follow an alternating, counterbalanced, random, or custom design.\n\nWe define one cycle of phases as a pair of treatment phases for the alternating, counterbalanced, and random designs.\nThe random design yields either an alternating or counterbalanced sequence.\nOne cycle of the respective designs yields AB (alternating), AB (counterbalanced), or AB/BA (random).\nTwo cycles yield ABAB (alternating), ABBA (counterbalanced), or ABAB/ABBA (random).\n\nIn the custom design, a custom sequence can be defined, e.g., ABBAA.\nHere, one cycle refers to the full custom sequence, i.e., 2 cycles of ABBAA would yield ABBAAABBAA.",
   "study_schedule_banner_description": "Design effective N-of-1 trials by understanding the different sequence types and how they affect your study results.",
   "study_schedule_alternating_description": "Alternating: Each participant follows an ABAB pattern, switching between interventions in a predictable sequence.",
-  "study_schedule_balanced_description": "Balanced: Participants are randomly assigned to either ABAB or BABA sequences to reduce order effects.",
+  "study_schedule_balanced_description": "Counterbalanced: Each participant follows an ABBA pattern, switching between interventions in a predictable sequence.",
   "study_schedule_random_description": "Random: The sequence is completely randomized for each cycle, providing maximum variability.",
-  "study_schedule_custom_description": "Custom: Define your own sequence pattern to meet specific study requirements."
+  "study_schedule_custom_description": "Custom: Define your own sequence pattern to meet specific study requirements.",
+  "@__________________DASHBOARD_FILTER__________________": {},
+  "filter_studies": "Filter Studies",
+  "filter_manage_presets": "Manage Presets",
+  "filter_load_preset": "Load Preset",
+  "filter_save_changes": "Save changes",
+  "filter_save_as_new": "Save as new",
+  "filter_delete_preset": "Delete preset",
+  "filter_reset_all": "Clear all",
+  "code_list_filter_title": "Filter invite codes",
+  "code_list_filter_enrolled_status": "Enrolled status",
+  "code_list_filter_enrolled_min": "Enrolled min",
+  "code_list_filter_enrolled_max": "Enrolled max",
+  "code_list_filter_intervention_assignment": "Intervention assignment",
+  "code_list_filter_apply": "Apply",
+  "code_list_filter_option_all": "All",
+  "code_list_filter_option_unused": "Unused",
+  "code_list_filter_option_used": "Used",
+  "code_list_filter_button_active": "Filter ({count})",
+  "@code_list_filter_button_active": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filter_show_studies": "Show {count} Studies",
+  "@filter_show_studies": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filter_dialog_save_title": "Save Filter Preset",
+  "filter_dialog_preset_name_hint": "Preset Name",
+  "filter_category_basic": "Basic Info",
+  "filter_category_visibility": "Visibility & Role",
+  "filter_category_participants": "Participants",
+  "filter_category_dates": "Dates",
+  "filter_field_title": "Title",
+  "filter_field_status": "Status",
+  "filter_field_participation": "Participation",
+  "filter_field_result_sharing": "Result Sharing",
+  "filter_field_registry_published": "Registry Published",
+  "filter_field_participant_count": "Participant Count",
+  "filter_field_active_count": "Active Count",
+  "filter_field_completed_count": "Completed Count",
+  "filter_field_created_date": "Created Date",
+  "filter_date_from": "From",
+  "filter_date_to": "To",
+  "filter_operator_contains": "Contains",
+  "filter_operator_equals": "Matches",
+  "filter_operator_starts_with": "Starts with",
+  "filter_operator_ends_with": "Ends with",
+  "filter_operator_is": "Is",
+  "filter_operator_is_not": "Is not",
+  "filter_operator_min": "Min",
+  "filter_operator_max": "Max",
+  "filter_operator_exactly": "Exactly",
+  "filter_operator_more_than": "More than",
+  "filter_operator_less_than": "Less than",
+  "filter_bool_yes": "Yes",
+  "filter_bool_no": "No",
+  "preset_my_active_studies": "My Active Studies",
+  "preset_studies_needing_attention": "Studies Needing Attention",
+  "preset_recently_created": "Recently Created",
+  "preset_public_studies": "Public Studies",
+  "preset_draft_studies": "Draft Studies",
+  "preset_custom": "Custom preset",
+  "preset_none": "No custom presets",
+  "preset_tooltip_my_active_studies": "Studies you own that are currently running",
+  "preset_tooltip_studies_needing_attention": "Running studies with low participation",
+  "preset_tooltip_recently_created": "Studies created in the last 30 days",
+  "preset_tooltip_public_studies": "Studies published to the registry or with public results",
+  "preset_tooltip_draft_studies": "Studies currently in draft mode",
+  "preset_loaded_tooltip": "Currently loaded preset",
+  "filter_result_sharing_public": "Public",
+  "filter_result_sharing_private": "Private",
+  "filter_result_sharing_organization": "Organization",
+  "participation_open": "Open",
+  "participation_invite": "Invite-only",
+  "filter_section_default_presets": "Default Presets",
+  "filter_section_custom_presets": "Custom Presets",
+  "filter_button_advanced": "Configure Filters...",
+  "filter_button_clear": "Clear filter",
+  "filter_button_main": "Filter",
+  "code_list_no_results_title": "No matching invite codes",
+  "code_list_no_results_description": "Try changing your search to see more invite codes.",
+  "code_list_search_hint": "Search invite codes",
+  "code_list_search_hint_compact": "Search codes",
+  "code_list_active_count": "{count} active invite codes",
+  "@code_list_active_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_total_count": "{count, plural, =1{1 invite} other{{count} invites}}",
+  "@code_list_total_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_page_size": "Rows",
+  "code_list_rows_per_page": "Rows per page:",
+  "code_list_page": "Page {page}",
+  "@code_list_page": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_page_range": "{start}–{end} of {count}",
+  "@code_list_page_range": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_page_loading": "Loading {start}–{end}...",
+  "@code_list_page_loading": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "code_list_page_fetch_error": "Couldn’t load the next page. Check your connection and try again.",
+  "code_list_retry": "Retry",
+  "code_list_previous_page": "Previous page",
+  "code_list_next_page": "Next page",
+  "action_regenerate_invite_code": "Regenerate invite code",
+  "dialog_qr_code_description": "Share the link or QR code with participants so they can access this study. When participants open the link or scan the QR code with their phone, the StudyU App opens and adds them to the study.",
+  "all_studies": "All Studies",
+  "studies_filter_add_filter": "Add filter",
+  "studies_filter_remove_filter": "Remove filter",
+  "studies_end_of_list_create": "Create a study.",
+  "studies_end_of_list_public": "Didn't find what you're looking for?",
+  "error_qr_code_generation": "The QR code could not be displayed.",
+  "form_field_invite_link": "Invite link",
+  "form_field_invite_link_tooltip": "Share this link with participants so they can open the StudyU App and join the study.",
+  "form_field_invitation_message": "Invitation message",
+  "invitation_message_intro": "You have been invited to participate in the study \"{title}\" using StudyU.",
+  "@invitation_message_intro": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "invitation_message_install_app": "1. Install the StudyU Health app on your phone if needed:",
+  "invitation_message_android": "Android: {link}",
+  "@invitation_message_android": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "invitation_message_ios": "iPhone/iPad: {link}",
+  "@invitation_message_ios": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "invitation_message_open_link": "2. Open this invitation link on your phone:",
+  "invitation_message_alternative": "Alternatively, open the StudyU Health app and enter this invitation code:",
+  "form_field_report_improvementDirection_hint": "Select an improvement direction",
+  "form_field_report_data_source_hint": "Select a data source",
+  "form_field_report_data_source_empty": "No scale survey question defined"
 }
-

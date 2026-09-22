@@ -10,7 +10,7 @@ part of 'invite_code_repository.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(inviteCodeRepository)
-const inviteCodeRepositoryProvider = InviteCodeRepositoryFamily._();
+final inviteCodeRepositoryProvider = InviteCodeRepositoryFamily._();
 
 final class InviteCodeRepositoryProvider
     extends
@@ -20,7 +20,7 @@ final class InviteCodeRepositoryProvider
           InviteCodeRepository
         >
     with $Provider<InviteCodeRepository> {
-  const InviteCodeRepositoryProvider._({
+  InviteCodeRepositoryProvider._({
     required InviteCodeRepositoryFamily super.from,
     required StudyID super.argument,
   }) : super(
@@ -73,11 +73,11 @@ final class InviteCodeRepositoryProvider
 }
 
 String _$inviteCodeRepositoryHash() =>
-    r'301a627858ddb89e3c4a291bb9ebd09d6b933513';
+    r'a9fb04158c1a28ab43e7db764875569151b7ad34';
 
 final class InviteCodeRepositoryFamily extends $Family
     with $FunctionalFamilyOverride<InviteCodeRepository, StudyID> {
-  const InviteCodeRepositoryFamily._()
+  InviteCodeRepositoryFamily._()
     : super(
         retry: null,
         name: r'inviteCodeRepositoryProvider',

@@ -6,7 +6,6 @@ import 'package:studyu_designer_v2/common_views/async_value_widget.dart';
 import 'package:studyu_designer_v2/common_views/layout_single_column.dart';
 import 'package:studyu_designer_v2/common_views/navbar_tabbed.dart';
 import 'package:studyu_designer_v2/common_views/primary_button.dart';
-import 'package:studyu_designer_v2/common_views/secondary_button.dart';
 import 'package:studyu_designer_v2/common_views/sync_indicator.dart';
 import 'package:studyu_designer_v2/common_views/utils.dart';
 import 'package:studyu_designer_v2/constants.dart';
@@ -22,7 +21,7 @@ import 'package:studyu_designer_v2/features/study/study_status_badge.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-abstract class IStudyAppBarViewModel
+abstract class IStudyAppBarViewModel()
     implements IStudyStatusBadgeViewModel, IStudyNavViewModel {
   bool get isSyncIndicatorVisible;
 
@@ -34,52 +33,31 @@ abstract class IStudyAppBarViewModel
 }
 
 /// Custom scaffold shared between all pages for an individual [Study]
-class StudyScaffold extends ConsumerStatefulWidget {
-  const StudyScaffold({
-    this.studyId = Config.newStudyId,
-    required this.body,
-    this.layoutType,
-    this.tabs,
-    this.tabsSubnav,
-    this.selectedTab,
-    this.selectedTabSubnav,
-    this.drawer = const AppDrawer(),
-    this.disableActions = false,
-    this.actionsSpacing = 2.0,
-    this.actionsPadding = 4.0,
-    this.appbarHeight = 56.0,
-    this.appbarSubnavHeight = 44.0,
-    super.key,
-  });
-
+class const StudyScaffold({
   /// The currently selected [Study.id]
   /// Defaults to [Config.newStudyId] when creating a new study
-  final String studyId;
-
-  final List<NavbarTab>? tabs;
-  final List<NavbarTab>? tabsSubnav;
-  final NavbarTab? selectedTab;
-  final NavbarTab? selectedTabSubnav;
+  final String studyId = Config.newStudyId,
 
   /// The widget to be rendered as the main page body
-  final StudyPageWidget body;
-
-  final Widget? drawer;
-
-  final bool disableActions;
-  final double actionsSpacing;
-  final double actionsPadding;
-
-  final SingleColumnLayoutType? layoutType;
-
-  final double appbarHeight;
-  final double appbarSubnavHeight;
-
+  required final StudyPageWidget body,
+  final SingleColumnLayoutType? layoutType,
+  final List<NavbarTab>? tabs,
+  final List<NavbarTab>? tabsSubnav,
+  final NavbarTab? selectedTab,
+  final NavbarTab? selectedTabSubnav,
+  final Widget? drawer = const AppDrawer(),
+  final bool disableActions = false,
+  final double actionsSpacing = 2.0,
+  final double actionsPadding = 4.0,
+  final double appbarHeight = 56.0,
+  final double appbarSubnavHeight = 44.0,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<StudyScaffold> createState() => _StudyScaffoldState();
 }
 
-class _StudyScaffoldState extends ConsumerState<StudyScaffold> {
+class _StudyScaffoldState() extends ConsumerState<StudyScaffold> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -243,6 +221,7 @@ class _StudyScaffoldState extends ConsumerState<StudyScaffold> {
           // enable re-rendering based on form validation status
           builder: (context, form, child) {
             return PrimaryButton(
+              key: const ValueKey('publish_button'),
               text: tr.action_button_study_launch,
               tooltipDisabled:
                   "${tr.form_invalid_prompt}\n\n${form.validationErrorSummary}",
@@ -261,34 +240,10 @@ class _StudyScaffoldState extends ConsumerState<StudyScaffold> {
       actionButtons.add(const SizedBox(width: 12.0)); // padding
     }
 
-    if (state.isClosedVisible) {
-      final formViewModel = ref.watch(
-        studyPublishValidatorProvider(widget.studyId),
-      );
-      final closeButton = ReactiveForm(
-        formGroup: formViewModel.form,
-        child: ReactiveFormConsumer(
-          // enable re-rendering based on form validation status
-          builder: (context, form, child) {
-            return SecondaryButton(
-              text: tr.action_button_study_close,
-              icon: null,
-              onPressed: () => showStudyDialog(
-                context,
-                widget.studyId,
-                StudyDialogType.close,
-              ),
-            );
-          },
-        ),
-      );
-      actionButtons.add(closeButton);
-      actionButtons.add(const SizedBox(width: 12.0)); // padding
-    }
-
     if (state.isSettingsEnabled) {
       actionButtons.add(
         IconButton(
+          key: const ValueKey('study_settings_button'),
           onPressed: controller.onSettingsPressed,
           icon: Icon(Icons.settings_rounded, size: theme.iconTheme.size),
           tooltip: tr.study_settings,
@@ -300,6 +255,7 @@ class _StudyScaffoldState extends ConsumerState<StudyScaffold> {
 
     actionButtons.add(
       ActionPopUpMenuButton(
+        key: const ValueKey('study_overflow_menu'),
         actions: state.studyActions,
         orientation: Axis.vertical,
         enabled: state.study.hasValue, // disable while study is loading

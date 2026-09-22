@@ -51,11 +51,11 @@ Future<int> scheduleReminderForDate(
     }
 
     flutterLocalNotificationsPlugin.zonedSchedule(
-      currentId,
-      task.title,
-      body,
-      reminderTime,
-      notificationDetails,
+      id: currentId,
+      title: task.title,
+      body: body,
+      scheduledDate: reminderTime,
+      notificationDetails: notificationDetails,
       payload: studyNotification.taskInstance.id,
       // exactAllowWhileIdle only works if the exact alarm permission has been granted
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -163,25 +163,18 @@ List<StudyNotification> _buildNotificationList(
   return taskNotifications;
 }
 
-Future<void>? cancelNotifications(BuildContext context) async {
-  if (kIsWeb) return Future.value(); // Notifications not supported on web
-  final appState = context.read<AppState>();
-  final notificationsPlugin =
-      appState.studyNotifications?.flutterLocalNotificationsPlugin;
-
-  await notificationsPlugin?.cancelAll();
+Future<void> cancelNotificationsForAppState(AppState appState) async {
+  if (kIsWeb) return; // Notifications not supported on web
+  await appState.studyNotifications?.flutterLocalNotificationsPlugin
+      .cancelAll();
   await FlutterLocalNotificationsPlugin().cancelAll();
   StudyNotifications.scheduledNotificationsDebug = 'cleared';
-  if (context.mounted) context.read<AppState>().studyNotifications = null;
-  if (StudyNotifications.debug) {
-    StudyULogger.debug('Notifications cancelled');
-  }
-  return Future.value();
+  appState.studyNotifications = null;
+  if (StudyNotifications.debug) StudyULogger.debug('Notifications cancelled');
 }
 
-class StudyNotification {
-  StudyNotification(this.taskInstance, this.date);
-
-  final TaskInstance taskInstance;
-  final DateTime date;
+Future<void> cancelNotifications(BuildContext context) async {
+  await cancelNotificationsForAppState(context.read<AppState>());
 }
+
+class StudyNotification(final TaskInstance taskInstance, final DateTime date);

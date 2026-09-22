@@ -5,23 +5,23 @@ import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart'
 import 'package:studyu_app/widgets/selectable_button.dart';
 import 'package:studyu_core/core.dart';
 
-class BooleanQuestionWidget extends QuestionWidget {
-  final BooleanQuestion question;
-  final Function(Answer)? onDone;
-
-  const BooleanQuestionWidget({super.key, required this.question, this.onDone});
-
+class const BooleanQuestionWidget({
+  super.key,
+  required final BooleanQuestion question,
+  final Function(Answer)? onDone,
+  final Answer<bool>? initialAnswer,
+}) extends QuestionWidget {
   @override
   State<BooleanQuestionWidget> createState() => _BooleanQuestionWidgetState();
 }
 
-class _BooleanQuestionWidgetState extends State<BooleanQuestionWidget> {
+class _BooleanQuestionWidgetState() extends State<BooleanQuestionWidget> {
   bool? selected;
 
   @override
   void initState() {
     super.initState();
-    selected = null;
+    selected = widget.initialAnswer?.response;
   }
 
   void tapped({bool? choice}) {

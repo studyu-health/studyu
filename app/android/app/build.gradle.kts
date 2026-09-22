@@ -1,6 +1,5 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -32,11 +31,12 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "health.studyu.app"
-    // compileSdk = flutter.compileSdkVersion
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
+    compileSdkMinor = 0
     // Start flutter_local_notifications
     // compileSdk = 35
     // End flutter_local_notifications
-    compileSdk = 36
+    //compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -44,12 +44,8 @@ android {
         // Flag to enable support for the new language APIs
         isCoreLibraryDesugaringEnabled = true
         // End flutter_local_notifications
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     signingConfigs {
@@ -84,6 +80,12 @@ android {
                     signingConfigs.getByName("release")
                 else signingConfigs.getByName("debug")
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

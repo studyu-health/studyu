@@ -22,55 +22,62 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  static_analysis_fix:
+  qualitycheck:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.READY_TO_MERGE_TOKEN }}
+          ref: ${{ github.sha }}
 
       - name: Init workspace
         uses: ./.github/workflows/init-workspace
 
-      - name: Run fix
-        run: melos run fix
+      - name: Generate files
+        run: dart run melos generate
+
+      - name: Check generated files
+        run: |
+          git diff --exit-code
+          untracked=$(git ls-files --others --exclude-standard)
+          if [ -n "$untracked" ]; then
+            echo "Generation produced untracked files:"
+            echo "$untracked"
+            exit 1
+          fi
 
       - name: Run quality check
-        run: melos qualitycheck
-
-      - name: Restore ignored files
-        shell: bash
-        run: |
-          shopt -s globstar nullglob
-          git checkout .fvmrc 2>/dev/null || true
-          git checkout .vscode/settings.json 2>/dev/null || true
-          git checkout l10n-missing.txt 2>/dev/null || true
-          for f in **/l10n-missing.txt; do
-            git checkout "$f" 2>/dev/null || true
-          done
-          for f in **/app_localizations_*.dart; do
-            git checkout "$f" 2>/dev/null || true
-          done
-
-      - name: Commit changes if any
-        uses: stefanzweifel/git-auto-commit-action@v6
-        with:
-          commit_message: 'chore: Apply static analysis changes'
+        run: dart run melos qualitycheck
 
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
 
       - name: Init workspace
         uses: ./.github/workflows/init-workspace
 
       - name: Run Test
-        run: melos run test --no-select
+        run: dart run melos run test:coverage --no-select
+
+      - name: Upload Sonar coverage artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: sonar-coverage
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            app/coverage
+            core/coverage
+            designer_v2/coverage
+            flutter_common/coverage

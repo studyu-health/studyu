@@ -1,0 +1,61 @@
+#!/bin/sh
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+if ! command -v fvm >/dev/null 2>&1; then
+  echo "fvm not found on PATH. Run './setup.sh' before committing." >&2
+  exit 1
+fi
+
+rtk_prefix=""
+if [ "${CI:-}" != "true" ] && command -v rtk >/dev/null 2>&1; then
+  rtk_prefix="rtk "
+fi
+
+run_melos() {
+  if [ "${CI:-}" = "true" ]; then
+    dart run melos "$@"
+  else
+    ${rtk_prefix}fvm dart run melos "$@"
+  fi
+}
+
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+# Git exports repository variables to hooks. Remove them so Flutter can inspect its SDK repository.
+unset $(git rev-parse --local-env-vars)
+
+run_and_require_clean_tree() {
+  "$@"
+
+  if ! git diff --quiet; then
+    echo ""
+    echo "Pre-commit checks changed files."
+    echo "Please review and stage formatted/generated changes, then commit again:"
+    echo ""
+    git status --short
+    exit 1
+  fi
+}
+
+cd "$ROOT"
+
+echo "Running format before commit..."
+run_and_require_clean_tree run_melos format
+
+if printf '%s\n' "$STAGED_FILES" | grep -Eq '^(core|designer_v2)/(lib/.*\.dart|build\.yaml|pubspec\.yaml)$|^pubspec\.yaml$|\.g\.dart$'; then
+  echo "Build-related files staged. Running generate..."
+  run_and_require_clean_tree run_melos generate
+else
+  echo "No build-related files staged. Skipping generate."
+fi
+
+echo "Running analyze before commit..."
+if [ "$CI" = "true" ]; then
+  ${rtk_prefix}dart analyze
+  ${rtk_prefix}flutter analyze
+else
+  ${rtk_prefix}fvm dart analyze
+  ${rtk_prefix}fvm flutter analyze
+fi

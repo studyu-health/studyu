@@ -12,16 +12,16 @@ import 'package:studyu_designer_v2/features/forms/form_validation.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class InterventionTaskFormView extends StatefulWidget {
-  const InterventionTaskFormView({required this.formViewModel, super.key});
-
-  final InterventionTaskFormViewModel formViewModel;
+class const InterventionTaskFormView({
+  required final InterventionTaskFormViewModel formViewModel,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<InterventionTaskFormView> createState() =>
       _InterventionTaskFormViewState();
 }
 
-class _InterventionTaskFormViewState extends State<InterventionTaskFormView> {
+class _InterventionTaskFormViewState() extends State<InterventionTaskFormView> {
   bool isStylingInformationDismissed = true;
 
   void onDismissedCallback() => setState(() {
@@ -56,28 +56,27 @@ class _InterventionTaskFormViewState extends State<InterventionTaskFormView> {
                 ),
                 FormTableRow(
                   control: widget.formViewModel.taskDescriptionControl,
-                  labelBuilder: (context) => Row(
+                  labelBuilder: (context) => Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 3.0,
+                    runSpacing: 8.0,
                     children: [
                       FormLabel(
                         labelText: tr.form_field_intervention_task_description,
                         helpText:
                             tr.form_field_intervention_task_description_tooltip,
                       ),
-                      const SizedBox(height: 8),
-                      Container(
-                        margin: const EdgeInsets.only(left: 3.0),
-                        child: Opacity(
-                          opacity: ThemeConfig.kMuteFadeFactor,
-                          child: Tooltip(
-                            message: "Use html to style your content",
-                            child: Hyperlink(
-                              text: "styleable",
-                              onClick: () => setState(() {
-                                isStylingInformationDismissed =
-                                    !isStylingInformationDismissed;
-                              }),
-                              visitedColor: null,
-                            ),
+                      Opacity(
+                        opacity: ThemeConfig.kMuteFadeFactor,
+                        child: Tooltip(
+                          message: "Use html to style your content",
+                          child: Hyperlink(
+                            text: "styleable",
+                            onClick: () => setState(() {
+                              isStylingInformationDismissed =
+                                  !isStylingInformationDismissed;
+                            }),
+                            visitedColor: null,
                           ),
                         ),
                       ),

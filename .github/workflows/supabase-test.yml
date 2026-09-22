@@ -10,36 +10,29 @@ on:
 jobs:
   pgtap:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: supabase/postgres:15.1.0.90
-        env:
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Prepare Supabase CI Seed
-        run: |
-          cp supabase/seed-ci.sql supabase/seed.sql
+        uses: actions/checkout@v7
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@v2
         with:
           version: latest
+
+      - name: Diagnose Supabase port
+        run: |
+          sudo lsof -nP -iTCP:54322 -sTCP:LISTEN || true
+          docker ps --format 'table {{.Names}}\t{{.Ports}}'
 
       - name: Start Supabase database
         run: |
           supabase db start
 
+      - name: Reset Supabase test database
+        run: |
+          ./scripts/reset-test-db.sh --yes
+
       - name: Run Supabase Tests
         run: |
-          supabase test db
+          supabase test db --local supabase/tests

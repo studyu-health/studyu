@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/main.dart';
 import 'package:studyu_app/models/app_state.dart';
-import 'package:studyu_app/routes.dart';
 import 'package:studyu_app/theme.dart';
-import 'package:studyu_app/util/app_analytics.dart';
+import 'package:studyu_app/util/date_time_preferences.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class MyApp extends StatefulWidget {
-  const MyApp(
-    this.queryParameters,
-    this.appConfig, {
-    super.key,
-    required this.initialRoute,
-  });
-  final Map<String, String> queryParameters;
-  final AppConfig? appConfig;
-  final String initialRoute;
-
+class const MyApp(
+  final Map<String, String> queryParameters,
+  final AppConfig? appConfig, {
+  super.key,
+  required final String initialRoute,
+}) extends StatefulWidget {
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState() extends State<MyApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = createAppRouter(
+      queryParameters: widget.queryParameters,
+      initialLocation: widget.initialRoute,
+      navigatorKey: navigatorKey,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -33,20 +41,20 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider<AppLanguage>(
           create: (context) => AppLanguage(AppLocalizations.supportedLocales),
         ),
+        ChangeNotifierProvider<DateTimePreferences>(
+          create: (context) => DateTimePreferences(),
+        ),
         ChangeNotifierProvider<AppState>(create: (context) => AppState()),
       ],
       child: Consumer<AppLanguage>(
         builder: (context, model, child) {
-          context.read<AppState>().analytics = AppAnalytics(context);
-          return MaterialApp(
+          return MaterialApp.router(
             title: 'StudyU',
             theme: theme,
-            initialRoute: widget.initialRoute,
-            onGenerateRoute: (RouteSettings settings) {
-              return Routes.generateRoute(settings, widget.queryParameters);
-            },
-            onUnknownRoute: Routes.unknownRoute,
-            navigatorObservers: [SentryNavigatorObserver()],
+            routerConfig: _router,
+            // `isDebugMode` can be false through `--dart-define`.
+            // ignore: avoid_redundant_argument_values
+            debugShowCheckedModeBanner: isDebugMode,
             localeListResolutionCallback: (locales, supportedLocales) {
               // print('device locales=$locales supported locales=$supportedLocales');
               final supportedLanguageCodes = supportedLocales.map(
@@ -64,7 +72,6 @@ class _MyAppState extends State<MyApp> {
             locale: model.appLocal,
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
-            navigatorKey: navigatorKey,
           );
         },
       ),

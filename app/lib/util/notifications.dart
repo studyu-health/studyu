@@ -5,31 +5,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/main.dart';
-import 'package:studyu_app/routes.dart';
-import 'package:studyu_app/screens/study/dashboard/dashboard.dart';
-import 'package:studyu_app/screens/study/tasks/task_screen.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_core/core.dart';
 
-class NotificationValidators {
-  bool didNotificationLaunchApp = false;
+class NotificationValidators(
+  var bool didNotificationLaunchApp,
   // do not launch notification action twice if user subscribes to a new study
-  bool wasNotificationActionHandled = false;
-  bool wasNotificationActionCompleted = false;
+  var bool wasNotificationActionHandled,
+  var bool wasNotificationActionCompleted,
+);
 
-  NotificationValidators(
-    this.didNotificationLaunchApp,
-    this.wasNotificationActionHandled,
-    this.wasNotificationActionCompleted,
-  );
-}
-
-class StudyNotifications {
-  StudySubject? subject;
+class StudyNotifications._create(
+  var StudySubject? subject,
+  var BuildContext context,
+) {
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  BuildContext context;
   final StreamController<ReceivedNotification>
   didReceiveLocalNotificationStream =
       StreamController<ReceivedNotification>.broadcast();
@@ -42,11 +37,11 @@ class StudyNotifications {
     false,
   );
 
-  static const bool debug = kDebugMode; //kDebugMode;
+  static const bool debug = isDebugMode;
   static String? scheduledNotificationsDebug;
 
   /// Private constructor
-  StudyNotifications._create(this.subject, this.context) {
+  this {
     _initNotificationsPlugin();
     _requestPermissions();
     _isAndroidPermissionGranted();
@@ -140,15 +135,10 @@ class StudyNotifications {
               CupertinoDialogAction(
                 isDefaultAction: true,
                 onPressed: () async {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  await Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) =>
-                          const DashboardScreen(),
-                    ),
-                  );
+                  context.pop();
+                  await context.push('/${RouteNames.dashboard}');
                 },
-                child: const Text('Ok'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
@@ -179,17 +169,12 @@ class StudyNotifications {
           linux: initializationSettingsLinux,
         );
     flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
-            switch (notificationResponse.notificationResponseType) {
-              case NotificationResponseType.selectedNotification:
-                selectNotificationStream.add(notificationResponse.payload);
-              case NotificationResponseType.selectedNotificationAction:
-                /*if (notificationResponse.actionId == navigationActionId) {
+            if (notificationResponse.notificationResponseType ==
+                NotificationResponseType.selectedNotification) {
               selectNotificationStream.add(notificationResponse.payload);
-            }*/
-                break;
             }
           },
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
@@ -213,13 +198,11 @@ class StudyNotifications {
       StudyUTimeOfDay.now(),
     );
     if (!completed && isInsidePeriod) {
-      await navigatorKey.currentState!.push(
-        MaterialPageRoute(builder: (_) => TaskScreen(taskInstance: taskToRun)),
+      await navigatorKey.currentContext!.push(
+        '/${RouteNames.task}',
+        extra: taskToRun,
       );
-      navigatorKey.currentState!.pushNamedAndRemoveUntil(
-        Routes.loading,
-        (_) => false,
-      );
+      navigatorKey.currentContext!.go('/${RouteNames.loading}');
     } else {
       final errorMessage = completed
           ? AppLocalizations.of(context)!.task_already_completed
@@ -227,18 +210,17 @@ class StudyNotifications {
           ? AppLocalizations.of(context)!.task_cannot_be_completed
           : AppLocalizations.of(context)!.task_outside_period;
 
-      navigatorKey.currentState!.push(
-        MaterialPageRoute(builder: (_) => DashboardScreen(error: errorMessage)),
+      navigatorKey.currentContext!.go(
+        '/${RouteNames.dashboard}',
+        extra: errorMessage,
       );
     }
   }
 }
 
-class ReceivedNotification {
-  ReceivedNotification({this.id, this.title, this.body, this.payload});
-
-  final int? id;
-  final String? title;
-  final String? body;
-  final String? payload;
-}
+class ReceivedNotification({
+  final int? id,
+  final String? title,
+  final String? body,
+  final String? payload,
+});

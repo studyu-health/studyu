@@ -10,13 +10,11 @@ class AudioRecordingQuestion extends Question<AudioRecordingQuestion> {
   @JsonKey(name: 'maxRecordingDurationSeconds')
   final int maxRecordingDurationSeconds;
 
-  AudioRecordingQuestion({required this.maxRecordingDurationSeconds})
-    : super(questionType);
+  new({required this.maxRecordingDurationSeconds}) : super(questionType);
 
-  AudioRecordingQuestion.withId(this.maxRecordingDurationSeconds)
-    : super.withId(questionType);
+  new withId(this.maxRecordingDurationSeconds) : super.withId(questionType);
 
-  factory AudioRecordingQuestion.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$AudioRecordingQuestionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$AudioRecordingQuestionToJson(this);

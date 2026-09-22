@@ -9,11 +9,11 @@ part 'intervention_result.g.dart';
 class InterventionResult extends StudyResult {
   static const String studyResultType = 'intervention';
 
-  InterventionResult() : super(studyResultType);
+  new() : super(studyResultType);
 
-  InterventionResult.withId() : super.withId(studyResultType);
+  new withId() : super.withId(studyResultType);
 
-  factory InterventionResult.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$InterventionResultFromJson(json);
 
   @override
@@ -23,9 +23,9 @@ class InterventionResult extends StudyResult {
   List<String> getHeaders(Study studySpec) {
     final schedule = studySpec.schedule;
     final numberOfDays = schedule.getNumberOfPhases() * schedule.phaseDuration;
-    return Iterable<int>.generate(
-      numberOfDays,
-    ).map((e) => e.toString()).toList();
+    return Iterable<int>.generate(numberOfDays)
+        .map((e) => e.toString())
+        .toList();
   }
 
   @override

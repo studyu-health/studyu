@@ -3,6 +3,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 
+final Future<PackageInfo> _packageInfo = PackageInfo.fromPlatform();
+
 typedef WidgetDecorator = Widget Function(Widget widget);
 
 List<Widget> withSpacing(
@@ -63,7 +65,7 @@ Widget interventionPrefix(int rowIdx, ThemeData theme) {
 
 Widget versionText({TextStyle? textStyle}) {
   return FutureBuilder<PackageInfo>(
-    future: PackageInfo.fromPlatform(),
+    future: _packageInfo,
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const SizedBox.shrink();

@@ -9,23 +9,10 @@ import 'package:studyu_core/core.dart';
 /// A widget that displays front and back views of a body for selection.
 /// This widget provides a [SegmentedButton] to switch between [BodySide.front]
 /// and [BodySide.back] views, wrapping the [BodyPartSelector].
-class BodyPartSelectorTurnable extends StatefulWidget {
-  const BodyPartSelectorTurnable({
-    required this.body,
-    super.key,
-    this.onPainChanged,
-    this.scale = PainScale.english,
-    this.unselectedColor,
-    this.unselectedOutlineColor,
-    this.padding = const EdgeInsets.all(16),
-    this.frontButtonText = 'Front',
-    this.backButtonText = 'Back',
-    this.frontButtonIcon = const Icon(Icons.face),
-    this.backButtonIcon = const Icon(Icons.face_retouching_natural),
-  });
-
+class const BodyPartSelectorTurnable({
   /// The body object containing the full hierarchy of parts and their pain state.
-  final Body body;
+  required final Body body,
+  super.key,
 
   /// Called when pain details for a body part are updated via the dialog.
   final void Function(
@@ -33,38 +20,38 @@ class BodyPartSelectorTurnable extends StatefulWidget {
     String childPartId,
     BodyPain newPain,
   )?
-  onPainChanged;
+  onPainChanged,
 
   /// The configuration for the pain scale, including styles and translations.
-  final PainScale scale;
+  final PainScale scale = PainScale.english,
 
   /// The color of body parts with no pain.
-  final Color? unselectedColor;
+  final Color? unselectedColor,
 
   /// The color of the outline of body parts with no pain.
-  final Color? unselectedOutlineColor;
+  final Color? unselectedOutlineColor,
 
   /// The padding around the rendered body.
-  final EdgeInsets padding;
+  final EdgeInsets padding = const EdgeInsets.all(16),
 
   /// The text for the front button.
-  final String frontButtonText;
+  final String frontButtonText = 'Front',
 
   /// The text for the back button.
-  final String backButtonText;
+  final String backButtonText = 'Back',
 
   /// The icon for the front button. Can be null.
-  final Widget? frontButtonIcon;
+  final Widget? frontButtonIcon = const Icon(Icons.face),
 
   /// The icon for the back button. Can be null.
-  final Widget? backButtonIcon;
-
+  final Widget? backButtonIcon = const Icon(Icons.face_retouching_natural),
+}) extends StatefulWidget {
   @override
   State<BodyPartSelectorTurnable> createState() =>
       _BodyPartSelectorTurnableState();
 }
 
-class _BodyPartSelectorTurnableState extends State<BodyPartSelectorTurnable> {
+class _BodyPartSelectorTurnableState() extends State<BodyPartSelectorTurnable> {
   BodySide _side = BodySide.front;
 
   @override

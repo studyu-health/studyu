@@ -1,30 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/util/date_time_preferences.dart';
 import 'package:studyu_app/util/fitbit_handler.dart';
 import 'package:studyu_app/util/string_extensions.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class FitbitQuestionWidget extends QuestionWidget {
-  final FitbitQuestion question;
-  final String taskId;
-  final Function(Answer) onDone;
-
-  const FitbitQuestionWidget({
-    super.key,
-    required this.question,
-    required this.taskId,
-    required this.onDone,
-  });
-
+class const FitbitQuestionWidget({
+  super.key,
+  required final FitbitQuestion question,
+  required final String taskId,
+  required final Function(Answer) onDone,
+}) extends QuestionWidget {
   @override
   State<FitbitQuestionWidget> createState() => _FitbitQuestionWidgetState();
 }
 
-class _FitbitQuestionWidgetState extends State<FitbitQuestionWidget> {
+class _FitbitQuestionWidgetState() extends State<FitbitQuestionWidget> {
   late List<FitbitData> value;
   bool _isLoading = false;
 
@@ -72,9 +68,8 @@ class _FitbitQuestionWidgetState extends State<FitbitQuestionWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(
-              context,
-            )!.error_syncing_fitbit_data(e.toString()),
+            AppLocalizations.of(context)!
+                .error_syncing_fitbit_data(e.toString()),
           ),
         ),
       );
@@ -102,6 +97,7 @@ class _FitbitQuestionWidgetState extends State<FitbitQuestionWidget> {
   }
 
   void _showSyncDetailsDialog(Map<String, Map<String, DateTime>> syncDates) {
+    final dateTimePreferences = context.read<DateTimePreferences?>();
     final earliestDates = syncDates['earliest']!;
     final latestDates = syncDates['latest']!;
     showDialog(
@@ -129,16 +125,26 @@ class _FitbitQuestionWidgetState extends State<FitbitQuestionWidget> {
                       Text(
                         AppLocalizations.of(context)!.fitbit_data_earliest_date(
                           //textual representation of the date
-                          DateFormat.yMMMd().add_jm().format(
-                            earliestDates[type]!,
-                          ),
+                          dateTimePreferences?.formatDateTime(
+                                context,
+                                earliestDates[type]!,
+                              ) ??
+                              DateTimeFormat.formatDateTime(
+                                context,
+                                earliestDates[type]!,
+                              ),
                         ),
                       ),
                       Text(
                         AppLocalizations.of(context)!.fitbit_data_latest_date(
-                          DateFormat.yMMMd().add_jm().format(
-                            latestDates[type]!,
-                          ),
+                          dateTimePreferences?.formatDateTime(
+                                context,
+                                latestDates[type]!,
+                              ) ??
+                              DateTimeFormat.formatDateTime(
+                                context,
+                                latestDates[type]!,
+                              ),
                         ),
                       ),
                     ],
@@ -148,7 +154,7 @@ class _FitbitQuestionWidgetState extends State<FitbitQuestionWidget> {
           ),
           actions: <Widget>[
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => context.pop(),
               child: Text(AppLocalizations.of(context)!.fitbit_data_close_btn),
             ),
           ],

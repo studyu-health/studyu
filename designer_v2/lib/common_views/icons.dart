@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:studyu_designer_v2/common_views/mouse_events.dart';
 
-class HelpIcon extends StatelessWidget {
-  const HelpIcon({this.tooltipText, super.key});
+class const HelpIcon({final String? tooltipText, super.key})
+    extends StatefulWidget {
+  @override
+  State<HelpIcon> createState() => _HelpIconState();
+}
 
-  final String? tooltipText;
+class _HelpIconState() extends State<HelpIcon> {
+  bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final iconColor =
+        theme.iconTheme.color?.withValues(alpha: _hovered ? 0.6 : 0.35) ??
+        theme.colorScheme.onSurface.withValues(alpha: 0.3);
 
     return Tooltip(
-      message: tooltipText,
-      child: MouseEventsRegion(
-        builder: (context, states) {
-          final iconColor =
-              theme.iconTheme.color?.withValues(
-                alpha: (states.contains(WidgetState.hovered)) ? 0.6 : 0.35,
-              ) ??
-              theme.colorScheme.onSurface.withValues(alpha: 0.3);
-          return Icon(
-            Icons.help_outline_rounded,
-            size: theme.textTheme.bodySmall!.fontSize! + 2.0,
-            color: iconColor,
-          );
-        },
+      message: widget.tooltipText,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: Icon(
+          Icons.help_outline_rounded,
+          size: theme.textTheme.bodySmall!.fontSize! + 2.0,
+          color: iconColor,
+        ),
       ),
     );
   }

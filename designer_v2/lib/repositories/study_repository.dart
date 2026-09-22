@@ -1,55 +1,53 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_designer_v2/common_views/study_delete_confirmation_dialog.dart';
+import 'package:studyu_designer_v2/common_views/study_title_confirmation_dialog.dart';
 import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/domain/study_export.dart';
 import 'package:studyu_designer_v2/features/analyze/study_export_zip.dart';
+import 'package:studyu_designer_v2/features/dashboard/studies_filter.dart';
+import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_types.dart';
+import 'package:studyu_designer_v2/features/dialogs/study_dialogs.dart';
+import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/repositories/api_client.dart';
 import 'package:studyu_designer_v2/repositories/auth_repository.dart';
 import 'package:studyu_designer_v2/repositories/model_repository.dart';
+import 'package:studyu_designer_v2/repositories/study_repository_interface.dart';
 import 'package:studyu_designer_v2/routing/router.dart';
 import 'package:studyu_designer_v2/routing/router_intent.dart';
 import 'package:studyu_designer_v2/services/notification_service.dart';
-import 'package:studyu_designer_v2/services/notification_types.dart';
 import 'package:studyu_designer_v2/services/notifications.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/optimistic_update.dart';
 import 'package:studyu_designer_v2/utils/performance.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+export 'study_repository_interface.dart';
 
 part 'study_repository.g.dart';
 
-abstract class IStudyRepository implements ModelRepository<Study> {
-  Future<void> launch(Study study);
-  Future<void> deleteParticipants(Study study);
-  Future<void> close(Study study);
-  // Future<void> deleteProgress(Study study);
-}
-
-class StudyRepository extends ModelRepository<Study>
-    implements IStudyRepository {
-  StudyRepository({
-    this.sortCallback,
-    required this.apiClient,
-    required this.authRepository,
-    required this.ref,
-  }) : super(
-         StudyRepositoryDelegate(
-           apiClient: apiClient,
-           authRepository: authRepository,
-         ),
-       );
+class StudyRepository({
+  final VoidCallback? sortCallback,
 
   /// Reference to the StudyU API injected via Riverpod
-  final StudyUApi apiClient;
+  required final StudyUApi apiClient,
 
   /// Reference to the auth repository injected via Riverpod
-  final IAuthRepository authRepository;
+  required final IAuthRepository authRepository,
 
   /// Reference to Riverpod's context to resolve dependencies in callbacks
-  final Ref ref;
-
-  final VoidCallback? sortCallback;
+  required final Ref ref,
+}) extends ModelRepository<Study> implements IStudyRepository {
+  this
+    : super(
+        StudyRepositoryDelegate(
+          apiClient: apiClient,
+          authRepository: authRepository,
+        ),
+      );
 
   @override
   ModelID getKey(Study model) {
@@ -115,46 +113,77 @@ class StudyRepository extends ModelRepository<Study>
     final duplicate = completeModel.duplicateAsDraft(
       authRepository.currentUser!.id,
     );
-    await save(duplicate);
+    await save(duplicate, runOptimistically: false);
   }
 
   @override
-  Future<void> close(Study study) {
-    final wrappedModel = get(study.id);
-    if (wrappedModel == null) {
+  Future<void> close(Study study) async {
+    if (get(study.id) == null) {
       throw ModelNotFoundException();
     }
-    study.status = StudyStatus.closed;
 
-    final publishOperation = OptimisticUpdate(
-      applyOptimistic: () => {}, // nothing to do here
-      apply: () => save(study, runOptimistically: false),
-      rollback: () {}, // nothing to do here
-      onUpdate: () => emitUpdate(),
-      onError: (e, stackTrace) {
-        emitError(modelStreamControllers[study.id], e, stackTrace);
-      },
+    final closedStudy = study.exactDuplicate()..status = StudyStatus.closed;
+    await save(closedStudy, runOptimistically: false);
+  }
+
+  @override
+  Future<StudiesPage> fetchPage({
+    required int offset,
+    required int limit,
+    required StudiesTableColumn sortBy,
+    required bool ascending,
+    required StudiesFilter preset,
+    required User currentUser,
+    String? searchQuery,
+    FilterGroup? advancedFilter,
+    List<String> excludeIds = const [],
+  }) async {
+    final page = await apiClient.getUserStudiesPage(
+      offset: offset,
+      limit: limit,
+      sortBy: sortBy,
+      ascending: ascending,
+      preset: preset,
+      currentUser: currentUser,
+      searchQuery: searchQuery,
+      advancedFilter: advancedFilter,
+      excludeIds: excludeIds,
     );
+    final wrappedStudies = upsertAllLocally(page.studies);
+    for (final wrappedStudy in wrappedStudies) {
+      wrappedStudy.markAsFetched();
+    }
+    return page;
+  }
 
-    return publishOperation.execute();
+  @override
+  Future<List<Study>> fetchPinned(Set<String> pinnedIds) async {
+    final studies = await apiClient.getPinnedUserStudies(pinnedIds: pinnedIds);
+    final wrappedStudies = upsertAllLocally(studies);
+    for (final wrappedStudy in wrappedStudies) {
+      wrappedStudy.markAsFetched();
+    }
+    return studies;
   }
 
   @override
   List<ModelAction> availableActions(Study model) {
-    Future<void> onDeleteCallback() {
-      return delete(model.id)
-          .then(
-            (value) =>
-                ref.read(routerProvider).dispatch(RoutingIntents.studies),
-          )
-          .then(
-            (value) => Future.delayed(
-              const Duration(milliseconds: 200),
-              () => ref
-                  .read(notificationServiceProvider)
-                  .show(Notifications.studyDeleted),
-            ),
-          );
+    Future<void> onDeleteCallback() async {
+      final router = ref.read(routerProvider);
+      bool isDashboard() =>
+          router.routeInformationProvider.value.uri.path ==
+          RoutingIntents.studies.route.path;
+
+      try {
+        await delete(model.id, runOptimistically: false);
+      } catch (_) {
+        if (isDashboard()) rethrow;
+        ref.read(notificationServiceProvider).showMessage(tr.sync_failed);
+        return;
+      }
+
+      if (!isDashboard()) router.dispatch(RoutingIntents.studies);
+      ref.read(notificationServiceProvider).show(Notifications.studyDeleted);
     }
 
     final currentUser = authRepository.currentUser;
@@ -174,26 +203,24 @@ class StudyRepository extends ModelRepository<Study>
         // same as "Copy" but for non-drafts
         type: StudyActionType.duplicateDraft,
         label: StudyActionType.duplicateDraft.string,
-        onExecute: () async {
-          return await duplicateAndSave(model).then(
-            (value) =>
-                ref.read(routerProvider).dispatch(RoutingIntents.studies),
-          );
-        },
+        onExecute: () => duplicateAndSave(model),
         isAvailable:
             model.status != StudyStatus.draft && model.canCopy(currentUser),
       ),
       ModelAction(
         type: StudyActionType.duplicate,
         label: StudyActionType.duplicate.string,
-        onExecute: () async {
-          return await duplicateAndSave(model).then(
-            (value) =>
-                ref.read(routerProvider).dispatch(RoutingIntents.studies),
-          );
-        },
+        onExecute: () => duplicateAndSave(model),
         isAvailable:
             model.status == StudyStatus.draft && model.canCopy(currentUser),
+      ),
+      ModelAction(
+        type: StudyActionType.exportDefinition,
+        label: StudyActionType.exportDefinition.string,
+        onExecute: () {
+          model.downloadDefinition();
+        },
+        isAvailable: model.canCopy(currentUser),
       ),
       /*
       TODO re-implement this properly
@@ -216,23 +243,65 @@ class StudyRepository extends ModelRepository<Study>
       ),
       if (model.canDelete(currentUser)) ModelAction.addSeparator(),
       ModelAction(
-        type: StudyActionType.delete,
-        label: StudyActionType.delete.string,
-        onExecute: () {
-          return ref
-              .read(notificationServiceProvider)
-              .show(
-                Notifications
-                    .studyDeleteConfirmation, // TODO: more severe confirmation for running studies
-                actions: [
-                  NotificationAction(
-                    label: StudyActionType.delete.string,
-                    onSelect: onDeleteCallback,
-                    isDestructive: true,
+        type: StudyActionType.close,
+        label: StudyActionType.close.string,
+        onExecute: () => close(model),
+        confirmation: ModelActionConfirmation(
+          title: tr.dialog_study_close_title,
+          message: tr.dialog_study_close_description,
+          dialogBuilder: (dialogContext, action) =>
+              StudyTitleConfirmationDialog(
+                study: model,
+                title: tr.dialog_study_close_title,
+                description: tr.dialog_study_close_description,
+                instruction: tr.dialog_study_close_type_name_instruction(
+                  model.title ?? '',
+                ),
+                textFieldLabel: tr.dialog_study_close_type_name_label,
+                confirmLabel: action.label,
+                confirmationCheckboxes: [
+                  StudyConfirmationCheckbox(
+                    key: const ValueKey('study_close_irreversible_checkbox'),
+                    label: Text(
+                      tr.dialog_study_close_irreversible_confirmation,
+                    ),
                   ),
                 ],
-              );
-        },
+                destructive: true,
+                onConfirmed: () async => Navigator.of(dialogContext).pop(true),
+              ),
+        ),
+        isAvailable:
+            model.status == StudyStatus.running && model.canClose(currentUser),
+      ),
+      ModelAction(
+        type: StudyActionType.delete,
+        label: StudyActionType.delete.string,
+        onExecute: onDeleteCallback,
+        confirmation: ModelActionConfirmation(
+          title: tr.dialog_study_delete_title,
+          message: tr.dialog_study_delete_description,
+          dialogBuilder: (dialogContext, action) =>
+              StudyDeleteConfirmationDialog(
+                study: model,
+                confirmLabel: action.label,
+                onDownloadBackup: () async {
+                  model.downloadDefinition();
+                  await model.exportData.downloadAsZip();
+                },
+                onCloseInstead: () async {
+                  Navigator.of(dialogContext).pop(false);
+                  await Future<void>.delayed(Duration.zero);
+                  if (dialogContext.mounted) {
+                    await showStudyDialog(
+                      dialogContext,
+                      model.id,
+                      StudyDialogType.close,
+                    );
+                  }
+                },
+              ),
+        ),
         isAvailable: model.canDelete(currentUser),
         isDestructive: true,
       ),
@@ -242,15 +311,10 @@ class StudyRepository extends ModelRepository<Study>
   }
 }
 
-class StudyRepositoryDelegate extends IModelRepositoryDelegate<Study> {
-  StudyRepositoryDelegate({
-    required this.apiClient,
-    required this.authRepository,
-  });
-
-  final StudyUApi apiClient;
-  final IAuthRepository authRepository;
-
+class StudyRepositoryDelegate({
+  required final StudyUApi apiClient,
+  required final IAuthRepository authRepository,
+}) extends IModelRepositoryDelegate<Study> {
   @override
   Future<List<Study>> fetchAll() {
     return apiClient.getUserStudies(forDashboardDisplay: true);

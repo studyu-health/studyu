@@ -4,5 +4,3 @@ analyzer:
   errors:
     avoid_classes_with_only_static_members: ignore
     unsafe_html: ignore
-  plugins:
-    - custom_lint

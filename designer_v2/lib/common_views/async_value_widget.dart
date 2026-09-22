@@ -3,22 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Simple wrapper around [AsyncValue] to render standardized
 /// widgets for different states (loading, error, empty)
-class AsyncValueWidget<T> extends StatelessWidget {
-  const AsyncValueWidget({
-    super.key,
-    required this.value,
-    required this.data,
-    this.error,
-    this.loading,
-    this.empty,
-  });
-
-  final AsyncValue<T> value;
-  final Widget Function(T) data;
-  final Widget Function(Object, StackTrace?)? error;
-  final Widget Function()? loading;
-  final Widget Function()? empty;
-
+class const AsyncValueWidget<T>({
+  super.key,
+  required final AsyncValue<T> value,
+  required final Widget Function(T) data,
+  final Widget Function(Object, StackTrace?)? error,
+  final Widget Function()? loading,
+  final Widget Function()? empty,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return value.when(

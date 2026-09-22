@@ -1,3 +1,322 @@
+## 2.15.0
+
+ - **REFACTOR**: Rename wordlist constants and export recovery utilities from the core package.
+ - **REFACTOR**(app): keep legal consent visible.
+ - **REFACTOR**(app): move onboarding debug control.
+ - **REFACTOR**(app): unify study onboarding descriptions.
+ - **REFACTOR**(app): unify study onboarding navigation.
+ - **REFACTOR**(app): remove recovery phrase purpose messages from localization files.
+ - **REFACTOR**(app): simplify onboarding layouts.
+ - **REFACTOR**(app): simplify questionnaire flow.
+ - **REFACTOR**: simplify onboarding button logic and remove unused localization strings for study switch.
+ - **REFACTOR**: Optimize widget instantiation and clean up imports in recovery flow tests.
+ - **REFACTOR**: simplify builder syntax for deep link invite route.
+ - **REFACTOR**: centralize study fetching logic by moving `fetchById` and `fetchByInviteCode` methods to the `Study` model.
+ - **REFACTOR**: centralize invite code fetching in DeepLinkService.
+ - **REFACTOR**(deep-link): apply Copilot review suggestions.
+ - **REFACTOR**: use RoutePaths constant for eligibility check route.
+ - **REFACTOR**: Improve formatting of button labels in recovery phrase widget for better readability.
+ - **REFACTOR**: Update import paths for recovery QR utilities and enhance UI theming in QR code scanner and settings screens.
+ - **REFACTOR**: Update `share_plus` API usage, simplify QR scanner camera setup and color opacity, and streamline menu positioning.
+ - **FIX**(app): clear multi-choice answers consistently.
+ - **FIX**(app): group onboarding content.
+ - **FIX**(app): localize recovery word count.
+ - **FIX**(app): center onboarding content.
+ - **FIX**(l10n): preserve German resource entries.
+ - **FIX**(deep-links): separate web and app links.
+ - **FIX**: clear CI analysis failures.
+ - **FIX**(app): connect eligibility banner to nav.
+ - **FIX**(app): restore study tile Hero transition.
+ - **FIX**(app): center titles and toggle labels.
+ - **FIX**(app): refine invite code action.
+ - **FIX**(app): close why dialogs.
+ - **FIX**(app): align legal content spacing.
+ - **FIX**(app): refine study page hierarchy.
+ - **FIX**(app): correct onboarding back navigation.
+ - **FIX**(app): gate dashboard tour replay.
+ - **FIX**(app): redirect study exit to welcome.
+ - **FIX**(app): fix exit dialog layout and transitions.
+ - **FIX**(app): refine study start state.
+ - **FIX**(app): align onboarding navigation.
+ - **FIX**(app): stop eligibility banner flicker.
+ - **FIX**(app): clarify study start copy.
+ - **FIX**(app): refine onboarding presentation.
+ - **FIX**(app): keep onboarding navigation current.
+ - **FIX**(app): refine onboarding copy and spacing.
+ - **FIX**(app): clarify welcome action hierarchy.
+ - **FIX**(app): guard onboarding route progression.
+ - **FIX**(app): refine onboarding flow.
+ - **FIX**(app): align onboarding progress.
+ - **FIX**(app): remove kickoff screen flicker.
+ - **FIX**(app): tighten journey timeline spacing.
+ - **FIX**(app): align journey onboarding layout.
+ - **FIX**(app): align destructive action colors.
+ - **FIX**(app): route support email to study team.
+ - **FIX**(app): simplify study information.
+ - **FIX**(app): streamline debug onboarding.
+ - **FIX**(app): clear declined consent state.
+ - **FIX**(app): align onboarding layouts.
+ - **FIX**(app): harden participant navigation.
+ - **FIX**(app): show recovery before dashboard.
+ - **FIX**(app): handle dismissed notifications.
+ - **FIX**(recovery): keep recovery phrases stable.
+ - **FIX**(recovery): make account recovery retry-safe and revoke old sessions.
+ - **FIX**: address review feedback.
+ - **FIX**(app): restrict preview Firebase origins.
+ - **FIX**(app): reject explicit preview ports.
+ - **FIX**(app): validate preview origins exactly.
+ - **FIX**(app): localize deep-link warning instruction.
+ - **FIX**(app): reject lookalike firebase project ids for preview origin.
+ - **FIX**(app): restrict preview designer origin to trusted hosts.
+ - **FIX**(designer): restore referrer-first origin for preview messaging.
+ - **FIX**(app): resolve blocking review findings.
+ - **FIX**(app): allow recovery phrase retry.
+ - **FIX**(app): propagate recovery lookup errors.
+ - **FIX**(app): initialize internal browser routes.
+ - **FIX**(app): preserve latest preview study during startup.
+ - **FIX**(designer): transmit preview studies outside urls.
+ - **FIX**(app): remove study list invite action.
+ - **FIX**(app): stabilize study tile hero.
+ - **FIX**(app): align study overview hero bounds.
+ - **FIX**(designer): preserve legacy free-text conditions.
+ - **FIX**(deps): bump deps.
+ - **FIX**(app): clear required choice answers.
+ - **FIX**(app): allow clearing required choice answers.
+ - **FIX**(app): guard unavailable study router lookup.
+ - **FIX**(app): restore unavailable study back navigation.
+ - **FIX**(app): hide unavailable study back fallback.
+ - **FIX**(app): block unavailable studies from participant flows.
+ - **FIX**(app): handle unknown eligibility criteria.
+ - **FIX**(core): correct choice visibility evaluation.
+ - **FIX**(app): improve disabled choice button contrast.
+ - **FIX**(app): refine legal onboarding experience.
+ - **FIX**(app): focus invite code input.
+ - **FIX**(app): reuse invite code action on study selection.
+ - **FIX**(app): improve invite code label.
+ - **FIX**(app): make onboarding back navigation consistent.
+ - **FIX**(app): keep study onboarding steps in order.
+ - **FIX**(app): preserve onboarding back stack.
+ - **FIX**(l10n): complete Korean localization.
+ - **FIX**(app): align public study description spacing.
+ - **FIX**(app): make invite code field copyable.
+ - **FIX**(app): balance invite code and QR options.
+ - **FIX**(db): rotate account recovery credentials.
+ - **FIX**(designer): secure participant study previews.
+ - **FIX**(app): remember terms acceptance during onboarding.
+ - **FIX**(app): isolate preview scroll state.
+ - **FIX**(app): guard invite lookup lifecycle.
+ - **FIX**(app): replace invite dialog during navigation.
+ - **FIX**(app): keep invite dialog mounted during lookup.
+ - **FIX**(app): hide recovery success banners in dialog.
+ - **FIX**(app): assess eligibility after final answer.
+ - **FIX**(app): update review prompts and button labels in questionnaire.
+ - **FIX**(designer): support free-text length conditions.
+ - **FIX**(app): disable completion while answers need review.
+ - **FIX**(app): reevaluate questionnaire after free-text edits.
+ - **FIX**(app): prevent study tile overflow.
+ - **FIX**(deps): update Podfile.lock checksum.
+ - **FIX**(app): preserve onboarding back stack.
+ - **FIX**(app): update terms and privacy content to remove contact information.
+ - **FIX**(app): return from intervention to eligibility.
+ - **FIX**(app): avoid null study during eligibility exit.
+ - **FIX**(app): preserve cold start deep links.
+ - **FIX**(app): keep deep link navigation unblocked.
+ - **FIX**(app): return to study selection from overview.
+ - **FIX**(app): clear abandoned invite flows.
+ - **FIX**(app): keep onboarding completion forward.
+ - **FIX**(app): remove debug prefix from onboarding button.
+ - **FIX**(app): skip onboarding in debug and preview.
+ - **FIX**(designer): stream live study updates to preview.
+ - **FIX**(app): stop eligibility flow on failed answer.
+ - **FIX**(app): restore eligibility gating.
+ - **FIX**(app): resolve dev merge conflicts.
+ - **FIX**(app): show dashboard tour after study starts.
+ - **FIX**(app): clarify active study invite switch.
+ - **FIX**(app): repair invite onboarding routing.
+ - **FIX**(app): persist pending deep links.
+ - **FIX**(app): show recovery phrase after dashboard opens.
+ - **FIX**: re-design app language picker.
+ - **FIX**(app): prevent recovery phrase cache leaks.
+ - **FIX**(app): rename rejoin account route to restore account and update related references.
+ - **FIX**(app): rename recovery account route.
+ - **FIX**(app): improve account recovery flow.
+ - **FIX**(app): preserve malformed invite URLs.
+ - **FIX**(designer): preserve free text conditional semantics.
+ - **FIX**(app,core,db): address code review findings from dev merge.
+ - **FIX**(app): update deep link routes from studyShared to study.
+ - **FIX**(app): reuse onboarding participant.
+ - **FIX**: address code review findings across app, core, and designer.
+ - **FIX**(app): keep about out of terms back stack.
+ - **FIX**(app): allow terms back navigation.
+ - **FIX**(app): show welcome after completed tour.
+ - **FIX**(app): guard iframe preview posts.
+ - **FIX**: add passkeys script to index.html for app & designer to support supabase_flutter v2.15.0.
+ - **FIX**(app): make recovery reset visible.
+ - **FIX**(app): clarify dashboard tour actions.
+ - **FIX**(app): preserve draft review context.
+ - **FIX**(app): fix app initialization.
+ - **FIX**(app): repair german showcase localization.
+ - **FIX**(app): repair dashboard showcase replay.
+ - **FIX**(app): handle nullable iframe referrer.
+ - **FIX**(app): restore done button after editing free text.
+ - **FIX**(app): remove done buttons from slider questions.
+ - **FIX**(app): remove Done button for non-last free text, clean up unused code.
+ - **FIX**(app): review lower restored answers.
+ - **FIX**(app): require review for restored answers.
+ - **FIX**(app): keep local data for deleted studies.
+ - **FIX**(app): prevent dashboard reload crash.
+ - **FIX**(app): register dashboard showcase consistently.
+ - **FIX**(app): resolve questionnaire controller merge conflicts.
+ - **FIX**(app): apply dart fix and replace deprecated mdi store icons with material icons.
+ - **FIX**: migrate remaining material_design_icons_flutter imports to flutter_material_design_icons.
+ - **FIX**: remove deprecated material_design_icons_flutter dependency.
+ - **FIX**: address pr review items - study shared link path, web landing page study link, ios deferred link host.
+ - **FIX**(app): continue button advances only, add free-text placeholder hint.
+ - **FIX**(app): unify questionnaire cta into single button, fix validation and caching bugs.
+ - **FIX**(app): preserve questionnaire cta cache.
+ - **FIX**(app): normalize welcome locale.
+ - **FIX**: ensure correct subject and studyId are returned by validating activeSubject and cache against activeSubjectId.
+ - **FIX**: use pushNamed for terms route when handling pending deep link to preserve navigation stack.
+ - **FIX**: migrate Riverpod analyzer plugin.
+ - **FIX**: allow public study reads for open studies. Adjust RLS policy to allow anon role to read open studies for onboarding via deep links.
+ - **FIX**: update download app join message to specify StudyU App in localization files.
+ - **FIX**: update web deep link handling to support both invite codes and study IDs.
+ - **FIX**: update deep link handling to prioritize invite codes and adjust pending link storage.
+ - **FIX**: update invite code RPC permissions for anonymous access.
+ - **FIX**: Handle deleted study subject gracefully with localized error messages.
+ - **FIX**: onboarding translation issues.
+ - **FIX**(deps): update flutter and deps.
+ - **FIX**(l10n): merge dev and correct Korean copy.
+ - **FIX**(ci): resolve invite flow checks.
+ - **FIX**: Correctly instantiate RecoveryPhraseWidget with const for performance optimization.
+ - **FIX**: Update exception handling in rejoin study service and improve recovery flow tests.
+ - **FIX**(deep-link): handle custom URL scheme in GoRouter.
+ - **FIX**: remove obsolete analyzer plugins.
+ - **FIX**(app): fix deep linking native splash overlay and dev environment support.
+ - **FIX**: address Copilot review comments for deep link feature.
+ - **FIX**: Remove integration_test dependency from dev_dependencies in pubspec.yaml.
+ - **FIX**: resolve analysis and web build failures.
+ - **FIX**: onboarding screen new route.
+ - **FIX**: Update LoadingScreen query parameters to use state.uri for improved navigation.
+ - **FIX**: Ensure mounted state check in InviteCodeDialog and handle errors in deep link processing.
+ - **FIX**: address localization review feedback.
+ - **FIX**(app): clarify invite instructions.
+ - **FIX**(app): restore bottom onboarding back arrows using go_router.
+ - **FIX**(app): allow isolated welcome rendering.
+ - **FIX**: error screen email did not work.
+ - **FIX**(router): add root route to handle '/' path.
+ - **FIX**: update loading screen routing for onboarding completion.
+ - **FEAT**: user can view onboarding again in about screen.
+ - **FEAT**: fix startup flow structure and warn user if deeplink opened and already in study.
+ - **FEAT**: refactor deep link generation for invite codes.
+ - **FEAT**: improve deep link study switch UX with confirmation dialogs and clearer data choice options.
+ - **FEAT**(app): add dashboard showcase tour.
+ - **FEAT**: Introduce recovery phrase and rejoin study features with new onboarding screens, core utilities, and localization.
+ - **FEAT**: Add initial internationalization support with German and English localization files.
+ - **FEAT**: Update deep link handling and environment configuration for Android and iOS.
+ - **FEAT**: implement account recovery and study rejoining functionality with a new service and backend migration.
+ - **FEAT**(app): add study information and participation controls.
+ - **FEAT**: Upgrade recovery phrase system to 128-bit IDs, updating encoding logic and UI to support 13 words.
+ - **FEAT**: Enhance recovery flow with validation, constants, and integration tests.
+ - **FEAT**: enhance deep link processing and add error handling for missing parameters.
+ - **FEAT**(app): support required choice selections.
+ - **FEAT**: add deep link handling for study invites.
+ - **FEAT**(app): improve onboarding entry choices.
+ - **FEAT**(app): add onboarding widget previews.
+ - **FEAT**: Refactor route path constants to route name constants and update navigation throughout the app.
+ - **FEAT**(app): defer terms until study review.
+ - **FEAT**(app): simplify study entry choices.
+ - **FEAT**(app): add public studies app bar.
+ - **FEAT**(app): add recovery phrase rotation.
+ - **FEAT**(recruit): improve invite sharing.
+ - **FEAT**(app): link invite entry from study list.
+ - **FEAT**: Implement deep link handling for studies and invite codes with a new service, routing, and UI.
+ - **FEAT**(app): add korean localization.
+ - **FEAT**: Implement secure account recovery with a dedicated recovery ID and refactor phrase display into a new widget.
+ - **FEAT**: Migrate navigation to GoRouter and update route handling across multiple screens.
+ - **FEAT**: Implement navigation improvements in settings and study selection screens.
+ - **FEAT**: Enhance loading screen behavior and improve router configuration.
+ - **FEAT**(localization): synchronize app language with server and improve locale handling.
+ - **FEAT**: Update recovery phrase save hint for improved clarity in English and German localizations.
+ - **FEAT**(app): unify recovery phrase guidance.
+ - **FEAT**: Add localized strings for general settings, current study, participation options, and recovery actions in English and German.
+ - **FEAT**(app): add welcome language picker.
+ - **FEAT**: Implement deep linking for Android and iOS, and update unknown route handling to a loading screen.
+ - **FEAT**(app): add invite QR flow.
+ - **FEAT**: Add QR code support for recovery phrase management, enabling scanning, sharing, and downloading options.
+ - **FEAT**(app): animate invite code dialog.
+ - **FEAT**: enhance rejoin study screen with a single recovery phrase input field and comprehensive help instructions.
+ - **FEAT**(app): submit invite code with enter.
+ - **DOCS**(app): explain pushReplacementNamed in invite navigation.
+ - **DOCS**(app): condense study guidance in onboarding.
+
+## 2.14.0
+
+ - **REFACTOR**: clean up date question localization and validation messages.
+ - **FIX**(app): disable back without route history.
+ - **FIX**(app): open preview on study overview.
+ - **FIX**(app): restore date question answers.
+ - **FIX**: upgrade deps.
+ - **FIX**: upgrade deps.
+ - **FIX**: replace deprecated mdi store icons with material icons.
+ - **FIX**: remove deprecated material_design_icons_flutter dependency.
+ - **FIX**(app): clarify study selection banner message.
+ - **FIX**(preview): avoid reloading test app page navigation.
+ - **FIX**(preview): skip app onboarding in designer preview.
+ - **FEAT**(designer): localize hardcoded preview overlay strings.
+ - **FEAT**: Add onCleared callback to DateQuestionWidget and QuestionContainer.
+ - **FEAT**: Enhance Date Question Functionality with Time Input and Localization.
+ - **FEAT**: remove initial date handling from date question components.
+ - **FEAT**: add date picker localization strings in German.
+ - **FEAT**: add DateQuestion and DateQuestionWidget for date selection in questionnaires.
+
+## 2.13.0
+
+ - **REFACTOR**(questionnaire): improve free text question handling and remove custom error message support.
+ - **REFACTOR**: removed unused shared preferences.
+ - **FIX**: upgrade deps.
+ - **FIX**(app): gate free text submit to active question.
+ - **FIX**(app): restore free text validation invalidation/re-completion and fix custom regex length skip.
+ - **FIX**: update free text validation messages and regex handling.
+ - **FIX**: align dependencies for Flutter 3.44.
+ - **FIX**: add missing const constructors to satisfy linter.
+ - **FIX**: replace deprecated MdiIcons with Flutter's built-in Icons for store links.
+ - **FIX**: migrate to flutter_material_design_icons in favor of deprecated material_design_icons_flutter.
+ - **FIX**: upgrade deps.
+ - **FIX**: adjust iOS project configurations.
+ - **FIX**: migrate flutter_secure_storage v10.0.0.
+ - **FIX**: Update onboarding subtitles for clarity and fix image paths.
+ - **FIX**: hide back button on terms screen.
+ - **FEAT**(app): cache hidden questionnaire answers, restore UI, validate complete.
+ - **FEAT**: Add custom error message support for free text questions.
+ - **FEAT**: add validation handling for free text questions.
+ - **FEAT**(test): add stable ValueKeys for MCP automation.
+ - **FEAT**: Make onboarding screen shorter.
+ - **FEAT**: Revamp onboarding screen content and structure for improved user guidance.
+ - **FEAT**: add custom_lint dependency for improved code quality checks".
+ - **FEAT**: update custom_lint and add riverpod_lint for enhanced code quality".
+ - **FEAT**: update custom_lint and add riverpod_lint for enhanced code quality.
+ - **FEAT**: add custom_lint dependency for improved code quality checks.
+ - **FEAT**: enhance onboarding flow by redirecting users based on onboarding status.
+ - **FEAT**: replace onboarding skip button with a back button.
+ - **FEAT**: Implement new app onboarding flow with dedicated screen and assets, and refine study schedule localization.
+
+## 2.12.5
+
+ - **FIX**: migrate flutter_local_notifications.
+ - **FIX**: update to flutter v3.41.5.
+ - **FIX**: upgrade to flutter v3.38.4.
+
+## 2.12.4
+
+ - **FIX**: fix caching.
+ - **FIX**(designer_v2): update code for Riverpod 3.x compatibility.
+ - **FIX**: null check for study invite.
+ - **FIX**(database): revoke unnecessary EXECUTE privileges and update function access policies.
+ - **FIX**: study length calculation and update localization for study schedule.
+ - **FIX**(app): offline mode was not working.
+ - **FIX**: offline mode was not working.
+
 ## 2.12.3
 
  - **FIX**: fix caching.

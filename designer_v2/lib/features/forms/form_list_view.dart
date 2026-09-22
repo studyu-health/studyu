@@ -7,50 +7,28 @@ import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/common_views/standard_table.dart';
 import 'package:studyu_designer_v2/features/forms/form_array_table.dart';
 
-class FormListView<T> extends StatelessWidget {
-  const FormListView({
-    required this.control,
-    required this.items,
-    required this.onSelectItem,
-    required this.getActionsAt,
-    this.onNewItem,
-    required this.onNewItemLabel,
-    required this.rowTitle,
-    this.rowPrefix,
-    this.rowSuffix,
-    this.leadingWidget,
-    this.sectionTitle,
-    this.sectionDescription,
-    this.emptyIcon,
-    this.emptyTitle,
-    this.emptyDescription,
-    this.itemsPadding = const EdgeInsets.symmetric(vertical: 8.0),
-    this.hideLeadingTrailingWhenEmpty = false,
-    this.reorderable = false,
-    this.onReorder,
-    super.key,
-  });
-
-  final AbstractControl control;
-  final List<T> items;
-  final OnSelectHandler<T> onSelectItem;
-  final ActionsProviderAt<T> getActionsAt;
-  final VoidCallback? onNewItem;
-  final FormArrayTableRowLabelProvider<T> rowTitle;
-  final String onNewItemLabel;
-  final String? sectionTitle;
-  final String? sectionDescription;
-  final IconData? emptyIcon;
-  final String? emptyTitle;
-  final String? emptyDescription;
-  final WidgetBuilderAt<T>? rowPrefix;
-  final WidgetBuilderAt<T>? rowSuffix;
-  final Widget? leadingWidget;
-  final EdgeInsets itemsPadding;
-  final bool hideLeadingTrailingWhenEmpty;
-  final bool reorderable;
-  final void Function(int oldIndex, int newIndex)? onReorder;
-
+class const FormListView<T>({
+  required final AbstractControl control,
+  required final List<T> items,
+  required final OnSelectHandler<T> onSelectItem,
+  required final ActionsProviderAt<T> getActionsAt,
+  final VoidCallback? onNewItem,
+  required final String onNewItemLabel,
+  required final FormArrayTableRowLabelProvider<T> rowTitle,
+  final WidgetBuilderAt<T>? rowPrefix,
+  final WidgetBuilderAt<T>? rowSuffix,
+  final Widget? leadingWidget,
+  final String? sectionTitle,
+  final String? sectionDescription,
+  final IconData? emptyIcon,
+  final String? emptyTitle,
+  final String? emptyDescription,
+  final EdgeInsets itemsPadding = const EdgeInsets.symmetric(vertical: 8.0),
+  final bool hideLeadingTrailingWhenEmpty = false,
+  final bool reorderable = false,
+  final void Function(int oldIndex, int newIndex)? onReorder,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -59,7 +37,7 @@ class FormListView<T> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (leadingWidget != null) leadingWidget!,
+        ?leadingWidget,
         if (sectionTitle != null && !(hasEmptyWidget && items.isEmpty))
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
@@ -83,12 +61,9 @@ class FormListView<T> extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length,
-            onReorder:
+            onReorderItem:
                 onReorder ??
                 (oldIndex, newIndex) {
-                  if (newIndex > oldIndex) {
-                    newIndex -= 1;
-                  }
                   final item = items.removeAt(oldIndex);
                   items.insert(newIndex, item);
                   // Optionally, call setState or notify listeners if needed

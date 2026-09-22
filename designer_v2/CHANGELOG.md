@@ -1,3 +1,252 @@
+## 1.19.0
+
+ - **REFACTOR**(designer): introduce dashboardDispatch indirection.
+ - **FIX**(designer): keep error notices on empty dashboard.
+ - **FIX**(designer): remove flags from language picker.
+ - **FIX**: migrate Riverpod analyzer plugin.
+ - **FIX**: address localization review feedback.
+ - **FIX**: remove obsolete analyzer plugins.
+ - **FIX**: resolve analysis and web build failures.
+ - **FIX**: close snackbar automatically.
+ - **FIX**(l10n): complete Korean localization.
+ - **FIX**(deps): update flutter and deps.
+ - **FIX**(designer): center empty studies.
+ - **FIX**(designer): cache QR preview future.
+ - **FIX**(designer): dashboard pagination race, sort persistence, and scroll virtualization.
+ - **FIX**(designer): refine QR dialog overlay.
+ - **FIX**(designer): hide unchanged invite save.
+ - **FIX**(designer): show QR copy feedback above modal.
+ - **FIX**(designer): escape LIKE backslashes.
+ - **FIX**(designer): prevent invite save flicker.
+ - **FIX**(designer): drawer entries silently dropped clicks.
+ - **FIX**(designer): refine invite code actions.
+ - **FIX**: address pr review items - study shared link path, web landing page study link, ios deferred link host.
+ - **FIX**(designer): refine invite dialog interactions.
+ - **FIX**: remove deprecated material_design_icons_flutter dependency.
+ - **FIX**(designer): improve invite table layout.
+ - **FIX**(designer): tune invite pagination.
+ - **FIX**(designer): stop invite search flicker.
+ - **FIX**(designer): stabilize login footer.
+ - **FIX**(designer): close model event streams.
+ - **FIX**: center empty studies widget.
+ - **FIX**(designer): keep dashboard rows during refresh.
+ - **FIX**(designer): fix studies list display.
+ - **FIX**(designer): constrain dashboard height.
+ - **FIX**(designer): bound invite repository cache.
+ - **FIX**(designer): align auth prompt actions.
+ - **FIX**(designer): refine auth inline prompt actions.
+ - **FIX**(designer): polish auth form layout.
+ - **FIX**(designer): use clearer language picker icon.
+ - **FIX**(designer): decouple study repository interface.
+ - **FIX**(designer): harden invite code flows.
+ - **FIX**(designer): harden dashboard pagination.
+ - **FIX**: clear CI analysis failures.
+ - **FIX**(designer): remove dashboard drawer divider.
+ - **FIX**: address review feedback.
+ - **FIX**(designer): refresh preview on locale change.
+ - **FIX**(designer): dispose preview message listener.
+ - **FIX**(designer): remove unusable preview tab action.
+ - **FIX**(designer): trim delete confirmation title input.
+ - **FIX**(designer): fix filter helper dependencies.
+ - **FIX**(designer): isolate advanced filter preview count by tab.
+ - **FIX**(designer): make dashboard state testable on vm.
+ - **FIX**(app): resolve questionnaire controller merge conflicts.
+ - **FIX**(designer): resolve dashboard review issues.
+ - **FIX**(designer): address invite review feedback.
+ - **FIX**(app): remove Done button for non-last free text, clean up unused code.
+ - **FIX**: resolve flutter analyze failure.
+ - **FIX**(designer): delete study dependents first.
+ - **FIX**(designer): harden dashboard header layout.
+ - **FIX**(designer): restore invite code create and dismiss flow.
+ - **FIX**(designer): refine invite code empty state copy.
+ - **FIX**(designer): improve recruit mobile header layout.
+ - **FIX**(designer): refine recruit header responsiveness.
+ - **FIX**(designer): update invite code subtitle copy.
+ - **FIX**(designer): handle empty invite code fetch.
+ - **FIX**(designer): transmit preview studies outside urls.
+ - **FIX**(designer): resolve recruit invite code test regressions.
+ - **FIX**(designer): refine invite code recruit flow.
+ - **FIX**(designer): polish invite page dropdown menu.
+ - **FIX**(designer): resolve dashboard test lint warnings.
+ - **FIX**(designer): make dashboard updates smoother.
+ - **FIX**(designer): stabilize dashboard study actions.
+ - **FIX**(designer): refine invite code table polish.
+ - **FIX**(designer): remove invite row hover gap.
+ - **FIX**(designer): update pinned study locally.
+ - **FIX**(designer): hide study count while loading.
+ - **FIX**(designer): preserve legacy free-text conditions.
+ - **FIX**(designer): use signed free text threshold keyboard.
+ - **FIX**(designer): make study mutations reliable.
+ - **FIX**(designer): handle enum dashboard filters.
+ - **FIX**(designer): remove invite timestamp drift.
+ - **FIX**(designer): polish invite page size menu.
+ - **FIX**(designer): refresh invite codes recruit ui.
+ - **FIX**(designer): clarify required choice selection.
+ - **FIX**(designer): style cycle dropdown.
+ - **FIX**(designer): tighten cycle dropdown.
+ - **FIX**(designer): avoid cycle dropdown overflow.
+ - **FIX**(designer): use cycle count dropdown.
+ - **FIX**(designer): handle study schedule number input.
+ - **FIX**(designer): remove unsupported repository test.
+ - **FIX**(designer): strengthen study deletion warning.
+ - **FIX**(designer): widen choice question labels.
+ - **FIX**(designer): secure participant study previews.
+ - **FIX**(designer): strengthen study deletion flow.
+ - **FIX**(designer): address dashboard pagination review issues.
+ - **FIX**(designer): wait for survey save navigation.
+ - **FIX**(designer): await nested form saves.
+ - **FIX**(designer): stabilize autosave integration test.
+ - **FIX**(designer): show sync status for new studies.
+ - **FIX**(designer): keep questionnaire edits in local draft.
+ - **FIX**(designer): intercept confirmation dialog pointer events.
+ - **FIX**(designer): intercept preview pointer events in discard dialog.
+ - **FIX**(designer): normalize custom study sequence input.
+ - **FIX**(designer): stream live study updates to preview.
+ - **FIX**(designer): keep live preview loaded while editing.
+ - **FIX**(designer): preview unsaved test-ready studies.
+ - **FIX**(designer): enable copying study names in confirmations.
+ - **FIX**(designer): copy raw invite code.
+ - **FIX**(designer): widen invite date columns.
+ - **FIX**(designer): validate custom sequence conditionally.
+ - **FIX**(designer): align invite table serial header.
+ - **FIX**(designer): improve invite code table responsiveness.
+ - **FIX**(designer): make invite code table responsive.
+ - **FIX**(designer): refresh custom sequence validation.
+ - **FIX**: add passkeys script to index.html for app & designer to support supabase_flutter v2.15.0.
+ - **FIX**(designer): correct invite code pagination state.
+ - **FIX**(designer): support free-text length conditions.
+ - **FIX**(designer): restore invite code search pagination.
+ - **FIX**(designer): allow signed free-text thresholds.
+ - **FIX**(designer): correct dashboard study totals.
+ - **FIX**(designer): localize dashboard count and copy.
+ - **FIX**(designer): refine dashboard header responsiveness.
+ - **FIX**(designer): preserve free text conditional semantics.
+ - **FIX**(app): update deep link routes from studyShared to study.
+ - **FIX**(designer): make preview panes responsive.
+ - **FIX**: address code review findings across app, core, and designer.
+ - **FIX**(designer): align discard confirmation actions.
+ - **FEAT**(designer): add invite code table sorting.
+ - **FEAT**(designer): support invite code enrolled sorting.
+ - **FEAT**(designer): add invite code filters.
+ - **FEAT**: Introduce QR code generation and deep link sharing for study invite codes, supported by new environment variables and localization.
+ - **FEAT**(app): support required choice selections.
+ - **FEAT**(designer): improve invite code sharing actions.
+ - **FEAT**(designer): add korean localization.
+ - **FEAT**(localization): synchronize app language with server and improve locale handling.
+ - **FEAT**(recruit): improve invite sharing.
+ - **FEAT**(designer): improve invite code pagination controls.
+ - **FEAT**(dashboard): enhance pagination and localization for dashboard features.
+ - **FEAT**(designer): add QR link copy field.
+ - **FEAT**(designer): improve QR code dialog.
+ - **FEAT**(designer): improve QR copy feedback.
+ - **FEAT**(designer): show invite code in QR dialog.
+ - **FEAT**(designer): server-side pagination for studies dashboard.
+ - **FEAT**(app): add invite QR flow.
+ - **FEAT**(designer): translate dashboard filters to PostgREST.
+ - **FEAT**: update public recruitment messaging and localization.
+ - **FEAT**: add recruitment share links for public studies.
+ - **FEAT**: refactor deep link generation for invite codes.
+ - **FEAT**(designer): enhance invite code sidebar.
+ - **FEAT**: rework recruitment share options.
+ - **FEAT**: rework invite code sharing menu.
+ - **FEAT**(invite-codes): make invite codes case-insensitive and space-trimmed.
+ - **FEAT**: Update deep link handling and environment configuration for Android and iOS.
+ - **FEAT**(designer): improve invite code table behavior.
+
+## 1.18.0
+
+ - **REFACTOR**: clean up date question localization and validation messages.
+ - **FIX**(designer): enlarge test preview frame.
+ - **FIX**(designer): disable screener without questions.
+ - **FIX**(app): open preview on study overview.
+ - **FIX**(designer): revert unintended app controller change.
+ - **FIX**(designer): restore default search bar background.
+ - **FIX**(designer): resolve splash screen initialization loop.
+ - **FIX**(dashboard): restore localized search placeholder.
+ - **FIX**(designer): use outer context for popup actions.
+ - **FIX**(designer): defer popup menu action execution.
+ - **FIX**(designer): remove default confirmation icons.
+ - **FIX**(designer): resolve confirmation merge conflicts.
+ - **FIX**(designer): centralize destructive action confirmations.
+ - **FIX**(designer): style actions in destructive confirmation dialog.
+ - **FIX**(designer): update unsaved changes dialog copy and button weights.
+ - **FIX**(designer): centralize destructive action confirmations.
+ - **FIX**(designer): handle recruit popup menu delete action.
+ - **FIX**: upgrade deps.
+ - **FIX**: upgrade deps.
+ - **FIX**: remove deprecated material_design_icons_flutter dependency.
+ - **FIX**(preview): avoid reloading test app page navigation.
+ - **FEAT**(designer): localize hardcoded preview overlay strings.
+ - **FEAT**: Add onCleared callback to DateQuestionWidget and QuestionContainer.
+ - **FEAT**: Refactor preview iframe style injection and cleanup logic.
+ - **FEAT**: Enhance Date Question Functionality with Time Input and Localization.
+ - **FEAT**: simplify date question form by removing unused preview section and related logic.
+ - **FEAT**: update date label translations for clarity in German and English.
+ - **FEAT**: remove initial date handling from date question components.
+ - **FEAT**: add localization for date format preset labels in English and German.
+ - **FEAT**: implement date range validation and localization for date questions.
+ - **FEAT**: add DateQuestion and DateQuestionWidget for date selection in questionnaires.
+
+## 1.17.0
+
+ - **REFACTOR**(questionnaire): improve free text question handling and remove custom error message support.
+ - **FIX**: upgrade deps.
+ - **FIX**(measurements): persist new survey questions.
+ - **FIX**(designer): preserve form dirty guards.
+ - **FIX**(designer): intervention task dismissable warning works.
+ - **FIX**(designer): duplicate unsaved survey questions.
+ - **FIX**: update free text validation messages and regex handling.
+ - **FIX**: align dependencies for Flutter 3.44.
+ - **FIX**: add missing const constructors to satisfy linter.
+ - **FIX**: migrate to flutter_material_design_icons in favor of deprecated material_design_icons_flutter.
+ - **FIX**: upgrade deps.
+ - **FIX**: update Flutter version to 3.44.0 and clean up unused imports.
+ - **FIX**: remove redundant fitbit label.
+ - **FEAT**: make barrier dismissable with warning check.
+ - **FEAT**: Add custom error message support for free text questions.
+ - **FEAT**: add custom free text validation and localization support.
+ - **FEAT**(test): add stable ValueKeys for MCP automation.
+ - **FEAT**(designer): move fitbit credentials into measurement question editor.
+
+## 1.16.0
+
+ - **REFACTOR**: fix and format.
+ - **REFACTOR**: Update widget constructors to use `super.key` and refine filter UI constants and German localization.
+ - **REFACTOR**: remove "Clear all" filter option from dashboard studies filter.
+ - **REFACTOR**: filter_builder smaller.
+ - **REFACTOR**: Add new filter widgets for enum, boolean, number, text, and date range types for dashboard studies, and update the filter builder to utilize them.
+ - **FIX**: migrate csv.
+ - **FIX**: update to flutter v3.41.5.
+ - **FIX**: resolve hash conflict in dashboardControllerHash.
+ - **FIX**: filter out exportDefinition action from available study actions.
+ - **FIX**: cast error value to Object for validation message function.
+ - **FIX**: Center studies table content and headers, adjust column sizing, and add DevTools options file.
+ - **FIX**: upgrade to flutter v3.38.4.
+ - **FIX**: Introduce comparator utility for symbol display and enhance filter chip labels and conditional form options.
+ - **FIX**: filter translation.
+ - **FIX**: preset highlighting bug.
+ - **FIX**: make `setStudiesFilter` asynchronous and fetch user data.
+ - **FIX**: improve dashboard responsiveness by adapting UI elements to screen sizes and add a DevTools options file.
+ - **FEAT**: Implement study definition export as JSON and add null check for study import.
+ - **FEAT**: Implement study import functionality, include study definition in export, and add customizable row spacing to form layouts.
+ - **FEAT**: localize dashboard filter UI, preset management, and related enum labels.
+ - **FEAT**: Track expanded filter fields in controller and enhance selected preset UI in filter builder.
+ - **FEAT**: add active state highlighting to filter presets, update filter action button labels and icons, and remove filter match count display.
+ - **FEAT**: Add 6px horizontal spacing to the filter builder UI.
+ - **FEAT**: Add persistent user-defined study filters and active filter state to user preferences.
+ - **FEAT**: Initialize filter builder's active preset from dashboard state or by matching saved filters.
+ - **FEAT**: Overhaul dashboard filter UI with auto-apply on close, enhanced preset management, and expandable filter sections.
+ - **FEAT**: Add dashboard filter presets and a unified filter menu, replacing old filter view components.
+ - **FEAT**: Implement dynamic and hierarchical study filtering on the dashboard, including UI, data models, and evaluation logic.
+
+## 1.15.5
+
+ - **FIX**: update balanced description in study schedule translations and upgrade dependencies.
+
+## 1.15.4
+
+ - **FIX**: update balanced description in study schedule translations.
+
 ## 1.15.3
 
  - **REFACTOR**(designer_v2): centralize AsyncValue study state access.

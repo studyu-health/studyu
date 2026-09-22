@@ -3,7 +3,7 @@ import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/routing/router_intent.dart';
 
-abstract class IStudyNavViewModel {
+abstract class IStudyNavViewModel() {
   bool get isEditTabEnabled;
   bool get isTestTabEnabled;
   bool get isRecruitTabEnabled;
@@ -12,7 +12,7 @@ abstract class IStudyNavViewModel {
   bool get isSettingsEnabled;
 }
 
-class StudyNav {
+class StudyNav() {
   static List<NavbarTab> tabs(StudyID studyId, IStudyNavViewModel viewModel) =>
       <NavbarTab>[
         edit(studyId, enabled: viewModel.isEditTabEnabled),
@@ -54,14 +54,13 @@ class StudyNav {
   );
 }
 
-class StudyDesignNav {
+class StudyDesignNav() {
   static List<NavbarTab> tabs(StudyID studyId) => <NavbarTab>[
     info(studyId),
     enrollment(studyId),
     interventions(studyId),
     measurements(studyId),
     reports(studyId),
-    fitbitCredentials(studyId),
   ];
 
   static NavbarTab info(StudyID studyId) => NavbarTab(
@@ -86,12 +85,7 @@ class StudyDesignNav {
   );
   static NavbarTab reports(StudyID studyId) => NavbarTab(
     index: 4,
-    title: "Reports",
+    title: tr.form_array_report_items_title,
     intent: RoutingIntents.studyEditReports(studyId),
-  );
-  static NavbarTab fitbitCredentials(StudyID studyId) => NavbarTab(
-    index: 5,
-    title: "Fitbit",
-    intent: RoutingIntents.studyEditFitbitCredentials(studyId),
   );
 }

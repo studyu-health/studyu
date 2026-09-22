@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/patrol_finders.dart';
+import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyMeasurementsRobot {
-  const StudyMeasurementsRobot(this.$);
-
-  final PatrolTester $;
-
+class const StudyMeasurementsRobot(final PatrolTester $) {
   Future<void> tapAddSurveyButton() async {
     await $(tr.form_array_measurements_surveys_new).tap();
   }
@@ -17,11 +14,17 @@ class StudyMeasurementsRobot {
   }
 
   Future<void> tapSaveSurveyButton() async {
-    await $(tr.dialog_save).tap();
+    await $(PrimaryButton)
+        .which<PrimaryButton>((widget) => widget.text == tr.dialog_save)
+        .last
+        .tap();
   }
 
   Future<void> tapSaveSurveyQuestionButton() async {
-    await $(tr.dialog_save).tap();
+    await $(PrimaryButton)
+        .which<PrimaryButton>((widget) => widget.text == tr.dialog_save)
+        .last
+        .tap();
   }
 
   Future<void> enterSurveyName(String surveyName) async {

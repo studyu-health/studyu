@@ -5,9 +5,12 @@ import 'package:studyu_designer_v2/features/design/shared/questionnaire/question
 import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
 import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
+import 'package:studyu_designer_v2/utils/comparator_utils.dart';
 
-class ConditionRowFormViewModel
-    extends ManagedFormViewModel<ConditionRowFormData> {
+class ConditionRowFormViewModel({
+  required final String currentQuestionId,
+  Expression? initialExpression,
+}) extends ManagedFormViewModel<ConditionRowFormData> {
   // --- Controls ---
   final questionIdControl = FormControl<String>();
   final comparatorControl = FormControl<dynamic>();
@@ -37,8 +40,6 @@ class ConditionRowFormViewModel
 
   // todo do not make this static, try to use a provider to get the questions
   static List<Question> availableQuestions = [];
-  final String currentQuestionId;
-
   void refreshAvailableQuestions() {
     final question = selectedQuestion;
     if (question != null) {
@@ -46,10 +47,7 @@ class ConditionRowFormViewModel
     }
   }
 
-  ConditionRowFormViewModel({
-    required this.currentQuestionId,
-    Expression? initialExpression,
-  }) {
+  this {
     if (initialExpression != null) {
       questionIdControl.value = extractQuestionId(initialExpression);
       comparatorControl.value = extractComparator(initialExpression);
@@ -86,6 +84,13 @@ class ConditionRowFormViewModel
 
     // Listen for comparator changes
     comparatorControl.valueChanges.listen((_) {
+      if (selectedQuestion?.type == FreeTextQuestion.questionType &&
+          selectedComparatorUsesNumericThreshold) {
+        final currentValue = valueControl.value?.toString();
+        if (currentValue != null && int.tryParse(currentValue) == null) {
+          valueControl.value = null;
+        }
+      }
       form.markAsDirty();
     });
 
@@ -134,14 +139,71 @@ class ConditionRowFormViewModel
         ];
       case ScaleQuestion.questionType:
         return [
-          const FormControlOption(NumericComparator.equal, '='),
-          const FormControlOption(NumericComparator.notEqual, '≠'),
-          const FormControlOption(NumericComparator.greaterThan, '>'),
-          const FormControlOption(NumericComparator.lessThan, '<'),
-          const FormControlOption(NumericComparator.greaterThanOrEqual, '≥'),
-          const FormControlOption(NumericComparator.lessThanOrEqual, '≤'),
+          FormControlOption(
+            NumericComparator.equal,
+            NumericComparator.equal.stringSymbol,
+          ),
+          FormControlOption(
+            NumericComparator.notEqual,
+            NumericComparator.notEqual.stringSymbol,
+          ),
+          FormControlOption(
+            NumericComparator.greaterThan,
+            NumericComparator.greaterThan.stringSymbol,
+          ),
+          FormControlOption(
+            NumericComparator.lessThan,
+            NumericComparator.lessThan.stringSymbol,
+          ),
+          FormControlOption(
+            NumericComparator.greaterThanOrEqual,
+            NumericComparator.greaterThanOrEqual.stringSymbol,
+          ),
+          FormControlOption(
+            NumericComparator.lessThanOrEqual,
+            NumericComparator.lessThanOrEqual.stringSymbol,
+          ),
         ];
       case FreeTextQuestion.questionType:
+        final freeTextQuestion = q as FreeTextQuestion;
+        if (freeTextQuestion.textType == FreeTextQuestionType.numeric) {
+          return [
+            FormControlOption(
+              NumericComparator.equal,
+              NumericComparator.equal.stringSymbol,
+            ),
+            FormControlOption(
+              NumericComparator.notEqual,
+              NumericComparator.notEqual.stringSymbol,
+            ),
+            FormControlOption(
+              NumericComparator.greaterThan,
+              NumericComparator.greaterThan.stringSymbol,
+            ),
+            FormControlOption(
+              NumericComparator.lessThan,
+              NumericComparator.lessThan.stringSymbol,
+            ),
+            FormControlOption(
+              NumericComparator.greaterThanOrEqual,
+              NumericComparator.greaterThanOrEqual.stringSymbol,
+            ),
+            FormControlOption(
+              NumericComparator.lessThanOrEqual,
+              NumericComparator.lessThanOrEqual.stringSymbol,
+            ),
+            if (comparatorControl.value == TextComparator.contains)
+              FormControlOption(
+                TextComparator.contains,
+                tr.form_array_question_visibility_logic_contains,
+              ),
+            if (comparatorControl.value == TextComparator.doesNotContain)
+              FormControlOption(
+                TextComparator.doesNotContain,
+                tr.form_array_question_visibility_logic_does_not_contain,
+              ),
+          ];
+        }
         return [
           FormControlOption(
             TextComparator.equal,
@@ -159,10 +221,58 @@ class ConditionRowFormViewModel
             TextComparator.doesNotContain,
             tr.form_array_question_visibility_logic_does_not_contain,
           ),
+          FormControlOption(
+            TextComparator.lengthLessThan,
+            tr.form_array_question_visibility_logic_shorter_than,
+          ),
+          FormControlOption(
+            TextComparator.lengthLessThanOrEqual,
+            tr.form_array_question_visibility_logic_shorter_than_or_equal_to,
+          ),
+          FormControlOption(
+            TextComparator.lengthGreaterThan,
+            tr.form_array_question_visibility_logic_longer_than,
+          ),
+          FormControlOption(
+            TextComparator.lengthGreaterThanOrEqual,
+            tr.form_array_question_visibility_logic_longer_than_or_equal_to,
+          ),
+          FormControlOption(
+            TextComparator.lengthEqual,
+            tr.form_array_question_visibility_logic_same_length_as,
+          ),
+          FormControlOption(
+            TextComparator.lengthNotEqual,
+            tr.form_array_question_visibility_logic_different_length_as,
+          ),
         ];
       default:
         return [];
     }
+  }
+
+  bool get selectedComparatorUsesNumericThreshold {
+    return switch (comparatorControl.value) {
+      NumericComparator.equal ||
+      NumericComparator.notEqual ||
+      NumericComparator.greaterThan ||
+      NumericComparator.lessThan ||
+      NumericComparator.greaterThanOrEqual ||
+      NumericComparator.lessThanOrEqual ||
+      TextComparator.lengthGreaterThan ||
+      TextComparator.lengthLessThan ||
+      TextComparator.lengthGreaterThanOrEqual ||
+      TextComparator.lengthLessThanOrEqual ||
+      TextComparator.lengthEqual ||
+      TextComparator.lengthNotEqual => true,
+      _ => false,
+    };
+  }
+
+  bool get selectedQuestionAllowsSignedNumericThreshold {
+    final question = selectedQuestion;
+    return question is FreeTextQuestion &&
+        question.textType == FreeTextQuestionType.numeric;
   }
 
   // --- Get available values for a 'choice' question ---
@@ -192,7 +302,7 @@ class ConditionRowFormViewModel
     if (expression is NumericExpression) {
       return expression.comparator;
     } else if (expression is TextExpression) {
-      return expression.comparator;
+      return _normalizeLegacyFreeTextComparator(expression.comparator);
     } else if (expression is ChoiceExpression) {
       return '='; // Default for ChoiceExpression if no NotExpression
     } else if (expression is BooleanExpression) {
@@ -293,7 +403,28 @@ class ConditionRowFormViewModel
         return NumericExpression(comparator: comparator, value: value)
           ..target = questionId;
       case FreeTextQuestion.questionType:
-        if (comparator is! TextComparator || value == null) return null;
+        final freeTextQuestion = selectedQ as FreeTextQuestion;
+        if (value == null) return null;
+        if (freeTextQuestion.textType == FreeTextQuestionType.numeric) {
+          if (comparator == TextComparator.contains ||
+              comparator == TextComparator.doesNotContain) {
+            return TextExpression(
+              comparator: comparator as TextComparator,
+              value: value.toString(),
+            )..target = questionId;
+          }
+          if (value is String) {
+            value = num.tryParse(value);
+          }
+          if (comparator is! NumericComparator || value is! num) return null;
+          return NumericExpression(comparator: comparator, value: value)
+            ..target = questionId;
+        }
+        if (comparator is! TextComparator) return null;
+        if (selectedComparatorUsesNumericThreshold &&
+            int.tryParse(value as String) == null) {
+          return null;
+        }
         return TextExpression(comparator: comparator, value: value as String)
           ..target = questionId;
       default:
@@ -339,6 +470,27 @@ class ConditionRowFormViewModel
   @override
   ManagedFormViewModel<ConditionRowFormData> createDuplicate() {
     return ConditionRowFormViewModel(currentQuestionId: currentQuestionId);
+  }
+
+  dynamic _normalizeLegacyFreeTextComparator(TextComparator comparator) {
+    final question = selectedQuestion;
+    if (question is! FreeTextQuestion ||
+        question.textType != FreeTextQuestionType.numeric) {
+      return comparator;
+    }
+
+    return switch (comparator) {
+      TextComparator.equal ||
+      TextComparator.lengthEqual => NumericComparator.equal,
+      TextComparator.notEqual ||
+      TextComparator.lengthNotEqual => NumericComparator.notEqual,
+      TextComparator.lengthGreaterThan => NumericComparator.greaterThan,
+      TextComparator.lengthLessThan => NumericComparator.lessThan,
+      TextComparator.lengthGreaterThanOrEqual =>
+        NumericComparator.greaterThanOrEqual,
+      TextComparator.lengthLessThanOrEqual => NumericComparator.lessThanOrEqual,
+      _ => comparator,
+    };
   }
 
   @override

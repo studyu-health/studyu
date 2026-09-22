@@ -3,41 +3,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
 /// Interface for widgets that render an optional banner
-abstract class IWithBanner {
+abstract class IWithBanner() {
   Widget? banner(BuildContext context, WidgetRef ref);
 }
 
-enum BannerStyle { warning, info, error }
+enum BannerStyle() {
+  warning,
+  info,
+  error,
+}
 
-class BannerBox extends StatefulWidget {
-  const BannerBox({
-    required this.body,
-    required this.style,
-    this.padding = const EdgeInsets.symmetric(vertical: 18.0, horizontal: 48.0),
-    this.prefixIcon,
-    this.noPrefix = false,
-    this.isDismissed,
-    this.dismissable = true,
-    this.onDismissed,
-    this.dismissIconSize = 24.0,
-    super.key,
-  });
-
-  final Widget? prefixIcon;
-  final Widget body;
-  final BannerStyle style;
-  final EdgeInsets? padding;
-  final bool noPrefix;
-  final bool dismissable;
-  final bool? isDismissed;
-  final Function()? onDismissed;
-  final double dismissIconSize;
-
+class const BannerBox({
+  required final Widget body,
+  required final BannerStyle style,
+  final EdgeInsets? padding = const EdgeInsets.symmetric(
+    vertical: 18.0,
+    horizontal: 48.0,
+  ),
+  final Widget? prefixIcon,
+  final bool noPrefix = false,
+  final bool? isDismissed,
+  final bool dismissable = true,
+  final Function()? onDismissed,
+  final double dismissIconSize = 24.0,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<BannerBox> createState() => _BannerBoxState();
 }
 
-class _BannerBoxState extends State<BannerBox> {
+class _BannerBoxState() extends State<BannerBox> {
   bool isDismissed = false;
 
   @override

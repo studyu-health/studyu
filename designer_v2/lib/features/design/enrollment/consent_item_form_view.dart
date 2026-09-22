@@ -10,16 +10,15 @@ import 'package:studyu_designer_v2/features/forms/form_validation.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class ConsentItemFormView extends StatefulWidget {
-  const ConsentItemFormView({required this.formViewModel, super.key});
-
-  final ConsentItemFormViewModel formViewModel;
-
+class const ConsentItemFormView({
+  required final ConsentItemFormViewModel formViewModel,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<ConsentItemFormView> createState() => _ConsentItemFormViewState();
 }
 
-class _ConsentItemFormViewState extends State<ConsentItemFormView> {
+class _ConsentItemFormViewState() extends State<ConsentItemFormView> {
   bool isStylingInformationDismissed = true;
 
   void onDismissedCallback() => setState(() {

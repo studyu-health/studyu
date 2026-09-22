@@ -5,6 +5,7 @@ import 'package:studyu_designer_v2/domain/study_export.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:studyu_designer_v2/utils/file_download.dart';
+import 'package:studyu_designer_v2/utils/json_format.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 extension StudyExportZipX on StudyExportData {
@@ -14,6 +15,7 @@ extension StudyExportZipX on StudyExportData {
     final toJsonString = JsonStringEncoder();
 
     final files = {
+      'study_definition.json': prettyJson(study.toJson()),
       'measurements.csv': toCSVString(measurementsData),
       'measurements.json': toJsonString(measurementsData),
       'interventions.csv': toCSVString(interventionsData),
@@ -50,16 +52,25 @@ extension StudyExportZipX on StudyExportData {
 
 extension StudyExportX on Study {
   bool canExport(User user) =>
-      !exportData.isEmpty && (canEdit(user) || publishedToRegistryResults);
+      (canEdit(user) || publishedToRegistryResults) &&
+      (participants?.isNotEmpty ?? false);
 
   String? exportDisabledReason(User user) {
     if (canExport(user)) return null;
-    if (exportData.isEmpty) {
-      return tr.study_export_unavailable_empty_tooltip;
-    }
     if (!canEdit(user) && !publishedToRegistryResults) {
       return tr.study_export_unavailable_no_permission_tooltip;
     }
+    if (participants?.isEmpty ?? true) {
+      return tr.study_export_unavailable_empty_tooltip;
+    }
     return null;
+  }
+}
+
+extension StudyDefinitionExportX on Study {
+  void downloadDefinition() {
+    final json = prettyJson((this as dynamic).toJson());
+    final filename = '${title?.toKey() ?? ''}_study_definition.json';
+    downloadFile(fileContent: json, filename: filename);
   }
 }

@@ -1,17 +1,16 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/models/app_state.dart';
-import 'package:studyu_app/routes.dart';
 import 'package:studyu_app/util/fitbit_handler.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class Preview {
-  final Map<String, String>? queryParameters;
-  final AppLanguage appLanguage;
+class Preview(
+  final Map<String, String>? queryParameters,
+  final AppLanguage appLanguage,
+) {
   String? selectedRoute;
   String? extra;
 
@@ -20,7 +19,7 @@ class Preview {
   String? selectedStudyObjectId;
   StudySubject? subject;
 
-  Preview(this.queryParameters, this.appLanguage) {
+  this {
     handleQueries();
   }
 
@@ -31,7 +30,13 @@ class Preview {
 
   Future init() async {
     previewSubjectIdKey();
-    selectedStudyObjectId = await getActiveSubjectId();
+    try {
+      selectedStudyObjectId = await getActiveSubjectId().timeout(
+        const Duration(seconds: 5),
+      );
+    } catch (_) {
+      selectedStudyObjectId = null;
+    }
 
     if (containsQuery('languageCode')) {
       final locale = Locale(queryParameters!['languageCode']!);
@@ -39,22 +44,25 @@ class Preview {
     }
   }
 
-  Future<bool> handleAuthorization() async {
-    if (!containsQuery('studyid') && !containsQuery('session')) return false;
+  Future<bool> handleAuthorization(
+    String session, {
+    Future<void> Function(String)? recoverSession,
+  }) async {
+    if (!containsQuery('studyid') || session.isEmpty) return false;
 
-    final String session = Uri.decodeComponent(queryParameters!['session']!);
     try {
-      await Supabase.instance.client.auth.recoverSession(session);
+      await (recoverSession ?? Supabase.instance.client.auth.recoverSession)(
+        session,
+      );
     } catch (_) {
       return false;
     }
 
-    if (containsQuery('data')) {
-      final data =
-          jsonDecode(queryParameters!['data']!) as Map<String, dynamic>;
-      study = Study.fromJson(data);
-    } else {
-      study = await SupabaseQuery.getById<Study>(queryParameters!['studyid']!);
+    if (study == null) {
+      final savedStudy = await SupabaseQuery.getById<Study>(
+        queryParameters!['studyid']!,
+      );
+      study ??= savedStudy;
     }
     // todo are results visible for published studies inside preview?
     if (study == null) return false;
@@ -100,17 +108,19 @@ class Preview {
       if ('route' == k) {
         switch (queryParameters![k]) {
           case 'consent':
-            return Routes.consent;
+            return '/${RouteNames.consent}';
           case 'eligibilityCheck': // this should include questionnaire and eligibility_criteria
-            return '/eligibilityCheck';
+            return '/${RouteNames.eligibilityCheck}';
           case 'interventionSelection':
-            return Routes.interventionSelection;
+            return '/${RouteNames.interventionSelection}';
           case 'journey':
-            return Routes.journey;
+            return '/${RouteNames.journey}';
           case 'questionnaire':
-            return Routes.questionnaire;
+            return '/${RouteNames.questionnaire}';
           case 'dashboard':
-            return Routes.dashboard;
+            return '/${RouteNames.dashboard}';
+          case 'studyOverview':
+            return '/${RouteNames.studyOverview}';
           case 'intervention':
             return '/intervention';
           case 'observation':
@@ -183,6 +193,8 @@ class Preview {
         print(
           '[PreviewApp]: Failed fetching subject. Maybe subject was reset? Error: $e',
         );
+        await deleteActiveStudyReference();
+        selectedStudyObjectId = null;
         // todo try sign in again if token expired see loading screen
       }
     }
@@ -228,17 +240,32 @@ class Preview {
 
   List<String> getInterventionIds() {
     final interventionList = study!.interventions.map((i) => i.id).toList();
+    if (interventionList.isEmpty) {
+      return const [];
+    }
+
     List<String> newInterventionList = [];
     // If we have a specific intervention we want to show, select that and another one
     if (selectedRoute == '/intervention' && extra != null) {
-      final String intId = interventionList.firstWhere((id) => id == extra);
-      newInterventionList
-        ..add(intId)
-        ..add(interventionList.firstWhere((id) => id != intId));
-      assert(newInterventionList.length == 2);
+      final String? selectedInterventionId = interventionList
+          .cast<String?>()
+          .firstWhere((id) => id == extra, orElse: () => null);
+
+      if (selectedInterventionId != null) {
+        newInterventionList.add(selectedInterventionId);
+      }
+
+      final String? alternativeInterventionId = interventionList
+          .cast<String?>()
+          .firstWhere(
+            (id) => id != null && id != selectedInterventionId,
+            orElse: () => null,
+          );
+      if (alternativeInterventionId != null) {
+        newInterventionList.add(alternativeInterventionId);
+      }
     } else {
-      // just take the first two
-      newInterventionList = interventionList.sublist(0, 2);
+      newInterventionList = interventionList.take(2).toList();
     }
     return newInterventionList;
   }

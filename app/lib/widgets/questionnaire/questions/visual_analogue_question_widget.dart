@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
 @Deprecated('Use [AnnotatedScaleQuestionWidget]')
-class VisualAnalogueQuestionWidget extends QuestionWidget {
-  final VisualAnalogueQuestion question;
-  final Function(Answer)? onDone;
-
+class const VisualAnalogueQuestionWidget({
+  super.key,
+  required final VisualAnalogueQuestion question,
+  final Function(Answer)? onDone,
+  final Answer<num>? initialAnswer,
+}) extends QuestionWidget {
   @Deprecated('Use [AnnotatedScaleQuestionWidget]')
-  const VisualAnalogueQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-  });
+  this;
 
   @override
   State<VisualAnalogueQuestionWidget> createState() =>
@@ -21,14 +18,18 @@ class VisualAnalogueQuestionWidget extends QuestionWidget {
 }
 
 @Deprecated('Use [_AnnotatedScaleQuestionWidgetState]')
-class _VisualAnalogueQuestionWidgetState
+class _VisualAnalogueQuestionWidgetState()
     extends State<VisualAnalogueQuestionWidget> {
+  @Deprecated('Use [_AnnotatedScaleQuestionWidgetState]')
+  this;
+
   late double value;
 
   @override
   void initState() {
     super.initState();
-    value = widget.question.initial;
+    value =
+        widget.initialAnswer?.response.toDouble() ?? widget.question.initial;
   }
 
   void changed(double value) {
@@ -65,19 +66,13 @@ class _VisualAnalogueQuestionWidgetState
         Slider(
           value: value,
           onChanged: changed,
+          onChangeEnd: (val) =>
+              widget.onDone!(widget.question.constructAnswer(val)),
           min: widget.question.minimum,
           max: widget.question.maximum,
           divisions:
               (widget.question.maximum - widget.question.minimum) ~/
               widget.question.step,
-        ),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () =>
-                widget.onDone!(widget.question.constructAnswer(value)),
-            child: Text(AppLocalizations.of(context)!.done),
-          ),
         ),
       ],
     );

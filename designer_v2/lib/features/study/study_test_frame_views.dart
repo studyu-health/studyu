@@ -8,11 +8,16 @@ import 'package:studyu_designer_v2/features/design/study_form_providers.dart';
 import 'package:studyu_designer_v2/features/forms/form_validation.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class WebFrame extends StatelessWidget {
-  final String previewSrc;
-  final String studyId;
-  const WebFrame(this.previewSrc, this.studyId, {super.key});
+enum PreviewOverlayStage() {
+  healthChecking,
+  connecting,
+  appLoading,
+  error,
+  none,
+}
 
+class const WebFrame(final String previewSrc, final String studyId, {super.key})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // todo make dynamic width should be half the size of height or height double the width
@@ -29,9 +34,7 @@ class WebFrame extends StatelessWidget {
   }
 }
 
-class DisabledFrame extends StatelessWidget {
-  const DisabledFrame({super.key});
-
+class const DisabledFrame({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -54,29 +57,122 @@ class DisabledFrame extends StatelessWidget {
   }
 }
 
-class PhoneContainer extends StatelessWidget {
-  static const double defaultWidth = 300.0;
-  static const double defaultHeight = 600.0;
+class const PreviewStatusFrame({
+  required final IconData icon,
+  required final String title,
+  required final String description,
+  final Widget? action,
+  final Color? borderColor,
+  final Color? innerContentBackgroundColor,
+  super.key,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return PhoneContainer(
+      innerContent: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: EmptyBody(
+          icon: icon,
+          title: title,
+          description: description,
+          button: action,
+        ),
+      ),
+      borderColor:
+          borderColor ?? theme.colorScheme.secondary.withValues(alpha: 0.35),
+      innerContentBackgroundColor:
+          innerContentBackgroundColor ??
+          theme.colorScheme.secondary.withValues(alpha: 0.08),
+    );
+  }
+}
 
-  const PhoneContainer({
-    required this.innerContent,
-    this.width = PhoneContainer.defaultWidth,
-    this.height = PhoneContainer.defaultHeight,
-    this.borderColor = Colors.black,
-    this.borderWidth = 8.0,
-    this.borderRadius = 25.0,
-    this.innerContentBackgroundColor = Colors.white,
-    super.key,
-  });
+class const LoadingFrame({
+  required final String configuredUrl,
+  required final bool isLocalDevelopment,
+  required final PreviewOverlayStage stage,
+  final String? message,
+  super.key,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = tr;
+    final title = switch (stage) {
+      PreviewOverlayStage.healthChecking =>
+        l10n.preview_overlay_health_checking_title,
+      PreviewOverlayStage.connecting => l10n.preview_overlay_connecting_title,
+      PreviewOverlayStage.appLoading => l10n.preview_overlay_loading_title,
+      PreviewOverlayStage.error || PreviewOverlayStage.none => '',
+    };
+    final description =
+        message ??
+        switch (stage) {
+          PreviewOverlayStage.healthChecking =>
+            isLocalDevelopment
+                ? l10n.preview_overlay_health_checking_description_local(
+                    configuredUrl,
+                  )
+                : l10n.preview_overlay_health_checking_description_remote(
+                    configuredUrl,
+                  ),
+          PreviewOverlayStage.connecting =>
+            isLocalDevelopment
+                ? l10n.preview_overlay_connecting_description_local
+                : l10n.preview_overlay_connecting_description_remote,
+          PreviewOverlayStage.appLoading =>
+            isLocalDevelopment
+                ? l10n.preview_overlay_loading_description_local
+                : l10n.preview_overlay_loading_description_remote,
+          PreviewOverlayStage.error || PreviewOverlayStage.none => '',
+        };
 
-  final double width;
-  final double height;
-  final Color borderColor;
-  final double borderWidth;
-  final double borderRadius;
+    return PreviewStatusFrame(
+      icon: Icons.sync_rounded,
+      title: title,
+      description: description,
+      action: const Padding(
+        padding: EdgeInsets.only(top: 8.0),
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
+        ),
+      ),
+      innerContentBackgroundColor: Colors.white,
+    );
+  }
+}
 
-  final Widget innerContent;
-  final Color? innerContentBackgroundColor;
+class const ErrorFrame({
+  required final String title,
+  required final String message,
+  super.key,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return PreviewStatusFrame(
+      icon: Icons.warning_amber_rounded,
+      title: title,
+      description: message,
+      innerContentBackgroundColor: Colors.white,
+    );
+  }
+}
+
+class const PhoneContainer({
+  required final Widget innerContent,
+  final double width = PhoneContainer.defaultWidth,
+  final double height = PhoneContainer.defaultHeight,
+  final Color borderColor = Colors.black,
+  final double borderWidth = 8.0,
+  final double borderRadius = 25.0,
+  final Color? innerContentBackgroundColor = Colors.white,
+  super.key,
+}) extends StatelessWidget {
+  static const double minWidth = 260.0;
+  static const double defaultWidth = 360.0;
+  static const double defaultHeight = 720.0;
 
   @override
   Widget build(BuildContext context) {
@@ -128,18 +224,14 @@ class PhoneContainer extends StatelessWidget {
   }
 }
 
-class MobileFrame extends StatelessWidget {
-  const MobileFrame({super.key});
-
+class const MobileFrame({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(child: SizedBox(height: 600, width: 300));
   }
 }
 
-class DesktopFrame extends StatelessWidget {
-  const DesktopFrame({super.key});
-
+class const DesktopFrame({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(child: SizedBox(height: 600, width: 300));

@@ -2,22 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:gauge_indicator/gauge_indicator.dart';
 import 'package:statistics/statistics.dart';
 
-class GaugesWidget extends StatelessWidget {
-  final String nameInterventionA;
-  final String nameInterventionB;
-  final num meanInterventionA;
-  final num meanInterventionB;
-  final bool showColors;
-
-  GaugesWidget(
-    this.nameInterventionA,
-    this.nameInterventionB,
-    List<num> valuesInterventionA,
-    List<num> valuesInterventionB, {
-    this.showColors = true,
-    super.key,
-  }) : meanInterventionA = valuesInterventionA.mean,
-       meanInterventionB = valuesInterventionB.mean;
+// ignore: prefer_const_constructors_in_immutables
+class GaugesWidget(
+  final String nameInterventionA,
+  final String nameInterventionB,
+  List<num> valuesInterventionA,
+  List<num> valuesInterventionB, {
+  final bool showColors = true,
+  super.key,
+}) extends StatelessWidget {
+  final num meanInterventionA = valuesInterventionA.mean;
+  final num meanInterventionB = valuesInterventionB.mean;
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +85,11 @@ class GaugesWidget extends StatelessWidget {
       gaugeAxis = GaugeAxis(
         min: min,
         max: max,
-        degrees: 240, // Set to 240 degrees for a 3/4 circular gauge
+        sweepDegrees: 240,
+        // Set to 240 degrees for a 3/4 circular gauge
         style: const GaugeAxisStyle(
           background: gaugeBackgroundColor,
-          segmentSpacing: 4,
+          zoneSpacing: 4,
         ),
         pointer: const GaugePointer.needle(
           width: 10,
@@ -102,27 +98,28 @@ class GaugesWidget extends StatelessWidget {
           color: Color(0xFF193663),
         ),
         progressBar: null, // Disable the progress bar
-        segments: [
-          GaugeSegment(from: 0, to: 1, color: Colors.red[900]!),
-          const GaugeSegment(from: 1, to: 2, color: Colors.red),
-          GaugeSegment(from: 2, to: 3, color: Colors.orange[900]!),
-          const GaugeSegment(from: 3, to: 4, color: Colors.orange),
-          const GaugeSegment(from: 4, to: 5, color: Colors.yellow),
-          const GaugeSegment(from: 5, to: 6, color: Colors.lightGreen),
-          GaugeSegment(from: 6, to: 7, color: Colors.green[600]!),
-          GaugeSegment(from: 7, to: 8, color: Colors.green[700]!),
-          GaugeSegment(from: 8, to: 9, color: Colors.green[800]!),
-          GaugeSegment(from: 9, to: 10, color: Colors.green[900]!),
+        zones: [
+          GaugeZone(from: 0, to: 1, color: Colors.red[900]!),
+          const GaugeZone(from: 1, to: 2, color: Colors.red),
+          GaugeZone(from: 2, to: 3, color: Colors.orange[900]!),
+          const GaugeZone(from: 3, to: 4, color: Colors.orange),
+          const GaugeZone(from: 4, to: 5, color: Colors.yellow),
+          const GaugeZone(from: 5, to: 6, color: Colors.lightGreen),
+          GaugeZone(from: 6, to: 7, color: Colors.green[600]!),
+          GaugeZone(from: 7, to: 8, color: Colors.green[700]!),
+          GaugeZone(from: 8, to: 9, color: Colors.green[800]!),
+          GaugeZone(from: 9, to: 10, color: Colors.green[900]!),
         ],
       );
     } else {
       gaugeAxis = GaugeAxis(
         min: min,
         max: max,
-        degrees: 240, // Set to 240 degrees for a 3/4 circular gauge
+        sweepDegrees: 240,
+        // Set to 240 degrees for a 3/4 circular gauge
         style: const GaugeAxisStyle(
           background: gaugeBackgroundColor,
-          segmentSpacing: 4,
+          zoneSpacing: 4,
         ),
         pointer: const GaugePointer.needle(
           width: 10,
@@ -145,8 +142,7 @@ class GaugesWidget extends StatelessWidget {
         ),
         // Text placed inside the gauge box
         Positioned(
-          bottom:
-              30, // Position text inside the gauge without overlapping the needle
+          bottom: 30, // Position text inside the gauge without overlapping the needle
           child: RichText(
             text: TextSpan(
               children: <TextSpan>[

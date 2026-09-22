@@ -22,7 +22,7 @@ void downloadBytes({required List<int> bytes, required String filename}) {
   anchor.remove();
 }
 
-abstract class FileFormatEncoder {
+abstract class FileFormatEncoder() {
   Future<String> encodeAsync(List<Map<String, dynamic>> records) {
     return runInBackground<String>(() => encode(records));
   }
@@ -34,7 +34,7 @@ abstract class FileFormatEncoder {
   }
 }
 
-class CSVStringEncoder extends FileFormatEncoder {
+class CSVStringEncoder() extends FileFormatEncoder {
   @override
   String encode(List<Map<String, dynamic>> records) {
     final Set<String> columnNames = {};
@@ -54,11 +54,11 @@ class CSVStringEncoder extends FileFormatEncoder {
     }).toList();
 
     final table = [headerRow, ...dataRows];
-    return const ListToCsvConverter().convert(table);
+    return Csv().encode(table);
   }
 }
 
-class JsonStringEncoder extends FileFormatEncoder {
+class JsonStringEncoder() extends FileFormatEncoder {
   @override
   String encode(List<Map<String, dynamic>> records) {
     return prettyJson(records);

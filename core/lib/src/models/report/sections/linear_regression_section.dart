@@ -15,15 +15,18 @@ class LinearRegressionSection extends ReportSection {
   double alpha = 0.05;
   ImprovementDirection? improvement;
 
-  LinearRegressionSection() : super(sectionType);
+  new() : super(sectionType);
 
-  LinearRegressionSection.withId() : super.withId(sectionType);
+  new withId() : super.withId(sectionType);
 
-  factory LinearRegressionSection.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$LinearRegressionSectionFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$LinearRegressionSectionToJson(this);
 }
 
-enum ImprovementDirection { positive, negative }
+enum ImprovementDirection() {
+  positive,
+  negative,
+}

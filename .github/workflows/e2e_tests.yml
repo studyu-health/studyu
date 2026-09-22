@@ -5,13 +5,16 @@ on:
     paths:
       - ".github/workflows/e2e_tests.yml"
       - ".github/workflows/init-workspace/action.yml"
-      - 'designer_v2/**'
-      - 'core/**'
-      - 'flutter_common/**'
+      - "supabase/**"
+      - "scripts/reset-test-db.sh"
+      - "designer_v2/**"
+      - "app/**"
+      - "core/**"
+      - "flutter_common/**"
   workflow_dispatch:
 
 env:
-  MELOS_SDK_PATH: 'auto'
+  MELOS_SDK_PATH: "auto"
 
 jobs:
   drive_web:
@@ -19,7 +22,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -27,7 +30,7 @@ jobs:
         uses: ./.github/workflows/init-workspace
 
       - name: Setup ChromeDriver
-        uses: nanasess/setup-chromedriver@v2
+        uses: nanasess/setup-chromedriver@v3
 
       - name: Enable web support
         run: flutter config --enable-web
@@ -35,15 +38,10 @@ jobs:
       - name: Prepare environment
         run: |
           dart pub get
-          dart pub global activate melos
-          melos bootstrap
-
-      - name: Prepare Supabase CI Seed
-        run: |
-          cp supabase/seed-ci.sql supabase/seed.sql
+          dart run melos bootstrap
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@v3
         with:
           version: latest
 
@@ -51,11 +49,20 @@ jobs:
         run: |
           supabase start -x studio,imgproxy
 
+      - name: Reset Supabase database
+        run: ./scripts/reset-test-db.sh --yes
+
       - name: Configure local StudyU environment
         run: |
-          cp flutter_common/lib/envs/.env.local.example flutter_common/lib/envs/.env.local
-          LC_ALL=C sed -i.bak '/STUDYU_SUPABASE_PUBLIC_ANON_KEY/d' flutter_common/lib/envs/.env.local
-          echo "STUDYU_SUPABASE_PUBLIC_ANON_KEY=$(supabase status -o env | grep ANON_KEY | cut -d'=' -f2)" >> flutter_common/lib/envs/.env.local
+          cp flutter_common/lib/envs/.env.local.example \
+            flutter_common/lib/envs/.env.local
+          LC_ALL=C sed -i.bak \
+            '/STUDYU_SUPABASE_PUBLIC_ANON_KEY/d' \
+            flutter_common/lib/envs/.env.local
+          supabase_anon_key="$(supabase status -o env | grep ANON_KEY \
+            | cut -d'=' -f2)"
+          echo "STUDYU_SUPABASE_PUBLIC_ANON_KEY=$supabase_anon_key" \
+            >> flutter_common/lib/envs/.env.local
 
       - name: Start Chrome Driver
         run: |
@@ -63,10 +70,46 @@ jobs:
           chromedriver --port=4444 &
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
 
-      - name: Run Flutter E2E tests
+      - name: Run Designer Flutter E2E tests
         working-directory: ./designer_v2
         run: |
           flutter drive --driver=test_driver/integration_driver.dart \
             --target=integration_test/app_test.dart -d web-server \
-            --web-browser-flag="--disable-web-security" \
             --dart-define="STUDYU_ENV=.env.local"
+
+      - name: Run app E2E tests
+        working-directory: ./app
+        run: |
+          # Run every app integration test target, one isolated
+          # Flutter-drive/ChromeDriver browser session each, so targets never
+          # share browser/app state. Successful recovery persists credentials
+          # and an active subject.
+          #
+          # recovery_e2e_signed_out_test.dart merges the former active,
+          # no_study, and reused_phrase targets into one browser session so
+          # CI compiles the app once for all three. Its test cases call
+          # resetToSignedOut (recovery_e2e_support.dart) between recoveries.
+          # Declaration order in the file keeps the active-subject case
+          # before the reused-phrase case, which restores the same fixed
+          # phrase the active-subject case already consumed.
+          # recovery_e2e_confirmation_test.dart stays a separate process so
+          # its launch-time dart-define sign-in bootstrap keeps real cold
+          # start semantics. No ordering dependency exists between the two
+          # files; alphabetical glob order (confirmation < signed_out) is
+          # fine.
+          e2e_email="recovery-signed-in@local.studyu.test"
+          e2e_password="recovery-signed-in-pass"
+          for target in integration_test/*_test.dart; do
+            defines=("--dart-define=STUDYU_ENV=.env.local")
+            case "$target" in
+              *recovery_e2e_confirmation_test.dart)
+                # Only the signed-in journey bootstraps a participant session.
+                defines+=(
+                  "--dart-define=STUDYU_E2E_PARTICIPANT_EMAIL=$e2e_email"
+                  "--dart-define=STUDYU_E2E_PARTICIPANT_PASSWORD=$e2e_password"
+                )
+                ;;
+            esac
+            flutter drive --driver=test_driver/integration_driver.dart \
+              --target="$target" -d web-server "${defines[@]}"
+          done

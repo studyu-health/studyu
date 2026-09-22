@@ -10,12 +10,12 @@ part of 'study_recruit_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(StudyRecruitController)
-const studyRecruitControllerProvider = StudyRecruitControllerFamily._();
+final studyRecruitControllerProvider = StudyRecruitControllerFamily._();
 
 final class StudyRecruitControllerProvider
     extends
         $NotifierProvider<StudyRecruitController, StudyRecruitControllerState> {
-  const StudyRecruitControllerProvider._({
+  StudyRecruitControllerProvider._({
     required StudyRecruitControllerFamily super.from,
     required StudyID super.argument,
   }) : super(
@@ -61,7 +61,7 @@ final class StudyRecruitControllerProvider
 }
 
 String _$studyRecruitControllerHash() =>
-    r'31c42f0aec63c01dca7af6dc86a88e6f75be2b42';
+    r'74037381833f71fa425e63d241ee50893fd8658c';
 
 final class StudyRecruitControllerFamily extends $Family
     with
@@ -72,7 +72,7 @@ final class StudyRecruitControllerFamily extends $Family
           StudyRecruitControllerState,
           StudyID
         > {
-  const StudyRecruitControllerFamily._()
+  StudyRecruitControllerFamily._()
     : super(
         retry: null,
         name: r'studyRecruitControllerProvider',
@@ -96,8 +96,7 @@ abstract class _$StudyRecruitController
   StudyRecruitControllerState build(StudyID studyId);
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build(_$args);
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<StudyRecruitControllerState, StudyRecruitControllerState>;
@@ -112,6 +111,6 @@ abstract class _$StudyRecruitController
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

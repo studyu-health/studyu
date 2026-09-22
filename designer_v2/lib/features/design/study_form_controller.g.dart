@@ -15,7 +15,7 @@ part of 'study_form_controller.dart';
 /// before the [StudyController]'s [Study] is available (see also: [AsyncValue])
 
 @ProviderFor(studyFormViewModel)
-const studyFormViewModelProvider = StudyFormViewModelFamily._();
+final studyFormViewModelProvider = StudyFormViewModelFamily._();
 
 /// Provides the [FormViewModel] that is responsible for displaying and
 /// editing the study design form.
@@ -36,7 +36,7 @@ final class StudyFormViewModelProvider
   ///
   /// Note: This is not safe to use in widgets (or other providers) that are built
   /// before the [StudyController]'s [Study] is available (see also: [AsyncValue])
-  const StudyFormViewModelProvider._({
+  StudyFormViewModelProvider._({
     required StudyFormViewModelFamily super.from,
     required StudyID super.argument,
   }) : super(
@@ -99,7 +99,7 @@ String _$studyFormViewModelHash() =>
 
 final class StudyFormViewModelFamily extends $Family
     with $FunctionalFamilyOverride<StudyFormViewModel, StudyID> {
-  const StudyFormViewModelFamily._()
+  StudyFormViewModelFamily._()
     : super(
         retry: null,
         name: r'studyFormViewModelProvider',

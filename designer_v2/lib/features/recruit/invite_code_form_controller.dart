@@ -1,34 +1,25 @@
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/domain/study_invite.dart';
 import 'package:studyu_designer_v2/domain/study_schedule.dart';
 import 'package:studyu_designer_v2/features/design/study_form_validation.dart';
 import 'package:studyu_designer_v2/features/forms/form_validation.dart';
 import 'package:studyu_designer_v2/features/forms/form_view_model.dart';
-import 'package:studyu_designer_v2/features/study/study_controller.dart';
+import 'package:studyu_designer_v2/features/recruit/invite_code_form_repository.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
-import 'package:studyu_designer_v2/repositories/invite_code_repository.dart';
 import 'package:uuid/uuid.dart';
 
-part 'invite_code_form_controller.g.dart';
-
-class InviteCodeFormViewModel extends FormViewModel<StudyInvite> {
-  InviteCodeFormViewModel({
-    required this.study,
-    required this.inviteCodeRepository,
-    super.formData,
-    super.delegate,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  final Study study;
-  final IInviteCodeRepository inviteCodeRepository;
-
+class InviteCodeFormViewModel({
+  required final Study study,
+  required final InviteCodeFormRepository inviteCodeRepository,
+  super.formData,
+  super.delegate,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends FormViewModel<StudyInvite> {
   @override
   Map<FormMode, String> get titles => {
     FormMode.create: tr.form_code_create,
+    FormMode.edit: tr.form_code_readonly,
     FormMode.readonly: tr.form_code_readonly,
   };
 
@@ -117,6 +108,22 @@ class InviteCodeFormViewModel extends FormViewModel<StudyInvite> {
   @override
   void initControls() {
     regenerateCode(); // initialize randomly
+    syncCodeControlEnabledState();
+    prevFormValue = {...form.value};
+  }
+
+  @override
+  set formMode(FormMode mode) {
+    super.formMode = mode;
+    syncCodeControlEnabledState();
+  }
+
+  void syncCodeControlEnabledState() {
+    if (formMode == FormMode.edit) {
+      codeControl.markAsDisabled();
+      return;
+    }
+    codeControl.markAsEnabled();
   }
 
   // - Validation
@@ -124,7 +131,11 @@ class InviteCodeFormViewModel extends FormViewModel<StudyInvite> {
   Future<Map<String, dynamic>?> _uniqueInviteCode(
     AbstractControl control,
   ) async {
-    final code = control.value as String;
+    final code = _normalizeCode(control.value as String?);
+    if (code.isEmpty || _matchesExistingInviteCode(code)) {
+      return null;
+    }
+
     final isCodeAlreadyUsed = await inviteCodeRepository.isCodeAlreadyUsed(
       code,
     );
@@ -135,6 +146,18 @@ class InviteCodeFormViewModel extends FormViewModel<StudyInvite> {
       return error;
     }
     return null;
+  }
+
+  bool _matchesExistingInviteCode(String code) {
+    final existingCode = formData?.code;
+    if (existingCode == null) {
+      return false;
+    }
+    return code == _normalizeCode(existingCode);
+  }
+
+  String _normalizeCode(String? code) {
+    return code?.trim().toLowerCase() ?? '';
   }
 
   void regenerateCode() {
@@ -150,8 +173,11 @@ class InviteCodeFormViewModel extends FormViewModel<StudyInvite> {
 
   @override
   StudyInvite buildFormData() {
+    final code = formMode == FormMode.edit && formData != null
+        ? formData!.code
+        : codeControl.value!.trim().toLowerCase();
     return StudyInvite(
-      codeControl.value!,
+      code,
       study.id,
       preselectedInterventionIds: preconfiguredSchedule,
     );
@@ -165,28 +191,24 @@ class InviteCodeFormViewModel extends FormViewModel<StudyInvite> {
       interventionAControl.value = data.preselectedInterventionIds![0];
       interventionBControl.value = data.preselectedInterventionIds![1];
     }
+    syncCodeControlEnabledState();
   }
 
   @override
   Future<StudyInvite> save({bool updateState = true}) {
-    return inviteCodeRepository
-        .save(buildFormData())
-        .then((wrapped) => wrapped!.model);
+    final nextInvite = buildFormData();
+    final saveOperation = inviteCodeRepository.save(
+      nextInvite,
+      runOptimistically: false,
+    );
+
+    return saveOperation.then((wrapped) {
+      if (updateState) {
+        formData = wrapped!.model;
+        syncCodeControlEnabledState();
+        finalizeInitializationBaseline();
+      }
+      return wrapped!.model;
+    });
   }
-}
-
-/// Provide a controller parametrized by [StudyID]
-///
-/// Note: This is not safe to use in widgets (or other providers) that are built
-/// before the [StudyController]'s [Study] is available (see also: [AsyncValue])
-@riverpod
-InviteCodeFormViewModel inviteCodeFormViewModel(Ref ref, StudyID studyId) {
-  // Reactively bind to and obtain [StudyController]'s current study
-  final state = ref.watch(studyControllerProvider(studyId));
-  final inviteCodeRepository = ref.watch(inviteCodeRepositoryProvider(studyId));
-
-  return InviteCodeFormViewModel(
-    study: state.studyValueRequired,
-    inviteCodeRepository: inviteCodeRepository,
-  );
 }

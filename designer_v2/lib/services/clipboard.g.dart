@@ -10,7 +10,7 @@ part of 'clipboard.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(clipboardService)
-const clipboardServiceProvider = ClipboardServiceProvider._();
+final clipboardServiceProvider = ClipboardServiceProvider._();
 
 final class ClipboardServiceProvider
     extends
@@ -20,7 +20,7 @@ final class ClipboardServiceProvider
           IClipboardService
         >
     with $Provider<IClipboardService> {
-  const ClipboardServiceProvider._()
+  ClipboardServiceProvider._()
     : super(
         from: null,
         argument: null,

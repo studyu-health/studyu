@@ -12,7 +12,7 @@ import 'package:studyu_designer_v2/utils/performance.dart';
 part 'study_analyze_controller.g.dart';
 
 @riverpod
-class StudyAnalyzeController extends _$StudyAnalyzeController {
+class StudyAnalyzeController() extends _$StudyAnalyzeController {
   @override
   StudyAnalyzeControllerState build(StudyID studyId) {
     return StudyAnalyzeControllerState(

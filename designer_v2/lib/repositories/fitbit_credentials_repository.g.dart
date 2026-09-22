@@ -10,7 +10,7 @@ part of 'fitbit_credentials_repository.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(fitbitCredentialsRepository)
-const fitbitCredentialsRepositoryProvider =
+final fitbitCredentialsRepositoryProvider =
     FitbitCredentialsRepositoryFamily._();
 
 final class FitbitCredentialsRepositoryProvider
@@ -21,7 +21,7 @@ final class FitbitCredentialsRepositoryProvider
           FitbitCredentialsRepository
         >
     with $Provider<FitbitCredentialsRepository> {
-  const FitbitCredentialsRepositoryProvider._({
+  FitbitCredentialsRepositoryProvider._({
     required FitbitCredentialsRepositoryFamily super.from,
     required StudyID super.argument,
   }) : super(
@@ -79,7 +79,7 @@ String _$fitbitCredentialsRepositoryHash() =>
 
 final class FitbitCredentialsRepositoryFamily extends $Family
     with $FunctionalFamilyOverride<FitbitCredentialsRepository, StudyID> {
-  const FitbitCredentialsRepositoryFamily._()
+  FitbitCredentialsRepositoryFamily._()
     : super(
         retry: null,
         name: r'fitbitCredentialsRepositoryProvider',

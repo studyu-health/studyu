@@ -1,29 +1,25 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
-import 'package:studyu_app/screens/study/multimodal/capture_picture_screen.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class ImageCapturingQuestionWidget extends QuestionWidget {
-  final ImageCapturingQuestion question;
-  final Function(Answer<FutureBlobFile>)? onDone;
-
-  const ImageCapturingQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-  });
-
+class const ImageCapturingQuestionWidget({
+  super.key,
+  required final ImageCapturingQuestion question,
+  final Function(Answer<FutureBlobFile>)? onDone,
+}) extends QuestionWidget {
   @override
   State<ImageCapturingQuestionWidget> createState() =>
       _ImageCapturingQuestionWidgetState();
 }
 
-class _ImageCapturingQuestionWidgetState
+class _ImageCapturingQuestionWidgetState()
     extends State<ImageCapturingQuestionWidget> {
   bool _hasCaptured = false;
 
@@ -84,16 +80,12 @@ class _ImageCapturingQuestionWidgetState
       return;
     }
     final appState = context.read<AppState>();
-    final FutureBlobFile? imageFile = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) {
-          return CapturePictureScreen(
-            studyId: appState.activeSubject!.studyId,
-            userId: appState.activeSubject!.userId,
-          );
-        },
-      ),
+    final FutureBlobFile? imageFile = await context.push(
+      '/${RouteNames.capturePicture}',
+      extra: {
+        'studyId': appState.activeSubject!.studyId,
+        'userId': appState.activeSubject!.userId,
+      },
     );
     if (imageFile != null) {
       setState(() {

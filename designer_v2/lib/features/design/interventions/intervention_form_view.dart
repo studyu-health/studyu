@@ -17,17 +17,16 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/routing/router_config.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class InterventionFormView extends ConsumerStatefulWidget {
-  const InterventionFormView({required this.formViewModel, super.key});
-
-  final InterventionFormViewModel formViewModel;
-
+class const InterventionFormView({
+  required final InterventionFormViewModel formViewModel,
+  super.key,
+}) extends ConsumerStatefulWidget {
   @override
   ConsumerState<InterventionFormView> createState() =>
       _InterventionFormViewState();
 }
 
-class _InterventionFormViewState extends ConsumerState<InterventionFormView> {
+class _InterventionFormViewState() extends ConsumerState<InterventionFormView> {
   bool isStylingInformationDismissed = true;
 
   void onDismissedCallback() => setState(() {
@@ -83,28 +82,26 @@ class _InterventionFormViewState extends ConsumerState<InterventionFormView> {
             ),
             FormTableRow(
               control: widget.formViewModel.interventionDescriptionControl,
-              labelBuilder: (context) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              labelBuilder: (context) => Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 3.0,
+                runSpacing: 8.0,
                 children: [
                   FormLabel(
                     labelText: tr.form_field_intervention_description,
                     helpText: tr.form_field_intervention_description_tooltip,
                   ),
-                  const SizedBox(height: 8),
-                  Container(
-                    margin: const EdgeInsets.only(left: 3.0),
-                    child: Opacity(
-                      opacity: ThemeConfig.kMuteFadeFactor,
-                      child: Tooltip(
-                        message: "Use html to style your content",
-                        child: Hyperlink(
-                          text: "styleable",
-                          onClick: () => setState(() {
-                            isStylingInformationDismissed =
-                                !isStylingInformationDismissed;
-                          }),
-                          visitedColor: null,
-                        ),
+                  Opacity(
+                    opacity: ThemeConfig.kMuteFadeFactor,
+                    child: Tooltip(
+                      message: "Use html to style your content",
+                      child: Hyperlink(
+                        text: "styleable",
+                        onClick: () => setState(() {
+                          isStylingInformationDismissed =
+                              !isStylingInformationDismissed;
+                        }),
+                        visitedColor: null,
                       ),
                     ),
                   ),
@@ -160,8 +157,9 @@ class _InterventionFormViewState extends ConsumerState<InterventionFormView> {
                   hideLeadingTrailingWhenEmpty: true,
                   reorderable: !widget.formViewModel.isReadonly,
                   onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) {
-                      newIndex -= 1;
+                    var effectiveNewIndex = newIndex;
+                    if (effectiveNewIndex > oldIndex) {
+                      effectiveNewIndex -= 1;
                     }
                     final item = widget
                         .formViewModel
@@ -169,7 +167,7 @@ class _InterventionFormViewState extends ConsumerState<InterventionFormView> {
                         .formViewModels
                         .removeAt(oldIndex);
                     widget.formViewModel.tasksCollection.formViewModels.insert(
-                      newIndex,
+                      effectiveNewIndex,
                       item,
                     );
                     final controlItem = widget
@@ -177,7 +175,7 @@ class _InterventionFormViewState extends ConsumerState<InterventionFormView> {
                         .interventionTasksArray
                         .removeAt(oldIndex);
                     widget.formViewModel.interventionTasksArray.insert(
-                      newIndex,
+                      effectiveNewIndex,
                       controlItem,
                     );
                   },

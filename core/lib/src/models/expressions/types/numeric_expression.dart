@@ -4,7 +4,7 @@ import 'package:studyu_core/src/models/questionnaire/questionnaire_state.dart';
 
 part 'numeric_expression.g.dart';
 
-enum NumericComparator {
+enum NumericComparator() {
   @JsonValue('=')
   equal,
   @JsonValue('!=')
@@ -20,17 +20,18 @@ enum NumericComparator {
 }
 
 @JsonSerializable()
-class NumericExpression extends ValueExpression<num> {
+class NumericExpression({
+  required var NumericComparator comparator,
+  required var num value,
+}) extends ValueExpression<num> {
   // Use 'num' for int/double
   static const String expressionType = 'numeric';
 
-  NumericComparator comparator;
-  num value; // The value to compare against
+  // The value to compare against
 
-  NumericExpression({required this.comparator, required this.value})
-    : super(expressionType);
+  this : super(expressionType);
 
-  factory NumericExpression.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$NumericExpressionFromJson(json);
 
   @override

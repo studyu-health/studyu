@@ -12,7 +12,7 @@ part of 'locale_providers.dart';
 /// Returns the locale of the Platform.localeName
 
 @ProviderFor(platformLocale)
-const platformLocaleProvider = PlatformLocaleProvider._();
+final platformLocaleProvider = PlatformLocaleProvider._();
 
 /// Platform Locale Provider
 /// Returns the locale of the Platform.localeName
@@ -22,7 +22,7 @@ final class PlatformLocaleProvider
     with $Provider<Locale> {
   /// Platform Locale Provider
   /// Returns the locale of the Platform.localeName
-  const PlatformLocaleProvider._()
+  PlatformLocaleProvider._()
     : super(
         from: null,
         argument: null,
@@ -60,7 +60,7 @@ String _$platformLocaleHash() => r'e490bf2439a27d6a6ca15f4029f5b198fd6817ba';
 /// Supported Locales Provider
 
 @ProviderFor(supportedLocales)
-const supportedLocalesProvider = SupportedLocalesProvider._();
+final supportedLocalesProvider = SupportedLocalesProvider._();
 
 /// Supported Locales Provider
 
@@ -68,7 +68,7 @@ final class SupportedLocalesProvider
     extends $FunctionalProvider<List<Locale>, List<Locale>, List<Locale>>
     with $Provider<List<Locale>> {
   /// Supported Locales Provider
-  const SupportedLocalesProvider._()
+  SupportedLocalesProvider._()
     : super(
         from: null,
         argument: null,
@@ -107,7 +107,7 @@ String _$supportedLocalesHash() => r'9cd4634b71b66c5e97b66ecbfd966d91eecfcc64';
 /// Provides the current locale, and automatically updates when the locale changes.
 
 @ProviderFor(locale)
-const localeProvider = LocaleProvider._();
+final localeProvider = LocaleProvider._();
 
 /// Locale Provider
 /// Provides the current locale, and automatically updates when the locale changes.
@@ -116,7 +116,7 @@ final class LocaleProvider extends $FunctionalProvider<Locale, Locale, Locale>
     with $Provider<Locale> {
   /// Locale Provider
   /// Provides the current locale, and automatically updates when the locale changes.
-  const LocaleProvider._()
+  LocaleProvider._()
     : super(
         from: null,
         argument: null,

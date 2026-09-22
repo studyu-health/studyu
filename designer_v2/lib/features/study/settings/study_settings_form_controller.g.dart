@@ -14,7 +14,7 @@ part of 'study_settings_form_controller.dart';
 /// before the [StudyController]'s [Study] is available (see also: [AsyncValue])
 
 @ProviderFor(studySettingsFormViewModel)
-const studySettingsFormViewModelProvider = StudySettingsFormViewModelFamily._();
+final studySettingsFormViewModelProvider = StudySettingsFormViewModelFamily._();
 
 /// Provides the [FormViewModel] responsible for managing the study settings.
 ///
@@ -33,7 +33,7 @@ final class StudySettingsFormViewModelProvider
   ///
   /// Note: This is not safe to use in widgets (or other providers) that are built
   /// before the [StudyController]'s [Study] is available (see also: [AsyncValue])
-  const StudySettingsFormViewModelProvider._({
+  StudySettingsFormViewModelProvider._({
     required StudySettingsFormViewModelFamily super.from,
     required String super.argument,
   }) : super(
@@ -96,7 +96,7 @@ String _$studySettingsFormViewModelHash() =>
 
 final class StudySettingsFormViewModelFamily extends $Family
     with $FunctionalFamilyOverride<StudySettingsFormViewModel, String> {
-  const StudySettingsFormViewModelFamily._()
+  StudySettingsFormViewModelFamily._()
     : super(
         retry: null,
         name: r'studySettingsFormViewModelProvider',

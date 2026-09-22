@@ -1,34 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/widgets/questionnaire/custom_slider.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class AnnotatedScaleQuestionWidget extends QuestionWidget {
-  final AnnotatedScaleQuestion question;
-  final Function(Answer)? onDone;
-
-  const AnnotatedScaleQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-  });
-
+class const AnnotatedScaleQuestionWidget({
+  super.key,
+  required final AnnotatedScaleQuestion question,
+  final Function(Answer)? onDone,
+  final Answer<num>? initialAnswer,
+}) extends QuestionWidget {
   @override
   State<AnnotatedScaleQuestionWidget> createState() =>
       _AnnotatedScaleQuestionWidgetState();
 }
 
-class _AnnotatedScaleQuestionWidgetState
+class _AnnotatedScaleQuestionWidgetState()
     extends State<AnnotatedScaleQuestionWidget> {
   double? value;
-  late bool sliderTouched;
 
   @override
   void initState() {
     super.initState();
-    value = widget.question.initial;
-    sliderTouched = false;
+    value =
+        widget.initialAnswer?.response.toDouble() ?? widget.question.initial;
   }
 
   @override
@@ -50,7 +44,6 @@ class _AnnotatedScaleQuestionWidgetState
             //widget.onDone(widget.question.constructAnswer(value));
           }),
           onChangeEnd: (val) => setState(() {
-            sliderTouched = true;
             value = val;
             widget.onDone!(widget.question.constructAnswer(value!));
           }),
@@ -58,19 +51,6 @@ class _AnnotatedScaleQuestionWidgetState
           linearStep: false,
           steps: widget.question,
         ),
-        if (!sliderTouched)
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                setState(() {
-                  sliderTouched = true;
-                });
-                widget.onDone!(widget.question.constructAnswer(value!));
-              },
-              child: Text(AppLocalizations.of(context)!.done),
-            ),
-          ),
       ],
     );
   }

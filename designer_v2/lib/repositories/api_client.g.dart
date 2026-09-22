@@ -10,13 +10,13 @@ part of 'api_client.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(apiClient)
-const apiClientProvider = ApiClientProvider._();
+final apiClientProvider = ApiClientProvider._();
 
 final class ApiClientProvider
     extends
         $FunctionalProvider<StudyUApiClient, StudyUApiClient, StudyUApiClient>
     with $Provider<StudyUApiClient> {
-  const ApiClientProvider._()
+  ApiClientProvider._()
     : super(
         from: null,
         argument: null,

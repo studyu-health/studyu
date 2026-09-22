@@ -135,9 +135,10 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
-!.vscode/settings.json
-
 # +++ CUSTOM ADDITIONS +++
+
+# Scratch directory
+.tmp/
 
 # Melos
 !*.lock
@@ -158,6 +159,7 @@ generated/
 
 # Ruby bundler files for fastlane
 .bundle
+**/vendor/bundle/
 
 # Megalinter
 megalinter-reports/
@@ -167,3 +169,17 @@ megalinter-reports/
 
 # No localization file on workspace level
 l10n-missing.txt
+
+# Local OpenCode state
+docs/superpowers/
+interview/
+.opencode/
+
+# Local git worktrees
+.worktrees/
+
+# Local subagent artifacts
+.pi-subagents/
+
+.vscode/settings.json
+/.qwen/

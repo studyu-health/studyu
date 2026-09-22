@@ -2,12 +2,9 @@ import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/design/shared/questionnaire/question/question_form_data.dart';
 import 'package:studyu_designer_v2/features/forms/form_data.dart';
 
-class QuestionnaireFormData implements IFormData {
-  QuestionnaireFormData({this.questionsData});
-
-  final List<QuestionFormData>? questionsData;
-
-  factory QuestionnaireFormData.fromDomainModel(
+class QuestionnaireFormData({final List<QuestionFormData>? questionsData})
+    implements IFormData {
+  factory fromDomainModel(
     StudyUQuestionnaire questionnaire,
     List<EligibilityCriterion> eligibilityCriteria,
   ) {
@@ -38,7 +35,11 @@ class QuestionnaireFormData implements IFormData {
   }
 
   List<EligibilityCriterion> toEligibilityCriteria() {
-    return questionsData?.map((q) => q.toEligibilityCriterion()).toList() ?? [];
+    return questionsData
+            ?.map((q) => q.toEligibilityCriterion())
+            .nonNulls
+            .toList() ??
+        [];
   }
 
   @override

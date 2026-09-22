@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
-import 'package:studyu_app/screens/study/report/report_details.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ReportHistoryScreen extends StatelessWidget {
-  const ReportHistoryScreen({super.key});
-
+class const ReportHistoryScreen({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,11 +38,8 @@ class ReportHistoryScreen extends StatelessWidget {
   }
 }
 
-class ReportHistoryItem extends StatelessWidget {
-  final StudySubject subject;
-
-  const ReportHistoryItem(this.subject, {super.key});
-
+class const ReportHistoryItem(final StudySubject subject, {super.key})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -53,10 +49,7 @@ class ReportHistoryItem extends StatelessWidget {
       color: isActiveStudy ? Colors.green[600] : theme.cardColor,
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            ReportDetailsScreen.routeFor(subject: subject),
-          );
+          context.push('/${RouteNames.reportDetails}', extra: subject);
         },
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -65,7 +58,7 @@ class ReportHistoryItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Icon(
-                  MdiIcons.fromString(subject.study.iconName) ??
+                  MdiIconsHelper.fromString(subject.study.iconName) ??
                       MdiIcons.accountHeart,
                   color: isActiveStudy ? Colors.white : Colors.black,
                 ),

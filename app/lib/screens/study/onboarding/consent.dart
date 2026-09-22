@@ -1,35 +1,65 @@
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
-import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:provider/provider.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
-import 'package:studyu_app/routes.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
+import 'package:studyu_app/services/pending_deep_link_service.dart';
+import 'package:studyu_app/services/study_start_service.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/save_pdf.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
 import 'package:studyu_app/widgets/html_text.dart';
+import 'package:studyu_app/widgets/loading_overlay.dart';
+import 'package:studyu_app/widgets/onboarding_shell.dart';
+import 'package:studyu_app/widgets/study_onboarding_description.dart';
+import 'package:studyu_app/widgets/title_description_layout.dart';
+import 'package:studyu_app/widgets/why_dialog.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class ConsentScreen extends StatefulWidget {
-  const ConsentScreen({super.key});
-
+class const ConsentScreen({super.key}) extends StatefulWidget {
   @override
   State<ConsentScreen> createState() => _ConsentScreenState();
 }
 
-class _ConsentScreenState extends State<ConsentScreen> {
+class _ConsentScreenState() extends State<ConsentScreen> {
   StudySubject? subject;
   late List<bool> boxLogic;
   late List<ConsentItem> consentList;
+  bool _isStarting = false;
 
   void onBoxTapped(int index) {
     setState(() {
       boxLogic[index] = true;
     });
+  }
+
+  // Accepting consent starts the study in place: this screen shows the
+  // loading state while the subject is created, then navigates directly to
+  // the next screen. It deliberately does not pop back to the journey
+  // screen first, so no pop-then-push route animation plays.
+  Future<void> _acceptConsent() async {
+    setState(() => _isStarting = true);
+    final started = await StudyStartService.startStudy(context, subject!);
+    if (started || !mounted) return;
+    setState(() => _isStarting = false);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.error)),
+    );
+  }
+
+  Future<void> _declineConsent() async {
+    final appState = context.read<AppState>();
+    appState.activeSubject = null;
+    appState.onboardingPhase = null;
+    context.go('/${RouteNames.welcome}');
+    await PendingDeepLinkService.clear(appState);
   }
 
   @override
@@ -68,12 +98,36 @@ class _ConsentScreenState extends State<ConsentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final appState = context.read<AppState>();
+    final nav = BottomOnboardingNavigation(
+      backLabel: AppLocalizations.of(context)!.decline,
+      showBackIcon: false,
+      onBack: _declineConsent,
+      nextLabel: AppLocalizations.of(context)!.accept,
+      showNextIcon: false,
+      onNext: boxLogic.every((element) => element) || isDebugMode
+          ? _acceptConsent
+          : null,
+      progress: OnboardingProgress.forPage(appState, OnboardingStep.consent),
+    );
 
-    return Scaffold(
+    final navNotifier = OnboardingNavNotifier.maybeOf(context);
+    navNotifier?.register(
+      this,
+      '/${RouteNames.consent}',
+      OnboardingNavConfig.fromNav(
+        nav,
+        loadingMessage: _isStarting
+            ? AppLocalizations.of(context)!.starting_study
+            : null,
+      ),
+    );
+
+    final scaffold = Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
         title: Text(AppLocalizations.of(context)!.consent),
-        leading: Icon(MdiIcons.textBoxCheck),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -87,9 +141,8 @@ class _ConsentScreenState extends State<ConsentScreen> {
                       AppLocalizations.of(context)!.save_not_supported,
                     ),
                     content: Text(
-                      AppLocalizations.of(
-                        context,
-                      )!.save_not_supported_description,
+                      AppLocalizations.of(context)!
+                          .save_not_supported_description,
                     ),
                   ),
                 );
@@ -115,102 +168,59 @@ class _ConsentScreenState extends State<ConsentScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: AppLocalizations.of(context)!.please_give_consent,
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      TextSpan(text: ' ', style: theme.textTheme.titleMedium),
-                      TextSpan(
-                        text: AppLocalizations.of(
-                          context,
-                        )!.please_give_consent_why,
-                        style: theme.textTheme.titleSmall!.copyWith(
-                          color: theme.primaryColor,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              content: Text(
-                                AppLocalizations.of(
-                                  context,
-                                )!.please_give_consent_reason,
-                              ),
-                            ),
-                          ),
-                      ),
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                        ),
-                    itemCount: consentList.length,
-                    itemBuilder: (context, index) {
-                      return ConsentCard(
-                        consent: consentList[index],
-                        isChecked: boxLogic[index],
-                        index: index,
-                        onTapped: onBoxTapped,
-                      );
-                    },
-                    primary: false,
-                    padding: const EdgeInsets.all(20),
-                  ),
-                ),
-              ],
+      body: TitleDescriptionLayout(
+        descriptionWidget: StudyOnboardingDescription(
+          text: AppLocalizations.of(context)!.please_give_consent,
+          actionLabel: AppLocalizations.of(context)!.please_give_consent_why,
+          onAction: () => showDialog(
+            context: context,
+            builder: (context) => WhyDialog(
+              content: AppLocalizations.of(context)!.please_give_consent_reason,
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomOnboardingNavigation(
-        backLabel: AppLocalizations.of(context)!.decline,
-        backIcon: const Icon(Icons.close),
-        onBack: () => Navigator.popUntil(
-          context,
-          ModalRoute.withName(Routes.studySelection),
+        descriptionBottomSpacing: 0,
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          itemCount: consentList.length,
+          itemBuilder: (context, index) => ConsentCard(
+            consent: consentList[index],
+            isChecked: boxLogic[index],
+            index: index,
+            onTapped: onBoxTapped,
+          ),
         ),
-        nextLabel: AppLocalizations.of(context)!.accept,
-        nextIcon: const Icon(Icons.check),
-        onNext: boxLogic.every((element) => element) || kDebugMode
-            ? () => Navigator.pop(context, true)
-            : null,
-        progress: const OnboardingProgress(stage: 2, progress: 2.5),
       ),
+      bottomNavigationBar: navNotifier != null ? null : nav,
+    );
+
+    // In shell mode the loading overlay is rendered by OnboardingShell so it
+    // covers the full screen including the persistent bottom nav.
+    if (navNotifier != null) return scaffold;
+
+    return Stack(
+      children: [
+        scaffold,
+        if (_isStarting)
+          LoadingOverlay(message: AppLocalizations.of(context)!.starting_study),
+      ],
     );
   }
 }
 
-class ConsentCard extends StatelessWidget {
-  final ConsentItem? consent;
-  final int? index;
-  final Function(int) onTapped;
-  final bool? isChecked;
-
-  const ConsentCard({
-    super.key,
-    this.consent,
-    this.index,
-    required this.onTapped,
-    this.isChecked,
-  });
-
+class const ConsentCard({
+  super.key,
+  final ConsentItem? consent,
+  final int? index,
+  required final Function(int) onTapped,
+  final bool? isChecked,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -231,7 +241,7 @@ class ConsentCard extends StatelessWidget {
                 children: [
                   if (consent!.iconName.isNotEmpty)
                     Icon(
-                      MdiIcons.fromString(consent!.iconName),
+                      MdiIconsHelper.fromString(consent!.iconName),
                       color: theme.primaryColor,
                     )
                   else
@@ -243,7 +253,7 @@ class ConsentCard extends StatelessWidget {
                   Expanded(child: Text(consent!.title!)),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => context.pop(),
                   ),
                 ],
               ),
@@ -260,7 +270,7 @@ class ConsentCard extends StatelessWidget {
             children: [
               if (consent!.iconName.isNotEmpty)
                 Icon(
-                  MdiIcons.fromString(consent!.iconName),
+                  MdiIconsHelper.fromString(consent!.iconName),
                   size: 60,
                   color: Colors.blue,
                 )
@@ -286,16 +296,9 @@ class ConsentCard extends StatelessWidget {
   }
 }
 
-class ConsentElement {
-  final String title;
-  final String descriptionText;
-  final String acknowledgmentText;
-  final IconData icon;
-
-  ConsentElement(
-    this.title,
-    this.descriptionText,
-    this.acknowledgmentText,
-    this.icon,
-  );
-}
+class ConsentElement(
+  final String title,
+  final String descriptionText,
+  final String acknowledgmentText,
+  final IconData icon,
+);

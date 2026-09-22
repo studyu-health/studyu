@@ -2,27 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/common_views/mouse_events.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 
-class ActionMenuInline extends StatelessWidget {
-  const ActionMenuInline({
-    required this.actions,
-    this.splashRadius = 18.0,
-    this.iconSize,
-    this.iconColor,
-    this.visible = true,
-    this.paddingHorizontal = 2.0,
-    this.paddingVertical = 0.0,
-    super.key,
-  });
-
-  final List<ModelAction> actions;
-  final WidgetStateProperty<Color>? iconColor;
-  final double? iconSize;
-  final bool visible;
-  final double? splashRadius;
-
-  final double? paddingVertical;
-  final double? paddingHorizontal;
-
+class const ActionMenuInline({
+  required final List<ModelAction> actions,
+  final double? splashRadius = 18.0,
+  final double? iconSize,
+  final WidgetStateProperty<Color>? iconColor,
+  final BoxConstraints? buttonConstraints,
+  final VisualDensity? visualDensity,
+  final bool visible = true,
+  final double? paddingHorizontal = 2.0,
+  final double? paddingVertical = 0.0,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (actions.isEmpty || !visible) {
@@ -45,8 +36,10 @@ class ActionMenuInline extends StatelessWidget {
           builder: (context, state) {
             return IconButton(
               padding: EdgeInsets.zero,
+              constraints: buttonConstraints,
               splashRadius: splashRadius,
-              onPressed: () => action.onExecute(),
+              visualDensity: visualDensity,
+              onPressed: () => action.execute(context),
               iconSize: iconSize ?? theme.iconTheme.size ?? 16.0,
               icon: Icon(
                 action.icon,

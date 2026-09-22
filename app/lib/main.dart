@@ -8,10 +8,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:studyu_app/app.dart';
-import 'package:studyu_app/routes.dart';
-import 'package:studyu_app/util/app_analytics.dart';
+import 'package:studyu_app/app_router.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase/supabase.dart';
@@ -20,14 +21,12 @@ import 'package:timezone/timezone.dart' as tz;
 
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse notificationResponse) {
-  // ignore: avoid_print
   print(
     'notification(${notificationResponse.id}) action tapped: '
     '${notificationResponse.actionId} with'
     ' payload: ${notificationResponse.payload}',
   );
   if (notificationResponse.input?.isNotEmpty ?? false) {
-    // ignore: avoid_print
     print(
       'notification action tapped with input: ${notificationResponse.input}',
     );
@@ -63,18 +62,22 @@ Future<void> main() async {
     debugPrint('Error loading env: $error');
   }
   await _configureLocalTimeZone();
+  await _storeE2eParticipantCredentials();
   final queryParameters = Uri.base.queryParameters;
   // Turn off the # in the URLs on the web
   usePathUrlStrategy();
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   AppConfig? appConfig;
-  String initialRoute = Routes.loading;
+  final platformInitialRoute =
+      WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+  String initialRoute = initialRouteFromPlatformRoute(platformInitialRoute);
   try {
     appConfig = await AppConfig.getAppConfig();
   } on PostgrestException catch (e) {
     debugPrint('Postgres exception: $e');
     if (e.code == 'PGRST301') {
       // Unauthorized - likely due to wrong supabase environment variables
-      initialRoute = Routes.appErrorScreen;
+      initialRoute = '/${RouteNames.appErrorScreen}';
     }
   } catch (error) {
     // device could be offline
@@ -82,38 +85,30 @@ Future<void> main() async {
   }
 
   if (appConfig != null && await isAppOutdated(appConfig)) {
-    initialRoute = Routes.appOutdated;
+    initialRoute = '/${RouteNames.appOutdated}';
   }
 
-  await AppAnalytics.init();
-  if (!kDebugMode &&
-      AppAnalytics.isUserEnabled != null &&
-      AppAnalytics.isUserEnabled!) {
-    AppAnalytics.start(
-      appConfig,
-      MyApp(queryParameters, appConfig, initialRoute: initialRoute),
-    );
-  } else {
-    runApp(MyApp(queryParameters, appConfig, initialRoute: initialRoute));
-  }
+  // This application uses Provider rather than Riverpod, so it does not need a ProviderScope.
+  // ignore: riverpod_lint/missing_provider_scope
+  runApp(MyApp(queryParameters, appConfig, initialRoute: initialRoute));
 
   AppLifecycleListener(
     onResume: () async {
       try {
-        final navigatorState = navigatorKey.currentState;
-        if (navigatorState == null) return;
-        String? currentRoute;
-        navigatorState.popUntil((route) {
-          currentRoute = route.settings.name;
-          return true;
-        });
-        if (currentRoute == Routes.appOutdated) return;
+        final context = navigatorKey.currentContext;
+        if (context == null) return;
+
+        // Get the current location from the GoRouter
+        final router = GoRouter.of(context);
+        final currentLocation =
+            router.routerDelegate.currentConfiguration.uri.path;
+        if (currentLocation == '/${RouteNames.appOutdated}') return;
+
         final appConfig = await AppConfig.getAppConfig();
         if (await isAppOutdated(appConfig)) {
-          await navigatorState.pushNamedAndRemoveUntil(
-            Routes.appOutdated,
-            (route) => false,
-          );
+          if (context.mounted) {
+            context.go('/${RouteNames.appOutdated}');
+          }
         }
       } catch (error) {
         // device could be offline
@@ -142,6 +137,17 @@ Future<bool> isAppOutdated(AppConfig appConfig) async {
 }
 
 /// This is needed for flutter_local_notifications
+/// Stores local-only fixture credentials before production startup for a
+/// browser E2E run. LoadingScreen then signs in through signInParticipant.
+Future<void> _storeE2eParticipantCredentials() async {
+  const email = String.fromEnvironment('STUDYU_E2E_PARTICIPANT_EMAIL');
+  const password = String.fromEnvironment('STUDYU_E2E_PARTICIPANT_PASSWORD');
+
+  if (!isDebugMode || email.isEmpty || password.isEmpty) return;
+
+  await storeFakeUserEmailAndPassword(email, password);
+}
+
 Future<void> _configureLocalTimeZone() async {
   if (kIsWeb || Platform.isLinux) {
     return;

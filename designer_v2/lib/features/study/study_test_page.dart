@@ -17,11 +17,11 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class StudyTestScreen extends StudyPageWidget {
-  const StudyTestScreen(super.studyId, {this.previewRoute, super.key});
-
-  final String? previewRoute;
-
+class const StudyTestScreen(
+  super.studyId, {
+  final String? previewRoute,
+  super.key,
+}) extends StudyPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formViewModel = ref.watch(studyTestValidatorProvider(studyId));
@@ -30,22 +30,11 @@ class StudyTestScreen extends StudyPageWidget {
     final frameController = ref.watch(
       studyTestPlatformControllerProvider(studyId),
     );
-    frameController.generateUrl();
-    frameController.activate();
     load().then((hasHelped) {
       if (!hasHelped && context.mounted) {
         showHelp(ref, context);
       }
     });
-    final interventionSelectionDisabled =
-        !canTest ||
-        formViewModel
-                .interventionsFormViewModel
-                .interventionsArray
-                .value!
-                .length <=
-            2;
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -68,74 +57,110 @@ class StudyTestScreen extends StudyPageWidget {
               const SizedBox(height: 24.0),
               Text(tr.study_test_app_nav_title),
               const SizedBox(height: 12.0),
-              TextButton.icon(
-                icon: const Icon(Icons.arrow_forward),
-                label: Text(tr.navlink_study_test_app_overview),
-                onPressed: (!canTest)
-                    ? null
-                    : () {
-                        frameController.navigate();
-                      },
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.arrow_forward),
-                label: Text(tr.navlink_study_test_app_eligibility),
-                onPressed: (!canTest)
-                    ? null
-                    : () {
-                        frameController.navigate(
-                          route: TestAppRoutes.eligibility,
-                        );
-                      },
-              ),
-              Row(
-                children: [
-                  Tooltip(
-                    message: interventionSelectionDisabled
-                        ? tr.navlink_study_test_app_intervention_disabled
-                        : '',
-                    child: TextButton.icon(
-                      icon: const Icon(Icons.arrow_forward),
-                      label: Text(tr.navlink_study_test_app_intervention),
-                      onPressed: interventionSelectionDisabled
-                          ? null
-                          : () {
-                              frameController.navigate(
-                                route: TestAppRoutes.intervention,
-                              );
-                            },
-                    ),
-                  ),
-                ],
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.arrow_forward),
-                label: Text(tr.navlink_study_test_app_consent),
-                onPressed: (!canTest)
-                    ? null
-                    : () {
-                        frameController.navigate(route: TestAppRoutes.consent);
-                      },
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.arrow_forward),
-                label: Text(tr.navlink_study_test_app_journey),
-                onPressed: (!canTest)
-                    ? null
-                    : () {
-                        frameController.navigate(route: TestAppRoutes.journey);
-                      },
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.arrow_forward),
-                label: Text(tr.navlink_study_test_app_dashboard),
-                onPressed: (!canTest)
-                    ? null
-                    : () {
-                        frameController.navigate(
-                          route: TestAppRoutes.dashboard,
-                        );
-                      },
+              ValueListenableBuilder<bool>(
+                valueListenable: frameController.navigationEnabled,
+                builder: (context, previewReady, child) {
+                  final navigationEnabled = canTest && previewReady;
+                  final screenerDisabled =
+                      !navigationEnabled ||
+                      formViewModel
+                          .enrollmentFormViewModel
+                          .questionModels
+                          .isEmpty;
+                  final interventionSelectionDisabled =
+                      !navigationEnabled ||
+                      formViewModel
+                              .interventionsFormViewModel
+                              .interventionsArray
+                              .value!
+                              .length <=
+                          2;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextButton.icon(
+                        icon: const Icon(Icons.arrow_forward),
+                        label: Text(tr.navlink_study_test_app_overview),
+                        onPressed: (!navigationEnabled)
+                            ? null
+                            : () {
+                                frameController.navigate(
+                                  route: TestAppRoutes.studyOverview,
+                                );
+                              },
+                      ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.arrow_forward),
+                        label: Text(tr.navlink_study_test_app_eligibility),
+                        onPressed: screenerDisabled
+                            ? null
+                            : () {
+                                frameController.navigate(
+                                  route: TestAppRoutes.eligibility,
+                                );
+                              },
+                      ),
+                      Row(
+                        children: [
+                          Tooltip(
+                            message:
+                                interventionSelectionDisabled &&
+                                    navigationEnabled
+                                ? tr.navlink_study_test_app_intervention_disabled
+                                : '',
+                            child: TextButton.icon(
+                              icon: const Icon(Icons.arrow_forward),
+                              label: Text(
+                                tr.navlink_study_test_app_intervention,
+                              ),
+                              onPressed: interventionSelectionDisabled
+                                  ? null
+                                  : () {
+                                      frameController.navigate(
+                                        route: TestAppRoutes.intervention,
+                                      );
+                                    },
+                            ),
+                          ),
+                        ],
+                      ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.arrow_forward),
+                        label: Text(tr.navlink_study_test_app_consent),
+                        onPressed: (!navigationEnabled)
+                            ? null
+                            : () {
+                                frameController.navigate(
+                                  route: TestAppRoutes.consent,
+                                );
+                              },
+                      ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.arrow_forward),
+                        label: Text(tr.navlink_study_test_app_journey),
+                        onPressed: (!navigationEnabled)
+                            ? null
+                            : () {
+                                frameController.navigate(
+                                  route: TestAppRoutes.journey,
+                                );
+                              },
+                      ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.arrow_forward),
+                        label: Text(tr.navlink_study_test_app_dashboard),
+                        onPressed: (!navigationEnabled)
+                            ? null
+                            : () {
+                                frameController.navigate(
+                                  route: TestAppRoutes.dashboard,
+                                );
+                              },
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),

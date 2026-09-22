@@ -6,13 +6,12 @@ import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/common_views/text_hyperlink.dart';
 import 'package:studyu_designer_v2/features/auth/auth_form_controller.dart';
 import 'package:studyu_designer_v2/features/auth/auth_form_fields.dart';
+import 'package:studyu_designer_v2/features/auth/auth_inline_prompt_action.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/routing/router.dart';
 import 'package:studyu_designer_v2/routing/router_intent.dart';
 
-class LoginForm extends FormConsumerRefWidget {
-  const LoginForm({super.key});
-
+class const LoginForm({super.key}) extends FormConsumerRefWidget {
   @override
   Widget build(BuildContext context, FormGroup form, WidgetRef ref) {
     const formKey = AuthFormKey.login;
@@ -24,9 +23,13 @@ class LoginForm extends FormConsumerRefWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        EmailTextField(formControl: controller.getEmailControl()),
+        EmailTextField(
+          key: const ValueKey('login_email'),
+          formControl: controller.getEmailControl(),
+        ),
         const SizedBox(height: 4.0),
         PasswordTextField(
+          key: const ValueKey('login_password'),
           formControl: controller.getPasswordControl(),
           onSubmitted: (_) => form.valid
               ? ref.read(authFormControllerProvider(formKey).notifier).signIn()
@@ -37,6 +40,7 @@ class LoginForm extends FormConsumerRefWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Hyperlink(
+              key: const ValueKey('forgot_password_link'),
               text: tr.link_forgot_password,
               style: TextStyle(fontSize: theme.textTheme.bodySmall!.fontSize),
               onClick: () => ref
@@ -48,8 +52,10 @@ class LoginForm extends FormConsumerRefWidget {
         const SizedBox(height: 24.0),
         ReactiveFormConsumer(
           builder: (context, form, child) {
-            return Center(
+            return SizedBox(
+              width: double.infinity,
               child: PrimaryButton(
+                key: const ValueKey('login_button'),
                 icon: Icons.login,
                 text: tr.action_button_login,
                 isLoading: state.isLoading,
@@ -69,17 +75,12 @@ class LoginForm extends FormConsumerRefWidget {
         const SizedBox(height: 24.0),
         const Divider(height: 1),
         const SizedBox(height: 12.0),
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(tr.link_signup_description),
-            const SizedBox(width: 4.0),
-            Hyperlink(
-              text: tr.link_signup,
-              onClick: () =>
-                  ref.read(routerProvider).dispatch(RoutingIntents.signup),
-            ),
-          ],
+        AuthInlinePromptAction(
+          key: const ValueKey('signup_link'),
+          promptText: tr.link_signup_description,
+          actionText: tr.link_signup,
+          onPressed: () =>
+              ref.read(routerProvider).dispatch(RoutingIntents.signup),
         ),
       ],
     );

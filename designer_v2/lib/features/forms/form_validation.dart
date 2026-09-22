@@ -3,22 +3,15 @@ import 'package:studyu_designer_v2/utils/tuple.dart';
 
 /// Interface to be implemented by an enum that is used for indexing into
 /// a [FormValidationConfigSet]
-abstract class FormValidationSetEnum {}
+abstract class FormValidationSetEnum();
 
 /// Validator configuration that is applied to the given [control] at runtime
-class FormControlValidation {
-  const FormControlValidation({
-    required this.control,
-    required this.validators,
-    this.asyncValidators,
-    required this.validationMessages,
-  });
-
-  final AbstractControl<dynamic> control;
-  final List<Validator> validators;
-  final List<AsyncValidator>? asyncValidators;
-  final Map<String, ValidationMessageFunction> validationMessages;
-
+class const FormControlValidation({
+  required final AbstractControl<dynamic> control,
+  required final List<Validator> validators,
+  final List<AsyncValidator>? asyncValidators,
+  required final Map<String, ValidationMessageFunction> validationMessages,
+}) {
   FormControlValidation merge(FormControlValidation? other) {
     if (other == null) {
       return this;
@@ -90,7 +83,7 @@ List<Tuple<AbstractControl, String>> _collectValidationErrorMessages(
 
     final validationMessageFunc = control.validationMessages[error.key];
     final String validationMessage =
-        validationMessageFunc?.call(error.value) ?? '[${error.key}]';
+        validationMessageFunc?.call(error.value as Object) ?? '[${error.key}]';
     allValidationErrorMessages.add(Tuple(control, validationMessage));
   }
 
@@ -162,9 +155,16 @@ extension FormGroupX on FormGroup {
   String get validationErrorSummary => getValidationErrorSummary();
 
   String getValidationErrorSummary({bool uniqueErrors = true}) {
-    final errorMessages = uniqueErrors
-        ? {...formattedErrorMessages}.toList()
-        : formattedErrorMessages;
+    final errorMessages =
+        (uniqueErrors
+                ? {...formattedErrorMessages}.toList()
+                : formattedErrorMessages)
+            .map((message) => message.trim())
+            .where((message) => message.isNotEmpty)
+            .toList();
+    if (errorMessages.isEmpty) {
+      return '';
+    }
     return "- ${errorMessages.join("\n- ")}";
   }
 }

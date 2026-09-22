@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Designer - Local" type="FlutterRunConfigurationType" factoryName="Flutter">
+    <option name="additionalArgs" value="--dart-define=STUDYU_ENV=.env.local --web-port 8081 --dart-define=EMAIL=user1@studyu.health --dart-define=PASSWORD=user1pass --dart-define=AUTO_LOGIN=true" />
+    <option name="filePath" value="$PROJECT_DIR$/designer_v2/lib/main.dart" />
+    <method v="2" />
+  </configuration>
+</component>

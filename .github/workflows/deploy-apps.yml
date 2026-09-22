@@ -12,6 +12,15 @@ on:
       - '.github/workflows/deploy-apps.yml'
       - '.fvmrc'
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Build Environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
 
 env:
   MELOS_SDK_PATH: 'auto'
@@ -26,9 +35,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      # NEW: Determine if this is a Prod build based on Branch OR Input
+      - name: Setup Build Environment Logic
+        id: env-check
+        run: |
+          # Default to false
+          IS_PROD=false
+          
+          # Check Workflow Dispatch Input
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.environment }}" == "prod" ]]; then
+              IS_PROD=true
+            fi
+          # Check Branch Logic (Push event)
+          elif [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            IS_PROD=true
+          fi
+          
+          echo "IS_PROD=$IS_PROD" >> $GITHUB_ENV
+          echo "Build environment is Prod: $IS_PROD"
 
       - name: Init workspace
         uses: ./.github/workflows/init-workspace
@@ -36,26 +65,19 @@ jobs:
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3 # do not use head
+          ruby-version: 3.4 # do not use head
           bundler-cache: true
 
       - name: Set up java env
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: temurin
 
       - name: Bundle install for Android Gemfile
-        run: |
-          bundle install
+        run: bundle install
         timeout-minutes: 5
         working-directory: ./app/android
-
-      - name: Set up Flutter with FVM
-        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
-        with:
-          # todo
-          cache: false
 
       - name: Prepare upload key
         run: |
@@ -67,12 +89,12 @@ jobs:
           STUDYU_KEY_PROPERTIES: ${{ secrets.STUDYU_KEY_PROPERTIES }}
 
       - name: Build StudyU app bundle (prod)
-        if: ${{ startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/heads/staging') }}
+        if: ${{ env.IS_PROD == 'true' }}
         run: flutter build appbundle --release --build-number ${{ github.run_number }}
         working-directory: ./app
 
       - name: Build StudyU app bundle (dev)
-        if: ${{ !startsWith(github.ref, 'refs/heads/main') && !startsWith(github.ref, 'refs/heads/staging') }}
+        if: ${{ env.IS_PROD == 'false' }}
         run: flutter build appbundle --release --build-number ${{ github.run_number }} --dart-define=STUDYU_ENV=.env.dev
         working-directory: ./app
 
@@ -93,9 +115,23 @@ jobs:
           xcode-version: latest-stable
 
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      # NEW: Determine if this is a Prod build based on Branch OR Input
+      - name: Setup Build Environment Logic
+        id: env-check
+        run: |
+          IS_PROD=false
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.environment }}" == "prod" ]]; then
+              IS_PROD=true
+            fi
+          elif [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            IS_PROD=true
+          fi
+          echo "IS_PROD=$IS_PROD" >> $GITHUB_ENV
 
       - name: Init workspace
         uses: ./.github/workflows/init-workspace
@@ -103,21 +139,14 @@ jobs:
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3 # do not use head
+          ruby-version: 3.4 # do not use head
           # todo
           bundler-cache: false
 
       - name: Bundle install for iOS Gemfile
-        run: |
-          bundle install
+        run: bundle install
         timeout-minutes: 5
         working-directory: ./app/ios
-
-      - name: Set up Flutter with FVM
-        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
-        with:
-          # todo
-          cache: false
 
       - name: Get StudyU app version
         run: |
@@ -137,12 +166,12 @@ jobs:
         working-directory: ./app
 
       - name: Build StudyU for iOS without codesign (prod)
-        if: ${{ startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/heads/staging') }}
+        if: ${{ env.IS_PROD == 'true' }}
         run: flutter build ios --release --no-codesign --build-number ${{ github.run_number }} --build-name ${{ env.STUDYU_APP_VERSION }}
         working-directory: ./app
 
       - name: Build StudyU for iOS without codesign (dev)
-        if: ${{ !startsWith(github.ref, 'refs/heads/main') && !startsWith(github.ref, 'refs/heads/staging') }}
+        if: ${{ env.IS_PROD == 'false' }}
         run: flutter build ios --release --no-codesign --build-number ${{ github.run_number }} --build-name ${{ env.STUDYU_APP_VERSION }} --dart-define=STUDYU_ENV=.env.dev
         working-directory: ./app
 

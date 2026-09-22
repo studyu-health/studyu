@@ -10,7 +10,7 @@ part of 'fitbit_credentials_form_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(fitbitCredentialsFormViewModel)
-const fitbitCredentialsFormViewModelProvider =
+final fitbitCredentialsFormViewModelProvider =
     FitbitCredentialsFormViewModelFamily._();
 
 final class FitbitCredentialsFormViewModelProvider
@@ -21,7 +21,7 @@ final class FitbitCredentialsFormViewModelProvider
           FitbitCredentialsFormViewModel
         >
     with $Provider<FitbitCredentialsFormViewModel> {
-  const FitbitCredentialsFormViewModelProvider._({
+  FitbitCredentialsFormViewModelProvider._({
     required FitbitCredentialsFormViewModelFamily super.from,
     required StudyID super.argument,
   }) : super(
@@ -77,11 +77,11 @@ final class FitbitCredentialsFormViewModelProvider
 }
 
 String _$fitbitCredentialsFormViewModelHash() =>
-    r'48f5beab67898dea41cacd2ef9dfe297356e4a17';
+    r'dd4d4a74b099d59056da3a49b9d6554603f430ad';
 
 final class FitbitCredentialsFormViewModelFamily extends $Family
     with $FunctionalFamilyOverride<FitbitCredentialsFormViewModel, StudyID> {
-  const FitbitCredentialsFormViewModelFamily._()
+  FitbitCredentialsFormViewModelFamily._()
     : super(
         retry: null,
         name: r'fitbitCredentialsFormViewModelProvider',

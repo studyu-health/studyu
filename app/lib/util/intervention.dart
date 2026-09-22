@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 Widget interventionIcon(Intervention intervention, {Color? color}) {
   if (intervention.isBaseline()) {
@@ -9,7 +10,7 @@ Widget interventionIcon(Intervention intervention, {Color? color}) {
 
   return intervention.icon.isNotEmpty
       ? Icon(
-          MdiIcons.fromString(intervention.icon),
+          MdiIconsHelper.fromString(intervention.icon),
           color: color ?? Colors.white,
         )
       : Text(

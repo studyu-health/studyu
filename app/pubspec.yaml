@@ -1,73 +1,83 @@
 name: studyu_app
-version: 2.12.3
-description: Partake in digital N-of-1 trials with the innovative StudyU Health App
+version: 2.15.0
+description: >-
+  Partake in digital N-of-1 trials with the innovative StudyU Health App
 publish_to: none
 homepage: https://studyu.health
 repository: https://github.com/hpi-studyu/studyu
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.13.0 <4.0.0"
 resolution: workspace
 
 dependencies:
-  camera: ^0.11.3
+  camera: ^0.12.1
   collection: ^1.19.1
-  cross_file: ^0.3.5
-  cupertino_icons: ^1.0.8
+  cross_file: ^0.3.5+5
+  cupertino_icons: ^1.0.9
   fitbitter:
     git:
       url: https://github.com/hpi-studyu/fitbitter.git
       ref: master
-  fl_chart: ^1.1.1
+  fl_chart: ^1.2.0
   flutter:
     sdk: flutter
-  flutter_file_dialog: ^3.0.2
-  flutter_local_notifications: ^19.5.0
+  flutter_driver:
+    sdk: flutter
+  flutter_file_dialog: ^3.3.2
+  flutter_local_notifications: ^22.3.1
   flutter_localizations:
     sdk: flutter
-  flutter_native_splash: ^2.4.7
-  flutter_svg: ^2.2.2
-  flutter_timezone: ^5.0.1
+  flutter_material_design_icons: ^3.1.0+7447
+  flutter_native_splash: ^2.4.8
+  flutter_svg: ^2.3.0
+  flutter_timezone: ^5.1.0
   flutter_web_plugins:
     sdk: flutter
-  flutter_widget_from_html: ^0.17.1
-  gauge_indicator: ^0.4.3
+  flutter_widget_from_html: ^0.17.4
+  gauge_indicator: ^0.6.0
+  go_router: ^18.0.1
   intersperse: ^2.0.0
-  intl: ^0.20.2
-  material_design_icons_flutter: ^7.0.7296
-  package_info_plus: ^9.0.0
+  intl: ^0.20.3
+  introduction_screen: ^5.0.1
+  mobile_scanner: ^7.4.2
+  package_info_plus: ^10.2.1
   path: ^1.9.1
   path_drawing: ^1.0.1
-  path_provider: ^2.1.5
-  pdf: ^3.11.3
-  permission_handler: ^12.0.1
+  path_provider: ^2.1.6
+  pdf: ^3.13.0
+  permission_handler: ^13.0.2
+  pretty_qr_code: ^3.6.0
   provider: ^6.1.5+1
   quiver: ^3.2.2
   rainbow_color: ^2.0.1
-  record: ^6.1.2
-  sentry_flutter: ^9.8.0
-  sentry_logging: ^9.8.0
-  shared_preferences: ^2.5.3
-  statistics: ^1.2.0
-  studyu_core: ^4.7.1
-  studyu_flutter_common: ^1.10.1
-  supabase: ^2.10.0
-  supabase_flutter: ^2.10.3
+  record: ^7.1.1
+  shared_preferences: ^2.5.5
+  showcaseview: ^5.1.0
+  stack_deferred_link: ^1.0.1
+  statistics: ^1.2.2
+  studyu_core: ^4.10.0
+  studyu_flutter_common: ^1.11.0
+  supabase: ^2.16.1
+  supabase_flutter: ^2.17.2
   timeline_tile: ^2.0.0
-  timezone: ^0.10.1
+  timezone: ^0.11.1
   touchable: ^1.0.2
   universal_html: ^2.3.0
   url_launcher: ^6.3.2
-  uuid: ^4.5.2
-  wakelock_plus: ^1.4.0
-  xml: ^6.6.1
+  uuid: ^4.6.0
+  wakelock_plus: ^1.8.0
+  xml: ^7.0.1
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.14.4
+  # flutter_launcher_icons: ^0.14.4
+  # Deprecated? icons_launcher may be an alternative.
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  lint: ^2.8.0
+  integration_test:
+    sdk: flutter
+  lint: ^2.14.0
 
 flutter:
   generate: true
@@ -77,6 +87,7 @@ flutter:
     - assets/icon/
     - assets/fonts/
     - assets/images/
+    - assets/images/onboarding/
 
 flutter_launcher_icons:
   android: true

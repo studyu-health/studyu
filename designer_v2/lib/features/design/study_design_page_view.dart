@@ -6,9 +6,8 @@ import 'package:studyu_designer_v2/features/design/study_form_controller.dart';
 import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-abstract class StudyDesignPageWidget extends StudyPageWidget {
-  const StudyDesignPageWidget(super.studyId, {super.key});
-
+abstract class const StudyDesignPageWidget(super.studyId, {super.key})
+    extends StudyPageWidget {
   @override
   Widget? banner(BuildContext context, WidgetRef ref) {
     final viewModel = ref.watch(studyFormViewModelProvider(studyId));

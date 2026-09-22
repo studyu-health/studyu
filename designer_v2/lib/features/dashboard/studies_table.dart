@@ -4,32 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/common_views/action_popup_menu.dart';
 import 'package:studyu_designer_v2/common_views/standard_table.dart';
+import 'package:studyu_designer_v2/common_views/text_hyperlink.dart';
 import 'package:studyu_designer_v2/features/dashboard/dashboard_controller.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_table_column_header.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_table_item.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
+import 'package:studyu_designer_v2/repositories/study_repository_interface.dart';
 
-enum StudiesTableColumn {
-  pin,
-  title,
-  status,
-  participation,
-  createdAt,
-  enrolled,
-  active,
-  completed,
-  action,
-}
+export 'package:studyu_designer_v2/repositories/study_repository_interface.dart'
+    show StudiesTableColumn;
 
-class StudiesTableColumnSize {
-  final bool collapsed;
-  final int? flex;
-  final double? width;
-
-  StudiesTableColumnSize._(this.flex, this.width, this.collapsed);
-  StudiesTableColumnSize.fixedWidth(double width) : this._(null, width, false);
-  StudiesTableColumnSize.flexWidth(int flex) : this._(flex, null, false);
-  StudiesTableColumnSize.collapsed() : this._(null, null, true);
+class StudiesTableColumnSize._(
+  final int? flex,
+  final double? width,
+  final bool collapsed,
+) {
+  new fixedWidth(double width) : this._(null, width, false);
+  new flexWidth(int flex) : this._(flex, null, false);
+  new collapsed() : this._(null, null, true);
 
   Widget createContainer({required Widget child, double? height}) {
     if (collapsed) {
@@ -43,40 +35,40 @@ class StudiesTableColumnSize {
   }
 }
 
-class StudiesTable extends StatelessWidget {
-  const StudiesTable({
-    required this.studies,
-    required this.onSelect,
-    required this.getActions,
-    required this.emptyWidget,
-    required this.pinnedStudies,
-    required this.dashboardController,
-    this.itemHeight = 60.0,
-    this.itemPadding = 10.0,
-    this.rowSpacing = 9.0,
-    this.columnSpacing = 10.0,
-    this.compactWidthThreshold = 1000.0,
-    this.superCompactWidthThreshold = 600.0,
-    this.compactStatTitleThreshold = 1100.0,
-    super.key,
-  });
-
-  final double itemHeight;
-  final double itemPadding;
-  final double rowSpacing;
-  final double columnSpacing;
-  final double compactWidthThreshold;
-  final double superCompactWidthThreshold;
-  final double compactStatTitleThreshold;
-  final List<Study> studies;
-  final OnSelectHandler<Study> onSelect;
-  final ActionsProviderFor<Study> getActions;
-  final Widget emptyWidget;
-  final Iterable<String> pinnedStudies;
-  final DashboardController dashboardController;
+class const StudiesTable({
+  required final List<Study> studies,
+  required final OnSelectHandler<Study> onSelect,
+  required final ActionsProviderFor<Study> getActions,
+  required final Widget emptyWidget,
+  required final Iterable<String> pinnedStudies,
+  required final DashboardController dashboardController,
+  final Set<String> pendingStudyIds = const {},
+  final bool isLoadingMore = false,
+  final bool hasMore = false,
+  final bool advancedFilterUnsupported = false,
+  final bool showCreateStudyLink = false,
+  final Object? loadError,
+  final VoidCallback? onRetry,
+  final Future<void> Function()? onLoadMore,
+  final double itemHeight = 60.0,
+  final double itemPadding = 10.0,
+  final double rowSpacing = 9.0,
+  final double columnSpacing = 10.0,
+  final double compactWidthThreshold = 1000.0,
+  final double superCompactWidthThreshold = 600.0,
+  final double compactStatTitleThreshold = 1100.0,
+  super.key,
+}) extends StatelessWidget {
+  static const _loadMorePrefetchThreshold = 5;
 
   @override
   Widget build(BuildContext context) {
+    if (advancedFilterUnsupported) {
+      return _AdvancedFilterUnsupportedNotice(onRetry: onRetry);
+    }
+    if (studies.isEmpty && loadError != null) {
+      return _LoadErrorNotice(error: loadError!, onRetry: onRetry);
+    }
     if (studies.isEmpty) {
       return emptyWidget;
     }
@@ -89,34 +81,42 @@ class StudiesTable extends StatelessWidget {
         final isCompactStatTitle =
             constraints.maxWidth < compactStatTitleThreshold;
         // Calculate the minimum stat column width
-        final int maxStatTitleLength = isCompactStatTitle
-            ? "Completed".length
-            : tr.studies_list_header_participants_completed.length;
-        final double statsColumnWidth = maxStatTitleLength * 9.9;
+        final double enrolledColumnWidth =
+            (isCompactStatTitle
+                ? "Enrolled".length
+                : tr.studies_list_header_participants_enrolled.length) *
+            10;
+        final double activeColumnWidth =
+            (isCompactStatTitle
+                ? "Active".length
+                : tr.studies_list_header_participants_active.length) *
+            10;
+        final double completedColumnWidth =
+            (isCompactStatTitle
+                ? "Completed".length
+                : tr.studies_list_header_participants_completed.length) *
+            10;
 
         // Calculate the minimum status column width
-        int maxStatusLength = "Entwurf".length;
-        maxStatusLength = max(
-          maxStatusLength,
-          tr.studies_list_header_status.length,
-        );
+        final maxStatusLength = [
+          tr.study_status_draft,
+          tr.study_status_running,
+          tr.study_status_closed,
+          tr.studies_list_header_status,
+        ].map((label) => label.length).reduce(max);
         final double statusColumnWidth = maxStatusLength * 11.5;
 
         // Calculate the minimum participation column width
         final int maxParticipationLength = isCompact
             ? "Invite-only".length
             : tr.participation_invite_who.length;
-        maxStatusLength = max(
-          maxStatusLength,
-          tr.studies_list_header_participation.length,
-        );
         final double participationColumnWidth =
             20 + (maxParticipationLength * 7.5);
 
         // Set column definitions
         final columnDefinitionsMap = {
           StudiesTableColumn.pin: StudiesTableColumnSize.fixedWidth(itemHeight),
-          StudiesTableColumn.title: StudiesTableColumnSize.flexWidth(24),
+          StudiesTableColumn.title: StudiesTableColumnSize.flexWidth(32),
           StudiesTableColumn.status: StudiesTableColumnSize.fixedWidth(
             statusColumnWidth,
           ),
@@ -128,13 +128,13 @@ class StudiesTable extends StatelessWidget {
               : StudiesTableColumnSize.flexWidth(10),
           StudiesTableColumn.enrolled: isCompact
               ? StudiesTableColumnSize.collapsed()
-              : StudiesTableColumnSize.fixedWidth(statsColumnWidth),
+              : StudiesTableColumnSize.fixedWidth(enrolledColumnWidth),
           StudiesTableColumn.active: isCompact
               ? StudiesTableColumnSize.collapsed()
-              : StudiesTableColumnSize.fixedWidth(statsColumnWidth),
+              : StudiesTableColumnSize.fixedWidth(activeColumnWidth),
           StudiesTableColumn.completed: isCompact
               ? StudiesTableColumnSize.collapsed()
-              : StudiesTableColumnSize.fixedWidth(statsColumnWidth),
+              : StudiesTableColumnSize.fixedWidth(completedColumnWidth),
           StudiesTableColumn.action: StudiesTableColumnSize.fixedWidth(
             itemHeight,
           ),
@@ -223,28 +223,67 @@ class StudiesTable extends StatelessWidget {
               ),
             ),
             SizedBox(height: rowSpacing),
-            ListView.builder(
-              itemCount: studies.length,
-              itemExtent: (2 * itemPadding) + itemHeight + rowSpacing,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                final item = studies[index];
-                return StudiesTableItem(
-                  study: item,
-                  columnSizes: columnDefinitionsMap.values.toList(),
-                  actions: getActions(item),
-                  isPinned: pinnedStudies.contains(item.id),
-                  itemHeight: itemHeight,
-                  rowSpacing: rowSpacing,
-                  columnSpacing: columnSpacing,
-                  onPinnedChanged: (study, pinned) {
-                    pinnedStudies.contains(item.id)
-                        ? dashboardController.pinOffStudy(item.id)
-                        : dashboardController.pinStudy(item.id);
-                  },
-                  onTap: (study) => onSelect.call(study),
-                );
-              },
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final needsScrolling =
+                      studies.length * (itemHeight + rowSpacing) >
+                      constraints.maxHeight;
+                  final showsFooter = _showsFooter(needsScrolling);
+
+                  return ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context)
+                        .copyWith(scrollbars: true),
+                    child: ListView.builder(
+                      key: const ValueKey('studies_table_rows'),
+                      prototypeItem: StudiesTableItem.prototype(
+                        columnSizes: columnDefinitionsMap.values.toList(),
+                        itemHeight: itemHeight,
+                        itemPadding: itemPadding,
+                        rowSpacing: rowSpacing,
+                        columnSpacing: columnSpacing,
+                      ),
+                      itemCount: studies.length + (showsFooter ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= studies.length) {
+                          return _buildFooter(context);
+                        }
+
+                        if (hasMore &&
+                            !isLoadingMore &&
+                            index >=
+                                studies.length - _loadMorePrefetchThreshold) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            onLoadMore?.call();
+                          });
+                        }
+
+                        final item = studies[index];
+                        return RepaintBoundary(
+                          child: StudiesTableItem(
+                            key: ValueKey('study_row_${item.id}'),
+                            study: item,
+                            columnSizes: columnDefinitionsMap.values.toList(),
+                            actions: getActions(item),
+                            isPinned: pinnedStudies.contains(item.id),
+                            isBusy: pendingStudyIds.contains(item.id),
+                            itemHeight: itemHeight,
+                            itemPadding: itemPadding,
+                            rowSpacing: rowSpacing,
+                            columnSpacing: columnSpacing,
+                            onPinnedChanged: (study, pinned) {
+                              pinnedStudies.contains(item.id)
+                                  ? dashboardController.pinOffStudy(item.id)
+                                  : dashboardController.pinStudy(item.id);
+                            },
+                            onTap: (study) => onSelect.call(study),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         );
@@ -285,6 +324,9 @@ class StudiesTable extends StatelessWidget {
       sortable: sortable,
       sortingActive: sortingActive,
       sortAscending: sortAscending(),
+      center:
+          column != StudiesTableColumn.title &&
+          column != StudiesTableColumn.pin,
       onSort: sortable
           ? () {
               dashboardController.setSorting(
@@ -293,6 +335,141 @@ class StudiesTable extends StatelessWidget {
               );
             }
           : null,
+    );
+  }
+
+  bool _showsFooter(bool needsScrolling) =>
+      isLoadingMore || loadError != null || (!hasMore && needsScrolling);
+
+  Widget _buildFooter(BuildContext context) {
+    if (isLoadingMore) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16.0),
+        child: Center(
+          child: SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    if (loadError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Center(
+          child: TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: Text(tr.action_button_retry),
+          ),
+        ),
+      );
+    }
+
+    final theme = Theme.of(context);
+    final footerStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.hintColor,
+    );
+
+    return Padding(
+      padding: EdgeInsets.only(top: rowSpacing, bottom: rowSpacing),
+      child: Center(
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 4,
+          children: [
+            Text(
+              showCreateStudyLink
+                  ? tr.studies_end_of_list_public
+                  : tr.studies_end_of_list,
+              style: footerStyle,
+            ),
+            if (showCreateStudyLink)
+              Hyperlink(
+                text: tr.studies_end_of_list_create,
+                onClick: dashboardController.onClickNewStudy,
+                style: footerStyle?.copyWith(
+                  decoration: TextDecoration.underline,
+                ),
+                hoverStyle: const TextStyle(
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class const _AdvancedFilterUnsupportedNotice({
+  required final VoidCallback? onRetry,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.filter_alt_off_outlined,
+              color: Theme.of(context).hintColor,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              tr.studies_filter_server_side_unsupported,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: onRetry,
+                child: Text(tr.filter_button_clear),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class const _LoadErrorNotice({
+  required final Object error,
+  required final VoidCallback? onRetry,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline),
+            const SizedBox(height: 8),
+            Text(
+              tr.studies_load_failed,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: Text(tr.action_button_retry),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

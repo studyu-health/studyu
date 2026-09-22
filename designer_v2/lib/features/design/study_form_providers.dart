@@ -154,7 +154,12 @@ StudyFormViewModel studyPublishValidator(Ref ref, StudyID studyId) {
 /// a [StudyFormValidationSet.test]
 @riverpod
 StudyFormViewModel studyTestValidator(Ref ref, StudyID studyId) {
-  final state = ref.watch(studyControllerProvider(studyId));
+  final formViewModel = ref.watch(studyFormViewModelProvider(studyId));
+  final subscription = formViewModel.form.valueChanges.listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(subscription.cancel);
+
   return StudyFormViewModel(
     router: ref.watch(routerProvider),
     studyRepository: ref.watch(studyRepositoryProvider),
@@ -162,6 +167,7 @@ StudyFormViewModel studyTestValidator(Ref ref, StudyID studyId) {
     fitbitCredentialsRepository: ref.watch(
       fitbitCredentialsRepositoryProvider(studyId),
     ),
-    formData: state.studyValueRequired,
+    formData: formViewModel.buildFormData(),
+    validationSet: StudyFormValidationSet.test,
   );
 }

@@ -1,17 +1,11 @@
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/features/forms/form_data.dart';
 
-class ConditionRowFormData extends IFormData {
-  ConditionRowFormData({
-    required this.questionId,
-    required this.comparator,
-    required this.value,
-  });
-
-  final String? questionId;
-  final dynamic comparator;
-  final dynamic value;
-
+class ConditionRowFormData({
+  required final String? questionId,
+  required final dynamic comparator,
+  required final dynamic value,
+}) extends IFormData {
   Expression? buildExpression() {
     if (questionId == null) return null;
 
@@ -64,9 +58,14 @@ class ConditionRowFormData extends IFormData {
     // Handle text questions
     if (comparator is TextComparator) {
       if (value == null) return null;
+      final textValue = value.toString();
+      if (_usesTextLengthComparator(comparator as TextComparator) &&
+          int.tryParse(textValue) == null) {
+        return null;
+      }
       return TextExpression(
         comparator: comparator as TextComparator,
-        value: value.toString(),
+        value: textValue,
       )..target = questionId;
     }
 
@@ -88,4 +87,16 @@ class ConditionRowFormData extends IFormData {
 
   @override
   FormDataID get id => throw UnimplementedError();
+
+  bool _usesTextLengthComparator(TextComparator comparator) {
+    return switch (comparator) {
+      TextComparator.lengthGreaterThan ||
+      TextComparator.lengthLessThan ||
+      TextComparator.lengthGreaterThanOrEqual ||
+      TextComparator.lengthLessThanOrEqual ||
+      TextComparator.lengthEqual ||
+      TextComparator.lengthNotEqual => true,
+      _ => false,
+    };
+  }
 }

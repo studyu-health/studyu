@@ -1,5 +1,6 @@
 import 'package:studyu_designer_v2/features/forms/form_data.dart';
 import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dart';
+import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/typings.dart';
 
@@ -17,6 +18,7 @@ extension FormViewModelCollectionActions<
     VoidCallbackOn<T>? onEdit,
     VoidCallbackOn<T>? onDuplicate,
     VoidCallbackOn<T>? onDelete,
+    String? confirmationSubject,
     bool isReadOnly = false,
   }) {
     final actions = [
@@ -35,7 +37,7 @@ extension FormViewModelCollectionActions<
                 final duplicateFormViewModel =
                     formViewModel.createDuplicate() as T;
                 add(duplicateFormViewModel);
-                formViewModel.save();
+                duplicateFormViewModel.save();
               },
         isAvailable: !isReadOnly,
       ),
@@ -43,6 +45,9 @@ extension FormViewModelCollectionActions<
         type: ModelActionType.delete,
         label: ModelActionType.delete.string,
         isDestructive: true,
+        confirmation: ModelActionConfirmations.delete(
+          subject: confirmationSubject ?? tr.dialog_subject_item,
+        ),
         onExecute: (onDelete != null)
             ? () => onDelete(formViewModel)
             : () {
@@ -60,20 +65,24 @@ extension FormViewModelCollectionActions<
 
   List<ModelAction> availablePopupActions(
     T formViewModel, {
+    String? confirmationSubject,
     bool isReadOnly = false,
   }) {
     return availableActions(
       formViewModel,
+      confirmationSubject: confirmationSubject,
       isReadOnly: isReadOnly,
     ).where((action) => action.type != ModelActionType.edit).toList();
   }
 
   List<ModelAction> availableInlineActions(
     T formViewModel, {
+    String? confirmationSubject,
     bool isReadOnly = false,
   }) {
     return availableActions(
       formViewModel,
+      confirmationSubject: confirmationSubject,
       isReadOnly: isReadOnly,
     ).where((action) => action.type == ModelActionType.edit).toList();
   }

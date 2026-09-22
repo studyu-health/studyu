@@ -19,7 +19,7 @@ part of 'router.dart';
 /// route changes in the app. See router_intent.dart for more details.
 
 @ProviderFor(router)
-const routerProvider = RouterProvider._();
+final routerProvider = RouterProvider._();
 
 /// How to create a new page & use it for navigation:
 ///
@@ -43,7 +43,7 @@ final class RouterProvider
   /// 2. To navigate to the new route from your code, specify one or more
   /// [RoutingIntent]s in router_intent.dart. These intents correspond to
   /// route changes in the app. See router_intent.dart for more details.
-  const RouterProvider._()
+  RouterProvider._()
     : super(
         from: null,
         argument: null,

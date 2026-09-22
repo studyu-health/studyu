@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "health.studyu.app",
+      "sha256_cert_fingerprints": [
+        "C4:32:1F:77:93:5E:6A:A1:29:FA:A4:D1:9B:C0:21:D1:76:52:49:3F:A1:02:63:8C:17:FA:85:97:96:14:01:FB"
+      ]
+    }
+  }
+]

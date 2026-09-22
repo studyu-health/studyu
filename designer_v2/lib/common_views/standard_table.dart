@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:studyu_designer_v2/common_views/action_inline_menu.dart';
 import 'package:studyu_designer_v2/common_views/action_menu.dart';
 import 'package:studyu_designer_v2/common_views/action_popup_menu.dart';
@@ -11,66 +11,69 @@ import 'package:studyu_designer_v2/utils/model_action.dart';
 
 typedef OnSelectHandler<T> = void Function(T item);
 
-typedef StandardTableRowBuilder =
-    TableRow Function(BuildContext context, List<StandardTableColumn> columns);
+typedef StandardTableRowBuilder = TableRow Function(
+  BuildContext context,
+  List<StandardTableColumn> columns,
+);
 
-typedef StandardTableCellsBuilder<T> =
-    List<Widget> Function(
-      BuildContext context,
-      T item,
-      int rowIdx,
-      Set<WidgetState> states,
-    );
+typedef StandardTableCellsBuilder<T> = List<Widget> Function(
+  BuildContext context,
+  T item,
+  int rowIdx,
+  Set<WidgetState> states,
+);
 
-enum StandardTableStyle { plain, material }
+enum StandardTableStyle() {
+  plain,
+  material,
+  flat,
+}
 
 /// Default descriptor for a table column
-class StandardTableColumn {
-  StandardTableColumn({
-    required this.label,
-    this.tooltip,
-    this.columnWidth = const FlexColumnWidth(),
-    this.sortable = false,
-  });
-
-  final String label;
-  final String? tooltip;
-  final TableColumnWidth columnWidth;
-  final bool sortable;
-
+class StandardTableColumn({
+  required final String label,
+  final String? tooltip,
+  final TableColumnWidth columnWidth = const FlexColumnWidth(),
+  final bool sortable = false,
+}) {
   bool? sortAscending;
   Widget? sortableIcon;
 }
 
-class StandardTable<T> extends StatefulWidget {
-  StandardTable({
-    required this.items,
-    required List<StandardTableColumn>? columns,
-    required this.onSelectItem,
-    required this.buildCellsAt,
-    this.sortColumnPredicates,
-    this.trailingActionsAt,
-    StandardTableColumn? trailingActionsColumn,
-    this.trailingActionsMenuType = ActionMenuType.popup,
-    this.headerRowBuilder,
-    this.dataRowBuilder,
-    this.cellSpacing = 10.0,
-    this.rowSpacing = 9.0,
-    this.minRowHeight = 60.0,
-    this.headerMaxLines = 1,
-    this.softWrapHeader = false,
-    this.showTableHeader = true,
-    this.tableWrapper,
-    this.leadingWidget,
-    this.trailingWidget,
-    this.leadingWidgetSpacing = 12.0,
-    this.trailingWidgetSpacing = 8.0,
-    this.emptyWidget,
-    this.rowStyle = StandardTableStyle.material,
-    this.disableRowInteractions = false,
-    this.hideLeadingTrailingWhenEmpty = true,
-    super.key,
-  }) {
+class StandardTable<T>({
+  required final List<T> items,
+  required List<StandardTableColumn>? columns,
+  required final OnSelectHandler<T> onSelectItem,
+  required final StandardTableCellsBuilder<T> buildCellsAt,
+  final List<int Function(T a, T b)?>? sortColumnPredicates,
+  final ActionsProviderAt<T>? trailingActionsAt,
+  StandardTableColumn? trailingActionsColumn,
+  final ActionMenuType? trailingActionsMenuType = ActionMenuType.popup,
+  final StandardTableRowBuilder? headerRowBuilder,
+  final StandardTableRowBuilder? dataRowBuilder,
+  final double cellSpacing = 10.0,
+  final double rowSpacing = 9.0,
+  final double? minRowHeight = 60.0,
+  final int headerMaxLines = 1,
+  final bool softWrapHeader = false,
+  final bool showTableHeader = true,
+  final WidgetDecorator? tableWrapper,
+
+  /// Optional widget rendered above/below the table body
+  final Widget? leadingWidget,
+  final Widget? trailingWidget,
+  final double? leadingWidgetSpacing = 12.0,
+  final double? trailingWidgetSpacing = 8.0,
+
+  /// Optional widget rendered when there are no rows in the table
+  /// If undefined, renders an empty table instead
+  final Widget? emptyWidget,
+  final StandardTableStyle rowStyle = StandardTableStyle.material,
+  final bool disableRowInteractions = false,
+  final bool hideLeadingTrailingWhenEmpty = true,
+  super.key,
+}) extends StatefulWidget {
+  this {
     if (trailingActionsColumn == null) {
       inputTrailingActionsColumn = StandardTableColumn(
         label: '',
@@ -91,49 +94,14 @@ class StandardTable<T> extends StatefulWidget {
     }
   }
 
-  final List<T> items;
   late final List<StandardTableColumn> inputColumns;
-  final OnSelectHandler<T> onSelectItem;
-  final ActionsProviderAt<T>? trailingActionsAt;
-  final ActionMenuType? trailingActionsMenuType;
-
-  final StandardTableCellsBuilder<T> buildCellsAt;
-  final List<int Function(T a, T b)?>? sortColumnPredicates;
-  final StandardTableRowBuilder? headerRowBuilder;
-  final StandardTableRowBuilder? dataRowBuilder;
   late final StandardTableColumn inputTrailingActionsColumn;
-
-  final WidgetDecorator? tableWrapper;
-
-  final double cellSpacing;
-  final double rowSpacing;
-  final double? minRowHeight;
-
-  final int headerMaxLines;
-  final bool softWrapHeader;
-  final bool showTableHeader;
-  final bool hideLeadingTrailingWhenEmpty;
-
-  /// Optional widget rendered above/below the table body
-  final Widget? leadingWidget;
-  final Widget? trailingWidget;
-
-  final double? leadingWidgetSpacing;
-  final double? trailingWidgetSpacing;
-
-  /// Optional widget rendered when there are no rows in the table
-  /// If undefined, renders an empty table instead
-  final Widget? emptyWidget;
-
-  final StandardTableStyle rowStyle;
-
-  final bool disableRowInteractions;
 
   @override
   State<StandardTable<T>> createState() => _StandardTableState<T>();
 }
 
-class _StandardTableState<T> extends State<StandardTable<T>> {
+class _StandardTableState<T>() extends State<StandardTable<T>> {
   /// Cached list of [TableRow]s corresponding to each item in [widget.items]
   final List<TableRow> _cachedRows = [];
 
@@ -143,9 +111,6 @@ class _StandardTableState<T> extends State<StandardTable<T>> {
 
   /// Indices to rebuild [TableRow]s for instead of using the cached version
   final Set<int> _dirtyRowIndices = {};
-
-  /// Static helper row for padding
-  late final TableRow paddingRow = _buildPaddingRow();
 
   List<T>? sortDefaultOrder;
 
@@ -188,6 +153,7 @@ class _StandardTableState<T> extends State<StandardTable<T>> {
     }
 
     final headerRow = _buildHeaderRow();
+    final paddingRow = _buildPaddingRow();
     final List<TableRow> tableHeaderRows = (widget.showTableHeader)
         ? [headerRow, paddingRow, paddingRow]
         : [];
@@ -289,6 +255,7 @@ class _StandardTableState<T> extends State<StandardTable<T>> {
 
   List<TableRow> _tableRows(ThemeData theme) {
     final List<TableRow> rows = [];
+    final paddingRow = _buildPaddingRow();
 
     // reuse or rebuild rows if needed
     for (var rowIdx = 0; rowIdx < widget.items.length; rowIdx++) {
@@ -393,9 +360,9 @@ class _StandardTableState<T> extends State<StandardTable<T>> {
   void sortAction(int i, {PointerEvent? hover}) {
     if (!widget.inputColumns[i].sortable) return;
 
-    final ascendingIcon = Icon(MdiIcons.arrowUp);
-    final descendingIcon = Icon(MdiIcons.arrowDown);
-    final hoveredIcon = Icon(MdiIcons.arrowUp, color: Colors.grey);
+    const ascendingIcon = Icon(MdiIcons.arrowUp);
+    const descendingIcon = Icon(MdiIcons.arrowDown);
+    const hoveredIcon = Icon(MdiIcons.arrowUp, color: Colors.grey);
 
     setState(() {
       // Clicked
@@ -446,9 +413,14 @@ class _StandardTableState<T> extends State<StandardTable<T>> {
     final theme = Theme.of(context);
     final rowIsHovered = states.contains(WidgetState.hovered);
     final rowIsPressed = states.contains(WidgetState.pressed);
-    final rowColor = (widget.rowStyle == StandardTableStyle.material)
-        ? theme.colorScheme.onPrimary
-        : Colors.transparent;
+    final rowColor = switch (widget.rowStyle) {
+      StandardTableStyle.material => theme.colorScheme.onPrimary,
+      StandardTableStyle.flat =>
+        rowIsHovered || rowIsPressed
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.18)
+            : Colors.transparent,
+      StandardTableStyle.plain => Colors.transparent,
+    };
 
     Widget decorateCellInteractions(Widget child, {bool disableOnTap = false}) {
       return MouseEventsRegion(
@@ -517,12 +489,17 @@ class _StandardTableState<T> extends State<StandardTable<T>> {
     for (var i = 0; i < rawCells.length; i++) {
       final isLeading = i == 0;
       final isTrailing = i == rawCells.length - 1;
-      //final disableOnTap = (widget.trailingActionsAt != null && isTrailing)
-      //    ? true : false;
+      // Avoid triggering row selection while interacting with trailing actions.
+      final disableOnTap = widget.trailingActionsAt != null && isTrailing;
       final cellColumnConfig = widget.inputColumns[i];
 
       Widget cell = rawCells[i];
-      cell = decorateCell(cell, isLeading: isLeading, isTrailing: isTrailing);
+      cell = decorateCell(
+        cell,
+        isLeading: isLeading,
+        isTrailing: isTrailing,
+        disableOnTap: disableOnTap,
+      );
       cell = applyColumnConfiguration(cell, cellColumnConfig);
       dataCells.add(cell);
     }
@@ -556,7 +533,22 @@ class _StandardTableState<T> extends State<StandardTable<T>> {
               color: theme.colorScheme.onPrimary,
             ),
           )
-        : TableRow(key: ObjectKey(item), children: dataCells);
+        : TableRow(
+            key: ObjectKey(item),
+            children: dataCells,
+            decoration: widget.rowStyle == StandardTableStyle.flat
+                ? BoxDecoration(
+                    color: rowColor,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.9,
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
+          );
   }
 
   Widget _buildActionMenu(BuildContext context, List<ModelAction> actions) {
@@ -568,9 +560,8 @@ class _StandardTableState<T> extends State<StandardTable<T>> {
       final theme = Theme.of(context);
       actionMenuWidget = ActionPopUpMenuButton(
         actions: actions,
-        triggerIconColor: ThemeConfig.bodyTextMuted(
-          theme,
-        ).color?.withValues(alpha: 0.6),
+        triggerIconColor: ThemeConfig.bodyTextMuted(theme).color
+            ?.withValues(alpha: 0.6),
         triggerIconColorHover: theme.colorScheme.primary,
         disableSplashEffect: true,
         position: PopupMenuPosition.over,

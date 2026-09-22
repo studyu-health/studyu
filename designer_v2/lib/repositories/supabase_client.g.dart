@@ -10,12 +10,12 @@ part of 'supabase_client.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(supabaseClient)
-const supabaseClientProvider = SupabaseClientProvider._();
+final supabaseClientProvider = SupabaseClientProvider._();
 
 final class SupabaseClientProvider
     extends $FunctionalProvider<SupabaseClient, SupabaseClient, SupabaseClient>
     with $Provider<SupabaseClient> {
-  const SupabaseClientProvider._()
+  SupabaseClientProvider._()
     : super(
         from: null,
         argument: null,

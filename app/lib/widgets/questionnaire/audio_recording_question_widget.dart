@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
@@ -11,22 +11,17 @@ import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/question_widget.dart';
 import 'package:studyu_core/core.dart';
 
-class AudioRecordingQuestionWidget extends QuestionWidget {
-  final AudioRecordingQuestion question;
-  final Function(Answer<FutureBlobFile>)? onDone;
-
-  const AudioRecordingQuestionWidget({
-    super.key,
-    required this.question,
-    this.onDone,
-  });
-
+class const AudioRecordingQuestionWidget({
+  super.key,
+  required final AudioRecordingQuestion question,
+  final Function(Answer<FutureBlobFile>)? onDone,
+}) extends QuestionWidget {
   @override
   State<AudioRecordingQuestionWidget> createState() =>
       _AudioRecordingQuestionWidgetState();
 }
 
-class _AudioRecordingQuestionWidgetState
+class _AudioRecordingQuestionWidgetState()
     extends State<AudioRecordingQuestionWidget> {
   bool _isRecording = false;
   bool _hasRecorded = false;
@@ -238,8 +233,7 @@ class _AudioRecordingQuestionWidgetState
     final errorMessage = isPermissionRelated
         ? AppLocalizations.of(context)!.microphone_access_denied
         : AppLocalizations.of(context)!.recording_error;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(errorMessage)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(errorMessage)));
   }
 }

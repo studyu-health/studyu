@@ -3,25 +3,22 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 
-class CapturePictureScreen extends StatefulWidget {
-  final String userId;
-  final String studyId;
-
-  const CapturePictureScreen({
-    super.key,
-    required this.userId,
-    required this.studyId,
-  });
-
+class const CapturePictureScreen({
+  super.key,
+  required final String userId,
+  required final String studyId,
+}) extends StatefulWidget {
   @override
   State<CapturePictureScreen> createState() => _CapturePictureScreenState();
 }
 
-class _CapturePictureScreenState extends State<CapturePictureScreen>
+class _CapturePictureScreenState()
+    extends State<CapturePictureScreen>
     with WidgetsBindingObserver {
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
@@ -96,10 +93,9 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
         }
       }
 
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorText)));
+      context.pop();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errorText)));
     }
   }
 
@@ -165,7 +161,7 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
     await imageFile.rename(stagingImageFile.localFilePath);
 
     if (!mounted) return;
-    Navigator.pop(context, stagingImageFile);
+    context.pop(stagingImageFile);
   }
 
   @override

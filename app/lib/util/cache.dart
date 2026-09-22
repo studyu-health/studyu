@@ -3,11 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
-class Cache {
+class Cache() {
   static bool isSynchronizing = false;
 
   static Future<void> storeSubject(StudySubject? subject) async {
@@ -78,9 +79,9 @@ class Cache {
     return null;
   }
 
-  static Future<void> delete() async {
+  static Future<void> delete() {
     StudyULogger.warning("Delete cache");
-    SecureStorage.delete(cacheSubjectKey);
+    return SecureStorage.delete(cacheSubjectKey);
   }
 
   static Future<void> uploadBlobFiles() async {
@@ -105,7 +106,7 @@ class Cache {
     // local and remote subject are equal, nothing to synchronize
     if (localSubject == remoteSubject) return remoteSubject;
     // remote subject belongs to a different study
-    if (!kDebugMode &&
+    if (!isDebugMode &&
         remoteSubject.startedAt!.isAfter(localSubject.startedAt!)) {
       return remoteSubject;
     }
@@ -161,15 +162,12 @@ class Cache {
         // Unable to determine what has changed
         // We can either drop local or overwrite remote
         // ... for now do nothing
-        if (!kDebugMode && localSubject.startedAt == remoteSubject.startedAt) {
+        if (!isDebugMode && localSubject.startedAt == remoteSubject.startedAt) {
           StudyULogger.fatal(
             "Cache synchronization found local changes that cannot be merged",
           );
-          StudyUDiagnostics.captureMessage(
+          StudyULogger.error(
             "localSubject: ${localSubject.toFullJson()} \nremoteSubject: ${remoteSubject.toFullJson()}",
-          );
-          StudyUDiagnostics.captureException(
-            Exception("CacheSynchronizationException"),
           );
         }
       }
@@ -185,11 +183,6 @@ class Cache {
     debugInfo.writeln('=== Cached User Data Debug Info ===');
 
     try {
-      // Check for fake StudyU email domain
-      debugInfo.writeln(
-        'Fake StudyU Email Domain: fake-studyu-email-domain.com',
-      );
-
       // Check selected subject ID
       if (await SecureStorage.containsKey('selected_study_object_id')) {
         final selectedSubjectId = await SecureStorage.read(

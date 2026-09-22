@@ -3,6 +3,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  actions: read
+  checks: read
+
 concurrency:
   group: ${{ github.ref }}-ready-to-merge
   cancel-in-progress: true
@@ -12,159 +16,206 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check if PR is ready to merge
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
-            // Define a list of workflows that need to finish successfully if run before merging  
-            workflows_to_check = [
-              "all_packages.yml",
-              "linter.yml",
-              "mega-linter.yml",
-              "e2e_tests.yml",
-              "supabase-test.yml",
-            ];
-            console.log("Initializing with workflows to check: " + workflows_to_check);
             const { owner, repo } = context.repo;
-            let branch_name;
-            if (context.payload.pull_request !== undefined) {
-              // PR event detected
-              branch_name = context.payload.pull_request.head.ref;
-            } else {
-              // Workflow dispatch event detected
-              branch_name = context.ref.split("/").pop();
-            }
-            console.log("Branch name: " + branch_name);
-            const maxRetries = 15; // Maximum number of retries
-            
-            async function fetchLatestWorkflowRun(workflowId) {
-              console.log("Fetching workflow runs for: " + workflowId);
-              try {
-                const response = await github.rest.actions.listWorkflowRuns({
-                  owner,
-                  repo,
-                  workflow_id: workflowId,
-                  branch: branch_name,
-                  per_page: 1,
-                });
-                return response.data.workflow_runs[0];
-              } catch (error) {
-                if (error.status === 404) {
-                  console.warn("Workflow not found: " + workflowId + ". It will be ignored.");
-                  return;
-                }
-                core.setFailed("Error fetching workflow runs for: " + workflowId + ". Error: " + error.message);
-                process.exit();
-              }
-            }
+            const commitSha =
+              context.payload.pull_request?.head?.sha ?? context.sha;
+            const startupRetries = 15;
+            const completionRetries = 15;
+            const startupDelay = 10000;
+            const completionDelay = 60000;
 
-            async function sleep(ms) {
+            // Push workflows run for every branch. Path-filtered workflows
+            // are optional. Fork pull requests push their commits to a fork
+            // repository. Push workflows never run for their head SHA in this
+            // repository, so the required push checks are skipped for them.
+            const fromFork =
+              context.payload.pull_request?.head?.repo?.full_name !==
+                undefined &&
+              context.payload.pull_request.head.repo.full_name !==
+                `${owner}/${repo}`;
+            const workflowsToCheck = [
+              ...(fromFork
+                ? []
+                : [
+                    { id: "linter.yml", required: true },
+                    { id: "mega-linter.yml", required: true },
+                  ]),
+              { id: "all_packages.yml", required: false },
+              { id: "e2e_tests.yml", required: false },
+              { id: "supabase-test.yml", required: false },
+              // SonarQube runs only for pull requests from this repository
+              // that are not from dependabot. A failed SonarQube run blocks
+              // the merge. A missing run does not.
+              { id: "sonarqube.yml", required: false },
+            ];
+            // dart_file_lines.yml is dispatch-only, so it is not a merge gate.
+
+            function sleep(ms) {
               return new Promise((resolve) => setTimeout(resolve, ms));
             }
-            
-            console.log("Sleeping 10s to give other runs a chance to start");
-            await sleep(10000);
-            for (const workflowId of workflows_to_check) {
-              let retryCount = 0;
-              let inProgressFound = false;
-              let workflowRun = await fetchLatestWorkflowRun(workflowId);
-              if (!workflowRun) {
-                console.log("No workflow runs found for: " + workflowId);
-                continue;
-              }
-              do {
-                console.log("Checking workflow run: " + workflowRun.name + " with status: " + workflowRun.status + " and conclusion: " + workflowRun.conclusion);
-                if (retryCount >= maxRetries) {
-                  core.setFailed(
-                    "Maximum retries reached with check runs still in progress."
-                  );
-                  break;
-                }
-                if (workflowRun.conclusion === "success" || workflowRun.conclusion === "skipped" || workflowRun.conclusion === "cancelled") {
-                  console.log("Workflow run completed successfully: " + workflowRun.name + " with conclusion: " + workflowRun.conclusion);
-                  break;
-                }
-                if (workflowRun.conclusion === "failure") {
-                  console.log("Workflow run failed: " + workflowRun.name);
-                  const checkSuiteId = workflowRun.check_suite_id;
-                  const urlOfFailedCheckSuite = workflowRun.html_url;
-                  const checkRuns = await github.rest.checks.listForSuite({
-                    owner,
-                    repo,
-                    check_suite_id: checkSuiteId,
-                  });
-                  const failedCheckNames = checkRuns.data.check_runs
-                      .filter((checkRun) => checkRun.conclusion === "failure")
-                      .map((checkRun) => checkRun.name);
-                  core.setFailed("The workflow run '" +
-                    workflowRun.name + "' has failed. Please fix the failed checks: '" +
-                    failedCheckNames.join(", ") + "'. Check suite URL: " +
-                    urlOfFailedCheckSuite
-                  );
-                  break;
-                }
-                console.log("Waiting for 1 minute before rechecking...");
-                await sleep(60000);
-                workflowRun = await fetchLatestWorkflowRun(workflowId);
-                retryCount++;
-              } while (true);
+
+            async function findNewestRun(workflowId) {
+              const response = await github.rest.actions.listWorkflowRuns({
+                owner,
+                repo,
+                workflow_id: workflowId,
+                head_sha: commitSha,
+                per_page: 100,
+              });
+              return response.data.workflow_runs
+                .filter((run) => run.head_sha === commitSha)
+                .sort((a, b) => {
+                  const first = Date.parse(a.created_at);
+                  const second = Date.parse(b.created_at);
+                  return second - first;
+                })[0];
             }
-            console.log("All given workflow runs completed.");
 
-            // Do not check the check runs for now, since fetchCheckRuns also 
-            // includes the workflows we checked above for the latest commit.
-            // Todo: find another way to check for checks that are not part 
-            // of this repository e.g. GitGuardian
+            // Poll all workflows for a run of this commit inside one shared
+            // startup window, so optional path-filtered workflows that never
+            // start cost one window in total instead of one per workflow.
+            async function waitForRuns() {
+              const pending = [...workflowsToCheck];
+              const started = [];
+              for (let attempt = 0; attempt <= startupRetries; attempt += 1) {
+                for (const workflow of pending) {
+                  let run;
+                  try {
+                    run = await findNewestRun(workflow.id);
+                  } catch (error) {
+                    if (error.status !== 404) {
+                      throw error;
+                    }
+                  }
+                  if (run) {
+                    console.log(
+                      `Found ${workflow.id} run ${run.id} for ${commitSha}.`
+                    );
+                    started.push({ workflow, run });
+                  }
+                }
+                pending.splice(
+                  0,
+                  pending.length,
+                  ...pending.filter(
+                    (workflow) =>
+                      !started.some((entry) => entry.workflow === workflow)
+                  )
+                );
+                if (!pending.length || attempt === startupRetries) {
+                  break;
+                }
+                console.log(
+                  `Waiting for ${pending
+                    .map((workflow) => workflow.id)
+                    .join(", ")} to start ` +
+                  `(${attempt + 1}/${startupRetries})...`
+                );
+                await sleep(startupDelay);
+              }
+              return started;
+            }
 
-            /* 
-              const commit_sha = context.payload.pull_request.head.sha; // Get the SHA of the head commit of the PR
-              console.log("commit_sha " + commit_sha);
-              // exclude the current workflow from the list of workflows to check
-              const excludedCheckRunName = 'check_commit_status'
-              // console.log("context sha: " + context.sha);
-              // console.log("github sha: " + github.sha);
-              async function fetchCheckRuns() {
-                const response = await github.rest.checks.listForRef({
+            async function failedChecks(run) {
+              if (!run.check_suite_id) {
+                return [];
+              }
+              try {
+                const response = await github.rest.checks.listForSuite({
                   owner,
                   repo,
-                  ref: commit_sha,
+                  check_suite_id: run.check_suite_id,
                   per_page: 100,
                 });
-                console.log("Found " + response.data.check_runs.length + " check runs.");
-                return response.data.check_runs;
+                return response.data.check_runs
+                  .filter((checkRun) => checkRun.conclusion !== "success")
+                  .map((checkRun) => {
+                    const url = checkRun.html_url
+                      ? ` (${checkRun.html_url})`
+                      : "";
+                    return `${checkRun.name}${url}`;
+                  });
+              } catch (error) {
+                console.warn(
+                  `Could not list checks for run ${run.id}: ${error.message}`
+                );
+                return [];
               }
-              console.log("Checking check runs...");
-              let checkRuns = await fetchCheckRuns();
-              let inProgressFound = false;
-              for (const checkRun of checkRuns) {
-                let retryCount = 0;
-                do {
-                  inProgressFound = false;
-                  console.log("Checking check run: " + checkRun.name + " with status: " + checkRun.status + " and conclusion: " + checkRun.conclusion);
-                  if (checkRun.name === excludedCheckRunName) {
-                    console.log("Skipping excluded check run: " + checkRun.name);
-                    break;
+            }
+
+            async function waitForCompletion(run) {
+              for (
+                let attempt = 0;
+                attempt <= completionRetries;
+                attempt += 1
+              ) {
+                const current = await github.rest.actions.getWorkflowRun({
+                  owner,
+                  repo,
+                  run_id: run.id,
+                });
+                const workflowRun = current.data;
+                console.log(
+                  `${workflowRun.name} run ${workflowRun.id}: ` +
+                  `${workflowRun.status}/${workflowRun.conclusion}`
+                );
+                if (workflowRun.status === "completed") {
+                  if (workflowRun.conclusion === "success") {
+                    return;
                   }
-                  if (checkRun.status === "in_progress") {
-                    console.log("Check run in progress: " + checkRun.name);
-                    if (retryCount >= maxRetries) {
-                      core.setFailed(
-                        "Maximum retries reached with check runs still in progress."
-                      );
-                      break;
-                    }
-                    console.log("Waiting for 1 minute before rechecking...");
-                    await sleep(60000);
-                    checkRuns = await fetchCheckRuns();
-                    retryCount++;
-                    inProgressFound = true;
-                  }
-                  if (checkRun.conclusion === "failure") {
-                    core.setFailed("The check run '" +
-                      checkRun.name + "' has failed. Please fix the failed checks. Check run URL: " +
-                      checkRun.html_url
-                    );
-                  }
-                } while (inProgressFound);
+                  const checks = await failedChecks(workflowRun);
+                  const checkSummary = checks.length
+                    ? ` Failed checks: ${checks.join(", ")}.`
+                    : "";
+                  throw new Error(
+                    `${workflowRun.name} finished with ` +
+                    `conclusion '${workflowRun.conclusion}'. ` +
+                    `Run URL: ${workflowRun.html_url}.${checkSummary}`
+                  );
+                }
+                if (attempt === completionRetries) {
+                  throw new Error(
+                    `${workflowRun.name} run ${workflowRun.id} did not ` +
+                    "finish " +
+                    `within the polling limit. Run URL: ${workflowRun.html_url}`
+                  );
+                }
+                await sleep(completionDelay);
               }
-              console.log("All check runs completed successfully.");
-            */
+            }
+
+            const failures = [];
+            console.log(`Checking workflows for immutable SHA ${commitSha}.`);
+            const started = await waitForRuns();
+            for (const workflow of workflowsToCheck) {
+              if (started.some((entry) => entry.workflow === workflow)) {
+                continue;
+              }
+              if (workflow.required) {
+                failures.push(
+                  `${workflow.id} did not start for ${commitSha} ` +
+                  `within the startup limit.`
+                );
+              } else {
+                console.log(
+                  `Skipping optional path-filtered workflow ${workflow.id}; ` +
+                  "no run was found."
+                );
+              }
+            }
+            await Promise.all(
+              started.map(({ run }) =>
+                waitForCompletion(run).catch((error) => {
+                  failures.push(error.message);
+                })
+              )
+            );
+
+            if (failures.length) {
+              core.setFailed(failures.join("\n"));
+            } else {
+              console.log("All required workflow runs succeeded.");
+            }

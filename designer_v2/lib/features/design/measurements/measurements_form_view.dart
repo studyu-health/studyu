@@ -11,9 +11,8 @@ import 'package:studyu_designer_v2/features/forms/form_list_view.dart';
 import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyDesignMeasurementsFormView extends StudyDesignPageWidget {
-  const StudyDesignMeasurementsFormView(super.studyId, {super.key});
-
+class const StudyDesignMeasurementsFormView(super.studyId, {super.key})
+    extends StudyDesignPageWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyControllerProvider(studyId));
@@ -60,21 +59,22 @@ class StudyDesignMeasurementsFormView extends StudyDesignPageWidget {
                         hideLeadingTrailingWhenEmpty: true,
                         reorderable: !formViewModel.isReadonly,
                         onReorder: (oldIndex, newIndex) {
-                          if (newIndex > oldIndex) {
-                            newIndex -= 1;
+                          var effectiveNewIndex = newIndex;
+                          if (effectiveNewIndex > oldIndex) {
+                            effectiveNewIndex -= 1;
                           }
                           // Reorder the view models
                           final item = formViewModel.measurementViewModels
                               .removeAt(oldIndex);
                           formViewModel.measurementViewModels.insert(
-                            newIndex,
+                            effectiveNewIndex,
                             item,
                           );
                           // Reorder the underlying form array to match
                           final controlItem = formViewModel.measurementsArray
                               .removeAt(oldIndex);
                           formViewModel.measurementsArray.insert(
-                            newIndex,
+                            effectiveNewIndex,
                             controlItem,
                           );
                           formViewModel.save();

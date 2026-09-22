@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:go_router/go_router.dart';
+import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_core/env.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AppErrorScreen extends StatefulWidget {
-  final String? selectedSubjectId;
+enum AppErrorReason() {
+  loading,
+  deletedStudy,
+}
 
-  const AppErrorScreen({super.key, this.selectedSubjectId});
+class const AppErrorScreenArguments({
+  final String? selectedSubjectId,
+  final AppErrorReason reason = AppErrorReason.loading,
+});
 
+class const AppErrorScreen({
+  super.key,
+  final String? selectedSubjectId,
+  final AppErrorReason reason = AppErrorReason.loading,
+}) extends StatefulWidget {
   @override
   State<AppErrorScreen> createState() => _AppErrorScreenState();
 }
 
-class _AppErrorScreenState extends State<AppErrorScreen> {
+class _AppErrorScreenState() extends State<AppErrorScreen> {
   String? cachedUserData;
   bool isLoadingData = true;
 
@@ -60,13 +71,21 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  loc.loading_error_title,
+                  switch (widget.reason) {
+                    AppErrorReason.loading => loc.loading_error_title,
+                    AppErrorReason.deletedStudy =>
+                      loc.deleted_study_error_title,
+                  },
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  loc.loading_error_description,
+                  switch (widget.reason) {
+                    AppErrorReason.loading => loc.loading_error_description,
+                    AppErrorReason.deletedStudy =>
+                      loc.deleted_study_error_description,
+                  },
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16),
                 ),
@@ -80,7 +99,7 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(MdiIcons.informationOutline),
+                            const Icon(MdiIcons.informationOutline),
                             const SizedBox(width: 8),
                             Text(
                               'Debug Information',
@@ -118,21 +137,21 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
-                        icon: Icon(MdiIcons.emailOutline),
-                        onPressed: () => _contactSupport(context),
+                        icon: const Icon(MdiIcons.emailOutline),
+                        onPressed: () => _contactStudyTeam(context),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary,
                         ),
-                        label: Text(loc.contact_support),
+                        label: Text(loc.email_study_team),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: TextButton.icon(
-                        icon: Icon(MdiIcons.deleteOutline),
+                        icon: const Icon(MdiIcons.deleteOutline),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.red,
                         ),
@@ -151,15 +170,26 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
     );
   }
 
-  Future<void> _contactSupport(BuildContext context) async {
-    StudyULogger.info("User chose to contact support from AppErrorScreen");
+  Future<void> _contactStudyTeam(BuildContext context) async {
+    StudyULogger.info(
+      "User chose to contact the study team from AppErrorScreen",
+    );
+    final loc = AppLocalizations.of(context)!;
 
-    const emailSubject = 'StudyU Support Request - Loading Error';
+    final emailSubject = switch (widget.reason) {
+      AppErrorReason.loading => loc.support_email_subject_loading_error,
+      AppErrorReason.deletedStudy => loc.support_email_subject_deleted_study,
+    };
 
     // Get the base email body from localization
-    String emailBody = AppLocalizations.of(
-      context,
-    )!.support_email_body(widget.selectedSubjectId ?? '');
+    String emailBody = switch (widget.reason) {
+      AppErrorReason.loading => loc.support_email_body(
+        widget.selectedSubjectId ?? '',
+      ),
+      AppErrorReason.deletedStudy => loc.deleted_study_support_email_body(
+        widget.selectedSubjectId ?? '',
+      ),
+    };
 
     // Append cached user data to the email body
     if (cachedUserData != null && cachedUserData!.isNotEmpty) {
@@ -168,43 +198,58 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
       emailBody += '\n\n--- Debug Information ---\nNo cached data available';
     }
 
-    // Get contact email with fallback to developer email
-    String? contactEmail;
+    String contactEmail = '';
     try {
-      final appContact = await AppConfig.getAppContact();
-      contactEmail = appContact.email;
+      final cachedSubject = await Cache.loadSubject();
+      if (cachedSubject.id != widget.selectedSubjectId) {
+        throw StateError('Cached subject does not match selected subject');
+      }
+      contactEmail = cachedSubject.study.contact.email.trim();
     } catch (e) {
-      StudyULogger.warning(
-        'Failed to get app contact, using developer email fallback: $e',
-      );
-      contactEmail = developerEmail;
+      StudyULogger.warning('Failed to load study team contact email: $e');
     }
 
-    if (contactEmail == null || contactEmail.isEmpty) {
-      StudyULogger.error('No contact email available.');
+    if (contactEmail.isEmpty) {
+      StudyULogger.error('No study team contact email available.');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.no_contact_email)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(loc.study_team_email_unavailable)));
       return;
     }
 
     final uriString =
         'mailto:$contactEmail?subject=${Uri.encodeComponent(emailSubject)}&body=${Uri.encodeComponent(emailBody)}';
     final emailUri = Uri.parse(uriString);
-    await launchUrl(emailUri);
+    bool didLaunch = false;
+    try {
+      didLaunch = await launchUrl(
+        emailUri,
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (e) {
+      StudyULogger.warning('Failed to launch study team email URI: $e');
+    }
 
-    // Show non dismissible dialog to inform the user that support has been contacted
+    if (!didLaunch) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(loc.study_team_email_unavailable)));
+      return;
+    }
+
+    // Let users dismiss the confirmation after the email app was opened.
     if (!context.mounted) return;
     await showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.support_email_sent),
-          content: Text(
-            AppLocalizations.of(context)!.support_email_sent_description,
-          ),
+          title: Text(loc.support_email_sent),
+          content: Text(loc.support_email_sent_description),
+          actions: [
+            TextButton(onPressed: () => context.pop(), child: Text(loc.ok)),
+          ],
         );
       },
     );
@@ -222,12 +267,12 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => context.pop(false),
               child: Text(AppLocalizations.of(context)!.cancel),
             ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () => context.pop(true),
               child: Text(AppLocalizations.of(context)!.reset_app),
             ),
           ],
@@ -236,13 +281,24 @@ class _AppErrorScreenState extends State<AppErrorScreen> {
     );
 
     if (result == true) {
-      // Delete all secure storage data
-      StudyULogger.info("Deleting all secure storage data");
       if (!context.mounted) return;
       await cancelNotifications(context);
-      await SecureStorage.deleteAll();
-      StudyULogger.info("Secure storage data deleted");
+
+      if (widget.reason == AppErrorReason.deletedStudy) {
+        StudyULogger.info("Clearing active study reference");
+        await deleteActiveStudyReference();
+        StudyULogger.info("Active study reference cleared");
+      } else {
+        StudyULogger.info("Deleting all secure storage data");
+        await SecureStorage.deleteAll();
+        StudyULogger.info("Secure storage data deleted");
+      }
+
+      if (!context.mounted) return;
+      context.goNamed(RouteNames.welcome);
+      return;
     }
+
     StudyULogger.info("User chose not to delete secure storage data.");
   }
 }

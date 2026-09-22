@@ -1,29 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:studyu_designer_v2/common_views/mouse_events.dart';
 
-class StudiesTableColumnHeader extends StatefulWidget {
-  final String title;
-  final bool sortable;
-  final bool sortAscending;
-  final bool sortingActive;
-  final void Function()? onSort;
-
-  const StudiesTableColumnHeader(
-    this.title, {
-    super.key,
-    required this.sortable,
-    required this.sortingActive,
-    required this.sortAscending,
-    this.onSort,
-  });
-
+class const StudiesTableColumnHeader(
+  final String title, {
+  super.key,
+  required final bool sortable,
+  required final bool sortingActive,
+  required final bool sortAscending,
+  final void Function()? onSort,
+  final bool center = false,
+  final bool rightAlign = false,
+}) extends StatefulWidget {
   @override
   State<StudiesTableColumnHeader> createState() =>
       _StudiesTableColumnHeaderState();
 }
 
-class _StudiesTableColumnHeaderState extends State<StudiesTableColumnHeader> {
+class _StudiesTableColumnHeaderState() extends State<StudiesTableColumnHeader> {
   bool isHovering = false;
 
   @override
@@ -31,8 +25,18 @@ class _StudiesTableColumnHeaderState extends State<StudiesTableColumnHeader> {
     final theme = Theme.of(context);
 
     return MouseEventsRegion(
+      key: ValueKey('studies_table_column_header_${widget.title}'),
       builder: (context, state) {
+        final alignment = widget.center
+            ? MainAxisAlignment.center
+            : (widget.rightAlign
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.start);
+        final textAlign = widget.center
+            ? TextAlign.center
+            : (widget.rightAlign ? TextAlign.end : TextAlign.start);
         return Row(
+          mainAxisAlignment: alignment,
           children: [
             Flexible(
               child: Text(
@@ -40,13 +44,14 @@ class _StudiesTableColumnHeaderState extends State<StudiesTableColumnHeader> {
                 maxLines: 1,
                 overflow: TextOverflow.fade,
                 softWrap: false,
-                style: theme.textTheme.bodySmall!.copyWith(
+                textAlign: textAlign,
+                style: theme.textTheme.bodyMedium!.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
               ),
             ),
             if (widget.sortable)
-              _getIcon() ?? const SizedBox(width: 17)
+              _getIcon() ?? const SizedBox.shrink()
             else
               const SizedBox.shrink(),
           ],
@@ -59,10 +64,10 @@ class _StudiesTableColumnHeaderState extends State<StudiesTableColumnHeader> {
   }
 
   Icon? _getIcon() {
-    final ascendingIcon = Icon(MdiIcons.arrowUp);
-    final descendingIcon = Icon(MdiIcons.arrowDown);
-    final hoveredAscendingIcon = Icon(MdiIcons.arrowUp, color: Colors.grey);
-    final hoveredDescendingIcon = Icon(MdiIcons.arrowDown, color: Colors.grey);
+    const ascendingIcon = Icon(MdiIcons.arrowUp);
+    const descendingIcon = Icon(MdiIcons.arrowDown);
+    const hoveredAscendingIcon = Icon(MdiIcons.arrowUp, color: Colors.grey);
+    const hoveredDescendingIcon = Icon(MdiIcons.arrowDown, color: Colors.grey);
 
     if (!widget.sortable) {
       return null;

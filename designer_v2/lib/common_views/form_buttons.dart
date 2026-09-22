@@ -9,8 +9,8 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 
 /// A cancel / dismiss button for use with [FormScaffold] [showFormSideSheet)
 /// Heavily inspired by [CloseButton]
-class DismissButton extends StatelessWidget {
-  const DismissButton({this.text, this.onPressed, super.key});
+class const DismissButton({
+  final String? text,
 
   /// An override callback to perform instead of the default behavior which is
   /// to pop the [Navigator].
@@ -20,10 +20,9 @@ class DismissButton extends StatelessWidget {
   /// situations.
   ///
   /// Defaults to null.
-  final VoidCallback? onPressed;
-
-  final String? text;
-
+  final VoidCallback? onPressed,
+  super.key,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -36,6 +35,7 @@ class DismissButton extends StatelessWidget {
         }
       },
       child: SecondaryButton(
+        key: const ValueKey('form_dismiss_button'),
         text: text ?? tr.dialog_cancel,
         icon: null,
         //tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
@@ -58,9 +58,8 @@ List<Widget> buildFormButtons(FormViewModel formViewModel, FormMode formMode) {
       builder: (context, form, child) {
         return retainSizeInAppBar(
           DismissButton(
-            onPressed: () => formViewModel.cancel().then((_) {
-              if (context.mounted) Navigator.maybePop(context);
-            }),
+            key: const ValueKey('form_cancel_button'),
+            onPressed: () => Navigator.maybePop(context),
           ),
         );
       },
@@ -70,6 +69,7 @@ List<Widget> buildFormButtons(FormViewModel formViewModel, FormMode formMode) {
       builder: (context, form, child) {
         return retainSizeInAppBar(
           PrimaryButton(
+            key: const ValueKey('form_save_button'),
             text: tr.dialog_save,
             tooltipDisabled:
                 "${tr.form_invalid_prompt}\n\n${formViewModel.form.validationErrorSummary}",
@@ -95,6 +95,7 @@ List<Widget> buildFormButtons(FormViewModel formViewModel, FormMode formMode) {
       builder: (context, form, child) {
         return retainSizeInAppBar(
           DismissButton(
+            key: const ValueKey('form_close_button'),
             text: tr.dialog_close,
             onPressed: () => Navigator.maybePop(context),
           ),

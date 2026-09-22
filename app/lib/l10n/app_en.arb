@@ -1,14 +1,13 @@
 {
   "@@locale": "en",
-
   "loading": "Loading",
+  "starting_study": "Starting your study…",
   "loading_error_title": "Loading Error",
   "loading_error_description": "The study data could not be retrieved. If you are currently participating in a study, please first contact your study supervisor for assistance. Only contact support if you are not in a study or your supervisor instructs you to do so. Do not delete your data unless told by your supervisor or support. Deleting data will remove all your study data and you will have to rejoin the study.",
   "try_again": "Try again",
   "delete_all_data": "Delete all data",
   "delete_all_data_description": "Do you really want to delete all data? This will delete all your study data and you will have to rejoin the study.",
   "reset_app": "Reset App",
-
   "what_is_studyu": "What is StudyU?",
   "description_part1": "Imagine reading the sentence: \"Eating after 6 pm decreases sleep quality\"",
   "description_part2": "Now you might think something like: Well... good to know but is that affecting everyone and also ME?",
@@ -19,10 +18,25 @@
   "description_part7": "Once you have chosen one of our studies we will make sure that your health status allows participation. Afterwards you can enroll as a participant and adapt the study plan to your everyday life. Tasks (e.g. eating late and rating your tiredness) have to be done on a regular basis (e.g. once per day). Once you have reached the minimum study duration (usually just a few weeks) you will be able to unlock results for free.",
   "description_part8": "But bear in mind that results are more reliable the longer you take actively part in the study. And in order to prevent systematic error you cannot go on with the study after unlocking results. Therefore, with the help of a progress bar we will indicate you how many tasks are still needed for the minimum and how much you could improve your results with going on for some more weeks.",
   "description_part9": "But enough from our side, now it's time for StudyU!",
-
   "get_started": "Get started",
+  "welcome_find_study_title": "Find what works for you",
+  "made_with_love_in_potsdam": "Made with ♥ in Potsdam",
+  "welcome_find_study_description": "Choose a public study or use an invitation.",
+  "browse_public_studies": "Browse public studies",
+  "welcome_returning_participant": "Already participated with StudyU?",
+  "restore_studyu_account": "Restore StudyU account",
+  "show_onboarding_again": "Show onboarding again",
+  "onboarding_page0_title": "Welcome to StudyU",
+  "onboarding_page0_subtitle": "Researchers can estimate what works on average. They cannot determine whether a habit or treatment works for you. StudyU helps you test that question yourself.",
+  "onboarding_page1_title": "Your personal study",
+  "onboarding_page1_subtitle": "In an N-of-1 study, you are the only participant. You follow different phases, such as eating early and eating late, and record outcomes such as sleep quality.",
+  "onboarding_page2_title": "An expert study plan",
+  "onboarding_page2_subtitle": "Choose a study that matches your question. StudyU provides an expert-designed protocol, checks whether you can participate safely, and helps fit the plan into your routine.",
+  "onboarding_page3_title": "Complete regular tasks",
+  "onboarding_page3_subtitle": "Follow the assigned option and record your observations, usually once a day. The progress bar shows how many tasks remain before you can view your results.",
+  "onboarding_page4_title": "Build reliable evidence",
+  "onboarding_page4_subtitle": "After a few weeks, you can compare how each option worked for you. Each completed task strengthens the result. When you unlock your results, StudyU ends the study to protect the analysis.",
   "study_selection": "Study Selection",
-  "study_selection_description": "Please select a study.",
   "study_selection_single": "You can only participate in one study at a time.",
   "study_selection_single_why": "Why?",
   "study_selection_single_reason": "If you were to participate in multiple studies at a time, the interventions of these studies might interfere with one another and alter the results.",
@@ -30,43 +44,63 @@
   "study_selection_unsupported": "The study you are trying to join is not compatible with your app version. Please update the app to the latest version.",
   "study_selection_closed_title": "Study closed",
   "study_selection_closed": "This study is currently closed for new participants.",
-  "study_selection_hidden_studies": "Some studies couldn't be shown, because your app version is outdated. Please update your app to see all available studies.",
-  "study_overview_title": "Overview",
-  "eligibility_questionnaire_title": "Questionnaire",
+  "study_selection_hidden_studies": "Some studies could not be displayed. This can happen when your app version is outdated. Please update the app to see all available studies, or join one of the studies shown below.",
+  "study_selection_no_public_studies": "There are currently no public studies available. If you have an invite code, you can still join a private study.",
+  "study_overview_title": "Study overview",
+  "eligibility_questionnaire_title": "Eligibility check",
   "please_answer_eligibility": "Please answer a few questions to make sure that you can safely participate in this study.",
-  "intervention_selection_title": "Interventions",
+  "intervention_selection_title": "Intervention selection",
   "please_select_interventions": "Please select two interventions to apply during the study.",
-  "please_select_interventions_description": "The effects of these two interventions will be measured and compared during the study. Interventions will follow the order you select. Choosing A before B means A comes first",
+  "please_select_interventions_description": "The effects of these two interventions will be measured and compared during the study.",
   "no_interventions_available": "No interventions available.",
   "loading_interventions": "Loading interventions",
-
   "task_already_completed": "You have already completed this task today",
   "task_cannot_be_completed": "The task cannot be completed",
   "task_outside_period": "The task cannot be completed outside of the intervention period",
   "study_notification_body": "A new task awaits your attention",
-
   "intervention_phase_duration": "Intervention phase duration",
   "days": "days",
   "study_length": "Study length",
   "study_publisher": "Study Publisher",
-
   "tasks_daily": "Tasks:",
   "baseline_description": "The baseline is a phase within a study in which the initial state is measured to allow later comparisons. During the baseline phase you should behave as usual, no study-specific interventions are carried out yet.",
   "baseline": "Baseline",
   "days_left": "days left",
-
   "today_tasks": "Today's tasks",
   "intervention_current": "Current intervention",
   "study_current": "Current study:",
   "opt_out": "Leave study",
-  "delete_data": "Leave study and delete all data",
+  "leave_study_keep_data_title": "Leave study and keep your data?",
+  "leave_study_keep_data_body": "You will stop participating in the study “{studyName}”. We will keep the progress and responses you have already submitted, and researchers may continue to use your anonymized data.\n\nYou cannot rejoin this participation after leaving. Your previous studies will not be affected.",
+  "@leave_study_keep_data_body": {
+    "placeholders": {
+      "studyName": {
+        "type": "String"
+      }
+    }
+  },
+  "stay_in_study": "Stay in study",
+  "acknowledge_consequences": "I have read this information and understand the consequences.",
+  "leave_keep_data": "Leave and keep my data",
+  "leave_study_description": "Stop participating. Your existing study data will be retained.",
+  "delete_data": "Leave study and delete my data",
+  "leave_study_delete_data_title": "Leave study and delete my data?",
+  "leave_study_delete_data_body": "You will stop participating in the study “{studyName}”. We will permanently delete your progress and responses for this study from our servers and remove its saved data from this device.\n\nThis cannot be undone. Neither you nor anyone from the study team will be able to recover this data.",
+  "@leave_study_delete_data_body": {
+    "placeholders": {
+      "studyName": {
+        "type": "String"
+      }
+    }
+  },
+  "leave_delete_data": "Leave and delete my data",
+  "delete_study_data_description": "Permanently delete your study data. This cannot be undone.",
   "soft_delete_desc": "You will lose your progress in ",
   "soft_delete_desc_2": " and won't be able to recover it. Previously completed studies will not be deleted.\nYour anonymized data up to this point may still be used for research purposes.",
   "hard_delete_desc": "You are about to delete all data from your device and our servers. You will not be able to restore your data.\nYour anonymized data will not be available for research purposes anymore.",
-
-  "your_journey": "Your Journey",
+  "your_journey": "Your journey",
+  "journey_overview_description": "Review your study timeline before continuing.",
   "journey_results_available": "Results available",
-
   "summary": "Summary",
   "consent": "Consent",
   "error": "An error occurred!",
@@ -75,23 +109,19 @@
   "back_pain": "Back pain",
   "video_task": "Video task",
   "finished": "Finished",
-
   "how_would_you_rate_your_pain_today": "How would you rate your pain today? (0 = no pain, 10 = extreme pain)",
   "thank_you_for_your_input": "Thank you for your input",
   "please_give_consent": "Please give your consent to participate in this study. You are required to read all boxes by clicking on them.",
   "please_give_consent_why": "Why?",
   "please_give_consent_reason": "Studies need to request specific consent from participants, for reasons of safety and data privacy. Hence, you must explicitly consent to participate in each study.",
   "user_did_not_give_consent": "You did not give your consent. To participate you need to give consent.",
-
-  "setting_up_study": "Setting up your study...",
-  "good_to_go": "You are good to go!",
-
   "dashboard": "Dashboard",
+  "study_not_available_for_testing_yet": "This study is not available for testing yet.",
   "home": "Home",
   "profile": "Profile",
   "help": "Help",
   "contact": "Contact",
-  "contact_support": "Contact Support",
+  "contact_support": "Contact study team",
   "support_email_body": "Hello,\n\nI am experiencing a loading error in the StudyU app. My subject ID is: {subjectId}\n\nPlease assist me with this issue.\n\nThank you.",
   "@support_email_body": {
     "description": "Body of the support email, includes the subject ID",
@@ -102,12 +132,36 @@
     }
   },
   "about": "About",
+  "study_information": "Study information",
+  "study_information_description": "Only share these details with your study team when they ask for them.",
+  "study_name": "Study name",
+  "study_id": "Study ID",
+  "subject_id": "Subject ID",
+  "study_start_date": "Study start date",
+  "app_version": "App version",
+  "platform": "Platform",
+  "not_available": "Not available",
+  "view_study_information": "View details",
+  "email_study_team": "Contact study team",
+  "study_team_email_unavailable": "This study has no contact email.",
+  "copy_all_information": "Copy all",
+  "value_copied": "{label} copied to clipboard.",
+  "@value_copied": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "all_information_copied": "All information copied to clipboard.",
+  "participant_information_email_subject": "[StudyU] Participant information",
+  "participant_information_email_intro": "Hello,\n\nI am contacting you about my participation in the study. These are my StudyU details:",
+  "email_app_unavailable": "No email app is available.",
   "settings": "Settings",
   "yes": "yes",
   "no": "no",
   "confirm": "Confirm selection",
   "survey": "Survey",
-
   "complete": "Complete",
   "cancel": "Cancel",
   "accept": "Accept",
@@ -118,12 +172,9 @@
   "completed": "Completed",
   "faq_full": "Frequently Asked Questions",
   "faq": "FAQ",
-
   "start_study": "Start Study",
   "next_day": "Next day",
-
   "could_not_save_results": "Could not save results",
-
   "take_a_photo": "Take a photo",
   "start_recording": "Start recording",
   "stop_recording": "Stop recording",
@@ -139,16 +190,14 @@
   "storing_photo": "The photo is being stored",
   "storing_audio": "The audio file is being stored",
   "upload_error": "The file could not be uploaded",
-
   "language": "Language",
+  "use_device_language": "Use device language",
   "en": "English",
   "de": "German",
   "allow_analytics": "Allow app analytics",
   "allow_analytics_desc": "All collected data is used only to improve app performance and never for tracking purposes. You can read more about this in our data privacy.",
-
   "video_test": "This is a video test",
   "survey_test": "This is a survey test",
-
   "current_report": "Current report",
   "report_history": "Report history",
   "no_reports_found": "No reports defined yet",
@@ -156,34 +205,34 @@
   "not_enough_data": "Not enough data",
   "barely_enough_data": "Barely enough data",
   "enough_data": "Enough data",
-
+  "legal_documents": "Legal documents",
+  "legal_documents_description": "Please review and accept these documents to continue.",
   "terms": "Terms of Use",
   "terms_read": "Read Terms of Use",
-  "terms_content": "The terms of use give an overview on the purpose and use of the StudyU app. In case you have any questions please reach out to us via the contact information in the legal notice.",
+  "terms_content": "The terms of use give an overview on the purpose and use of the StudyU app.",
   "terms_agree": "I have read and agree to the terms of use",
-
   "privacy": "Privacy Policy",
   "privacy_read": "Read Privacy Policy",
-  "privacy_content": "The privacy policy describes which data is stored, why, when, where, access rights, and which rights you have. In case you have any questions please reach out to us via the contact information in the legal notice.",
+  "privacy_content": "The privacy policy describes which data is stored, why, when, where, access rights, and which rights you have.",
   "privacy_agree": "I have read and agree to the privacy policy",
+  "legal_notice": "Legal Notice",
+  "legal_notice_content": "The legal notice shows who is responsible for StudyU and how you can contact us.",
   "imprint_read": "Read Legal Notice",
-
-  "invite_code_button": "Use invite code",
-  "private_study_invite_code": "Private study invite code",
+  "invite_code_button": "Join with an invite code",
+  "private_study_invite_code": "Enter invite code",
+  "private_study_invite_code_description": "Enter the code shared by your study team.",
   "invite_code": "Invite code",
   "invalid_invite_code": "Not a valid invite code",
-
   "save_pdf": "Save as PDF",
   "was_saved_to": "The file was saved to ",
   "save_not_supported": "Error",
   "save_not_supported_description": "Downloading files is currently not supported in the web version.",
-
   "eligible_no": "You are not eligible for this study",
   "eligible_yes": "You are eligible for this study",
   "eligible_mistake": "If you made a mistake, you can still change your answers",
   "eligible_back": "Back to study selection",
-  "eligible_choice_multi_selection": "Select all that apply",
-
+  "eligible_choice_multi_selection": "Select all that apply (optional)",
+  "eligible_choice_multi_selection_required": "Select all that apply (at least one required)",
   "report_overview": "Report overview",
   "report_primary_result": "Primary Result",
   "report_disclaimer": "This report is only valid if you entered all information correctly.",
@@ -191,15 +240,11 @@
   "performance_overview": "Overview of completion of tasks",
   "performance_overview_interventions": "Interventions",
   "performance_overview_observations": "Observations",
-
   "report_outcome_inconclusive": "The results are inconclusive. There does not seem to be a statistically significant difference between the interventions.",
   "report_outcome_neither": "Both interventions seem to have a negative effect on the outcome for you.",
   "report_outcome_one": "The intervention {intervention} seems to improve the outcome for you.",
   "report_axis_phase": "Phase",
-
-  "study_not_started": "Your study has not started yet. Please check back tomorrow!",
   "completed_study": "You completed your last study. Look at past reports or start a new study.",
-
   "app_support": "App support",
   "app_support_text": "Contact for problems or questions with the app",
   "study_support": "Study support",
@@ -211,7 +256,6 @@
   "email": "Email",
   "phone": "Phone",
   "additionalInfo": "Additional information",
-
   "free_text_min_length_error": "Please enter at least {min} characters",
   "@free_text_min_length_error": {
     "placeholders": {
@@ -230,17 +274,9 @@
   },
   "free_text_alphanumeric_error": "Please enter only alphanumeric characters",
   "free_text_numeric_error": "Please enter only numeric characters",
-  "free_text_custom_error": "Please enter only characters matching the pattern {pattern}",
-  "@free_text_custom_error": {
-    "placeholders": {
-      "pattern": {
-        "type": "String"
-      }
-    }
-  },
+  "free_text_custom_error": "Please enter a value in the required format",
   "app_outdated_message": "A new version of the StudyU App is available. Please update to get the latest features and improvements. Thank you for your support!",
   "update_now": "Update now",
-
   "text_summary_section_prefix_higher": "Your ",
   "text_summary_section_was_higher": " was higher during intervention: ",
   "text_summary_section_was_lower": " was lower during intervention: ",
@@ -293,10 +329,9 @@
   "average": "Average",
   "minimum": "Minimum",
   "maximum": "Maximum",
-  "support_email_sent": "Support Email Sent",
-  "support_email_sent_description": "Your support request has been prepared in your email app. Please send the email to reach our support team and wait for their reply.\n\nIf you are currently participating in a study, please continue tracking your results outside the app until the issue is resolved. Thank you for your understanding.",
-	"no_contact_email": "The support email address is not configured. Please contact your study supervisor for assistance.",
-
+  "support_email_sent": "Email opened",
+  "support_email_sent_description": "Your message to the study team was prepared in your email app. Review and send the email, then wait for their reply.\n\nIf you are currently participating in a study, continue tracking your results outside the app until the issue is resolved.",
+  "no_contact_email": "The support email address is not configured. Please contact your study supervisor for assistance.",
   "sync_fitbit_data": "Sync Fitbit Data",
   "fitbit_data_synced": "Fitbit data synced successfully",
   "fitbit_data_not_synced": "Fitbit data could not be synced. Please be sure that you have synced your Fitbit data with the Fitbit app.",
@@ -443,7 +478,6 @@
   "painTypeTightness": "Tightness",
   "painTypeSoreness": "Soreness",
   "painTypeStiffness": "Stiffness",
-
   "preview_mode": "Preview Mode",
   "preview_mode_active": "Preview Mode Active",
   "preview_mode_active_state": "Preview mode is now active.",
@@ -451,5 +485,287 @@
   "preview_mode_description": "You are currently in preview mode. This allows you to:\n\n• Fast-forward through study days using the \"Next Day\" button\n• Complete tasks multiple times without restrictions\n• Experience the full study flow without affecting real data\n\nImportant: Results and data from preview mode are not stored or mixed with actual participant results from running studies.",
   "preview_mode_results_not_saved": "Task completed in preview mode - results are not saved to protect study data integrity.",
   "ok": "OK",
-  "submit" : "Submit"
+  "submit": "Submit",
+  "go_back": "Go back",
+  "study_settings_section": "Study settings",
+  "recovery_phrase_header": "Recovery phrase",
+  "copy_to_clipboard": "Copy to clipboard",
+  "copied_to_clipboard": "Copied to clipboard. Paste the recovery phrase somewhere secure on your phone now.",
+  "recovery_phrase_save_warning": "Never share them with anyone.",
+  "show_recovery_phrase": "Show Recovery Phrase",
+  "recovery_phrase_saved_confirmation": "I have saved all 13 words in a safe place and can retrieve them when I want to restore my account. I can also view them again in Study Settings.",
+  "recovery_phrase_rotate_button": "Reissue recovery phrase",
+  "recovery_phrase_rotate_dialog_title": "Reissue recovery phrase?",
+  "recovery_phrase_rotate_dialog_description": "Your current recovery phrase will immediately stop working. You must save the new phrase to recover your account in the future.",
+  "recovery_phrase_rotate_acknowledgement": "I understand that my current recovery phrase will immediately stop working.",
+  "recovery_phrase_rotate_confirm": "Reissue phrase",
+  "recovery_phrase_rotate_success": "A new recovery phrase has been issued. Save it now.",
+  "recovery_phrase_rotate_error": "Could not issue a new recovery phrase. Please try again.",
+  "continue_to_study": "Done",
+  "restore_account": "Restore account",
+  "enter_recovery_phrase": "Enter your recovery phrase",
+  "restore_account_signed_in_title": "Already signed in",
+  "restore_account_signed_in_description": "You are already signed in on this device. Restoring an account will replace the current account. Your recovery phrase remains valid after recovery.",
+  "required": "Required",
+  "invalid_recovery_phrase": "This recovery phrase does not match an account. Make sure all 13 words are in the right order.",
+  "recovery_phrase_too_many_words": "Recovery phrases have 13 words. Remove extra words to continue.",
+  "recovery_successful": "Recovery successful! ID: {id}",
+  "@recovery_successful": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "deep_link_error_title": "Error",
+  "deep_link_study_not_found": "Study with ID {studyId} not found or not available",
+  "@deep_link_study_not_found": {
+    "placeholders": {
+      "studyId": {
+        "type": "String"
+      }
+    }
+  },
+  "recovery_in_progress": "Recovering your account...",
+  "recovery_failed": "Recovery failed. Please check your recovery phrase and try again.",
+  "recovery_user_not_found": "No account found with this recovery phrase.",
+  "recovery_network_error": "Network error. Please check your connection and try again.",
+  "restore_account_description": "Restore your account on this device with the recovery phrase you saved before joining a study.",
+  "restore_account_help_title": "Restore with your recovery phrase",
+  "restore_account_help_1": "Enter all 13 words in order",
+  "restore_account_help_2": "You can type or paste the phrase manually",
+  "share_recovery": "Share Recovery",
+  "share_as_text": "Share as Text",
+  "download_recovery": "Download Recovery",
+  "download_as_text": "Download as Text File",
+  "file_saved": "File saved successfully",
+  "file_save_error": "Error saving file",
+  "share_btn": "Share",
+  "copy_btn": "Copy",
+  "download_btn": "Download",
+  "general_section": "General",
+  "current_study_section": "Current study",
+  "participation_options_section": "Manage participation",
+  "share_recovery_text_btn": "Share Recovery Text",
+  "recovery_phrase_load_error": "Failed to load recovery phrase",
+  "share_error": "Error sharing: {error}",
+  "@share_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deep_link_study_invite_only": "This study requires an invite code to join",
+  "deep_link_invite_invalid": "Invalid or expired invite code: {code}",
+  "@deep_link_invite_invalid": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "deep_link_error_invalid_invite": "Invalid invite code",
+  "deep_link_switch_warning_title": "You are already in a study",
+  "deep_link_switch_warning_description": "You are currently enrolled in:\n{currentStudy}\n\nThe deep link points to:\n{targetStudy}\n\nYou can return to your current study (recommended) or continue to leave it and switch.",
+  "@deep_link_switch_warning_description": {
+    "placeholders": {
+      "currentStudy": {
+        "type": "String"
+      },
+      "targetStudy": {
+        "type": "String"
+      }
+    }
+  },
+  "deep_link_switch_warning_opt_out_instruction": "If you want to leave your current study, open Settings and use \"{optOut}\" first. Then open the invite again.",
+  "@deep_link_switch_warning_opt_out_instruction": {
+    "placeholders": {
+      "optOut": {
+        "type": "String"
+      }
+    }
+  },
+  "deep_link_switch_open_settings": "Open Settings",
+  "deep_link_switch_continue_study": "Continue Study",
+  "deep_link_switch_primary_return": "Return to current study",
+  "deep_link_switch_secondary_continue": "Leave current study and switch",
+  "deep_link_switch_data_choice_title": "How do you want to leave your current study?",
+  "deep_link_switch_data_choice_description": "Choose what should happen to your current study data before switching.",
+  "deep_link_switch_soft_delete_button": "Soft delete and switch",
+  "deep_link_switch_hard_delete_button": "Hard delete and switch",
+  "deep_link_switch_confirm_soft_title": "Confirm soft delete",
+  "deep_link_switch_confirm_soft_button": "Confirm soft delete",
+  "deep_link_switch_confirm_hard_title": "Confirm hard delete",
+  "deep_link_switch_confirm_hard_description": "This will permanently and irreversibly delete all your data.",
+  "deep_link_switch_confirm_hard_button": "Confirm hard delete",
+  "open_link_on_mobile": "Please open this link on your mobile device.",
+  "you_have_been_invited": "You have been invited to a study!",
+  "download_app_join": "Download the StudyU App & Join",
+  "deleted_study_error_title": "Study unavailable",
+  "deleted_study_error_description": "This study is no longer available from the server. Your data remains on this device for now. Please contact your study supervisor or support before deleting anything. Only use 'Delete all data' if they tell you to reset the app.",
+  "dashboard_showcase_progress_title": "Study progress",
+  "dashboard_showcase_progress_description": "This shows where you are in the study and how much is left.",
+  "dashboard_showcase_current_intervention_title": "Current intervention",
+  "dashboard_showcase_current_intervention_description": "Here you can see your current intervention and how many days remain in this phase.",
+  "dashboard_showcase_today_tasks_title": "Today's tasks",
+  "dashboard_showcase_today_tasks_description": "Here you can find the tasks you need to complete today as part of the study.",
+  "dashboard_showcase_contact_title": "Contact",
+  "dashboard_showcase_contact_description": "Use this if you need help from the study team.",
+  "dashboard_showcase_report_title": "Report",
+  "dashboard_showcase_report_description": "Open your current report when results are available.",
+  "dashboard_showcase_menu_title": "More options",
+  "dashboard_showcase_menu_description": "Find settings, FAQs, report history, and more here.",
+  "dashboard_showcase_finish": "Finish",
+  "support_email_subject_loading_error": "StudyU Support Request - Loading Error",
+  "support_email_subject_deleted_study": "StudyU Support Request - Study Unavailable",
+  "deleted_study_support_email_body": "Hello,\n\nThe StudyU app says that my study is no longer available from the server. My subject ID is: {subjectId}\n\nPlease let me know whether I should keep my local data or reset the app.\n\nThank you.",
+  "@deleted_study_support_email_body": {
+    "description": "Body of the support email for deleted study errors, includes the Subject ID",
+    "placeholders": {
+      "subjectId": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboard_tour": "Dashboard tour",
+  "show_again": "View tour again",
+  "free_text_hint": "Enter your answer",
+  "preview_failed_to_initialize": "Preview failed to initialize.",
+  "preview_overlay_reset_hint": "The preview could not be opened right now. Please try resetting the preview.",
+  "preview_overlay_study_not_ready": "The preview could not be opened for this study yet. Please try resetting the preview.",
+  "preview_overlay_route_open_failed": "The preview route could not be opened right now.",
+  "continue_label": "Continue",
+  "restored_answer_needs_review": "Restored answer requires review",
+  "restored_answer_review_description": "Complete task becomes available after review.",
+  "mark_answer_reviewed": "I've reviewed this answer",
+  "answer_reviewed": "Answer reviewed",
+  "review_restored_answer_to_continue": "Review the restored answer to continue.",
+  "complete_task": "Complete task",
+  "no_internet_connection": "No internet connection. Please try again when online.",
+  "error_occurred_with_message": "An error occurred: {message}",
+  "@error_occurred_with_message": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "date_picker_hint": "Select a date",
+  "time_picker_hint": "Select a time",
+  "date_picker_button_label": "Choose date",
+  "date_time_picker_button_label": "Choose date and time",
+  "date_picker_button_label_datetime": "Select date",
+  "time_picker_button_label_datetime": "Select time",
+  "time_picker_button_label": "Select a time",
+  "date_picker_clear": "Clear",
+  "date_picker_validation_required": "Please select a date",
+  "time_picker_validation_required": "Please select a time",
+  "datetime_picker_validation_required": "Please select both date and time",
+  "time_picker_validation_range": "Please select a time within the allowed range",
+  "time_picker_range_hint": "Select a time between {min} and {max}",
+  "@time_picker_range_hint": {
+    "placeholders": {
+      "min": {},
+      "max": {}
+    }
+  },
+  "time_picker_min_hint": "Earliest allowed time: {min}",
+  "@time_picker_min_hint": {
+    "placeholders": {
+      "min": {}
+    }
+  },
+  "time_picker_max_hint": "Latest allowed time: {max}",
+  "@time_picker_max_hint": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "date_picker_validation_min_date": "Date must be after {minDate}",
+  "@date_picker_validation_min_date": {
+    "placeholders": {
+      "minDate": {
+        "type": "String"
+      }
+    }
+  },
+  "date_picker_validation_max_date": "Date must be before {maxDate}",
+  "@date_picker_validation_max_date": {
+    "placeholders": {
+      "maxDate": {
+        "type": "String"
+      }
+    }
+  },
+  "please_select_interventions_why": "Why?",
+  "recovery_phrase_description": "Save these 13 words in a safe place. They are the only way to restore your account if you lose access to this device.",
+  "recovery_phrase_why": "Why?",
+  "recovery_phrase_reason": "StudyU does not use passwords or email accounts. These 13 words are the only way to restore your account if you get a new phone or reinstall the app. Write them down or store them digitally somewhere only you can access. Never share them with anyone. You can view your recovery phrase again at any time under Settings → Study settings.",
+  "study_not_started_title": "You’ve joined the study",
+  "study_not_started_description": "Come back tomorrow to begin. We’ll remind you when there’s something to do.",
+  "recovery_phrase_word_count": "{count}/{total} words",
+  "ko": "Korean",
+  "faq_section_data_storage_privacy": "Data Storage and Privacy",
+  "faq_question_data_storage": "Where and how is my data stored?",
+  "faq_answer_data_storage": "The data collected from you is stored locally on your device and is uploaded to a secure server when it is connected to the internet. All study data is collected and stored anonymously.",
+  "faq_question_personal_data": "Which personal data does the app collect?",
+  "faq_answer_personal_data": "The app does not collect any personal data of the user.",
+  "faq_section_studies": "Studies",
+  "faq_question_study_duration": "How long will the study take to finish?",
+  "faq_answer_study_duration": "The duration of each study is mentioned during initial study selection.",
+  "faq_question_change_intervention": "Can I select a different intervention?",
+  "faq_answer_change_intervention": "Before starting the study, go back to the intervention selection screen to choose different interventions. After the study has started, you cannot change the selected interventions for that participation. To choose different interventions, leave the study from Settings, choose whether to keep or permanently delete your existing data, and then select a study and its interventions again during enrollment.",
+  "faq_question_missed_tasks": "Can I redo my missed tasks on a later date?",
+  "faq_answer_missed_tasks": "No, you cannot redo a missed task on a later date. However, you can finish it at anytime on the same day.",
+  "faq_question_leave_study": "How can I leave the current study?",
+  "faq_answer_leave_study": "Go to the Settings tab on the Dashboard and click \"Leave study\". This will exit the study without deleting your progress data, allowing it to be included in the study analysis. To leave the study and delete all progress data both locally and on the server, click \"Leave study and delete all data\". All data will be permanently removed from the server and your device.",
+  "faq_section_report_details": "Report Details",
+  "faq_question_daily_tasks": "What are daily tasks and how do I complete them?",
+  "faq_answer_daily_tasks": "To find out which intervention works best for you, you need to perform some daily tasks for each intervention. Please make sure to hit the \"Complete\" button after finishing it",
+  "faq_question_rate_your_day": "What is \"Rate your day\"?",
+  "faq_answer_rate_your_day": "\"Rate your day\" is a feature that tracks your health during entire study period. It requires you to rate certain health-related queries on a scale of 1 to 10.",
+  "faq_question_track_activities": "How can I keep track of my activities?",
+  "faq_answer_track_activities": "You can get an overview of your daily tasks and health status in the \"Reports History section\"",
+  "faq_question_download_report": "How can I download my Study report?",
+  "faq_answer_download_report": "Your report will be ready to download once you have completed the minimum required tasks for a study. It will be available in the Report History tab located on the Dashboard.",
+  "debug_notifications_not_initialized": "Notifications are not initialized yet. Please start a study and open this through the about section.",
+  "debug_test_notification_title": "StudyU Test Notification",
+  "debug_test_notification_body": "This notification confirms that you receive StudyU notifications",
+  "debug_reset_success": "App reset successfully! Please restart the app.",
+  "debug_reset_error": "Error while resetting the app. Please try again.",
+  "debug_screen_title": "Debug Screen",
+  "debug_send_information_via_email": "Send debug information via email",
+  "debug_receive_test_notification": "Receive test notification",
+  "debug_show_onboarding": "Show onboarding",
+  "invite_landing_instruction_title": "Join the study with StudyU Health",
+  "invite_landing_qr_label": "Study invitation QR code",
+  "invite_landing_invite_code": "Invite code",
+  "invite_landing_invalid": "This invitation is no longer available. Please check the link or code and try again.",
+  "invite_landing_load_error": "We could not load this invitation. Please try again later.",
+  "invite_landing_loading": "Loading invitation…",
+  "scan_invite_code": "Scan QR code",
+  "scan_invite_code_description": "Point your camera at the invitation QR code.",
+  "open_study_app": "Open in StudyU Health",
+  "invite_landing_google_play": "Get it on Google Play",
+  "invite_landing_app_store": "Download on the App Store",
+  "invite_landing_step_download": "Get the StudyU Health app",
+  "invite_landing_step_join": "Join the study in the app",
+  "invite_landing_step_join_description": "Open StudyU Health on your phone and tap Join with an invite code. Enter the invite code or scan the QR code to join the study.",
+  "invite_landing_invited_title": "You’re invited to join",
+  "invite_landing_phone_instruction": "Enter this invite code in the StudyU Health app.",
+  "invite_landing_other_device_instruction": "For quick access, scan this QR code with your phone.",
+  "invite_landing_enter_code_title": "Enter invite code",
+  "invite_landing_scan_qr_title": "Scan QR code",
+  "invite_landing_copied": "Copied",
+  "invite_landing_copy_code": "Copy invite code",
+  "date_format": "Date format",
+  "date_format_european": "European (31/12/2024)",
+  "date_format_german": "German (31.12.2024)",
+  "date_format_iso": "ISO (2024-12-31)",
+  "date_format_us": "US (12/31/2024)",
+  "system": "System",
+  "time_format": "Time format",
+  "time_format_12_hour": "12-hour (2:30 PM)",
+  "time_format_24_hour": "24-hour (14:30)"
 }

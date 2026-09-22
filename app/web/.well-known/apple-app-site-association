@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "PG566C9XUK.health.studyu.app",
+        "paths": [
+          "*"
+        ]
+      }
+    ]
+  }
+}

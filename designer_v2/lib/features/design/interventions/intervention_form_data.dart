@@ -6,27 +6,19 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:uuid/uuid.dart';
 
-class InterventionFormData extends IFormData {
+class InterventionFormData({
+  required final InterventionID interventionId,
+  required final String title,
+  final String? description,
+  final List<InterventionTaskFormData>? tasksData,
+  final String? iconName,
+}) extends IFormData {
   static String get kDefaultTitle => tr.form_field_intervention_title_default;
-
-  InterventionFormData({
-    required this.interventionId,
-    required this.title,
-    this.description,
-    this.tasksData,
-    this.iconName,
-  });
-
-  final InterventionID interventionId;
-  final String title;
-  final String? description;
-  final List<InterventionTaskFormData>? tasksData;
-  final String? iconName;
 
   @override
   FormDataID get id => interventionId;
 
-  factory InterventionFormData.fromDomainModel(Intervention intervention) {
+  factory fromDomainModel(Intervention intervention) {
     return InterventionFormData(
       interventionId: intervention.id,
       title: intervention.name ?? '',

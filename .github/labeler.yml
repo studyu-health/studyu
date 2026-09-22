@@ -1,14 +1,22 @@
 'core':
-  - 'core/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'core/**/*'
 'designer_v2':
-  - 'designer_v2/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'designer_v2/**/*'
 'app':
-  - 'app/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'app/**/*'
 'flutter_common':
-  - 'flutter_common/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'flutter_common/**/*'
 'dependencies':
-  - '**/pubspec.yaml'
-  - '**/pubspec.lock'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/pubspec.yaml'
+          - '**/pubspec.lock'
 'documentation':
-  - 'docs/**/*'
-  - '**/*.md'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**/*'
+          - '**/*.md'

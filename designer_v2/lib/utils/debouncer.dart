@@ -10,9 +10,7 @@ import 'package:studyu_designer_v2/utils/typings.dart';
 /// is executed. This is useful in scenarios where a function might be
 /// called frequently, but it is not necessary or desirable for it to
 /// execute on every call.
-abstract class ExecutionLimiter {
-  ExecutionLimiter({this.milliseconds = 300});
-  final int milliseconds;
+abstract class ExecutionLimiter({final int milliseconds = 300}) {
   static Timer? _timer;
 
   void dispose() {
@@ -25,22 +23,18 @@ abstract class ExecutionLimiter {
 /// This class extends [ExecutionLimiter] to provide a debouncing mechanism.
 /// This means that if the function is called multiple times in quick
 /// succession, it will only be executed once after a certain delay.
-class Debouncer extends ExecutionLimiter {
-  Debouncer({
-    super.milliseconds = 300,
-    this.leading = true,
-    this.cancelUncompleted = true,
-  });
+class Debouncer({
+  super.milliseconds = 300,
 
   /// If there is no active debounce, the callback is called immediately
   /// Subsequent calls within the debounce interval are debounced as usual
-  final bool leading;
+  final bool leading = true,
 
   /// If another operation is debounced before the future returned by the
   /// previous operation has completed, cancel the previous future & prevent
   /// it from executing entirely (if set to true)
-  final bool cancelUncompleted;
-
+  final bool cancelUncompleted = true,
+}) extends ExecutionLimiter {
   CancelableOperation? _uncompletedFutureOperation;
 
   void call({VoidCallback? callback, FutureFactory? futureBuilder}) {
@@ -82,9 +76,7 @@ class Debouncer extends ExecutionLimiter {
 /// This class extends [ExecutionLimiter] to provide a throttling mechanism.
 /// This means that the function will not be executed if it has been called
 /// recently, ensuring a minimum delay between executions.
-class Throttler extends ExecutionLimiter {
-  Throttler({super.milliseconds = 300});
-
+class Throttler({super.milliseconds = 300}) extends ExecutionLimiter {
   void call(VoidCallback callback) {
     if (ExecutionLimiter._timer?.isActive ?? false) return;
     ExecutionLimiter._timer?.cancel();

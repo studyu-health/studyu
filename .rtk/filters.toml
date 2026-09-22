@@ -1,0 +1,597 @@
+schema_version = 1
+
+[filters.fvm-melos-bootstrap]
+description = "Compact melos bootstrap success and failures"
+match_command = "^((fvm\\s+)?dart\\s+run\\s+melos|(fvm\\s+exec\\s+)?melos)\\s+(bs|bootstrap)(\\s|$)"
+strip_ansi = true
+filter_stderr = true
+keep_lines_matching = [
+  "(?i)(error|exception|failed|failure|could not|not found|invalid|missing|denied|timed out|pub get failed|unable)",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+:\\d+",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+"
+]
+max_lines = 80
+on_empty = "melos bootstrap: ok"
+
+[filters.melos-qualitycheck]
+description = "Compact melos qualitycheck wrapper output"
+match_command = "^((fvm\\s+)?dart\\s+run\\s+melos|(fvm\\s+exec\\s+)?melos)\\s+(run\\s+)?qualitycheck(\\s|$)"
+strip_ansi = true
+filter_stderr = true
+keep_lines_matching = [
+  "(?i)(error|exception|failed|failure|could not|not found|invalid|missing|denied|timed out|unable)",
+  "^\\s*(error|warning|info) - ",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+:\\d+",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+",
+  "^Formatted \\d+ files? \\([1-9]\\d* changed\\)",
+  "^dart analyze: No issues found$",
+  "^flutter analyze: No issues found$"
+]
+max_lines = 120
+on_empty = "qualitycheck: ok"
+
+[[tests.melos-qualitycheck]]
+name = "qualitycheck keeps compact success"
+input = """
+melos qualitycheck
+  └> RUNNING
+studyu_app:
+Formatted 111 files (0 changed) in 0.47 seconds.
+studyu_app: SUCCESS
+dart analyze: No issues found
+flutter analyze: No issues found
+"""
+expected = "dart analyze: No issues found\nflutter analyze: No issues found"
+
+[[tests.melos-qualitycheck]]
+name = "qualitycheck keeps pubspec failure"
+input = """
+Resolving dependencies...
+Error on line 6, column 3 of pubspec.yaml: pubspec.yaml refers to an unknown sdk 'broken_yaml'.
+  ╷
+6 │   broken_yaml:
+  │   ^^^^^^^^^^^
+  ╵
+"""
+expected = "Error on line 6, column 3 of pubspec.yaml: pubspec.yaml refers to an unknown sdk 'broken_yaml'."
+
+[[tests.fvm-melos-bootstrap]]
+name = "bootstrap success is empty"
+input = """
+Running pub get...
+SUCCESS
+ -> 5 packages bootstrapped
+"""
+expected = "melos bootstrap: ok"
+
+[[tests.fvm-melos-bootstrap]]
+name = "bootstrap keeps option error"
+input = """
+Could not find an option named \"--definitely-bad-option\".
+Usage: melos bootstrap [arguments]
+"""
+expected = "Could not find an option named \"--definitely-bad-option\"."
+
+[[tests.fvm-melos-bootstrap]]
+name = "direct bootstrap keeps option error"
+input = """
+Could not find an option named \"--definitely-bad-option\".
+Usage: melos bootstrap [arguments]
+"""
+expected = "Could not find an option named \"--definitely-bad-option\"."
+
+[filters.fvm]
+description = "Compact FVM shell output only"
+match_command = "^fvm\\s+shell\\b"
+strip_ansi = true
+filter_stderr = true
+keep_lines_matching = [
+  "(?i)(error|exception|failed|failure|could not|not found|invalid|missing|denied|timed out|pub get failed|\\bwarning\\b)",
+  "^\\s*(error|warning|info) - ",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+:\\d+",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+"
+]
+max_lines = 120
+on_empty = "fvm: ok"
+
+[[tests.fvm]]
+name = "fvm shell success is empty"
+input = """
+fvm: Running version: \"3.44.4\"
+Flutter SDK: SDK Version : 3.44.4 is already installed.
+Project now uses Flutter SDK : SDK Version : 3.44.4
+"""
+expected = "fvm: ok"
+
+[[tests.fvm]]
+name = "fvm keeps failure"
+input = """
+Failed to install Flutter SDK.
+"""
+expected = "Failed to install Flutter SDK."
+
+[filters.dart-analyze]
+description = "Compact dart analyze — strip headers and info-level issues; keep error/warning lines and summary"
+match_command = "^(fvm\\s+(exec\\s+)?)?dart\\s+analyze\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Analyzing ",
+  "^info -",
+  "^No issues found",
+]
+on_empty = "dart analyze: No issues found"
+max_lines = 80
+
+[[tests.dart-analyze]]
+name = "dart analyze success"
+input = """
+Analyzing studyu...
+No issues found!
+"""
+expected = "dart analyze: No issues found"
+
+[[tests.dart-analyze]]
+name = "dart analyze keeps warnings"
+input = """
+Analyzing lib...
+info - lib/a.dart:1:1 - info only - lint
+warning - lib/a.dart:2:1 - Unused import. - unused_import
+1 issue found.
+"""
+expected = "warning - lib/a.dart:2:1 - Unused import. - unused_import\n1 issue found."
+
+[filters.dart-pub-get]
+description = "Compact dart pub get — strip download noise; keep summary, warnings, and hints"
+match_command = "^(fvm\\s+(exec\\s+)?)?dart\\s+pub\\s+(get|add|upgrade|downgrade|outdated)\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Resolving dependencies",
+  "^Downloading packages",
+  "^  [a-zA-Z_][a-zA-Z0-9_-]* \\d",
+]
+max_lines = 60
+
+[[tests.dart-pub-get]]
+name = "dart pub strips package list"
+input = """
+Resolving dependencies in `/repo`...
+Downloading packages...
+  analyzer 12.1.0 (14.0.0 available)
+Got dependencies in `/repo`!
+49 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+"""
+expected = "Got dependencies in `/repo`!\n49 packages have newer versions incompatible with dependency constraints.\nTry `dart pub outdated` for more information."
+
+[filters.dart-test]
+description = "Compact dart test output — strip loading and blank lines, keep all test results"
+match_command = "^(fvm\\s+(exec\\s+)?)?dart\\s+test\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*loading",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*.*$",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+: All tests passed!",
+]
+on_empty = "ok dart test: all passed"
+max_lines = 80
+
+[[tests.dart-test]]
+name = "dart test success"
+input = """
+00:00 +0: loading test/example_test.dart
+00:00 +1: All tests passed!
+"""
+expected = "ok dart test: all passed"
+
+[[tests.dart-test]]
+name = "dart test keeps failure"
+input = """
+00:00 +0: loading test/example_test.dart
+00:00 +0 -1: test/example_test.dart: fails [E]
+  Expected: true
+    Actual: false
+00:00 +0 -1: Some tests failed.
+"""
+expected = "00:00 +0 -1: test/example_test.dart: fails [E]\n  Expected: true\n    Actual: false\n00:00 +0 -1: Some tests failed."
+
+[filters.flutter-analyze]
+description = "Compact flutter analyze — strip headers and info-level issues; keep error/warning lines and summary"
+match_command = "^(fvm\\s+(exec\\s+)?)?flutter\\s+analyze\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Analyzing ",
+  "^info ",
+  "^No issues found",
+  "^Resolving dependencies",
+  "^Downloading packages",
+  "^Got dependencies",
+  "^  [a-zA-Z_][a-zA-Z0-9_-]* \\d",
+  "^\\d+ packages have newer",
+  "^Try `flutter pub outdated`",
+]
+on_empty = "flutter analyze: No issues found"
+max_lines = 80
+
+[[tests.flutter-analyze]]
+name = "flutter analyze success"
+input = """
+Analyzing studyu...
+No issues found! (ran in 3.5s)
+"""
+expected = "flutter analyze: No issues found"
+
+[[tests.flutter-analyze]]
+name = "flutter analyze keeps errors"
+input = """
+Analyzing broken.dart...
+info • info only • broken.dart:1:1 • lint
+error • Undefined method • broken.dart:24:5 • undefined_method
+1 issue found. (ran in 0.1s)
+"""
+expected = "error • Undefined method • broken.dart:24:5 • undefined_method\n1 issue found. (ran in 0.1s)"
+
+[filters.flutter-pub-get]
+description = "Compact flutter pub get — strip download noise; keep summary, warnings, and hints"
+match_command = "^(fvm\\s+(exec\\s+)?)?flutter\\s+pub\\s+(get|add|upgrade|downgrade|outdated)\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Resolving dependencies",
+  "^Downloading packages",
+  "^  [a-zA-Z_][a-zA-Z0-9_-]* \\d",
+]
+max_lines = 60
+
+[[tests.flutter-pub-get]]
+name = "flutter pub strips package list"
+input = """
+Resolving dependencies in `/repo`...
+Downloading packages...
+  analyzer 12.1.0 (14.0.0 available)
+Got dependencies in `/repo`!
+49 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+"""
+expected = "Got dependencies in `/repo`!\n49 packages have newer versions incompatible with dependency constraints.\nTry `flutter pub outdated` for more information."
+
+[filters.flutter-test]
+description = "Compact flutter test output — strip pub preamble, loading lines, and blank lines; keep test results only"
+match_command = "^(fvm\\s+(exec\\s+)?)?flutter\\s+test\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*loading",
+  "^Resolving dependencies",
+  "^Downloading packages",
+  "^Got dependencies",
+  "^  [a-zA-Z_][a-zA-Z0-9_-]* \\d",
+  "^\\d+ packages have newer",
+  "^Try `flutter pub outdated`",
+  "^The following plugins do not support",
+  "^  - ",
+  "^This will become an error",
+  "^Running",
+  "^\\[\\+\\d+ ms\\] ",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*.*$",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+: All tests passed!",
+]
+on_empty = "ok flutter test: all passed"
+max_lines = 80
+
+[[tests.flutter-test]]
+name = "flutter test success"
+input = """
+Resolving dependencies...
+Got dependencies!
+00:00 +0: loading test/widget_test.dart
+00:00 +1: All tests passed!
+"""
+expected = "ok flutter test: all passed"
+
+[[tests.flutter-test]]
+name = "flutter test keeps failure"
+input = """
+Resolving dependencies...
+Downloading packages...
+  analyzer 12.1.0 (14.0.0 available)
+Got dependencies!
+00:00 +0: loading test/widget_test.dart
+00:00 +0 -1: test/widget_test.dart: fails [E]
+  Expected: true
+    Actual: false
+00:00 +0 -1: Some tests failed.
+"""
+expected = "00:00 +0 -1: test/widget_test.dart: fails [E]\n  Expected: true\n    Actual: false\n00:00 +0 -1: Some tests failed."
+
+[filters.dart-build-runner]
+description = "Compact dart run build_runner — strip AOT compile progress, per-file intermediate lines; keep builder summaries, warnings, and final result"
+match_command = "^(fvm\\s+(exec\\s+)?)?dart\\s+run\\s+build_runner\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^\\s*\\d+s compiling builders",
+  "^W These options have been removed",
+  ".*;\\s*\\S+\\.dart$",
+]
+max_lines = 60
+
+[[tests.dart-build-runner]]
+name = "build runner keeps summaries"
+input = """
+  1s compiling builders/aot
+  0s json_serializable on 95 inputs; lib/core.dart
+  0s json_serializable on 95 inputs: 95 skipped
+  Built with build_runner/aot in 0s; wrote 0 outputs.
+"""
+expected = "  0s json_serializable on 95 inputs: 95 skipped\n  Built with build_runner/aot in 0s; wrote 0 outputs."
+
+[filters.flutter-build]
+description = "Compact flutter build — strip pub preamble, plugin warnings, tree-shaking, spinners; keep errors, wasm findings, build result"
+match_command = "^(fvm\\s+(exec\\s+)?)?flutter\\s+build\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Resolving dependencies",
+  "^Downloading packages",
+  "^  [a-zA-Z_][a-zA-Z0-9_-]* \\d",
+  "^Got dependencies",
+  "^\\d+ packages have newer",
+  "^Try `flutter pub outdated`",
+  "^The following plugins do not support",
+  "^  - ",
+  "^This will become an error",
+  "^Font asset",
+  "^Compiling ",
+  "^Running",
+  "^\\[\\+\\d+ ms\\] ",
+]
+max_lines = 60
+
+[[tests.flutter-build]]
+name = "flutter build keeps result"
+input = """
+Resolving dependencies...
+Downloading packages...
+  analyzer 12.1.0 (14.0.0 available)
+Got dependencies!
+Font asset x was tree-shaken.
+✓ Built build/web
+"""
+expected = "✓ Built build/web"
+
+[[tests.flutter-build]]
+name = "flutter build keeps error"
+input = """
+Resolving dependencies...
+lib/main.dart:10:5: Error: bad
+    foo();
+    ^^^
+"""
+expected = "lib/main.dart:10:5: Error: bad\n    foo();\n    ^^^"
+
+[filters.dart-fix]
+description = "Compact dart fix — strip headers, keep applied changes and errors"
+match_command = "^(fvm\\s+(exec\\s+)?)?dart\\s+fix\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Analyzing ",
+  "^\\s*No issues found",
+]
+on_empty = "dart fix: ok"
+max_lines = 60
+
+[[tests.dart-fix]]
+name = "dart fix success"
+input = """
+Analyzing lib...
+  No issues found!
+"""
+expected = "dart fix: ok"
+
+[[tests.dart-fix]]
+name = "dart fix shows corrections"
+input = """
+Analyzing lib...
+  Correcting some_file.dart...
+  1 issue found.
+"""
+expected = "  Correcting some_file.dart...\n  1 issue found."
+
+[filters.flutter-fix]
+description = "Compact flutter fix — strip headers, keep applied changes and errors"
+match_command = "^(fvm\\s+(exec\\s+)?)?flutter\\s+fix\\b"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Analyzing ",
+  "^\\s*No issues found",
+]
+on_empty = "flutter fix: ok"
+max_lines = 60
+
+[[tests.flutter-fix]]
+name = "flutter fix success"
+input = """
+Analyzing lib...
+  No issues found!
+"""
+expected = "flutter fix: ok"
+
+[[tests.flutter-fix]]
+name = "flutter fix shows corrections"
+input = """
+Analyzing lib...
+  Correcting some_file.dart...
+  1 issue found.
+"""
+expected = "  Correcting some_file.dart...\n  1 issue found."
+
+[filters.melos-test]
+description = "Compact melos test output — strip per-test progress while keeping failures and summaries"
+match_command = "^(fvm\\s+exec\\s+)?melos\\s+(run\\s+)?test(\\s|$)"
+strip_ansi = true
+filter_stderr = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^QuestionnaireWidget:",
+  "^\\[[^]]+\\]:\\s+QuestionnaireWidget:",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*loading\\b",
+  "^\\[[^]]+\\]:\\s+\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*loading\\b",
+  "^\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s*(test|integration_test)/",
+  "^\\[[^]]+\\]:\\s+\\d\\d:\\d\\d\\s+\\+\\d+\\s*:\\s+(/|test|integration_test)",
+]
+max_lines = 120
+
+[[tests.melos-test]]
+name = "melos test strips progress but keeps summaries"
+input = """
+00:00 +0: loading test/foo_test.dart
+00:00 +1: test/foo_test.dart: passes
+QuestionnaireWidget: Answer received for question q1 - Answer(q1: yes)
+00:00 +1: All tests passed!
+studyu_app: SUCCESS
+"""
+expected = "00:00 +1: All tests passed!\nstudyu_app: SUCCESS"
+
+[[tests.melos-test]]
+name = "melos test keeps failure details"
+input = """
+00:00 +0 -1: test/foo_test.dart: fails [E]
+  Expected: true
+    Actual: false
+00:00 +0 -1: Some tests failed.
+studyu_app: FAILURE
+"""
+expected = "00:00 +0 -1: test/foo_test.dart: fails [E]\n  Expected: true\n    Actual: false\n00:00 +0 -1: Some tests failed.\nstudyu_app: FAILURE"
+
+[filters.melos-format]
+description = "Compact melos format — only show packages with actual changes"
+match_command = "^((fvm\\s+)?dart\\s+format|(fvm\\s+(exec\\s+)?)?melos\\s+format)\\b"
+strip_ansi = true
+filter_stderr = true
+keep_lines_matching = [
+  "(?i)(error|exception|failed|failure|could not|not found|invalid|missing|denied|timed out|unable)",
+  "^\\s*(error|warning|info) - ",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+:\\d+",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+",
+  "^Formatted \\d+ files? \\([1-9]\\d* changed\\)",
+]
+on_empty = "melos format: ok (0 files changed)"
+max_lines = 60
+[[tests.melos-format]]
+name = "melos format no changes"
+input = """
+$ melos format
+  └> dart format .
+     └> RUNNING (in 4 packages)
+
+--------------------------------------------------------------------------------
+studyu_app:
+Formatted 116 files (0 changed) in 0.68 seconds.
+studyu_app: SUCCESS
+--------------------------------------------------------------------------------
+studyu_core:
+Formatted 149 files (0 changed) in 0.13 seconds.
+studyu_core: SUCCESS
+--------------------------------------------------------------------------------
+
+$ melos format
+  └> dart format .
+     └> SUCCESS
+"""
+expected = "melos format: ok (0 files changed)"
+
+[[tests.melos-format]]
+name = "melos format with changes"
+input = """
+$ melos format
+  └> dart format .
+     └> RUNNING (in 1 packages)
+
+--------------------------------------------------------------------------------
+studyu_app:
+Formatted 3 files (2 changed) in 0.10 seconds.
+studyu_app: SUCCESS
+--------------------------------------------------------------------------------
+
+$ melos format
+  └> dart format .
+     └> SUCCESS
+"""
+expected = "Formatted 3 files (2 changed) in 0.10 seconds."
+
+[filters.melos-generate]
+description = "Compact melos generate — only show build_runner output and errors"
+match_command = "^(fvm\\s+(exec\\s+)?)?melos\\s+(run\\s+)?generate(\\s|$)"
+strip_ansi = true
+filter_stderr = true
+keep_lines_matching = [
+  "(?i)(error|exception|failed|failure|could not|not found|invalid|missing|denied|timed out|unable)",
+  "^\\s*(error|warning|info) - ",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+:\\d+",
+  "^\\s*[A-Za-z0-9_./:-]+:\\d+",
+  "[1-9]\\d* outputs",
+  "wrote [1-9]",
+]
+on_empty = "melos generate: ok (0 outputs)"
+max_lines = 60
+[[tests.melos-generate]]
+name = "melos generate all clean"
+input = """
+$ melos exec
+  └> dart run build_runner build
+     └> RUNNING (in 2 packages)
+
+--------------------------------------------------------------------------------
+studyu_core:
+  0s json_serializable on 95 inputs: 95 skipped
+  Built with build_runner/aot in 0s; wrote 0 outputs.
+studyu_core: SUCCESS
+--------------------------------------------------------------------------------
+studyu_designer_v2:
+  0s riverpod_generator on 315 inputs: 315 skipped
+  Built with build_runner/aot in 1s; wrote 0 outputs.
+studyu_designer_v2: SUCCESS
+--------------------------------------------------------------------------------
+
+$ melos exec
+  └> dart run build_runner build
+     └> SUCCESS
+"""
+expected = "melos generate: ok (0 outputs)"
+
+[[tests.melos-generate]]
+name = "melos generate with outputs"
+input = """
+$ melos exec
+  └> dart run build_runner build
+     └> RUNNING (in 1 packages)
+
+--------------------------------------------------------------------------------
+studyu_core:
+  0s json_serializable on 95 inputs: 95 skipped
+  1s source_gen on 8 inputs: 5 outputs
+  Built with build_runner/aot in 1s; wrote 5 outputs.
+studyu_core: SUCCESS
+--------------------------------------------------------------------------------
+
+$ melos exec
+  └> dart run build_runner build
+     └> SUCCESS
+"""
+expected = "  1s source_gen on 8 inputs: 5 outputs\n  Built with build_runner/aot in 1s; wrote 5 outputs."

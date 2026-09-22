@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class StudyUJobsToBeDone extends StatelessWidget {
-  const StudyUJobsToBeDone({super.key});
-
+class const StudyUJobsToBeDone({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

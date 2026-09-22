@@ -3,18 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
-class LiveConditionPreview extends StatelessWidget {
-  final CompositeExpression? compositeExpression;
-  final List<Question> allQuestions;
-  final String currentQuestionId;
-
-  const LiveConditionPreview({
-    super.key,
-    required this.compositeExpression,
-    required this.allQuestions,
-    required this.currentQuestionId,
-  });
-
+class const LiveConditionPreview({
+  super.key,
+  required final CompositeExpression? compositeExpression,
+  required final List<Question> allQuestions,
+  required final String currentQuestionId,
+}) extends StatelessWidget {
   String _getQuestionPreviewText(String questionId) {
     /*if (questionId == currentQuestionId) {
       // Use the specific question text from the ViewModel for clarity
@@ -57,18 +51,48 @@ class LiveConditionPreview extends StatelessWidget {
       return '${_getQuestionPreviewText(expression.target!)} $comparatorSymbol ${expression.value}';
     } else if (expression is TextExpression) {
       final String comparatorText;
+      final bool usesLengthComparison;
       switch (expression.comparator) {
         case TextComparator.equal:
-          comparatorText = '=';
+          comparatorText = tr.form_array_question_visibility_logic_is;
+          usesLengthComparison = false;
         case TextComparator.notEqual:
-          comparatorText = '!=';
+          comparatorText = tr.form_array_question_visibility_logic_is_not;
+          usesLengthComparison = false;
         case TextComparator.contains:
           comparatorText = tr.form_array_question_visibility_logic_contains;
+          usesLengthComparison = false;
         case TextComparator.doesNotContain:
           comparatorText =
               tr.form_array_question_visibility_logic_does_not_contain;
+          usesLengthComparison = false;
+        case TextComparator.lengthGreaterThan:
+          comparatorText = tr.form_array_question_visibility_logic_longer_than;
+          usesLengthComparison = true;
+        case TextComparator.lengthLessThan:
+          comparatorText = tr.form_array_question_visibility_logic_shorter_than;
+          usesLengthComparison = true;
+        case TextComparator.lengthGreaterThanOrEqual:
+          comparatorText =
+              tr.form_array_question_visibility_logic_longer_than_or_equal_to;
+          usesLengthComparison = true;
+        case TextComparator.lengthLessThanOrEqual:
+          comparatorText =
+              tr.form_array_question_visibility_logic_shorter_than_or_equal_to;
+          usesLengthComparison = true;
+        case TextComparator.lengthEqual:
+          comparatorText =
+              tr.form_array_question_visibility_logic_same_length_as;
+          usesLengthComparison = true;
+        case TextComparator.lengthNotEqual:
+          comparatorText =
+              tr.form_array_question_visibility_logic_different_length_as;
+          usesLengthComparison = true;
       }
-      return "${_getQuestionPreviewText(expression.target!)} $comparatorText '${expression.value}'";
+      final previewValue = usesLengthComparison
+          ? expression.value
+          : "'${expression.value}'";
+      return '${_getQuestionPreviewText(expression.target!)} $comparatorText $previewValue';
     } else if (expression is CompositeExpression) {
       if (expression.expressions.isEmpty) {
         return tr.form_array_question_visibility_logic_always_true;

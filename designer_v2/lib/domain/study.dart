@@ -6,7 +6,7 @@ import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'package:uuid/uuid.dart';
 
-enum StudyActionType {
+enum StudyActionType() {
   pin,
   pinoff,
   edit,
@@ -14,6 +14,8 @@ enum StudyActionType {
   duplicateDraft,
   addCollaborator,
   export,
+  exportDefinition,
+  close,
   delete,
 }
 
@@ -27,6 +29,8 @@ extension StudyActionTypeFormatted on StudyActionType {
         return tr.action_unpin;
       case StudyActionType.edit:
         return tr.action_edit;
+      case StudyActionType.close:
+        return tr.action_button_study_close;
       case StudyActionType.delete:
         return tr.action_delete;
       case StudyActionType.duplicate:
@@ -37,6 +41,8 @@ extension StudyActionTypeFormatted on StudyActionType {
         return "[StudyActionType.addCollaborator]"; // todo not implemented yet
       case StudyActionType.export:
         return tr.action_study_export_results;
+      case StudyActionType.exportDefinition:
+        return tr.action_export_study_definition;
     }
   }
 }
@@ -219,7 +225,7 @@ extension StudyRegistryX on Study {
   bool get publishedToRegistryResults => resultSharing == ResultSharing.public;
 }
 
-class StudyTemplates {
+class StudyTemplates() {
   static String get kUnnamedStudyTitle => tr.form_field_study_title_default;
 
   static Study emptyDraft(String userId) {
@@ -237,7 +243,7 @@ extension StudyParticipantCountX on Study {
     }
     int count = 0;
     for (final participant in participants!) {
-      if (participant.inviteCode == invite.code) {
+      if (!participant.isDeleted && participant.inviteCode == invite.code) {
         count += 1;
       }
     }

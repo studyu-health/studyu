@@ -9,9 +9,8 @@ import 'package:studyu_designer_v2/features/study/study_page_view.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 
-class StudyAnalyzeScreen extends StudyPageWidget {
-  const StudyAnalyzeScreen(super.studyId, {super.key});
-
+class const StudyAnalyzeScreen(super.studyId, {super.key})
+    extends StudyPageWidget {
   @override
   Widget? banner(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyAnalyzeControllerProvider(studyId));

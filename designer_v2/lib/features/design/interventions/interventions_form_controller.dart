@@ -20,7 +20,14 @@ import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 import 'package:studyu_designer_v2/utils/riverpod.dart';
 
-class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
+class InterventionsFormViewModel({
+  required final Study study,
+  required final GoRouter router,
+  super.delegate,
+  super.formData,
+  super.autosave = true,
+  super.validationSet = StudyFormValidationSet.draft,
+}) extends FormViewModel<InterventionsFormData>
     with StudyScheduleControls
     implements
         IFormViewModelDelegate<InterventionFormViewModel>,
@@ -29,18 +36,6 @@ class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
           InterventionFormViewModel,
           InterventionFormRouteArgs
         > {
-  InterventionsFormViewModel({
-    required this.study,
-    required this.router,
-    super.delegate,
-    super.formData,
-    super.autosave = true,
-    super.validationSet = StudyFormValidationSet.draft,
-  });
-
-  final Study study;
-  final GoRouter router;
-
   // - Form fields
 
   final FormArray interventionsArray = FormArray([]);
@@ -124,6 +119,7 @@ class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
     final actions = interventionsCollection.availableActions(
       model,
       onEdit: onSelectItem,
+      confirmationSubject: tr.dialog_subject_intervention,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);
@@ -132,6 +128,7 @@ class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
   List<ModelAction> availablePopupActions(InterventionFormViewModel model) {
     final actions = interventionsCollection.availablePopupActions(
       model,
+      confirmationSubject: tr.dialog_subject_intervention,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);
@@ -140,6 +137,7 @@ class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
   List<ModelAction> availableInlineActions(InterventionFormViewModel model) {
     final actions = interventionsCollection.availableInlineActions(
       model,
+      confirmationSubject: tr.dialog_subject_intervention,
       isReadOnly: isReadonly,
     );
     return withIcons(actions, modelActionIcons);
@@ -156,9 +154,14 @@ class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
 
   @override
   void onNewItem() {
-    final studyId = study.id;
+    final viewModel = provide(
+      InterventionFormRouteArgs(
+        studyId: study.id,
+        interventionId: Config.newModelId,
+      ),
+    );
     router.dispatch(
-      RoutingIntents.studyEditIntervention(studyId, Config.newModelId),
+      RoutingIntents.studyEditIntervention(study.id, viewModel.interventionId),
     );
   }
 
@@ -168,14 +171,17 @@ class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
   @override
   InterventionFormViewModel provide(InterventionFormRouteArgs args) {
     if (args.interventionId.isNewId) {
-      // Eagerly add the managed viewmodel in case it needs to be [provide]d
-      // to a child controller
+      final existingDraft = interventionsCollection.findWhere(
+        (viewModel) => viewModel.formMode == FormMode.create,
+      );
+      if (existingDraft != null) return existingDraft;
+
       final viewModel = InterventionFormViewModel(
         study: study,
         delegate: this,
         validationSet: validationSet,
       );
-      interventionsCollection.stage(viewModel);
+      interventionsCollection.add(viewModel);
       return viewModel;
     }
 
@@ -192,7 +198,9 @@ class InterventionsFormViewModel extends FormViewModel<InterventionsFormData>
 
   @override
   void onCancel(InterventionFormViewModel formViewModel, FormMode formMode) {
-    return; // no-op
+    if (formMode == FormMode.create) {
+      interventionsCollection.remove(formViewModel);
+    }
   }
 
   @override

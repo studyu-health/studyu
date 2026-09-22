@@ -1,3 +1,40 @@
+## 1.11.0
+
+ - **FIX**: remove obsolete analyzer plugins.
+ - **FIX**: resolve analysis and web build failures.
+ - **FIX**(deps): update flutter and deps.
+ - **FIX**(deep-links): separate web and app links.
+ - **FIX**: clear CI analysis failures.
+ - **FIX**: address review feedback.
+ - **FIX**(app): resolve dev merge conflicts.
+ - **FIX**(app,core,db): address code review findings from dev merge.
+ - **FIX**(app): reuse onboarding participant.
+ - **FEAT**(localization): synchronize app language with server and improve locale handling.
+ - **FEAT**: Update deep link handling and environment configuration for Android and iOS.
+ - **FEAT**: Enhance recovery flow with validation, constants, and integration tests.
+ - **FEAT**: Introduce QR code generation and deep link sharing for study invite codes, supported by new environment variables and localization.
+
+## 1.10.4
+
+ - **FIX**: upgrade deps.
+ - **FIX**(flutter_common): use supabase publishable key.
+ - **FIX**: upgrade deps.
+ - **FIX**(flutter_common): use supabase publishable key.
+
+## 1.10.3
+
+ - **FIX**: upgrade deps.
+ - **FIX**(flutter_common): use supabase publishable key.
+ - **FIX**: add flutter_common mdi package dependency.
+ - **FIX**: migrate to flutter_material_design_icons in favor of deprecated material_design_icons_flutter.
+ - **FIX**: upgrade deps.
+ - **FIX**: migrate flutter_secure_storage v10.0.0.
+
+## 1.10.2
+
+ - **FIX**: update to flutter v3.41.5.
+ - **FIX**: new env dev.
+
 ## 1.10.1
 
  - Update a dependency to the latest release.
