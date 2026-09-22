@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:studyu_app/app.dart';
 import 'package:studyu_app/app_router.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase/supabase.dart';
@@ -154,7 +155,7 @@ Future<void> _storeE2eParticipantCredentials() async {
   const email = String.fromEnvironment('STUDYU_E2E_PARTICIPANT_EMAIL');
   const password = String.fromEnvironment('STUDYU_E2E_PARTICIPANT_PASSWORD');
 
-  if (!kDebugMode || email.isEmpty || password.isEmpty) return;
+  if (!isDebugMode || email.isEmpty || password.isEmpty) return;
 
   await storeFakeUserEmailAndPassword(email, password);
 }

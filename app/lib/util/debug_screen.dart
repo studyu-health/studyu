@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -10,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/notifications.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_core/core.dart';
@@ -143,7 +143,7 @@ class __DebugDialogState() extends State<_DebugDialog> {
           _buildTestNotificationButton(),
           const SizedBox(height: 8),
           _buildResetAppButton(),
-          if (kDebugMode) ...[
+          if (isDebugMode) ...[
             const SizedBox(height: 8),
             _buildShowOnboardingButton(),
           ],
