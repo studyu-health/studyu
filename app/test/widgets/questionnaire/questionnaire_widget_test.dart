@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/widgets/questionnaire/custom_slider.dart';
 import 'package:studyu_app/widgets/questionnaire/image_capturing_question_widget.dart';
 import 'package:studyu_app/widgets/questionnaire/question_container.dart';
 import 'package:studyu_app/widgets/questionnaire/questionnaire_widget.dart';
@@ -2358,5 +2359,164 @@ void main() {
     expect(completion.answers['q1']?.response, isFalse);
     expect(completion.answers['q3']?.response, isTrue);
     expect(completion.answers.containsKey('q2'), isFalse);
+  });
+
+  testWidgets(
+    'auto-complete pauses for aggregate review and completes after confirmation',
+    (tester) async {
+      final q0 = _boolQuestion('q0', 'Keep the dependent answer visible?');
+      final q1 = _boolQuestion('q1', 'Change the context?');
+      final q2 = _singleChoiceQuestion('q2', 'Dependent answer')
+        ..conditional = QuestionConditional.withCondition(
+          CompositeExpression(
+            logicType: LogicType.or,
+            expressions: [
+              BooleanExpression()..target = 'q0',
+              BooleanExpression()..target = 'q1',
+            ],
+          ),
+        );
+      final completions = <QuestionnaireState?>[];
+
+      await tester.pumpWidget(
+        setup(
+          QuestionnaireWidget(
+            [q0, q1, q2],
+            autoComplete: true,
+            onComplete: completions.add,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('yes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('yes').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('A'));
+      await tester.pumpAndSettle();
+      expect(completions.whereType<QuestionnaireState>(), hasLength(1));
+
+      // q0 keeps q2 visible while changing the earlier q1 answer.
+      await tester.tap(find.text('no').last);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('questionnaire_review_card')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('questionnaire_review_confirm')),
+        findsOneWidget,
+      );
+      expect(completions.whereType<QuestionnaireState>(), hasLength(1));
+
+      final confirmation = find.byKey(
+        const ValueKey('questionnaire_review_confirm'),
+      );
+      await tester.drag(find.byType(ListView).first, const Offset(0, -400));
+      await tester.pumpAndSettle();
+      await tester.tap(confirmation);
+      await tester.pumpAndSettle();
+
+      expect(completions.whereType<QuestionnaireState>(), hasLength(2));
+    },
+  );
+
+  testWidgets(
+    'editing an answered slider without a new question does not auto-scroll',
+    (tester) async {
+      final q0 = _boolQuestion('q0', 'Keep the later question visible?');
+      final q1 = ScaleQuestion.withId()
+        ..id = 'q1'
+        ..prompt = 'Earlier slider'
+        ..minimum = 0
+        ..maximum = 10
+        ..step = 1;
+      final q2 = _boolQuestion('q2', 'Later question')
+        ..conditional = QuestionConditional.withCondition(
+          CompositeExpression(
+            logicType: LogicType.and,
+            expressions: [BooleanExpression()..target = 'q0'],
+          ),
+        );
+
+      tester.view.physicalSize = const Size(320, 320);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(setup(QuestionnaireWidget([q0, q1, q2])));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('yes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(CustomSlider));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('yes').last);
+      await tester.pumpAndSettle();
+
+      final scrollables = find
+          .byType(Scrollable)
+          .evaluate()
+          .whereType<StatefulElement>()
+          .map((element) => element.state)
+          .whereType<ScrollableState>()
+          .toSet()
+          .toList();
+      final scrollable = scrollables.reduce(
+        (first, second) =>
+            first.position.maxScrollExtent >= second.position.maxScrollExtent
+            ? first
+            : second,
+      );
+      final before = scrollable.position.pixels;
+      final slider = find.byType(CustomSlider).first;
+      await tester.tapAt(tester.getCenter(slider));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.position.pixels, closeTo(before, 0.1));
+    },
+  );
+
+  testWidgets('progressive reveal scrolls to a genuinely new question', (
+    tester,
+  ) async {
+    final q1 = _boolQuestion('q1', 'Reveal the next question?');
+    final q2 =
+        FreeTextQuestion.withId(
+            textType: FreeTextQuestionType.any,
+            lengthRange: [0, 100],
+          )
+          ..id = 'q2'
+          ..prompt = 'Newly revealed question';
+
+    tester.view.physicalSize = const Size(320, 260);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(setup(QuestionnaireWidget([q1, q2])));
+    await tester.pumpAndSettle();
+    final scrollables = find
+        .byType(Scrollable)
+        .evaluate()
+        .whereType<StatefulElement>()
+        .map((element) => element.state)
+        .whereType<ScrollableState>()
+        .toSet()
+        .toList();
+    final scrollable = scrollables.reduce(
+      (first, second) =>
+          first.position.maxScrollExtent >= second.position.maxScrollExtent
+          ? first
+          : second,
+    );
+    expect(scrollable.position.pixels, 0);
+
+    await tester.tap(find.text('yes'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextFormField), findsOneWidget);
+    expect(scrollable.position.pixels, greaterThan(0));
   });
 }
