@@ -6,14 +6,20 @@ import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 
 extension StudySubjectExtension on StudySubject {
-  /// Upserts a DailyRecall result - updates existing or creates new.
-  /// Used for auto-save functionality where we want to overwrite previous saves.
+  /// Updates an existing completed recall or creates a completed result.
+  /// Draft recalls stay in local auto-save storage.
   Future<void> upsertNutritionResult({
     required String taskId,
     required String periodId,
     required DailyRecall recall,
     DateTime? completionDateOverride,
   }) async {
+    if (recall.entryCompletedAt == null && completionDateOverride == null) {
+      throw StateError(
+        'Nutrition drafts cannot be saved as completed progress',
+      );
+    }
+
     final resultObject = Result<DailyRecall>.app(
       type: 'DailyRecall',
       periodId: periodId,
@@ -21,13 +27,7 @@ extension StudySubjectExtension on StudySubject {
     );
 
     String interventionId;
-    final completionDate =
-        completionDateOverride ??
-        recall.entryCompletedAt ??
-        recall
-            .entryStartedAt ?? // stable per recall to avoid new PK per autosave
-        recall.lastAutoSavedAt ??
-        DateTime.now();
+    final completionDate = completionDateOverride ?? recall.entryCompletedAt!;
 
     final baseDate = startedAt;
     final snapshotDate = baseDate != null && recall.studyDaySnapshot != null

@@ -21,6 +21,7 @@ class NutritionFormData({
   final bool allowRecipes = true,
   final int? minimumMealsRequired,
   final List<String>? customMealTypes,
+  final TaskScheduleRule? scheduleRule,
 }) extends IFormDataWithSchedule {
   static String get kDefaultTitle => 'Nutrition Tracking';
 
@@ -42,6 +43,7 @@ class NutritionFormData({
       allowRecipes: nutritionTask.allowRecipes,
       minimumMealsRequired: nutritionTask.minimumMealsRequired,
       customMealTypes: nutritionTask.customMealTypes,
+      scheduleRule: nutritionTask.scheduleRule,
     );
   }
 
@@ -55,6 +57,7 @@ class NutritionFormData({
     nutritionTask.allowRecipes = allowRecipes;
     nutritionTask.minimumMealsRequired = minimumMealsRequired;
     nutritionTask.customMealTypes = customMealTypes;
+    nutritionTask.scheduleRule = scheduleRule;
     return nutritionTask;
   }
 
@@ -76,6 +79,7 @@ class NutritionFormData({
       customMealTypes: customMealTypes != null
           ? List.from(customMealTypes!)
           : null,
+      scheduleRule: scheduleRule,
     );
   }
 }

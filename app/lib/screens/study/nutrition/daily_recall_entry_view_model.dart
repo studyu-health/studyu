@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
-import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 
 class DailyRecallEntryViewModel({
@@ -46,7 +45,9 @@ class DailyRecallEntryViewModel({
   bool get meetsMinimumMeals {
     final minimum = task?.minimumMealsRequired;
     if (minimum == null) return true;
-    final nonSkippedCount = recall.meals.where((m) => !m.isSkipped).length;
+    final nonSkippedCount = recall.meals
+        .where((MealLog meal) => !meal.isSkipped)
+        .length;
     return nonSkippedCount >= minimum;
   }
 
@@ -273,14 +274,6 @@ class DailyRecallEntryViewModel({
         periodId: _periodId ?? NutritionRecallAutoSaveManager.defaultPeriodId,
         studyDaySnapshot: _studyDaySnapshot!,
       );
-
-      if (shouldSaveToDb) {
-        await subject!.upsertNutritionResult(
-          taskId: task!.id,
-          periodId: completionPeriod!.id,
-          recall: recallToSave,
-        );
-      }
 
       lastSaveTime = now;
     } finally {

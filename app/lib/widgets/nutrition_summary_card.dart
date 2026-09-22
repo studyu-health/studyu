@@ -371,61 +371,9 @@ class const DailyNutritionSummaryCard({
   required final DailyRecall dailyRecall,
   super.key,
 }) extends StatelessWidget {
-  NutritionProfile _calculateDailyNutrition() {
-    double totalEnergy = 0;
-    double totalProtein = 0;
-    double totalCarbs = 0;
-    double totalFat = 0;
-    double totalSugars = 0;
-    double totalFiber = 0;
-    double totalSaturatedFat = 0;
-    double totalTransFat = 0;
-    double totalCholesterol = 0;
-    double totalSodium = 0;
-    double totalWater = 0;
-    final Map<String, double> totalMicros = {};
-
-    for (final meal in dailyRecall.meals) {
-      if (!meal.isSkipped) {
-        for (final food in meal.foods) {
-          totalEnergy += food.nutrition.energyKcal;
-          totalProtein += food.nutrition.protein;
-          totalCarbs += food.nutrition.carbs;
-          totalFat += food.nutrition.fat;
-          totalSugars += food.nutrition.sugars;
-          totalFiber += food.nutrition.fiber;
-          totalSaturatedFat += food.nutrition.saturatedFat;
-          totalTransFat += food.nutrition.transFat;
-          totalCholesterol += food.nutrition.cholesterol;
-          totalSodium += food.nutrition.sodium;
-          totalWater += food.nutrition.waterContent;
-
-          food.nutrition.micros.forEach((key, value) {
-            totalMicros[key] = (totalMicros[key] ?? 0) + value;
-          });
-        }
-      }
-    }
-
-    return NutritionProfile(
-      energyKcal: totalEnergy,
-      protein: totalProtein,
-      carbs: totalCarbs,
-      fat: totalFat,
-      sugars: totalSugars,
-      fiber: totalFiber,
-      saturatedFat: totalSaturatedFat,
-      transFat: totalTransFat,
-      cholesterol: totalCholesterol,
-      sodium: totalSodium,
-      waterContent: totalWater,
-      micros: totalMicros,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final nutrition = _calculateDailyNutrition();
+    final nutrition = dailyRecall.totalNutrition;
     final l10n = AppLocalizations.of(context)!;
     return NutritionSummaryCard(
       nutrition: nutrition,
@@ -436,57 +384,9 @@ class const DailyNutritionSummaryCard({
 
 class const MealNutritionSummaryCard({required final MealLog meal, super.key})
     extends StatelessWidget {
-  NutritionProfile _calculateMealNutrition() {
-    double totalEnergy = 0;
-    double totalProtein = 0;
-    double totalCarbs = 0;
-    double totalFat = 0;
-    double totalSugars = 0;
-    double totalFiber = 0;
-    double totalSaturatedFat = 0;
-    double totalTransFat = 0;
-    double totalCholesterol = 0;
-    double totalSodium = 0;
-    double totalWater = 0;
-    final Map<String, double> totalMicros = {};
-
-    for (final food in meal.foods) {
-      totalEnergy += food.nutrition.energyKcal;
-      totalProtein += food.nutrition.protein;
-      totalCarbs += food.nutrition.carbs;
-      totalFat += food.nutrition.fat;
-      totalSugars += food.nutrition.sugars;
-      totalFiber += food.nutrition.fiber;
-      totalSaturatedFat += food.nutrition.saturatedFat;
-      totalTransFat += food.nutrition.transFat;
-      totalCholesterol += food.nutrition.cholesterol;
-      totalSodium += food.nutrition.sodium;
-      totalWater += food.nutrition.waterContent;
-
-      food.nutrition.micros.forEach((key, value) {
-        totalMicros[key] = (totalMicros[key] ?? 0) + value;
-      });
-    }
-
-    return NutritionProfile(
-      energyKcal: totalEnergy,
-      protein: totalProtein,
-      carbs: totalCarbs,
-      fat: totalFat,
-      sugars: totalSugars,
-      fiber: totalFiber,
-      saturatedFat: totalSaturatedFat,
-      transFat: totalTransFat,
-      cholesterol: totalCholesterol,
-      sodium: totalSodium,
-      waterContent: totalWater,
-      micros: totalMicros,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final nutrition = _calculateMealNutrition();
+    final nutrition = meal.totalNutrition;
     final l10n = AppLocalizations.of(context)!;
     return NutritionSummaryCard(
       nutrition: nutrition,

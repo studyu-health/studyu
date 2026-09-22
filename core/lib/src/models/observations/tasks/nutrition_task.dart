@@ -42,19 +42,23 @@ class NutritionTask extends Observation {
       sourceResults.map((e) {
         final result = (e.result as Result<DailyRecall>).result;
 
+        final nutrition = result.totalNutrition;
+
         // Extract different properties based on what's requested
         dynamic value;
         switch (property) {
           case 'totalCalories':
-            value = _calculateTotalCalories(result);
+            value = nutrition.energyKcal;
           case 'totalProtein':
-            value = _calculateTotalProtein(result);
+            value = nutrition.protein;
           case 'totalCarbs':
-            value = _calculateTotalCarbs(result);
+            value = nutrition.carbs;
           case 'totalFat':
-            value = _calculateTotalFat(result);
+            value = nutrition.fat;
           case 'mealCount':
-            value = result.meals.where((m) => !m.isSkipped).length;
+            value = result.meals
+                .where((MealLog meal) => !meal.isSkipped)
+                .length;
           case 'completionTime':
             value = result.entryCompletedAt;
           default:
@@ -96,54 +100,5 @@ class NutritionTask extends Observation {
       default:
         return null;
     }
-  }
-
-  // Helper methods to calculate totals
-  double _calculateTotalCalories(DailyRecall recall) {
-    double total = 0;
-    for (final meal in recall.meals) {
-      if (!meal.isSkipped) {
-        for (final food in meal.foods) {
-          total += food.nutrition.energyKcal;
-        }
-      }
-    }
-    return total;
-  }
-
-  double _calculateTotalProtein(DailyRecall recall) {
-    double total = 0;
-    for (final meal in recall.meals) {
-      if (!meal.isSkipped) {
-        for (final food in meal.foods) {
-          total += food.nutrition.protein;
-        }
-      }
-    }
-    return total;
-  }
-
-  double _calculateTotalCarbs(DailyRecall recall) {
-    double total = 0;
-    for (final meal in recall.meals) {
-      if (!meal.isSkipped) {
-        for (final food in meal.foods) {
-          total += food.nutrition.carbs;
-        }
-      }
-    }
-    return total;
-  }
-
-  double _calculateTotalFat(DailyRecall recall) {
-    double total = 0;
-    for (final meal in recall.meals) {
-      if (!meal.isSkipped) {
-        for (final food in meal.foods) {
-          total += food.nutrition.fat;
-        }
-      }
-    }
-    return total;
   }
 }

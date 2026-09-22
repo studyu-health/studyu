@@ -164,23 +164,31 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   }
 
   void _saveFood() {
-    if (_formKey.currentState!.validate()) {
-      final nutrition = NutritionProfile(
-        energyKcal: double.tryParse(_energyController.text) ?? 0,
-        protein: double.tryParse(_proteinController.text) ?? 0,
-        carbs: double.tryParse(_carbsController.text) ?? 0,
-        fat: double.tryParse(_fatController.text) ?? 0,
-        sugars: double.tryParse(_sugarsController.text) ?? 0,
-        fiber: double.tryParse(_fiberController.text) ?? 0,
-        saturatedFat: double.tryParse(_saturatedFatController.text) ?? 0,
-        transFat: 0,
-        cholesterol: 0,
-        sodium: double.tryParse(_sodiumController.text) ?? 0,
-        waterContent: 0,
-        micros: {},
-      );
+    final food = _buildFoodEntry();
+    if (food != null) Navigator.of(context).pop(food);
+  }
 
-      final food = FoodEntry.withId(
+  FoodEntry? _buildFoodEntry() {
+    if (!_formKey.currentState!.validate()) return null;
+
+    final existing = widget.existingFood;
+    final nutrition = NutritionProfile(
+      energyKcal: double.tryParse(_energyController.text) ?? 0,
+      protein: double.tryParse(_proteinController.text) ?? 0,
+      carbs: double.tryParse(_carbsController.text) ?? 0,
+      fat: double.tryParse(_fatController.text) ?? 0,
+      sugars: double.tryParse(_sugarsController.text) ?? 0,
+      fiber: double.tryParse(_fiberController.text) ?? 0,
+      saturatedFat: double.tryParse(_saturatedFatController.text) ?? 0,
+      transFat: existing?.nutrition.transFat ?? 0,
+      cholesterol: existing?.nutrition.cholesterol ?? 0,
+      sodium: double.tryParse(_sodiumController.text) ?? 0,
+      waterContent: existing?.nutrition.waterContent ?? 0,
+      micros: Map.of(existing?.nutrition.micros ?? const {}),
+    );
+
+    if (existing == null) {
+      return FoodEntry.withId(
         entryType: _entryType,
         name: _nameController.text,
         brandName: _brandController.text.isEmpty ? null : _brandController.text,
@@ -206,55 +214,30 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
         confidenceScore: 1.0,
         originalValues: {},
       );
-
-      Navigator.of(context).pop(food);
     }
-  }
 
-  FoodEntry? _buildFoodEntry() {
-    if (!_formKey.currentState!.validate()) return null;
-
-    final nutrition = NutritionProfile(
-      energyKcal: double.tryParse(_energyController.text) ?? 0,
-      protein: double.tryParse(_proteinController.text) ?? 0,
-      carbs: double.tryParse(_carbsController.text) ?? 0,
-      fat: double.tryParse(_fatController.text) ?? 0,
-      sugars: double.tryParse(_sugarsController.text) ?? 0,
-      fiber: double.tryParse(_fiberController.text) ?? 0,
-      saturatedFat: double.tryParse(_saturatedFatController.text) ?? 0,
-      transFat: 0,
-      cholesterol: 0,
-      sodium: double.tryParse(_sodiumController.text) ?? 0,
-      waterContent: 0,
-      micros: {},
-    );
-
-    return FoodEntry.withId(
-      entryType: _entryType,
-      name: _nameController.text,
-      brandName: _brandController.text.isEmpty ? null : _brandController.text,
-      description: _descriptionController.text.isEmpty
+    return FoodEntry.fromJson(existing.toJson())
+      ..entryType = _entryType
+      ..name = _nameController.text
+      ..brandName = _brandController.text.isEmpty ? null : _brandController.text
+      ..description = _descriptionController.text.isEmpty
           ? null
-          : _descriptionController.text,
-      amount: double.parse(_amountController.text),
-      unit: _unitController.text,
-      servingSizeGrams: double.parse(_servingSizeController.text),
-      portionReference: _portionReferenceController.text.isEmpty
+          : _descriptionController.text
+      ..amount = double.parse(_amountController.text)
+      ..unit = _unitController.text
+      ..servingSizeGrams = double.parse(_servingSizeController.text)
+      ..portionReference = _portionReferenceController.text.isEmpty
           ? null
-          : _portionReferenceController.text,
-      portionEstimationMethod: _portionMethod,
-      portionState: _portionState,
-      yieldFactor: _yieldFactorController.text.isEmpty
+          : _portionReferenceController.text
+      ..portionEstimationMethod = _portionMethod
+      ..portionState = _portionState
+      ..yieldFactor = _yieldFactorController.text.isEmpty
           ? null
-          : double.tryParse(_yieldFactorController.text),
-      ediblePortion: _ediblePortionController.text.isEmpty
+          : double.tryParse(_yieldFactorController.text)
+      ..ediblePortion = _ediblePortionController.text.isEmpty
           ? null
-          : double.tryParse(_ediblePortionController.text),
-      nutrition: nutrition,
-      source: _source,
-      confidenceScore: 1.0,
-      originalValues: {},
-    );
+          : double.tryParse(_ediblePortionController.text)
+      ..nutrition = nutrition;
   }
 
   Future<void> _saveAsTemplate() async {

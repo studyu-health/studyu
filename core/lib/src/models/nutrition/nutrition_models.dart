@@ -2,6 +2,7 @@ export 'daily_recall.dart';
 export 'enums.dart';
 export 'food_entry.dart';
 export 'meal_log.dart';
+export 'nutrition_calculations.dart';
 export 'nutrition_profile.dart';
 export 'recipe_composition.dart';
 export 'recipe_metadata.dart';

@@ -163,30 +163,15 @@ extension StudyExportX on Study {
           // Add nutrition columns
           final dailyRecall = record.result.result as DailyRecall;
 
-          // Calculate nutritional totals
-          double totalCalories = 0;
-          double totalProtein = 0;
-          double totalCarbs = 0;
-          double totalFat = 0;
-          int mealCount = 0;
+          final nutrition = dailyRecall.totalNutrition;
 
-          for (final meal in dailyRecall.meals) {
-            if (!meal.isSkipped) {
-              mealCount++;
-              for (final food in meal.foods) {
-                totalCalories += food.nutrition.energyKcal;
-                totalProtein += food.nutrition.protein;
-                totalCarbs += food.nutrition.carbs;
-                totalFat += food.nutrition.fat;
-              }
-            }
-          }
-
-          row['total_calories'] = totalCalories;
-          row['total_protein'] = totalProtein;
-          row['total_carbs'] = totalCarbs;
-          row['total_fat'] = totalFat;
-          row['meal_count'] = mealCount;
+          row['total_calories'] = nutrition.energyKcal;
+          row['total_protein'] = nutrition.protein;
+          row['total_carbs'] = nutrition.carbs;
+          row['total_fat'] = nutrition.fat;
+          row['meal_count'] = dailyRecall.meals
+              .where((MealLog meal) => !meal.isSkipped)
+              .length;
           row['entry_completed_at'] =
               dailyRecall.entryCompletedAt?.toString() ?? '';
         }
