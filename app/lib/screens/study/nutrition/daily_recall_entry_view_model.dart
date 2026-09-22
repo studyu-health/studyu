@@ -23,6 +23,7 @@ class DailyRecallEntryViewModel({
   String? _interventionId;
   String? _periodId;
   bool _isDisposed = false;
+  bool _hasCompletedRecall = false;
 
   this {
     if (existingRecall != null) {
@@ -93,7 +94,7 @@ class DailyRecallEntryViewModel({
   void dispose() {
     _isDisposed = true;
     _autoSaveTimer?.cancel();
-    if (recall.meals.isNotEmpty && subject != null) {
+    if (!_hasCompletedRecall && recall.meals.isNotEmpty && subject != null) {
       _performAutoSaveSync();
     }
     super.dispose();
@@ -102,7 +103,7 @@ class DailyRecallEntryViewModel({
   void onAppLifecycleStateChanged(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
       _autoSaveTimer?.cancel();
-      if (recall.meals.isNotEmpty && subject != null) {
+      if (!_hasCompletedRecall && recall.meals.isNotEmpty && subject != null) {
         _performAutoSaveSync();
       }
     }
@@ -182,18 +183,34 @@ class DailyRecallEntryViewModel({
 
   DailyRecall markCompleted() {
     final completedAt = DateTime.now();
+    _hasCompletedRecall = true;
     recall = _copyWithRecall(entryCompletedAt: completedAt);
     notifyListeners();
     return recall;
   }
 
-  /// Cancels a scheduled auto-save and waits for an already-running save.
+  Future<void> clearAutoSave() async {
+    if (subject == null || _studyDaySnapshot == null) return;
+
+    await _autoSaveManager.deleteRecall(
+      subjectId: subject!.id,
+      taskId: task?.id ?? NutritionRecallAutoSaveManager.standaloneTaskId,
+      studyDay: _studyDaySnapshot!,
+    );
+  }
+
+  /// Runs a scheduled auto-save immediately and waits for any active save.
   ///
   /// Completion must be persisted after any older auto-save so that an
   /// incomplete snapshot cannot overwrite the completed recall.
   Future<void> flushPendingAutoSave() async {
+    final hasScheduledSave = _autoSaveTimer?.isActive ?? false;
     _autoSaveTimer?.cancel();
     _autoSaveTimer = null;
+
+    if (hasScheduledSave) {
+      _autoSaveFuture = _performAutoSave();
+    }
 
     final pendingSave = _autoSaveFuture;
     if (pendingSave == null) return;

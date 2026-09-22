@@ -14,7 +14,7 @@ extension StudySubjectExtension on StudySubject {
     required DailyRecall recall,
     DateTime? completionDateOverride,
   }) async {
-    if (recall.entryCompletedAt == null && completionDateOverride == null) {
+    if (recall.entryCompletedAt == null) {
       throw StateError(
         'Nutrition drafts cannot be saved as completed progress',
       );
@@ -82,6 +82,15 @@ extension StudySubjectExtension on StudySubject {
         progress.add(progressToSave);
       }
     }
+  }
+
+  bool hasNutritionResultForStudyDay({
+    required String taskId,
+    required DailyRecall recall,
+  }) {
+    return progress.any(
+      (p) => p.taskId == taskId && _isSameStudyDay(p, recall),
+    );
   }
 
   bool _isSameStudyDay(SubjectProgress p, DailyRecall recall) {

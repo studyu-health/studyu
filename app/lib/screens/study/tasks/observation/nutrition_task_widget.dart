@@ -231,6 +231,7 @@ class _NutritionTaskWidgetState()
           recall: completedRecall,
         );
       }
+      await model.clearAutoSave();
       if (mounted) Navigator.of(context).pop(completedRecall);
     } catch (error) {
       if (mounted) {

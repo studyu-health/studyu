@@ -232,6 +232,24 @@ class NutritionRecallAutoSaveManager() {
           continue;
         }
 
+        if (pending.recall.entryCompletedAt == null &&
+            subject.hasNutritionResultForStudyDay(
+              taskId: pending.taskId,
+              recall: pending.recall,
+            )) {
+          StudyULogger.debug(
+            '[AutoSave] discard incomplete pending recall because a completed '
+            'result already exists | task=${pending.taskId} '
+            'studyDay=${pending.studyDaySnapshot}',
+          );
+          await deleteRecall(
+            subjectId: pending.subjectId,
+            taskId: pending.taskId,
+            studyDay: pending.studyDaySnapshot,
+          );
+          continue;
+        }
+
         final now = DateTime.now();
         final originalRecall = pending.recall;
         final lastSaved =
