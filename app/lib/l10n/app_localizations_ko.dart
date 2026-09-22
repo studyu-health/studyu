@@ -1633,14 +1633,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get continue_label => '계속';
 
   @override
-  String get questionnaire_review_title => 'Review your answers';
+  String get questionnaire_review_title => '답변 검토';
 
   @override
   String get questionnaire_review_description =>
-      'You changed an earlier answer. Review your later answers before you complete the questionnaire.';
+      '이전 답변을 변경했습니다. 설문을 완료하기 전에 이후 답변을 검토하세요.';
 
   @override
-  String get questionnaire_review_confirmation => 'I reviewed my answers';
+  String get questionnaire_review_confirmation => '답변을 검토했습니다';
 
   @override
   String get restored_answer_needs_review => '복원된 답변은 검토가 필요합니다';
