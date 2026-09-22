@@ -8,6 +8,63 @@ import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_core/core.dart';
 
+@visibleForTesting
+NutritionProfile calculateRecipeNutrition({
+  required List<FoodEntry> ingredientFoods,
+  required List<RecipeComposition> ingredients,
+  required double servings,
+}) {
+  double totalEnergy = 0;
+  double totalProtein = 0;
+  double totalCarbs = 0;
+  double totalFat = 0;
+  double totalSugars = 0;
+  double totalFiber = 0;
+  double totalSaturatedFat = 0;
+  double totalTransFat = 0;
+  double totalCholesterol = 0;
+  double totalSodium = 0;
+  double totalWater = 0;
+  final Map<String, double> totalMicros = {};
+
+  for (int i = 0; i < ingredientFoods.length; i++) {
+    final food = ingredientFoods[i];
+    final composition = ingredients[i];
+    final ratio = composition.amount / food.amount;
+
+    totalEnergy += food.nutrition.energyKcal * ratio;
+    totalProtein += food.nutrition.protein * ratio;
+    totalCarbs += food.nutrition.carbs * ratio;
+    totalFat += food.nutrition.fat * ratio;
+    totalSugars += food.nutrition.sugars * ratio;
+    totalFiber += food.nutrition.fiber * ratio;
+    totalSaturatedFat += food.nutrition.saturatedFat * ratio;
+    totalTransFat += food.nutrition.transFat * ratio;
+    totalCholesterol += food.nutrition.cholesterol * ratio;
+    totalSodium += food.nutrition.sodium * ratio;
+    totalWater += food.nutrition.waterContent * ratio;
+
+    food.nutrition.micros.forEach((key, value) {
+      totalMicros[key] = (totalMicros[key] ?? 0) + (value * ratio);
+    });
+  }
+
+  return NutritionProfile(
+    energyKcal: totalEnergy / servings,
+    protein: totalProtein / servings,
+    carbs: totalCarbs / servings,
+    fat: totalFat / servings,
+    sugars: totalSugars / servings,
+    fiber: totalFiber / servings,
+    saturatedFat: totalSaturatedFat / servings,
+    transFat: totalTransFat / servings,
+    cholesterol: totalCholesterol / servings,
+    sodium: totalSodium / servings,
+    waterContent: totalWater / servings,
+    micros: totalMicros.map((key, value) => MapEntry(key, value / servings)),
+  );
+}
+
 class const RecipeBuilderScreen({final FoodEntry? existingRecipe, super.key})
     extends StatefulWidget {
   static MaterialPageRoute<FoodEntry> route({FoodEntry? existingRecipe}) =>
@@ -207,60 +264,11 @@ class _RecipeBuilderScreenState() extends State<RecipeBuilderScreen> {
     });
   }
 
-  NutritionProfile _calculateTotalNutrition() {
-    double totalEnergy = 0;
-    double totalProtein = 0;
-    double totalCarbs = 0;
-    double totalFat = 0;
-    double totalSugars = 0;
-    double totalFiber = 0;
-    double totalSaturatedFat = 0;
-    double totalTransFat = 0;
-    double totalCholesterol = 0;
-    double totalSodium = 0;
-    double totalWater = 0;
-    final Map<String, double> totalMicros = {};
-
-    for (int i = 0; i < _ingredientFoods.length; i++) {
-      final food = _ingredientFoods[i];
-      final composition = _ingredients[i];
-
-      final ratio = composition.amount / food.amount;
-
-      totalEnergy += food.nutrition.energyKcal * ratio;
-      totalProtein += food.nutrition.protein * ratio;
-      totalCarbs += food.nutrition.carbs * ratio;
-      totalFat += food.nutrition.fat * ratio;
-      totalSugars += food.nutrition.sugars * ratio;
-      totalFiber += food.nutrition.fiber * ratio;
-      totalSaturatedFat += food.nutrition.saturatedFat * ratio;
-      totalTransFat += food.nutrition.transFat * ratio;
-      totalCholesterol += food.nutrition.cholesterol * ratio;
-      totalSodium += food.nutrition.sodium * ratio;
-      totalWater += food.nutrition.waterContent * ratio;
-
-      food.nutrition.micros.forEach((key, value) {
-        totalMicros[key] = (totalMicros[key] ?? 0) + (value * ratio);
-      });
-    }
-
-    final servings = double.tryParse(_servingsController.text) ?? 1;
-
-    return NutritionProfile(
-      energyKcal: totalEnergy / servings,
-      protein: totalProtein / servings,
-      carbs: totalCarbs / servings,
-      fat: totalFat / servings,
-      sugars: totalSugars / servings,
-      fiber: totalFiber / servings,
-      saturatedFat: totalSaturatedFat / servings,
-      transFat: totalTransFat / servings,
-      cholesterol: totalCholesterol / servings,
-      sodium: totalSodium / servings,
-      waterContent: totalWater / servings,
-      micros: totalMicros,
-    );
-  }
+  NutritionProfile _calculateTotalNutrition() => calculateRecipeNutrition(
+    ingredientFoods: _ingredientFoods,
+    ingredients: _ingredients,
+    servings: double.tryParse(_servingsController.text) ?? 1,
+  );
 
   FoodEntry? _buildRecipe() {
     if (!_formKey.currentState!.validate() || _ingredients.isEmpty) {
