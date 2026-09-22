@@ -3151,6 +3151,24 @@ abstract class AppLocalizations {
   /// **'Continue'**
   String get continue_label;
 
+  /// No description provided for @questionnaire_review_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your answers'**
+  String get questionnaire_review_title;
+
+  /// No description provided for @questionnaire_review_description.
+  ///
+  /// In en, this message translates to:
+  /// **'You changed an earlier answer. Review your later answers before you complete the questionnaire.'**
+  String get questionnaire_review_description;
+
+  /// No description provided for @questionnaire_review_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'I reviewed my answers'**
+  String get questionnaire_review_confirmation;
+
   /// No description provided for @restored_answer_needs_review.
   ///
   /// In en, this message translates to:

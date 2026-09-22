@@ -1701,6 +1701,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get continue_label => 'Weiter';
 
   @override
+  String get questionnaire_review_title => 'Überprüfe deine Antworten';
+
+  @override
+  String get questionnaire_review_description =>
+      'Du hast eine frühere Antwort geändert. Überprüfe deine späteren Antworten, bevor du den Fragebogen abschließt.';
+
+  @override
+  String get questionnaire_review_confirmation =>
+      'Ich habe meine Antworten überprüft';
+
+  @override
   String get restored_answer_needs_review =>
       'Wiederhergestellte Antwort muss überprüft werden';
 

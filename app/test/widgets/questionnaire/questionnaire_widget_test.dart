@@ -1116,8 +1116,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(blockedPayload, isNull);
-      expect(find.text('Restored answer requires review'), findsOneWidget);
-      await tester.tap(find.text("I've reviewed this answer"));
+      expect(find.text('Review your answers'), findsOneWidget);
+      await tester.tap(find.text("I reviewed my answers"));
       await tester.pumpAndSettle();
 
       final payload = questionnaireKey.currentState!
@@ -1208,7 +1208,7 @@ void main() {
           .validateSyncAndBuildPayload();
       await tester.pumpAndSettle();
       expect(blockedCorrectedPayload, isNull);
-      await tester.tap(find.text("I've reviewed this answer"));
+      await tester.tap(find.text("I reviewed my answers"));
       await tester.pumpAndSettle();
 
       final correctedPayload = questionnaireKey.currentState!
@@ -1296,7 +1296,7 @@ void main() {
           .validateSyncAndBuildPayload();
       await tester.pumpAndSettle();
       expect(blockedCorrectedPayload, isNull);
-      await tester.tap(find.text("I've reviewed this answer"));
+      await tester.tap(find.text("I reviewed my answers"));
       await tester.pumpAndSettle();
 
       final correctedPayload = questionnaireKey.currentState!
@@ -1485,8 +1485,8 @@ void main() {
     expect(find.text('Complete task'), findsNothing);
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
-    expect(find.text('Restored answer requires review'), findsOneWidget);
-    await tester.tap(find.text("I've reviewed this answer"));
+    expect(find.text('Review your answers'), findsOneWidget);
+    await tester.tap(find.text("I reviewed my answers"));
     await tester.pumpAndSettle();
 
     final syncedPayload = _snapshot(
@@ -2153,13 +2153,11 @@ void main() {
     await tester.tap(find.text('no').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Restored answer requires review'), findsOneWidget);
+    expect(find.text('Review your answers'), findsOneWidget);
     expect(
-      find.text('Complete task becomes available after review.'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Review the restored answer to continue.'),
+      find.text(
+        'You changed an earlier answer. Review your later answers before you complete the questionnaire.',
+      ),
       findsOneWidget,
     );
     final completeButton = tester.widget<ElevatedButton>(
@@ -2182,29 +2180,23 @@ void main() {
       completions.whereType<QuestionnaireState>().length,
       completionCountBeforeBlockedSubmit,
     );
-    expect(find.text('Restored answer requires review'), findsOneWidget);
+    expect(find.text('Review your answers'), findsOneWidget);
 
     final markReviewedButton = find.widgetWithText(
       FilledButton,
-      "I've reviewed this answer",
+      "I reviewed my answers",
     );
     expect(markReviewedButton, findsOneWidget);
-    expect(find.byIcon(Icons.restore_outlined), findsOneWidget);
-    expect(
-      find.widgetWithText(TextButton, "I've reviewed this answer"),
-      findsNothing,
-    );
 
     await tester.tap(markReviewedButton);
     await tester.pumpAndSettle();
-    expect(find.text('Restored answer requires review'), findsNothing);
+    expect(find.text('Review your answers'), findsNothing);
     expect(
-      find.text('Complete task becomes available after review.'),
+      find.text(
+        'You changed an earlier answer. Review your later answers before you complete the questionnaire.',
+      ),
       findsNothing,
     );
-    expect(find.text('Review the restored answer to continue.'), findsNothing);
-    expect(find.text('Answer reviewed'), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
     final enabledCompleteButton = tester.widget<ElevatedButton>(
       find.widgetWithText(ElevatedButton, 'Complete task'),
     );
@@ -2260,7 +2252,7 @@ void main() {
     await tester.tap(find.text('no').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Restored answer requires review'), findsOneWidget);
+    expect(find.text('Review your answers'), findsOneWidget);
     expect(
       completions.whereType<QuestionnaireState>().length,
       completedBeforeContextChange,
@@ -2315,7 +2307,7 @@ void main() {
     await tester.tap(find.text('no').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Restored answer requires review'), findsOneWidget);
+    expect(find.text('Review your answers'), findsOneWidget);
     expect(
       completions.whereType<QuestionnaireState>().length,
       completedBeforeContextChange,

@@ -45,8 +45,6 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
   // Stable keys reused across rebuilds to preserve widget state.
   final Map<String, GlobalKey> _containerKeys = {};
   final Map<String, GlobalKey<FreeTextQuestionWidgetState>> _freeTextKeys = {};
-  final Set<String> _shownReviewErrors = {};
-  final Set<String> _reviewedAnswerIds = {};
 
   QuestionnaireState? validateSyncAndBuildPayload() {
     final containersAtClick = List<QuestionContainer>.of(shownQuestions);
@@ -115,10 +113,7 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
       return null;
     }
 
-    if (_blockCompletionForReview(
-      containers: containersAtClick,
-      renderKeys: renderKeysAtClick,
-    )) {
+    if (_blockCompletionForReview()) {
       return null;
     }
 
@@ -151,31 +146,10 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     return _controller.answerFor(question.id);
   }
 
-  bool _blockCompletionForReview({
-    List<QuestionContainer>? containers,
-    List<GlobalKey>? renderKeys,
-  }) {
-    final reviewQuestionId = _controller.firstVisibleAnswerNeedingReview();
-    if (reviewQuestionId == null) return false;
-
-    setState(() => _shownReviewErrors.add(reviewQuestionId));
-    final reviewIndex = containers?.indexWhere(
-      (container) => container.question.id == reviewQuestionId,
-    );
-    if (reviewIndex != null &&
-        reviewIndex >= 0 &&
-        renderKeys != null &&
-        reviewIndex < renderKeys.length) {
-      _scrollToQuestion(renderKeys[reviewIndex]);
-    }
+  bool _blockCompletionForReview() {
+    if (!_controller.visibleAnswersNeedReview()) return false;
+    setState(() {});
     return true;
-  }
-
-  void _finishQuestionnaireIfReviewed(QuestionnaireState payload) {
-    if (_blockCompletionForReview()) {
-      return;
-    }
-    _finishQuestionnaire(payload);
   }
 
   void _finishQuestionnaire(QuestionnaireState? result) {
@@ -215,7 +189,7 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
       // Use the payload validated above rather than calling buildVisiblePayload()
       // a second time after setState, which can produce a different snapshot if
       // the rebuild changed which questions are visible.
-      _finishQuestionnaireIfReviewed(payload);
+      if (!_blockCompletionForReview()) _finishQuestionnaire(payload);
     } else {
       _finishQuestionnaire(null);
       _scrollToNewQuestion();
@@ -225,7 +199,6 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
   void _onQuestionCleared(String questionId) {
     _controller.removeAnswer(questionId);
     setState(() {
-      _reviewedAnswerIds.remove(questionId);
       _rebuildShownQuestionsFromController(revealNext: false);
     });
     _finishQuestionnaire(null);
@@ -325,7 +298,9 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
   }
 
   void _onQuestionDone(Answer answer, int _) {
-    _reviewedAnswerIds.remove(answer.question);
+    final previouslyShownIds = shownQuestions
+        .map((container) => container.question.id)
+        .toSet();
     if (isDebugMode) {
       debugPrint(
         "QuestionnaireWidget: Answer received for question ${answer.question} - $answer",
@@ -357,7 +332,10 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     } else if (_controller.hasConditionalDependents(answer.question)) {
       _finishQuestionnaire(null);
     }
-    _scrollToNewQuestion();
+    final gainedQuestion = shownQuestions.any(
+      (container) => !previouslyShownIds.contains(container.question.id),
+    );
+    if (gainedQuestion) _scrollToNewQuestion();
   }
 
   void _scrollToNewQuestion() {
@@ -453,15 +431,23 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
         !widget.autoComplete &&
         !widget.hideCta &&
         ctaMode != QuestionnaireCtaMode.hidden;
+    final showReviewCard = _controller.visibleAnswersNeedReview();
 
     return Column(
       children: [
         Expanded(
           child: ListView.builder(
             controller: _scrollController,
-            itemCount: shownQuestions.length + (showCta ? 1 : 0),
+            itemCount:
+                shownQuestions.length +
+                (showReviewCard ? 1 : 0) +
+                (showCta ? 1 : 0),
             itemBuilder: (context, index) {
-              if (showCta && index == shownQuestions.length) {
+              if (showReviewCard && index == shownQuestions.length) {
+                return _buildReviewCard();
+              }
+              if (showCta &&
+                  index == shownQuestions.length + (showReviewCard ? 1 : 0)) {
                 return _buildCtaBar(ctaMode);
               }
               final question = shownQuestions[index];
@@ -471,22 +457,7 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
                       widget.header != null &&
                       widget.header!.isNotEmpty)
                     HtmlTextBox(widget.header),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        question,
-                        if (_controller.needsReview(question.question.id))
-                          _buildReviewRequiredNotice(question.question.id)
-                        else if (_reviewedAnswerIds.contains(
-                          question.question.id,
-                        ))
-                          _buildAnswerReviewedNotice(),
-                      ],
-                    ),
-                  ),
+                  question,
                   if (index == shownQuestions.length - 1 &&
                       widget.footer != null &&
                       widget.footer!.isNotEmpty)
@@ -500,15 +471,11 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     );
   }
 
-  void _markAnswerReviewed(String questionId) {
-    _controller.markReviewed(questionId);
-    setState(() {
-      _shownReviewErrors.remove(questionId);
-      _reviewedAnswerIds.add(questionId);
-    });
-
+  void _confirmReview() {
+    _controller.markVisibleAnswersReviewed();
+    setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _controller.visibleAnswersNeedReview()) return;
+      if (!mounted) return;
       if (_autoCompleteIfReady()) return;
       if (_completeButtonFocusNode.context != null) {
         _completeButtonFocusNode.requestFocus();
@@ -516,87 +483,35 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     });
   }
 
-  Widget _buildReviewRequiredNotice(String questionId) {
+  Widget _buildReviewCard() {
     final l10n = AppLocalizations.of(context)!;
-
     return Semantics(
       container: true,
       liveRegion: true,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.amber.shade50,
-            borderRadius: BorderRadius.circular(8),
+      label: l10n.questionnaire_review_title,
+      child: Card(
+        key: const ValueKey('questionnaire_review_card'),
+        margin: const EdgeInsets.all(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.questionnaire_review_title,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(l10n.questionnaire_review_description),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                key: const ValueKey('questionnaire_review_confirm'),
+                onPressed: _confirmReview,
+                icon: const Icon(Icons.check),
+                label: Text(l10n.questionnaire_review_confirmation),
+              ),
+            ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 2),
-                      child: Icon(Icons.restore_outlined, size: 18),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.restored_answer_needs_review,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            l10n.restored_answer_review_description,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                FilledButton.icon(
-                  onPressed: () => _markAnswerReviewed(questionId),
-                  style: FilledButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  icon: const Icon(Icons.check),
-                  label: Text(l10n.mark_answer_reviewed),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAnswerReviewedNotice() {
-    final l10n = AppLocalizations.of(context)!;
-    final color = Theme.of(context).colorScheme.primary;
-
-    return Semantics(
-      container: true,
-      liveRegion: true,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-        child: Row(
-          children: [
-            Icon(Icons.check_circle_outline, size: 18, color: color),
-            const SizedBox(width: 8),
-            Text(
-              l10n.answer_reviewed,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: color, fontWeight: FontWeight.w600),
-            ),
-          ],
         ),
       ),
     );
@@ -644,17 +559,6 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
           ),
-          if (needsReview) ...[
-            const SizedBox(height: 8),
-            Semantics(
-              liveRegion: true,
-              child: Text(
-                l10n.review_restored_answer_to_continue,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          ],
         ],
       ),
     );

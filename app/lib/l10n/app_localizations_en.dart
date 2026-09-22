@@ -1681,6 +1681,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continue_label => 'Continue';
 
   @override
+  String get questionnaire_review_title => 'Review your answers';
+
+  @override
+  String get questionnaire_review_description =>
+      'You changed an earlier answer. Review your later answers before you complete the questionnaire.';
+
+  @override
+  String get questionnaire_review_confirmation => 'I reviewed my answers';
+
+  @override
   String get restored_answer_needs_review => 'Restored answer requires review';
 
   @override

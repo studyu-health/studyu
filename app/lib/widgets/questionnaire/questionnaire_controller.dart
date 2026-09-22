@@ -206,6 +206,22 @@ class QuestionnaireController(final List<Question> questions)
     notifyListeners();
   }
 
+  /// Clears review flags for all currently visible answers.
+  ///
+  /// Hidden answer metadata is left unchanged. Notifies listeners once when
+  /// at least one visible answer was marked as reviewed.
+  void markVisibleAnswersReviewed() {
+    var changed = false;
+    for (final question in visibleQuestions) {
+      final metadata = _answers.answerMetadata[question.id];
+      if (metadata?.needsReview ?? false) {
+        metadata!.needsReview = false;
+        changed = true;
+      }
+    }
+    if (changed) notifyListeners();
+  }
+
   bool visibleAnswersNeedReview() {
     final visibleIds = visibleQuestions.map((q) => q.id).toSet();
     return visibleIds.any((id) => needsReview(id));
