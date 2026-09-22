@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:studyu_core/env.dart' as env;
 import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 import 'package:studyu_flutter_common/src/utils/storage.dart';
+import 'package:studyu_flutter_common/src/utils/user.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const envsAssetPath = 'packages/studyu_flutter_common/lib/envs';
@@ -85,6 +86,11 @@ Future<void> loadEnv() async {
   );
   SupabaseStorage.suppressPersistedSessionRecovery = false;
 
+  if (startupConfig.suppressPersistedSessionRecovery) {
+    appConnectionStatusController.scheduleHealthyConnectionRecovery(
+      recoverSessionAfterDegradedStartup,
+    );
+  }
   appConnectionStatusController.syncAuthAutoRefresh();
 
   env.setEnv(

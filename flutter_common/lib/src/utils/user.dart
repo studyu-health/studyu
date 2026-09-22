@@ -1,6 +1,6 @@
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/src/utils/connection_status.dart';
-import 'package:studyu_flutter_common/studyu_flutter_common.dart';
+import 'package:studyu_flutter_common/src/utils/storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -82,6 +82,60 @@ Future<bool> signInParticipant() async {
     }
   }
   return false;
+}
+
+Future<HealthyConnectionRecoveryResult> recoverSessionAfterDegradedStartup({
+  bool Function()? isSignedIn,
+  Future<String?> Function()? loadPersistedSession,
+  Future<void> Function(String session)? recoverPersistedSession,
+  Future<bool> Function()? hasStoredCredentials,
+  Future<bool> Function()? signIn,
+}) async {
+  final currentStatus = isSignedIn ?? isUserLoggedIn;
+  final credentialsAvailable =
+      hasStoredCredentials ??
+      () async =>
+          await SecureStorage.containsKey(userEmailKey) &&
+          await SecureStorage.containsKey(userPasswordKey);
+  if (currentStatus()) return HealthyConnectionRecoveryResult.completed;
+
+  var retryNeeded = false;
+  try {
+    final persistedSession =
+        await (loadPersistedSession ??
+            () => SecureStorage.read(supabasePersistSessionKey))();
+    if (persistedSession != null) {
+      await (recoverPersistedSession ??
+          (session) async {
+            await Supabase.instance.client.auth.recoverSession(session);
+          })(persistedSession);
+      retryNeeded = !currentStatus();
+    }
+  } catch (error) {
+    retryNeeded = true;
+    StudyULogger.warning('Could not recover the persisted session: $error');
+  }
+
+  if (currentStatus()) return HealthyConnectionRecoveryResult.completed;
+
+  try {
+    if (!await credentialsAvailable()) {
+      return retryNeeded
+          ? HealthyConnectionRecoveryResult.retryNeeded
+          : HealthyConnectionRecoveryResult.completed;
+    }
+    if (await (signIn ?? signInParticipant)() || currentStatus()) {
+      return HealthyConnectionRecoveryResult.completed;
+    }
+    return await credentialsAvailable()
+        ? HealthyConnectionRecoveryResult.retryNeeded
+        : HealthyConnectionRecoveryResult.completed;
+  } catch (error) {
+    StudyULogger.warning(
+      'Could not recover participant credentials after reconnecting: $error',
+    );
+    return HealthyConnectionRecoveryResult.retryNeeded;
+  }
 }
 
 Future<bool> ensureParticipantSignedIn({

@@ -43,11 +43,13 @@ class _AppErrorScreenState() extends State<AppErrorScreen> {
   Future<void> _loadCachedUserData() async {
     try {
       final data = await Cache.getCachedUserData();
+      if (!mounted) return;
       setState(() {
         cachedUserData = data;
         isLoadingData = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         cachedUserData = 'Error loading cached data: $e';
         isLoadingData = false;

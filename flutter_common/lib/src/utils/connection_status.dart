@@ -5,18 +5,31 @@ import 'package:flutter/foundation.dart';
 import 'package:studyu_flutter_common/src/utils/connection_status_platform.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-enum AppConnectionStatus { healthy, deviceOffline, backendUnavailable }
+enum AppConnectionStatus() {
+  healthy,
+  deviceOffline,
+  backendUnavailable,
+}
 
 typedef AuthAutoRefreshSync = void Function(AppConnectionStatus status);
 
-class AppConnectionStatusController extends ChangeNotifier {
-  AppConnectionStatusController._();
+enum HealthyConnectionRecoveryResult() {
+  completed,
+  retryNeeded,
+}
 
+typedef HealthyConnectionRecovery =
+    Future<HealthyConnectionRecoveryResult> Function();
+
+class AppConnectionStatusController._() extends ChangeNotifier {
   static final AppConnectionStatusController instance =
       AppConnectionStatusController._();
 
   AppConnectionStatus _status = AppConnectionStatus.healthy;
   AuthAutoRefreshSync? _authAutoRefreshSyncOverride;
+  HealthyConnectionRecovery? _pendingHealthyConnectionRecovery;
+  int _healthyConnectionRecoveryGeneration = 0;
+  int? _activeHealthyConnectionRecoveryGeneration;
 
   AppConnectionStatus get status => _status;
 
@@ -24,7 +37,17 @@ class AppConnectionStatusController extends ChangeNotifier {
     if (_status == status) return;
     _status = status;
     _syncAuthAutoRefresh();
+    if (status == AppConnectionStatus.healthy) {
+      _startPendingHealthyConnectionRecovery();
+    }
     notifyListeners();
+  }
+
+  void scheduleHealthyConnectionRecovery(HealthyConnectionRecovery recovery) {
+    _pendingHealthyConnectionRecovery = recovery;
+    if (_status == AppConnectionStatus.healthy) {
+      _startPendingHealthyConnectionRecovery();
+    }
   }
 
   void syncAuthAutoRefresh() {
@@ -49,8 +72,43 @@ class AppConnectionStatusController extends ChangeNotifier {
     }
   }
 
+  void _startPendingHealthyConnectionRecovery() {
+    final recovery = _pendingHealthyConnectionRecovery;
+    if (recovery == null ||
+        _activeHealthyConnectionRecoveryGeneration != null) {
+      return;
+    }
+    _pendingHealthyConnectionRecovery = null;
+    final generation = ++_healthyConnectionRecoveryGeneration;
+    _activeHealthyConnectionRecoveryGeneration = generation;
+    unawaited(_runHealthyConnectionRecovery(recovery, generation));
+  }
+
+  Future<void> _runHealthyConnectionRecovery(
+    HealthyConnectionRecovery recovery,
+    int generation,
+  ) async {
+    var result = HealthyConnectionRecoveryResult.retryNeeded;
+    try {
+      result = await recovery();
+    } catch (error, stackTrace) {
+      debugPrint('Could not recover auth after reconnecting: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+
+    if (_activeHealthyConnectionRecoveryGeneration != generation) return;
+    _activeHealthyConnectionRecoveryGeneration = null;
+    if (result == HealthyConnectionRecoveryResult.retryNeeded &&
+        _pendingHealthyConnectionRecovery == null) {
+      _pendingHealthyConnectionRecovery = recovery;
+    }
+  }
+
   @visibleForTesting
   void reset() {
+    _pendingHealthyConnectionRecovery = null;
+    _healthyConnectionRecoveryGeneration++;
+    _activeHealthyConnectionRecoveryGeneration = null;
     if (_status == AppConnectionStatus.healthy) return;
     _status = AppConnectionStatus.healthy;
     _syncAuthAutoRefresh();

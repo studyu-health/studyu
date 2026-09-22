@@ -409,4 +409,82 @@ void main() {
       AppConnectionStatus.backendUnavailable,
     );
   });
+
+  test(
+    'degraded startup recovery restores the persisted session first',
+    () async {
+      var signedIn = false;
+      var credentialSignInCalls = 0;
+
+      final result = await recoverSessionAfterDegradedStartup(
+        isSignedIn: () => signedIn,
+        loadPersistedSession: () async => 'persisted-session',
+        recoverPersistedSession: (session) async {
+          expect(session, 'persisted-session');
+          signedIn = true;
+        },
+        signIn: () async {
+          credentialSignInCalls++;
+          return true;
+        },
+      );
+
+      expect(result, HealthyConnectionRecoveryResult.completed);
+      expect(signedIn, isTrue);
+      expect(credentialSignInCalls, 0);
+    },
+  );
+
+  test(
+    'degraded startup recovery falls back to participant credentials',
+    () async {
+      var credentialSignInCalls = 0;
+
+      final result = await recoverSessionAfterDegradedStartup(
+        isSignedIn: () => false,
+        loadPersistedSession: () async => 'invalid-session',
+        recoverPersistedSession: (_) => Future<void>.error(
+          const FormatException('invalid persisted session'),
+        ),
+        hasStoredCredentials: () async => true,
+        signIn: () async {
+          credentialSignInCalls++;
+          return true;
+        },
+      );
+
+      expect(result, HealthyConnectionRecoveryResult.completed);
+      expect(credentialSignInCalls, 1);
+    },
+  );
+
+  test('degraded startup recovery retries transient auth failures', () async {
+    final result = await recoverSessionAfterDegradedStartup(
+      isSignedIn: () => false,
+      loadPersistedSession: () async => 'persisted-session',
+      recoverPersistedSession: (_) =>
+          Future<void>.error(Exception('ClientException: Failed to fetch')),
+      hasStoredCredentials: () async => true,
+      signIn: () async => false,
+    );
+
+    expect(result, HealthyConnectionRecoveryResult.retryNeeded);
+  });
+
+  test('degraded startup recovery consumes missing auth data', () async {
+    var signInCalls = 0;
+
+    final result = await recoverSessionAfterDegradedStartup(
+      isSignedIn: () => false,
+      loadPersistedSession: () async => null,
+      hasStoredCredentials: () async => false,
+      signIn: () async {
+        signInCalls++;
+        return false;
+      },
+    );
+
+    expect(result, HealthyConnectionRecoveryResult.completed);
+    expect(signInCalls, 0);
+  });
 }

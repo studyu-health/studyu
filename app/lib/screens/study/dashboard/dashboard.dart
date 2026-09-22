@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -19,7 +18,7 @@ import 'package:studyu_app/theme.dart' as app_theme;
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/debug_screen.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_flutter_common/src/utils/connection_status.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @visibleForTesting

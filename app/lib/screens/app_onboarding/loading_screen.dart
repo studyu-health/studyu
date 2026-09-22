@@ -22,7 +22,6 @@ import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_app/widgets/deep_link_onboarding_widgets.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase/supabase.dart'
     show AuthApiException, PostgrestException;
@@ -76,6 +75,18 @@ AppErrorReason appErrorReasonForCacheUnavailable(Object? cause) {
     return AppErrorReason.cacheUnavailableMissing;
   }
   return AppErrorReason.cacheUnavailableCorrupt;
+}
+
+@visibleForTesting
+Future<StudySubject> loadCachedSubjectForStartup({
+  required String selectedSubjectId,
+  required Future<StudySubject> Function() loadCached,
+}) async {
+  final cachedSubject = await loadCached();
+  if (cachedSubject.id != selectedSubjectId) {
+    throw StateError('Cached subject does not match selected subject');
+  }
+  return cachedSubject;
 }
 
 @visibleForTesting
@@ -643,7 +654,10 @@ class _LoadingScreenState() extends State<LoadingScreen> {
   Future<StudySubject?> _retrieveSubject(String selectedStudyObjectId) {
     return restoreCachedValueForStartup<StudySubject>(
       fetchRemote: () => _fetchRemoteSubject(selectedStudyObjectId),
-      loadCached: Cache.loadSubject,
+      loadCached: () => loadCachedSubjectForStartup(
+        selectedSubjectId: selectedStudyObjectId,
+        loadCached: Cache.loadSubject,
+      ),
       signIn: signInParticipant,
       isDeletedRemoteError: (error) =>
           error is PostgrestException && error.code == 'PGRST116',

@@ -21,7 +21,6 @@ import 'package:studyu_app/screens/app_onboarding/welcome.dart';
 import 'package:studyu_app/screens/study/dashboard/dashboard.dart';
 import 'package:studyu_app/screens/study/onboarding/study_selection.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase/supabase.dart';
 

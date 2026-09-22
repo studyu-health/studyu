@@ -3,7 +3,6 @@ import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/notifications.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 /// Phases of the normal (non-preview) study enrollment flow, in guarded

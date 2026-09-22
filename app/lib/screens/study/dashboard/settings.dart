@@ -16,7 +16,6 @@ import 'package:studyu_app/widgets/study_onboarding_description.dart';
 import 'package:studyu_app/widgets/title_description_layout.dart';
 import 'package:studyu_app/widgets/why_dialog.dart';
 import 'package:studyu_core/core.dart';
-import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:supabase/supabase.dart' show PostgrestException;
 
