@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
@@ -117,6 +119,75 @@ void main() {
     },
   );
 
+  test('completion flush waits for active and scheduled autosaves', () async {
+    SharedPreferences.setMockInitialValues({});
+
+    final study = Study('study', 'owner')
+      ..schedule.numberOfCycles = 0
+      ..schedule.includeBaseline = true;
+    final subject =
+        StudySubject('subject-queued-flush', study.id, 'user', const [])
+          ..study = study
+          ..startedAt = DateTime.now().subtract(const Duration(hours: 1));
+    final task = NutritionTask.withId();
+    final period = task.schedule.completionPeriods.single;
+    final autoSaveManager = _BlockingAutoSaveManager();
+    final viewModel = DailyRecallEntryViewModel(
+      subject: subject,
+      task: task,
+      completionPeriod: period,
+      autoSaveManager: autoSaveManager,
+    );
+    addTearDown(viewModel.dispose);
+
+    viewModel.addMeal(
+      MealLog.withId(
+        mealType: MealType.lunch,
+        mealContext: MealContext.home,
+        timestamp: DateTime.now(),
+        timezone: 'UTC',
+        isSkipped: false,
+        foods: [],
+      ),
+    );
+
+    final firstFlush = viewModel.flushPendingAutoSave();
+    await autoSaveManager.firstSaveStarted.future;
+
+    viewModel.updateSpecialOccasion('Birthday');
+    var completionFinished = false;
+    final completion = () async {
+      await viewModel.flushPendingAutoSave();
+      viewModel.markCompleted();
+      await viewModel.clearAutoSave();
+      completionFinished = true;
+    }();
+
+    expect(completionFinished, isFalse);
+    expect(autoSaveManager.secondSaveStarted.isCompleted, isFalse);
+
+    autoSaveManager.releaseFirstSave.complete();
+    await autoSaveManager.secondSaveStarted.future;
+    await firstFlush;
+    expect(completionFinished, isFalse);
+
+    autoSaveManager.releaseSecondSave.complete();
+    await completion;
+
+    expect(autoSaveManager.savedRecalls, hasLength(2));
+    expect(autoSaveManager.savedRecalls.first.specialOccasion, isNull);
+    expect(autoSaveManager.savedRecalls.last.specialOccasion, 'Birthday');
+    expect(viewModel.recall.entryCompletedAt, isNotNull);
+    expect(
+      await autoSaveManager.loadRecall(
+        subjectId: subject.id,
+        taskId: task.id,
+        studyDay: 0,
+      ),
+      isNull,
+    );
+  });
+
   test(
     'rejects an incomplete recall instead of creating completed progress',
     () async {
@@ -215,4 +286,37 @@ void main() {
       );
     },
   );
+}
+
+class _BlockingAutoSaveManager() extends NutritionRecallAutoSaveManager {
+  final firstSaveStarted = Completer<void>();
+  final secondSaveStarted = Completer<void>();
+  final releaseFirstSave = Completer<void>();
+  final releaseSecondSave = Completer<void>();
+  final savedRecalls = <DailyRecall>[];
+
+  @override
+  Future<void> saveRecall({
+    required DailyRecall recall,
+    required String subjectId,
+    required String taskId,
+    required String interventionId,
+    required String periodId,
+    required int studyDaySnapshot,
+  }) async {
+    savedRecalls.add(recall);
+    final saveNumber = savedRecalls.length;
+    final started = saveNumber == 1 ? firstSaveStarted : secondSaveStarted;
+    final release = saveNumber == 1 ? releaseFirstSave : releaseSecondSave;
+    started.complete();
+    await release.future;
+    await super.saveRecall(
+      recall: recall,
+      subjectId: subjectId,
+      taskId: taskId,
+      interventionId: interventionId,
+      periodId: periodId,
+      studyDaySnapshot: studyDaySnapshot,
+    );
+  }
 }

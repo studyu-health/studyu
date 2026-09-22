@@ -9,9 +9,10 @@ class DailyRecallEntryViewModel({
   final NutritionTask? task,
   final CompletionPeriod? completionPeriod,
   DailyRecall? existingRecall,
+  @visibleForTesting NutritionRecallAutoSaveManager? autoSaveManager,
 }) extends ChangeNotifier {
   final NutritionRecallAutoSaveManager _autoSaveManager =
-      NutritionRecallAutoSaveManager();
+      autoSaveManager ?? NutritionRecallAutoSaveManager();
 
   late DailyRecall recall;
   bool isSaving = false;
@@ -209,7 +210,7 @@ class DailyRecallEntryViewModel({
     _autoSaveTimer = null;
 
     if (hasScheduledSave) {
-      _autoSaveFuture = _performAutoSave();
+      _queueAutoSave();
     }
 
     final pendingSave = _autoSaveFuture;
@@ -235,8 +236,26 @@ class DailyRecallEntryViewModel({
     _autoSaveTimer?.cancel();
     _autoSaveTimer = Timer(NutritionRecallAutoSaveManager.debounceDuration, () {
       _autoSaveTimer = null;
-      _autoSaveFuture = _performAutoSave();
+      _queueAutoSave();
     });
+  }
+
+  Future<void> _queueAutoSave() {
+    final pendingSave = _autoSaveFuture;
+    final queuedSave = () async {
+      if (pendingSave != null) {
+        try {
+          await pendingSave;
+        } catch (error, stackTrace) {
+          StudyULogger.warning(
+            '[DailyRecallVM] Earlier auto-save failed: $error\n$stackTrace',
+          );
+        }
+      }
+      await _performAutoSave();
+    }();
+    _autoSaveFuture = queuedSave;
+    return queuedSave;
   }
 
   void _performAutoSaveSync() {
@@ -260,7 +279,7 @@ class DailyRecallEntryViewModel({
   }
 
   Future<void> _performAutoSave() async {
-    if (isSaving || subject == null || _studyDaySnapshot == null) return;
+    if (subject == null || _studyDaySnapshot == null) return;
     if (!isInTaskMode) {
       StudyULogger.debug('[DailyRecallVM] Skip auto-save (not in task mode)');
       return;
