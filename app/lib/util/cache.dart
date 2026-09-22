@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
@@ -105,7 +106,7 @@ class Cache() {
     // local and remote subject are equal, nothing to synchronize
     if (localSubject == remoteSubject) return remoteSubject;
     // remote subject belongs to a different study
-    if (!kDebugMode &&
+    if (!isDebugMode &&
         remoteSubject.startedAt!.isAfter(localSubject.startedAt!)) {
       return remoteSubject;
     }
@@ -161,7 +162,7 @@ class Cache() {
         // Unable to determine what has changed
         // We can either drop local or overwrite remote
         // ... for now do nothing
-        if (!kDebugMode && localSubject.startedAt == remoteSubject.startedAt) {
+        if (!isDebugMode && localSubject.startedAt == remoteSubject.startedAt) {
           StudyULogger.fatal(
             "Cache synchronization found local changes that cannot be merged",
           );

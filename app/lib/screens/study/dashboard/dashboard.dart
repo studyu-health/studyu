@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -17,6 +16,7 @@ import 'package:studyu_app/screens/app_onboarding/study_unavailable_screen.dart'
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
 import 'package:studyu_app/theme.dart' as app_theme;
 import 'package:studyu_app/util/dashboard_showcase.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/debug_screen.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
@@ -79,7 +79,7 @@ class _DashboardScreenState()
   bool get _studyIsAvailable => isStudyAvailableForTesting(subject!.study);
 
   bool get showNextDay =>
-      (kDebugMode || context.read<AppState>().isPreview) &&
+      (isDebugMode || context.read<AppState>().isPreview) &&
       !subject!.completedStudy;
 
   Future<void> _submitPendingNutritionRecalls() async {
