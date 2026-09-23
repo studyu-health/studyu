@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +10,7 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
 import 'package:studyu_app/services/pending_deep_link_service.dart';
 import 'package:studyu_app/services/study_start_service.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/save_pdf.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
 import 'package:studyu_app/widgets/html_text.dart';
@@ -104,7 +105,7 @@ class _ConsentScreenState() extends State<ConsentScreen> {
       onBack: _declineConsent,
       nextLabel: AppLocalizations.of(context)!.accept,
       showNextIcon: false,
-      onNext: boxLogic.every((element) => element) || kDebugMode
+      onNext: boxLogic.every((element) => element) || isDebugMode
           ? _acceptConsent
           : null,
       progress: OnboardingProgress.forPage(appState, OnboardingStep.consent),

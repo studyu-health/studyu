@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_app/widgets/questionnaire/question_container.dart';
 import 'package:studyu_app/widgets/questionnaire/questionnaire_controller.dart';
@@ -325,7 +326,7 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
 
   void _onQuestionDone(Answer answer, int _) {
     _reviewedAnswerIds.remove(answer.question);
-    if (kDebugMode) {
+    if (isDebugMode) {
       debugPrint(
         "QuestionnaireWidget: Answer received for question ${answer.question} - $answer",
       );
