@@ -161,10 +161,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get form_field_password_current_hint => 'Enter current password';
 
   @override
-  String get form_field_password_current_invalid =>
-      'Current password is invalid';
-
-  @override
   String get form_field_reset_password => 'Reset password';
 
   @override
@@ -520,30 +516,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'I understand that my decision is final and irreversible and that all data is completely deleted and cannot be restored again.';
 
   @override
-  String get dialog_study_delete_data_confirmation_emphasis_1 =>
-      'deleted forever';
-
-  @override
-  String get dialog_study_delete_data_confirmation_emphasis_2 =>
-      'cannot be retrieved again';
-
-  @override
-  String get dialog_study_delete_participant_confirmation_emphasis_1 =>
-      'current participants will not be able to continue';
-
-  @override
-  String get dialog_study_delete_participant_confirmation_emphasis_2 =>
-      'all data from current and past participants';
-
-  @override
-  String get dialog_study_delete_irreversible_confirmation_emphasis_1 =>
-      'final and irreversible';
-
-  @override
-  String get dialog_study_delete_irreversible_confirmation_emphasis_2 =>
-      'cannot be restored again';
-
-  @override
   String dialog_study_delete_type_name_instruction(Object studyName) {
     return 'Type the study name \"$studyName\" to confirm deletion.';
   }
@@ -591,9 +563,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dialog_subject_study => 'study';
-
-  @override
   String get dialog_subject_item => 'item';
 
   @override
@@ -619,9 +588,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dialog_subject_report_section => 'report section';
-
-  @override
-  String get dialog_subject_invite_code => 'invite code';
 
   @override
   String get dialog_delete_invite_code_title => 'Delete invite code?';
@@ -694,19 +660,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get question_type_pain_description =>
       'Participants can select one or more body parts on a diagram and assign a pain level to each selected part using a pain scale. This is useful for tracking localized pain.';
-
-  @override
-  String get question_type_pain_preview_title => 'In-App Preview';
-
-  @override
-  String get question_type_pain_preview_description =>
-      'Below is a simplified representation of how the pain selection interface will appear to participants in the StudyU app. They will be able to tap on body parts to select them and then assign a pain level.';
-
-  @override
-  String get question_type_pain_front_view => 'Front View';
-
-  @override
-  String get question_type_pain_back_view => 'Back View';
 
   @override
   String get question_type_pain_functionality_title => 'Functionality';
@@ -1048,44 +1001,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Earliest date cannot be after the latest date';
 
   @override
-  String get date_picker_button_label_datetime => 'Select date';
-
-  @override
-  String get time_picker_button_label_datetime => 'Select time';
-
-  @override
-  String get time_picker_button_label => 'Select a time';
-
-  @override
-  String get date_picker_validation_required => 'Please select a date';
-
-  @override
-  String get time_picker_validation_required => 'Please select a time';
-
-  @override
-  String get datetime_picker_validation_required =>
-      'Please select both date and time';
-
-  @override
-  String get time_picker_validation_range =>
-      'Please select a time within the allowed range';
-
-  @override
-  String time_picker_range_hint(Object min, Object max) {
-    return 'Select a time between $min and $max';
-  }
-
-  @override
-  String time_picker_min_hint(Object min) {
-    return 'Earliest allowed time: $min';
-  }
-
-  @override
-  String time_picker_max_hint(Object max) {
-    return 'Latest allowed time: $max';
-  }
-
-  @override
   String get date_validation_default_today_before_min =>
       '\'Today\' is before the earliest allowed date';
 
@@ -1103,9 +1018,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fitbit_question_title => 'Fitbit';
-
-  @override
-  String get fitbit_question_type_empty => 'No Fitbit data available';
 
   @override
   String get navlink_question_visibility_logic => 'Visibility';
@@ -1205,23 +1117,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get form_array_question_visibility_logic_different_length_as =>
       'different length as';
-
-  @override
-  String get form_array_question_visibility_logic_length_greater_than =>
-      'length >';
-
-  @override
-  String get form_array_question_visibility_logic_length_less_than =>
-      'length <';
-
-  @override
-  String
-  get form_array_question_visibility_logic_length_greater_than_or_equal =>
-      'length >=';
-
-  @override
-  String get form_array_question_visibility_logic_length_less_than_or_equal =>
-      'length <=';
 
   @override
   String get form_array_question_visibility_logic_not => 'NOT';
@@ -1332,27 +1227,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get form_field_study_description_required =>
       'The study description must not be empty';
-
-  @override
-  String get form_field_study_tags => 'Tags';
-
-  @override
-  String get form_field_study_tags_hint =>
-      'Write down a tag and press the Enter key';
-
-  @override
-  String get form_field_study_tags_tooltip =>
-      'Add tags to your study to make it easier to find for other researchers and clinicians';
-
-  @override
-  String form_field_study_tags_error_length(Object count) {
-    return 'You can only add up to $count tags to your study';
-  }
-
-  @override
-  String form_field_study_tags_helper(Object count) {
-    return 'Select up to $count tags from the list or add your own.';
-  }
 
   @override
   String get form_field_study_icon_required =>
@@ -1957,10 +1831,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a numerical value';
 
   @override
-  String get form_field_report_alphaConfidence_required =>
-      'An alpha confidence value needs to be defined';
-
-  @override
   String get form_field_report_alphaConfidence_number =>
       'The alpha confidence value must be a numeric value';
 
@@ -2218,9 +2088,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get participant_details_title => 'Participant details';
-
-  @override
-  String get participant_details_study_days_overview => 'Study days overview';
 
   @override
   String get participant_details_study_days_description =>
@@ -2511,9 +2378,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get action_delete => 'Delete';
 
   @override
-  String get action_delete_invite_code => 'Delete invite code';
-
-  @override
   String get action_delete_code => 'Delete code';
 
   @override
@@ -2654,14 +2518,6 @@ class AppLocalizationsEn extends AppLocalizations {
       '8. Copy and paste the credentials below.';
 
   @override
-  String get fitbit_credentials_success_instruction =>
-      'Once you enter the credentials, Fitbit integration will be enabled for your study.';
-
-  @override
-  String get fitbit_credentials_add_question_instruction =>
-      'To add a Fitbit question, navigate to the measurements section and create a new Fitbit Question within a measurement.';
-
-  @override
   String get fitbit_credentials_screenshot_step1 => 'Step 1: Developer Portal';
 
   @override
@@ -2683,32 +2539,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fitbit_credentials_screenshot_step7 => 'Step 7: Fill Form';
 
   @override
-  String get fitbit_credentials_cannot_change_title =>
-      'Fitbit credentials can\'t be changed';
-
-  @override
-  String get fitbit_credentials_cannot_change_description =>
-      'Fitbit credentials can\'t be changed while the study is not in draft mode.';
-
-  @override
   String get fitbit_only_participant_title =>
       'If you\'re running this study just for yourself';
 
   @override
   String get fitbit_only_participant_subtitle =>
       'Since you\'re both creating and participating in this study, you don\'t need to fill out the intraday data request form. Simply follow these easy steps:';
-
-  @override
-  String get fitbit_only_participant_description =>
-      'If you\'re running this study just for yourself, you must use your own Fitbit account\'s Client ID and Client Secret on the previous page.';
-
-  @override
-  String get fitbit_multiple_participant_title =>
-      'If you\'re running this study for multiple participants';
-
-  @override
-  String get fitbit_multiple_participant_description =>
-      'Each participant must log in with their own Fitbit account in the StudyU app. The data will be collected separately for each participant.';
 
   @override
   String get study_import_title => 'Import Study';
@@ -2722,11 +2558,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get study_import_success => 'Study imported successfully';
-
-  @override
-  String study_import_error(String error) {
-    return 'Failed to import study: $error';
-  }
 
   @override
   String get fitbit_only_participant_step_1 =>
@@ -2772,10 +2603,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screenshots_for_guidance => 'Screenshots for Guidance:';
-
-  @override
-  String get fitbit_credentials_not_set =>
-      'Fitbit credentials are not set. Please navigate to the \'Fitbit\' tab in the study designer to enter your Fitbit client ID and client secret. Once completed, return here to add Fitbit questions.';
 
   @override
   String get fitbit_question_type_heartrate_description =>
@@ -2878,44 +2705,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filter_reset_all => 'Clear all';
-
-  @override
-  String get code_list_filter_title => 'Filter invite codes';
-
-  @override
-  String get code_list_filter_enrolled_status => 'Enrolled status';
-
-  @override
-  String get code_list_filter_enrolled_min => 'Enrolled min';
-
-  @override
-  String get code_list_filter_enrolled_max => 'Enrolled max';
-
-  @override
-  String get code_list_filter_intervention_assignment =>
-      'Intervention assignment';
-
-  @override
-  String get code_list_filter_apply => 'Apply';
-
-  @override
-  String get code_list_filter_option_all => 'All';
-
-  @override
-  String get code_list_filter_option_unused => 'Unused';
-
-  @override
-  String get code_list_filter_option_used => 'Used';
-
-  @override
-  String code_list_filter_button_active(int count) {
-    return 'Filter ($count)';
-  }
-
-  @override
-  String filter_show_studies(int count) {
-    return 'Show $count Studies';
-  }
 
   @override
   String get filter_dialog_save_title => 'Save Filter Preset';
@@ -3094,11 +2883,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get code_list_search_hint_compact => 'Search codes';
 
   @override
-  String code_list_active_count(int count) {
-    return '$count active invite codes';
-  }
-
-  @override
   String code_list_total_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3110,24 +2894,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get code_list_page_size => 'Rows';
-
-  @override
   String get code_list_rows_per_page => 'Rows per page:';
-
-  @override
-  String code_list_page(int page) {
-    return 'Page $page';
-  }
 
   @override
   String code_list_page_range(int start, int end, int count) {
     return '$start–$end of $count';
-  }
-
-  @override
-  String code_list_page_loading(int start, int end) {
-    return 'Loading $start–$end...';
   }
 
   @override
@@ -3138,20 +2909,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get code_list_retry => 'Retry';
 
   @override
-  String get code_list_previous_page => 'Previous page';
-
-  @override
-  String get code_list_next_page => 'Next page';
-
-  @override
   String get action_regenerate_invite_code => 'Regenerate invite code';
 
   @override
   String get dialog_qr_code_description =>
       'Share the link or QR code with participants so they can access this study. When participants open the link or scan the QR code with their phone, the StudyU App opens and adds them to the study.';
-
-  @override
-  String get all_studies => 'All Studies';
 
   @override
   String get studies_filter_add_filter => 'Add filter';

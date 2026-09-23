@@ -58,7 +58,6 @@
   "notification_user_already_registered": "User already registered",
   "form_field_password_current": "Current password",
   "form_field_password_current_hint": "Enter current password",
-  "form_field_password_current_invalid": "Current password is invalid",
   "form_field_reset_password": "Reset password",
   "change_password": "Change password",
   "password_change_description": "Enter a new password for your account",
@@ -184,12 +183,6 @@
   "dialog_study_delete_data_confirmation": "I understand that the study and all associated data will be deleted forever and cannot be retrieved again.",
   "dialog_study_delete_participant_confirmation": "I understand that current participants will not be able to continue their study and that all data from current and past participants will be deleted for them and for me.",
   "dialog_study_delete_irreversible_confirmation": "I understand that my decision is final and irreversible and that all data is completely deleted and cannot be restored again.",
-  "dialog_study_delete_data_confirmation_emphasis_1": "deleted forever",
-  "dialog_study_delete_data_confirmation_emphasis_2": "cannot be retrieved again",
-  "dialog_study_delete_participant_confirmation_emphasis_1": "current participants will not be able to continue",
-  "dialog_study_delete_participant_confirmation_emphasis_2": "all data from current and past participants",
-  "dialog_study_delete_irreversible_confirmation_emphasis_1": "final and irreversible",
-  "dialog_study_delete_irreversible_confirmation_emphasis_2": "cannot be restored again",
   "dialog_study_delete_type_name_instruction": "Type the study name \"{studyName}\" to confirm deletion.",
   "@dialog_study_delete_type_name_instruction": {
     "placeholders": {
@@ -231,7 +224,6 @@
       "subject": {}
     }
   },
-  "dialog_subject_study": "study",
   "dialog_subject_item": "item",
   "dialog_subject_question": "question",
   "dialog_subject_screener_question": "screener question",
@@ -241,7 +233,6 @@
   "dialog_subject_survey": "survey",
   "dialog_subject_consent_item": "consent item",
   "dialog_subject_report_section": "report section",
-  "dialog_subject_invite_code": "invite code",
   "dialog_delete_invite_code_title": "Delete invite code?",
   "dialog_delete_invite_code_message": "Anyone with invite code {code} will no longer be able to use it.",
   "@dialog_delete_invite_code_message": {
@@ -269,10 +260,6 @@
   "question_type_free_text": "Free text",
   "question_type_pain": "Pain Tracker",
   "question_type_pain_description": "Participants can select one or more body parts on a diagram and assign a pain level to each selected part using a pain scale. This is useful for tracking localized pain.",
-  "question_type_pain_preview_title": "In-App Preview",
-  "question_type_pain_preview_description": "Below is a simplified representation of how the pain selection interface will appear to participants in the StudyU app. They will be able to tap on body parts to select them and then assign a pain level.",
-  "question_type_pain_front_view": "Front View",
-  "question_type_pain_back_view": "Back View",
   "question_type_pain_functionality_title": "Functionality",
   "question_type_pain_functionality_description": "When a participant taps on a body part, a dialog appears where they can select a pain level. Each selected body part can have a different pain level. The collected data includes the identified body parts and their corresponding pain scores.",
   "question_type_bool": "Yes/no",
@@ -430,38 +417,11 @@
   "date_max_time_label": "Latest time",
   "date_max_time_label_helper": "The latest time participants can select",
   "date_validation_min_greater_than_max": "Earliest date cannot be after the latest date",
-  "date_picker_button_label_datetime": "Select date",
-  "time_picker_button_label_datetime": "Select time",
-  "time_picker_button_label": "Select a time",
-  "date_picker_validation_required": "Please select a date",
-  "time_picker_validation_required": "Please select a time",
-  "datetime_picker_validation_required": "Please select both date and time",
-  "time_picker_validation_range": "Please select a time within the allowed range",
-  "time_picker_range_hint": "Select a time between {min} and {max}",
-  "@time_picker_range_hint": {
-    "placeholders": {
-      "min": {},
-      "max": {}
-    }
-  },
-  "time_picker_min_hint": "Earliest allowed time: {min}",
-  "@time_picker_min_hint": {
-    "placeholders": {
-      "min": {}
-    }
-  },
-  "time_picker_max_hint": "Latest allowed time: {max}",
-  "@time_picker_max_hint": {
-    "placeholders": {
-      "max": {}
-    }
-  },
   "date_validation_default_today_before_min": "'Today' is before the earliest allowed date",
   "date_validation_default_today_after_max": "'Today' is after the latest allowed date",
   "date_validation_default_specific_before_min": "Default date is before the earliest allowed date",
   "date_validation_default_specific_after_max": "Default date is after the latest allowed date",
   "fitbit_question_title": "Fitbit",
-  "fitbit_question_type_empty": "No Fitbit data available",
   "navlink_question_visibility_logic": "Visibility",
   "form_array_question_visibility_logic_title": "Visibility Logic",
   "form_array_question_visibility_logic_question_tooltip": "This question has visibility logic defined. It will only be shown to the participant if the conditions are met.",
@@ -490,10 +450,6 @@
   "form_array_question_visibility_logic_longer_than_or_equal_to": "longer than or equal to",
   "form_array_question_visibility_logic_same_length_as": "same length as",
   "form_array_question_visibility_logic_different_length_as": "different length as",
-  "form_array_question_visibility_logic_length_greater_than": "length >",
-  "form_array_question_visibility_logic_length_less_than": "length <",
-  "form_array_question_visibility_logic_length_greater_than_or_equal": "length >=",
-  "form_array_question_visibility_logic_length_less_than_or_equal": "length <=",
   "form_array_question_visibility_logic_not": "NOT",
   "form_array_question_visibility_logic_always_true": "always true",
   "form_array_question_visibility_logic_preview_description": "Show this question if the following conditions are met:",
@@ -527,11 +483,6 @@
   "form_field_study_description_tooltip": "Give a short summary of your study to participants",
   "form_field_study_description_hint": "Give a short summary of your study to participants",
   "form_field_study_description_required": "The study description must not be empty",
-  "form_field_study_tags": "Tags",
-  "form_field_study_tags_hint": "Write down a tag and press the Enter key",
-  "form_field_study_tags_tooltip": "Add tags to your study to make it easier to find for other researchers and clinicians",
-  "form_field_study_tags_error_length": "You can only add up to {count} tags to your study",
-  "form_field_study_tags_helper": "Select up to {count} tags from the list or add your own.",
   "form_field_study_icon_required": "You must select an icon for your study",
   "form_section_publisher": "Publisher and Contact Information",
   "form_section_publisher_description": "Participants will be able to contact you via the StudyU App using this information. Other clinicians or researchers will only be able to contact you if you agree to publish your study to the study registry.",
@@ -748,7 +699,6 @@
   "form_field_report_linearRegression_alpha_title": "Alpha Confidence",
   "form_field_report_linearRegression_alpha_tooltip": "Define the alpha confidence",
   "form_field_report_linearRegression_alpha_hint": "Enter a numerical value",
-  "form_field_report_alphaConfidence_required": "An alpha confidence value needs to be defined",
   "form_field_report_alphaConfidence_number": "The alpha confidence value must be a numeric value",
   "form_field_report_data_source_title": "Data Source",
   "form_field_report_data_source_tooltip": "The data source defines which observation the report section is based on. The observation needs to be a question with a numerical result, e.g. a scale question.",
@@ -857,7 +807,6 @@
   "action_button_code_new": "New code",
   "@__________________STUDYPAGE_MONITOR__________________": {},
   "participant_details_title": "Participant details",
-  "participant_details_study_days_overview": "Study days overview",
   "participant_details_study_days_description": "This section provides an overview of the participant's progress in the study. The color coding indicates the status of the participant's tasks on each day. Hover over each day to see more details about the participant's activity.",
   "participant_details_color_legend_title": "Legend",
   "participant_details_color_tooltip_legend_title": "Activity Detail Legend",
@@ -973,7 +922,6 @@
   "action_pin": "Pin",
   "action_unpin": "Remove pin",
   "action_delete": "Delete",
-  "action_delete_invite_code": "Delete invite code",
   "action_delete_code": "Delete code",
   "action_remove": "Remove",
   "action_duplicate": "Duplicate",
@@ -1017,8 +965,6 @@
   "fitbit_credentials_step6": "6. Submit the form to get your \"Client ID\" and \"Client Secret\".",
   "fitbit_credentials_step7": "7. Please fill the following form to obtain access for intraday data. Without this, you cannot obtain any data from Fitbit for your trials.",
   "fitbit_credentials_step8": "8. Copy and paste the credentials below.",
-  "fitbit_credentials_success_instruction": "Once you enter the credentials, Fitbit integration will be enabled for your study.",
-  "fitbit_credentials_add_question_instruction": "To add a Fitbit question, navigate to the measurements section and create a new Fitbit Question within a measurement.",
   "fitbit_credentials_screenshot_step1": "Step 1: Developer Portal",
   "fitbit_credentials_screenshot_step2": "Step 2: Login",
   "fitbit_credentials_screenshot_step3": "Step 3: Register App",
@@ -1026,25 +972,12 @@
   "fitbit_credentials_screenshot_step5": "Step 5: Set Access",
   "fitbit_credentials_screenshot_step6": "Step 6: Get Credentials",
   "fitbit_credentials_screenshot_step7": "Step 7: Fill Form",
-  "fitbit_credentials_cannot_change_title": "Fitbit credentials can't be changed",
-  "fitbit_credentials_cannot_change_description": "Fitbit credentials can't be changed while the study is not in draft mode.",
   "fitbit_only_participant_title": "If you're running this study just for yourself",
   "fitbit_only_participant_subtitle": "Since you're both creating and participating in this study, you don't need to fill out the intraday data request form. Simply follow these easy steps:",
-  "fitbit_only_participant_description": "If you're running this study just for yourself, you must use your own Fitbit account's Client ID and Client Secret on the previous page.",
-  "fitbit_multiple_participant_title": "If you're running this study for multiple participants",
-  "fitbit_multiple_participant_description": "Each participant must log in with their own Fitbit account in the StudyU app. The data will be collected separately for each participant.",
   "study_import_title": "Import Study",
   "study_import_description": "Import a study definition from a JSON file. This will create a new draft study.",
   "study_import_button": "Import Study from JSON",
   "study_import_success": "Study imported successfully",
-  "study_import_error": "Failed to import study: {error}",
-  "@study_import_error": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "fitbit_only_participant_step_1": "When creating your Fitbit app, choose 'Personal' as the app type.",
   "fitbit_only_participant_step_2": "When syncing data, make sure to use the same Google account that's connected to your Fitbit watch and the Fitbit app you've set up.",
   "client_id": "Client ID",
@@ -1058,7 +991,6 @@
   "fitbit_client_secret_required": "Client secret is required",
   "fitbit_question_type_required": "At least one Fitbit type must be selected.",
   "screenshots_for_guidance": "Screenshots for Guidance:",
-  "fitbit_credentials_not_set": "Fitbit credentials are not set. Please navigate to the 'Fitbit' tab in the study designer to enter your Fitbit client ID and client secret. Once completed, return here to add Fitbit questions.",
   "fitbit_question_type_heartrate_description": "Captures heart rate measured every minute throughout the day.",
   "fitbit_question_type_steps_description": "Records the number of steps taken, measured every minute.",
   "fitbit_question_type_sleep_description": "Records sleep stages (wake, light, deep, REM) at 30-second to 1-minute intervals during your sleep.",
@@ -1090,31 +1022,6 @@
   "filter_save_as_new": "Save as new",
   "filter_delete_preset": "Delete preset",
   "filter_reset_all": "Clear all",
-  "code_list_filter_title": "Filter invite codes",
-  "code_list_filter_enrolled_status": "Enrolled status",
-  "code_list_filter_enrolled_min": "Enrolled min",
-  "code_list_filter_enrolled_max": "Enrolled max",
-  "code_list_filter_intervention_assignment": "Intervention assignment",
-  "code_list_filter_apply": "Apply",
-  "code_list_filter_option_all": "All",
-  "code_list_filter_option_unused": "Unused",
-  "code_list_filter_option_used": "Used",
-  "code_list_filter_button_active": "Filter ({count})",
-  "@code_list_filter_button_active": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "filter_show_studies": "Show {count} Studies",
-  "@filter_show_studies": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "filter_dialog_save_title": "Save Filter Preset",
   "filter_dialog_preset_name_hint": "Preset Name",
   "filter_category_basic": "Basic Info",
@@ -1172,14 +1079,6 @@
   "code_list_no_results_description": "Try changing your search to see more invite codes.",
   "code_list_search_hint": "Search invite codes",
   "code_list_search_hint_compact": "Search codes",
-  "code_list_active_count": "{count} active invite codes",
-  "@code_list_active_count": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "code_list_total_count": "{count, plural, =1{1 invite} other{{count} invites}}",
   "@code_list_total_count": {
     "placeholders": {
@@ -1188,16 +1087,7 @@
       }
     }
   },
-  "code_list_page_size": "Rows",
   "code_list_rows_per_page": "Rows per page:",
-  "code_list_page": "Page {page}",
-  "@code_list_page": {
-    "placeholders": {
-      "page": {
-        "type": "int"
-      }
-    }
-  },
   "code_list_page_range": "{start}–{end} of {count}",
   "@code_list_page_range": {
     "placeholders": {
@@ -1212,24 +1102,10 @@
       }
     }
   },
-  "code_list_page_loading": "Loading {start}–{end}...",
-  "@code_list_page_loading": {
-    "placeholders": {
-      "start": {
-        "type": "int"
-      },
-      "end": {
-        "type": "int"
-      }
-    }
-  },
   "code_list_page_fetch_error": "Couldn’t load the next page. Check your connection and try again.",
   "code_list_retry": "Retry",
-  "code_list_previous_page": "Previous page",
-  "code_list_next_page": "Next page",
   "action_regenerate_invite_code": "Regenerate invite code",
   "dialog_qr_code_description": "Share the link or QR code with participants so they can access this study. When participants open the link or scan the QR code with their phone, the StudyU App opens and adds them to the study.",
-  "all_studies": "All Studies",
   "studies_filter_add_filter": "Add filter",
   "studies_filter_remove_filter": "Remove filter",
   "studies_end_of_list_create": "Create a study.",

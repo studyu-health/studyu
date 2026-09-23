@@ -73,6 +73,10 @@ melos:
       packageFilters:
         dirExists: test
 
+    l10n:unused:
+      run: fvm dart scripts/check_unused_l10n.dart
+      description: Report unused l10n keys in the app and designer_v2 ARB files
+
     generate:
       run: |
         rtk_prefix=""
