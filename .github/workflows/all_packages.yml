@@ -7,6 +7,7 @@ on:
       - "core/**"
       - "designer_v2/**"
       - "flutter_common/**"
+      - "scripts/**"
       - '*.gitignore'
       - 'pubspec.yaml'
       - 'pubspec.lock'
