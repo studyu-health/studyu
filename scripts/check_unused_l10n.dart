@@ -31,22 +31,25 @@ String get _repoRoot => File(Platform.script.toFilePath()).parent.parent.path;
 /// Every `.<identifier>` occurring in a non-generated Dart file under
 /// [packageDir]. Generated `app_localizations*.dart` files are skipped
 /// because they declare every key and would mark all of them as used.
-Set<String> _accessedMembers(Directory packageDir) {
+({Set<String> members, int files}) _accessedMembers(Directory packageDir) {
   final members = <String>{};
+  var files = 0;
   for (final entity in packageDir.listSync(recursive: true)) {
     if (entity is! File) continue;
     final name = entity.uri.pathSegments.last;
     if (!name.endsWith('.dart')) continue;
     if (name.startsWith('app_localizations')) continue;
+    files++;
     for (final match in _memberAccess.allMatches(entity.readAsStringSync())) {
       members.add(match.group(1)!);
     }
   }
-  return members;
+  return (members: members, files: files);
 }
 
 void main() {
   final root = _repoRoot;
+  final stopwatch = Stopwatch()..start();
   final unused = <String>[];
   for (final (arbPath, libPath) in _targets) {
     final arbFile = File('$root/$arbPath');
@@ -61,19 +64,22 @@ void main() {
     }
     final package = libPath;
     final arb = jsonDecode(arbFile.readAsStringSync()) as Map<String, dynamic>;
-    final members = _accessedMembers(libDir);
-    for (final key in arb.keys) {
-      if (key.startsWith('@')) continue;
-      if (!members.contains(key)) unused.add('$package/$key');
+    final keys = arb.keys.where((key) => !key.startsWith('@')).toList();
+    final scanned = _accessedMembers(libDir);
+    print('$package: ${keys.length} l10n keys in ${scanned.files} dart files');
+    for (final key in keys) {
+      if (!scanned.members.contains(key)) unused.add('$package/$key');
     }
   }
+  final elapsed = stopwatch.elapsedMilliseconds;
   if (unused.isEmpty) {
-    print('No unused l10n keys.');
+    print('No unused l10n keys. ($elapsed ms)');
     return;
   }
   unused.sort();
   for (final hit in unused) {
     print('unused l10n key: $hit');
   }
+  print('${unused.length} unused l10n keys found. ($elapsed ms)');
   exit(1);
 }
