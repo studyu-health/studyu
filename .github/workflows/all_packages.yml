@@ -11,6 +11,7 @@ on:
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - ".github/workflows/all_packages.yml"
+      - "scripts/check_arb_completeness.dart"
       - ".github/workflows/init-workspace/**"
   workflow_dispatch:
 
