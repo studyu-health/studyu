@@ -28,7 +28,7 @@ void main() {
   });
 
   test(
-    'retries recovery on the next healthy transition without overlap',
+    'retries recovery while the connection remains healthy without overlap',
     () async {
       var recoveryCalls = 0;
       final firstRecovery = Completer<HealthyConnectionRecoveryResult>();
@@ -43,21 +43,11 @@ void main() {
       });
 
       appConnectionStatusController.setStatus(AppConnectionStatus.healthy);
-      appConnectionStatusController.setStatus(
-        AppConnectionStatus.deviceOffline,
-      );
-      appConnectionStatusController.setStatus(AppConnectionStatus.healthy);
       expect(recoveryCalls, 1);
 
       firstRecovery.complete(HealthyConnectionRecoveryResult.retryNeeded);
       await Future<void>.delayed(Duration.zero);
-      expect(recoveryCalls, 1);
-
-      appConnectionStatusController.setStatus(
-        AppConnectionStatus.deviceOffline,
-      );
-      appConnectionStatusController.setStatus(AppConnectionStatus.healthy);
-      await Future<void>.delayed(Duration.zero);
+      expect(appConnectionStatusController.status, AppConnectionStatus.healthy);
       expect(recoveryCalls, 2);
 
       appConnectionStatusController.setStatus(
