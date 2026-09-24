@@ -520,5 +520,8 @@
   "system": "시스템",
   "time_format": "시간 형식",
   "time_format_12_hour": "12시간제 (오후 2:30)",
-  "time_format_24_hour": "24시간제 (14:30)"
+  "time_format_24_hour": "24시간제 (14:30)",
+  "questionnaire_review_title": "답변 검토",
+  "questionnaire_review_description": "이전 답변을 변경했습니다. 설문을 완료하기 전에 이후 답변을 검토하세요.",
+  "questionnaire_review_confirmation": "답변을 검토했습니다"
 }
