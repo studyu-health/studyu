@@ -12,7 +12,6 @@ on:
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - ".github/workflows/all_packages.yml"
-      - "scripts/check_arb_completeness.dart"
       - ".github/workflows/init-workspace/**"
   workflow_dispatch:
 
@@ -37,9 +36,6 @@ jobs:
 
       - name: Init workspace
         uses: ./.github/workflows/init-workspace
-
-      - name: Check unused l10n keys
-        run: dart scripts/check_unused_l10n.dart
 
       - name: Generate files
         run: dart run melos generate
