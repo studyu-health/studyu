@@ -5,7 +5,7 @@
 1. Install [FVM](https://fvm.app/documentation/getting-started/installation).
 2. Install Node.js ≥ 22.20 (for agent skills).
 3. Clone this repository and open its root directory.
-4. Run `./setup.sh` to install the pinned Flutter SDK, resolve Melos from the lockfile, dependencies, workspace links, and agent skills from `studyu-health/studyu-agent-marketplace`.
+4. Run `./setup.sh` to install the pinned Flutter SDK, resolve Melos from the lockfile, dependencies, workspace links, and agent setup from `studyu-health/studyu-agent-marketplace`. Setup installs the skills pinned in `skills-lock.json` and asks whether to write the StudyU MCP servers (`dart`, `sonarqube`) into the ignored `.mcp.json`.
 
 To edit skills, make changes in `studyu-health/studyu-agent-marketplace`. In this repository, run `npx skills update -p` and commit the updated `skills-lock.json`.
 
@@ -27,7 +27,7 @@ fvm flutter --version
 fvm dart --version
 ```
 
-`./setup.sh` reads `.fvmrc`, installs the pinned Flutter SDK, and creates the ignored `.fvm/flutter_sdk` link to the cached project SDK. It also installs Melos, bootstraps the workspace, fetches root dependencies, creates `.env.local` from `.env.local.example` when needed, and installs pinned agent skills when Node.js ≥ 22.20 is available. The root `pubspec.yaml` points Melos to the same SDK through `melos.sdkPath`; no manual `MELOS_SDK_PATH` export is required.
+`./setup.sh` reads `.fvmrc`, installs the pinned Flutter SDK, and creates the ignored `.fvm/flutter_sdk` link to the cached project SDK. It also installs Melos, bootstraps the workspace, fetches root dependencies, creates `.env.local` from `.env.local.example` when needed, and fetches `studyu-health/studyu-agent-marketplace`. It installs the skills pinned in `skills-lock.json` when Node.js ≥ 22.20 is available and asks whether to write the StudyU MCP servers (`dart`, `sonarqube`) into the ignored `.mcp.json`. The root `pubspec.yaml` points Melos to the same SDK through `melos.sdkPath`; no manual `MELOS_SDK_PATH` export is required.
 
 Use the project SDK for development commands:
 

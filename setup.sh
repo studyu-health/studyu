@@ -25,24 +25,14 @@ fvm dart pub get
 echo "Bootstrapping Melos packages via fvm dart run melos..."
 fvm dart run melos bootstrap
 
-# Install agent skills pinned in skills-lock.json (source: studyu-health/studyu-agent-marketplace).
-if command -v npx >/dev/null 2>&1; then
-  echo "Installing agent skills via npx skills..."
-  if ! DISABLE_TELEMETRY=1 npx --yes skills@1.7.0 experimental_install; then
-    echo "Warning: agent skills could not be installed. Check marketplace access and re-run ./setup.sh." >&2
-  elif [ ! -d .agents/skills ]; then
-    echo "Warning: marketplace installer returned without skills; check skills-lock.json and re-run ./setup.sh." >&2
-  fi
-  # Remove legacy per-skill links so Claude reads only the canonical directory.
-  if [ -d .claude/skills ] && [ ! -L .claude/skills ]; then
-    find .claude/skills -mindepth 1 -maxdepth 1 -type l -delete
-    rmdir .claude/skills 2>/dev/null || echo "Warning: .claude/skills contains files; move them and re-run ./setup.sh." >&2
-  fi
-  if [ ! -L .claude/skills ] && [ -e .agents/skills ]; then
-    ln -s ../.agents/skills .claude/skills
-  fi
+# Install agent skills and MCP config from studyu-health/studyu-agent-marketplace.
+marketplace_ref="${STUDYU_AGENT_MARKETPLACE_REF:-main}"
+marketplace_dir="${XDG_CACHE_HOME:-$HOME/.cache}/studyu-agent-marketplace"
+rm -rf "$marketplace_dir"
+if git clone --quiet --depth 1 --branch "$marketplace_ref" https://github.com/studyu-health/studyu-agent-marketplace.git "$marketplace_dir"; then
+  bash "$marketplace_dir/bin/install.sh" all "$PWD" || echo "Warning: agent setup failed; re-run ./setup.sh." >&2
 else
-  echo "Warning: npx not found; agent skills not installed. Install Node >= 22.20 and re-run ./setup.sh." >&2
+  echo "Warning: could not fetch the agent marketplace; agent skills and MCP servers not installed. Re-run ./setup.sh." >&2
 fi
 
 echo "Setup complete!"
