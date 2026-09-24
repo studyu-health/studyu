@@ -12,6 +12,8 @@ import 'package:url_launcher/url_launcher.dart';
 enum AppErrorReason() {
   loading,
   deletedStudy,
+  cacheUnavailableMissing,
+  cacheUnavailableCorrupt,
 }
 
 class const AppErrorScreenArguments({
@@ -41,11 +43,13 @@ class _AppErrorScreenState() extends State<AppErrorScreen> {
   Future<void> _loadCachedUserData() async {
     try {
       final data = await Cache.getCachedUserData();
+      if (!mounted) return;
       setState(() {
         cachedUserData = data;
         isLoadingData = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         cachedUserData = 'Error loading cached data: $e';
         isLoadingData = false;
@@ -75,6 +79,10 @@ class _AppErrorScreenState() extends State<AppErrorScreen> {
                     AppErrorReason.loading => loc.loading_error_title,
                     AppErrorReason.deletedStudy =>
                       loc.deleted_study_error_title,
+                    AppErrorReason.cacheUnavailableMissing =>
+                      loc.cache_missing_error_title,
+                    AppErrorReason.cacheUnavailableCorrupt =>
+                      loc.cache_corrupt_error_title,
                   },
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium,
@@ -85,6 +93,10 @@ class _AppErrorScreenState() extends State<AppErrorScreen> {
                     AppErrorReason.loading => loc.loading_error_description,
                     AppErrorReason.deletedStudy =>
                       loc.deleted_study_error_description,
+                    AppErrorReason.cacheUnavailableMissing =>
+                      loc.cache_missing_error_description,
+                    AppErrorReason.cacheUnavailableCorrupt =>
+                      loc.cache_corrupt_error_description,
                   },
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16),
@@ -179,6 +191,10 @@ class _AppErrorScreenState() extends State<AppErrorScreen> {
     final emailSubject = switch (widget.reason) {
       AppErrorReason.loading => loc.support_email_subject_loading_error,
       AppErrorReason.deletedStudy => loc.support_email_subject_deleted_study,
+      AppErrorReason.cacheUnavailableMissing =>
+        loc.support_email_subject_cache_missing,
+      AppErrorReason.cacheUnavailableCorrupt =>
+        loc.support_email_subject_cache_corrupt,
     };
 
     // Get the base email body from localization
@@ -189,6 +205,10 @@ class _AppErrorScreenState() extends State<AppErrorScreen> {
       AppErrorReason.deletedStudy => loc.deleted_study_support_email_body(
         widget.selectedSubjectId ?? '',
       ),
+      AppErrorReason.cacheUnavailableMissing =>
+        loc.cache_missing_support_email_body(widget.selectedSubjectId ?? ''),
+      AppErrorReason.cacheUnavailableCorrupt =>
+        loc.cache_corrupt_support_email_body(widget.selectedSubjectId ?? ''),
     };
 
     // Append cached user data to the email body

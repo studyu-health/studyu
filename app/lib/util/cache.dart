@@ -171,7 +171,12 @@ class Cache() {
           );
         }
       }
+      appConnectionStatusController.setStatus(AppConnectionStatus.healthy);
     } catch (exception) {
+      final status = connectionStatusFromError(exception);
+      if (status != null) {
+        appConnectionStatusController.setStatus(status);
+      }
       StudyULogger.warning(exception);
     }
     isSynchronizing = false;

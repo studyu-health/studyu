@@ -3,6 +3,7 @@ import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/notifications.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 /// Phases of the normal (non-preview) study enrollment flow, in guarded
 /// progression order.
@@ -73,9 +74,13 @@ class AppState() with ChangeNotifier {
 
   String? pendingDeepLinkStudyId;
   String? pendingDeepLinkInviteCode;
+  late final VoidCallback _connectionStatusListener;
+  AppConnectionStatus _connectionStatus = appConnectionStatusController.status;
 
   bool get hasPendingDeepLink =>
       pendingDeepLinkStudyId != null || pendingDeepLinkInviteCode != null;
+
+  AppConnectionStatus get connectionStatus => _connectionStatus;
 
   bool get showParticipantRecovery => !isPreview;
 
@@ -119,6 +124,13 @@ class AppState() with ChangeNotifier {
   /// mixing results from test users with actual participants)
   bool get trackParticipantProgress => !(isPreview && selectedStudy!.isRunning);
 
+  this {
+    _connectionStatusListener = () {
+      _applyConnectionStatus(appConnectionStatusController.status);
+    };
+    appConnectionStatusController.addListener(_connectionStatusListener);
+  }
+
   void init(BuildContext context) {
     scheduleNotifications(context);
     initCache();
@@ -148,5 +160,21 @@ class AppState() with ChangeNotifier {
     isPreview = preview;
     selectedStudy = activeSubject?.study;
     notifyListeners();
+  }
+
+  void setConnectionStatus(AppConnectionStatus status) {
+    appConnectionStatusController.setStatus(status);
+  }
+
+  void _applyConnectionStatus(AppConnectionStatus status) {
+    if (_connectionStatus == status) return;
+    _connectionStatus = status;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    appConnectionStatusController.removeListener(_connectionStatusListener);
+    super.dispose();
   }
 }

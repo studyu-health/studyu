@@ -1,3 +1,4 @@
+export 'src/utils/connection_status.dart';
 export 'src/utils/date_time_format.dart';
 export 'src/utils/env_loader.dart';
 export 'src/utils/localization.dart';

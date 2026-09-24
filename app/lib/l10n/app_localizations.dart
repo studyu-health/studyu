@@ -2545,6 +2545,30 @@ abstract class AppLocalizations {
   /// **'This study is no longer available from the server. Your data remains on this device for now. Please contact your study supervisor or support before deleting anything. Only use \'Delete all data\' if they tell you to reset the app.'**
   String get deleted_study_error_description;
 
+  /// No description provided for @cache_missing_error_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached study data not found'**
+  String get cache_missing_error_title;
+
+  /// No description provided for @cache_missing_error_description.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyU could not find cached study data on this device while the service is unavailable. Please reconnect and try again later, or contact your study supervisor or support before deleting any data.'**
+  String get cache_missing_error_description;
+
+  /// No description provided for @cache_corrupt_error_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached study data could not be read'**
+  String get cache_corrupt_error_title;
+
+  /// No description provided for @cache_corrupt_error_description.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyU found local study data, but it could not be restored safely while the service is unavailable. Please contact your study supervisor or support before deleting any data.'**
+  String get cache_corrupt_error_description;
+
   /// No description provided for @dashboard_showcase_progress_title.
   ///
   /// In en, this message translates to:
@@ -2635,11 +2659,35 @@ abstract class AppLocalizations {
   /// **'StudyU Support Request - Study Unavailable'**
   String get support_email_subject_deleted_study;
 
+  /// No description provided for @support_email_subject_cache_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyU Support Request - Cached Study Data Missing'**
+  String get support_email_subject_cache_missing;
+
+  /// No description provided for @support_email_subject_cache_corrupt.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyU Support Request - Cached Study Data Corrupt'**
+  String get support_email_subject_cache_corrupt;
+
   /// Body of the support email for deleted study errors, includes the Subject ID
   ///
   /// In en, this message translates to:
   /// **'Hello,\n\nThe StudyU app says that my study is no longer available from the server. My subject ID is: {subjectId}\n\nPlease let me know whether I should keep my local data or reset the app.\n\nThank you.'**
   String deleted_study_support_email_body(String subjectId);
+
+  /// Body of the support email for missing cached study data, includes the Subject ID
+  ///
+  /// In en, this message translates to:
+  /// **'Hello,\n\nThe StudyU app could not find cached study data on my device while the service was unavailable. My subject ID is: {subjectId}\n\nPlease let me know how I should recover access safely.\n\nThank you.'**
+  String cache_missing_support_email_body(String subjectId);
+
+  /// Body of the support email for corrupt cached study data, includes the Subject ID
+  ///
+  /// In en, this message translates to:
+  /// **'Hello,\n\nThe StudyU app found cached study data on my device, but it could not restore it safely while the service was unavailable. My subject ID is: {subjectId}\n\nPlease let me know how I should recover access safely.\n\nThank you.'**
+  String cache_corrupt_support_email_body(String subjectId);
 
   /// No description provided for @dashboard_tour.
   ///
@@ -2730,6 +2778,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No internet connection. Please try again when online.'**
   String get no_internet_connection;
+
+  /// No description provided for @connection_banner_device_offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Cached study data is in use and changes will sync when you are online again.'**
+  String get connection_banner_device_offline;
+
+  /// No description provided for @connection_banner_backend_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyU service is currently unavailable. Cached study data remains available and changes will sync later.'**
+  String get connection_banner_backend_unavailable;
 
   /// No description provided for @error_occurred_with_message.
   ///

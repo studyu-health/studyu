@@ -520,5 +520,15 @@
   "system": "시스템",
   "time_format": "시간 형식",
   "time_format_12_hour": "12시간제 (오후 2:30)",
-  "time_format_24_hour": "24시간제 (14:30)"
+  "time_format_24_hour": "24시간제 (14:30)",
+  "cache_missing_error_title": "Cached study data not found",
+  "cache_missing_error_description": "StudyU could not find cached study data on this device while the service is unavailable. Please reconnect and try again later, or contact your study supervisor or support before deleting any data.",
+  "cache_corrupt_error_title": "Cached study data could not be read",
+  "cache_corrupt_error_description": "StudyU found local study data, but it could not be restored safely while the service is unavailable. Please contact your study supervisor or support before deleting any data.",
+  "support_email_subject_cache_missing": "StudyU Support Request - Cached Study Data Missing",
+  "support_email_subject_cache_corrupt": "StudyU Support Request - Cached Study Data Corrupt",
+  "cache_missing_support_email_body": "Hello,\n\nThe StudyU app could not find cached study data on my device while the service was unavailable. My subject ID is: {subjectId}\n\nPlease let me know how I should recover access safely.\n\nThank you.",
+  "cache_corrupt_support_email_body": "Hello,\n\nThe StudyU app found cached study data on my device, but it could not restore it safely while the service was unavailable. My subject ID is: {subjectId}\n\nPlease let me know how I should recover access safely.\n\nThank you.",
+  "connection_banner_device_offline": "You are offline. Cached study data is in use and changes will sync when you are online again.",
+  "connection_banner_backend_unavailable": "StudyU service is currently unavailable. Cached study data remains available and changes will sync later."
 }

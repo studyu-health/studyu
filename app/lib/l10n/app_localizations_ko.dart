@@ -1304,6 +1304,20 @@ class AppLocalizationsKo extends AppLocalizations {
       '이 연구는 더 이상 서버에서 사용할 수 없습니다. 현재 데이터는 이 기기에 남아 있습니다. 삭제하기 전에 연구 책임자나 지원팀에 문의하세요. \'모든 데이터 삭제\'는 그들이 앱을 재설정하라고 지시할 때만 사용하세요.';
 
   @override
+  String get cache_missing_error_title => 'Cached study data not found';
+
+  @override
+  String get cache_missing_error_description =>
+      'StudyU could not find cached study data on this device while the service is unavailable. Please reconnect and try again later, or contact your study supervisor or support before deleting any data.';
+
+  @override
+  String get cache_corrupt_error_title => 'Cached study data could not be read';
+
+  @override
+  String get cache_corrupt_error_description =>
+      'StudyU found local study data, but it could not be restored safely while the service is unavailable. Please contact your study supervisor or support before deleting any data.';
+
+  @override
   String get dashboard_showcase_progress_title => '연구 진행 상황';
 
   @override
@@ -1354,8 +1368,26 @@ class AppLocalizationsKo extends AppLocalizations {
   String get support_email_subject_deleted_study => 'StudyU 지원 요청 - 연구 이용 불가';
 
   @override
+  String get support_email_subject_cache_missing =>
+      'StudyU Support Request - Cached Study Data Missing';
+
+  @override
+  String get support_email_subject_cache_corrupt =>
+      'StudyU Support Request - Cached Study Data Corrupt';
+
+  @override
   String deleted_study_support_email_body(String subjectId) {
     return '안녕하세요,\n\nStudyU 앱에서 제 연구가 더 이상 서버에서 사용할 수 없다고 나옵니다. 제 참여자 ID는: $subjectId 입니다.\n\n로컬 데이터를 유지해야 하는지 아니면 앱을 재설정해야 하는지 알려주세요.\n\n감사합니다.';
+  }
+
+  @override
+  String cache_missing_support_email_body(String subjectId) {
+    return 'Hello,\n\nThe StudyU app could not find cached study data on my device while the service was unavailable. My subject ID is: $subjectId\n\nPlease let me know how I should recover access safely.\n\nThank you.';
+  }
+
+  @override
+  String cache_corrupt_support_email_body(String subjectId) {
+    return 'Hello,\n\nThe StudyU app found cached study data on my device, but it could not restore it safely while the service was unavailable. My subject ID is: $subjectId\n\nPlease let me know how I should recover access safely.\n\nThank you.';
   }
 
   @override
@@ -1404,6 +1436,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get no_internet_connection => '인터넷에 연결되어 있지 않습니다. 온라인 상태에서 다시 시도하십시오.';
+
+  @override
+  String get connection_banner_device_offline =>
+      'You are offline. Cached study data is in use and changes will sync when you are online again.';
+
+  @override
+  String get connection_banner_backend_unavailable =>
+      'StudyU service is currently unavailable. Cached study data remains available and changes will sync later.';
 
   @override
   String error_occurred_with_message(String message) {

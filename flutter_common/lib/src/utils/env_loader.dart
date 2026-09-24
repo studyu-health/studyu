@@ -3,10 +3,18 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:studyu_core/env.dart' as env;
+import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 import 'package:studyu_flutter_common/src/utils/storage.dart';
+import 'package:studyu_flutter_common/src/utils/user.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const envsAssetPath = 'packages/studyu_flutter_common/lib/envs';
+
+typedef SupabaseStartupConfig = ({
+  String url,
+  AppConnectionStatus status,
+  bool suppressPersistedSessionRecovery,
+});
 
 // load env from envs/.env or from the filename specified in the STUDYU_ENV runtime-variable
 String envFilePath() {
@@ -63,20 +71,30 @@ Future<void> loadEnv() async {
   // await SecureStorage.migrateSharedPreferencesToSecureStorage();
 
   // Test if supabaseUrls has multiple entries and try them in order until one works
-  final workingSupabaseUrl = await findWorkingSupabaseUrl(
+  final startupConfig = await findWorkingSupabaseUrl(
     supabaseUrls,
     supabaseAnonKey!,
   );
+  SupabaseStorage.suppressPersistedSessionRecovery =
+      startupConfig.suppressPersistedSessionRecovery;
 
   await Supabase.initialize(
-    url: workingSupabaseUrl,
+    url: startupConfig.url,
     publishableKey: supabaseAnonKey,
     authOptions: FlutterAuthClientOptions(localStorage: SupabaseStorage()),
     debug: true,
   );
+  SupabaseStorage.suppressPersistedSessionRecovery = false;
+
+  if (startupConfig.suppressPersistedSessionRecovery) {
+    appConnectionStatusController.scheduleHealthyConnectionRecovery(
+      recoverSessionAfterDegradedStartup,
+    );
+  }
+  appConnectionStatusController.syncAuthAutoRefresh();
 
   env.setEnv(
-    workingSupabaseUrl,
+    startupConfig.url,
     supabaseAnonKey,
     envAppUrl: envAppUrl,
     envDesignerUrl: envDesignerUrl,
@@ -126,10 +144,11 @@ List<String> loadSupabaseUrls() {
   return urls;
 }
 
-Future<String> findWorkingSupabaseUrl(
+Future<SupabaseStartupConfig> findWorkingSupabaseUrl(
   List<String> supabaseUrls,
   String supabaseAnonKey,
 ) async {
+  AppConnectionStatus detectedStatus = AppConnectionStatus.backendUnavailable;
   for (final url in supabaseUrls) {
     final client = SupabaseClient(url, supabaseAnonKey);
     try {
@@ -145,11 +164,25 @@ Future<String> findWorkingSupabaseUrl(
                 throw TimeoutException('Connection timeout after 5 seconds'),
           );
       debugPrint("✅ Connected to Supabase at $url");
-      return url;
+      appConnectionStatusController.setStatus(AppConnectionStatus.healthy);
+      return (
+        url: url,
+        status: AppConnectionStatus.healthy,
+        suppressPersistedSessionRecovery: false,
+      );
     } catch (e) {
+      detectedStatus = connectionStatusFromError(e) ?? detectedStatus;
       debugPrint("⚠️ Failed to connect to $url: $e");
     }
   }
 
-  throw Exception("No Supabase URL worked!");
+  appConnectionStatusController.setStatus(detectedStatus);
+  debugPrint(
+    "⚠️ No Supabase URL responded. Initializing with ${supabaseUrls.first} for offline use.",
+  );
+  return (
+    url: supabaseUrls.first,
+    status: detectedStatus,
+    suppressPersistedSessionRecovery: true,
+  );
 }

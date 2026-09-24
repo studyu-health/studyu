@@ -109,6 +109,7 @@ class _StudySelectionScreenState() extends State<StudySelectionScreen> {
             constraints: const BoxConstraints(maxWidth: 700),
             child: RetryFutureBuilder<ExtractionResult<Study>>(
               tryFunction: () => publishedStudies,
+              trackConnectionStatus: true,
               successBuilder:
                   (
                     BuildContext context,

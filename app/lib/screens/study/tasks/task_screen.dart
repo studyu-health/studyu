@@ -7,6 +7,7 @@ import 'package:studyu_app/screens/study/tasks/observation/questionnaire_task_wi
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 class const TaskScreen({required final TaskInstance taskInstance, super.key})
     extends StatefulWidget {
@@ -81,6 +82,7 @@ Future<void> handleTaskCompletion(
   try {
     if (state.trackParticipantProgress) {
       await completionCallback(activeSubject);
+      state.setConnectionStatus(AppConnectionStatus.healthy);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -92,6 +94,10 @@ Future<void> handleTaskCompletion(
       );
     }
   } catch (exception) {
+    final status = connectionStatusFromError(exception);
+    if (status != null) {
+      state.setConnectionStatus(status);
+    }
     debugPrint("Could not save results: $exception");
     try {
       await Cache.storeSubject(activeSubject);

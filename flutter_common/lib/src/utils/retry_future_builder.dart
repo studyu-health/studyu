@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 import 'package:flutter/material.dart';
+import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 
 typedef CustomErrorWidgetBuilder = Widget Function(
   BuildContext context,
@@ -44,6 +45,7 @@ class const RetryFutureBuilder<T>({
   /// return [null] to revert to default behavior
   final CustomErrorWidgetBuilder? errorWidgetBuilder,
   final List<Widget> extraWidgets = const [],
+  final bool trackConnectionStatus = false,
 }) extends StatefulWidget {
   static RetryFutureBuilderState? of(BuildContext context) =>
       context.findAncestorStateOfType<RetryFutureBuilderState>();
@@ -86,6 +88,7 @@ class RetryFutureBuilderState<T>() extends State<RetryFutureBuilder<T>> {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
             if (snapshot.hasError) {
+              _syncConnectionStatus(snapshot.error);
               if (widget.errorWidgetBuilder != null) {
                 return widget.errorWidgetBuilder!(
                   context,
@@ -95,6 +98,7 @@ class RetryFutureBuilderState<T>() extends State<RetryFutureBuilder<T>> {
               }
               return buildErrorView(context, snapshot.error);
             }
+            _syncConnectionStatus(null);
             return widget.successBuilder(context, snapshot.data);
           default:
             return widget.loadingBuilder != null
@@ -112,8 +116,7 @@ class RetryFutureBuilderState<T>() extends State<RetryFutureBuilder<T>> {
       child: Center(
         child: Column(
           children: [
-            // todo translate
-            const Text('Could not load information. Device might be offline.'),
+            const Text('Could not load information.'),
             //const SizedBox(height: 16),
             //Text(error.toString()),
             const SizedBox(height: 16),
@@ -131,5 +134,18 @@ class RetryFutureBuilderState<T>() extends State<RetryFutureBuilder<T>> {
         ),
       ),
     );
+  }
+
+  void _syncConnectionStatus(Object? error) {
+    if (!widget.trackConnectionStatus) return;
+
+    final status = error == null
+        ? AppConnectionStatus.healthy
+        : connectionStatusFromError(error);
+    if (status == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appConnectionStatusController.setStatus(status);
+    });
   }
 }

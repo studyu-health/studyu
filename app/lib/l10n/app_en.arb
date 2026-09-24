@@ -506,6 +506,10 @@
   "download_app_join": "Download the StudyU App & Join",
   "deleted_study_error_title": "Study unavailable",
   "deleted_study_error_description": "This study is no longer available from the server. Your data remains on this device for now. Please contact your study supervisor or support before deleting anything. Only use 'Delete all data' if they tell you to reset the app.",
+  "cache_missing_error_title": "Cached study data not found",
+  "cache_missing_error_description": "StudyU could not find cached study data on this device while the service is unavailable. Please reconnect and try again later, or contact your study supervisor or support before deleting any data.",
+  "cache_corrupt_error_title": "Cached study data could not be read",
+  "cache_corrupt_error_description": "StudyU found local study data, but it could not be restored safely while the service is unavailable. Please contact your study supervisor or support before deleting any data.",
   "dashboard_showcase_progress_title": "Study progress",
   "dashboard_showcase_progress_description": "This shows where you are in the study and how much is left.",
   "dashboard_showcase_current_intervention_title": "Current intervention",
@@ -521,9 +525,29 @@
   "dashboard_showcase_finish": "Finish",
   "support_email_subject_loading_error": "StudyU Support Request - Loading Error",
   "support_email_subject_deleted_study": "StudyU Support Request - Study Unavailable",
+  "support_email_subject_cache_missing": "StudyU Support Request - Cached Study Data Missing",
+  "support_email_subject_cache_corrupt": "StudyU Support Request - Cached Study Data Corrupt",
   "deleted_study_support_email_body": "Hello,\n\nThe StudyU app says that my study is no longer available from the server. My subject ID is: {subjectId}\n\nPlease let me know whether I should keep my local data or reset the app.\n\nThank you.",
   "@deleted_study_support_email_body": {
     "description": "Body of the support email for deleted study errors, includes the Subject ID",
+    "placeholders": {
+      "subjectId": {
+        "type": "String"
+      }
+    }
+  },
+  "cache_missing_support_email_body": "Hello,\n\nThe StudyU app could not find cached study data on my device while the service was unavailable. My subject ID is: {subjectId}\n\nPlease let me know how I should recover access safely.\n\nThank you.",
+  "@cache_missing_support_email_body": {
+    "description": "Body of the support email for missing cached study data, includes the Subject ID",
+    "placeholders": {
+      "subjectId": {
+        "type": "String"
+      }
+    }
+  },
+  "cache_corrupt_support_email_body": "Hello,\n\nThe StudyU app found cached study data on my device, but it could not restore it safely while the service was unavailable. My subject ID is: {subjectId}\n\nPlease let me know how I should recover access safely.\n\nThank you.",
+  "@cache_corrupt_support_email_body": {
+    "description": "Body of the support email for corrupt cached study data, includes the Subject ID",
     "placeholders": {
       "subjectId": {
         "type": "String"
@@ -545,6 +569,8 @@
   "review_restored_answer_to_continue": "Review the restored answer to continue.",
   "complete_task": "Complete task",
   "no_internet_connection": "No internet connection. Please try again when online.",
+  "connection_banner_device_offline": "You are offline. Cached study data is in use and changes will sync when you are online again.",
+  "connection_banner_backend_unavailable": "StudyU service is currently unavailable. Cached study data remains available and changes will sync later.",
   "error_occurred_with_message": "An error occurred: {message}",
   "@error_occurred_with_message": {
     "placeholders": {

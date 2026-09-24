@@ -8,6 +8,7 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/theme.dart';
 import 'package:studyu_app/util/date_time_preferences.dart';
 import 'package:studyu_app/util/debug_mode.dart';
+import 'package:studyu_app/widgets/app_connection_status_banner.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
@@ -52,6 +53,9 @@ class _MyAppState() extends State<MyApp> {
             title: 'StudyU',
             theme: theme,
             routerConfig: _router,
+            builder: (context, child) => AppConnectionStatusBannerHost(
+              child: child ?? const SizedBox.shrink(),
+            ),
             // `isDebugMode` can be false through `--dart-define`.
             // ignore: avoid_redundant_argument_values
             debugShowCheckedModeBanner: isDebugMode,
