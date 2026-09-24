@@ -449,7 +449,6 @@
   "form_array_question_visibility_logic_always_true": "immer wahr",
   "form_array_question_visibility_logic_preview_description": "Zeige diese Frage nur an, wenn die folgenden Bedingungen erfüllt sind:",
   "form_array_question_visibility_logic_unknown_expression": "Unbekannter Ausdruck",
-  "form_array_question_visibility_logic_this_question": "diese Frage",
   "form_mode_visibility_create": "Bedingung erstellen",
   "form_mode_visibility_edit": "Bedingung bearbeiten",
   "form_mode_visibility_readonly": "Bedingung anzeigen",

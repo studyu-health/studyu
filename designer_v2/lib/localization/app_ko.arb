@@ -267,7 +267,6 @@
   "form_array_question_visibility_logic_same_length_as": "동일한 길이",
   "form_array_question_visibility_logic_shorter_than": "보다 짧다",
   "form_array_question_visibility_logic_shorter_than_or_equal_to": "이하",
-  "form_array_question_visibility_logic_this_question": "이 질문",
   "form_array_question_visibility_logic_title": "가시성 로직",
   "form_array_question_visibility_logic_tooltip": "조건은 연구의 다른 질문에 대한 응답을 기반으로 합니다. 현재 질문 다음에 나오는 질문만 가시성 로직에 사용할 수 있습니다.",
   "form_array_question_visibility_logic_true": "참",

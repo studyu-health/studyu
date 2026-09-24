@@ -2051,12 +2051,6 @@ abstract class AppLocalizations {
   /// **'Unknown Expression'**
   String get form_array_question_visibility_logic_unknown_expression;
 
-  /// No description provided for @form_array_question_visibility_logic_this_question.
-  ///
-  /// In en, this message translates to:
-  /// **'this question'**
-  String get form_array_question_visibility_logic_this_question;
-
   /// No description provided for @form_mode_visibility_create.
   ///
   /// In en, this message translates to:

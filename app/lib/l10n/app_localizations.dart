@@ -226,12 +226,6 @@ abstract class AppLocalizations {
   /// **'Made with ♥ in Potsdam'**
   String get made_with_love_in_potsdam;
 
-  /// No description provided for @welcome_find_study_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a public study or use an invitation.'**
-  String get welcome_find_study_description;
-
   /// No description provided for @browse_public_studies.
   ///
   /// In en, this message translates to:
@@ -585,12 +579,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred!'**
   String get error;
-
-  /// No description provided for @finished.
-  ///
-  /// In en, this message translates to:
-  /// **'Finished'**
-  String get finished;
 
   /// No description provided for @please_give_consent.
   ///
@@ -1179,24 +1167,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Observations'**
   String get performance_overview_observations;
-
-  /// No description provided for @report_outcome_inconclusive.
-  ///
-  /// In en, this message translates to:
-  /// **'The results are inconclusive. There does not seem to be a statistically significant difference between the interventions.'**
-  String get report_outcome_inconclusive;
-
-  /// No description provided for @report_outcome_neither.
-  ///
-  /// In en, this message translates to:
-  /// **'Both interventions seem to have a negative effect on the outcome for you.'**
-  String get report_outcome_neither;
-
-  /// No description provided for @report_outcome_one.
-  ///
-  /// In en, this message translates to:
-  /// **'The intervention {intervention} seems to improve the outcome for you.'**
-  String report_outcome_one(Object intervention);
 
   /// No description provided for @completed_study.
   ///

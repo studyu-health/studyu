@@ -83,9 +83,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get made_with_love_in_potsdam => '포츠담에서 정성을 담아 제작';
 
   @override
-  String get welcome_find_study_description => '공개 연구를 선택하거나 초대장을 사용하세요.';
-
-  @override
   String get browse_public_studies => '공개 연구 둘러보기';
 
   @override
@@ -277,9 +274,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get error => '오류가 발생했습니다!';
-
-  @override
-  String get finished => '완료됨';
 
   @override
   String get please_give_consent =>
@@ -583,18 +577,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get performance_overview_observations => '관찰';
-
-  @override
-  String get report_outcome_inconclusive =>
-      '결과는 결론을 내리기 어렵습니다. 중재 간에 통계적으로 유의미한 차이가 없는 것으로 보입니다.';
-
-  @override
-  String get report_outcome_neither => '두 중재 모두 귀하의 결과에 부정적인 영향을 미친 것으로 보입니다.';
-
-  @override
-  String report_outcome_one(Object intervention) {
-    return '$intervention 중재가 귀하의 결과를 개선하는 것으로 보입니다.';
-  }
 
   @override
   String get completed_study => '마지막 연구를 완료했습니다. 이전 보고서를 확인하거나 새 연구를 시작하세요.';

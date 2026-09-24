@@ -84,10 +84,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get made_with_love_in_potsdam => 'Made with ♥ in Potsdam';
 
   @override
-  String get welcome_find_study_description =>
-      'Choose a public study or use an invitation.';
-
-  @override
   String get browse_public_studies => 'Browse public studies';
 
   @override
@@ -287,9 +283,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error => 'An error occurred!';
-
-  @override
-  String get finished => 'Finished';
 
   @override
   String get please_give_consent =>
@@ -604,19 +597,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get performance_overview_observations => 'Observations';
-
-  @override
-  String get report_outcome_inconclusive =>
-      'The results are inconclusive. There does not seem to be a statistically significant difference between the interventions.';
-
-  @override
-  String get report_outcome_neither =>
-      'Both interventions seem to have a negative effect on the outcome for you.';
-
-  @override
-  String report_outcome_one(Object intervention) {
-    return 'The intervention $intervention seems to improve the outcome for you.';
-  }
 
   @override
   String get completed_study =>

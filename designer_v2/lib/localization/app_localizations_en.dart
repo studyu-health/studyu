@@ -1133,10 +1133,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unknown Expression';
 
   @override
-  String get form_array_question_visibility_logic_this_question =>
-      'this question';
-
-  @override
   String get form_mode_visibility_create => 'Create Condition';
 
   @override

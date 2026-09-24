@@ -31,6 +31,75 @@ const _targets = [
 
 final _memberAccess = RegExp(r'\.([A-Za-z_]\w*)');
 
+/// [source] with comments removed, so comment text never counts as a member
+/// access. String literals are skipped; when quote tracking gets confused by
+/// interpolation the result only errs toward keeping text, which keeps the
+/// scan conservative (a key is only ever reported when no code match remains).
+String _stripComments(String source) {
+  final out = StringBuffer();
+  var i = 0;
+  var block = 0;
+  var quote = '';
+  var raw = false;
+  while (i < source.length) {
+    final c = source[i];
+    if (block > 0) {
+      if (source.startsWith('/*', i)) {
+        block++;
+        i += 2;
+      } else if (source.startsWith('*/', i)) {
+        block--;
+        i += 2;
+      } else {
+        i++;
+      }
+      continue;
+    }
+    if (quote.isNotEmpty) {
+      out.write(c);
+      if (!raw && c == r'\') {
+        if (i + 1 < source.length) out.write(source[i + 1]);
+        i += 2;
+        continue;
+      }
+      if (source.startsWith(quote, i)) {
+        i += quote.length;
+        quote = '';
+        continue;
+      }
+      i++;
+      if (c == '\n' && quote.length < 3) quote = '';
+      continue;
+    }
+    if (source.startsWith('//', i)) {
+      while (i < source.length && source[i] != '\n') {
+        i++;
+      }
+      continue;
+    }
+    if (source.startsWith('/*', i)) {
+      block = 1;
+      i += 2;
+      continue;
+    }
+    if (c == "'" || c == '"') {
+      final triple = source.startsWith(c * 3, i);
+      quote = triple ? c * 3 : c;
+      final prev = i > 0 ? source[i - 1] : '';
+      final prevPrev = i > 1 ? source[i - 2] : '';
+      raw =
+          prev == 'r' &&
+          !RegExp('[A-Za-z0-9_]').hasMatch(prevPrev.isEmpty ? ' ' : prevPrev);
+      i += triple ? 3 : 1;
+      out.write(quote);
+      continue;
+    }
+    out.write(c);
+    i++;
+  }
+  return out.toString();
+}
+
 /// Repository root derived from this script's location (`<root>/scripts/...`).
 String get _repoRoot => File(Platform.script.toFilePath()).parent.parent.path;
 
@@ -46,7 +115,9 @@ String get _repoRoot => File(Platform.script.toFilePath()).parent.parent.path;
     if (!name.endsWith('.dart')) continue;
     if (name.startsWith('app_localizations')) continue;
     files++;
-    for (final match in _memberAccess.allMatches(entity.readAsStringSync())) {
+    for (final match in _memberAccess.allMatches(
+      _stripComments(entity.readAsStringSync()),
+    )) {
       members.add(match.group(1)!);
     }
   }

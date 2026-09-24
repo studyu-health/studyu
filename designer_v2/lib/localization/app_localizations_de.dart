@@ -1145,10 +1145,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Unbekannter Ausdruck';
 
   @override
-  String get form_array_question_visibility_logic_this_question =>
-      'diese Frage';
-
-  @override
   String get form_mode_visibility_create => 'Bedingung erstellen';
 
   @override

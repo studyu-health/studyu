@@ -454,7 +454,6 @@
   "form_array_question_visibility_logic_always_true": "always true",
   "form_array_question_visibility_logic_preview_description": "Show this question if the following conditions are met:",
   "form_array_question_visibility_logic_unknown_expression": "Unknown Expression",
-  "form_array_question_visibility_logic_this_question": "this question",
   "form_mode_visibility_create": "Create Condition",
   "form_mode_visibility_edit": "Edit Condition",
   "form_mode_visibility_readonly": "View Condition",

@@ -1099,9 +1099,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '알 수 없는 표현';
 
   @override
-  String get form_array_question_visibility_logic_this_question => '이 질문';
-
-  @override
   String get form_mode_visibility_create => '조건 생성';
 
   @override
