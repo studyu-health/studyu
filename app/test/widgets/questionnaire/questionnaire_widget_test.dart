@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/widgets/questionnaire/custom_slider.dart';
 import 'package:studyu_app/widgets/questionnaire/image_capturing_question_widget.dart';
 import 'package:studyu_app/widgets/questionnaire/question_container.dart';
 import 'package:studyu_app/widgets/questionnaire/questionnaire_widget.dart';
@@ -1116,8 +1117,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(blockedPayload, isNull);
-      expect(find.text('Restored answer requires review'), findsOneWidget);
-      await tester.tap(find.text("I've reviewed this answer"));
+      expect(find.text('Review your answers'), findsOneWidget);
+      await tester.tap(find.text("I reviewed my answers"));
       await tester.pumpAndSettle();
 
       final payload = questionnaireKey.currentState!
@@ -1208,7 +1209,7 @@ void main() {
           .validateSyncAndBuildPayload();
       await tester.pumpAndSettle();
       expect(blockedCorrectedPayload, isNull);
-      await tester.tap(find.text("I've reviewed this answer"));
+      await tester.tap(find.text("I reviewed my answers"));
       await tester.pumpAndSettle();
 
       final correctedPayload = questionnaireKey.currentState!
@@ -1296,7 +1297,7 @@ void main() {
           .validateSyncAndBuildPayload();
       await tester.pumpAndSettle();
       expect(blockedCorrectedPayload, isNull);
-      await tester.tap(find.text("I've reviewed this answer"));
+      await tester.tap(find.text("I reviewed my answers"));
       await tester.pumpAndSettle();
 
       final correctedPayload = questionnaireKey.currentState!
@@ -1485,8 +1486,8 @@ void main() {
     expect(find.text('Complete task'), findsNothing);
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
-    expect(find.text('Restored answer requires review'), findsOneWidget);
-    await tester.tap(find.text("I've reviewed this answer"));
+    expect(find.text('Review your answers'), findsOneWidget);
+    await tester.tap(find.text("I reviewed my answers"));
     await tester.pumpAndSettle();
 
     final syncedPayload = _snapshot(
@@ -2129,7 +2130,7 @@ void main() {
           ],
         ),
       );
-    final q2ChoiceAId = q2.choices.first.id;
+    final q2ChoiceBId = q2.choices.last.id;
 
     final List<QuestionnaireState?> completions = [];
 
@@ -2153,13 +2154,11 @@ void main() {
     await tester.tap(find.text('no').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Restored answer requires review'), findsOneWidget);
+    expect(find.text('Review your answers'), findsOneWidget);
     expect(
-      find.text('Complete task becomes available after review.'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Review the restored answer to continue.'),
+      find.text(
+        'You changed an earlier answer. Review your later answers before you complete the questionnaire.',
+      ),
       findsOneWidget,
     );
     final completeButton = tester.widget<ElevatedButton>(
@@ -2172,6 +2171,19 @@ void main() {
     );
     expect(completions.last, isNull);
 
+    // Editing the flagged later answer must not dismiss the aggregate review.
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(find.text('Review your answers'), findsOneWidget);
+    expect(
+      tester
+          .widget<ElevatedButton>(
+            find.widgetWithText(ElevatedButton, 'Complete task'),
+          )
+          .onPressed,
+      isNull,
+    );
+
     final completionCountBeforeBlockedSubmit = completions
         .whereType<QuestionnaireState>()
         .length;
@@ -2182,29 +2194,23 @@ void main() {
       completions.whereType<QuestionnaireState>().length,
       completionCountBeforeBlockedSubmit,
     );
-    expect(find.text('Restored answer requires review'), findsOneWidget);
+    expect(find.text('Review your answers'), findsOneWidget);
 
     final markReviewedButton = find.widgetWithText(
       FilledButton,
-      "I've reviewed this answer",
+      "I reviewed my answers",
     );
     expect(markReviewedButton, findsOneWidget);
-    expect(find.byIcon(Icons.restore_outlined), findsOneWidget);
-    expect(
-      find.widgetWithText(TextButton, "I've reviewed this answer"),
-      findsNothing,
-    );
 
     await tester.tap(markReviewedButton);
     await tester.pumpAndSettle();
-    expect(find.text('Restored answer requires review'), findsNothing);
+    expect(find.text('Review your answers'), findsNothing);
     expect(
-      find.text('Complete task becomes available after review.'),
+      find.text(
+        'You changed an earlier answer. Review your later answers before you complete the questionnaire.',
+      ),
       findsNothing,
     );
-    expect(find.text('Review the restored answer to continue.'), findsNothing);
-    expect(find.text('Answer reviewed'), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
     final enabledCompleteButton = tester.widget<ElevatedButton>(
       find.widgetWithText(ElevatedButton, 'Complete task'),
     );
@@ -2215,7 +2221,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final reviewedCompletion = completions.whereType<QuestionnaireState>().last;
-    expect(reviewedCompletion.answers['q2']?.response, [q2ChoiceAId]);
+    expect(reviewedCompletion.answers['q2']?.response, [q2ChoiceBId]);
     expect(reviewedCompletion.answerMetadata['q2']?.needsReview, isFalse);
   });
 
@@ -2260,7 +2266,7 @@ void main() {
     await tester.tap(find.text('no').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Restored answer requires review'), findsOneWidget);
+    expect(find.text('Review your answers'), findsOneWidget);
     expect(
       completions.whereType<QuestionnaireState>().length,
       completedBeforeContextChange,
@@ -2315,7 +2321,7 @@ void main() {
     await tester.tap(find.text('no').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Restored answer requires review'), findsOneWidget);
+    expect(find.text('Review your answers'), findsOneWidget);
     expect(
       completions.whereType<QuestionnaireState>().length,
       completedBeforeContextChange,
@@ -2323,20 +2329,25 @@ void main() {
     expect(completions.last, isNull);
   });
 
-  testWidgets('hidden restored answer needing review does not block submit', (
+  testWidgets('hidden flagged answer is excluded from shown review state', (
     tester,
   ) async {
-    final q1 = _boolQuestion('q1', 'Show meal answer?');
+    final q0 = _boolQuestion('q0', 'Keep meal answer visible?');
+    final q1 = DateQuestion.withId()
+      ..id = 'q1'
+      ..prompt = 'Meal date';
     final q2 = _singleChoiceQuestion('q2', 'What did you eat?')
       ..conditional = QuestionConditional.withCondition(
         CompositeExpression(
-          logicType: LogicType.and,
-          expressions: [BooleanExpression()..target = 'q1'],
+          logicType: LogicType.or,
+          expressions: [
+            BooleanExpression()..target = 'q0',
+            RequiresDateAnswerExpression(target: 'q1'),
+          ],
         ),
       );
-    final q3 = _boolQuestion('q3', 'Independent visible question');
 
-    final List<QuestionnaireState?> completions = [];
+    final completions = <QuestionnaireState?>[];
 
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1.0;
@@ -2344,27 +2355,210 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      setup(QuestionnaireWidget([q3, q1, q2], onComplete: completions.add)),
+      setup(QuestionnaireWidget([q0, q1, q2], onComplete: completions.add)),
     );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('yes'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('yes').last);
+    final dateWidget = tester.widget<DateQuestionWidget>(
+      find.byType(DateQuestionWidget),
+    );
+    dateWidget.onDone!(q1.constructAnswer(DateTime(2025, 6)));
     await tester.pumpAndSettle();
     await tester.tap(find.text('A'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('no').last);
+    // Change the earlier context while q2 stays technically visible.
+    final updatedDateWidget = tester.widget<DateQuestionWidget>(
+      find.byType(DateQuestionWidget),
+    );
+    updatedDateWidget.onDone!(q1.constructAnswer(DateTime(2025, 6, 2)));
+    await tester.pumpAndSettle();
+
+    // Clear q1. It is now the unanswered shown question, so q2 is removed
+    // from shownQuestions even though its flagged answer remains cached.
+    final clearedDateWidget = tester.widget<DateQuestionWidget>(
+      find.byType(DateQuestionWidget),
+    );
+    clearedDateWidget.onCleared!();
     await tester.pumpAndSettle();
     expect(find.text('What did you eat?'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('questionnaire_review_card')),
+      findsNothing,
+    );
 
-    await tester.tap(find.text('Complete task'));
+    // Re-answer q0 to rebuild the progressive UI, then answer q1 naturally.
+    await tester.tap(find.text('yes'));
+    await tester.pumpAndSettle();
+    final reshownDateWidget = tester.widget<DateQuestionWidget>(
+      find.byType(DateQuestionWidget),
+    );
+    reshownDateWidget.onDone!(q1.constructAnswer(DateTime(2025, 6, 3)));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('questionnaire_review_card')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets(
+    'auto-complete pauses for aggregate review and completes after confirmation',
+    (tester) async {
+      final q0 = _boolQuestion('q0', 'Keep the dependent answer visible?');
+      final q1 = _boolQuestion('q1', 'Change the context?');
+      final q2 = _singleChoiceQuestion('q2', 'Dependent answer')
+        ..conditional = QuestionConditional.withCondition(
+          CompositeExpression(
+            logicType: LogicType.or,
+            expressions: [
+              BooleanExpression()..target = 'q0',
+              BooleanExpression()..target = 'q1',
+            ],
+          ),
+        );
+      final completions = <QuestionnaireState?>[];
+
+      await tester.pumpWidget(
+        setup(
+          QuestionnaireWidget(
+            [q0, q1, q2],
+            autoComplete: true,
+            onComplete: completions.add,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('yes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('yes').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('A'));
+      await tester.pumpAndSettle();
+      expect(completions.whereType<QuestionnaireState>(), hasLength(1));
+
+      // q0 keeps q2 visible while changing the earlier q1 answer.
+      await tester.tap(find.text('no').last);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('questionnaire_review_card')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('questionnaire_review_confirm')),
+        findsOneWidget,
+      );
+      expect(completions.whereType<QuestionnaireState>(), hasLength(1));
+
+      final confirmation = find.byKey(
+        const ValueKey('questionnaire_review_confirm'),
+      );
+      await tester.drag(find.byType(ListView).first, const Offset(0, -400));
+      await tester.pumpAndSettle();
+      await tester.tap(confirmation);
+      await tester.pumpAndSettle();
+
+      expect(completions.whereType<QuestionnaireState>(), hasLength(2));
+    },
+  );
+
+  testWidgets(
+    'editing an answered slider without a new question does not auto-scroll',
+    (tester) async {
+      final q0 = _boolQuestion('q0', 'Keep the later question visible?');
+      final q1 = ScaleQuestion.withId()
+        ..id = 'q1'
+        ..prompt = 'Earlier slider'
+        ..minimum = 0
+        ..maximum = 10
+        ..step = 1;
+      final q2 = _boolQuestion('q2', 'Later question')
+        ..conditional = QuestionConditional.withCondition(
+          CompositeExpression(
+            logicType: LogicType.and,
+            expressions: [BooleanExpression()..target = 'q0'],
+          ),
+        );
+
+      tester.view.physicalSize = const Size(320, 320);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(setup(QuestionnaireWidget([q0, q1, q2])));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('yes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(CustomSlider));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('yes').last);
+      await tester.pumpAndSettle();
+
+      final scrollables = find
+          .byType(Scrollable)
+          .evaluate()
+          .whereType<StatefulElement>()
+          .map((element) => element.state)
+          .whereType<ScrollableState>()
+          .toSet()
+          .toList();
+      final scrollable = scrollables.reduce(
+        (first, second) =>
+            first.position.maxScrollExtent >= second.position.maxScrollExtent
+            ? first
+            : second,
+      );
+      final before = scrollable.position.pixels;
+      final slider = find.byType(CustomSlider).first;
+      await tester.tapAt(tester.getCenter(slider));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.position.pixels, closeTo(before, 0.1));
+    },
+  );
+
+  testWidgets('progressive reveal scrolls to a genuinely new question', (
+    tester,
+  ) async {
+    final q1 = _boolQuestion('q1', 'Reveal the next question?');
+    final q2 =
+        FreeTextQuestion.withId(
+            textType: FreeTextQuestionType.any,
+            lengthRange: [0, 100],
+          )
+          ..id = 'q2'
+          ..prompt = 'Newly revealed question';
+
+    tester.view.physicalSize = const Size(320, 260);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(setup(QuestionnaireWidget([q1, q2])));
+    await tester.pumpAndSettle();
+    final scrollables = find
+        .byType(Scrollable)
+        .evaluate()
+        .whereType<StatefulElement>()
+        .map((element) => element.state)
+        .whereType<ScrollableState>()
+        .toSet()
+        .toList();
+    final scrollable = scrollables.reduce(
+      (first, second) =>
+          first.position.maxScrollExtent >= second.position.maxScrollExtent
+          ? first
+          : second,
+    );
+    expect(scrollable.position.pixels, 0);
+
+    await tester.tap(find.text('yes'));
     await tester.pumpAndSettle();
 
-    final completion = completions.whereType<QuestionnaireState>().last;
-    expect(completion.answers['q1']?.response, isFalse);
-    expect(completion.answers['q3']?.response, isTrue);
-    expect(completion.answers.containsKey('q2'), isFalse);
+    expect(find.byType(TextFormField), findsOneWidget);
+    expect(scrollable.position.pixels, greaterThan(0));
   });
 }

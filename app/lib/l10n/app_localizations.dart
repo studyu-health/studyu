@@ -2689,35 +2689,23 @@ abstract class AppLocalizations {
   /// **'Continue'**
   String get continue_label;
 
-  /// No description provided for @restored_answer_needs_review.
+  /// No description provided for @questionnaire_review_title.
   ///
   /// In en, this message translates to:
-  /// **'Restored answer requires review'**
-  String get restored_answer_needs_review;
+  /// **'Review your answers'**
+  String get questionnaire_review_title;
 
-  /// No description provided for @restored_answer_review_description.
+  /// No description provided for @questionnaire_review_description.
   ///
   /// In en, this message translates to:
-  /// **'Complete task becomes available after review.'**
-  String get restored_answer_review_description;
+  /// **'You changed an earlier answer. Review your later answers before you complete the questionnaire.'**
+  String get questionnaire_review_description;
 
-  /// No description provided for @mark_answer_reviewed.
+  /// No description provided for @questionnaire_review_confirmation.
   ///
   /// In en, this message translates to:
-  /// **'I\'ve reviewed this answer'**
-  String get mark_answer_reviewed;
-
-  /// No description provided for @answer_reviewed.
-  ///
-  /// In en, this message translates to:
-  /// **'Answer reviewed'**
-  String get answer_reviewed;
-
-  /// No description provided for @review_restored_answer_to_continue.
-  ///
-  /// In en, this message translates to:
-  /// **'Review the restored answer to continue.'**
-  String get review_restored_answer_to_continue;
+  /// **'I reviewed my answers'**
+  String get questionnaire_review_confirmation;
 
   /// No description provided for @complete_task.
   ///

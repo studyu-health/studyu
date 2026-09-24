@@ -3,7 +3,6 @@
   "about": "정보",
   "accept": "수락",
   "additionalInfo": "추가 정보",
-  "answer_reviewed": "답변 검토됨",
   "app_outdated_message": "StudyU 앱의 새로운 버전이 있습니다. 최신 기능과 개선 사항을 이용하려면 업데이트해 주세요. 지원해 주셔서 감사합니다!",
   "app_support": "앱 지원",
   "app_support_text": "앱 관련 문제나 질문 문의",
@@ -212,7 +211,6 @@
   "loading": "로딩 중",
   "loading_error_description": "연구 데이터를 가져올 수 없습니다. 현재 연구에 참여 중이라면 먼저 연구 담당자에게 도움을 요청하십시오. 연구에 참여하지 않거나 담당자가 요청하는 경우에만 지원팀에 연락하십시오. 담당자나 지원팀의 지시 없이 데이터를 삭제하지 마십시오. 데이터를 삭제하면 연구 데이터가 모두 제거되며 연구에 다시 참여해야 합니다.",
   "loading_error_title": "로딩 오류",
-  "mark_answer_reviewed": "이 답변을 검토했습니다",
   "maximum": "최대",
   "mean": "평균",
   "microphone_access_denied": "마이크 접근 거부됨",
@@ -303,9 +301,6 @@
   "report_primary_result": "주요 결과",
   "researchers": "연구원",
   "reset_app": "앱 재설정",
-  "restored_answer_needs_review": "복원된 답변은 검토가 필요합니다",
-  "restored_answer_review_description": "검토 후 과제 완료가 가능합니다.",
-  "review_restored_answer_to_continue": "계속하려면 복원된 답변을 검토하세요.",
   "save_not_supported": "오류",
   "save_not_supported_description": "현재 웹 버전에서는 파일 다운로드를 지원하지 않습니다.",
   "settings": "설정",
@@ -520,5 +515,8 @@
   "system": "시스템",
   "time_format": "시간 형식",
   "time_format_12_hour": "12시간제 (오후 2:30)",
-  "time_format_24_hour": "24시간제 (14:30)"
+  "time_format_24_hour": "24시간제 (14:30)",
+  "questionnaire_review_title": "답변 검토",
+  "questionnaire_review_description": "이전 답변을 변경했습니다. 설문을 완료하기 전에 이후 답변을 검토하세요.",
+  "questionnaire_review_confirmation": "답변을 검토했습니다"
 }
