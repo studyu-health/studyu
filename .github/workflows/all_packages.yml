@@ -7,11 +7,11 @@ on:
       - "core/**"
       - "designer_v2/**"
       - "flutter_common/**"
+      - "scripts/**"
       - '*.gitignore'
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - ".github/workflows/all_packages.yml"
-      - "scripts/check_arb_completeness.dart"
       - ".github/workflows/init-workspace/**"
   workflow_dispatch:
 
