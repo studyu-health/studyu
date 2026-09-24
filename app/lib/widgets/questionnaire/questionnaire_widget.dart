@@ -146,8 +146,11 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     return _controller.answerFor(question.id);
   }
 
+  Set<String> get _shownQuestionIds =>
+      shownQuestions.map((container) => container.question.id).toSet();
+
   bool _blockCompletionForReview() {
-    if (!_controller.visibleAnswersNeedReview()) return false;
+    if (!_controller.visibleAnswersNeedReview(_shownQuestionIds)) return false;
     setState(() {});
     return true;
   }
@@ -431,7 +434,9 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
         !widget.autoComplete &&
         !widget.hideCta &&
         ctaMode != QuestionnaireCtaMode.hidden;
-    final showReviewCard = _controller.visibleAnswersNeedReview();
+    final showReviewCard = _controller.visibleAnswersNeedReview(
+      _shownQuestionIds,
+    );
 
     return Column(
       children: [
@@ -472,7 +477,8 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
   }
 
   void _confirmReview() {
-    _controller.markVisibleAnswersReviewed();
+    _controller.markVisibleAnswersReviewed(_shownQuestionIds);
+
     setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -523,7 +529,8 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     final label = isContinue ? l10n.continue_label : l10n.complete_task;
     final backgroundColor = isContinue ? Colors.orange.shade700 : Colors.green;
     final isSubmitting = widget.isSubmitting;
-    final needsReview = !isContinue && _controller.visibleAnswersNeedReview();
+    final needsReview =
+        !isContinue && _controller.visibleAnswersNeedReview(_shownQuestionIds);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(

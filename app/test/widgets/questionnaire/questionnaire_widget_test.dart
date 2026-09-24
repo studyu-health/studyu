@@ -2329,20 +2329,25 @@ void main() {
     expect(completions.last, isNull);
   });
 
-  testWidgets('hidden restored answer needing review does not block submit', (
+  testWidgets('hidden flagged answer is excluded from shown review state', (
     tester,
   ) async {
-    final q1 = _boolQuestion('q1', 'Show meal answer?');
+    final q0 = _boolQuestion('q0', 'Keep meal answer visible?');
+    final q1 = DateQuestion.withId()
+      ..id = 'q1'
+      ..prompt = 'Meal date';
     final q2 = _singleChoiceQuestion('q2', 'What did you eat?')
       ..conditional = QuestionConditional.withCondition(
         CompositeExpression(
-          logicType: LogicType.and,
-          expressions: [BooleanExpression()..target = 'q1'],
+          logicType: LogicType.or,
+          expressions: [
+            BooleanExpression()..target = 'q0',
+            RequiresDateAnswerExpression(target: 'q1'),
+          ],
         ),
       );
-    final q3 = _boolQuestion('q3', 'Independent visible question');
 
-    final List<QuestionnaireState?> completions = [];
+    final completions = <QuestionnaireState?>[];
 
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1.0;
@@ -2350,28 +2355,52 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      setup(QuestionnaireWidget([q3, q1, q2], onComplete: completions.add)),
+      setup(QuestionnaireWidget([q0, q1, q2], onComplete: completions.add)),
     );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('yes'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('yes').last);
+    final dateWidget = tester.widget<DateQuestionWidget>(
+      find.byType(DateQuestionWidget),
+    );
+    dateWidget.onDone!(q1.constructAnswer(DateTime(2025, 6, 1)));
     await tester.pumpAndSettle();
     await tester.tap(find.text('A'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('no').last);
+    // Change the earlier context while q2 stays technically visible.
+    final updatedDateWidget = tester.widget<DateQuestionWidget>(
+      find.byType(DateQuestionWidget),
+    );
+    updatedDateWidget.onDone!(q1.constructAnswer(DateTime(2025, 6, 2)));
+    await tester.pumpAndSettle();
+
+    // Clear q1. It is now the unanswered shown question, so q2 is removed
+    // from shownQuestions even though its flagged answer remains cached.
+    final clearedDateWidget = tester.widget<DateQuestionWidget>(
+      find.byType(DateQuestionWidget),
+    );
+    clearedDateWidget.onCleared!();
     await tester.pumpAndSettle();
     expect(find.text('What did you eat?'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('questionnaire_review_card')),
+      findsNothing,
+    );
 
-    await tester.tap(find.text('Complete task'));
+    // Re-answer q0 to rebuild the progressive UI, then answer q1 naturally.
+    await tester.tap(find.text('yes'));
     await tester.pumpAndSettle();
-
-    final completion = completions.whereType<QuestionnaireState>().last;
-    expect(completion.answers['q1']?.response, isFalse);
-    expect(completion.answers['q3']?.response, isTrue);
-    expect(completion.answers.containsKey('q2'), isFalse);
+    final reshownDateWidget = tester.widget<DateQuestionWidget>(
+      find.byType(DateQuestionWidget),
+    );
+    reshownDateWidget.onDone!(q1.constructAnswer(DateTime(2025, 6, 3)));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('questionnaire_review_card')),
+      findsOneWidget,
+    );
   });
 
   testWidgets(

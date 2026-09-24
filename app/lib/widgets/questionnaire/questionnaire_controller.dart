@@ -206,25 +206,33 @@ class QuestionnaireController(final List<Question> questions)
     notifyListeners();
   }
 
-  /// Clears review flags for all currently visible answers.
+  /// Returns whether any answer in [questionIds] needs review.
   ///
-  /// Hidden answer metadata is left unchanged. Notifies listeners once when
-  /// at least one visible answer was marked as reviewed.
-  void markVisibleAnswersReviewed() {
+  /// When omitted, checks all currently visible questions.
+  bool visibleAnswersNeedReview([Iterable<String>? questionIds]) {
+    final ids =
+        questionIds?.toSet() ??
+        visibleQuestions.map((question) => question.id).toSet();
+    return ids.any(needsReview);
+  }
+
+  /// Clears review flags for [questionIds].
+  ///
+  /// When omitted, clears flags for all currently visible questions.
+  /// Hidden answer metadata is left unchanged.
+  void markVisibleAnswersReviewed([Iterable<String>? questionIds]) {
+    final ids =
+        questionIds?.toSet() ??
+        visibleQuestions.map((question) => question.id).toSet();
     var changed = false;
-    for (final question in visibleQuestions) {
-      final metadata = _answers.answerMetadata[question.id];
+    for (final id in ids) {
+      final metadata = _answers.answerMetadata[id];
       if (metadata?.needsReview ?? false) {
         metadata!.needsReview = false;
         changed = true;
       }
     }
     if (changed) notifyListeners();
-  }
-
-  bool visibleAnswersNeedReview() {
-    final visibleIds = visibleQuestions.map((q) => q.id).toSet();
-    return visibleIds.any((id) => needsReview(id));
   }
 
   String? firstVisibleAnswerNeedingReview() {
