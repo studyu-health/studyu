@@ -305,7 +305,7 @@ Run unit tests for workspace packages with tests:
 fvm exec melos test
 ```
 
-Run `fvm exec melos qualitycheck` for a full workspace check. It checks formatting and
+Run `fvm dart run melos qualitycheck` for a full workspace check. It checks formatting and
 analyzes the workspace without writing files. Review any formatting or analysis issues and
 fix only those caused by the upgrade.
 
