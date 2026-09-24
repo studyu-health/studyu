@@ -17,10 +17,16 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
-/// Template ARB file and package directory for each checked package.
+/// Template ARB file and the package source directories to scan: library,
+/// unit tests, and integration tests. Other directories (build output,
+/// `.dart_tool`) hold gitignored sources and are excluded so the scan only
+/// sees tracked files. Missing scan directories are skipped.
 const _targets = [
-  ('app/lib/l10n/app_en.arb', 'app'),
-  ('designer_v2/lib/localization/app_en.arb', 'designer_v2'),
+  ('app/lib/l10n/app_en.arb', ['app/lib', 'app/test', 'app/integration_test']),
+  (
+    'designer_v2/lib/localization/app_en.arb',
+    ['designer_v2/lib', 'designer_v2/test', 'designer_v2/integration_test'],
+  ),
 ];
 
 final _memberAccess = RegExp(r'\.([A-Za-z_]\w*)');
@@ -51,24 +57,27 @@ void main() {
   final root = _repoRoot;
   final stopwatch = Stopwatch()..start();
   final unused = <String>[];
-  for (final (arbPath, libPath) in _targets) {
+  for (final (arbPath, scanPaths) in _targets) {
     final arbFile = File('$root/$arbPath');
-    final libDir = Directory('$root/$libPath');
     if (!arbFile.existsSync()) {
       stderr.writeln('missing ARB file: $arbPath');
       exit(2);
     }
-    if (!libDir.existsSync()) {
-      stderr.writeln('missing package directory: $libPath');
-      exit(2);
-    }
-    final package = libPath;
+    final package = arbPath.split('/').first;
     final arb = jsonDecode(arbFile.readAsStringSync()) as Map<String, dynamic>;
     final keys = arb.keys.where((key) => !key.startsWith('@')).toList();
-    final scanned = _accessedMembers(libDir);
-    print('$package: ${keys.length} l10n keys in ${scanned.files} dart files');
+    final members = <String>{};
+    var files = 0;
+    for (final scanPath in scanPaths) {
+      final dir = Directory('$root/$scanPath');
+      if (!dir.existsSync()) continue;
+      final scanned = _accessedMembers(dir);
+      members.addAll(scanned.members);
+      files += scanned.files;
+    }
+    print('$package: ${keys.length} l10n keys in $files dart files');
     for (final key in keys) {
-      if (!scanned.members.contains(key)) unused.add('$package/$key');
+      if (!members.contains(key)) unused.add('$package/$key');
     }
   }
   final elapsed = stopwatch.elapsedMilliseconds;
