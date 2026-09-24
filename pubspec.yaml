@@ -15,11 +15,6 @@ melos:
   repository: https://github.com/hpi-studyu/studyu
   sdkPath: .fvm/flutter_sdk
   scripts:
-    setup:
-      run: git config core.hooksPath .githooks
-      description: >-
-        Configure git to use the project's tracked hooks in .githooks/
-
     fix:
       run: |
         dart run melos exec -c 6 -- \
@@ -98,10 +93,13 @@ melos:
           dart_cmd="fvm dart"
           flutter_cmd="fvm flutter"
         fi
+        ${dart_cmd} scripts/check_arb_completeness.dart --check
+        ${dart_cmd} scripts/check_arb_completeness.dart
+        ${dart_cmd} scripts/check_unused_l10n.dart
         ${rtk_prefix}${dart_cmd} format \
           --output=none --set-exit-if-changed .
         ${rtk_prefix}${dart_cmd} analyze
-      description: Run read-only format and analysis checks
+      description: Run read-only ARB completeness, unused l10n key, format, and analysis checks
 
     reset:
       run: |

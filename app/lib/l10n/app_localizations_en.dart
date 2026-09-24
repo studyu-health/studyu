@@ -84,18 +84,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get made_with_love_in_potsdam => 'Made with ♥ in Potsdam';
 
   @override
-  String get welcome_find_study_description =>
-      'Choose a public study or use an invitation.';
-
-  @override
   String get browse_public_studies => 'Browse public studies';
 
   @override
   String get welcome_returning_participant =>
       'Already participated with StudyU?';
-
-  @override
-  String get restore_studyu_account => 'Restore StudyU account';
 
   @override
   String get show_onboarding_again => 'Show onboarding again';
@@ -196,9 +189,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_interventions_available => 'No interventions available.';
 
   @override
-  String get loading_interventions => 'Loading interventions';
-
-  @override
   String get task_already_completed =>
       'You have already completed this task today';
 
@@ -244,9 +234,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get intervention_current => 'Current intervention';
 
   @override
-  String get study_current => 'Current study:';
-
-  @override
   String get opt_out => 'Leave study';
 
   @override
@@ -268,10 +255,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leave_keep_data => 'Leave and keep my data';
 
   @override
-  String get leave_study_description =>
-      'Stop participating. Your existing study data will be retained.';
-
-  @override
   String get delete_data => 'Leave study and delete my data';
 
   @override
@@ -286,21 +269,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leave_delete_data => 'Leave and delete my data';
 
   @override
-  String get delete_study_data_description =>
-      'Permanently delete your study data. This cannot be undone.';
-
-  @override
-  String get soft_delete_desc => 'You will lose your progress in ';
-
-  @override
-  String get soft_delete_desc_2 =>
-      ' and won\'t be able to recover it. Previously completed studies will not be deleted.\nYour anonymized data up to this point may still be used for research purposes.';
-
-  @override
-  String get hard_delete_desc =>
-      'You are about to delete all data from your device and our servers. You will not be able to restore your data.\nYour anonymized data will not be available for research purposes anymore.';
-
-  @override
   String get your_journey => 'Your journey';
 
   @override
@@ -311,35 +279,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journey_results_available => 'Results available';
 
   @override
-  String get summary => 'Summary';
-
-  @override
   String get consent => 'Consent';
 
   @override
   String get error => 'An error occurred!';
-
-  @override
-  String get tea_vs_coffee => 'Tea vs. Coffee';
-
-  @override
-  String get weed_vs_alcohol => 'Weed vs. Alcohol';
-
-  @override
-  String get back_pain => 'Back pain';
-
-  @override
-  String get video_task => 'Video task';
-
-  @override
-  String get finished => 'Finished';
-
-  @override
-  String get how_would_you_rate_your_pain_today =>
-      'How would you rate your pain today? (0 = no pain, 10 = extreme pain)';
-
-  @override
-  String get thank_you_for_your_input => 'Thank you for your input';
 
   @override
   String get please_give_consent =>
@@ -364,19 +307,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This study is not available for testing yet.';
 
   @override
-  String get home => 'Home';
-
-  @override
-  String get profile => 'Profile';
-
-  @override
   String get help => 'Help';
 
   @override
   String get contact => 'Contact';
-
-  @override
-  String get contact_support => 'Contact study team';
 
   @override
   String support_email_body(String subjectId) {
@@ -427,11 +361,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copy_all_information => 'Copy all';
 
   @override
-  String value_copied(String label) {
-    return '$label copied to clipboard.';
-  }
-
-  @override
   String get all_information_copied => 'All information copied to clipboard.';
 
   @override
@@ -456,9 +385,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirm => 'Confirm selection';
-
-  @override
-  String get survey => 'Survey';
 
   @override
   String get complete => 'Complete';
@@ -491,9 +417,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get faq => 'FAQ';
 
   @override
-  String get start_study => 'Start Study';
-
-  @override
   String get next_day => 'Next day';
 
   @override
@@ -507,9 +430,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stop_recording => 'Stop recording';
-
-  @override
-  String get error_recording => 'Error occurred during recording';
 
   @override
   String get photo_captured => 'Photo captured';
@@ -537,15 +457,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recording_error => 'Recording error';
 
   @override
-  String get storing_photo => 'The photo is being stored';
-
-  @override
-  String get storing_audio => 'The audio file is being stored';
-
-  @override
-  String get upload_error => 'The file could not be uploaded';
-
-  @override
   String get language => 'Language';
 
   @override
@@ -556,19 +467,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get de => 'German';
-
-  @override
-  String get allow_analytics => 'Allow app analytics';
-
-  @override
-  String get allow_analytics_desc =>
-      'All collected data is used only to improve app performance and never for tracking purposes. You can read more about this in our data privacy.';
-
-  @override
-  String get video_test => 'This is a video test';
-
-  @override
-  String get survey_test => 'This is a survey test';
 
   @override
   String get current_report => 'Current report';
@@ -651,9 +549,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalid_invite_code => 'Not a valid invite code';
 
   @override
-  String get save_pdf => 'Save as PDF';
-
-  @override
   String get was_saved_to => 'The file was saved to ';
 
   @override
@@ -672,9 +567,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get eligible_mistake =>
       'If you made a mistake, you can still change your answers';
-
-  @override
-  String get eligible_back => 'Back to study selection';
 
   @override
   String get eligible_choice_multi_selection =>
@@ -705,22 +597,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get performance_overview_observations => 'Observations';
-
-  @override
-  String get report_outcome_inconclusive =>
-      'The results are inconclusive. There does not seem to be a statistically significant difference between the interventions.';
-
-  @override
-  String get report_outcome_neither =>
-      'Both interventions seem to have a negative effect on the outcome for you.';
-
-  @override
-  String report_outcome_one(Object intervention) {
-    return 'The intervention $intervention seems to improve the outcome for you.';
-  }
-
-  @override
-  String get report_axis_phase => 'Phase';
 
   @override
   String get completed_study =>
@@ -832,22 +708,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get show_colorless_gauges => 'Enable accessible charts';
 
   @override
-  String get welchs_t_test_results => 'Welch\'s t-test Results';
-
-  @override
-  String get sample_a => 'Sample A';
-
-  @override
-  String get sample_b => 'Sample B';
-
-  @override
-  String get sample_size => 'n';
-
-  @override
   String get mean => 'mean';
-
-  @override
-  String get variance => 'var';
 
   @override
   String get t_statistic => 't-statistic';
@@ -857,12 +718,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get p_value => 'p-value';
-
-  @override
-  String get result_significant => 'Significantly different';
-
-  @override
-  String get result_not_significant => 'Not significantly different';
 
   @override
   String get level_of_significance => 'Level of significance';
@@ -879,9 +734,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get significance_level_and_p_value => 'Significance level and p-value';
-
-  @override
-  String get descriptive_statistics => 'Descriptive statistics';
 
   @override
   String compare_results_between(String nameA, String nameB) {
@@ -927,10 +779,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your message to the study team was prepared in your email app. Review and send the email, then wait for their reply.\n\nIf you are currently participating in a study, continue tracking your results outside the app until the issue is resolved.';
 
   @override
-  String get no_contact_email =>
-      'The support email address is not configured. Please contact your study supervisor for assistance.';
-
-  @override
   String get sync_fitbit_data => 'Sync Fitbit Data';
 
   @override
@@ -973,9 +821,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dialogTitle => 'Select Pain Level';
-
-  @override
-  String get okButton => 'OK';
 
   @override
   String get cancelButton => 'Cancel';
@@ -1337,26 +1182,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ok => 'OK';
 
   @override
-  String get submit => 'Submit';
-
-  @override
-  String get go_back => 'Go back';
-
-  @override
   String get study_settings_section => 'Study settings';
 
   @override
   String get recovery_phrase_header => 'Recovery phrase';
 
   @override
-  String get copy_to_clipboard => 'Copy to clipboard';
-
-  @override
   String get copied_to_clipboard =>
       'Copied to clipboard. Paste the recovery phrase somewhere secure on your phone now.';
-
-  @override
-  String get recovery_phrase_save_warning => 'Never share them with anyone.';
 
   @override
   String get show_recovery_phrase => 'Show Recovery Phrase';
@@ -1418,14 +1251,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Recovery phrases have 13 words. Remove extra words to continue.';
 
   @override
-  String recovery_successful(String id) {
-    return 'Recovery successful! ID: $id';
-  }
-
-  @override
-  String get deep_link_error_title => 'Error';
-
-  @override
   String deep_link_study_not_found(String studyId) {
     return 'Study with ID $studyId not found or not available';
   }
@@ -1450,35 +1275,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Restore your account on this device with the recovery phrase you saved before joining a study.';
 
   @override
-  String get restore_account_help_title => 'Restore with your recovery phrase';
-
-  @override
-  String get restore_account_help_1 => 'Enter all 13 words in order';
-
-  @override
-  String get restore_account_help_2 =>
-      'You can type or paste the phrase manually';
-
-  @override
-  String get share_recovery => 'Share Recovery';
-
-  @override
-  String get share_as_text => 'Share as Text';
-
-  @override
-  String get download_recovery => 'Download Recovery';
-
-  @override
-  String get download_as_text => 'Download as Text File';
-
-  @override
   String get file_saved => 'File saved successfully';
 
   @override
   String get file_save_error => 'Error saving file';
-
-  @override
-  String get share_btn => 'Share';
 
   @override
   String get copy_btn => 'Copy';
@@ -1490,21 +1290,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get general_section => 'General';
 
   @override
-  String get current_study_section => 'Current study';
-
-  @override
   String get participation_options_section => 'Manage participation';
 
   @override
-  String get share_recovery_text_btn => 'Share Recovery Text';
-
-  @override
   String get recovery_phrase_load_error => 'Failed to load recovery phrase';
-
-  @override
-  String share_error(String error) {
-    return 'Error sharing: $error';
-  }
 
   @override
   String get deep_link_study_invite_only =>
@@ -1514,9 +1303,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String deep_link_invite_invalid(String code) {
     return 'Invalid or expired invite code: $code';
   }
-
-  @override
-  String get deep_link_error_invalid_invite => 'Invalid invite code';
 
   @override
   String get deep_link_switch_warning_title => 'You are already in a study';
@@ -1539,47 +1325,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deep_link_switch_continue_study => 'Continue Study';
-
-  @override
-  String get deep_link_switch_primary_return => 'Return to current study';
-
-  @override
-  String get deep_link_switch_secondary_continue =>
-      'Leave current study and switch';
-
-  @override
-  String get deep_link_switch_data_choice_title =>
-      'How do you want to leave your current study?';
-
-  @override
-  String get deep_link_switch_data_choice_description =>
-      'Choose what should happen to your current study data before switching.';
-
-  @override
-  String get deep_link_switch_soft_delete_button => 'Soft delete and switch';
-
-  @override
-  String get deep_link_switch_hard_delete_button => 'Hard delete and switch';
-
-  @override
-  String get deep_link_switch_confirm_soft_title => 'Confirm soft delete';
-
-  @override
-  String get deep_link_switch_confirm_soft_button => 'Confirm soft delete';
-
-  @override
-  String get deep_link_switch_confirm_hard_title => 'Confirm hard delete';
-
-  @override
-  String get deep_link_switch_confirm_hard_description =>
-      'This will permanently and irreversibly delete all your data.';
-
-  @override
-  String get deep_link_switch_confirm_hard_button => 'Confirm hard delete';
-
-  @override
-  String get open_link_on_mobile =>
-      'Please open this link on your mobile device.';
 
   @override
   String get you_have_been_invited => 'You have been invited to a study!';
@@ -1720,16 +1465,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get date_picker_hint => 'Select a date';
-
-  @override
-  String get time_picker_hint => 'Select a time';
-
-  @override
   String get date_picker_button_label => 'Choose date';
-
-  @override
-  String get date_time_picker_button_label => 'Choose date and time';
 
   @override
   String get date_picker_button_label_datetime => 'Select date';
@@ -1770,16 +1506,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String time_picker_max_hint(Object max) {
     return 'Latest allowed time: $max';
-  }
-
-  @override
-  String date_picker_validation_min_date(String minDate) {
-    return 'Date must be after $minDate';
-  }
-
-  @override
-  String date_picker_validation_max_date(String maxDate) {
-    return 'Date must be before $maxDate';
   }
 
   @override
