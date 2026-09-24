@@ -25,4 +25,24 @@ fvm dart pub get
 echo "Bootstrapping Melos packages via fvm dart run melos..."
 fvm dart run melos bootstrap
 
+# Install agent skills pinned in skills-lock.json (source: studyu-health/studyu-agent-marketplace).
+if command -v npx >/dev/null 2>&1; then
+  echo "Installing agent skills via npx skills..."
+  if ! DISABLE_TELEMETRY=1 npx --yes skills@1.7.0 experimental_install; then
+    echo "Warning: agent skills could not be installed. Check marketplace access and re-run ./setup.sh." >&2
+  elif [ ! -d .agents/skills ]; then
+    echo "Warning: marketplace installer returned without skills; check skills-lock.json and re-run ./setup.sh." >&2
+  fi
+  # Remove legacy per-skill links so Claude reads only the canonical directory.
+  if [ -d .claude/skills ] && [ ! -L .claude/skills ]; then
+    find .claude/skills -mindepth 1 -maxdepth 1 -type l -delete
+    rmdir .claude/skills 2>/dev/null || echo "Warning: .claude/skills contains files; move them and re-run ./setup.sh." >&2
+  fi
+  if [ ! -L .claude/skills ] && [ -e .agents/skills ]; then
+    ln -s ../.agents/skills .claude/skills
+  fi
+else
+  echo "Warning: npx not found; agent skills not installed. Install Node >= 22.20 and re-run ./setup.sh." >&2
+fi
+
 echo "Setup complete!"

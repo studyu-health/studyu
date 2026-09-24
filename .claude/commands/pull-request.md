@@ -1,1 +1,0 @@
-../../.agents/skills/pull-request/SKILL.md

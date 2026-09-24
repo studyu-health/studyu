@@ -3,27 +3,23 @@
 ## Getting Started
 
 1. Install [FVM](https://fvm.app/documentation/getting-started/installation).
-2. Clone this repository and open its root directory.
-3. Run `./setup.sh` to install the pinned Flutter SDK, resolve Melos from the lockfile,
-   dependencies, and workspace links.
+2. Install Node.js ≥ 22.20 (for agent skills).
+3. Clone this repository and open its root directory.
+4. Run `./setup.sh` to install the pinned Flutter SDK, resolve Melos from the lockfile, dependencies, workspace links, and agent skills from `studyu-health/studyu-agent-marketplace`.
 
-The root [`pubspec.yaml`](pubspec.yaml) is the command catalog. Run its Melos
-scripts as `fvm dart run melos <script>`.
+To edit skills, make changes in `studyu-health/studyu-agent-marketplace`. In this repository, run `npx skills update -p` and commit the updated `skills-lock.json`.
+
+The root [`pubspec.yaml`](pubspec.yaml) is the command catalog. Run its Melos scripts as `fvm dart run melos <script>`.
 
 ## Flutter SDK Setup
 
-FVM manages the Flutter SDK for this repository. Refer to the [official FVM
-installation guide](https://fvm.app/documentation/getting-started/installation) for
-installation requirements and the [FVM workflow documentation](https://fvm.app/documentation/guides/workflows)
-for general FVM usage.
+FVM manages the Flutter SDK for this repository. Refer to the [official FVM installation guide](https://fvm.app/documentation/getting-started/installation) for installation requirements and the [FVM workflow documentation](https://fvm.app/documentation/guides/workflows) for general FVM usage.
 
-The committed [`.fvmrc`](.fvmrc) pins this repository to the configured version. The
-project version takes precedence over a global Flutter version. All commands below
-must be run from the repository root.
+The committed [`.fvmrc`](.fvmrc) pins this repository to the configured version. The project version takes precedence over a global Flutter version. All commands below must be run from the repository root.
 
 ### Set up the repository
 
-After installing FVM, run:
+After installing FVM and Node.js, run:
 
 ```bash
 ./setup.sh
@@ -31,11 +27,7 @@ fvm flutter --version
 fvm dart --version
 ```
 
-`./setup.sh` reads `.fvmrc`, installs the pinned Flutter SDK, and creates the ignored
-`.fvm/flutter_sdk` link to the cached project SDK. It also installs Melos, bootstraps the
-workspace, fetches root dependencies, and creates `.env.local` from `.env.local.example` when
-needed. The root `pubspec.yaml` points Melos to the same SDK through `melos.sdkPath`; no manual
-`MELOS_SDK_PATH` export is required.
+`./setup.sh` reads `.fvmrc`, installs the pinned Flutter SDK, and creates the ignored `.fvm/flutter_sdk` link to the cached project SDK. It also installs Melos, bootstraps the workspace, fetches root dependencies, creates `.env.local` from `.env.local.example` when needed, and installs pinned agent skills when Node.js ≥ 22.20 is available. The root `pubspec.yaml` points Melos to the same SDK through `melos.sdkPath`; no manual `MELOS_SDK_PATH` export is required.
 
 Use the project SDK for development commands:
 
@@ -49,21 +41,16 @@ fvm dart run melos local:designer_v2
 
 ### IDE configuration
 
-Open the repository root, not an individual package. Configure the IDE to use the
-project SDK link at `.fvm/flutter_sdk`.
+Open the repository root, not an individual package. Configure the IDE to use the project SDK link at `.fvm/flutter_sdk`.
 
-For VS Code or VSCodium, set `dart.flutterSdkPath` to `.fvm/flutter_sdk`. Refer to
-the [FVM VS Code documentation](https://fvm.app/documentation/guides/vscode) for
-FVM-specific editor integration.
+For VS Code or VSCodium, set `dart.flutterSdkPath` to `.fvm/flutter_sdk`. Refer to the [FVM VS Code documentation](https://fvm.app/documentation/guides/vscode) for FVM-specific editor integration.
 
 For Android Studio or IntelliJ:
 
 1. Open **Settings/Preferences > Languages & Frameworks > Flutter**.
 2. Set **Flutter SDK path** to `<repository-root>/.fvm/flutter_sdk`.
-3. If required, set the Dart SDK path to
-   `<repository-root>/.fvm/flutter_sdk/bin/cache/dart-sdk`.
-4. Re-select the project SDK path after changing versions with `fvm use` if the IDE
-   has resolved the previous symlink target.
+3. If required, set the Dart SDK path to `<repository-root>/.fvm/flutter_sdk/bin/cache/dart-sdk`.
+4. Re-select the project SDK path after changing versions with `fvm use` if the IDE has resolved the previous symlink target.
 
 For project-specific diagnostics, run `fvm doctor` from the repository root.
 
@@ -84,8 +71,7 @@ Backend and tooling at the repo root (outside the Flutter workspace):
 - [supabase/](./supabase): migrations, seeds, local CLI config, and database tests.
 - [database/migration-legacy/](./database/migration-legacy): historical migrations; no longer the current migration path.
 
-Run `fvm dart run melos <script>` from the repository root to operate on the
-workspace. See `pubspec.yaml` for the full script catalog.
+Run `fvm dart run melos <script>` from the repository root to operate on the workspace. See `pubspec.yaml` for the full script catalog.
 
 ## Environments
 
@@ -93,21 +79,13 @@ Environment files live under `flutter_common/lib/envs/`:
 
 - `.env` — Production database using main branch (default; do **not** use for routine development).
 - `.env.dev` — Development database using dev branch.
-- `.env.local` — Local Supabase CLI instance. `./setup.sh` creates this file from
-  `.env.local.example` when it does not exist.
+- `.env.local` — Local Supabase CLI instance. `./setup.sh` creates this file from `.env.local.example` when it does not exist.
 
-Use the `dev:*` Melos scripts for the development environment and `local:*`
-for a local Supabase instance. Only `.env.dev` or `.env.local` should be used
-for routine development.
+Use the `dev:*` Melos scripts for the development environment and `local:*` for a local Supabase instance. Only `.env.dev` or `.env.local` should be used for routine development.
 
 ### Override the environment at runtime
 
-The loader reads `STUDYU_ENV` at runtime
-(`flutter_common/lib/src/utils/env_loader.dart`) and picks the matching file
-under `flutter_common/lib/envs/`. To override without renaming files, pass
-`STUDYU_ENV` to a Flutter subcommand, or add
-`--dart-define=STUDYU_ENV=.env.local` to the run configuration in Android
-Studio or VS Code:
+The loader reads `STUDYU_ENV` at runtime (`flutter_common/lib/src/utils/env_loader.dart`) and picks the matching file under `flutter_common/lib/envs/`. To override without renaming files, pass `STUDYU_ENV` to a Flutter subcommand, or add `--dart-define=STUDYU_ENV=.env.local` to the run configuration in Android Studio or VS Code:
 
 ```bash
 flutter [build, run, test] [android, ios, web] --dart-define=STUDYU_ENV=.env.local
@@ -115,8 +93,7 @@ flutter [build, run, test] [android, ios, web] --dart-define=STUDYU_ENV=.env.loc
 
 ### `.env` template
 
-Each env file is a key=value list. Required keys
-(see `flutter_common/lib/envs/.env` for the canonical version):
+Each env file is a key=value list. Required keys (see `flutter_common/lib/envs/.env` for the canonical version):
 
 ```shell
 STUDYU_SUPABASE_URLS=https://db-redirect-prod.studyu.health,https://studyu-01.dhc-lab.hpi.de
@@ -135,15 +112,11 @@ STUDYU_DEVELOPER_EMAIL=
 STUDYU_APP_DEEP_LINK_SCHEME=
 ```
 
-See [`supabase/README.md`](supabase/README.md) for the `.env.local` workflow
-and local backend setup.
+See [`supabase/README.md`](supabase/README.md) for the `.env.local` workflow and local backend setup.
 
 ## Codegen
 
-The `core` and `designer_v2` packages use code generation. `core` produces
-JSON IO for shared models via [build_runner](https://pub.dev/packages/build_runner)
-and [json_serializable](https://pub.dev/packages/json_serializable). `designer_v2`
-adds Riverpod, routing, and json_serializable output on top of that.
+The `core` and `designer_v2` packages use code generation. `core` produces JSON IO for shared models via [build_runner](https://pub.dev/packages/build_runner) and [json_serializable](https://pub.dev/packages/json_serializable). `designer_v2` adds Riverpod, routing, and json_serializable output on top of that.
 
 After changing annotated models, controllers, or routes, run:
 
@@ -151,23 +124,15 @@ After changing annotated models, controllers, or routes, run:
 fvm dart run melos generate
 ```
 
-Contrary to most recommendations, the generated files (`*.g.dart`) are committed
-to Git. This is required because `core` is imported as a dependency by both
-frontends, and consumers need the generated output present at dependency
-resolution.
+Contrary to most recommendations, the generated files (`*.g.dart`) are committed to Git. This is required because `core` is imported as a dependency by both frontends, and consumers need the generated output present at dependency resolution.
 
 ## Code Style
 
-The shared Dart and Flutter lint rules are defined in [`analysis_options.yaml`](analysis_options.yaml).
-Before committing, run `fvm dart run melos qualitycheck`; it checks formatting and analyzes the
-workspace without writing files. Run `fvm dart format .` to apply formatting fixes and
-`fvm dart run melos generate` separately when code generation is required.
+The shared Dart and Flutter lint rules are defined in [`analysis_options.yaml`](analysis_options.yaml). Before committing, run `fvm dart run melos qualitycheck`; it checks formatting and analyzes the workspace without writing files. Run `fvm dart format .` to apply formatting fixes and `fvm dart run melos generate` separately when code generation is required.
 
 ## Frontend
 
-Both frontends follow the [Material Design 3 guidelines](https://m3.material.io/get-started).
-Custom themes live in [`app/lib/theme.dart`](app/lib/theme.dart) (participant app) and
-[`designer_v2/lib/theme.dart`](designer_v2/lib/theme.dart) (researcher designer).
+Both frontends follow the [Material Design 3 guidelines](https://m3.material.io/get-started). Custom themes live in [`app/lib/theme.dart`](app/lib/theme.dart) (participant app) and [`designer_v2/lib/theme.dart`](designer_v2/lib/theme.dart) (researcher designer).
 
 ## Commits
 
@@ -177,9 +142,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org). The format i
 <type>[(<scope>)]: <description>
 ```
 
-Common types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`,
-`perf`, `ci`, `build`, `revert`. Use a `scope` that names the touched package
-(`app`, `designer`, `core`, `flutter_common`, `db`).
+Common types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`, `perf`, `ci`, `build`, `revert`. Use a `scope` that names the touched package (`app`, `designer`, `core`, `flutter_common`, `db`).
 
 Examples from this repo:
 
@@ -189,14 +152,11 @@ Examples from this repo:
 
 ## Pull Requests
 
-For any new feature or bug fix, create a branch and open a pull request. Follow the
-pull request template and these conventions:
+For any new feature or bug fix, create a branch and open a pull request. Follow the pull request template and these conventions:
 
 - Jira-backed branch: `<type>/studyu-<ticket-number>-<short-description>`
 - Jira-backed PR title: `[STUDYU-<ticket-number>] <type>[(<scope>)]: <description>`
-- Dependency-upgrade PRs created through `.agents/skills/dependency-upgrade`
-  are maintenance and do not require Jira. Use a `chore/<short-description>`
-  branch and a `chore(deps): <description>` PR title.
+- Dependency-upgrade PRs created through `.agents/skills/dependency-upgrade` are maintenance and do not require Jira. Use a `chore/<short-description>` branch and a `chore(deps): <description>` PR title.
 - A small maintenance PR can omit Jira only when all these conditions apply:
   - Its type is `chore`, `docs`, `ci`, `build`, or `test`.
   - It changes no user-facing behavior, database, deployment, or release.
@@ -205,28 +165,18 @@ pull request template and these conventions:
 - A ticketless maintenance branch uses `<type>/<short-description>`.
 - A ticketless maintenance PR title uses `<type>[(<scope>)]: <description>`.
 - PR description must include:
-  - A direct Jira link, or `Not applicable — maintenance PR.` for an approved
-    ticketless maintenance PR.
-  - A **description** of the change and its motivation, with any related
-    issues or context.
-  - **Testing steps** that let a reviewer reproduce and verify the change
-    locally.
-- **Screenshot or video** of any visual change. Use a screen recording for
-  interactive changes and a static screenshot for non-interactive ones.
-  Non-visual PRs may drop the `## Visuals` section of the template.
+  - A direct Jira link, or `Not applicable — maintenance PR.` for an approved ticketless maintenance PR.
+  - A **description** of the change and its motivation, with any related issues or context.
+  - **Testing steps** that let a reviewer reproduce and verify the change locally.
+- **Screenshot or video** of any visual change. Use a screen recording for interactive changes and a static screenshot for non-interactive ones. Non-visual PRs may drop the `## Visuals` section of the template.
 
 ## Writing Style
 
-Write issues, PR titles and descriptions, review comments, and documentation in
-[ASD-STE100](https://en.wikipedia.org/wiki/Simplified_Technical_English) Simplified
-Technical English: short active-voice sentences, one action per sentence, plain words,
-one term per concept. The `.agents/skills/asd-ste100` skill holds the full rules.
+Write issues, PR titles and descriptions, review comments, and documentation in [ASD-STE100](https://en.wikipedia.org/wiki/Simplified_Technical_English) Simplified Technical English: short active-voice sentences, one action per sentence, plain words, one term per concept. The `.agents/skills/asd-ste100` skill holds the full rules.
 
 ## Code Reviews — Conventional Comments
 
-We use [Conventional Comments](https://conventionalcomments.org/) for all review
-feedback. This standard makes the intent behind each comment clear and
-actionable.
+We use [Conventional Comments](https://conventionalcomments.org/) for all review feedback. This standard makes the intent behind each comment clear and actionable.
 
 ### Format
 
@@ -278,5 +228,4 @@ praise: Great use of the builder pattern here — very readable.
 
 ## Database and Backend
 
-See [`supabase/README.md`](supabase/README.md) for local setup, migrations,
-seeds, and database tests. `database/migration-legacy/` is historical only.
+See [`supabase/README.md`](supabase/README.md) for local setup, migrations, seeds, and database tests. `database/migration-legacy/` is historical only.

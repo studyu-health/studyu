@@ -183,3 +183,6 @@ interview/
 
 .vscode/settings.json
 /.qwen/
+# Agent skills (installed by ./setup.sh from hpi-studyu/studyu-agent-marketplace)
+/.agents/skills/
+/.claude/skills

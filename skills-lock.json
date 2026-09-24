@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "asd-ste100": {
+      "source": "studyu-health/studyu-agent-marketplace",
+      "sourceType": "github",
+      "skillPath": "skills/asd-ste100/SKILL.md",
+      "computedHash": "b450836056e20a2e7906a346eea0c264444be8da658c79f7f4e394a6248345a0"
+    },
+    "dependency-upgrade": {
+      "source": "studyu-health/studyu-agent-marketplace",
+      "sourceType": "github",
+      "skillPath": "skills/dependency-upgrade/SKILL.md",
+      "computedHash": "126702aba3e864fac93b35de57062929e54f328303c45e95169f10c53ca69e14"
+    },
+    "flutter-platform-regeneration": {
+      "source": "studyu-health/studyu-agent-marketplace",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-platform-regeneration/SKILL.md",
+      "computedHash": "8920ef973ce52a51cfbf6c91d243d5f26893f46f61e523a729c4ae9beeb295f3"
+    },
+    "manual-testing": {
+      "source": "studyu-health/studyu-agent-marketplace",
+      "sourceType": "github",
+      "skillPath": "skills/manual-testing/SKILL.md",
+      "computedHash": "12e9d60c6eeb3471f61059750e9f725b53b6a7f821e0c6715d0f4463e673a981"
+    },
+    "pull-request": {
+      "source": "studyu-health/studyu-agent-marketplace",
+      "sourceType": "github",
+      "skillPath": "skills/pull-request/SKILL.md",
+      "computedHash": "4aad06eb5febb38a569a56bc797aff090312891fb81f0aee6b55245e83344d5c"
+    }
+  }
+}
