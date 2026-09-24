@@ -226,12 +226,6 @@ abstract class AppLocalizations {
   /// **'Made with ♥ in Potsdam'**
   String get made_with_love_in_potsdam;
 
-  /// No description provided for @welcome_find_study_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a public study or use an invitation.'**
-  String get welcome_find_study_description;
-
   /// No description provided for @browse_public_studies.
   ///
   /// In en, this message translates to:
@@ -243,12 +237,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Already participated with StudyU?'**
   String get welcome_returning_participant;
-
-  /// No description provided for @restore_studyu_account.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore StudyU account'**
-  String get restore_studyu_account;
 
   /// No description provided for @show_onboarding_again.
   ///
@@ -418,12 +406,6 @@ abstract class AppLocalizations {
   /// **'No interventions available.'**
   String get no_interventions_available;
 
-  /// No description provided for @loading_interventions.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading interventions'**
-  String get loading_interventions;
-
   /// No description provided for @task_already_completed.
   ///
   /// In en, this message translates to:
@@ -508,12 +490,6 @@ abstract class AppLocalizations {
   /// **'Current intervention'**
   String get intervention_current;
 
-  /// No description provided for @study_current.
-  ///
-  /// In en, this message translates to:
-  /// **'Current study:'**
-  String get study_current;
-
   /// No description provided for @opt_out.
   ///
   /// In en, this message translates to:
@@ -550,12 +526,6 @@ abstract class AppLocalizations {
   /// **'Leave and keep my data'**
   String get leave_keep_data;
 
-  /// No description provided for @leave_study_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Stop participating. Your existing study data will be retained.'**
-  String get leave_study_description;
-
   /// No description provided for @delete_data.
   ///
   /// In en, this message translates to:
@@ -580,30 +550,6 @@ abstract class AppLocalizations {
   /// **'Leave and delete my data'**
   String get leave_delete_data;
 
-  /// No description provided for @delete_study_data_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Permanently delete your study data. This cannot be undone.'**
-  String get delete_study_data_description;
-
-  /// No description provided for @soft_delete_desc.
-  ///
-  /// In en, this message translates to:
-  /// **'You will lose your progress in '**
-  String get soft_delete_desc;
-
-  /// No description provided for @soft_delete_desc_2.
-  ///
-  /// In en, this message translates to:
-  /// **' and won\'t be able to recover it. Previously completed studies will not be deleted.\nYour anonymized data up to this point may still be used for research purposes.'**
-  String get soft_delete_desc_2;
-
-  /// No description provided for @hard_delete_desc.
-  ///
-  /// In en, this message translates to:
-  /// **'You are about to delete all data from your device and our servers. You will not be able to restore your data.\nYour anonymized data will not be available for research purposes anymore.'**
-  String get hard_delete_desc;
-
   /// No description provided for @your_journey.
   ///
   /// In en, this message translates to:
@@ -622,12 +568,6 @@ abstract class AppLocalizations {
   /// **'Results available'**
   String get journey_results_available;
 
-  /// No description provided for @summary.
-  ///
-  /// In en, this message translates to:
-  /// **'Summary'**
-  String get summary;
-
   /// No description provided for @consent.
   ///
   /// In en, this message translates to:
@@ -639,48 +579,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred!'**
   String get error;
-
-  /// No description provided for @tea_vs_coffee.
-  ///
-  /// In en, this message translates to:
-  /// **'Tea vs. Coffee'**
-  String get tea_vs_coffee;
-
-  /// No description provided for @weed_vs_alcohol.
-  ///
-  /// In en, this message translates to:
-  /// **'Weed vs. Alcohol'**
-  String get weed_vs_alcohol;
-
-  /// No description provided for @back_pain.
-  ///
-  /// In en, this message translates to:
-  /// **'Back pain'**
-  String get back_pain;
-
-  /// No description provided for @video_task.
-  ///
-  /// In en, this message translates to:
-  /// **'Video task'**
-  String get video_task;
-
-  /// No description provided for @finished.
-  ///
-  /// In en, this message translates to:
-  /// **'Finished'**
-  String get finished;
-
-  /// No description provided for @how_would_you_rate_your_pain_today.
-  ///
-  /// In en, this message translates to:
-  /// **'How would you rate your pain today? (0 = no pain, 10 = extreme pain)'**
-  String get how_would_you_rate_your_pain_today;
-
-  /// No description provided for @thank_you_for_your_input.
-  ///
-  /// In en, this message translates to:
-  /// **'Thank you for your input'**
-  String get thank_you_for_your_input;
 
   /// No description provided for @please_give_consent.
   ///
@@ -718,18 +616,6 @@ abstract class AppLocalizations {
   /// **'This study is not available for testing yet.'**
   String get study_not_available_for_testing_yet;
 
-  /// No description provided for @home.
-  ///
-  /// In en, this message translates to:
-  /// **'Home'**
-  String get home;
-
-  /// No description provided for @profile.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile'**
-  String get profile;
-
   /// No description provided for @help.
   ///
   /// In en, this message translates to:
@@ -741,12 +627,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Contact'**
   String get contact;
-
-  /// No description provided for @contact_support.
-  ///
-  /// In en, this message translates to:
-  /// **'Contact study team'**
-  String get contact_support;
 
   /// Body of the support email, includes the subject ID
   ///
@@ -838,12 +718,6 @@ abstract class AppLocalizations {
   /// **'Copy all'**
   String get copy_all_information;
 
-  /// No description provided for @value_copied.
-  ///
-  /// In en, this message translates to:
-  /// **'{label} copied to clipboard.'**
-  String value_copied(String label);
-
   /// No description provided for @all_information_copied.
   ///
   /// In en, this message translates to:
@@ -891,12 +765,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm selection'**
   String get confirm;
-
-  /// No description provided for @survey.
-  ///
-  /// In en, this message translates to:
-  /// **'Survey'**
-  String get survey;
 
   /// No description provided for @complete.
   ///
@@ -958,12 +826,6 @@ abstract class AppLocalizations {
   /// **'FAQ'**
   String get faq;
 
-  /// No description provided for @start_study.
-  ///
-  /// In en, this message translates to:
-  /// **'Start Study'**
-  String get start_study;
-
   /// No description provided for @next_day.
   ///
   /// In en, this message translates to:
@@ -993,12 +855,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop recording'**
   String get stop_recording;
-
-  /// No description provided for @error_recording.
-  ///
-  /// In en, this message translates to:
-  /// **'Error occurred during recording'**
-  String get error_recording;
 
   /// No description provided for @photo_captured.
   ///
@@ -1048,24 +904,6 @@ abstract class AppLocalizations {
   /// **'Recording error'**
   String get recording_error;
 
-  /// No description provided for @storing_photo.
-  ///
-  /// In en, this message translates to:
-  /// **'The photo is being stored'**
-  String get storing_photo;
-
-  /// No description provided for @storing_audio.
-  ///
-  /// In en, this message translates to:
-  /// **'The audio file is being stored'**
-  String get storing_audio;
-
-  /// No description provided for @upload_error.
-  ///
-  /// In en, this message translates to:
-  /// **'The file could not be uploaded'**
-  String get upload_error;
-
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
@@ -1089,30 +927,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'German'**
   String get de;
-
-  /// No description provided for @allow_analytics.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow app analytics'**
-  String get allow_analytics;
-
-  /// No description provided for @allow_analytics_desc.
-  ///
-  /// In en, this message translates to:
-  /// **'All collected data is used only to improve app performance and never for tracking purposes. You can read more about this in our data privacy.'**
-  String get allow_analytics_desc;
-
-  /// No description provided for @video_test.
-  ///
-  /// In en, this message translates to:
-  /// **'This is a video test'**
-  String get video_test;
-
-  /// No description provided for @survey_test.
-  ///
-  /// In en, this message translates to:
-  /// **'This is a survey test'**
-  String get survey_test;
 
   /// No description provided for @current_report.
   ///
@@ -1264,12 +1078,6 @@ abstract class AppLocalizations {
   /// **'Not a valid invite code'**
   String get invalid_invite_code;
 
-  /// No description provided for @save_pdf.
-  ///
-  /// In en, this message translates to:
-  /// **'Save as PDF'**
-  String get save_pdf;
-
   /// No description provided for @was_saved_to.
   ///
   /// In en, this message translates to:
@@ -1305,12 +1113,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'If you made a mistake, you can still change your answers'**
   String get eligible_mistake;
-
-  /// No description provided for @eligible_back.
-  ///
-  /// In en, this message translates to:
-  /// **'Back to study selection'**
-  String get eligible_back;
 
   /// No description provided for @eligible_choice_multi_selection.
   ///
@@ -1365,30 +1167,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Observations'**
   String get performance_overview_observations;
-
-  /// No description provided for @report_outcome_inconclusive.
-  ///
-  /// In en, this message translates to:
-  /// **'The results are inconclusive. There does not seem to be a statistically significant difference between the interventions.'**
-  String get report_outcome_inconclusive;
-
-  /// No description provided for @report_outcome_neither.
-  ///
-  /// In en, this message translates to:
-  /// **'Both interventions seem to have a negative effect on the outcome for you.'**
-  String get report_outcome_neither;
-
-  /// No description provided for @report_outcome_one.
-  ///
-  /// In en, this message translates to:
-  /// **'The intervention {intervention} seems to improve the outcome for you.'**
-  String report_outcome_one(Object intervention);
-
-  /// No description provided for @report_axis_phase.
-  ///
-  /// In en, this message translates to:
-  /// **'Phase'**
-  String get report_axis_phase;
 
   /// No description provided for @completed_study.
   ///
@@ -1582,41 +1360,11 @@ abstract class AppLocalizations {
   /// **'Enable accessible charts'**
   String get show_colorless_gauges;
 
-  /// No description provided for @welchs_t_test_results.
-  ///
-  /// In en, this message translates to:
-  /// **'Welch\'s t-test Results'**
-  String get welchs_t_test_results;
-
-  /// No description provided for @sample_a.
-  ///
-  /// In en, this message translates to:
-  /// **'Sample A'**
-  String get sample_a;
-
-  /// No description provided for @sample_b.
-  ///
-  /// In en, this message translates to:
-  /// **'Sample B'**
-  String get sample_b;
-
-  /// No description provided for @sample_size.
-  ///
-  /// In en, this message translates to:
-  /// **'n'**
-  String get sample_size;
-
   /// No description provided for @mean.
   ///
   /// In en, this message translates to:
   /// **'mean'**
   String get mean;
-
-  /// No description provided for @variance.
-  ///
-  /// In en, this message translates to:
-  /// **'var'**
-  String get variance;
 
   /// No description provided for @t_statistic.
   ///
@@ -1635,18 +1383,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'p-value'**
   String get p_value;
-
-  /// No description provided for @result_significant.
-  ///
-  /// In en, this message translates to:
-  /// **'Significantly different'**
-  String get result_significant;
-
-  /// No description provided for @result_not_significant.
-  ///
-  /// In en, this message translates to:
-  /// **'Not significantly different'**
-  String get result_not_significant;
 
   /// No description provided for @level_of_significance.
   ///
@@ -1677,12 +1413,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Significance level and p-value'**
   String get significance_level_and_p_value;
-
-  /// No description provided for @descriptive_statistics.
-  ///
-  /// In en, this message translates to:
-  /// **'Descriptive statistics'**
-  String get descriptive_statistics;
 
   /// Label for comparing results between two interventions or samples
   ///
@@ -1762,12 +1492,6 @@ abstract class AppLocalizations {
   /// **'Your message to the study team was prepared in your email app. Review and send the email, then wait for their reply.\n\nIf you are currently participating in a study, continue tracking your results outside the app until the issue is resolved.'**
   String get support_email_sent_description;
 
-  /// No description provided for @no_contact_email.
-  ///
-  /// In en, this message translates to:
-  /// **'The support email address is not configured. Please contact your study supervisor for assistance.'**
-  String get no_contact_email;
-
   /// No description provided for @sync_fitbit_data.
   ///
   /// In en, this message translates to:
@@ -1839,12 +1563,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Pain Level'**
   String get dialogTitle;
-
-  /// No description provided for @okButton.
-  ///
-  /// In en, this message translates to:
-  /// **'OK'**
-  String get okButton;
 
   /// No description provided for @cancelButton.
   ///
@@ -2560,18 +2278,6 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get ok;
 
-  /// No description provided for @submit.
-  ///
-  /// In en, this message translates to:
-  /// **'Submit'**
-  String get submit;
-
-  /// No description provided for @go_back.
-  ///
-  /// In en, this message translates to:
-  /// **'Go back'**
-  String get go_back;
-
   /// No description provided for @study_settings_section.
   ///
   /// In en, this message translates to:
@@ -2584,23 +2290,11 @@ abstract class AppLocalizations {
   /// **'Recovery phrase'**
   String get recovery_phrase_header;
 
-  /// No description provided for @copy_to_clipboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy to clipboard'**
-  String get copy_to_clipboard;
-
   /// No description provided for @copied_to_clipboard.
   ///
   /// In en, this message translates to:
   /// **'Copied to clipboard. Paste the recovery phrase somewhere secure on your phone now.'**
   String get copied_to_clipboard;
-
-  /// No description provided for @recovery_phrase_save_warning.
-  ///
-  /// In en, this message translates to:
-  /// **'Never share them with anyone.'**
-  String get recovery_phrase_save_warning;
 
   /// No description provided for @show_recovery_phrase.
   ///
@@ -2704,18 +2398,6 @@ abstract class AppLocalizations {
   /// **'Recovery phrases have 13 words. Remove extra words to continue.'**
   String get recovery_phrase_too_many_words;
 
-  /// No description provided for @recovery_successful.
-  ///
-  /// In en, this message translates to:
-  /// **'Recovery successful! ID: {id}'**
-  String recovery_successful(String id);
-
-  /// No description provided for @deep_link_error_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Error'**
-  String get deep_link_error_title;
-
   /// No description provided for @deep_link_study_not_found.
   ///
   /// In en, this message translates to:
@@ -2752,48 +2434,6 @@ abstract class AppLocalizations {
   /// **'Restore your account on this device with the recovery phrase you saved before joining a study.'**
   String get restore_account_description;
 
-  /// No description provided for @restore_account_help_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore with your recovery phrase'**
-  String get restore_account_help_title;
-
-  /// No description provided for @restore_account_help_1.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter all 13 words in order'**
-  String get restore_account_help_1;
-
-  /// No description provided for @restore_account_help_2.
-  ///
-  /// In en, this message translates to:
-  /// **'You can type or paste the phrase manually'**
-  String get restore_account_help_2;
-
-  /// No description provided for @share_recovery.
-  ///
-  /// In en, this message translates to:
-  /// **'Share Recovery'**
-  String get share_recovery;
-
-  /// No description provided for @share_as_text.
-  ///
-  /// In en, this message translates to:
-  /// **'Share as Text'**
-  String get share_as_text;
-
-  /// No description provided for @download_recovery.
-  ///
-  /// In en, this message translates to:
-  /// **'Download Recovery'**
-  String get download_recovery;
-
-  /// No description provided for @download_as_text.
-  ///
-  /// In en, this message translates to:
-  /// **'Download as Text File'**
-  String get download_as_text;
-
   /// No description provided for @file_saved.
   ///
   /// In en, this message translates to:
@@ -2805,12 +2445,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error saving file'**
   String get file_save_error;
-
-  /// No description provided for @share_btn.
-  ///
-  /// In en, this message translates to:
-  /// **'Share'**
-  String get share_btn;
 
   /// No description provided for @copy_btn.
   ///
@@ -2830,35 +2464,17 @@ abstract class AppLocalizations {
   /// **'General'**
   String get general_section;
 
-  /// No description provided for @current_study_section.
-  ///
-  /// In en, this message translates to:
-  /// **'Current study'**
-  String get current_study_section;
-
   /// No description provided for @participation_options_section.
   ///
   /// In en, this message translates to:
   /// **'Manage participation'**
   String get participation_options_section;
 
-  /// No description provided for @share_recovery_text_btn.
-  ///
-  /// In en, this message translates to:
-  /// **'Share Recovery Text'**
-  String get share_recovery_text_btn;
-
   /// No description provided for @recovery_phrase_load_error.
   ///
   /// In en, this message translates to:
   /// **'Failed to load recovery phrase'**
   String get recovery_phrase_load_error;
-
-  /// No description provided for @share_error.
-  ///
-  /// In en, this message translates to:
-  /// **'Error sharing: {error}'**
-  String share_error(String error);
 
   /// No description provided for @deep_link_study_invite_only.
   ///
@@ -2871,12 +2487,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid or expired invite code: {code}'**
   String deep_link_invite_invalid(String code);
-
-  /// No description provided for @deep_link_error_invalid_invite.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid invite code'**
-  String get deep_link_error_invalid_invite;
 
   /// No description provided for @deep_link_switch_warning_title.
   ///
@@ -2910,78 +2520,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue Study'**
   String get deep_link_switch_continue_study;
-
-  /// No description provided for @deep_link_switch_primary_return.
-  ///
-  /// In en, this message translates to:
-  /// **'Return to current study'**
-  String get deep_link_switch_primary_return;
-
-  /// No description provided for @deep_link_switch_secondary_continue.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave current study and switch'**
-  String get deep_link_switch_secondary_continue;
-
-  /// No description provided for @deep_link_switch_data_choice_title.
-  ///
-  /// In en, this message translates to:
-  /// **'How do you want to leave your current study?'**
-  String get deep_link_switch_data_choice_title;
-
-  /// No description provided for @deep_link_switch_data_choice_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose what should happen to your current study data before switching.'**
-  String get deep_link_switch_data_choice_description;
-
-  /// No description provided for @deep_link_switch_soft_delete_button.
-  ///
-  /// In en, this message translates to:
-  /// **'Soft delete and switch'**
-  String get deep_link_switch_soft_delete_button;
-
-  /// No description provided for @deep_link_switch_hard_delete_button.
-  ///
-  /// In en, this message translates to:
-  /// **'Hard delete and switch'**
-  String get deep_link_switch_hard_delete_button;
-
-  /// No description provided for @deep_link_switch_confirm_soft_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm soft delete'**
-  String get deep_link_switch_confirm_soft_title;
-
-  /// No description provided for @deep_link_switch_confirm_soft_button.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm soft delete'**
-  String get deep_link_switch_confirm_soft_button;
-
-  /// No description provided for @deep_link_switch_confirm_hard_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm hard delete'**
-  String get deep_link_switch_confirm_hard_title;
-
-  /// No description provided for @deep_link_switch_confirm_hard_description.
-  ///
-  /// In en, this message translates to:
-  /// **'This will permanently and irreversibly delete all your data.'**
-  String get deep_link_switch_confirm_hard_description;
-
-  /// No description provided for @deep_link_switch_confirm_hard_button.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm hard delete'**
-  String get deep_link_switch_confirm_hard_button;
-
-  /// No description provided for @open_link_on_mobile.
-  ///
-  /// In en, this message translates to:
-  /// **'Please open this link on your mobile device.'**
-  String get open_link_on_mobile;
 
   /// No description provided for @you_have_been_invited.
   ///
@@ -3199,29 +2737,11 @@ abstract class AppLocalizations {
   /// **'An error occurred: {message}'**
   String error_occurred_with_message(String message);
 
-  /// No description provided for @date_picker_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a date'**
-  String get date_picker_hint;
-
-  /// No description provided for @time_picker_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a time'**
-  String get time_picker_hint;
-
   /// No description provided for @date_picker_button_label.
   ///
   /// In en, this message translates to:
   /// **'Choose date'**
   String get date_picker_button_label;
-
-  /// No description provided for @date_time_picker_button_label.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose date and time'**
-  String get date_time_picker_button_label;
 
   /// No description provided for @date_picker_button_label_datetime.
   ///
@@ -3288,18 +2808,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Latest allowed time: {max}'**
   String time_picker_max_hint(Object max);
-
-  /// No description provided for @date_picker_validation_min_date.
-  ///
-  /// In en, this message translates to:
-  /// **'Date must be after {minDate}'**
-  String date_picker_validation_min_date(String minDate);
-
-  /// No description provided for @date_picker_validation_max_date.
-  ///
-  /// In en, this message translates to:
-  /// **'Date must be before {maxDate}'**
-  String date_picker_validation_max_date(String maxDate);
 
   /// No description provided for @please_select_interventions_why.
   ///

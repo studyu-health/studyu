@@ -1,203 +1,190 @@
 # StudyU Repository Instructions
 
-This is a Flutter/Dart monorepo. All agent work starts and runs from the repository root.
-Treat these instructions as a concise operating contract, not a replacement for the source
-code, tests, or linked project documentation.
+This is a Flutter/Dart monorepo. Work from the repository root, not a package directory.
+These rules are a contract, not a replacement for source code, tests, or linked docs.
 
 ## Working Principles
 
-- Inspect the relevant implementation, tests, callers, dependents, and documentation before
-  changing behavior. Use structural/code-graph tools when available; otherwise locate code with
-  filename and symbol search, then trace definitions and impact before editing.
-- Check whether the requested approach is correct. Surface a material flaw or a simpler and
-  safer alternative before implementing it.
-- Resolve ordinary uncertainty from repository evidence. Ask before implementation only when
-  unresolved ambiguity materially affects behavior, compatibility, data, security, or scope.
-- Prefer the smallest implementation consistent with the request, existing architecture, and
-  required failure handling. Do not add speculative features, configuration, or abstractions.
-- Keep changes scoped to the requested outcome. Do not include opportunistic refactors,
-  unrelated formatting, dependency upgrades, or cleanup.
-- Preserve unrelated working-tree changes and comments. Remove only imports, variables, or
-  other artifacts made unused by the current change.
+- Ask only when ambiguity affects behavior, compatibility, data, security, or scope. Otherwise
+  resolve it from the repo.
+- Build the smallest change that fits the request and the existing architecture. No speculative
+  features or config.
+- Stay in scope. No opportunistic refactors, unrelated formatting, or dependency bumps.
+- Keep unrelated working-tree changes and comments. Remove only what your change makes unused.
 
 ## Writing Discipline
 
-- Apply the `.agents/skills/asd-ste100` skill to all StudyU prose you write: issues, PR titles
-  and descriptions, review comments, documentation, and generated reports such as manual QA
-  checklists.
-- Preserve code spans, file paths, identifiers, and markers exactly. Never rewrite them.
+- Apply `.agents/skills/asd-ste100` to all StudyU prose: issues, PR text, review comments, docs,
+  QA checklists.
+- Never rewrite code spans, file paths, identifiers, or markers.
 
 ## Repository Map
 
-- `core/` contains shared Dart models and logic used by both frontends.
-- `flutter_common/` contains shared Flutter functionality, environment loading, and Supabase
-  initialization.
-- `app/` is the participant-facing Flutter application for Android, iOS, and web.
-- `designer_v2/` is the researcher-facing Flutter web Designer.
-- `supabase/` contains current migrations, seeds, local configuration, and database tests.
-- `database/migration-legacy/` is historical and is not the current migration path.
+- `core/` — shared Dart models and logic for both frontends.
+- `flutter_common/` — shared Flutter code, env loading, Supabase init.
+- `app/` — participant-facing app (Android, iOS, web).
+- `designer_v2/` — researcher-facing web Designer.
+- `supabase/` — current migrations, seeds, local config, database tests.
+- `database/migration-legacy/` — historical only, not the current migration path.
 
 ## Sources Of Truth
 
-- The root `pubspec.yaml` `melos.scripts` section is authoritative for commands, package
-  filters, ports, and environment defines. Do not copy its script bodies into this file.
-- `CONTRIBUTING.md` is authoritative for setup, coding conventions, commits, reviews, and PRs.
-- `.github/pull_request_template.md` is authoritative for PR body structure and checklists.
-- Hook, CI, and package configuration files are authoritative for what tools actually enforce.
-- `supabase/README.md` is authoritative for local backend setup, migrations, seeds, and database
-  tests.
-- When prose conflicts with executable configuration, inspect and reconcile the conflict rather
-  than guessing.
+- `pubspec.yaml` `melos.scripts` — commands, package filters, ports, env defines. Don't copy
+  script bodies here.
+- `CONTRIBUTING.md` — setup, conventions, commits, reviews, PRs.
+- `.github/pull_request_template.md` — PR body structure and checklists.
+- Hook, CI, and package config files — what's actually enforced.
+- `supabase/README.md` — local backend setup, migrations, seeds, database tests.
+- `docs/sonarqube.md` — SonarQube gate rules and how to reproduce coverage locally.
+- Prose vs. config conflict → trust the config, then fix the prose.
 
 ## Root-Only Workflow
 
-- Run all commands from the repository root. Do not change into a package directory for routine
-  work.
-- After creating a linked worktree, run `./setup.sh` once from its repository root before any
-  other project command.
-- Use `fvm dart run melos <script>` for root Melos scripts.
-- Use `fvm dart` or `fvm flutter` for direct SDK commands. Run `./setup.sh` if the configured
-  SDK is unavailable.
-- Prefer the existing root script catalog. For a targeted package check with no catalog entry,
-  use a root-level `fvm dart run melos exec` command with the appropriate package filter.
-- There is no automated pre-commit hook. Run `fvm dart run melos qualitycheck` before a PR; it
-  checks formatting and analyzes the workspace without writing files. Run `fvm dart format .`
-  and `fvm dart run melos generate` to apply fixes.
-
-## Environments
-
-- The default `.env` targets production. Unqualified `app`, `designer_v2`, and default build
-  scripts can therefore use production configuration.
-- Use `dev:*` scripts for the development environment and `local:*` scripts for local Supabase.
-- Do not run an unqualified application or build command for routine development.
-- Treat environment, storage, authentication, and Supabase initialization changes as affecting
-  both frontends when they touch `flutter_common/`.
-- Never add service-role keys, signing keys, OAuth secrets, store credentials, private keys, or
-  other privileged credentials to tracked client environment files.
-
-## Generated Files And Dependencies
-
-- Do not hand-edit generated Dart or localization output. Change models, annotations, ARB files,
-  or other generator inputs, then run the configured root generation script.
-- Generated `*.g.dart` files are tracked and must be included when regeneration changes them.
-- Inspect generated diffs for unexpected API, schema, or serialization changes.
-- Do not hand-edit lockfiles. For dependency work, change the manifest and use the configured
-  package workflow, then review all resulting lockfile changes.
-- Changes to `core/` models can affect both frontends and persisted study data. Inspect consumers
-  before changing public model or serialization contracts.
+- Run every command from the repository root.
+- New linked worktree → run `./setup.sh` once before anything else.
+- Root Melos scripts: `fvm dart run melos <script>`.
+- Direct SDK commands: `fvm dart` / `fvm flutter`. SDK missing → run `./setup.sh`.
+- No script for a targeted package check → `fvm dart run melos exec` with a package filter.
+  `--scope` takes the package name (`studyu_app`), not the directory (`app`) — a wrong name
+  silently runs 0 packages and reports success.
+- `fvm dart run melos qualitycheck` is for a full CI-style check or when asked.
+- After finishing changes, before commit: run `fvm dart run melos fix` to apply auto-fixable
+  lint fixes.
 
 ## Verification
 
-- Determine which packages and boundaries are affected, then run the narrowest relevant checks.
-- Use `fvm dart run melos test` for workspace Flutter unit and widget tests. This does not cover
-  Designer browser E2E tests or Supabase/pgTAP tests.
-- Run generation after model or annotation changes, and analyze/test affected packages after
-  generated output is updated.
-- Changes under `supabase/` require the database test workflow described in `supabase/README.md`
-  when the relevant local dependencies are available.
-- Changes to full Designer browser flows require the dedicated E2E setup and checks.
-- Changes to Android, iOS, permissions, notifications, camera/audio, Fitbit, or deep links
-  require the relevant platform validation when available.
-- For bugs, add or identify a regression test when practical. Do not weaken tests or expected
-  behavior merely to obtain a passing result.
-- Before reporting completion, inspect the final diff and state exactly which checks ran, which
-  passed, and what could not be verified.
+- Figure out which packages and boundaries a change touches, then run the narrowest checks that
+  cover it.
+- Touch a function → add or update a test that covers it.
+- `fvm dart run melos test` runs workspace unit and widget tests only — not Designer browser E2E
+  or Supabase/pgTAP tests.
+- Model or annotation change → run generation, then analyze and test the affected packages.
+- `supabase/` change → run the database test workflow in `supabase/README.md` when local
+  dependencies are available.
+- Full Designer browser flow change → run the dedicated E2E setup and checks.
+- Android/iOS/permissions/notifications/camera/audio/Fitbit/deep-link change → validate on the
+  relevant platform when available.
+- Bug fix → add a regression test when practical. Never weaken a test just to make it pass.
+- Before pushing → run `sonar analyze --staged` (or `--base dev`) to catch new SonarQube issues
+  locally. It does not compute coverage.
+- Before pushing → run `fvm dart run melos test:coverage`, then
+  `fvm dart scripts/normalize_lcov.dart coverage/sonar/lcov.info` to reproduce coverage locally.
+  The 80%-on-new-code gate itself only evaluates in CI; see `docs/sonarqube.md`.
+- Before reporting done: state exactly which checks ran, which passed, and what you couldn't
+  verify.
+
+## Environments
+
+- Default `.env` targets production. Unqualified `app`, `designer_v2`, and default build
+  scripts use it.
+- Use `dev:*` scripts for development, `local:*` scripts for local Supabase.
+- Never run an unqualified app or build command for routine development.
+- Never commit service-role keys, signing keys, OAuth secrets, store credentials, or other
+  privileged credentials to tracked client env files.
+
+## Generated Files And Dependencies
+
+- Never hand-edit generated Dart or localization output. Change the generator input (models,
+  annotations, ARB files), then run the root generation script.
+- Generated `*.g.dart` files are tracked. Commit them when regeneration changes them.
+- Inspect generated diffs for unexpected API, schema, or serialization changes.
+- Never hand-edit lockfiles. Change the manifest, run the package workflow, then review the
+  resulting lockfile diff.
 
 ## Code Reviews
 
-- Review the complete diff in repository context. Trace changed behavior through callers,
-  dependents, persistence boundaries, generated sources, tests, and relevant integrations.
-- Verify each finding against the implementation before reporting it. Include the exact file and
-  line. Use a question when a concern depends on missing context.
+- Trace changed behavior through callers, dependents, persistence, generated sources, tests, and
+  integrations.
+- Verify each finding against the code before reporting it. Cite the exact file and line.
 - Prioritize security, privacy, data integrity, compatibility, user-facing regressions, edge
-  cases, missing tests, and concrete over-engineering risks. Do not report style preferences,
-  restated diffs, or speculative improvements.
-- Format every finding according to [Conventional Comments](https://conventionalcomments.org/):
-  `<label> [decorations]: <subject>` followed by the discussion.
-- Use `issue` for a verified problem, `suggestion` for an improvement, and `question` when the
-  concern depends on missing context. Use `todo` or `chore` for small required work, and use
-  `nitpick` only for trivial preferences.
-- Use `praise`, `thought`, or `note` only when warranted. Do not manufacture praise.
-- Use only `(blocking)`, `(non-blocking)`, or `(if-minor)` decorations. A blocking finding must
-  identify a correctness, security, data-loss, compatibility, or required-process failure.
-- Write findings in concise, plain, active English. Preserve uncertainty and scope qualifiers.
-  Keep one issue per comment. Put evidence, impact, and the proposed next step in the discussion.
+  cases, missing tests, and real over-engineering. Skip style preferences and restated diffs.
+- Format every finding as a [Conventional Comment](https://conventionalcomments.org/):
+  `<label> [decorations]: <subject>`, then the discussion.
+- Labels: `issue` for a verified problem, `suggestion` for an improvement, `question` when
+  context is missing, `todo`/`chore` for small required work, `nitpick` only for trivial
+  preference.
+- `praise`/`thought`/`note` only when earned. Never manufacture praise.
+- Decorations: `(blocking)`, `(non-blocking)`, `(if-minor)` only. `(blocking)` requires a
+  correctness, security, data-loss, compatibility, or required-process failure.
+- Write plain, active English. One issue per comment. Put evidence, impact, and next step in the
+  discussion.
 
 ## Safety Boundaries
 
-Do not run any of the following without explicit user authorization and immediate verification
-of the target, environment, and data-loss impact:
+Never run these without explicit user authorization and immediate verification of target,
+environment, and data-loss impact:
 
-- `fvm dart run melos reset`, `git clean`, or other commands that discard local changes or files.
+- `fvm dart run melos reset`, `git clean`, or anything that discards local changes or files.
 - Supabase reset commands or `scripts/reset-test-db.sh` with an unverified or non-local
   `SUPABASE_DB_URL`.
-- `supabase link`, remote `db push`, remote migration commands, or any command against a remote
+- `supabase link`, remote `db push`, remote migration commands, or anything against a remote
   database or project.
-- Production seed operations. Production receives migrations only, never seeds.
-- Deployments, release tags, mobile store uploads, Firebase deployments, or Pub.dev publication.
-- Commands that push directly to `main` or `dev`.
+- Production seed operations. Production gets migrations only, never seeds.
+- Deployments, release tags, mobile store uploads, Firebase deployments, Pub.dev publication.
+- A direct push to `main` or `dev`.
 
-Markdown instructions are not a security boundary. Keep production credentials unavailable to
-routine agent sessions and use hooks, permissions, CI, and review gates for hard enforcement.
+Markdown instructions are not a security boundary. Keep production credentials out of routine
+agent sessions; enforce with hooks, permissions, CI, and review gates.
 
 ## Area-Specific Rules
 
-### When changing `core/`
+### `core/`
 
-- Keep shared model and serialization contracts compatible with both frontends and active study
-  data unless a breaking change is explicitly intended.
-- Run `fvm dart run melos generate` after model or annotation changes and commit tracked output.
+- Keep model and serialization contracts compatible with both frontends and active study data,
+  unless a breaking change is intended.
+- Run `fvm dart run melos generate` after model or annotation changes. Commit the tracked
+  output.
 - Prefer package-level tests for serialization and public model behavior.
 
-### When changing `flutter_common/`
+### `flutter_common/`
 
 - Assume the change affects both `app/` and `designer_v2/`.
-- Keep application-specific navigation and behavior out of shared code unless both consumers need
-  it.
+- Keep app-specific navigation and behavior out of shared code unless both consumers need it.
 - Review environment and secure-storage changes for production exposure and data persistence.
 
-### When changing `app/`
+### `app/`
 
-- Treat participant data, reminders, permissions, collection flows, and persistence as sensitive.
-- Preserve established Provider, GoRouter, Material theme, responsive layout, and localization
+- Treat participant data, reminders, permissions, collection flows, and persistence as
+  sensitive.
+- Preserve the existing Provider, GoRouter, Material theme, responsive layout, and localization
   patterns. Prefer theme values over hardcoded colors.
-- Validate relevant native platforms when changing Android or iOS configuration or integrations.
+- Validate the relevant native platform when you touch Android or iOS config or integrations.
 
-### When changing `designer_v2/`
+### `designer_v2/`
 
-- Preserve established Riverpod, reactive-form, routing, repository, and localization patterns.
-- Run generation after Riverpod or other annotation changes.
-- Use the dedicated browser E2E checks for full Designer flows when applicable.
+- Preserve the existing Riverpod, reactive-form, routing, repository, and localization patterns.
+- Run generation after a Riverpod or other annotation change.
+- Use the dedicated browser E2E checks for a full Designer flow.
 - Treat study deletion, publishing, exports, and participant-data operations as data-integrity
   sensitive.
 
-### When changing `supabase/`
+### `supabase/`
 
-- Add current migrations only under `supabase/migrations/`.
-- Review RLS, grants, authentication, cascades, and participant-data changes for security and
-  data loss, and add or update pgTAP coverage for relevant invariants.
-- Verify database targets are local before reset or seed operations.
+- New migrations go under `supabase/migrations/` only.
+- Review RLS, grants, auth, cascades, and participant-data changes for security and data loss.
+  Add or update pgTAP coverage for the invariants they touch.
+- Verify the database target is local before a reset or seed operation.
 - Read `supabase/README.md` before changing migration, seed, or test workflows.
 
-### When changing `database/`
+### `database/`
 
-- Treat `database/migration-legacy/` as historical reference only.
-- Put new database changes under `supabase/migrations/`.
+- `database/migration-legacy/` is historical reference only.
+- New database changes go under `supabase/migrations/`.
 
-### When changing `.github/`
+### `.github/`
 
-- Treat workflow changes as production-impacting because workflows can deploy, release,
-  publish, auto-commit, or access privileged secrets.
+- Workflow changes are production-impacting: they can deploy, release, publish, auto-commit, or
+  touch privileged secrets.
 - Preserve least-privilege permissions, secret references, triggers, and environment boundaries.
-- Validate workflow syntax and behavior without triggering a deployment or release.
+- Validate workflow syntax and behavior without triggering a real deployment or release.
 
 ## Git And Pull Requests
 
-- Follow `CONTRIBUTING.md`; do not invent generic commit messages or duplicate its conventions.
-- When creating a pull request, use `.agents/skills/pull-request/SKILL.md` for the procedural
-  workflow. It covers branch and commit validation, diff auditing, testing, and PR creation.
-- The pull-request skill must use `.github/pull_request_template.md` as the live PR body schema,
-  complete it from the actual diff and verification, and remind the user about required UI
-  screenshots or video.
-- Do not revert unrelated changes. All worktrees must be created under `.worktrees/` relative to
-  the repository root, for example `git worktree add .worktrees/<branch-name> <branch>`.
+- Follow `CONTRIBUTING.md`. Never invent a generic commit message or duplicate its conventions.
+- Creating a PR → follow `.agents/skills/pull-request/SKILL.md` for branch/commit validation,
+  diff audit, testing, and PR creation.
+- Build the PR body from `.github/pull_request_template.md`, filled from the actual diff and
+  verification. Remind the user about required UI screenshots or video.
+- Never revert unrelated changes.
+- Worktrees go under `.worktrees/` from the repo root, e.g.
+  `git worktree add .worktrees/<branch-name> <branch>`.
