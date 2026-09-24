@@ -98,10 +98,12 @@ melos:
           dart_cmd="fvm dart"
           flutter_cmd="fvm flutter"
         fi
+        ${dart_cmd} scripts/check_arb_completeness.dart --check
+        ${dart_cmd} scripts/check_arb_completeness.dart
         ${rtk_prefix}${dart_cmd} format \
           --output=none --set-exit-if-changed .
         ${rtk_prefix}${dart_cmd} analyze
-      description: Run read-only format and analysis checks
+      description: Run read-only ARB completeness, format, and analysis checks
 
     reset:
       run: |
