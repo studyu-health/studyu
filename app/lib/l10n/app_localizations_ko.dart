@@ -83,16 +83,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get made_with_love_in_potsdam => '포츠담에서 정성을 담아 제작';
 
   @override
-  String get welcome_find_study_description => '공개 연구를 선택하거나 초대장을 사용하세요.';
-
-  @override
   String get browse_public_studies => '공개 연구 둘러보기';
 
   @override
   String get welcome_returning_participant => 'StudyU 연구에 참여한 적이 있나요?';
-
-  @override
-  String get restore_studyu_account => 'StudyU 계정 복구';
 
   @override
   String get show_onboarding_again => '온보딩 다시 보기';
@@ -190,9 +184,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get no_interventions_available => '사용 가능한 개입이 없습니다';
 
   @override
-  String get loading_interventions => '개입 로딩 중';
-
-  @override
   String get task_already_completed => '오늘 이미 이 작업을 완료했습니다';
 
   @override
@@ -236,9 +227,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get intervention_current => '현재 개입';
 
   @override
-  String get study_current => '현재 연구:';
-
-  @override
   String get opt_out => '연구 탈퇴';
 
   @override
@@ -259,9 +247,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get leave_keep_data => '연구를 종료하고 내 데이터 유지';
 
   @override
-  String get leave_study_description => '연구 참여를 종료합니다. 기존 연구 데이터는 유지됩니다.';
-
-  @override
   String get delete_data => '연구를 탈퇴하고 모든 데이터를 삭제하세요';
 
   @override
@@ -276,21 +261,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get leave_delete_data => '연구를 종료하고 내 데이터 삭제';
 
   @override
-  String get delete_study_data_description =>
-      '연구 데이터를 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.';
-
-  @override
-  String get soft_delete_desc => '다음 ';
-
-  @override
-  String get soft_delete_desc_2 =>
-      ' 연구의 진행 상황이 삭제되며 복구할 수 없습니다. 이전에 완료한 연구는 삭제되지 않습니다.\n지금까지 익명화된 데이터는 연구 목적으로 계속 사용될 수 있습니다.';
-
-  @override
-  String get hard_delete_desc =>
-      '기기와 서버에서 모든 데이터를 삭제하려고 합니다. 데이터를 복원할 수 없습니다.\n익명화된 데이터는 더 이상 연구 목적으로 사용되지 않습니다.';
-
-  @override
   String get your_journey => '나의 연구 여정';
 
   @override
@@ -300,35 +270,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get journey_results_available => '결과 이용 가능';
 
   @override
-  String get summary => '요약';
-
-  @override
   String get consent => '동의';
 
   @override
   String get error => '오류가 발생했습니다!';
-
-  @override
-  String get tea_vs_coffee => '차 vs. 커피';
-
-  @override
-  String get weed_vs_alcohol => '대마초 vs. 알코올';
-
-  @override
-  String get back_pain => '허리 통증';
-
-  @override
-  String get video_task => '비디오 과제';
-
-  @override
-  String get finished => '완료됨';
-
-  @override
-  String get how_would_you_rate_your_pain_today =>
-      '오늘 통증 정도를 어떻게 평가하시겠습니까? (0 = 통증 없음, 10 = 극심한 통증)';
-
-  @override
-  String get thank_you_for_your_input => '의견을 주셔서 감사합니다';
 
   @override
   String get please_give_consent =>
@@ -351,19 +296,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get study_not_available_for_testing_yet => '이 연구는 아직 테스트할 수 없습니다.';
 
   @override
-  String get home => '홈';
-
-  @override
-  String get profile => '프로필';
-
-  @override
   String get help => '도움말';
 
   @override
   String get contact => '연락처';
-
-  @override
-  String get contact_support => '지원팀에 연락';
 
   @override
   String support_email_body(String subjectId) {
@@ -413,11 +349,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get copy_all_information => '모두 복사';
 
   @override
-  String value_copied(String label) {
-    return '$label이(가) 클립보드에 복사되었습니다.';
-  }
-
-  @override
   String get all_information_copied => '모든 정보가 클립보드에 복사되었습니다.';
 
   @override
@@ -441,9 +372,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get confirm => '선택 확인';
-
-  @override
-  String get survey => '설문조사';
 
   @override
   String get complete => '완료';
@@ -476,9 +404,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get faq => '자주 묻는 질문';
 
   @override
-  String get start_study => '연구 시작';
-
-  @override
   String get next_day => '다음 날';
 
   @override
@@ -492,9 +417,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get stop_recording => '녹음 중지';
-
-  @override
-  String get error_recording => '녹음 중 오류 발생';
 
   @override
   String get photo_captured => '촬영된 사진';
@@ -522,15 +444,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recording_error => '녹음 오류';
 
   @override
-  String get storing_photo => '사진이 저장되고 있습니다';
-
-  @override
-  String get storing_audio => '오디오 파일이 저장되고 있습니다';
-
-  @override
-  String get upload_error => '파일을 업로드할 수 없습니다';
-
-  @override
   String get language => '언어';
 
   @override
@@ -541,19 +454,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get de => '독일어';
-
-  @override
-  String get allow_analytics => '앱 분석 허용';
-
-  @override
-  String get allow_analytics_desc =>
-      '수집된 모든 데이터는 앱 성능 개선에만 사용되며 추적 목적으로는 사용되지 않습니다. 자세한 내용은 개인정보 처리방침에서 확인할 수 있습니다.';
-
-  @override
-  String get video_test => '이것은 비디오 테스트입니다';
-
-  @override
-  String get survey_test => '이것은 설문조사 테스트입니다';
 
   @override
   String get current_report => '현재 보고서';
@@ -633,9 +533,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get invalid_invite_code => '유효하지 않은 초대 코드입니다';
 
   @override
-  String get save_pdf => 'PDF로 저장';
-
-  @override
   String get was_saved_to => '파일 저장 위치: ';
 
   @override
@@ -652,9 +549,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get eligible_mistake => '실수를 했다면 여전히 답변을 변경할 수 있습니다';
-
-  @override
-  String get eligible_back => '연구 선택으로 돌아가기';
 
   @override
   String get eligible_choice_multi_selection => '해당되는 모든 항목 선택';
@@ -683,21 +577,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get performance_overview_observations => '관찰';
-
-  @override
-  String get report_outcome_inconclusive =>
-      '결과는 결론을 내리기 어렵습니다. 중재 간에 통계적으로 유의미한 차이가 없는 것으로 보입니다.';
-
-  @override
-  String get report_outcome_neither => '두 중재 모두 귀하의 결과에 부정적인 영향을 미친 것으로 보입니다.';
-
-  @override
-  String report_outcome_one(Object intervention) {
-    return '$intervention 중재가 귀하의 결과를 개선하는 것으로 보입니다.';
-  }
-
-  @override
-  String get report_axis_phase => '단계';
 
   @override
   String get completed_study => '마지막 연구를 완료했습니다. 이전 보고서를 확인하거나 새 연구를 시작하세요.';
@@ -801,22 +680,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get show_colorless_gauges => '접근 가능한 차트 활성화';
 
   @override
-  String get welchs_t_test_results => 'Welch의 t-검정 결과';
-
-  @override
-  String get sample_a => '샘플 A';
-
-  @override
-  String get sample_b => '샘플 B';
-
-  @override
-  String get sample_size => 'n';
-
-  @override
   String get mean => '평균';
-
-  @override
-  String get variance => '분산';
 
   @override
   String get t_statistic => 't-통계량';
@@ -826,12 +690,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get p_value => 'p-값';
-
-  @override
-  String get result_significant => '통계적으로 유의한 차이 있음';
-
-  @override
-  String get result_not_significant => '통계적으로 유의한 차이 없음';
 
   @override
   String get level_of_significance => '유의 수준';
@@ -847,9 +705,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get significance_level_and_p_value => '유의수준 및 p-값';
-
-  @override
-  String get descriptive_statistics => '기술 통계';
 
   @override
   String compare_results_between(String nameA, String nameB) {
@@ -895,10 +750,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '지원 요청이 이메일 앱에 작성되었습니다. 이메일을 보내 지원팀에 문의한 뒤 답변을 기다려 주세요.\n\n현재 연구에 참여 중이라면 문제가 해결될 때까지 앱 외부에서 결과를 계속 기록해 주세요. 이해해 주셔서 감사합니다.';
 
   @override
-  String get no_contact_email =>
-      '지원 이메일 주소가 구성되지 않았습니다. 도움을 받으려면 연구 감독자에게 문의하십시오.';
-
-  @override
   String get sync_fitbit_data => 'Fitbit 데이터 동기화';
 
   @override
@@ -940,9 +791,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dialogTitle => '통증 수준 선택';
-
-  @override
-  String get okButton => '확인';
 
   @override
   String get cancelButton => '취소';
@@ -1304,26 +1152,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ok => '확인';
 
   @override
-  String get submit => '제출';
-
-  @override
-  String get go_back => '뒤로 가기';
-
-  @override
   String get study_settings_section => '연구 설정';
 
   @override
   String get recovery_phrase_header => '복구 문구';
 
   @override
-  String get copy_to_clipboard => '클립보드에 복사';
-
-  @override
   String get copied_to_clipboard =>
       '클립보드에 복사되었습니다. 지금 휴대전화의 안전한 곳에 복구 문구를 붙여 넣으세요.';
-
-  @override
-  String get recovery_phrase_save_warning => '다른 사람과 절대 공유하지 마세요.';
 
   @override
   String get show_recovery_phrase => '복구 문구 표시';
@@ -1383,14 +1219,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '복구 문구는 13개 단어로 구성됩니다. 계속하려면 추가 단어를 삭제하세요.';
 
   @override
-  String recovery_successful(String id) {
-    return '복구에 성공했습니다! ID: $id';
-  }
-
-  @override
-  String get deep_link_error_title => '오류';
-
-  @override
   String deep_link_study_not_found(String studyId) {
     return '연구 ID $studyId에 해당하는 연구를 찾을 수 없거나 사용할 수 없습니다';
   }
@@ -1412,34 +1240,10 @@ class AppLocalizationsKo extends AppLocalizations {
       '연구에 참여하기 전에 저장한 복구 문구를 사용하여 이 기기에서 계정을 복구하세요.';
 
   @override
-  String get restore_account_help_title => '복구 문구로 계정 복구';
-
-  @override
-  String get restore_account_help_1 => '13개 단어를 순서대로 모두 입력하세요';
-
-  @override
-  String get restore_account_help_2 => '문구를 직접 입력하거나 붙여 넣을 수 있습니다';
-
-  @override
-  String get share_recovery => '복구 문구 공유';
-
-  @override
-  String get share_as_text => '텍스트로 공유';
-
-  @override
-  String get download_recovery => '복구 문구 다운로드';
-
-  @override
-  String get download_as_text => '텍스트 파일로 다운로드';
-
-  @override
   String get file_saved => '파일이 저장되었습니다';
 
   @override
   String get file_save_error => '파일 저장 오류';
-
-  @override
-  String get share_btn => '공유';
 
   @override
   String get copy_btn => '복사';
@@ -1451,21 +1255,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get general_section => '일반';
 
   @override
-  String get current_study_section => '현재 연구';
-
-  @override
   String get participation_options_section => '참여 관리';
 
   @override
-  String get share_recovery_text_btn => '복구 문구 텍스트 공유';
-
-  @override
   String get recovery_phrase_load_error => '복구 문구를 불러오지 못했습니다';
-
-  @override
-  String share_error(String error) {
-    return '공유 오류: $error';
-  }
 
   @override
   String get deep_link_study_invite_only => '이 연구는 참여를 위해 초대 코드가 필요합니다';
@@ -1474,9 +1267,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String deep_link_invite_invalid(String code) {
     return '잘못되었거나 만료된 초대 코드: $code';
   }
-
-  @override
-  String get deep_link_error_invalid_invite => '잘못된 초대 코드';
 
   @override
   String get deep_link_switch_warning_title => '이미 연구에 참여 중입니다';
@@ -1499,44 +1289,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get deep_link_switch_continue_study => '연구 계속하기';
-
-  @override
-  String get deep_link_switch_primary_return => '현재 연구로 돌아가기';
-
-  @override
-  String get deep_link_switch_secondary_continue => '현재 연구를 떠나고 전환';
-
-  @override
-  String get deep_link_switch_data_choice_title => '현재 연구를 어떻게 종료하시겠습니까?';
-
-  @override
-  String get deep_link_switch_data_choice_description =>
-      '전환하기 전에 현재 연구 데이터에 대해 어떤 조치를 취할지 선택하세요.';
-
-  @override
-  String get deep_link_switch_soft_delete_button => '소프트 삭제 후 전환';
-
-  @override
-  String get deep_link_switch_hard_delete_button => '하드 삭제 후 전환';
-
-  @override
-  String get deep_link_switch_confirm_soft_title => '소프트 삭제 확인';
-
-  @override
-  String get deep_link_switch_confirm_soft_button => '소프트 삭제 확인';
-
-  @override
-  String get deep_link_switch_confirm_hard_title => '하드 삭제 확인';
-
-  @override
-  String get deep_link_switch_confirm_hard_description =>
-      '이렇게 하면 모든 데이터가 영구적으로 되돌릴 수 없이 삭제됩니다.';
-
-  @override
-  String get deep_link_switch_confirm_hard_button => '하드 삭제 확인';
-
-  @override
-  String get open_link_on_mobile => '이 링크를 모바일 기기에서 열어주세요.';
 
   @override
   String get you_have_been_invited => '연구에 초대되었습니다!';
@@ -1699,16 +1451,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get date_picker_hint => '날짜 선택';
-
-  @override
-  String get time_picker_hint => '시간을 선택하세요';
-
-  @override
   String get date_picker_button_label => '날짜 선택';
-
-  @override
-  String get date_time_picker_button_label => '날짜와 시간 선택';
 
   @override
   String get date_picker_button_label_datetime => '날짜 선택';
@@ -1747,16 +1490,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String time_picker_max_hint(Object max) {
     return '허용되는 가장 늦은 시간: $max';
-  }
-
-  @override
-  String date_picker_validation_min_date(String minDate) {
-    return '날짜는 $minDate 이후여야 합니다';
-  }
-
-  @override
-  String date_picker_validation_max_date(String maxDate) {
-    return '날짜는 $maxDate 이전이어야 합니다';
   }
 
   @override

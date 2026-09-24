@@ -159,9 +159,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get form_field_password_current_hint => '현재 비밀번호를 입력하세요';
 
   @override
-  String get form_field_password_current_invalid => '현재 비밀번호가 잘못되었습니다';
-
-  @override
   String get form_field_reset_password => '비밀번호 재설정';
 
   @override
@@ -510,28 +507,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '제 결정이 최종적이며 되돌릴 수 없으며, 모든 데이터가 완전히 삭제되어 다시 복원할 수 없음을 이해합니다.';
 
   @override
-  String get dialog_study_delete_data_confirmation_emphasis_1 => '영구적으로 삭제됨';
-
-  @override
-  String get dialog_study_delete_data_confirmation_emphasis_2 => '다시 복구할 수 없음';
-
-  @override
-  String get dialog_study_delete_participant_confirmation_emphasis_1 =>
-      '현재 참가자들이 계속할 수 없음';
-
-  @override
-  String get dialog_study_delete_participant_confirmation_emphasis_2 =>
-      '현재 및 이전 참가자들의 모든 데이터';
-
-  @override
-  String get dialog_study_delete_irreversible_confirmation_emphasis_1 =>
-      '최종적이며 되돌릴 수 없음';
-
-  @override
-  String get dialog_study_delete_irreversible_confirmation_emphasis_2 =>
-      '다시 복원할 수 없음';
-
-  @override
   String dialog_study_delete_type_name_instruction(Object studyName) {
     return '삭제를 확인하려면 연구 이름 입력란에 다음을 입력하세요: \"$studyName\".';
   }
@@ -578,9 +553,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get dialog_subject_study => '연구';
-
-  @override
   String get dialog_subject_item => '항목';
 
   @override
@@ -606,9 +578,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dialog_subject_report_section => '보고서 섹션';
-
-  @override
-  String get dialog_subject_invite_code => '초대 코드';
 
   @override
   String get dialog_delete_invite_code_title => '초대 코드를 삭제할까요?';
@@ -680,19 +649,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get question_type_pain_description =>
       '참가자는 다이어그램에서 하나 이상의 신체 부위를 선택하고 각 선택한 부위에 대해 통증 수준을 통증 척도로 지정할 수 있습니다. 이는 국소적인 통증을 추적하는 데 유용합니다.';
-
-  @override
-  String get question_type_pain_preview_title => '앱 내 미리보기';
-
-  @override
-  String get question_type_pain_preview_description =>
-      '아래는 StudyU 앱에서 참여자에게 통증 선택 인터페이스가 어떻게 나타날지에 대한 간단한 예시입니다. 참여자는 신체 부위를 탭하여 선택한 후 통증 수준을 지정할 수 있습니다.';
-
-  @override
-  String get question_type_pain_front_view => '앞쪽 보기';
-
-  @override
-  String get question_type_pain_back_view => '뒤쪽 보기';
 
   @override
   String get question_type_pain_functionality_title => '기능';
@@ -1016,42 +972,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '가장 이른 날짜가 가장 늦은 날짜 이후일 수 없습니다';
 
   @override
-  String get date_picker_button_label_datetime => '날짜 선택';
-
-  @override
-  String get time_picker_button_label_datetime => '시간 선택';
-
-  @override
-  String get time_picker_button_label => '시간을 선택하세요';
-
-  @override
-  String get date_picker_validation_required => '날짜를 선택해 주세요';
-
-  @override
-  String get time_picker_validation_required => '시간을 선택하세요';
-
-  @override
-  String get datetime_picker_validation_required => '날짜와 시간을 모두 선택해 주세요';
-
-  @override
-  String get time_picker_validation_range => '허용된 범위 내에서 시간을 선택하세요';
-
-  @override
-  String time_picker_range_hint(Object min, Object max) {
-    return '$min~$max 사이의 시간을 선택하세요';
-  }
-
-  @override
-  String time_picker_min_hint(Object min) {
-    return '허용되는 가장 이른 시간: $min';
-  }
-
-  @override
-  String time_picker_max_hint(Object max) {
-    return '허용되는 가장 늦은 시간: $max';
-  }
-
-  @override
   String get date_validation_default_today_before_min =>
       '\'오늘\'이 허용된 가장 이른 날짜 이전입니다';
 
@@ -1069,9 +989,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get fitbit_question_title => 'Fitbit';
-
-  @override
-  String get fitbit_question_type_empty => '사용할 수 있는 Fitbit 데이터가 없습니다';
 
   @override
   String get navlink_question_visibility_logic => '가시성';
@@ -1168,21 +1085,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '길이가 다름';
 
   @override
-  String get form_array_question_visibility_logic_length_greater_than => '길이 >';
-
-  @override
-  String get form_array_question_visibility_logic_length_less_than => '길이 <';
-
-  @override
-  String
-  get form_array_question_visibility_logic_length_greater_than_or_equal =>
-      '길이 >=';
-
-  @override
-  String get form_array_question_visibility_logic_length_less_than_or_equal =>
-      '길이 <=';
-
-  @override
   String get form_array_question_visibility_logic_not => '아님';
 
   @override
@@ -1195,9 +1097,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get form_array_question_visibility_logic_unknown_expression =>
       '알 수 없는 표현';
-
-  @override
-  String get form_array_question_visibility_logic_this_question => '이 질문';
 
   @override
   String get form_mode_visibility_create => '조건 생성';
@@ -1287,26 +1186,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get form_field_study_description_required => '연구 설명은 비어 있을 수 없습니다';
-
-  @override
-  String get form_field_study_tags => '태그';
-
-  @override
-  String get form_field_study_tags_hint => '태그를 작성하고 Enter 키를 누르세요';
-
-  @override
-  String get form_field_study_tags_tooltip =>
-      '다른 연구자와 임상의가 연구를 더 쉽게 찾을 수 있도록 연구에 태그를 추가하세요';
-
-  @override
-  String form_field_study_tags_error_length(Object count) {
-    return '연구에는 최대 $count개의 태그만 추가할 수 있습니다';
-  }
-
-  @override
-  String form_field_study_tags_helper(Object count) {
-    return '목록에서 최대 $count개의 태그를 선택하거나 직접 추가하세요';
-  }
 
   @override
   String get form_field_study_icon_required => '연구에 사용할 아이콘을 선택해야 합니다';
@@ -1883,9 +1762,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get form_field_report_linearRegression_alpha_hint => '숫자 값을 입력하세요';
 
   @override
-  String get form_field_report_alphaConfidence_required => '알파 신뢰 값을 정의해야 합니다';
-
-  @override
   String get form_field_report_alphaConfidence_number => '알파 신뢰 값은 숫자 값이어야 합니다';
 
   @override
@@ -2130,9 +2006,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get participant_details_title => '참여자 상세 정보';
-
-  @override
-  String get participant_details_study_days_overview => '연구 일수 개요';
 
   @override
   String get participant_details_study_days_description =>
@@ -2410,9 +2283,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get action_delete => '삭제';
 
   @override
-  String get action_delete_invite_code => '초대 코드 삭제';
-
-  @override
   String get action_delete_code => '코드 삭제';
 
   @override
@@ -2550,14 +2420,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fitbit_credentials_step8 => '8. 아래 자격 증명을 복사하여 붙여넣습니다.';
 
   @override
-  String get fitbit_credentials_success_instruction =>
-      '자격 증명을 입력하면 Fitbit 통합이 연구에 대해 활성화됩니다.';
-
-  @override
-  String get fitbit_credentials_add_question_instruction =>
-      'Fitbit 질문을 추가하려면 측정 섹션으로 이동하여 측정 내에서 새 Fitbit 질문을 만드십시오.';
-
-  @override
   String get fitbit_credentials_screenshot_step1 => '1단계: 개발자 포털';
 
   @override
@@ -2579,30 +2441,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fitbit_credentials_screenshot_step7 => '7단계: 양식 작성';
 
   @override
-  String get fitbit_credentials_cannot_change_title =>
-      'Fitbit 자격 증명을 변경할 수 없습니다.';
-
-  @override
-  String get fitbit_credentials_cannot_change_description =>
-      '연구가 초안 모드가 아닐 때는 Fitbit 자격 증명을 변경할 수 없습니다.';
-
-  @override
   String get fitbit_only_participant_title => '연구를 본인만을 위해 진행하는 경우';
 
   @override
   String get fitbit_only_participant_subtitle =>
       '연구를 생성하고 참여하고 있으므로, 인트라데이 데이터 요청 양식을 작성할 필요가 없습니다. 다음 간단한 단계를 따르면 됩니다:';
-
-  @override
-  String get fitbit_only_participant_description =>
-      '이 연구를 본인만을 위해 진행하는 경우, 이전 페이지에서 본인의 Fitbit 계정의 Client ID와 Client Secret을 사용해야 합니다.';
-
-  @override
-  String get fitbit_multiple_participant_title => '이 연구를 여러 참가자를 위해 진행하는 경우';
-
-  @override
-  String get fitbit_multiple_participant_description =>
-      '각 참가자는 StudyU 앱에서 자신의 Fitbit 계정으로 로그인해야 합니다. 데이터는 각 참가자별로 별도로 수집됩니다.';
 
   @override
   String get study_import_title => '연구 가져오기';
@@ -2616,11 +2459,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get study_import_success => '연구가 성공적으로 가져와졌습니다';
-
-  @override
-  String study_import_error(String error) {
-    return '연구 가져오기 실패: $error';
-  }
 
   @override
   String get fitbit_only_participant_step_1 =>
@@ -2664,10 +2502,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get screenshots_for_guidance => '안내용 스크린샷:';
-
-  @override
-  String get fitbit_credentials_not_set =>
-      'Fitbit 자격 증명이 설정되지 않았습니다. 스터디 디자이너에서 \'Fitbit\' 탭으로 이동하여 Fitbit 클라이언트 ID와 클라이언트 시크릿을 입력하세요. 완료되면 여기로 돌아와 Fitbit 질문을 추가하세요.';
 
   @override
   String get fitbit_question_type_heartrate_description =>
@@ -2768,43 +2602,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get filter_reset_all => '모두 지우기';
-
-  @override
-  String get code_list_filter_title => '초대 코드 필터';
-
-  @override
-  String get code_list_filter_enrolled_status => '등록 상태';
-
-  @override
-  String get code_list_filter_enrolled_min => '등록 인원 최솟값';
-
-  @override
-  String get code_list_filter_enrolled_max => '등록 인원 최댓값';
-
-  @override
-  String get code_list_filter_intervention_assignment => '중재 배정';
-
-  @override
-  String get code_list_filter_apply => '적용';
-
-  @override
-  String get code_list_filter_option_all => '전체';
-
-  @override
-  String get code_list_filter_option_unused => '미사용';
-
-  @override
-  String get code_list_filter_option_used => '사용됨';
-
-  @override
-  String code_list_filter_button_active(int count) {
-    return '필터 ($count)';
-  }
-
-  @override
-  String filter_show_studies(int count) {
-    return '$count건의 연구 보기';
-  }
 
   @override
   String get filter_dialog_save_title => '필터 프리셋 저장';
@@ -2978,11 +2775,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get code_list_search_hint_compact => '코드 검색';
 
   @override
-  String code_list_active_count(int count) {
-    return '활성 초대 코드 $count개';
-  }
-
-  @override
   String code_list_total_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2994,24 +2786,11 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get code_list_page_size => '행';
-
-  @override
   String get code_list_rows_per_page => '페이지당 행 수:';
-
-  @override
-  String code_list_page(int page) {
-    return '$page페이지';
-  }
 
   @override
   String code_list_page_range(int start, int end, int count) {
     return '$count개 중 $start–$end';
-  }
-
-  @override
-  String code_list_page_loading(int start, int end) {
-    return '$start–$end 불러오는 중...';
   }
 
   @override
@@ -3022,20 +2801,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get code_list_retry => '다시 시도';
 
   @override
-  String get code_list_previous_page => '이전 페이지';
-
-  @override
-  String get code_list_next_page => '다음 페이지';
-
-  @override
   String get action_regenerate_invite_code => '초대 코드 재생성';
 
   @override
   String get dialog_qr_code_description =>
       '참여자가 이 연구에 접근할 수 있도록 링크나 QR 코드를 공유하세요. 참여자가 휴대전화로 링크를 열거나 QR 코드를 스캔하면 StudyU 앱이 열리고 연구에 참여하게 됩니다.';
-
-  @override
-  String get all_studies => '모든 연구';
 
   @override
   String get studies_filter_add_filter => '필터 추가';
