@@ -2364,7 +2364,7 @@ void main() {
     final dateWidget = tester.widget<DateQuestionWidget>(
       find.byType(DateQuestionWidget),
     );
-    dateWidget.onDone!(q1.constructAnswer(DateTime(2025, 6, 1)));
+    dateWidget.onDone!(q1.constructAnswer(DateTime(2025, 6)));
     await tester.pumpAndSettle();
     await tester.tap(find.text('A'));
     await tester.pumpAndSettle();

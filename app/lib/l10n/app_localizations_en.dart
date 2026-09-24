@@ -1436,23 +1436,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get questionnaire_review_confirmation => 'I reviewed my answers';
 
   @override
-  String get restored_answer_needs_review => 'Restored answer requires review';
-
-  @override
-  String get restored_answer_review_description =>
-      'Complete task becomes available after review.';
-
-  @override
-  String get mark_answer_reviewed => 'I\'ve reviewed this answer';
-
-  @override
-  String get answer_reviewed => 'Answer reviewed';
-
-  @override
-  String get review_restored_answer_to_continue =>
-      'Review the restored answer to continue.';
-
-  @override
   String get complete_task => 'Complete task';
 
   @override
