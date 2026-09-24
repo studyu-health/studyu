@@ -4583,6 +4583,120 @@ abstract class AppLocalizations {
   /// **'Custom: Define your own sequence pattern to meet specific study requirements.'**
   String get study_schedule_custom_description;
 
+  /// No description provided for @form_nutrition_tracking_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutritional Tracking'**
+  String get form_nutrition_tracking_title;
+
+  /// No description provided for @form_nutrition_tracking_enable_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable nutritional tracking for this study'**
+  String get form_nutrition_tracking_enable_hint;
+
+  /// No description provided for @form_measurement_type_select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Measurement Type'**
+  String get form_measurement_type_select;
+
+  /// No description provided for @form_measurement_type_survey.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey'**
+  String get form_measurement_type_survey;
+
+  /// No description provided for @form_measurement_type_survey_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect self-reported data from participants using questions and scales.'**
+  String get form_measurement_type_survey_description;
+
+  /// No description provided for @form_measurement_type_nutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition Task'**
+  String get form_measurement_type_nutrition;
+
+  /// No description provided for @form_measurement_type_nutrition_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Track participant food and drink intake using a structured journal or photo capture.'**
+  String get form_measurement_type_nutrition_description;
+
+  /// No description provided for @form_field_nutrition_instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get form_field_nutrition_instructions;
+
+  /// No description provided for @form_field_nutrition_instructions_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter instructions for the participant'**
+  String get form_field_nutrition_instructions_hint;
+
+  /// No description provided for @form_field_nutrition_collect_meal_context.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect Meal Context'**
+  String get form_field_nutrition_collect_meal_context;
+
+  /// No description provided for @form_field_nutrition_allow_recipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Recipes'**
+  String get form_field_nutrition_allow_recipes;
+
+  /// No description provided for @form_field_nutrition_minimum_meals_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Meals Required'**
+  String get form_field_nutrition_minimum_meals_required;
+
+  /// No description provided for @form_field_nutrition_minimum_meals_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get form_field_nutrition_minimum_meals_hint;
+
+  /// No description provided for @form_field_nutrition_default_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition Tracking'**
+  String get form_field_nutrition_default_title;
+
+  /// No description provided for @form_field_nutrition_custom_meal_types.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Meal Types'**
+  String get form_field_nutrition_custom_meal_types;
+
+  /// No description provided for @form_field_nutrition_custom_meal_types_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to use defaults'**
+  String get form_field_nutrition_custom_meal_types_hint;
+
+  /// No description provided for @form_field_nutrition_add_meal_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Add meal type'**
+  String get form_field_nutrition_add_meal_type;
+
+  /// No description provided for @form_field_nutrition_meal_type_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal type {index}'**
+  String form_field_nutrition_meal_type_label(Object index);
+
+  /// No description provided for @form_field_nutrition_minimum_meals_min_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be at least 1'**
+  String get form_field_nutrition_minimum_meals_min_error;
+
   /// No description provided for @filter_studies.
   ///
   /// In en, this message translates to:

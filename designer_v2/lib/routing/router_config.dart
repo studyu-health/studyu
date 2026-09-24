@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:studyu_designer_v2/common_views/layout_single_column.dart';
 import 'package:studyu_designer_v2/common_views/layout_two_column.dart';
@@ -28,15 +29,20 @@ import 'package:studyu_designer_v2/features/design/interventions/intervention_fo
 import 'package:studyu_designer_v2/features/design/interventions/intervention_preview_view.dart';
 import 'package:studyu_designer_v2/features/design/interventions/interventions_form_view.dart';
 import 'package:studyu_designer_v2/features/design/measurements/measurements_form_view.dart';
+import 'package:studyu_designer_v2/features/design/measurements/nutrition/nutrition_form_controller.dart';
+import 'package:studyu_designer_v2/features/design/measurements/nutrition/nutrition_form_view.dart';
+import 'package:studyu_designer_v2/features/design/measurements/nutrition/nutrition_preview_view.dart';
 import 'package:studyu_designer_v2/features/design/measurements/survey/survey_form_controller.dart';
 import 'package:studyu_designer_v2/features/design/measurements/survey/survey_form_view.dart';
 import 'package:studyu_designer_v2/features/design/measurements/survey/survey_preview_view.dart';
 import 'package:studyu_designer_v2/features/design/reports/reports_form_view.dart';
 import 'package:studyu_designer_v2/features/design/study_form_providers.dart';
 import 'package:studyu_designer_v2/features/design/study_form_scaffold.dart';
+import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dart';
 import 'package:studyu_designer_v2/features/monitor/study_monitor_page.dart';
 import 'package:studyu_designer_v2/features/recruit/study_recruit_page.dart';
 import 'package:studyu_designer_v2/features/study/settings/study_settings_dialog.dart';
+import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/features/study/study_navbar.dart';
 import 'package:studyu_designer_v2/features/study/study_scaffold.dart';
 import 'package:studyu_designer_v2/features/study/study_test_page.dart';
@@ -257,22 +263,57 @@ class RouterConf() {
             final routeArgs = MeasurementFormRouteArgs(
               studyId: state.pathParameters[RouteParams.studyId]!,
               measurementId: state.pathParameters[RouteParams.measurementId]!,
+              queryParams: state.uri.queryParameters,
             );
             return MaterialPage(
-              child: StudyFormScaffold<MeasurementSurveyFormViewModel>(
-                studyId: routeArgs.studyId,
-                formViewModelBuilder: (ref) =>
-                    ref.watch(surveyFormViewModelProvider(routeArgs)),
-                formViewBuilder: (formViewModel) => TwoColumnLayout.split(
-                  leftWidget: MeasurementSurveyFormView(
-                    formViewModel: formViewModel,
-                  ),
-                  rightWidget: SurveyPreview(routeArgs: routeArgs),
-                  flexLeft: 7,
-                  constraintsLeft: const BoxConstraints(minWidth: 500.0),
-                  scrollRight: false,
-                  paddingRight: null,
-                ),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final studyState = ref.watch(
+                    studyControllerProvider(routeArgs.studyId),
+                  );
+                  if (studyState.study.asData?.value == null) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  final formViewModel = ref.watch(
+                    measurementFormViewModelProvider(routeArgs),
+                  );
+                  if (formViewModel is NutritionFormViewModel) {
+                    return StudyFormScaffold<ManagedFormViewModel>(
+                      studyId: routeArgs.studyId,
+                      formViewModelBuilder: (_) =>
+                          formViewModel as ManagedFormViewModel,
+                      formViewBuilder: (formViewModel) => TwoColumnLayout.split(
+                        leftWidget: NutritionFormView(
+                          formViewModel:
+                              formViewModel as NutritionFormViewModel,
+                        ),
+                        rightWidget: NutritionPreview(routeArgs: routeArgs),
+                        flexLeft: 7,
+                        constraintsLeft: const BoxConstraints(minWidth: 500.0),
+                        scrollRight: false,
+                        paddingRight: null,
+                      ),
+                    );
+                  }
+                  return StudyFormScaffold<MeasurementSurveyFormViewModel>(
+                    studyId: routeArgs.studyId,
+                    formViewModelBuilder: (_) =>
+                        formViewModel as MeasurementSurveyFormViewModel,
+                    formViewBuilder: (formViewModel) => TwoColumnLayout.split(
+                      leftWidget: MeasurementSurveyFormView(
+                        formViewModel: formViewModel,
+                      ),
+                      rightWidget: SurveyPreview(routeArgs: routeArgs),
+                      flexLeft: 7,
+                      constraintsLeft: const BoxConstraints(minWidth: 500.0),
+                      scrollRight: false,
+                      paddingRight: null,
+                    ),
+                  );
+                },
               ),
             );
           },
@@ -437,6 +478,7 @@ class ConsentItemFormRouteArgs({
 class MeasurementFormRouteArgs({
   required final MeasurementID measurementId,
   required super.studyId,
+  final Map<String, String> queryParams = const {},
 }) extends StudyFormRouteArgs;
 
 class SurveyQuestionFormRouteArgs({

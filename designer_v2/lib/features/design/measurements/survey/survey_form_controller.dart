@@ -43,8 +43,63 @@ class MeasurementSurveyFormViewModel({
   final FormControl<String> surveyIntroTextControl = FormControl(value: '');
   final FormControl<String> surveyOutroTextControl = FormControl(value: '');
 
+  // --- Schedule Rule Controls ---
+  final FormControl<bool> isScheduledControl = FormControl(value: false);
+  final FormControl<String> scheduleTypeControl = FormControl(
+    value: TaskScheduleType.specificDays.name,
+  );
+  final FormControl<List<int>> specificDaysControl = FormControl(value: []);
+  final FormControl<int> intervalDaysControl = FormControl(value: 2);
+  final FormControl<int> startDayOffsetControl = FormControl(value: 0);
+  final FormControl<int> dayOfCycleControl = FormControl(value: 0);
+  final FormControl<List<int>> targetCyclesControl = FormControl(value: []);
+  final FormControl<bool> includeBaselineControl = FormControl(value: false);
+
   MeasurementID get measurementId => measurementIdControl.value!;
   MeasurementID get instanceId => instanceIdControl.value!;
+
+  /// Total study days derived from the study schedule.
+  int get studyLength => study.schedule.length;
+
+  /// Number of cycles in the study schedule.
+  int get numberOfCycles => study.schedule.numberOfCycles;
+
+  /// The currently selected schedule type.
+  TaskScheduleType get selectedScheduleType => TaskScheduleType.values.byName(
+    scheduleTypeControl.value ?? TaskScheduleType.specificDays.name,
+  );
+
+  /// Builds a [TaskScheduleRule] from the current form controls,
+  /// or null if scheduling is disabled.
+  TaskScheduleRule? buildScheduleRule() {
+    if (isScheduledControl.value != true) return null;
+    switch (selectedScheduleType) {
+      case TaskScheduleType.specificDays:
+        return TaskScheduleRule.forSpecificDays(
+          specificDaysControl.value ?? [],
+        );
+      case TaskScheduleType.everyNDays:
+        return TaskScheduleRule.forEveryNDays(
+          intervalDaysControl.value ?? 2,
+          startOffset: startDayOffsetControl.value ?? 0,
+        );
+      case TaskScheduleType.perCycle:
+        return TaskScheduleRule.forPerCycle(
+          dayOfCycleControl.value ?? 0,
+          targetCycles: (targetCyclesControl.value?.isNotEmpty ?? false)
+              ? targetCyclesControl.value
+              : null,
+          includeBaseline: includeBaselineControl.value ?? false,
+        );
+    }
+  }
+
+  /// Compute a preview of which study days this rule resolves to.
+  List<int> get previewDays {
+    final rule = buildScheduleRule();
+    if (rule == null) return [];
+    return rule.resolveScheduledDays(study.schedule);
+  }
 
   @override
   FormValidationConfigSet get sharedValidationConfig => {
@@ -79,6 +134,14 @@ class MeasurementSurveyFormViewModel({
     'surveyTitle': surveyTitleControl,
     'surveyIntroText': surveyIntroTextControl,
     'surveyOutroText': surveyOutroTextControl,
+    'isScheduled': isScheduledControl,
+    'scheduleType': scheduleTypeControl,
+    'specificDays': specificDaysControl,
+    'intervalDays': intervalDaysControl,
+    'startDayOffset': startDayOffsetControl,
+    'dayOfCycle': dayOfCycleControl,
+    'targetCycles': targetCyclesControl,
+    'includeBaseline': includeBaselineControl,
     ...questionnaireControls,
     ...scheduleFormControls,
   });
@@ -90,6 +153,23 @@ class MeasurementSurveyFormViewModel({
     surveyTitleControl.value = data.title;
     surveyIntroTextControl.value = data.introText ?? '';
     surveyOutroTextControl.value = data.outroText ?? '';
+
+    // Populate schedule rule controls from data
+    final rule = data.scheduleRule;
+    if (rule != null) {
+      isScheduledControl.value = true;
+      scheduleTypeControl.value = rule.type.name;
+      specificDaysControl.value = List<int>.from(rule.specificDays);
+      intervalDaysControl.value = rule.intervalDays ?? 2;
+      startDayOffsetControl.value = rule.startDayOffset ?? 0;
+      dayOfCycleControl.value = rule.dayOfCycle ?? 0;
+      targetCyclesControl.value = rule.targetCycles != null
+          ? List<int>.from(rule.targetCycles!)
+          : [];
+      includeBaselineControl.value = rule.includeBaseline;
+    } else {
+      isScheduledControl.value = false;
+    }
 
     setQuestionnaireControlsFrom(data.questionnaireFormData);
     setScheduleControlsFrom(data);
@@ -109,6 +189,7 @@ class MeasurementSurveyFormViewModel({
       timeLockEnd: restrictedTimeEndControl.value?.toStudyUTimeOfDay(),
       hasReminder: hasReminderControl.value!, // required
       reminderTime: reminderTimeControl.value?.toStudyUTimeOfDay(),
+      scheduleRule: buildScheduleRule(),
     );
     return data;
   }

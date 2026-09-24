@@ -255,9 +255,16 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   int totalTaskCountFor(Task task) {
     var daysCount = daysPerIntervention;
     if (task is Observation) {
-      daysCount =
-          2 * daysCount +
-          (study.schedule.includeBaseline ? study.schedule.phaseDuration : 0);
+      if (task.scheduleRule != null) {
+        daysCount = task.scheduleRule!
+            .resolveScheduledDays(study.schedule)
+            .length;
+        if (daysCount == 0) daysCount = 1; // Minimum 1 to avoid zero-count
+      } else {
+        daysCount =
+            2 * daysCount +
+            (study.schedule.includeBaseline ? study.schedule.phaseDuration : 0);
+      }
     }
     return daysCount * task.schedule.completionPeriods.length;
   }
@@ -273,7 +280,46 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
         taskSchedule.add(TaskInstance(task, completionPeriod.id));
       }
     }
+    final studyDayIndex = getDayOfStudyFor(dateTime);
+    final phaseDuration = study.schedule.phaseDuration;
+    final firstInterventionStartDay = study.schedule.includeBaseline
+        ? phaseDuration
+        : 0;
+
     for (final observation in study.observations) {
+      final title = observation.title;
+      if (title == null) {
+        for (final completionPeriod in observation.schedule.completionPeriods) {
+          taskSchedule.add(TaskInstance(observation, completionPeriod.id));
+        }
+        continue;
+      }
+
+      // Scheduled survey: show only on matching days
+      if (observation.scheduleRule != null) {
+        if (!observation.scheduleRule!.isScheduledForDay(
+          studyDayIndex,
+          study.schedule,
+        )) {
+          continue;
+        }
+        for (final completionPeriod in observation.schedule.completionPeriods) {
+          taskSchedule.add(TaskInstance(observation, completionPeriod.id));
+        }
+        continue;
+      }
+
+      // Normal (test) FFQ: one-time on first day of intervention 1
+      if (FFQQuestions.isFFQTask(title)) {
+        final firstInterventionIndex = study.schedule.includeBaseline ? 1 : 0;
+        final interventionIndex = getInterventionIndexForDate(dateTime);
+        if (interventionIndex != firstInterventionIndex ||
+            studyDayIndex != firstInterventionStartDay) {
+          continue;
+        }
+        if (resultsFor(observation.id).isNotEmpty) continue;
+      }
+
       for (final completionPeriod in observation.schedule.completionPeriods) {
         taskSchedule.add(TaskInstance(observation, completionPeriod.id));
       }

@@ -42,7 +42,7 @@
   "study_selection_unsupported": "The study you are trying to join is not compatible with your app version. Please update the app to the latest version.",
   "study_selection_closed_title": "Study closed",
   "study_selection_closed": "This study is currently closed for new participants.",
-  "study_selection_hidden_studies": "Some studies could not be displayed. This can happen when your app version is outdated. Please update the app to see all available studies, or join one of the studies shown below.",
+  "study_selection_hidden_studies": "Some studies couldn't be shown, because your app version is outdated. Please update your app to see all available studies.",
   "study_selection_no_public_studies": "There are currently no public studies available. If you have an invite code, you can still join a private study.",
   "study_overview_title": "Study overview",
   "eligibility_questionnaire_title": "Eligibility check",
@@ -650,5 +650,298 @@
   "system": "System",
   "time_format": "Time format",
   "time_format_12_hour": "12-hour (2:30 PM)",
-  "time_format_24_hour": "24-hour (14:30)"
+  "time_format_24_hour": "24-hour (14:30)",
+  "daily_food_diary": "Daily Food Diary",
+  "saving": "Saving...",
+  "saved_ago": "Saved {time} ago",
+  "@saved_ago": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "just_now": "just now",
+  "seconds_ago": "{seconds} seconds ago",
+  "@seconds_ago": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "minutes_ago": "{minutes} minute(s) ago",
+  "@minutes_ago": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "hours_ago": "{hours} hour(s) ago",
+  "@hours_ago": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "instructions": "Instructions",
+  "nutrition_instructions_default": "Please record all the foods and beverages you consumed today. For each meal or snack, provide as much detail as possible including portion sizes and preparation methods.",
+  "min_meals_required": "Please record at least {count} meal(s)",
+  "@min_meals_required": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recall_details": "Recall Details",
+  "date": "Date",
+  "recall_mode": "Recall Mode",
+  "recall_mode_realtime": "Real-time Recording",
+  "recall_mode_yesterday": "Yesterday Recall",
+  "usual_intake_day": "Usual Intake Day",
+  "usual_intake_question": "Was this a typical day for your diet?",
+  "special_occasion": "Special Occasion",
+  "special_occasion_hint": "e.g., Birthday, Holiday, etc.",
+  "meals_count": "Meals ({count})",
+  "@meals_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "add_meal": "Add Meal",
+  "no_meals_recorded": "No meals recorded yet",
+  "edit": "Edit",
+  "delete": "Delete",
+  "meal_type_breakfast": "Breakfast",
+  "meal_type_lunch": "Lunch",
+  "meal_type_dinner": "Dinner",
+  "meal_type_snack": "Snack",
+  "meal_type_brunch": "Brunch",
+  "meal_type_other": "Other",
+  "food_items_count": "{count} food items",
+  "@food_items_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "meal_entry_title": "Meal Entry",
+  "save": "Save",
+  "meal_information": "Meal Information",
+  "meal_type_label": "Meal Type",
+  "custom_meal_label": "Custom Meal Label",
+  "time": "Time",
+  "where_did_you_eat": "Where did you eat?",
+  "location_description": "Location Description",
+  "location_description_hint": "Describe where you ate",
+  "who_were_you_with": "Who were you with?",
+  "distractions_during_meal": "Distractions during meal?",
+  "skipped_this_meal": "Skipped this meal",
+  "reason_for_skipping": "Reason for skipping",
+  "food_items_section": "Food Items ({count})",
+  "@food_items_section": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "add_food": "Add Food",
+  "no_food_items_yet": "No food items yet",
+  "not_specified": "Not specified",
+  "context_home": "Home",
+  "context_restaurant": "Restaurant",
+  "context_takeout": "Takeout",
+  "context_vending": "Vending",
+  "context_other": "Other",
+  "company_alone": "👤 Alone",
+  "company_family": "👨‍👩‍👧‍👦 Family",
+  "company_friends": "👥 Friends",
+  "company_colleagues": "💼 Colleagues",
+  "company_other": "🤝 Other",
+  "distraction_none": "🧘 None",
+  "distraction_tv": "📺 TV",
+  "distraction_phone": "📱 Phone",
+  "distraction_work": "💻 Work",
+  "distraction_other": "📖 Other",
+  "food_entry_title": "Food Entry",
+  "food_information": "Food Information",
+  "entry_type": "Entry Type",
+  "food_name": "Food Name *",
+  "brand_name": "Brand Name",
+  "description": "Description",
+  "description_hint": "Optional notes about this food",
+  "recipe_info": "Recipe: Use Recipe Builder for better ingredient management",
+  "open_recipe_builder": "Open Recipe Builder",
+  "amount": "Amount *",
+  "unit": "Unit *",
+  "serving_size": "Serving Size (grams) *",
+  "portion_reference": "Portion Reference",
+  "portion_reference_hint": "e.g., 1 cup, 3 oz, medium apple",
+  "portion_estimation_method": "Portion Estimation Method",
+  "portion_state": "Portion State",
+  "yield_factor": "Yield Factor",
+  "yield_factor_hint": "e.g., 0.75",
+  "edible_portion": "Edible Portion",
+  "edible_portion_hint": "e.g., 0.85",
+  "nutrition_information": "Nutrition Information",
+  "energy_kcal": "Energy (kcal) *",
+  "protein_g": "Protein (g)",
+  "carbs_g": "Carbs (g)",
+  "fat_g": "Fat (g)",
+  "saturated_fat_g": "Sat. Fat (g)",
+  "sugars_g": "Sugars (g)",
+  "fiber_g": "Fiber (g)",
+  "sodium_mg": "Sodium (mg)",
+  "required_error": "Required",
+  "enter_food_name": "Please enter a food name",
+  "enter_serving_size": "Please enter serving size",
+  "entry_type_single_ingredient": "🥕 Single Ingredient",
+  "entry_type_recipe": "📖 Recipe",
+  "entry_type_branded_product": "🏷️ Branded Product",
+  "entry_type_manual_entry": "✏️ Manual Entry",
+  "portion_method_household": "Household Measure",
+  "portion_method_photograph": "Photograph",
+  "portion_method_standard_unit": "Standard Unit",
+  "portion_method_user_weighted": "User Weighted",
+  "portion_method_unknown": "Unknown",
+  "portion_state_raw": "Raw",
+  "portion_state_cooked": "Cooked",
+  "portion_state_as_served": "As Served",
+  "my_templates": "My Templates",
+  "save_as_template": "Save as Template",
+  "save_meal_template": "Save Meal Template",
+  "save_food_template": "Save Food Template",
+  "save_recipe_template": "Save Recipe Template",
+  "template_name": "Template Name",
+  "template_tags_optional": "Tags (optional)",
+  "template_tags_hint": "breakfast, quick, healthy",
+  "template_saved": "Template saved",
+  "select_meal_template": "Select Meal Template",
+  "select_food_template": "Select Food Template",
+  "search_templates": "Search templates...",
+  "no_templates_saved": "No templates saved yet",
+  "save_templates_hint": "Save your favorite meals and foods as templates for quick access",
+  "from_template": "From Template",
+  "add_new_food": "Add New Food",
+  "delete_template": "Delete Template",
+  "delete_template_confirmation": "Are you sure you want to delete this template?",
+  "filter_all": "All",
+  "filter_meals": "Meals",
+  "filter_foods": "Foods",
+  "filter_recipes": "Recipes",
+  "items_count": "{count} items",
+  "@items_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kcal_value": "{value} kcal",
+  "@kcal_value": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "template_type_meal": "Meal",
+  "template_type_food": "Food",
+  "template_type_recipe": "Recipe",
+  "rename_template": "Rename Template",
+  "new_name": "New Name",
+  "today": "Today",
+  "meals": "Meals",
+  "food_items": "Food items",
+  "tap_to_add_first_meal": "Tap the button above to add your first meal",
+  "tap_to_add_food": "Tap to add food",
+  "add_food_title": "Add Food",
+  "edit_food_title": "Edit Food",
+  "add_food_manually": "Add Food Manually",
+  "basic_information": "Basic Information",
+  "macronutrients": "Macronutrients",
+  "detailed_nutrients": "Detailed Nutrients",
+  "daily_nutrition_total": "Daily Nutrition Total",
+  "meal_nutrition": "Meal Nutrition",
+  "nutrition_summary": "Nutrition Summary",
+  "calorie_distribution": "Calorie Distribution",
+  "more_options": "More options",
+  "search_food_hint": "Search food (e.g., \"apple\", \"chicken\")",
+  "my_saved_items": "My Saved Items",
+  "global_database": "Global Database",
+  "quick_actions": "Quick Actions",
+  "create_recipe": "Create Recipe",
+  "create_recipe_subtitle": "Build from multiple ingredients",
+  "add_manually": "Add Manually",
+  "add_manually_subtitle": "Enter nutrition facts yourself",
+  "scan_barcode": "Scan Barcode",
+  "scan_barcode_subtitle": "Find packaged products quickly",
+  "search_for_food": "Search for Food",
+  "search_food_description": "Type above to search global databases",
+  "searching_databases": "Searching databases...",
+  "end_of_results": "End of results",
+  "no_results_found": "No results found. Try different keywords.",
+  "no_matching_templates": "No matching templates",
+  "detailed_nutrition": "Detailed Nutrition",
+  "detailed_nutrition_subtitle": "Fiber, Sugar, Sodium",
+  "advanced_options": "Advanced Options",
+  "advanced_options_subtitle": "Food type, serving size, portions",
+  "details": "Details",
+  "search_food_database": "Search Food Database",
+  "no_data_yet": "No data yet",
+  "start_tracking_nutrition": "Start tracking your nutrition by adding meals",
+  "photoRecallTitle": "Photo Recall",
+  "photoRecallSubtitle": "View photos from around this time",
+  "photoRecallPermissionNeeded": "Tap to enable photo access",
+  "photoRecallPermissionTitle": "Enable Photo Access",
+  "photoRecallPermissionDescription": "Access to your photos helps you recall what you ate. Photos are only displayed on your device.",
+  "photoRecallNoPhotos": "No photos found",
+  "photoRecallNoPhotosSubtitle": "We couldn't find any photos taken around this time",
+  "photoRecallTapToEnlarge": "Tap a photo to view it full screen",
+  "photoRecallTimeInfo": "Showing photos from around {time} (±2 hours)",
+  "@photoRecallTimeInfo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "grantPermission": "Grant Permission",
+  "analyzePhotoTooltip": "Analyze this food photo",
+  "analyzingPhoto": "Analyzing photo...",
+  "foodAnalysisError": "Could not analyze image - try manual entry",
+  "foodAnalysisNetworkError": "Could not connect to analysis service",
+  "foodAnalysisNoItems": "No food items detected in image",
+  "aiEstimatedBanner": "AI-estimated values - please review",
+  "selectFoodItemsTitle": "Select Food Items",
+  "selectFoodItemsSubtitle": "Select which items to add to your meal",
+  "addSelected": "Add Selected",
+  "analyzeAgain": "Analyze Again",
+  "select_all": "Select All",
+  "deselect_all": "Deselect All",
+  "confidenceLabel": "Confidence: {percentage}%",
+  "@confidenceLabel": {
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
+  "min_meals_not_met_title": "Minimum meals not reached",
+  "min_meals_not_met_message": "This task requires at least {count} meal(s). You have recorded fewer than required. Leave anyway?",
+  "@min_meals_not_met_message": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leave_anyway": "Leave anyway"
 }

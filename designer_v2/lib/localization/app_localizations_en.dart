@@ -2682,6 +2682,73 @@ class AppLocalizationsEn extends AppLocalizations {
       'Custom: Define your own sequence pattern to meet specific study requirements.';
 
   @override
+  String get form_nutrition_tracking_title => 'Nutritional Tracking';
+
+  @override
+  String get form_nutrition_tracking_enable_hint =>
+      'Enable nutritional tracking for this study';
+
+  @override
+  String get form_measurement_type_select => 'Select Measurement Type';
+
+  @override
+  String get form_measurement_type_survey => 'Survey';
+
+  @override
+  String get form_measurement_type_survey_description =>
+      'Collect self-reported data from participants using questions and scales.';
+
+  @override
+  String get form_measurement_type_nutrition => 'Nutrition Task';
+
+  @override
+  String get form_measurement_type_nutrition_description =>
+      'Track participant food and drink intake using a structured journal or photo capture.';
+
+  @override
+  String get form_field_nutrition_instructions => 'Instructions';
+
+  @override
+  String get form_field_nutrition_instructions_hint =>
+      'Enter instructions for the participant';
+
+  @override
+  String get form_field_nutrition_collect_meal_context =>
+      'Collect Meal Context';
+
+  @override
+  String get form_field_nutrition_allow_recipes => 'Allow Recipes';
+
+  @override
+  String get form_field_nutrition_minimum_meals_required =>
+      'Minimum Meals Required';
+
+  @override
+  String get form_field_nutrition_minimum_meals_hint => 'Optional';
+
+  @override
+  String get form_field_nutrition_default_title => 'Nutrition Tracking';
+
+  @override
+  String get form_field_nutrition_custom_meal_types => 'Custom Meal Types';
+
+  @override
+  String get form_field_nutrition_custom_meal_types_hint =>
+      'Leave empty to use defaults';
+
+  @override
+  String get form_field_nutrition_add_meal_type => 'Add meal type';
+
+  @override
+  String form_field_nutrition_meal_type_label(Object index) {
+    return 'Meal type $index';
+  }
+
+  @override
+  String get form_field_nutrition_minimum_meals_min_error =>
+      'Must be at least 1';
+
+  @override
   String get filter_studies => 'Filter Studies';
 
   @override

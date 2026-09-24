@@ -636,5 +636,74 @@
   "system": "System",
   "time_format": "Zeitformat",
   "time_format_12_hour": "12-Stunden (2:30 PM)",
-  "time_format_24_hour": "24-Stunden (14:30)"
+  "time_format_24_hour": "24-Stunden (14:30)",
+  "my_templates": "Meine Vorlagen",
+  "save_as_template": "Als Vorlage speichern",
+  "save_meal_template": "Mahlzeit als Vorlage speichern",
+  "save_food_template": "Lebensmittel als Vorlage speichern",
+  "save_recipe_template": "Rezept als Vorlage speichern",
+  "template_name": "Vorlagenname",
+  "template_tags_optional": "Tags (optional)",
+  "template_tags_hint": "Frühstück, schnell, gesund",
+  "template_saved": "Vorlage gespeichert",
+  "select_meal_template": "Mahlzeit-Vorlage auswählen",
+  "select_food_template": "Lebensmittel-Vorlage auswählen",
+  "search_templates": "Vorlagen suchen...",
+  "no_templates_saved": "Noch keine Vorlagen gespeichert",
+  "save_templates_hint": "Speichern Sie Ihre Lieblingsmahlzeiten und Lebensmittel als Vorlagen für schnellen Zugriff",
+  "from_template": "Aus Vorlage",
+  "add_new_food": "Neues Lebensmittel hinzufügen",
+  "delete_template": "Vorlage löschen",
+  "delete_template_confirmation": "Sind Sie sicher, dass Sie diese Vorlage löschen möchten?",
+  "filter_all": "Alle",
+  "filter_meals": "Mahlzeiten",
+  "filter_foods": "Lebensmittel",
+  "filter_recipes": "Rezepte",
+  "items_count": "{count} Elemente",
+  "@items_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kcal_value": "{value} kcal",
+  "@kcal_value": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "template_type_meal": "Mahlzeit",
+  "template_type_food": "Lebensmittel",
+  "template_type_recipe": "Rezept",
+  "rename_template": "Vorlage umbenennen",
+  "new_name": "Neuer Name",
+  "photoRecallTitle": "Foto-Erinnerung",
+  "photoRecallSubtitle": "Fotos von dieser Zeit ansehen",
+  "photoRecallPermissionNeeded": "Tippen, um Fotozugriff zu aktivieren",
+  "photoRecallPermissionTitle": "Fotozugriff aktivieren",
+  "photoRecallPermissionDescription": "Der Zugriff auf Ihre Fotos hilft Ihnen, sich an das Gegessene zu erinnern. Fotos werden nur auf Ihrem Gerät angezeigt.",
+  "photoRecallNoPhotos": "Keine Fotos gefunden",
+  "photoRecallNoPhotosSubtitle": "Wir konnten keine Fotos von dieser Zeit finden",
+  "photoRecallTapToEnlarge": "Tippen Sie auf ein Foto, um es Vollbild anzuzeigen",
+  "photoRecallTimeInfo": "Fotos von {time} (±2 Stunden)",
+  "grantPermission": "Berechtigung erteilen",
+  "analyzePhotoTooltip": "Dieses Foto analysieren",
+  "analyzingPhoto": "Foto wird analysiert...",
+  "foodAnalysisError": "Bild konnte nicht analysiert werden - versuchen Sie die manuelle Eingabe",
+  "foodAnalysisNetworkError": "Verbindung zum Analysedienst nicht möglich",
+  "foodAnalysisNoItems": "Keine Lebensmittel im Bild erkannt",
+  "aiEstimatedBanner": "KI-geschätzte Werte - bitte überprüfen",
+  "selectFoodItemsTitle": "Lebensmittel auswählen",
+  "selectFoodItemsSubtitle": "Wählen Sie die Elemente aus, die Sie hinzufügen möchten",
+  "addSelected": "Ausgewählte hinzufügen",
+  "analyzeAgain": "Erneut analysieren",
+  "select_all": "Alle auswählen",
+  "deselect_all": "Alle abwählen",
+  "confidenceLabel": "Konfidenz: {percentage}%",
+  "min_meals_not_met_title": "Mindestanzahl an Mahlzeiten nicht erreicht",
+  "min_meals_not_met_message": "Diese Aufgabe erfordert mindestens {count} Mahlzeit(en). Du hast weniger als erforderlich aufgezeichnet. Trotzdem verlassen?",
+  "leave_anyway": "Trotzdem verlassen"
 }

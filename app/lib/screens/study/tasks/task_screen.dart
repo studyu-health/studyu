@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/tasks/intervention/checkmark_task_widget.dart';
+import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/screens/study/tasks/observation/questionnaire_task_widget.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/widgets/html_text.dart';
@@ -22,6 +23,7 @@ class const TaskScreen({required final TaskInstance taskInstance, super.key})
 class _TaskScreenState() extends State<TaskScreen> {
   late TaskInstance taskInstance;
   StudySubject? subject;
+  bool _hasNavigated = false;
 
   @override
   void didChangeDependencies() {
@@ -31,6 +33,26 @@ class _TaskScreenState() extends State<TaskScreen> {
       widget.taskInstance.id,
       study: subject!.study,
     );
+
+    if (taskInstance.task is NutritionTask && !_hasNavigated) {
+      _hasNavigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToNutritionTask();
+      });
+    }
+  }
+
+  Future<void> _navigateToNutritionTask() async {
+    final nutritionTask = taskInstance.task as NutritionTask;
+    final result = await Navigator.of(context).push(
+      NutritionTaskWidget.route(
+        task: nutritionTask,
+        completionPeriod: taskInstance.completionPeriod,
+      ),
+    );
+
+    if (!mounted) return;
+    Navigator.of(context).pop(result != null);
   }
 
   Widget _buildTask() {
@@ -58,6 +80,9 @@ class _TaskScreenState() extends State<TaskScreen> {
           key: UniqueKey(),
           completionPeriod: taskInstance.completionPeriod,
         );
+      case final NutritionTask _:
+        // Navigation happens in didChangeDependencies, show loading indicator
+        return const Center(child: CircularProgressIndicator());
       default:
         throw ArgumentError('Task ${taskInstance.task.type} not supported');
     }

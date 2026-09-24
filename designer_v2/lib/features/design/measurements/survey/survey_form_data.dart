@@ -20,6 +20,7 @@ class MeasurementSurveyFormData({
   required super.hasReminder,
   super.reminderTime,
   required final QuestionnaireFormData questionnaireFormData,
+  final TaskScheduleRule? scheduleRule,
 }) extends IFormDataWithSchedule {
   static String get kDefaultTitle =>
       tr.form_field_measurement_survey_title_default;
@@ -43,6 +44,7 @@ class MeasurementSurveyFormData({
       hasReminder: questionnaireTask.schedule.hasReminder,
       reminderTime: questionnaireTask.schedule.reminderTime,
       instanceId: questionnaireTask.schedule.instanceId,
+      scheduleRule: questionnaireTask.scheduleRule,
     );
   }
 
@@ -54,6 +56,7 @@ class MeasurementSurveyFormData({
     questionnaireTask.footer = outroText;
     questionnaireTask.questions = questionnaireFormData.toQuestionnaire();
     questionnaireTask.schedule = toSchedule();
+    questionnaireTask.scheduleRule = scheduleRule;
     return questionnaireTask;
   }
 
@@ -71,6 +74,7 @@ class MeasurementSurveyFormData({
       timeLockEnd: timeLockEnd,
       hasReminder: hasReminder,
       reminderTime: reminderTime,
+      scheduleRule: scheduleRule,
     );
   }
 }

@@ -18,6 +18,7 @@ import 'package:studyu_app/theme.dart' as app_theme;
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/debug_screen.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -66,6 +67,10 @@ class _DashboardScreenState()
   late final TextStyle showcaseActionTextStyle;
   StudySubject? subject;
   List<TaskInstance>? scheduleToday;
+  final _nutritionAutoSaveManager = NutritionRecallAutoSaveManager();
+  Timer? _midnightSubmitTimer;
+  bool _hasCheckedPendingRecalls = false;
+  String? _lastSubjectId;
   bool _showcaseCheckStarted = false;
   bool _dashboardShowcaseStarted = false;
   bool _redirectingToLoading = false;
@@ -76,6 +81,46 @@ class _DashboardScreenState()
   bool get showNextDay =>
       (isDebugMode || context.read<AppState>().isPreview) &&
       !subject!.completedStudy;
+
+  Future<void> _submitPendingNutritionRecalls() async {
+    final currentSubject = subject;
+    if (currentSubject == null) return;
+
+    final trackProgress = context.read<AppState>().trackParticipantProgress;
+    if (!trackProgress) return;
+
+    try {
+      await _nutritionAutoSaveManager.submitPendingRecalls(
+        subject: currentSubject,
+        trackProgress: trackProgress,
+      );
+    } catch (e) {
+      StudyULogger.error('Failed to auto-submit pending nutrition recalls: $e');
+    }
+  }
+
+  void _scheduleMidnightSubmitTimer() {
+    _midnightSubmitTimer?.cancel();
+
+    final trackProgress = context.read<AppState>().trackParticipantProgress;
+    if (subject == null || !trackProgress) return;
+
+    final now = DateTime.now();
+    final tomorrow = DateTime(
+      now.year,
+      now.month,
+      now.day + 1,
+    ).add(const Duration(seconds: 5));
+    final delay = tomorrow.difference(now);
+
+    _midnightSubmitTimer = Timer(delay, () async {
+      if (!mounted) return;
+      await _submitPendingNutritionRecalls();
+      if (mounted) {
+        _scheduleMidnightSubmitTimer();
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -114,16 +159,14 @@ class _DashboardScreenState()
           setState(() {
             scheduleToday = subject!.scheduleFor(DateTime.now());
           });
+          unawaited(_submitPendingNutritionRecalls());
+          _scheduleMidnightSubmitTimer();
           unawaited(_startDashboardShowcaseIfNeeded());
         }
       case AppLifecycleState.inactive:
-        break;
       case AppLifecycleState.paused:
-        break;
       case AppLifecycleState.detached:
-        break;
       case AppLifecycleState.hidden:
-        break;
     }
   }
 
@@ -132,7 +175,25 @@ class _DashboardScreenState()
     super.didChangeDependencies();
     subject = context.watch<AppState>().activeSubject;
     if (subject != null && _studyIsAvailable) {
+      final subjectChanged = subject!.id != _lastSubjectId;
+      _lastSubjectId = subject!.id;
+      if (subjectChanged) {
+        _hasCheckedPendingRecalls = false;
+      }
+
       scheduleToday = subject!.scheduleFor(DateTime.now());
+      _scheduleMidnightSubmitTimer();
+
+      if (!_hasCheckedPendingRecalls &&
+          context.read<AppState>().trackParticipantProgress) {
+        _hasCheckedPendingRecalls = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _submitPendingNutritionRecalls();
+          }
+        });
+      }
+
       if (widget.error != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ScaffoldMessenger.of(context)
@@ -149,6 +210,7 @@ class _DashboardScreenState()
   void dispose() {
     _isDisposing = true;
     WidgetsBinding.instance.removeObserver(this);
+    _midnightSubmitTimer?.cancel();
     _dashboardShowcase.dismiss();
     super.dispose();
   }
@@ -409,9 +471,12 @@ class _DashboardScreenState()
                 onPressed: () async {
                   try {
                     await subject!.setStartDateBackBy(days: 1);
+
                     setState(() {
                       scheduleToday = subject!.scheduleFor(DateTime.now());
                     });
+                    await _submitPendingNutritionRecalls();
+                    _scheduleMidnightSubmitTimer();
                     unawaited(_startDashboardShowcaseIfNeeded());
                   } on SocketException catch (_) {}
                 },
