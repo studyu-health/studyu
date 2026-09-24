@@ -59,6 +59,34 @@ void main() {
   );
 
   test(
+    'runs a queued recovery after an active recovery requests a retry',
+    () async {
+      var firstRecoveryCalls = 0;
+      var secondRecoveryCalls = 0;
+      final firstRecovery = Completer<HealthyConnectionRecoveryResult>();
+
+      appConnectionStatusController.scheduleHealthyConnectionRecovery(() {
+        firstRecoveryCalls++;
+        return firstRecovery.future;
+      });
+      expect(firstRecoveryCalls, 1);
+
+      appConnectionStatusController.scheduleHealthyConnectionRecovery(() async {
+        secondRecoveryCalls++;
+        return HealthyConnectionRecoveryResult.completed;
+      });
+      expect(secondRecoveryCalls, 0);
+
+      firstRecovery.complete(HealthyConnectionRecoveryResult.retryNeeded);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(appConnectionStatusController.status, AppConnectionStatus.healthy);
+      expect(firstRecoveryCalls, 1);
+      expect(secondRecoveryCalls, 1);
+    },
+  );
+
+  test(
     'reset invalidates an active recovery without disrupting a new one',
     () async {
       final oldRecovery = Completer<HealthyConnectionRecoveryResult>();
@@ -94,7 +122,7 @@ void main() {
 
       newRecovery.complete(HealthyConnectionRecoveryResult.completed);
       await Future<void>.delayed(Duration.zero);
-      expect(replacementRecoveryCalls, 0);
+      expect(replacementRecoveryCalls, 1);
 
       appConnectionStatusController.setStatus(
         AppConnectionStatus.deviceOffline,

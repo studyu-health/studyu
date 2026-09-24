@@ -101,9 +101,9 @@ class AppConnectionStatusController._() extends ChangeNotifier {
     if (result == HealthyConnectionRecoveryResult.retryNeeded &&
         _pendingHealthyConnectionRecovery == null) {
       _pendingHealthyConnectionRecovery = recovery;
-      if (_status == AppConnectionStatus.healthy) {
-        _startPendingHealthyConnectionRecovery();
-      }
+    }
+    if (_status == AppConnectionStatus.healthy) {
+      _startPendingHealthyConnectionRecovery();
     }
   }
 
