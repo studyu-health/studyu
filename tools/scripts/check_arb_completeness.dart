@@ -255,7 +255,7 @@ void _runChecksAtRoot(String root) {
 
 void main(List<String> args) {
   if (args.isNotEmpty && !(args.length == 1 && args.first == '--check')) {
-    stderr.writeln('Usage: dart scripts/check_arb_completeness.dart [--check]');
+    stderr.writeln('Usage: dart tools/scripts/check_arb_completeness.dart [--check]');
     exitCode = 64;
     return;
   }

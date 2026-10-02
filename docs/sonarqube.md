@@ -127,8 +127,8 @@ Run these commands from the repository root:
 
 ```bash
 fvm exec melos test:coverage
-fvm dart scripts/normalize_lcov.dart coverage/sonar/lcov.info
-fvm dart scripts/normalize_lcov.dart --check
+fvm dart tools/scripts/normalize_lcov.dart coverage/sonar/lcov.info
+fvm dart tools/scripts/normalize_lcov.dart --check
 ```
 
 `test:coverage` runs `flutter test --coverage` for each package with a test directory. It writes
