@@ -24,17 +24,22 @@ typedef HealthyConnectionRecovery =
 class AppConnectionStatusController._() extends ChangeNotifier {
   static final AppConnectionStatusController instance =
       AppConnectionStatusController._();
+  static const _maxHealthyConnectionRecoveryRetries = 3;
 
   AppConnectionStatus _status = AppConnectionStatus.healthy;
   AuthAutoRefreshSync? _authAutoRefreshSyncOverride;
   HealthyConnectionRecovery? _pendingHealthyConnectionRecovery;
   int _healthyConnectionRecoveryGeneration = 0;
   int? _activeHealthyConnectionRecoveryGeneration;
+  int _healthyConnectionRecoveryRetryCount = 0;
 
   AppConnectionStatus get status => _status;
 
   void setStatus(AppConnectionStatus status) {
     if (_status == status) return;
+    if (status != AppConnectionStatus.healthy) {
+      _healthyConnectionRecoveryRetryCount = 0;
+    }
     _status = status;
     _syncAuthAutoRefresh();
     if (status == AppConnectionStatus.healthy) {
@@ -44,6 +49,10 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   }
 
   void scheduleHealthyConnectionRecovery(HealthyConnectionRecovery recovery) {
+    if (_status == AppConnectionStatus.healthy &&
+        _activeHealthyConnectionRecoveryGeneration == null) {
+      _healthyConnectionRecoveryRetryCount = 0;
+    }
     _pendingHealthyConnectionRecovery = recovery;
     if (_status == AppConnectionStatus.healthy) {
       _startPendingHealthyConnectionRecovery();
@@ -75,7 +84,9 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   void _startPendingHealthyConnectionRecovery() {
     final recovery = _pendingHealthyConnectionRecovery;
     if (recovery == null ||
-        _activeHealthyConnectionRecoveryGeneration != null) {
+        _activeHealthyConnectionRecoveryGeneration != null ||
+        _healthyConnectionRecoveryRetryCount >
+            _maxHealthyConnectionRecoveryRetries) {
       return;
     }
     _pendingHealthyConnectionRecovery = null;
@@ -98,9 +109,9 @@ class AppConnectionStatusController._() extends ChangeNotifier {
 
     if (_activeHealthyConnectionRecoveryGeneration != generation) return;
     _activeHealthyConnectionRecoveryGeneration = null;
-    if (result == HealthyConnectionRecoveryResult.retryNeeded &&
-        _pendingHealthyConnectionRecovery == null) {
-      _pendingHealthyConnectionRecovery = recovery;
+    if (result == HealthyConnectionRecoveryResult.retryNeeded) {
+      _healthyConnectionRecoveryRetryCount++;
+      _pendingHealthyConnectionRecovery ??= recovery;
     }
     if (_status == AppConnectionStatus.healthy) {
       _startPendingHealthyConnectionRecovery();
@@ -112,6 +123,7 @@ class AppConnectionStatusController._() extends ChangeNotifier {
     _pendingHealthyConnectionRecovery = null;
     _healthyConnectionRecoveryGeneration++;
     _activeHealthyConnectionRecoveryGeneration = null;
+    _healthyConnectionRecoveryRetryCount = 0;
     if (_status == AppConnectionStatus.healthy) return;
     _status = AppConnectionStatus.healthy;
     _syncAuthAutoRefresh();

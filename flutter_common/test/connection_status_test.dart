@@ -59,6 +59,25 @@ void main() {
   );
 
   test(
+    'bounds recovery retries while the connection remains healthy',
+    () async {
+      var recoveryCalls = 0;
+
+      appConnectionStatusController.scheduleHealthyConnectionRecovery(() async {
+        recoveryCalls++;
+        return HealthyConnectionRecoveryResult.retryNeeded;
+      });
+
+      await Future<void>.delayed(Duration.zero);
+
+      expect(recoveryCalls, 4);
+
+      await Future<void>.delayed(Duration.zero);
+      expect(recoveryCalls, 4);
+    },
+  );
+
+  test(
     'runs a queued recovery after an active recovery requests a retry',
     () async {
       var firstRecoveryCalls = 0;
