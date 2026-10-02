@@ -1304,6 +1304,20 @@ class AppLocalizationsKo extends AppLocalizations {
       '이 연구는 더 이상 서버에서 사용할 수 없습니다. 현재 데이터는 이 기기에 남아 있습니다. 삭제하기 전에 연구 책임자나 지원팀에 문의하세요. \'모든 데이터 삭제\'는 그들이 앱을 재설정하라고 지시할 때만 사용하세요.';
 
   @override
+  String get cache_missing_error_title => '캐시된 연구 데이터를 찾을 수 없음';
+
+  @override
+  String get cache_missing_error_description =>
+      '서비스를 이용할 수 없는 동안 StudyU가 이 기기에서 캐시된 연구 데이터를 찾지 못했습니다. 다시 연결한 후 나중에 다시 시도하거나, 데이터를 삭제하기 전에 연구 책임자 또는 지원팀에 문의하세요.';
+
+  @override
+  String get cache_corrupt_error_title => '캐시된 연구 데이터를 읽을 수 없음';
+
+  @override
+  String get cache_corrupt_error_description =>
+      'StudyU가 로컬 연구 데이터를 찾았지만, 서비스를 이용할 수 없는 동안 안전하게 복원하지 못했습니다. 데이터를 삭제하기 전에 연구 책임자 또는 지원팀에 문의하세요.';
+
+  @override
   String get dashboard_showcase_progress_title => '연구 진행 상황';
 
   @override
@@ -1354,8 +1368,26 @@ class AppLocalizationsKo extends AppLocalizations {
   String get support_email_subject_deleted_study => 'StudyU 지원 요청 - 연구 이용 불가';
 
   @override
+  String get support_email_subject_cache_missing =>
+      'StudyU 지원 요청 - 캐시된 연구 데이터 없음';
+
+  @override
+  String get support_email_subject_cache_corrupt =>
+      'StudyU 지원 요청 - 캐시된 연구 데이터 손상';
+
+  @override
   String deleted_study_support_email_body(String subjectId) {
     return '안녕하세요,\n\nStudyU 앱에서 제 연구가 더 이상 서버에서 사용할 수 없다고 나옵니다. 제 참여자 ID는: $subjectId 입니다.\n\n로컬 데이터를 유지해야 하는지 아니면 앱을 재설정해야 하는지 알려주세요.\n\n감사합니다.';
+  }
+
+  @override
+  String cache_missing_support_email_body(String subjectId) {
+    return '안녕하세요,\n\n서비스를 이용할 수 없는 동안 StudyU 앱이 제 기기에서 캐시된 연구 데이터를 찾지 못했습니다. 제 참여자 ID는: $subjectId 입니다.\n\n안전하게 다시 이용하려면 어떻게 해야 하는지 알려주세요.\n\n감사합니다.';
+  }
+
+  @override
+  String cache_corrupt_support_email_body(String subjectId) {
+    return '안녕하세요,\n\nStudyU 앱이 제 기기에서 캐시된 연구 데이터를 찾았지만, 서비스를 이용할 수 없는 동안 안전하게 복원하지 못했습니다. 제 참여자 ID는: $subjectId 입니다.\n\n안전하게 다시 이용하려면 어떻게 해야 하는지 알려주세요.\n\n감사합니다.';
   }
 
   @override
@@ -1404,6 +1436,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get no_internet_connection => '인터넷에 연결되어 있지 않습니다. 온라인 상태에서 다시 시도하십시오.';
+
+  @override
+  String get connection_banner_device_offline =>
+      '오프라인 상태입니다. 캐시된 연구 데이터를 사용 중이며, 다시 온라인 상태가 되면 변경 사항이 동기화됩니다.';
+
+  @override
+  String get connection_banner_backend_unavailable =>
+      '현재 StudyU 서비스를 이용할 수 없습니다. 캐시된 연구 데이터는 계속 사용할 수 있으며 변경 사항은 나중에 동기화됩니다.';
 
   @override
   String error_occurred_with_message(String message) {

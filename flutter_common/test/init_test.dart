@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/src/utils/connection_status.dart';
 import 'package:studyu_flutter_common/src/utils/date_time_format.dart';
 import 'package:studyu_flutter_common/src/utils/user.dart';
 
 void main() {
+  tearDown(() {
+    appConnectionStatusController.reset();
+  });
+
   test('infers date format from locale', () {
     expect(
       DateTimeFormat.defaultDateFormat(const Locale('de', 'DE')),
@@ -195,9 +200,14 @@ void main() {
   test('ensureParticipantSignedIn returns true for existing session', () async {
     var signInCalls = 0;
     var signUpCalls = 0;
+    var validateCalls = 0;
 
     final success = await ensureParticipantSignedIn(
       isSignedIn: () => true,
+      validateSession: () async {
+        validateCalls++;
+        return true;
+      },
       signIn: () async {
         signInCalls++;
         return false;
@@ -209,8 +219,36 @@ void main() {
     );
 
     expect(success, isTrue);
+    expect(validateCalls, 1);
     expect(signInCalls, 0);
     expect(signUpCalls, 0);
+  });
+
+  test('ensureParticipantSignedIn clears invalid current session before restoring credentials', () async {
+    var clearSessionCalls = 0;
+    var signInCalls = 0;
+    var signUpCalls = 0;
+
+    final success = await ensureParticipantSignedIn(
+      isSignedIn: () => true,
+      validateSession: () async => false,
+      clearSession: () async {
+        clearSessionCalls++;
+      },
+      signIn: () async {
+        signInCalls++;
+        return false;
+      },
+      signUp: () async {
+        signUpCalls++;
+        return true;
+      },
+    );
+
+    expect(success, isTrue);
+    expect(clearSessionCalls, 1);
+    expect(signInCalls, 1);
+    expect(signUpCalls, 1);
   });
 
   test(
@@ -250,4 +288,203 @@ void main() {
       expect(signUpCalls, 1);
     },
   );
+
+  test(
+    'ensureParticipantSignedIn keeps credentials on connectivity failure',
+    () async {
+      var signInCalls = 0;
+      var signUpCalls = 0;
+
+      final success = await ensureParticipantSignedIn(
+        isSignedIn: () => true,
+        validateSession: () => Future<bool>.error(
+          Exception(
+            'AuthRetryableFetchException(message: ClientException: Failed to fetch)',
+          ),
+        ),
+        signIn: () async {
+          signInCalls++;
+          return true;
+        },
+        signUp: () async {
+          signUpCalls++;
+          return true;
+        },
+      );
+
+      expect(success, isFalse);
+      expect(signInCalls, 0);
+      expect(signUpCalls, 0);
+      expect(
+        appConnectionStatusController.status,
+        AppConnectionStatus.backendUnavailable,
+      );
+    },
+  );
+
+  test('ensureParticipantSignedIn trusts existing session while connectivity is degraded', () async {
+    appConnectionStatusController.setStatus(
+      AppConnectionStatus.backendUnavailable,
+    );
+    var validateCalls = 0;
+    var signInCalls = 0;
+    var signUpCalls = 0;
+
+    final success = await ensureParticipantSignedIn(
+      isSignedIn: () => true,
+      validateSession: () async {
+        validateCalls++;
+        return false;
+      },
+      signIn: () async {
+        signInCalls++;
+        return false;
+      },
+      signUp: () async {
+        signUpCalls++;
+        return false;
+      },
+    );
+
+    expect(success, isTrue);
+    expect(validateCalls, 0);
+    expect(signInCalls, 0);
+    expect(signUpCalls, 0);
+  });
+
+  test('ensureParticipantSignedIn skips auth recovery without session while connectivity is degraded', () async {
+    appConnectionStatusController.setStatus(AppConnectionStatus.deviceOffline);
+    var signInCalls = 0;
+    var signUpCalls = 0;
+
+    final success = await ensureParticipantSignedIn(
+      isSignedIn: () => false,
+      signIn: () async {
+        signInCalls++;
+        return true;
+      },
+      signUp: () async {
+        signUpCalls++;
+        return true;
+      },
+    );
+
+    expect(success, isFalse);
+    expect(signInCalls, 0);
+    expect(signUpCalls, 0);
+  });
+
+  test('shouldAttemptParticipantAuthRecovery skips connectivity errors', () {
+    expect(
+      shouldAttemptParticipantAuthRecovery(
+        Exception('ClientException: Failed to fetch'),
+      ),
+      isFalse,
+    );
+    expect(
+      shouldAttemptParticipantAuthRecovery(
+        Exception('AuthApiException(code: invalid_credentials)'),
+      ),
+      isTrue,
+    );
+  });
+
+  test(
+    'connectionStatusFromError keeps invalid credentials out of connectivity',
+    () {
+      expect(
+        connectionStatusFromError(
+          Exception('AuthApiException(code: invalid_credentials)'),
+        ),
+        isNull,
+      );
+    },
+  );
+
+  test('connectionStatusFromError treats connection refused as backend unavailable', () {
+    expect(
+      connectionStatusFromError(
+        Exception('SocketException: Connection refused'),
+      ),
+      AppConnectionStatus.backendUnavailable,
+    );
+  });
+
+  test(
+    'degraded startup recovery restores the persisted session first',
+    () async {
+      var signedIn = false;
+      var credentialSignInCalls = 0;
+
+      final result = await recoverSessionAfterDegradedStartup(
+        isSignedIn: () => signedIn,
+        loadPersistedSession: () async => 'persisted-session',
+        recoverPersistedSession: (session) async {
+          expect(session, 'persisted-session');
+          signedIn = true;
+        },
+        signIn: () async {
+          credentialSignInCalls++;
+          return true;
+        },
+      );
+
+      expect(result, HealthyConnectionRecoveryResult.completed);
+      expect(signedIn, isTrue);
+      expect(credentialSignInCalls, 0);
+    },
+  );
+
+  test(
+    'degraded startup recovery falls back to participant credentials',
+    () async {
+      var credentialSignInCalls = 0;
+
+      final result = await recoverSessionAfterDegradedStartup(
+        isSignedIn: () => false,
+        loadPersistedSession: () async => 'invalid-session',
+        recoverPersistedSession: (_) => Future<void>.error(
+          const FormatException('invalid persisted session'),
+        ),
+        hasStoredCredentials: () async => true,
+        signIn: () async {
+          credentialSignInCalls++;
+          return true;
+        },
+      );
+
+      expect(result, HealthyConnectionRecoveryResult.completed);
+      expect(credentialSignInCalls, 1);
+    },
+  );
+
+  test('degraded startup recovery retries transient auth failures', () async {
+    final result = await recoverSessionAfterDegradedStartup(
+      isSignedIn: () => false,
+      loadPersistedSession: () async => 'persisted-session',
+      recoverPersistedSession: (_) =>
+          Future<void>.error(Exception('ClientException: Failed to fetch')),
+      hasStoredCredentials: () async => true,
+      signIn: () async => false,
+    );
+
+    expect(result, HealthyConnectionRecoveryResult.retryNeeded);
+  });
+
+  test('degraded startup recovery consumes missing auth data', () async {
+    var signInCalls = 0;
+
+    final result = await recoverSessionAfterDegradedStartup(
+      isSignedIn: () => false,
+      loadPersistedSession: () async => null,
+      hasStoredCredentials: () async => false,
+      signIn: () async {
+        signInCalls++;
+        return false;
+      },
+    );
+
+    expect(result, HealthyConnectionRecoveryResult.completed);
+    expect(signInCalls, 0);
+  });
 }

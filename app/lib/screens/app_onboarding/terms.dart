@@ -72,6 +72,7 @@ class _TermsScreenState() extends State<TermsScreen> {
         descriptionBottomSpacing: 0,
         child: RetryFutureBuilder<AppConfig>(
           tryFunction: AppConfig.getAppConfig,
+          trackConnectionStatus: true,
           successBuilder: (BuildContext context, AppConfig? appConfig) =>
               legalSection(context, appConfig),
         ),

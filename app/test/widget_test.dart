@@ -13,6 +13,7 @@ import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/app_onboarding/about.dart';
+import 'package:studyu_app/screens/app_onboarding/app_error_screen.dart';
 import 'package:studyu_app/screens/app_onboarding/loading_screen.dart';
 import 'package:studyu_app/screens/app_onboarding/restore_account_screen.dart';
 import 'package:studyu_app/screens/app_onboarding/terms.dart';
@@ -94,6 +95,74 @@ void main() {
       supabaseClient: SupabaseClient('https://example.supabase.co', 'test'),
     );
   });
+
+  test('startup session restore keeps going on backend failures', () async {
+    AppConnectionStatus? connectionStatus;
+    Object? capturedError;
+
+    await tryRestoreParticipantSession(
+      isLoggedIn: () => false,
+      hasStoredCredentials: () async => true,
+      signIn: () =>
+          Future<void>.error(Exception('ClientException: Failed to fetch')),
+      onConnectionStatusChanged: (status) => connectionStatus = status,
+      onError: (error) => capturedError = error,
+    );
+
+    expect(connectionStatus, AppConnectionStatus.backendUnavailable);
+    expect(capturedError, isNotNull);
+  });
+
+  test('maps deleted subject failure to deleted study app error', () {
+    final args = appErrorArgumentsForSubjectLoadFailure(
+      selectedSubjectId: 'subject-1',
+      error: const SubjectDeletedException(),
+    );
+
+    expect(args.selectedSubjectId, 'subject-1');
+    expect(args.reason, AppErrorReason.deletedStudy);
+  });
+
+  test('maps cache failure to cache unavailable app error', () {
+    final args = appErrorArgumentsForSubjectLoadFailure(
+      selectedSubjectId: 'subject-1',
+      error: const SubjectCacheUnavailableException('No cached subject found'),
+    );
+
+    expect(args.selectedSubjectId, 'subject-1');
+    expect(args.reason, AppErrorReason.cacheUnavailableMissing);
+  });
+
+  test('maps corrupt cache failure to cache corrupt app error', () {
+    final args = appErrorArgumentsForSubjectLoadFailure(
+      selectedSubjectId: 'subject-1',
+      error: const SubjectCacheUnavailableException(
+        'No backup subject provided',
+      ),
+    );
+
+    expect(args.selectedSubjectId, 'subject-1');
+    expect(args.reason, AppErrorReason.cacheUnavailableCorrupt);
+  });
+
+  test(
+    'startup session restore skips sign-in when no stored credentials',
+    () async {
+      var signInCalls = 0;
+
+      await tryRestoreParticipantSession(
+        isLoggedIn: () => false,
+        hasStoredCredentials: () async => false,
+        signIn: () {
+          signInCalls++;
+          return Future<void>.value();
+        },
+      );
+
+      expect(signInCalls, 0);
+    },
+  );
+
   testWidgets('welcome prioritizes study discovery', (tester) async {
     await tester.pumpWidget(setup(const WelcomeScreen()));
     await tester.pumpAndSettle();

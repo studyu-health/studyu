@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,8 +8,119 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/app_onboarding/app_error_screen.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
+import 'package:supabase/supabase.dart';
 
 void main() {
+  setUpAll(() {
+    setEnv(
+      'https://example.supabase.co',
+      'test-anon-key',
+      supabaseClient: SupabaseClient(
+        'https://example.supabase.co',
+        'test-anon-key',
+      ),
+      envDeveloperEmail: 'support@example.org',
+    );
+  });
+
+  testWidgets('can be disposed while cached data is loading', (tester) async {
+    final containsKey = Completer<bool>();
+    const secureStorageChannel = MethodChannel(
+      'plugins.it_nomads.com/flutter_secure_storage',
+    );
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      secureStorageChannel,
+      (call) => call.method == 'containsKey' ? containsKey.future : null,
+    );
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        secureStorageChannel,
+        null,
+      );
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        locale: Locale('en'),
+        home: AppErrorScreen(),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox());
+
+    containsKey.complete(false);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'missing-cache errors contact app support without loading the cache',
+    (tester) async {
+      const secureStorageChannel = MethodChannel(
+        'plugins.it_nomads.com/flutter_secure_storage',
+      );
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        secureStorageChannel,
+        (_) async => false,
+      );
+
+      String? launchedUrl;
+      const urlLauncherChannel = MethodChannel(
+        'plugins.flutter.io/url_launcher',
+      );
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        urlLauncherChannel,
+        (call) async {
+          if (call.method == 'launch') {
+            launchedUrl =
+                (call.arguments as Map<Object?, Object?>)['url']! as String;
+            return true;
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          secureStorageChannel,
+          null,
+        );
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          urlLauncherChannel,
+          null,
+        );
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          locale: Locale('en'),
+          home: AppErrorScreen(
+            selectedSubjectId: 'subject-1',
+            reason: AppErrorReason.cacheUnavailableMissing,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('App support'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('App support'));
+      await tester.pumpAndSettle();
+
+      final emailUri = Uri.parse(launchedUrl!);
+      expect(emailUri.path, 'support@example.org');
+      expect(emailUri.queryParameters['body'], contains('subject-1'));
+      expect(find.text('This study has no contact email.'), findsNothing);
+    },
+  );
+
   testWidgets('contacts the study team from the error screen', (tester) async {
     final study = Study('study-1', 'researcher-1')
       ..contact.email = 'researcher@example.org';

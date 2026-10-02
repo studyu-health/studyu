@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -466,6 +464,35 @@ class _RecoveryPhraseWidgetState() extends State<RecoveryPhraseWidget> {
   }
 }
 
+String _connectivityErrorMessage(
+  BuildContext context,
+  AppConnectionStatus status,
+) {
+  return switch (status) {
+    AppConnectionStatus.deviceOffline => AppLocalizations.of(
+      context,
+    )!.no_internet_connection,
+    AppConnectionStatus.backendUnavailable => AppLocalizations.of(
+      context,
+    )!.connection_banner_backend_unavailable,
+    AppConnectionStatus.healthy => '',
+  };
+}
+
+SnackBar _buildStatusSnackBar(BuildContext context, String message) {
+  final theme = Theme.of(context);
+  return SnackBar(
+    backgroundColor: theme.colorScheme.primary,
+    content: Text(
+      message,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: theme.colorScheme.onPrimary,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
+}
+
 class const OptOutAlertDialog({super.key, required final StudySubject? subject})
     extends StatefulWidget {
   @override
@@ -523,18 +550,21 @@ class _OptOutAlertDialogState() extends State<OptOutAlertDialog> {
               ? () async {
                   try {
                     await widget.subject!.softDelete();
-                  } on SocketException catch (_) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            AppLocalizations.of(context)!
-                                .no_internet_connection,
+                  } catch (error) {
+                    final status = connectionStatusFromError(error);
+                    if (status != null) {
+                      appConnectionStatusController.setStatus(status);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          _buildStatusSnackBar(
+                            context,
+                            _connectivityErrorMessage(context, status),
                           ),
-                        ),
-                      );
+                        );
+                      }
+                      return;
                     }
-                    return;
+                    rethrow;
                   }
                   await deleteActiveStudyReference();
                   await FitbitHandler.deleteFitbitCredentials(
@@ -612,35 +642,36 @@ class _DeleteAlertDialogState() extends State<DeleteAlertDialog> {
               ? () async {
                   try {
                     await widget.subject!.delete();
-                  } on SocketException catch (_) {
-                    // Device is offline — preserve local data so nothing is lost
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            AppLocalizations.of(context)!
-                                .no_internet_connection,
-                          ),
-                        ),
-                      );
-                    }
-                    return;
-                  } on PostgrestException catch (e) {
-                    if (e.code != 'PGRST116') {
+                  } on PostgrestException catch (error) {
+                    if (error.code != 'PGRST116') {
                       // Unexpected DB error — don't clear local data
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              AppLocalizations.of(context)!
-                                  .error_occurred_with_message(e.message),
-                            ),
+                          _buildStatusSnackBar(
+                            context,
+                            AppLocalizations.of(context)!
+                                .error_occurred_with_message(error.message),
                           ),
                         );
                       }
                       return;
                     }
                     // PGRST116: subject already deleted from DB — proceed with local cleanup
+                  } catch (error) {
+                    final status = connectionStatusFromError(error);
+                    if (status != null) {
+                      appConnectionStatusController.setStatus(status);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          _buildStatusSnackBar(
+                            context,
+                            _connectivityErrorMessage(context, status),
+                          ),
+                        );
+                      }
+                      return;
+                    }
+                    rethrow;
                   }
                   // Reached when delete succeeded or subject was already gone from DB
                   RestoreAccountService.clearCache();

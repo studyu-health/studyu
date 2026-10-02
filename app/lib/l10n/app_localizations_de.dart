@@ -1356,6 +1356,22 @@ class AppLocalizationsDe extends AppLocalizations {
       'Diese Studie ist auf dem Server nicht mehr verfügbar. Deine Daten bleiben vorerst auf diesem Gerät. Bitte kontaktiere deine Studienleitung oder den Support, bevor du etwas löschst. Nutze \'Alle Daten löschen\' nur, wenn du zum Zurücksetzen der App aufgefordert wirst.';
 
   @override
+  String get cache_missing_error_title =>
+      'Zwischengespeicherte Studiendaten nicht gefunden';
+
+  @override
+  String get cache_missing_error_description =>
+      'StudyU konnte auf diesem Gerät keine zwischengespeicherten Studiendaten finden, während der Dienst nicht verfügbar ist. Bitte stelle später wieder eine Verbindung her oder kontaktiere deine Studienleitung oder den Support, bevor du Daten löschst.';
+
+  @override
+  String get cache_corrupt_error_title =>
+      'Zwischengespeicherte Studiendaten konnten nicht gelesen werden';
+
+  @override
+  String get cache_corrupt_error_description =>
+      'StudyU hat lokale Studiendaten gefunden, konnte sie aber nicht sicher wiederherstellen, während der Dienst nicht verfügbar ist. Bitte kontaktiere deine Studienleitung oder den Support, bevor du Daten löschst.';
+
+  @override
   String get dashboard_showcase_progress_title => 'Studienfortschritt';
 
   @override
@@ -1410,8 +1426,26 @@ class AppLocalizationsDe extends AppLocalizations {
       'StudyU Support-Anfrage - Studie nicht verfügbar';
 
   @override
+  String get support_email_subject_cache_missing =>
+      'StudyU Support-Anfrage - Zwischengespeicherte Studiendaten fehlen';
+
+  @override
+  String get support_email_subject_cache_corrupt =>
+      'StudyU Support-Anfrage - Zwischengespeicherte Studiendaten beschädigt';
+
+  @override
   String deleted_study_support_email_body(String subjectId) {
     return 'Hallo,\n\ndie StudyU App zeigt an, dass meine Studie auf dem Server nicht mehr verfügbar ist. Meine Subject-ID ist: $subjectId\n\nBitte teile mir mit, ob ich meine lokalen Daten behalten oder die App zurücksetzen soll.\n\nVielen Dank.';
+  }
+
+  @override
+  String cache_missing_support_email_body(String subjectId) {
+    return 'Hallo,\n\ndie StudyU App konnte auf meinem Gerät keine zwischengespeicherten Studiendaten finden, während der Dienst nicht verfügbar war. Meine Subject-ID ist: $subjectId\n\nBitte teile mir mit, wie ich den Zugriff sicher wiederherstellen soll.\n\nVielen Dank.';
+  }
+
+  @override
+  String cache_corrupt_support_email_body(String subjectId) {
+    return 'Hallo,\n\ndie StudyU App hat zwischengespeicherte Studiendaten auf meinem Gerät gefunden, konnte sie aber nicht sicher wiederherstellen, während der Dienst nicht verfügbar war. Meine Subject-ID ist: $subjectId\n\nBitte teile mir mit, wie ich den Zugriff sicher wiederherstellen soll.\n\nVielen Dank.';
   }
 
   @override
@@ -1466,6 +1500,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get no_internet_connection =>
       'Keine Internetverbindung. Bitte versuche es erneut, wenn du online bist.';
+
+  @override
+  String get connection_banner_device_offline =>
+      'Sie sind offline. Zwischengespeicherte Studiendaten werden verwendet und Änderungen werden synchronisiert, sobald wieder eine Verbindung besteht.';
+
+  @override
+  String get connection_banner_backend_unavailable =>
+      'Der StudyU-Dienst ist derzeit nicht verfügbar. Zwischengespeicherte Studiendaten bleiben verfügbar und Änderungen werden später synchronisiert.';
 
   @override
   String error_occurred_with_message(String message) {

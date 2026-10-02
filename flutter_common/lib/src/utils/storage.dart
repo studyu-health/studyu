@@ -8,16 +8,20 @@ import 'package:synchronized/synchronized.dart';
 final storageLock = Lock();
 
 class SupabaseStorage() extends LocalStorage {
+  static bool suppressPersistedSessionRecovery = false;
+
   @override
   Future<void> initialize() async {}
 
   @override
   Future<bool> hasAccessToken() async {
+    if (suppressPersistedSessionRecovery) return false;
     return await SecureStorage.containsKey(supabasePersistSessionKey);
   }
 
   @override
   Future<String?> accessToken() async {
+    if (suppressPersistedSessionRecovery) return null;
     return await SecureStorage.read(supabasePersistSessionKey);
   }
 

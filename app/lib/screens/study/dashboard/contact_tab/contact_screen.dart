@@ -37,6 +37,7 @@ class _ContactScreenState() extends State<ContactScreen> {
           ),
           RetryFutureBuilder<Contact>(
             tryFunction: AppConfig.getAppContact,
+            trackConnectionStatus: true,
             successBuilder:
                 (BuildContext context, Contact? appSupportContact) =>
                     ContactWidget(
