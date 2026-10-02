@@ -237,6 +237,8 @@ class _EligibilityScreenState() extends State<EligibilityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     final nav = BottomOnboardingNavigation(
       onBack: context.canPop() ? () => context.pop() : null,
       nextButtonKey: const ValueKey('eligibility_continue'),
@@ -254,34 +256,38 @@ class _EligibilityScreenState() extends State<EligibilityScreen> {
       OnboardingNavConfig.fromNav(nav),
     );
 
-    return Scaffold(
-      key: const ValueKey('eligibility_screen'),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: Text(
-          AppLocalizations.of(context)!.eligibility_questionnaire_title,
-        ),
-      ),
-      body: TitleDescriptionLayout(
-        descriptionWidget: StudyOnboardingDescription(
-          text: AppLocalizations.of(context)!.please_answer_eligibility,
-        ),
-        descriptionBottomSpacing: 0,
-        scrollable: false,
-        bottomContent: activeResult != null ? _constructResultBanner() : null,
-        child: Expanded(
-          child: QuestionnaireWidget(
-            widget.study!.questionnaire.questions,
-            title: widget.study!.title,
-            onComplete: _evaluateResponse,
-            shouldContinue: _checkContinuation,
-            hideCta: activeResult?.eligible == false,
-            autoComplete: true,
+    return Title(
+      title: localizations.eligibility_questionnaire_title,
+      color: theme.colorScheme.primary,
+      child: Scaffold(
+        key: const ValueKey('eligibility_screen'),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          title: Text(
+            AppLocalizations.of(context)!.eligibility_questionnaire_title,
           ),
         ),
+        body: TitleDescriptionLayout(
+          descriptionWidget: StudyOnboardingDescription(
+            text: AppLocalizations.of(context)!.please_answer_eligibility,
+          ),
+          descriptionBottomSpacing: 0,
+          scrollable: false,
+          bottomContent: activeResult != null ? _constructResultBanner() : null,
+          child: Expanded(
+            child: QuestionnaireWidget(
+              widget.study!.questionnaire.questions,
+              title: widget.study!.title,
+              onComplete: _evaluateResponse,
+              shouldContinue: _checkContinuation,
+              hideCta: activeResult?.eligible == false,
+              autoComplete: true,
+            ),
+          ),
+        ),
+        bottomNavigationBar: navNotifier != null ? null : nav,
       ),
-      bottomNavigationBar: navNotifier != null ? null : nav,
     );
   }
 }

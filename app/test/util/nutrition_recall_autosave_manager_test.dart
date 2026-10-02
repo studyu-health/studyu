@@ -367,6 +367,36 @@ void main() {
     expect(await manager.scanPendingRecalls(subject.id), isEmpty);
   });
 
+  test('legacy completed recall discards a previous-day draft', () async {
+    final prefs = await SharedPreferences.getInstance();
+    DailyRecall? submitted;
+    final manager = NutritionRecallAutoSaveManager(
+      preferences: prefs,
+      submitter: (_, recall) async => submitted = recall,
+    );
+    final subject = _subject(daysAgo: 2);
+    final studyDay = subject.getDayOfStudyFor(DateTime.now()) - 1;
+    subject.progress.add(
+      SubjectProgress(
+        subjectId: subject.id,
+        interventionId: 'intervention',
+        taskId: 'task',
+        resultType: 'DailyRecall',
+        result: Result<DailyRecall>.app(
+          type: 'DailyRecall',
+          periodId: null,
+          result: _recall('completed', studyDay: studyDay),
+        ),
+      )..completedAt = DateTime.now().toUtc(),
+    );
+    await _save(manager, _recall('draft', studyDay: studyDay));
+
+    await manager.submitPendingRecalls(subject: subject, trackProgress: true);
+
+    expect(submitted, isNull);
+    expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+  });
+
   test(
     'historical correction keeps its existing completion metadata',
     () async {

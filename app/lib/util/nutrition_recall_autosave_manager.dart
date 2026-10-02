@@ -462,15 +462,13 @@ class NutritionRecallAutoSaveManager({
     required int studyDay,
   }) {
     return subject.progress.any((progress) {
-      if (progress.taskId != taskId ||
-          progress.resultType != 'DailyRecall' ||
-          progress.result.periodId != periodId) {
+      if (progress.taskId != taskId || progress.resultType != 'DailyRecall') {
         return false;
       }
+      final resultPeriodId = progress.result.periodId;
+      if (resultPeriodId != periodId && resultPeriodId != null) return false;
       final result = progress.result.result;
-      if (result is! DailyRecall || result.entryCompletedAt == null) {
-        return false;
-      }
+      if (result is! DailyRecall) return false;
       if (result.studyDaySnapshot == studyDay) return true;
       return result.studyDaySnapshot == null &&
           progress.completedAt != null &&

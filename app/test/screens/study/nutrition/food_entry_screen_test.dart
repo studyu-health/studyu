@@ -321,7 +321,7 @@ void main() {
     expect(result!.foodCode, existingFood.foodCode);
     expect(result!.externalId, existingFood.externalId);
     expect(result!.source, existingFood.source);
-    expect(result!.originalValues, same(existingFood.originalValues));
+    expect(result!.originalValues, equals(existingFood.originalValues));
   });
 
   testWidgets('normal editing of imported food does not show copy mode', (

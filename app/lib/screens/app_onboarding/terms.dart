@@ -50,6 +50,7 @@ class _TermsScreenState() extends State<TermsScreen> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
     final nav = _buildNavigation();
     final navNotifier = OnboardingNavNotifier.maybeOf(context);
@@ -59,24 +60,28 @@ class _TermsScreenState() extends State<TermsScreen> {
       OnboardingNavConfig.fromNav(nav),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: Text(localizations.legal_documents),
-      ),
-      body: TitleDescriptionLayout(
-        descriptionWidget: StudyOnboardingDescription(
-          text: localizations.legal_documents_description,
+    return Title(
+      title: localizations.terms,
+      color: theme.colorScheme.primary,
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          title: Text(localizations.legal_documents),
         ),
-        descriptionBottomSpacing: 0,
-        child: RetryFutureBuilder<AppConfig>(
-          tryFunction: AppConfig.getAppConfig,
-          successBuilder: (BuildContext context, AppConfig? appConfig) =>
-              legalSection(context, appConfig),
+        body: TitleDescriptionLayout(
+          descriptionWidget: StudyOnboardingDescription(
+            text: localizations.legal_documents_description,
+          ),
+          descriptionBottomSpacing: 0,
+          child: RetryFutureBuilder<AppConfig>(
+            tryFunction: AppConfig.getAppConfig,
+            successBuilder: (BuildContext context, AppConfig? appConfig) =>
+                legalSection(context, appConfig),
+          ),
         ),
+        bottomNavigationBar: navNotifier != null ? null : nav,
       ),
-      bottomNavigationBar: navNotifier != null ? null : nav,
     );
   }
 

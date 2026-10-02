@@ -141,7 +141,7 @@ void main() {
 
     final title = tester.widget<Title>(
       find.byWidgetPredicate(
-        (widget) => widget is Title && widget.title == 'Questionnaire',
+        (widget) => widget is Title && widget.title == 'Eligibility check',
       ),
     );
     expect(
