@@ -68,7 +68,7 @@ These rules are a contract, not a replacement for source code, tests, or linked 
 - Before pushing → run `sonar analyze --staged` (or `--base dev`) to catch new SonarQube issues
   locally. It does not compute coverage.
 - Before pushing → run `fvm dart run melos test:coverage`, then
-  `fvm dart scripts/normalize_lcov.dart coverage/sonar/lcov.info` to reproduce coverage locally.
+  `fvm dart tools/scripts/normalize_lcov.dart coverage/sonar/lcov.info` to reproduce coverage locally.
   The 80%-on-new-code gate itself only evaluates in CI; see `docs/sonarqube.md`.
 - Before reporting done: state exactly which checks ran, which passed, and what you couldn't
   verify.
@@ -115,7 +115,7 @@ Never run these without explicit user authorization and immediate verification o
 environment, and data-loss impact:
 
 - `fvm dart run melos reset`, `git clean`, or anything that discards local changes or files.
-- Supabase reset commands or `scripts/reset-test-db.sh` with an unverified or non-local
+- Supabase reset commands or `tools/scripts/reset-test-db.sh` with an unverified or non-local
   `SUPABASE_DB_URL`.
 - `supabase link`, remote `db push`, remote migration commands, or anything against a remote
   database or project.
