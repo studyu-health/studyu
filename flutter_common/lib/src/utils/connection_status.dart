@@ -32,7 +32,6 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   int _healthyConnectionRecoveryGeneration = 0;
   int? _activeHealthyConnectionRecoveryGeneration;
   int _healthyConnectionRecoveryCycle = 0;
-  bool _pendingHealthyConnectionRecoveryIsReplacement = false;
   int _healthyConnectionRecoveryRetryCount = 0;
 
   AppConnectionStatus get status => _status;
@@ -52,9 +51,8 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   }
 
   void scheduleHealthyConnectionRecovery(HealthyConnectionRecovery recovery) {
-    if (_activeHealthyConnectionRecoveryGeneration != null) {
-      _pendingHealthyConnectionRecoveryIsReplacement = true;
-    } else if (_status == AppConnectionStatus.healthy) {
+    if (_activeHealthyConnectionRecoveryGeneration == null &&
+        _status == AppConnectionStatus.healthy) {
       _healthyConnectionRecoveryRetryCount = 0;
     }
     _pendingHealthyConnectionRecovery = recovery;
@@ -115,12 +113,11 @@ class AppConnectionStatusController._() extends ChangeNotifier {
 
     if (_activeHealthyConnectionRecoveryGeneration != generation) return;
     _activeHealthyConnectionRecoveryGeneration = null;
-    if (cycle != _healthyConnectionRecoveryCycle) {
+    final hasPendingReplacement =
+        _pendingHealthyConnectionRecovery != null &&
+        _pendingHealthyConnectionRecovery != recovery;
+    if (cycle != _healthyConnectionRecoveryCycle || hasPendingReplacement) {
       _healthyConnectionRecoveryRetryCount = 0;
-      _pendingHealthyConnectionRecoveryIsReplacement = false;
-    } else if (_pendingHealthyConnectionRecoveryIsReplacement) {
-      _healthyConnectionRecoveryRetryCount = 0;
-      _pendingHealthyConnectionRecoveryIsReplacement = false;
     } else if (result == HealthyConnectionRecoveryResult.retryNeeded) {
       _healthyConnectionRecoveryRetryCount++;
       _pendingHealthyConnectionRecovery ??= recovery;
@@ -133,7 +130,6 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   @visibleForTesting
   void reset() {
     _pendingHealthyConnectionRecovery = null;
-    _pendingHealthyConnectionRecoveryIsReplacement = false;
     _healthyConnectionRecoveryGeneration++;
     _activeHealthyConnectionRecoveryGeneration = null;
     _healthyConnectionRecoveryRetryCount = 0;
