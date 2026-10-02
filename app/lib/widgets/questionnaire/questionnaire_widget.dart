@@ -488,10 +488,7 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (_autoCompleteIfReady()) return;
-      if (_completeButtonFocusNode.context != null) {
-        _completeButtonFocusNode.requestFocus();
-      }
+      _autoCompleteIfReady();
     });
   }
 
@@ -500,7 +497,6 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     return Semantics(
       container: true,
       liveRegion: true,
-      label: l10n.questionnaire_review_title,
       child: Padding(
         key: const ValueKey('questionnaire_review_card'),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

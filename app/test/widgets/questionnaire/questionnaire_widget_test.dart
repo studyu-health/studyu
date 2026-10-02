@@ -2149,6 +2149,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    final semantics = tester.ensureSemantics();
 
     await tester.tap(find.text('yes'));
     await tester.pumpAndSettle();
@@ -2174,6 +2175,12 @@ void main() {
         matching: find.byType(Card),
       ),
       findsNothing,
+    );
+    expect(
+      tester
+          .getSemantics(find.byKey(const ValueKey('questionnaire_review_card')))
+          .label,
+      'Review your answers\nYou changed an earlier answer. Review your later answers before you complete the questionnaire.',
     );
     final completeButton = tester.widget<ElevatedButton>(
       find.widgetWithText(ElevatedButton, 'Complete task'),
@@ -2230,10 +2237,11 @@ void main() {
       find.widgetWithText(ElevatedButton, 'Complete task'),
     );
     expect(enabledCompleteButton.onPressed, isNotNull);
-    expect(enabledCompleteButton.focusNode?.hasFocus, isTrue);
+    expect(enabledCompleteButton.focusNode?.hasFocus, isFalse);
 
     await tester.tap(find.text('Complete task'));
     await tester.pumpAndSettle();
+    semantics.dispose();
 
     final reviewedCompletion = completions.whereType<QuestionnaireState>().last;
     expect(reviewedCompletion.answers['q2']?.response, [q2ChoiceBId]);
