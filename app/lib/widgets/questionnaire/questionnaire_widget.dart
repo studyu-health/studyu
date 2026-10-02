@@ -437,6 +437,8 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
     final showReviewCard = _controller.visibleAnswersNeedReview(
       _shownQuestionIds,
     );
+    final showFooter =
+        !showReviewCard && widget.footer != null && widget.footer!.isNotEmpty;
 
     return Column(
       children: [
@@ -446,13 +448,22 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
             itemCount:
                 shownQuestions.length +
                 (showReviewCard ? 1 : 0) +
+                (showFooter ? 1 : 0) +
                 (showCta ? 1 : 0),
             itemBuilder: (context, index) {
-              if (showReviewCard && index == shownQuestions.length) {
+              var trailingIndex = shownQuestions.length;
+              if (showReviewCard && index == trailingIndex) {
                 return _buildReviewCard();
               }
-              if (showCta &&
-                  index == shownQuestions.length + (showReviewCard ? 1 : 0)) {
+              if (showReviewCard) trailingIndex++;
+              if (showFooter && index == trailingIndex) {
+                return HtmlTextBox(
+                  widget.footer,
+                  key: const ValueKey('questionnaire_footer'),
+                );
+              }
+              if (showFooter) trailingIndex++;
+              if (showCta && index == trailingIndex) {
                 return _buildCtaBar(ctaMode);
               }
               final question = shownQuestions[index];
@@ -463,10 +474,6 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
                       widget.header!.isNotEmpty)
                     HtmlTextBox(widget.header),
                   question,
-                  if (index == shownQuestions.length - 1 &&
-                      widget.footer != null &&
-                      widget.footer!.isNotEmpty)
-                    HtmlTextBox(widget.footer),
                 ],
               );
             },
@@ -478,7 +485,6 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
 
   void _confirmReview() {
     _controller.markVisibleAnswersReviewed(_shownQuestionIds);
-
     setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -495,29 +501,28 @@ class QuestionnaireWidgetState() extends State<QuestionnaireWidget> {
       container: true,
       liveRegion: true,
       label: l10n.questionnaire_review_title,
-      child: Card(
+      child: Padding(
         key: const ValueKey('questionnaire_review_card'),
-        margin: const EdgeInsets.all(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.questionnaire_review_title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(l10n.questionnaire_review_description),
-              const SizedBox(height: 12),
-              FilledButton.icon(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.questionnaire_review_title,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 4),
+            Text(l10n.questionnaire_review_description),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
                 key: const ValueKey('questionnaire_review_confirm'),
                 onPressed: _confirmReview,
-                icon: const Icon(Icons.check),
+                icon: const Icon(Icons.check, size: 18),
                 label: Text(l10n.questionnaire_review_confirmation),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

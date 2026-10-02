@@ -2140,7 +2140,13 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      setup(QuestionnaireWidget([q0, q1, q2], onComplete: completions.add)),
+      setup(
+        QuestionnaireWidget(
+          [q0, q1, q2],
+          footer: 'Thanks for completing the survey',
+          onComplete: completions.add,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -2160,6 +2166,14 @@ void main() {
         'You changed an earlier answer. Review your later answers before you complete the questionnaire.',
       ),
       findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('questionnaire_footer')), findsNothing);
+    expect(
+      find.ancestor(
+        of: find.byKey(const ValueKey('questionnaire_review_card')),
+        matching: find.byType(Card),
+      ),
+      findsNothing,
     );
     final completeButton = tester.widget<ElevatedButton>(
       find.widgetWithText(ElevatedButton, 'Complete task'),
@@ -2197,7 +2211,7 @@ void main() {
     expect(find.text('Review your answers'), findsOneWidget);
 
     final markReviewedButton = find.widgetWithText(
-      FilledButton,
+      TextButton,
       "I reviewed my answers",
     );
     expect(markReviewedButton, findsOneWidget);
@@ -2205,6 +2219,7 @@ void main() {
     await tester.tap(markReviewedButton);
     await tester.pumpAndSettle();
     expect(find.text('Review your answers'), findsNothing);
+    expect(find.byKey(const ValueKey('questionnaire_footer')), findsOneWidget);
     expect(
       find.text(
         'You changed an earlier answer. Review your later answers before you complete the questionnaire.',
