@@ -2222,6 +2222,14 @@ void main() {
       "I reviewed my answers",
     );
     expect(markReviewedButton, findsOneWidget);
+    expect(
+      tester.getSemantics(markReviewedButton),
+      isSemantics(
+        label: 'I reviewed my answers',
+        isButton: true,
+        hasTapAction: true,
+      ),
+    );
 
     await tester.tap(markReviewedButton);
     await tester.pumpAndSettle();
