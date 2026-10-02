@@ -78,6 +78,67 @@ void main() {
   );
 
   test(
+    'ignores an active recovery result after the connection degrades',
+    () async {
+      final oldRecovery = Completer<HealthyConnectionRecoveryResult>();
+      var oldRecoveryCalls = 0;
+      var replacementRecoveryCalls = 0;
+
+      appConnectionStatusController.setStatus(
+        AppConnectionStatus.backendUnavailable,
+      );
+      appConnectionStatusController.scheduleHealthyConnectionRecovery(() {
+        oldRecoveryCalls++;
+        return oldRecovery.future;
+      });
+      appConnectionStatusController.setStatus(AppConnectionStatus.healthy);
+      expect(oldRecoveryCalls, 1);
+
+      appConnectionStatusController.setStatus(
+        AppConnectionStatus.deviceOffline,
+      );
+      appConnectionStatusController.setStatus(AppConnectionStatus.healthy);
+      appConnectionStatusController.scheduleHealthyConnectionRecovery(() async {
+        replacementRecoveryCalls++;
+        return HealthyConnectionRecoveryResult.retryNeeded;
+      });
+
+      oldRecovery.complete(HealthyConnectionRecoveryResult.retryNeeded);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(oldRecoveryCalls, 1);
+      expect(replacementRecoveryCalls, 4);
+    },
+  );
+
+  test(
+    'starts a queued replacement after the final retry with a fresh budget',
+    () async {
+      var firstRecoveryCalls = 0;
+      var replacementRecoveryCalls = 0;
+      final finalRecovery = Completer<HealthyConnectionRecoveryResult>();
+
+      appConnectionStatusController.scheduleHealthyConnectionRecovery(() {
+        firstRecoveryCalls++;
+        if (firstRecoveryCalls == 4) return finalRecovery.future;
+        return Future.value(HealthyConnectionRecoveryResult.retryNeeded);
+      });
+      await Future<void>.delayed(Duration.zero);
+      expect(firstRecoveryCalls, 4);
+
+      appConnectionStatusController.scheduleHealthyConnectionRecovery(() async {
+        replacementRecoveryCalls++;
+        return HealthyConnectionRecoveryResult.retryNeeded;
+      });
+      finalRecovery.complete(HealthyConnectionRecoveryResult.retryNeeded);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(firstRecoveryCalls, 4);
+      expect(replacementRecoveryCalls, 4);
+    },
+  );
+
+  test(
     'runs a queued recovery after an active recovery requests a retry',
     () async {
       var firstRecoveryCalls = 0;

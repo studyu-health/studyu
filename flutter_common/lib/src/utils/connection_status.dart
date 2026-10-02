@@ -31,6 +31,8 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   HealthyConnectionRecovery? _pendingHealthyConnectionRecovery;
   int _healthyConnectionRecoveryGeneration = 0;
   int? _activeHealthyConnectionRecoveryGeneration;
+  int _healthyConnectionRecoveryCycle = 0;
+  bool _pendingHealthyConnectionRecoveryIsReplacement = false;
   int _healthyConnectionRecoveryRetryCount = 0;
 
   AppConnectionStatus get status => _status;
@@ -38,6 +40,7 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   void setStatus(AppConnectionStatus status) {
     if (_status == status) return;
     if (status != AppConnectionStatus.healthy) {
+      _healthyConnectionRecoveryCycle++;
       _healthyConnectionRecoveryRetryCount = 0;
     }
     _status = status;
@@ -49,8 +52,9 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   }
 
   void scheduleHealthyConnectionRecovery(HealthyConnectionRecovery recovery) {
-    if (_status == AppConnectionStatus.healthy &&
-        _activeHealthyConnectionRecoveryGeneration == null) {
+    if (_activeHealthyConnectionRecoveryGeneration != null) {
+      _pendingHealthyConnectionRecoveryIsReplacement = true;
+    } else if (_status == AppConnectionStatus.healthy) {
       _healthyConnectionRecoveryRetryCount = 0;
     }
     _pendingHealthyConnectionRecovery = recovery;
@@ -92,12 +96,14 @@ class AppConnectionStatusController._() extends ChangeNotifier {
     _pendingHealthyConnectionRecovery = null;
     final generation = ++_healthyConnectionRecoveryGeneration;
     _activeHealthyConnectionRecoveryGeneration = generation;
-    unawaited(_runHealthyConnectionRecovery(recovery, generation));
+    final cycle = _healthyConnectionRecoveryCycle;
+    unawaited(_runHealthyConnectionRecovery(recovery, generation, cycle));
   }
 
   Future<void> _runHealthyConnectionRecovery(
     HealthyConnectionRecovery recovery,
     int generation,
+    int cycle,
   ) async {
     var result = HealthyConnectionRecoveryResult.retryNeeded;
     try {
@@ -109,7 +115,13 @@ class AppConnectionStatusController._() extends ChangeNotifier {
 
     if (_activeHealthyConnectionRecoveryGeneration != generation) return;
     _activeHealthyConnectionRecoveryGeneration = null;
-    if (result == HealthyConnectionRecoveryResult.retryNeeded) {
+    if (cycle != _healthyConnectionRecoveryCycle) {
+      _healthyConnectionRecoveryRetryCount = 0;
+      _pendingHealthyConnectionRecoveryIsReplacement = false;
+    } else if (_pendingHealthyConnectionRecoveryIsReplacement) {
+      _healthyConnectionRecoveryRetryCount = 0;
+      _pendingHealthyConnectionRecoveryIsReplacement = false;
+    } else if (result == HealthyConnectionRecoveryResult.retryNeeded) {
       _healthyConnectionRecoveryRetryCount++;
       _pendingHealthyConnectionRecovery ??= recovery;
     }
@@ -121,6 +133,7 @@ class AppConnectionStatusController._() extends ChangeNotifier {
   @visibleForTesting
   void reset() {
     _pendingHealthyConnectionRecovery = null;
+    _pendingHealthyConnectionRecoveryIsReplacement = false;
     _healthyConnectionRecoveryGeneration++;
     _activeHealthyConnectionRecoveryGeneration = null;
     _healthyConnectionRecoveryRetryCount = 0;
