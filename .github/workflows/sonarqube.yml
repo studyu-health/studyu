@@ -61,7 +61,7 @@ jobs:
         uses: ./.github/workflows/init-workspace
 
       - name: Verify coverage normalizer
-        run: dart scripts/normalize_lcov.dart --check
+        run: dart tools/scripts/normalize_lcov.dart --check
 
       # All Packages runs the same coverage command and uploads its reports as
       # the `sonar-coverage` artifact for the same commit. Reusing that artifact
@@ -143,7 +143,7 @@ jobs:
           done
 
       - name: Validate and normalize coverage
-        run: dart scripts/normalize_lcov.dart coverage/sonar/lcov.info
+        run: dart tools/scripts/normalize_lcov.dart coverage/sonar/lcov.info
 
       - name: Generate Dart analyzer report
         shell: bash

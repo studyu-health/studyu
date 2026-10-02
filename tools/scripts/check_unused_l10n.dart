@@ -11,7 +11,7 @@
 /// Exit codes: 0 = no unused keys, 1 = unused keys found, 2 = missing input.
 ///
 /// Usage:
-///   dart scripts/check_unused_l10n.dart
+///   dart tools/scripts/check_unused_l10n.dart
 library;
 
 import 'dart:convert';
@@ -100,8 +100,8 @@ String _stripComments(String source) {
   return out.toString();
 }
 
-/// Repository root derived from this script's location (`<root>/scripts/...`).
-String get _repoRoot => File(Platform.script.toFilePath()).parent.parent.path;
+/// Repository root derived from this script's location (`<root>/tools/scripts/...`).
+String get _repoRoot => File(Platform.script.toFilePath()).parent.parent.parent.path;
 
 /// Every `.<identifier>` occurring in a non-generated Dart file under
 /// [packageDir]. Generated `app_localizations*.dart` files are skipped
