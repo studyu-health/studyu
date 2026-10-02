@@ -20,7 +20,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get loading_error_description =>
-      '연구 데이터를 가져올 수 없습니다. 현재 연구에 참여 중이라면 먼저 연구 담당자에게 도움을 요청하십시오. 연구에 참여하지 않거나 담당자가 요청하는 경우에만 지원팀에 연락하십시오. 담당자나 지원팀의 지시 없이 데이터를 삭제하지 마십시오. 데이터를 삭제하면 연구 데이터가 모두 제거되며 연구에 다시 참여해야 합니다.';
+      '연구 데이터를 불러올 수 없습니다. 현재 연구에 참여 중이라면 먼저 연구 담당자에게 도움을 요청해 주세요. 연구에 참여 중이 아니거나 연구 담당자가 안내한 경우에만 앱 지원팀에 문의해 주세요.\n연구 담당자나 앱 지원팀의 안내 없이 데이터를 삭제하지 마세요. 데이터를 삭제하면 모든 연구 데이터가 삭제되며, 연구에 다시 참여해야 합니다.';
 
   @override
   String get try_again => '다시 시도';
@@ -30,57 +30,57 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get delete_all_data_description =>
-      '정말로 모든 데이터를 삭제하시겠습니까? 이렇게 하면 모든 연구 데이터가 삭제되며 연구에 다시 참여해야 합니다.';
+      '모든 데이터를 삭제하시겠습니까? 모든 연구 데이터가 삭제되며, 연구에 다시 참여해야 합니다.';
 
   @override
   String get reset_app => '앱 재설정';
 
   @override
-  String get what_is_studyu => 'StudyU란 무엇입니까?';
+  String get what_is_studyu => 'StudyU는 어떤 앱인가요?';
 
   @override
   String get description_part1 =>
-      '다음 문장을 읽는 것을 상상해보세요: \"오후 6시 이후에 먹으면 수면의 질이 떨어진다\"';
+      '다음과 같은 문장을 읽었다고 생각해 보세요. “오후 6시 이후에 식사하면 수면의 질이 떨어진다.”';
 
   @override
   String get description_part2 =>
-      '이제 이렇게 생각할 수 있습니다: 음… 알겠지만, 그게 모든 사람에게 그리고 나에게도 영향을 미치나?';
+      '그러면 이런 생각이 들 수 있습니다. “알아 두면 좋겠지만… 모든 사람에게 해당할까? 나에게도 그럴까?”';
 
   @override
   String get description_part3 =>
-      '문제는 본인이 해당 연구에 직접 참여하지 않았기 때문에 이 질문에 답할 수 없다는 점입니다. 일반적인 연구로는 수면의 질이 영향을 받을 가능성만 알 수 있습니다. 늦은 식사가 본인의 수면에 미치는 영향은 직접 확인해야 합니다.';
+      '하지만 본인이 그 연구에 직접 참여한 것은 아니므로, 이 질문에 바로 답할 수는 없습니다. 일반적인 연구로는 수면의 질이 영향을 받을 가능성이 더 높은지만 알 수 있습니다. 늦은 식사가 본인의 수면에 어떤 영향을 미치는지는 직접 확인해야 합니다.';
 
   @override
   String get description_part4 =>
-      '이를 확인하려면 늦게 먹는 기간과 늦게 먹지 않는 기간을 나누어 개인 연구를 진행하고, 수면의 질을 정기적으로 기록해야 합니다. 이렇게 모은 결과로 늦은 식사가 본인의 수면의 질을 낮추는지 판단할 수 있습니다. StudyU는 이런 질문에 신뢰할 수 있는 답을 얻도록 돕습니다.';
+      '이를 확인하려면 늦게 식사하는 기간과 늦게 식사하지 않는 기간을 나누어, 본인을 대상으로 연구를 진행해야 합니다. 수면의 질을 정기적으로 평가하고 결과를 비교하면 늦은 식사가 본인의 수면의 질을 떨어뜨리는지 판단할 수 있습니다. StudyU는 이런 질문에 신뢰할 수 있는 답을 얻도록 돕는 것을 목표로 합니다.';
 
   @override
   String get description_part5 =>
-      'StudyU에서는 전문가가 설계한 N-of-1 연구에 참여할 수 있습니다. N-of-1은 연구 참가자 수(N)가 1명이라는 뜻입니다. 일반적인 임상시험과 마찬가지로 N-of-1 시험에도 명확한 연구 계획, 즉 연구 프로토콜이 필요합니다.';
+      'StudyU에서는 전문가가 설계한 N-of-1 연구에 참여할 수 있습니다. N-of-1은 연구 참여자 수를 나타내는 N이 1명이라는 뜻입니다. 일반적인 임상시험과 마찬가지로 N-of-1 연구에도 명확한 연구 계획, 즉 연구 프로토콜이 필요합니다.';
 
   @override
   String get description_part6 =>
-      '그리고 좋은 연구 프로토콜을 만드는 것이 쉽지 않기 때문에, 저희는 이 앱을 개발했습니다. 여기에서 여러분은 개인적인 관심사에 따라 다양한 N-of-1 연구를 선택할 수 있으며, 전문가가 개발한 계획을 자동으로 받아 신뢰할 수 있는 결과를 얻을 수 있습니다.';
+      '좋은 연구 프로토콜을 직접 만들기는 쉽지 않습니다. 그래서 StudyU를 개발했습니다. 관심사에 맞는 N-of-1 연구를 선택하면, 신뢰할 수 있는 결과를 얻을 수 있도록 전문가가 설계한 연구 계획이 자동으로 제공됩니다.';
 
   @override
   String get description_part7 =>
-      '연구를 선택하면 건강 상태상 안전하게 참여할 수 있는지 확인합니다. 참가 등록 후에는 연구 계획을 일상에 맞게 조정할 수 있습니다. 늦게 먹기나 피로도 평가 같은 과제를 정해진 주기(예: 하루 한 번)에 수행합니다. 최소 연구 기간(보통 몇 주)을 채우면 무료로 결과를 확인할 수 있습니다.';
+      '연구를 선택하면 먼저 건강 상태가 연구 참여에 적합한지 확인합니다. 그다음 참여 등록을 하고 연구 계획을 일상생활에 맞게 조정할 수 있습니다. 늦게 식사하기나 피로도 평가 같은 과제를 정해진 주기(예: 하루 한 번)에 따라 수행해야 합니다. 최소 연구 기간(보통 몇 주)을 채우면 무료로 결과를 확인할 수 있습니다.';
 
   @override
   String get description_part8 =>
-      '연구에 오래 참여하고 과제를 꾸준히 수행할수록 결과의 신뢰도가 높아집니다. 체계적 오류를 막기 위해 결과를 확인한 뒤에는 연구를 계속할 수 없습니다. 진행률 표시줄에서 결과 확인까지 남은 과제 수와 연구를 더 진행할 때 높아지는 결과의 신뢰도를 확인할 수 있습니다.';
+      '연구에 더 오래 참여하고 과제를 꾸준히 수행할수록 결과의 신뢰도가 높아집니다. 분석 결과가 왜곡되는 것을 막기 위해 결과를 확인한 뒤에는 해당 연구 참여를 계속할 수 없습니다. 진행률 표시줄에서 결과 확인까지 남은 과제 수와 몇 주 더 참여했을 때 결과의 신뢰도를 얼마나 높일 수 있는지 확인할 수 있습니다.';
 
   @override
-  String get description_part9 => '설명은 이쯤 하고, 이제 StudyU를 시작해 보세요!';
+  String get description_part9 => '설명은 여기까지입니다. 이제 StudyU를 시작해 보세요!';
 
   @override
   String get get_started => '시작하기';
 
   @override
-  String get welcome_find_study_title => '나에게 맞는 연구 찾기';
+  String get welcome_find_study_title => '나에게 맞는 방법 찾기';
 
   @override
-  String get made_with_love_in_potsdam => '포츠담에서 정성을 담아 제작';
+  String get made_with_love_in_potsdam => '독일 포츠담에서, 정성을 담아 제작';
 
   @override
   String get browse_public_studies => '공개 연구 둘러보기';
@@ -89,42 +89,42 @@ class AppLocalizationsKo extends AppLocalizations {
   String get welcome_returning_participant => 'StudyU 연구에 참여한 적이 있나요?';
 
   @override
-  String get show_onboarding_again => '온보딩 다시 보기';
+  String get show_onboarding_again => '시작 안내 다시 보기';
 
   @override
   String get onboarding_page0_title => 'StudyU에 오신 것을 환영합니다.';
 
   @override
   String get onboarding_page0_subtitle =>
-      '연구원들은 평균적으로 무엇이 효과가 있는지 추정할 수 있습니다. 하지만 어떤 습관이나 치료가 본인에게 효과가 있는지는 판단할 수 없습니다. StudyU는 그 질문을 직접 확인할 수 있도록 도와줍니다.';
+      '연구진은 평균적으로 어떤 방법이 효과적인지 추정할 수 있습니다. 하지만 특정 습관이나 치료가 본인에게도 효과가 있는지까지 판단할 수는 없습니다. StudyU는 이를 직접 확인할 수 있도록 도와줍니다.';
 
   @override
   String get onboarding_page1_title => '나만을 위한 연구';
 
   @override
   String get onboarding_page1_subtitle =>
-      'N-of-1 연구에서는 참가자가 단 한 명입니다. 일찍 먹기와 늦게 먹기처럼 서로 다른 단계를 따르고, 수면의 질과 같은 결과를 기록합니다.';
+      'N-of-1 연구에서는 본인 한 명이 연구 참여자가 됩니다. 예를 들어 일찍 식사하는 기간과 늦게 식사하는 기간을 나누어 생활하면서, 수면의 질과 같은 결과를 기록합니다.';
 
   @override
-  String get onboarding_page2_title => '전문가 연구 계획';
+  String get onboarding_page2_title => '전문가가 설계한 연구 계획';
 
   @override
   String get onboarding_page2_subtitle =>
-      '궁금한 점에 맞는 연구를 선택하세요. StudyU는 전문가가 설계한 프로토콜을 제공하고, 안전하게 참여할 수 있는지 확인하며, 계획을 일상에 맞추도록 돕습니다.';
+      '궁금한 점에 맞는 연구를 선택하세요. StudyU는 전문가가 설계한 연구 계획을 제공하고, 안전하게 참여할 수 있는지 확인하며, 계획을 일상생활에 맞게 조정하도록 도와줍니다.';
 
   @override
-  String get onboarding_page3_title => '정기 작업 완료';
+  String get onboarding_page3_title => '정해진 과제 수행하기';
 
   @override
   String get onboarding_page3_subtitle =>
-      '지정된 옵션을 따라 일일 관찰을 기록하세요. 진행률 표시줄은 결과를 볼 수 있기 전에 남은 작업 수를 보여줍니다.';
+      '배정된 방법에 따라 과제를 수행하고 관찰 결과를 기록해 주세요. 보통 하루에 한 번 진행합니다. 진행률 표시줄에서 결과를 확인하기까지 남은 과제 수를 볼 수 있습니다.';
 
   @override
   String get onboarding_page4_title => '신뢰할 수 있는 근거 쌓기';
 
   @override
   String get onboarding_page4_subtitle =>
-      '몇 주가 지나면 각 옵션이 얼마나 효과가 있었는지 비교할 수 있습니다. 과제를 완료할수록 결과의 신뢰도가 높아집니다. 결과를 확인하면 분석 결과가 왜곡되지 않도록 StudyU가 연구를 종료합니다.';
+      '몇 주가 지나면 각 방법이 본인에게 어떤 효과가 있었는지 비교할 수 있습니다. 과제를 완료할수록 결과의 신뢰도가 높아집니다. 결과를 확인하면 분석 결과가 왜곡되지 않도록 StudyU가 해당 연구 참여를 종료합니다.';
 
   @override
   String get study_selection => '연구 선택';
@@ -133,14 +133,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get study_selection_single => '한 번에 하나의 연구에만 참여할 수 있습니다.';
 
   @override
-  String get study_selection_single_why => '이유는 무엇인가요?';
+  String get study_selection_single_why => '왜 그런가요?';
 
   @override
   String get study_selection_single_reason =>
-      '여러 연구에 동시에 참여하면, 이러한 연구들의 개입이 서로 간섭하여 결과를 변경시킬 수 있습니다.';
+      '여러 연구에 동시에 참여하면 각 연구의 중재가 서로 영향을 주어 결과가 달라질 수 있습니다.';
 
   @override
-  String get study_selection_unsupported_title => '오래된 앱 버전';
+  String get study_selection_unsupported_title => '앱 업데이트 필요';
 
   @override
   String get study_selection_unsupported =>
@@ -154,137 +154,137 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get study_selection_hidden_studies =>
-      '일부 연구를 표시할 수 없습니다. 이는 앱 버전이 오래된 경우 발생할 수 있습니다. 모든 사용 가능한 연구를 확인하려면 앱을 업데이트하거나 아래에 표시된 연구 중 하나에 참여하세요.';
+      '일부 연구를 표시할 수 없습니다. 앱 버전이 오래된 경우 이런 문제가 발생할 수 있습니다. 참여 가능한 모든 연구를 보려면 앱을 최신 버전으로 업데이트하세요. 또는 아래에 표시된 연구 중 하나에 참여할 수 있습니다.';
 
   @override
   String get study_selection_no_public_studies =>
       '현재 참여할 수 있는 공개 연구가 없습니다. 초대 코드가 있으면 비공개 연구에 참여할 수 있습니다.';
 
   @override
-  String get study_overview_title => '개요';
+  String get study_overview_title => '연구 개요';
 
   @override
-  String get eligibility_questionnaire_title => '설문지';
+  String get eligibility_questionnaire_title => '참여 가능 여부 확인';
 
   @override
   String get please_answer_eligibility =>
-      '귀하가 안전하게 이 연구에 참여할 수 있는지 확인하기 위해 몇 가지 질문에 답해 주시기 바랍니다.';
+      '이 연구에 안전하게 참여할 수 있는지 확인하기 위해 몇 가지 질문에 답해 주세요';
 
   @override
   String get intervention_selection_title => '중재 선택';
 
   @override
-  String get please_select_interventions => '연구 중에 적용할 두 가지 개입을 선택해 주십시오.';
+  String get please_select_interventions => '연구에서 비교할 두 가지 방법(중재)을 선택해 주세요.';
 
   @override
   String get please_select_interventions_description =>
-      '연구 동안 이 두 개입의 효과를 측정하고 비교합니다.';
+      '연구 기간 동안 두 중재의 효과를 측정하고 비교합니다.';
 
   @override
-  String get no_interventions_available => '사용 가능한 개입이 없습니다';
+  String get no_interventions_available => '선택할 수 있는 중재가 없습니다.';
 
   @override
-  String get task_already_completed => '오늘 이미 이 작업을 완료했습니다';
+  String get task_already_completed => '오늘 이 과제를 이미 완료했습니다.';
 
   @override
-  String get task_cannot_be_completed => '작업을 완료할 수 없습니다';
+  String get task_cannot_be_completed => '이 과제를 완료할 수 없습니다.';
 
   @override
-  String get task_outside_period => '개입 기간 외에는 작업을 완료할 수 없습니다';
+  String get task_outside_period => '중재 기간이 아니므로 이 과제를 완료할 수 없습니다.';
 
   @override
-  String get study_notification_body => '완료할 새 과제가 있습니다.';
+  String get study_notification_body => '새 과제를 확인해 주세요.';
 
   @override
-  String get intervention_phase_duration => '개입 단계 기간';
+  String get intervention_phase_duration => '중재 기간';
 
   @override
   String get days => '일';
 
   @override
-  String get study_length => '연구 길이';
+  String get study_length => '연구 기간';
 
   @override
-  String get study_publisher => '연구 발행자';
+  String get study_publisher => '연구 게시자';
 
   @override
-  String get tasks_daily => '작업:';
+  String get tasks_daily => '과제:';
 
   @override
   String get baseline_description =>
-      '기준선은 연구의 초기 상태를 측정해 나중에 비교할 수 있도록 하는 단계입니다. 기준선 단계에서는 평소처럼 행동하며, 연구에서 정한 중재는 아직 시행하지 않습니다.';
+      '기초 관찰 기간은 이후 결과와 비교하기 위해 연구 시작 시의 상태를 측정하는 기간입니다. 이 기간에는 평소처럼 생활하며, 연구에서 정한 중재는 아직 시행하지 않습니다.';
 
   @override
-  String get baseline => '기준선';
+  String get baseline => '기초 관찰 기간';
 
   @override
-  String get days_left => '남은 일';
+  String get days_left => '남은 일수';
 
   @override
-  String get today_tasks => '오늘의 작업';
+  String get today_tasks => '오늘의 과제';
 
   @override
-  String get intervention_current => '현재 개입';
+  String get intervention_current => '현제 중재';
 
   @override
-  String get opt_out => '연구 탈퇴';
+  String get opt_out => '연구 참여 종료';
 
   @override
-  String get leave_study_keep_data_title => '연구를 종료하고 데이터를 유지할까요?';
+  String get leave_study_keep_data_title => '연구 참여를 종료하고 데이터를 보관하시겠습니까?';
 
   @override
   String leave_study_keep_data_body(String studyName) {
-    return '“$studyName” 연구 참여를 종료합니다. 이미 제출한 진행 상황과 응답은 유지되며, 연구자는 익명화된 데이터를 계속 사용할 수 있습니다.\n\n연구를 종료한 뒤에는 이 참여에 다시 참여할 수 없습니다. 이전 연구에는 영향을 주지 않습니다.';
+    return '“$studyName” 연구 참여를 종료합니다. 지금까지 제출한 진행 기록과 응답은 보관되며, 연구진은 익명화된 데이터를 계속 사용할 수 있습니다.\n\n참여를 종료하면 기존 참여를 이어서 진행할 수 없습니다. 이전에 참여한 다른 연구에는 영향을 주지 않습니다.';
   }
 
   @override
-  String get stay_in_study => '연구 계속 참여';
+  String get stay_in_study => '계속 참여하기';
 
   @override
-  String get acknowledge_consequences => '이 정보를 읽었으며 그 결과를 이해했습니다.';
+  String get acknowledge_consequences => '위 내용을 읽고, 진행 시 어떤 일이 일어나는지 이해했습니다.';
 
   @override
-  String get leave_keep_data => '연구를 종료하고 내 데이터 유지';
+  String get leave_keep_data => '참여 종료 및 데이터 보관';
 
   @override
-  String get delete_data => '연구를 탈퇴하고 모든 데이터를 삭제하세요';
+  String get delete_data => '참여 종료 및 데이터 삭제';
 
   @override
-  String get leave_study_delete_data_title => '연구를 종료하고 내 데이터를 삭제할까요?';
+  String get leave_study_delete_data_title => '연구 참여를 종료하고 데이터를 삭제하시겠습니까?';
 
   @override
   String leave_study_delete_data_body(String studyName) {
-    return '“$studyName” 연구 참여를 종료합니다. 서버에서 이 연구의 진행 상황과 응답을 영구적으로 삭제하고, 이 기기에 저장된 데이터도 삭제합니다.\n\n이 작업은 취소할 수 없습니다. 본인과 연구팀 모두 이 데이터를 복구할 수 없습니다.';
+    return '“$studyName” 연구 참여를 종료합니다. 이 연구의 진행 기록과 응답을 서버에서 영구적으로 삭제하고, 이 기기에 저장된 데이터도 삭제합니다.\n\n삭제는 되돌릴 수 없습니다. 본인과 연구팀(관리자) 모두 이 데이터를 복구할 수 없습니다.';
   }
 
   @override
-  String get leave_delete_data => '연구를 종료하고 내 데이터 삭제';
+  String get leave_delete_data => '참여 종료 및 데이터 삭제';
 
   @override
-  String get your_journey => '나의 연구 여정';
+  String get your_journey => '나의 연구 일정';
 
   @override
-  String get journey_overview_description => '계속하기 전에 연구 일정을 확인하세요.';
+  String get journey_overview_description => '계속하기 전에 연구 진행 일정을 확인하세요.';
 
   @override
-  String get journey_results_available => '결과 이용 가능';
+  String get journey_results_available => '결과 확인 가능';
 
   @override
   String get consent => '동의';
 
   @override
-  String get error => '오류가 발생했습니다!';
+  String get error => '오류가 발생했습니다.';
 
   @override
   String get please_give_consent =>
-      '이 연구에 참여하는 데 동의해 주시기 바랍니다. 모든 상자를 클릭하여 읽어야 합니다.';
+      '연구에 참여하려면 동의가 필요합니다. 각 항목을 눌러 내용을 모두 읽은 뒤 동의 여부를 선택해 주세요.';
 
   @override
-  String get please_give_consent_why => '이유는 무엇입니까?';
+  String get please_give_consent_why => '왜 필요한가요?';
 
   @override
   String get please_give_consent_reason =>
-      '연구자는 안전 및 데이터 개인정보 보호를 위해 참가자로부터 특정 동의를 요청해야 합니다. 따라서 각 연구에 참여하려면 명시적으로 동의해야 합니다.';
+      '참여자의 안전과 개인정보 보호를 위해 연구마다 별도의 동의가 필요합니다. 각 연구에 참여하려면 참여 의사를 명확히 밝혀 동의해야 합니다.';
 
   @override
   String get user_did_not_give_consent => '동의하지 않으셨습니다. 참여하려면 동의가 필요합니다.';
@@ -299,11 +299,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get help => '도움말';
 
   @override
-  String get contact => '연락처';
+  String get contact => '문의하기';
 
   @override
   String support_email_body(String subjectId) {
-    return '안녕하세요,\n\nStudyU 앱에서 로딩 오류가 발생하고 있습니다. 제 참여자 ID는: $subjectId 입니다.\n\n이 문제에 대해 도와주시기 바랍니다.\n\n감사합니다.';
+    return '안녕하세요.\n\nStudyU 앱에서 데이터를 불러오는 중 오류가 발생했습니다.\n참여자 ID: $subjectId\n\n문제를 해결할 수 있도록 도움을 부탁드립니다.\n\n감사합니다.';
   }
 
   @override
@@ -316,7 +316,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get study_information_description => '연구팀에서 요청하는 경우에만 이 정보를 공유하세요.';
 
   @override
-  String get study_name => '연구 이름';
+  String get study_name => '연구 제목';
 
   @override
   String get study_id => '연구 ID';
@@ -334,7 +334,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get platform => '플랫폼';
 
   @override
-  String get not_available => '사용할 수 없음';
+  String get not_available => '확인 할 수 없음';
 
   @override
   String get view_study_information => '세부 정보 보기';
@@ -343,7 +343,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get email_study_team => '연구팀에 문의';
 
   @override
-  String get study_team_email_unavailable => '이 연구에는 문의 이메일이 없습니다.';
+  String get study_team_email_unavailable => '연구팀의 문의 이메일 주소가 등록되어 있지 않습니다.';
 
   @override
   String get copy_all_information => '모두 복사';
@@ -356,7 +356,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get participant_information_email_intro =>
-      '안녕하세요,\n\n연구 참여와 관련하여 문의드립니다. 제 StudyU 정보는 다음과 같습니다:';
+      '안녕하세요.\n\n연구 참여와 관련하여 문의드립니다. 제 StudyU 정보는 다음과 같습니다.';
 
   @override
   String get email_app_unavailable => '사용할 수 있는 이메일 앱이 없습니다.';
@@ -419,23 +419,23 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stop_recording => '녹음 중지';
 
   @override
-  String get photo_captured => '촬영된 사진';
+  String get photo_captured => '사진 촬영 완료';
 
   @override
-  String get audio_recorded => '오디오 녹음됨';
+  String get audio_recorded => '녹음 완료';
 
   @override
   String get multimodal_not_supported =>
-      '다중 모드 과제는 현재 웹 브라우저에서 실행할 수 없습니다. Android 또는 iOS용 StudyU 앱을 사용해 주세요.';
+      '다양한 형태의 데이터를 수집하는 멀티모달 연구는 현재 웹 브라우저에서 실행할 수 없습니다. Android 또는 iOS용 StudyU 앱을 사용해 주세요.';
 
   @override
-  String get camera_access_denied => '카메라 접근 거부됨';
+  String get camera_access_denied => '카메라 사용 권한이 없습니다';
 
   @override
-  String get no_camera_available => '사용 가능한 카메라가 없습니다';
+  String get no_camera_available => '사용할 수 있는 카메라가 없습니다.';
 
   @override
-  String get microphone_access_denied => '마이크 접근 거부됨';
+  String get microphone_access_denied => '마이크 사용 권한이 없습니다';
 
   @override
   String get camera_error => '카메라 오류';
@@ -462,25 +462,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get report_history => '보고서 기록';
 
   @override
-  String get no_reports_found => '아직 정의된 보고서가 없습니다';
+  String get no_reports_found => '아직 등록된 보고서가 없습니다.';
 
   @override
   String get current_power_level => '현재 상태';
 
   @override
-  String get not_enough_data => '데이터가 충분하지 않습니다';
+  String get not_enough_data => '데이터 부족';
 
   @override
   String get barely_enough_data => '최소한의 데이터 확보';
 
   @override
-  String get enough_data => '충분한 데이터';
+  String get enough_data => '충분한 데이터 확보';
 
   @override
-  String get legal_documents => '법적 문서';
+  String get legal_documents => '약관 및 법적 안내';
 
   @override
-  String get legal_documents_description => '계속하려면 이 문서를 검토하고 동의하세요.';
+  String get legal_documents_description => '계속하려면 아래 문서를 읽고 동의해 주세요.';
 
   @override
   String get terms => '이용 약관';
@@ -489,8 +489,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get terms_read => '이용 약관 읽기';
 
   @override
-  String get terms_content =>
-      '이용 약관은 StudyU 앱의 목적과 사용에 대한 개요를 제공합니다. 궁금한 점이 있으시면 법적 고지에 있는 연락처를 통해 문의해 주십시오.';
+  String get terms_content => '이용 약관에서는 StudyU 앱의 목적과 이용 방법을 안내합니다.';
 
   @override
   String get terms_agree => '이용 약관을 읽었으며 이에 동의합니다';
@@ -503,7 +502,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get privacy_content =>
-      '개인정보 처리방침에는 저장되는 데이터와 저장 이유, 시기, 장소, 데이터 접근 권한 및 이용자의 권리가 설명되어 있습니다. 문의 사항이 있으면 법적 고지에 있는 연락처로 문의해 주세요.';
+      '개인정보 처리방침에서는 어떤 데이터를 언제, 어디에, 왜 저장하는지와 데이터 접근 권한, 이용자의 권리를 안내합니다.';
 
   @override
   String get privacy_agree => '개인정보 처리방침을 읽었으며 이에 동의합니다';
@@ -518,10 +517,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get imprint_read => '법적 고지 읽기';
 
   @override
-  String get invite_code_button => '초대 코드 사용';
+  String get invite_code_button => '초대 코드로 참여';
 
   @override
-  String get private_study_invite_code => '비공개 연구 초대 코드';
+  String get private_study_invite_code => '초대 코드 입력';
 
   @override
   String get private_study_invite_code_description => '연구팀에서 받은 코드를 입력하세요.';
@@ -530,7 +529,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get invite_code => '초대 코드';
 
   @override
-  String get invalid_invite_code => '유효하지 않은 초대 코드입니다';
+  String get invalid_invite_code => '유효하지 않은 초대 코드입니다.';
 
   @override
   String get was_saved_to => '파일 저장 위치: ';
@@ -542,20 +541,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get save_not_supported_description => '현재 웹 버전에서는 파일 다운로드를 지원하지 않습니다.';
 
   @override
-  String get eligible_no => '귀하는 이 연구에 적합하지 않습니다';
+  String get eligible_no => '이 연구의 참여 조건에 해당하지 않습니다';
 
   @override
-  String get eligible_yes => '귀하는 이 연구에 적합합니다';
+  String get eligible_yes => '이 연구의 참여 조건에 해당합니다';
 
   @override
-  String get eligible_mistake => '실수를 했다면 여전히 답변을 변경할 수 있습니다';
+  String get eligible_mistake => '잘못 입력한 내용이 있다면 답변을 수정할 수 있습니다.';
 
   @override
-  String get eligible_choice_multi_selection => '해당되는 모든 항목 선택';
+  String get eligible_choice_multi_selection => '해당하는 항목을 모두 선택해 주세요 (선택 사항)';
 
   @override
   String get eligible_choice_multi_selection_required =>
-      '해당하는 항목을 모두 선택하세요(하나 이상 필수)';
+      '해당하는 항목을 모두 선택해 주세요 (하나 이상 필수)';
 
   @override
   String get report_overview => '보고서 개요';
@@ -567,40 +566,41 @@ class AppLocalizationsKo extends AppLocalizations {
   String get report_disclaimer => '이 보고서는 모든 정보를 올바르게 입력했을 경우에만 유효합니다.';
 
   @override
-  String get performance => '수행';
+  String get performance => '과제 수행 현황';
 
   @override
-  String get performance_overview => '작업 완료 개요';
+  String get performance_overview => '과제 수행 현황';
 
   @override
-  String get performance_overview_interventions => '개입';
+  String get performance_overview_interventions => '중재';
 
   @override
   String get performance_overview_observations => '관찰';
 
   @override
-  String get completed_study => '마지막 연구를 완료했습니다. 이전 보고서를 확인하거나 새 연구를 시작하세요.';
+  String get completed_study =>
+      '최근 참여한 연구를 완료했습니다. 이전 보고서를 확인하거나 새 연구를 시작해 보세요.';
 
   @override
-  String get app_support => '앱 지원';
+  String get app_support => '앱 관련 문의';
 
   @override
-  String get app_support_text => '앱 관련 문제나 질문 문의';
+  String get app_support_text => '앱 관련 문제나 궁금한 점은 여기에 문의해 주세요.';
 
   @override
-  String get study_support => '연구 지원';
+  String get study_support => '연구 관련 문의';
 
   @override
-  String get study_support_text => '연구 관련 문제나 문의 연락처';
+  String get study_support_text => '연구 관련 문제나 궁금한 점은 여기에 문의해 주세요.';
 
   @override
-  String get organization => '조직';
+  String get organization => '기관';
 
   @override
   String get irb => '기관생명윤리위원회(IRB)';
 
   @override
-  String get researchers => '연구원';
+  String get researchers => '연구진';
 
   @override
   String get website => '웹사이트';
@@ -609,7 +609,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get email => '이메일';
 
   @override
-  String get phone => '전화';
+  String get phone => '전화번호';
 
   @override
   String get additionalInfo => '추가 정보';
@@ -625,23 +625,23 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get free_text_alphanumeric_error => '영숫자 문자만 입력해 주세요';
+  String get free_text_alphanumeric_error => '영문자와 숫자만 입력해 주세요.';
 
   @override
   String get free_text_numeric_error => '숫자만 입력해 주세요';
 
   @override
-  String get free_text_custom_error => '필수 형식으로 값을 입력해 주세요';
+  String get free_text_custom_error => '안내된 형식에 맞게 입력해 주세요.';
 
   @override
   String get app_outdated_message =>
-      'StudyU 앱의 새로운 버전이 있습니다. 최신 기능과 개선 사항을 이용하려면 업데이트해 주세요. 지원해 주셔서 감사합니다!';
+      'StudyU 앱의 새 버전이 있습니다. 최신 기능과 개선 사항을 이용하려면 앱을 업데이트해 주세요. 함께해 주셔서 감사합니다!';
 
   @override
   String get update_now => '지금 업데이트';
 
   @override
-  String get text_summary_section_prefix_higher => '귀하의 ';
+  String get text_summary_section_prefix_higher => '본인의 ';
 
   @override
   String get text_summary_section_was_higher => ' 수치가 더 높았던 중재: ';
@@ -650,19 +650,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get text_summary_section_was_lower => ' 수치가 더 낮았던 중재: ';
 
   @override
-  String get text_summary_section_compared_to => ', 비교 대상: ';
+  String get text_summary_section_compared_to => ' / 비교 대상: ';
 
   @override
   String get text_summary_section_and => ' 및 ';
 
   @override
-  String get text_summary_section_no_evidence => '중재 간 ';
+  String get text_summary_section_no_evidence =>
+      '다음 항목에서 중재 간 차이가 있다는 근거는 확인되지 않았습니다: ';
 
   @override
-  String get text_summary_section_between => ' 차이가 있다는 근거가 없습니다. 비교한 중재: ';
+  String get text_summary_section_between => ' / 비교한 중재: ';
 
   @override
-  String get intervention => '개입';
+  String get intervention => '중재';
 
   @override
   String get phase => '단계';
@@ -671,13 +672,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get day => '일';
 
   @override
-  String get no_data_available_yet => '아직 사용 가능한 데이터가 없습니다';
+  String get no_data_available_yet => '아직 표시할 데이터가 없습니다.';
 
   @override
   String get value => '값';
 
   @override
-  String get show_colorless_gauges => '접근 가능한 차트 활성화';
+  String get show_colorless_gauges => '접근성을 높인 차트 사용';
 
   @override
   String get mean => '평균';
@@ -689,13 +690,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get degrees_of_freedom => '자유도';
 
   @override
-  String get p_value => 'p-값';
+  String get p_value => 'p값';
 
   @override
-  String get level_of_significance => '유의 수준';
+  String get level_of_significance => '유의수준';
 
   @override
-  String get t_test_outcome_based_on => '결과는 다음 값에 따라 결정됩니다:';
+  String get t_test_outcome_based_on => '다음 값을 바탕으로 결과를 분석했습니다.';
 
   @override
   String get statistical_information => '통계 정보';
@@ -704,7 +705,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get close => '닫기';
 
   @override
-  String get significance_level_and_p_value => '유의수준 및 p-값';
+  String get significance_level_and_p_value => '유의수준 및 p값';
 
   @override
   String compare_results_between(String nameA, String nameB) {
@@ -712,8 +713,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get missing_observations_note =>
-      '참고: 누락된 관측값은 데이터가 기록되지 않은 날짜를 나타냅니다.';
+  String get missing_observations_note => '참고: 관측값이 없는 날은 데이터가 기록되지 않은 날입니다.';
 
   @override
   String get quick_summary => '간단 요약';
@@ -725,59 +725,59 @@ class AppLocalizationsKo extends AppLocalizations {
   String get data_completeness => '데이터 완전성';
 
   @override
-  String get statistic => '통계';
+  String get statistic => '통계량';
 
   @override
-  String get total_recordings => '총 녹음 수';
+  String get total_recordings => '총 기록 수';
 
   @override
-  String get missing_recordings => '누락된 녹음';
+  String get missing_recordings => '누락된 기록 수';
 
   @override
   String get average => '평균';
 
   @override
-  String get minimum => '최소';
+  String get minimum => '최소값';
 
   @override
-  String get maximum => '최대';
+  String get maximum => '최대값';
 
   @override
-  String get support_email_sent => '지원 이메일이 준비되었습니다';
+  String get support_email_sent => '이메일 작성 화면을 열었습니다';
 
   @override
   String get support_email_sent_description =>
-      '지원 요청이 이메일 앱에 작성되었습니다. 이메일을 보내 지원팀에 문의한 뒤 답변을 기다려 주세요.\n\n현재 연구에 참여 중이라면 문제가 해결될 때까지 앱 외부에서 결과를 계속 기록해 주세요. 이해해 주셔서 감사합니다.';
+      '연구팀에 보낼 메시지가 이메일 앱에 준비되었습니다. 내용을 확인하고 이메일을 보낸 뒤, 연구팀의 답변을 기다려 주세요.\n\n현재 연구에 참여 중이라면 문제가 해결될 때까지 앱 외부에서 결과를 계속 기록해 주세요.';
 
   @override
   String get sync_fitbit_data => 'Fitbit 데이터 동기화';
 
   @override
-  String get fitbit_data_synced => 'Fitbit 데이터 동기화에 성공했습니다';
+  String get fitbit_data_synced => 'Fitbit 데이터가 동기화되었습니다.';
 
   @override
   String get fitbit_data_not_synced =>
-      'Fitbit 데이터를 동기화할 수 없습니다. Fitbit 데이터를 Fitbit 앱과 동기화했는지 확인하세요.';
+      'Fitbit 데이터를 동기화할 수 없습니다. 먼저 Fitbit 앱에서 데이터 동기화를 완료했는지 확인해 주세요.';
 
   @override
   String error_syncing_fitbit_data(String error) {
-    return 'Fitbit 데이터 동기화 중 오류 발생: $error';
+    return 'Fitbit 데이터 동기화 중 오류가 발생했습니다: $error';
   }
 
   @override
   String get fitbit_data_synced_dialog_title => 'Fitbit 데이터 동기화 완료';
 
   @override
-  String get fitbit_data_synced_info => '다음 데이터 유형에 대해 데이터가 동기화되었습니다:';
+  String get fitbit_data_synced_info => '다음 유형의 데이터가 동기화되었습니다.';
 
   @override
   String fitbit_data_earliest_date(String date) {
-    return '가장 이른 날짜: $date';
+    return '가장 오래된 데이터 날짜: $date';
   }
 
   @override
   String fitbit_data_latest_date(String date) {
-    return '가장 최근 날짜: $date';
+    return '가장 최근 데이터 날짜: $date';
   }
 
   @override
@@ -787,10 +787,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fitbit_data_close_btn => '닫기';
 
   @override
-  String get painIndicatorText => '통증 수준';
+  String get painIndicatorText => '통증 정도';
 
   @override
-  String get dialogTitle => '통증 수준 선택';
+  String get dialogTitle => '통증 정도 선택';
 
   @override
   String get cancelButton => '취소';
@@ -811,13 +811,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get painLevel_8 => '매우 아픔';
 
   @override
-  String get painLevel_10 => '가능한 최악의 통증';
+  String get painLevel_10 => '상상할 수 있는 가장 심한 통증';
 
   @override
   String get body_head => '머리';
 
   @override
-  String get body_head_front => '머리 (앞)';
+  String get body_head_front => '머리 앞쪽';
 
   @override
   String get body_face => '얼굴';
@@ -835,19 +835,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_mouth => '입';
 
   @override
-  String get body_head_back => '머리 (뒤)';
+  String get body_head_back => '머리 뒤쪽';
 
   @override
-  String get body_inner_ear_balance => '내이 / 균형';
+  String get body_inner_ear_balance => '내이(속귀) / 균형(평형)';
 
   @override
   String get body_neck => '목';
 
   @override
-  String get body_neck_front => '목 (앞)';
+  String get body_neck_front => '목 앞쪽';
 
   @override
-  String get body_neck_back => '목 (뒤)';
+  String get body_neck_back => '뒷목';
 
   @override
   String get body_torso => '몸통';
@@ -862,10 +862,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_right_chest => '오른쪽 가슴';
 
   @override
-  String get body_breastbone => '흉골';
+  String get body_breastbone => '가슴뼈(흉골)';
 
   @override
-  String get body_upper_back => '등 상부';
+  String get body_upper_back => '등 위쪽';
 
   @override
   String get body_left_shoulder_blade => '왼쪽 어깨뼈';
@@ -874,28 +874,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_right_shoulder_blade => '오른쪽 어깨뼈';
 
   @override
-  String get body_spine_upper_middle => '척추 (상부/중간)';
+  String get body_spine_upper_middle => '척추 위쪽/중간';
 
   @override
-  String get body_abdomen => '복부';
+  String get body_abdomen => '배(복부)';
 
   @override
-  String get body_upper_abdomen => '상복부';
+  String get body_upper_abdomen => '윗배';
 
   @override
-  String get body_lower_abdomen => '하복부';
+  String get body_lower_abdomen => '아랫배';
 
   @override
-  String get body_left_side_abdomen => '왼쪽 측면 (복부)';
+  String get body_left_side_abdomen => '배 왼쪽 옆면';
 
   @override
-  String get body_right_side_abdomen => '오른쪽 옆 (복부)';
+  String get body_right_side_abdomen => '배 오른쪽 옆면';
 
   @override
   String get body_lower_back => '허리';
 
   @override
-  String get body_spine_lower => '척추 (하부)';
+  String get body_spine_lower => '척추 아래쪽';
 
   @override
   String get body_left_flank => '왼쪽 옆구리';
@@ -913,22 +913,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_left_shoulder => '왼쪽 어깨';
 
   @override
-  String get body_left_upper_arm => '왼쪽 상완';
+  String get body_left_upper_arm => '왼쪽 위팔(상완)';
 
   @override
-  String get body_left_bicep => '왼쪽 이두근';
+  String get body_left_bicep => '왼쪽 위팔 앞쪽 근육 (이두근)';
 
   @override
-  String get body_left_tricep => '왼쪽 삼두근';
+  String get body_left_tricep => '왼쪽 위팔 뒤쪽 근육 (삼두근)';
 
   @override
   String get body_left_elbow => '왼쪽 팔꿈치';
 
   @override
-  String get body_left_lower_arm => '왼쪽 하부 팔';
+  String get body_left_lower_arm => '왼쪽 아래팔';
 
   @override
-  String get body_left_forearm => '왼쪽 팔뚝';
+  String get body_left_forearm => '왼쪽 앞팔 (전완)';
 
   @override
   String get body_left_wrist => '왼쪽 손목';
@@ -949,31 +949,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_right_shoulder => '오른쪽 어깨';
 
   @override
-  String get body_right_upper_arm => '오른쪽 상완';
+  String get body_right_upper_arm => '오른쪽 위팔(상완)';
 
   @override
-  String get body_right_bicep => '오른쪽 이두근';
+  String get body_right_bicep => '오른쪽 위팔 앞쪽 근육 (이두근)';
 
   @override
-  String get body_right_tricep => '오른쪽 삼두근';
+  String get body_right_tricep => '오른쪽 위팔 뒤쪽 근육 (삼두근)';
 
   @override
   String get body_right_elbow => '오른쪽 팔꿈치';
 
   @override
-  String get body_right_lower_arm => '오른쪽 하부 팔';
+  String get body_right_lower_arm => '오른쪽 아래팔';
 
   @override
-  String get body_right_forearm => '오른쪽 팔뚝';
+  String get body_right_forearm => '오른쪽 앞팔 (전완)';
 
   @override
   String get body_right_wrist => '오른쪽 손목';
 
   @override
-  String get body_right_hand => '오른쪽 손';
+  String get body_right_hand => '오른손';
 
   @override
-  String get body_right_palm => '오른쪽 손바닥';
+  String get body_right_palm => '오른손바닥';
 
   @override
   String get body_right_fingers => '오른쪽 손가락';
@@ -1012,7 +1012,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_left_knee => '왼쪽 무릎';
 
   @override
-  String get body_left_lower_leg => '왼쪽 하부 다리';
+  String get body_left_lower_leg => '왼쪽 아랫다리';
 
   @override
   String get body_left_shin => '왼쪽 정강이';
@@ -1027,10 +1027,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_left_foot => '왼발';
 
   @override
-  String get body_left_heel => '왼쪽 뒤꿈치';
+  String get body_left_heel => '왼쪽 발뒤꿈치';
 
   @override
-  String get body_left_foot_sole => '왼쪽 발바닥 / 아치';
+  String get body_left_foot_sole => '왼쪽 발바닥/발바닥 아치';
 
   @override
   String get body_left_toes => '왼쪽 발가락';
@@ -1051,7 +1051,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_right_knee => '오른쪽 무릎';
 
   @override
-  String get body_right_lower_leg => '오른쪽 하부 다리';
+  String get body_right_lower_leg => '오른쪽 아랫다리';
 
   @override
   String get body_right_shin => '오른쪽 정강이';
@@ -1063,13 +1063,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get body_right_ankle => '오른쪽 발목';
 
   @override
-  String get body_right_foot => '오른쪽 발';
+  String get body_right_foot => '오른발';
 
   @override
-  String get body_right_heel => '오른쪽 뒤꿈치';
+  String get body_right_heel => '오른쪽 발뒤꿈치';
 
   @override
-  String get body_right_foot_sole => '오른쪽 발바닥 / 아치';
+  String get body_right_foot_sole => '오른쪽 발바닥/발바닥 아치';
 
   @override
   String get body_right_toes => '오른쪽 발가락';
@@ -1081,7 +1081,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get bodyPartLabel => '신체 부위';
 
   @override
-  String get painTypeUnspecified => '지정 안됨';
+  String get painTypeUnspecified => '선택 안 함';
 
   @override
   String get painTypeBurning => '화끈거림';
@@ -1096,31 +1096,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get painTypeThrobbing => '욱신거림';
 
   @override
-  String get painTypeSharp => '날카로움';
+  String get painTypeSharp => '날카로운 통증';
 
   @override
-  String get painTypeDull => '둔함';
+  String get painTypeDull => '둔탁한 통증';
 
   @override
-  String get painTypeCramping => '경련';
+  String get painTypeCramping => '쥐가 나거나 쥐어짜는 듯한 통증';
 
   @override
-  String get painTypeRadiating => '방사통';
+  String get painTypeRadiating => '주변으로 퍼지는 통증 (방사통)';
 
   @override
-  String get painTypeTingling => '따끔거림';
+  String get painTypeTingling => '저리거나 따끔거림';
 
   @override
   String get painTypeShooting => '쏘는 듯한 통증';
 
   @override
-  String get painTypePulsing => '맥박치듯';
+  String get painTypePulsing => '맥박처럼 뛰는 느낌';
 
   @override
   String get painTypePressure => '압박감';
 
   @override
-  String get painTypeTightness => '긴장감';
+  String get painTypeTightness => '조이는 느낌';
 
   @override
   String get painTypeSoreness => '뻐근함';
@@ -1132,21 +1132,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get preview_mode => '미리보기 모드';
 
   @override
-  String get preview_mode_active => '미리보기 모드 활성';
+  String get preview_mode_active => '미리보기 모드 사용 중';
 
   @override
-  String get preview_mode_active_state => '미리보기 모드가 이제 활성화되었습니다.';
+  String get preview_mode_active_state => '미리보기 모드가 켜졌습니다.';
 
   @override
-  String get preview_mode_inactive_state => '미리보기 모드가 비활성화되었습니다.';
+  String get preview_mode_inactive_state => '미리보기 모드가 꺼졌습니다.';
 
   @override
   String get preview_mode_description =>
-      '현재 미리보기 모드에 있습니다. 이를 통해 다음을 할 수 있습니다:\n\n• \'다음 날\' 버튼을 사용하여 연구 일정을 빠르게 진행\n• 제한 없이 여러 번 과제를 완료\n• 실제 데이터에 영향을 주지 않고 전체 연구 흐름을 경험\n\n중요: 미리보기 모드에서의 결과와 데이터는 저장되지 않으며 실제 참가자 결과와 혼합되지 않습니다.';
+      '현재 미리보기 모드입니다. 다음 기능을 사용할 수 있습니다.\n\n• “다음 날” 버튼으로 연구 일정을 빠르게 진행\n• 제한 없이 과제를 여러 번 수행\n• 실제 데이터에 영향을 주지 않고 전체 연구 과정 체험\n\n중요: 미리보기 모드의 결과와 데이터는 저장되지 않으며, 진행 중인 연구의 실제 참여자 결과와 섞이지 않습니다.';
 
   @override
   String get preview_mode_results_not_saved =>
-      '미리보기 모드에서 과제가 완료되었습니다 - 연구 데이터 무결성 보호를 위해 결과는 저장되지 않습니다.';
+      '미리보기 모드에서 과제를 완료했습니다. 실제 연구 데이터에 영향을 주지 않도록 결과는 저장되지 않습니다.';
 
   @override
   String get ok => '확인';
@@ -1159,37 +1159,38 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get copied_to_clipboard =>
-      '클립보드에 복사되었습니다. 지금 휴대전화의 안전한 곳에 복구 문구를 붙여 넣으세요.';
+      '클립보드에 복사했습니다. 지금 복구 문구를 휴대전화의 안전한 곳에 붙여 넣어 보관해 주세요.';
 
   @override
-  String get show_recovery_phrase => '복구 문구 표시';
+  String get show_recovery_phrase => '복구 문구 보기';
 
   @override
   String get recovery_phrase_saved_confirmation =>
-      '13개 단어를 모두 안전한 곳에 저장했으며, 계정을 복구할 때 다시 확인할 수 있습니다. 연구 설정에서도 다시 확인할 수 있습니다.';
+      '13개 단어를 모두 안전한 곳에 보관했으며, 계정을 복구할 때 다시 확인할 수 있습니다. “연구 설정”에서도 복구 문구를 다시 볼 수 있습니다.';
 
   @override
   String get recovery_phrase_rotate_button => '복구 문구 재발급';
 
   @override
-  String get recovery_phrase_rotate_dialog_title => '복구 문구를 재발급할까요?';
+  String get recovery_phrase_rotate_dialog_title => '복구 문구를 재발급하시겠습니까?';
 
   @override
   String get recovery_phrase_rotate_dialog_description =>
-      '현재 복구 문구는 즉시 더 이상 작동하지 않습니다. 나중에 계정을 복구하려면 새 문구를 저장해야 합니다.';
+      '재발급하면 기존 복구 문구는 즉시 사용할 수 없게 됩니다. 나중에 계정을 복구할 수 있도록 새 복구 문구를 반드시 보관해 주세요.';
 
   @override
   String get recovery_phrase_rotate_acknowledgement =>
-      '현재 복구 문구가 즉시 더 이상 작동하지 않는다는 점을 이해합니다.';
+      '기존 복구 문구를 즉시 사용할 수 없게 된다는 점을 이해했습니다.';
 
   @override
   String get recovery_phrase_rotate_confirm => '문구 재발급';
 
   @override
-  String get recovery_phrase_rotate_success => '새 복구 문구가 발급되었습니다. 지금 저장하세요.';
+  String get recovery_phrase_rotate_success =>
+      '새 복구 문구가 발급되었습니다. 지금 안전한 곳에 보관해 주세요.';
 
   @override
-  String get recovery_phrase_rotate_error => '새 복구 문구를 발급할 수 없습니다. 다시 시도하세요.';
+  String get recovery_phrase_rotate_error => '새 복구 문구를 발급할 수 없습니다. 다시 시도해 주세요.';
 
   @override
   String get continue_to_study => '완료';
@@ -1201,39 +1202,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get enter_recovery_phrase => '복구 문구를 입력하세요';
 
   @override
-  String get restore_account_signed_in_title => '이미 로그인됨';
+  String get restore_account_signed_in_title => '이미 로그인되어 있습니다';
 
   @override
   String get restore_account_signed_in_description =>
-      '이 기기에는 이미 로그인되어 있습니다. 계정을 복구하면 현재 계정이 교체됩니다. 복구 후에도 복구 문구는 계속 유효합니다.';
+      '이 기기에는 이미 로그인되어 있습니다. 계정을 복구하면 현재 로그인된 계정이 복구한 계정으로 바뀝니다. 복구에 사용한 문구는 이후에도 계속 사용할 수 있습니다.';
 
   @override
   String get required => '필수';
 
   @override
   String get invalid_recovery_phrase =>
-      '이 복구 문구와 일치하는 계정이 없습니다. 13개 단어가 올바른 순서인지 확인하세요.';
+      '이 복구 문구와 일치하는 계정이 없습니다. 13개 단어를 올바른 순서로 입력했는지 확인해 주세요.';
 
   @override
   String get recovery_phrase_too_many_words =>
-      '복구 문구는 13개 단어로 구성됩니다. 계속하려면 추가 단어를 삭제하세요.';
+      '복구 문구는 13개 단어로 이루어져 있습니다. 초과한 단어를 지워 주세요.';
 
   @override
   String deep_link_study_not_found(String studyId) {
-    return '연구 ID $studyId에 해당하는 연구를 찾을 수 없거나 사용할 수 없습니다';
+    return '연구 ID $studyId에 해당하는 연구를 찾을 수 없거나 이용할 수 없습니다.';
   }
 
   @override
   String get recovery_in_progress => '계정을 복구하는 중...';
 
   @override
-  String get recovery_failed => '계정 복구에 실패했습니다. 복구 문구를 확인하고 다시 시도하세요.';
+  String get recovery_failed => '계정을 복구하지 못했습니다. 복구 문구를 확인한 뒤 다시 시도해 주세요.';
 
   @override
   String get recovery_user_not_found => '이 복구 문구와 일치하는 계정을 찾을 수 없습니다.';
 
   @override
-  String get recovery_network_error => '네트워크 오류입니다. 연결을 확인하고 다시 시도하세요.';
+  String get recovery_network_error =>
+      '네트워크 오류가 발생했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.';
 
   @override
   String get restore_account_description =>
@@ -1255,13 +1257,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get general_section => '일반';
 
   @override
-  String get participation_options_section => '참여 관리';
+  String get participation_options_section => '연구 참여 관리';
 
   @override
   String get recovery_phrase_load_error => '복구 문구를 불러오지 못했습니다';
 
   @override
-  String get deep_link_study_invite_only => '이 연구는 참여를 위해 초대 코드가 필요합니다';
+  String get deep_link_study_invite_only => '이 연구에 참여하려면 초대 코드가 필요합니다.';
 
   @override
   String deep_link_invite_invalid(String code) {
@@ -1276,12 +1278,12 @@ class AppLocalizationsKo extends AppLocalizations {
     String currentStudy,
     String targetStudy,
   ) {
-    return '현재 다음 연구에 참여 중입니다:\n$currentStudy\n\n딥 링크가 가리키는 곳:\n$targetStudy\n\n현재 연구로 돌아가거나(권장) 계속해서 떠나고 전환할 수 있습니다.';
+    return '현재 참여 중인 연구:\n$currentStudy\n\n이 링크로 연결되는 연구:\n$targetStudy\n\n현재 연구로 돌아가는 것을 권장합니다. 현재 연구 참여를 종료한 뒤 다른 연구로 전환할 수도 있습니다.';
   }
 
   @override
   String deep_link_switch_warning_opt_out_instruction(String optOut) {
-    return '현재 연구를 종료하려면 설정을 열고 먼저 \"$optOut\"을 사용하세요. 그런 다음 초대장을 다시 여세요.';
+    return '현재 연구 참여를 종료하려면 먼저 “설정”에서 “$optOut” 메뉴를 선택해 주세요. 그런 다음 초대 링크를 다시 열어 주세요.';
   }
 
   @override
@@ -1294,68 +1296,69 @@ class AppLocalizationsKo extends AppLocalizations {
   String get you_have_been_invited => '연구에 초대되었습니다!';
 
   @override
-  String get download_app_join => 'StudyU 앱 다운로드 & 참여';
+  String get download_app_join => 'StudyU 앱 다운로드 및 연구 참여';
 
   @override
-  String get deleted_study_error_title => '연구를 사용할 수 없습니다';
+  String get deleted_study_error_title => '연구를 이용할 수 없습니다';
 
   @override
   String get deleted_study_error_description =>
-      '이 연구는 더 이상 서버에서 사용할 수 없습니다. 현재 데이터는 이 기기에 남아 있습니다. 삭제하기 전에 연구 책임자나 지원팀에 문의하세요. \'모든 데이터 삭제\'는 그들이 앱을 재설정하라고 지시할 때만 사용하세요.';
+      '이 연구는 더 이상 서버에서 이용할 수 없습니다. 현재 데이터는 이 기기에 남아 있습니다. 데이터를 삭제하기 전에 연구 담당자나 앱 지원팀에 문의해 주세요. “모든 데이터 삭제”는 담당자나 앱 지원팀에서 앱을 재설정하라고 안내한 경우에만 선택해 주세요.';
 
   @override
-  String get dashboard_showcase_progress_title => '연구 진행 상황';
+  String get dashboard_showcase_progress_title => '연구 진행 현황';
 
   @override
   String get dashboard_showcase_progress_description =>
-      '연구 진행 상황과 남은 과제를 확인할 수 있습니다.';
+      '현재 연구 진행 단계와 남은 일정을 확인할 수 있습니다.';
 
   @override
-  String get dashboard_showcase_current_intervention_title => '현재 개입';
+  String get dashboard_showcase_current_intervention_title => '현재 중재';
 
   @override
   String get dashboard_showcase_current_intervention_description =>
-      '여기에서 현재 개입과 이 단계에 남은 일수를 확인할 수 있습니다.';
+      '현재 중재와 해당 단계에 남은 일수를 확인할 수 있습니다.';
 
   @override
-  String get dashboard_showcase_today_tasks_title => '오늘의 작업';
+  String get dashboard_showcase_today_tasks_title => '오늘의 과제';
 
   @override
   String get dashboard_showcase_today_tasks_description =>
-      '여기에서 연구의 일환으로 오늘 완료해야 할 작업을 찾을 수 있습니다.';
+      '오늘 연구에서 수행해야 할 과제를 확인할 수 있습니다.';
 
   @override
-  String get dashboard_showcase_contact_title => '연락처';
+  String get dashboard_showcase_contact_title => '문의하기';
 
   @override
-  String get dashboard_showcase_contact_description =>
-      '연구 팀의 도움이 필요할 때 이 옵션을 사용하세요.';
+  String get dashboard_showcase_contact_description => '연구팀의 도움이 필요할 때 이용하세요.';
 
   @override
   String get dashboard_showcase_report_title => '보고서';
 
   @override
-  String get dashboard_showcase_report_description => '결과가 준비되면 현재 보고서를 엽니다.';
+  String get dashboard_showcase_report_description =>
+      '결과를 확인할 수 있게 되면 현재 보고서를 열어 보세요.';
 
   @override
-  String get dashboard_showcase_menu_title => '추가 옵션';
+  String get dashboard_showcase_menu_title => '더 보기';
 
   @override
   String get dashboard_showcase_menu_description =>
-      '설정, FAQ, 보고서 기록 등을 여기에서 찾을 수 있습니다.';
+      '설정, 자주 묻는 질문, 보고서 기록 등을 확인할 수 있습니다.';
 
   @override
   String get dashboard_showcase_finish => '완료';
 
   @override
-  String get support_email_subject_loading_error => 'StudyU 지원 요청 - 로딩 오류';
+  String get support_email_subject_loading_error =>
+      'StudyU 지원 요청 - 데이터 불러오기 오류';
 
   @override
   String get support_email_subject_deleted_study => 'StudyU 지원 요청 - 연구 이용 불가';
 
   @override
   String deleted_study_support_email_body(String subjectId) {
-    return '안녕하세요,\n\nStudyU 앱에서 제 연구가 더 이상 서버에서 사용할 수 없다고 나옵니다. 제 참여자 ID는: $subjectId 입니다.\n\n로컬 데이터를 유지해야 하는지 아니면 앱을 재설정해야 하는지 알려주세요.\n\n감사합니다.';
+    return '안녕하세요.\n\nStudyU 앱에 참여 중인 연구를 더 이상 서버에서 이용할 수 없다는 안내가 표시됩니다.\n참여자 ID: $subjectId\n\n기기에 저장된 데이터를 그대로 두어야 하는지, 앱을 재설정해야 하는지 안내 부탁드립니다.\n\n감사합니다.';
   }
 
   @override
@@ -1368,42 +1371,44 @@ class AppLocalizationsKo extends AppLocalizations {
   String get free_text_hint => '답변을 입력해 주세요';
 
   @override
-  String get preview_failed_to_initialize => '미리보기를 초기화하지 못했습니다.';
+  String get preview_failed_to_initialize => '미리보기를 시작할 수 없습니다.';
 
   @override
   String get preview_overlay_reset_hint =>
-      '미리보기를 지금 열 수 없습니다. 미리보기 재설정을 시도해 주세요.';
+      '현재 미리보기를 열 수 없습니다. 미리보기를 재설정한 뒤 다시 시도해 주세요.';
 
   @override
   String get preview_overlay_study_not_ready =>
-      '이 연구에 대한 미리보기를 아직 열 수 없습니다. 미리보기 재설정을 시도해 주세요.';
+      '이 연구의 미리보기를 아직 열 수 없습니다. 미리보기를 재설정한 뒤 다시 시도해 주세요.';
 
   @override
-  String get preview_overlay_route_open_failed => '미리보기 경로를 지금 열 수 없습니다.';
+  String get preview_overlay_route_open_failed => '현재 미리보기 화면을 열 수 없습니다.';
 
   @override
   String get continue_label => '계속';
 
   @override
-  String get restored_answer_needs_review => '복원된 답변은 검토가 필요합니다';
+  String get restored_answer_needs_review => '복원된 답변을 확인해 주세요';
 
   @override
-  String get restored_answer_review_description => '검토 후 과제 완료가 가능합니다.';
+  String get restored_answer_review_description =>
+      '복원된 답변을 확인한 후 과제를 완료할 수 있습니다.';
 
   @override
-  String get mark_answer_reviewed => '이 답변을 검토했습니다';
+  String get mark_answer_reviewed => '이 답변을 확인했습니다';
 
   @override
-  String get answer_reviewed => '답변 검토됨';
+  String get answer_reviewed => '답변 확인 완료';
 
   @override
-  String get review_restored_answer_to_continue => '계속하려면 복원된 답변을 검토하세요.';
+  String get review_restored_answer_to_continue => '계속하려면 복원된 답변을 확인하세요.';
 
   @override
-  String get complete_task => '작업 완료';
+  String get complete_task => '과제 완료';
 
   @override
-  String get no_internet_connection => '인터넷에 연결되어 있지 않습니다. 온라인 상태에서 다시 시도하십시오.';
+  String get no_internet_connection =>
+      '인터넷에 연결되어 있지 않습니다. 인터넷에 연결한 뒤 다시 시도해 주세요.';
 
   @override
   String error_occurred_with_message(String message) {
@@ -1420,7 +1425,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get time_picker_button_label_datetime => '시간 선택';
 
   @override
-  String get time_picker_button_label => '시간을 선택하세요';
+  String get time_picker_button_label => '시간 선택';
 
   @override
   String get date_picker_clear => '지우기';
@@ -1435,43 +1440,43 @@ class AppLocalizationsKo extends AppLocalizations {
   String get datetime_picker_validation_required => '날짜와 시간을 모두 선택해 주세요';
 
   @override
-  String get time_picker_validation_range => '허용 범위 내에서 시간을 선택해 주세요';
+  String get time_picker_validation_range => '선택 가능한 범위 안에서 시간을 선택해 주세요.';
 
   @override
   String time_picker_range_hint(Object min, Object max) {
-    return '$min~$max 사이의 시간을 선택해 주세요';
+    return '$min~$max 사이의 시간을 선택해 주세요.';
   }
 
   @override
   String time_picker_min_hint(Object min) {
-    return '허용되는 가장 이른 시간: $min';
+    return '선택 가능한 가장 이른 시간: $min';
   }
 
   @override
   String time_picker_max_hint(Object max) {
-    return '허용되는 가장 늦은 시간: $max';
+    return '선택 가능한 가장 늦은 시간: $max';
   }
 
   @override
-  String get please_select_interventions_why => '왜인가요?';
+  String get please_select_interventions_why => '왜 필요한가요?';
 
   @override
   String get recovery_phrase_description =>
-      '이 13개 단어를 안전한 곳에 보관하세요. 이 기기에 접근할 수 없게 될 경우 계정을 복구할 수 있는 유일한 방법입니다.';
+      '13개 단어를 안전한 곳에 보관해 주세요. 이 기기를 사용할 수 없게 되었을 때 계정을 복구할 수 있는 유일한 수단입니다.';
 
   @override
   String get recovery_phrase_why => '왜 필요한가요?';
 
   @override
   String get recovery_phrase_reason =>
-      'StudyU는 비밀번호나 이메일 계정을 사용하지 않습니다. 이 13개 단어는 새 휴대전화를 사용하거나 앱을 다시 설치할 때 계정을 복구할 수 있는 유일한 방법입니다. 단어를 적어 두거나 본인만 접근할 수 있는 곳에 디지털 방식으로 보관하세요. 다른 사람과 절대 공유하지 마세요. 설정 → 연구 설정에서 언제든지 복구 문구를 다시 확인할 수 있습니다.';
+      'StudyU는 비밀번호나 이메일 계정을 사용하지 않습니다. 이 13개 단어는 휴대전화를 바꾸거나 앱을 다시 설치했을 때 계정을 복구할 수 있는 유일한 수단입니다. 종이에 적어 두거나 본인만 접근할 수 있는 곳에 디지털 형태로 보관해 주세요. 다른 사람에게 절대 공유하지 마세요. “설정 → 연구 설정”에서 언제든지 복구 문구를 다시 확인할 수 있습니다.';
 
   @override
-  String get study_not_started_title => '연구에 참여했습니다';
+  String get study_not_started_title => '연구 참여 등록 완료';
 
   @override
   String get study_not_started_description =>
-      '내일 다시 방문하여 시작하세요. 할 일이 생기면 알려드리겠습니다.';
+      '내일 다시 앱을 열어 연구를 시작해 주세요. 수행할 과제가 있으면 알림으로 알려드립니다.';
 
   @override
   String recovery_phrase_word_count(Object count, Object total) {
@@ -1489,13 +1494,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get faq_answer_data_storage =>
-      '사용자에게서 수집된 데이터는 기기에 로컬로 저장되며, 인터넷에 연결되면 보안 서버에 업로드됩니다. 모든 연구 데이터는 익명으로 수집 및 저장됩니다.';
+      '수집된 데이터는 기기에 저장되며, 인터넷에 연결되면 보안 서버로 업로드됩니다. 모든 연구 데이터는 익명으로 수집·저장됩니다.';
 
   @override
-  String get faq_question_personal_data => '앱은 어떤 개인 데이터를 수집하나요?';
+  String get faq_question_personal_data => '앱은 어떤 개인정보를 수집하나요?';
 
   @override
-  String get faq_answer_personal_data => '앱은 사용자의 개인 데이터를 수집하지 않습니다.';
+  String get faq_answer_personal_data => '앱은 사용자의 개인정보를 수집하지 않습니다.';
 
   @override
   String get faq_section_studies => '연구';
@@ -1511,21 +1516,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get faq_answer_change_intervention =>
-      '연구를 시작하기 전에는 중재 선택 화면으로 돌아가 다른 중재를 선택할 수 있습니다. 연구가 시작된 후에는 해당 참여에서 선택한 중재를 변경할 수 없습니다. 다른 중재를 선택하려면 설정에서 연구를 탈퇴한 다음 기존 데이터를 유지할지 영구적으로 삭제할지 선택하고, 연구 참여 절차에서 연구와 중재를 다시 선택하세요.';
+      '연구를 시작하기 전에는 “중재 선택” 화면에서 다른 중재를 선택할 수 있습니다. 연구가 시작된 후에는 해당 연구 참여에서 선택한 중재를 바꿀 수 없습니다. 다른 중재를 선택하려면 “설정”에서 현재 연구 참여를 종료하고, 기존 데이터를 보관할지 영구적으로 삭제할지 선택해 주세요. 그런 다음 다시 참여 등록을 하면서 연구와 중재를 선택하세요.';
 
   @override
-  String get faq_question_missed_tasks => '놓친 과제를 나중에 다시 수행할 수 있나요?';
+  String get faq_question_missed_tasks => '놓친 과제를 다른 날에 수행할 수 있나요?';
 
   @override
   String get faq_answer_missed_tasks =>
-      '아니요. 놓친 과제를 나중에 다시 수행할 수는 없습니다. 하지만 같은 날에는 언제든지 완료할 수 있습니다.';
+      '아니요. 놓친 과제를 다른 날에 수행할 수는 없습니다. 다만 같은 날에는 언제든지 완료할 수 있습니다.';
 
   @override
-  String get faq_question_leave_study => '현재 연구를 어떻게 탈퇴할 수 있나요?';
+  String get faq_question_leave_study => '현재 연구 참여를 어떻게 종료할 수 있나요?';
 
   @override
   String get faq_answer_leave_study =>
-      '대시보드의 \"설정\" 탭으로 이동하여 \"연구 탈퇴\"를 선택하세요. 그러면 진행 데이터가 삭제되지 않고 연구에서 탈퇴되며, 해당 데이터는 연구 분석에 포함될 수 있습니다. 연구에서 탈퇴하고 기기와 서버의 모든 진행 데이터를 삭제하려면 \"연구 탈퇴 및 모든 데이터 삭제\"를 선택하세요. 모든 데이터가 서버와 기기에서 영구적으로 삭제됩니다.';
+      '대시보드의 “설정”에서 “연구 참여 종료”를 선택해 주세요. 참여는 종료되지만 진행 기록은 삭제되지 않아 연구 분석에 사용될 수 있습니다. 연구 참여를 종료하고 기기와 서버의 진행 기록도 모두 삭제하려면 “참여 종료 및 데이터 삭제”를 선택해 주세요. 해당 데이터는 기기와 서버에서 영구적으로 삭제됩니다.';
 
   @override
   String get faq_section_report_details => '보고서 세부 정보';
@@ -1535,44 +1540,45 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get faq_answer_daily_tasks =>
-      '어떤 중재가 자신에게 가장 효과적인지 확인하려면 각 중재에 대해 몇 가지 일일 과제를 수행해야 합니다. 과제를 마친 후 반드시 \"완료\" 버튼을 누르세요.';
+      '본인에게 가장 효과적인 중재를 확인하려면 각 중재에서 정한 과제를 매일 수행해야 합니다. 과제를 마친 뒤 반드시 “완료” 버튼을 눌러 주세요.';
 
   @override
-  String get faq_question_rate_your_day => '\"하루 평가\"란 무엇인가요?';
+  String get faq_question_rate_your_day => '“하루 평가”는 어떤 기능인가요?';
 
   @override
   String get faq_answer_rate_your_day =>
-      '\"하루 평가\"는 전체 연구 기간 동안 건강 상태를 추적하는 기능입니다. 특정 건강 관련 질문에 1점부터 10점까지 점수를 매겨야 합니다.';
+      '“하루 평가”는 연구 기간 동안 건강 상태를 기록하는 기능입니다. 건강과 관련된 몇 가지 질문에 1점부터 10점까지 점수를 매겨 답합니다.';
 
   @override
-  String get faq_question_track_activities => '활동을 어떻게 추적할 수 있나요?';
+  String get faq_question_track_activities => '내 활동을 어떻게 확인할 수 있나요?';
 
   @override
   String get faq_answer_track_activities =>
-      '\"보고서 기록\" 섹션에서 일일 과제와 건강 상태를 한눈에 확인할 수 있습니다.';
+      '“보고서 기록”에서 일일 과제 수행 현황과 건강 상태를 한눈에 확인할 수 있습니다.';
 
   @override
   String get faq_question_download_report => '연구 보고서를 어떻게 다운로드할 수 있나요?';
 
   @override
   String get faq_answer_download_report =>
-      '연구에 필요한 최소 과제를 완료하면 보고서를 다운로드할 수 있습니다. 보고서는 대시보드의 보고서 기록 탭에서 확인할 수 있습니다.';
+      '연구에서 요구하는 최소 과제를 완료하면 보고서를 다운로드할 수 있습니다. 대시보드의 “보고서 기록” 탭에서 확인해 주세요.';
 
   @override
   String get debug_notifications_not_initialized =>
-      '알림이 아직 초기화되지 않았습니다. 연구를 시작한 후 정보 섹션을 통해 이 기능을 여세요.';
+      '알림 기능이 아직 초기화되지 않았습니다. 연구를 시작한 뒤 “정보” 메뉴에서 이 기능을 다시 열어 주세요.';
 
   @override
   String get debug_test_notification_title => 'StudyU 테스트 알림';
 
   @override
-  String get debug_test_notification_body => '이 알림은 StudyU 알림을 받을 수 있음을 확인합니다.';
+  String get debug_test_notification_body =>
+      'StudyU 알림이 정상적으로 수신되는지 확인하는 테스트 알림입니다.';
 
   @override
-  String get debug_reset_success => '앱이 성공적으로 재설정되었습니다. 앱을 다시 시작하세요.';
+  String get debug_reset_success => '앱이 재설정되었습니다. 앱을 다시 시작해 주세요.';
 
   @override
-  String get debug_reset_error => '앱을 재설정하는 중 오류가 발생했습니다. 다시 시도하세요.';
+  String get debug_reset_error => '앱을 재설정하는 중 오류가 발생했습니다. 다시 시도해 주세요.';
 
   @override
   String get debug_screen_title => '디버그 화면';
@@ -1584,7 +1590,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get debug_receive_test_notification => '테스트 알림 받기';
 
   @override
-  String get debug_show_onboarding => '온보딩 보기';
+  String get debug_show_onboarding => '시작 안내 보기';
 
   @override
   String get invite_landing_instruction_title => 'StudyU Health로 연구에 참여하세요';
@@ -1597,7 +1603,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get invite_landing_invalid =>
-      '이 초대는 더 이상 사용할 수 없습니다. 링크 또는 코드를 확인한 후 다시 시도해 주세요.';
+      '이 초대는 더 이상 사용할 수 없습니다. 링크 또는 코드를 확인한 뒤 다시 시도해 주세요.';
 
   @override
   String get invite_landing_load_error => '초대를 불러올 수 없습니다. 나중에 다시 시도해 주세요.';
@@ -1609,7 +1615,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get scan_invite_code => 'QR 코드 스캔';
 
   @override
-  String get scan_invite_code_description => '카메라를 초대 QR 코드에 맞추세요.';
+  String get scan_invite_code_description => '카메라를 연구 초대 QR 코드에 맞추세요.';
 
   @override
   String get open_study_app => 'StudyU Health에서 열기';
@@ -1628,7 +1634,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get invite_landing_step_join_description =>
-      '휴대폰에서 StudyU Health를 열고 ‘초대 코드로 참여’를 누르세요. 초대 코드를 입력하거나 QR 코드를 스캔하여 연구에 참여하세요.';
+      '휴대전화에서 StudyU Health를 열고 “초대 코드로 참여”를 눌러 주세요. 초대 코드를 입력하거나 QR 코드를 스캔해 연구에 참여할 수 있습니다.';
 
   @override
   String get invite_landing_invited_title => '연구 참여 초대를 받았습니다';
@@ -1639,7 +1645,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get invite_landing_other_device_instruction =>
-      '빠르게 접속하려면 휴대폰으로 이 QR 코드를 스캔하세요.';
+      '빠르게 접속하려면 휴대전화로 이 QR 코드를 스캔해 주세요.';
 
   @override
   String get invite_landing_enter_code_title => '초대 코드 입력';
@@ -1669,7 +1675,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get date_format_us => '미국식 (12/31/2024)';
 
   @override
-  String get system => '시스템';
+  String get system => '기기 설정 따름';
 
   @override
   String get time_format => '시간 형식';
