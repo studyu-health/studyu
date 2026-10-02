@@ -306,6 +306,7 @@ SELECT is(
     'Old',
     'unrelated historical days are isolated'
 );
+SELECT tests.authenticate_as('nutrition_other');
 SELECT is(
     (
         SELECT result #>> '{result,meals,0,foods,0,name}'
@@ -315,6 +316,7 @@ SELECT is(
     'Other subject old',
     'other subjects are isolated'
 );
+SELECT tests.authenticate_as('nutrition_owner');
 
 INSERT INTO nutrition_results VALUES (
     'composite-create',

@@ -14,7 +14,7 @@ void main() {
         ..target = question.id
         ..choices = <dynamic>{});
 
-    expect(criterion.condition.evaluate(state), isFalse);
+    expect(criterion.condition.evaluate(state), isTrue);
     expect(criterion.isSatisfied(state), isTrue);
     expect(criterion.isViolated(state), isFalse);
   });

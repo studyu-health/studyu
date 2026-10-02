@@ -564,7 +564,7 @@ class _DashboardScreenState() extends ConsumerState<DashboardScreen> {
                     child: PrimaryButton(
                       key: const ValueKey('new_study_button'),
                       text: tr.action_button_new_study,
-                      onPressed: controller.onClickNewStudy,
+                      onPressedFuture: controller.onClickNewStudy,
                     ),
                   ),
                   if (showHeaderTitleAndCount)
