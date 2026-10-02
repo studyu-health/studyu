@@ -13,6 +13,10 @@ abstract class Task {
 
   Schedule schedule = Schedule();
 
+  /// When non-null, this task appears only on the study days
+  /// resolved by the rule (specific days, every N days, or per cycle).
+  TaskScheduleRule? scheduleRule;
+
   new(this.type);
 
   new withId(this.type) : id = const Uuid().v4();

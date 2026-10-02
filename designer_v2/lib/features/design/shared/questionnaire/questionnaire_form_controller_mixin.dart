@@ -20,19 +20,59 @@ mixin WithQuestionnaireControls<D, Q extends QuestionFormViewModel>
   late final questionFormViewModels =
       FormViewModelCollection<Q, QuestionFormData>([], questionsArray);
 
-  List<Q> get questionModels => questionFormViewModels.formViewModels;
+  List<Q> get questionModels {
+    _ensureQuestionViewModelsInitialized();
+    return questionFormViewModels.formViewModels;
+  }
 
   late final questionnaireControls = {'questions': questionsArray};
 
-  void setQuestionnaireControlsFrom(QuestionnaireFormData data) {
-    if (data.questionsData != null) {
-      final viewModels = data.questionsData!
-          .map((data) => provideQuestionFormViewModel(data))
-          .toList();
-      questionFormViewModels.reset(viewModels);
+  /// Raw question data stored for deferred VM creation.
+  /// When non-null, the actual [QuestionFormViewModel]s have NOT been created
+  /// yet — only lightweight placeholder [FormGroup]s sit in [questionsArray]
+  /// so that validation counts (e.g. "at least one question") still work.
+  List<QuestionFormData>? _deferredQuestionsData;
 
-      _initializeAvailableQuestionsForConditionals(viewModels);
+  /// Whether the full [QuestionFormViewModel]s have been materialized.
+  bool _questionViewModelsInitialized = false;
+
+  void setQuestionnaireControlsFrom(QuestionnaireFormData data) {
+    if (data.questionsData != null && data.questionsData!.isNotEmpty) {
+      // Store the raw data for deferred creation
+      _deferredQuestionsData = data.questionsData;
+      _questionViewModelsInitialized = false;
+
+      // Add lightweight placeholder FormGroups to questionsArray so that
+      // form validation (e.g. minLength) can count the number of questions
+      // without incurring the cost of full QuestionFormViewModel creation.
+      questionFormViewModels.formViewModels = [];
+      questionsArray.clear();
+      for (var i = 0; i < data.questionsData!.length; i++) {
+        questionsArray.add(FormGroup({}));
+      }
+      questionsArray.updateValueAndValidity();
     }
+  }
+
+  /// Materializes the full [QuestionFormViewModel]s from the stored raw data.
+  /// This is called lazily when the user navigates to edit the survey.
+  void _ensureQuestionViewModelsInitialized() {
+    if (_questionViewModelsInitialized) return;
+    _questionViewModelsInitialized = true;
+
+    if (_deferredQuestionsData == null || _deferredQuestionsData!.isEmpty) {
+      return;
+    }
+
+    final data = _deferredQuestionsData!;
+    _deferredQuestionsData = null; // clear to avoid re-initialization
+
+    final viewModels = data
+        .map((d) => provideQuestionFormViewModel(d))
+        .toList();
+    questionFormViewModels.reset(viewModels);
+
+    _initializeAvailableQuestionsForConditionals(viewModels);
   }
 
   void _initializeAvailableQuestionsForConditionals(
@@ -54,6 +94,10 @@ mixin WithQuestionnaireControls<D, Q extends QuestionFormViewModel>
   }
 
   QuestionnaireFormData buildQuestionnaireFormData() {
+    // If VMs haven't been created yet, build directly from stored data
+    if (!_questionViewModelsInitialized && _deferredQuestionsData != null) {
+      return QuestionnaireFormData(questionsData: _deferredQuestionsData);
+    }
     return QuestionnaireFormData(
       questionsData: questionFormViewModels.formData,
     );
@@ -64,7 +108,9 @@ mixin WithQuestionnaireControls<D, Q extends QuestionFormViewModel>
 
   @override
   void read([D? formData]) {
-    questionFormViewModels.read();
+    if (_questionViewModelsInitialized) {
+      questionFormViewModels.read();
+    }
     super.read(formData);
   }
 
@@ -76,7 +122,7 @@ mixin WithQuestionnaireControls<D, Q extends QuestionFormViewModel>
 
   @override
   void onCancel(Q formViewModel, FormMode prevFormMode) {
-    return; // no-op
+    questionFormViewModels.unstage(formViewModel);
   }
 
   @override
@@ -96,6 +142,9 @@ mixin WithQuestionnaireControls<D, Q extends QuestionFormViewModel>
 
   @override
   Q provide(QuestionFormRouteArgs args) {
+    // Ensure VMs are materialized before providing
+    _ensureQuestionViewModelsInitialized();
+
     if (args.questionId.isNewId) {
       // Eagerly add the managed viewmodel in case it needs to be [provide]d
       // to a child controller

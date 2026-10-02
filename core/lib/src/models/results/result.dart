@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:studyu_core/src/models/nutrition/daily_recall.dart';
 import 'package:studyu_core/src/models/questionnaire/questionnaire_state.dart';
 import 'package:studyu_core/src/models/unknown_json_type_error.dart';
 
@@ -29,6 +30,9 @@ class Result<T> {
         ..result = QuestionnaireState.fromJson(
           List<Map<String, dynamic>>.from(json[keyResult] as List),
         ),
+    'DailyRecall' => Result<DailyRecall>.parseJson(
+      json,
+    )..result = DailyRecall.fromJson(json[keyResult] as Map<String, dynamic>),
     'bool' => Result<bool>.parseJson(json)..result = json[keyResult] as bool,
     _ => throw UnknownJsonTypeError(json[keyType]),
   } as Result<T>;
@@ -38,6 +42,7 @@ class Result<T> {
       'QuestionnaireState' => {
         keyResult: (result as QuestionnaireState).toJson(),
       },
+      'DailyRecall' => {keyResult: (result as DailyRecall).toJson()},
       'bool' => {keyResult: result},
       _ => throw ArgumentError('Unknown result type $type'),
     };
