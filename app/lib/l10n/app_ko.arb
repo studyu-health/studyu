@@ -226,6 +226,11 @@
   "no_camera_available": "사용 가능한 카메라가 없습니다",
   "no_data_available_yet": "아직 사용 가능한 데이터가 없습니다",
   "no_internet_connection": "인터넷에 연결되어 있지 않습니다. 온라인 상태에서 다시 시도하십시오.",
+  "leave_unsynced_title": "동기화하지 않고 나가시겠습니까?",
+  "leave_unsynced_message": "일부 답변을 동기화하지 못했습니다. 계속하면 이 기기에만 저장된 모든 답변이 영구적으로 삭제됩니다. StudyU에 이미 전송된 답변은 선택한 참여 종료 또는 삭제 옵션에 따라 처리됩니다.",
+  "leave_unsynced_confirm": "동기화하지 않고 계속",
+  "connection_banner_device_offline": "오프라인 상태입니다. 캐시된 연구 데이터가 사용되며, 다시 온라인 상태가 되면 변경 사항이 동기화됩니다.",
+  "connection_banner_backend_unavailable": "StudyU 서비스를 현재 사용할 수 없습니다. 캐시된 연구 데이터는 계속 사용할 수 있으며, 변경 사항은 나중에 동기화됩니다.",
   "no_interventions_available": "사용 가능한 개입이 없습니다",
   "no_reports_found": "아직 정의된 보고서가 없습니다",
   "not_enough_data": "데이터가 충분하지 않습니다",
@@ -520,5 +525,8 @@
   "system": "시스템",
   "time_format": "시간 형식",
   "time_format_12_hour": "12시간제 (오후 2:30)",
-  "time_format_24_hour": "24시간제 (14:30)"
+  "time_format_24_hour": "24시간제 (14:30)",
+  "fitbit_authorization_failed": "Fitbit 인증에 실패했습니다. 다시 시도해 주세요.",
+  "fitbit_queue_full": "동기화를 기다리는 Fitbit 작업이 너무 많습니다. 다른 작업을 완료하기 전에 대기 중인 작업을 동기화하세요.",
+  "fitbit_data_deferred": "연결이 가능해지면 Fitbit 데이터가 동기화됩니다."
 }

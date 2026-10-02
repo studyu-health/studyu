@@ -3,6 +3,48 @@ import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 
+/// Returns [proposed], or the minimum timestamp strictly after the latest
+/// `completedAt` in [existingProgress] when [proposed] would collide with
+/// (or precede) it.
+///
+/// `participant_progress`'s primary key is `(completed_at, subject_id)`
+/// (see `supabase/migrations/00000000000001_studyu-schema.sql`), so two
+/// offline completions sharing a timestamp would collide on upload.
+DateTime disambiguatedCompletedAt(
+  Iterable<SubjectProgress> existingProgress,
+  DateTime proposed,
+) {
+  DateTime? latest;
+  for (final entry in existingProgress) {
+    final completedAt = entry.completedAt;
+    if (completedAt == null) continue;
+    if (latest == null || completedAt.isAfter(latest)) {
+      latest = completedAt;
+    }
+  }
+  if (latest != null && !proposed.isAfter(latest)) {
+    return latest.add(const Duration(microseconds: 1));
+  }
+  return proposed;
+}
+
+Future<void> prepareQuestionnaireMedia(QuestionnaireState state) async {
+  if (kIsWeb) return;
+  for (final entry in state.answers.entries.toList()) {
+    final response = entry.value.response;
+    if (response is FutureBlobFile) {
+      await TemporaryStorageHandler.moveStagingFileToUploadDirectory(
+        response.localFilePath,
+        response.futureBlobId,
+      );
+      state.answers[entry.key] = Answer<String>(
+        entry.value.question,
+        entry.value.timestamp,
+      )..response = response.futureBlobId;
+    }
+  }
+}
+
 extension StudySubjectExtension on StudySubject {
   Future<void> addResult<T>({
     required String taskId,
@@ -28,23 +70,9 @@ extension StudySubjectExtension on StudySubject {
     if (!kIsWeb) {
       // Move multimodal files to upload directory
       if (resultObject.result is QuestionnaireState) {
-        final questionnaireState = resultObject.result as QuestionnaireState;
-        for (final answerEntry in questionnaireState.answers.entries.toList()) {
-          final answer = answerEntry.value;
-          if (answer.response is FutureBlobFile) {
-            final futureBlobFile = answer.response as FutureBlobFile;
-            await TemporaryStorageHandler.moveStagingFileToUploadDirectory(
-              futureBlobFile.localFilePath,
-              futureBlobFile.futureBlobId,
-            );
-
-            // Replaces Answer<FutureBlobFile> with Answer<String>
-            questionnaireState.answers[answerEntry.key] = Answer<String>(
-              answer.question,
-              answer.timestamp,
-            )..response = futureBlobFile.futureBlobId;
-          }
-        }
+        await prepareQuestionnaireMedia(
+          resultObject.result as QuestionnaireState,
+        );
       }
       // Upload multimodal files
       if (!offline) {
@@ -60,7 +88,10 @@ extension StudySubjectExtension on StudySubject {
       resultType: resultObject.type,
     );
     if (offline) {
-      p.completedAt = DateTime.now().toUtc();
+      p.completedAt = disambiguatedCompletedAt(
+        progress,
+        DateTime.now().toUtc(),
+      );
       progress.add(p);
     } else {
       p = await p.save();

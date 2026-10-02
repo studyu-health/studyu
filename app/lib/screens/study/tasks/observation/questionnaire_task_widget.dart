@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:studyu_app/screens/study/tasks/task_screen.dart';
 import 'package:studyu_app/util/debug_mode.dart';
+import 'package:studyu_app/util/deferred_fitbit_sync.dart';
 import 'package:studyu_app/util/misc.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
@@ -29,7 +30,20 @@ class _QuestionnaireTaskWidgetState() extends State<QuestionnaireTaskWidget> {
     T response,
     BuildContext context,
   ) async {
-    await handleTaskCompletion(context, (StudySubject? subject) async {
+    final saved = await handleTaskCompletion(context, (
+      StudySubject? subject,
+    ) async {
+      if (response is QuestionnaireState &&
+          hasDeferredFitbitAnswers(widget.task, response)) {
+        await persistDeferredFitbitQuestionnaireResult(
+          subject: subject!,
+          task: widget.task,
+          interventionId: subject.getInterventionForDate(DateTime.now())!.id,
+          periodId: widget.completionPeriod.id,
+          questionnaireState: response,
+        );
+        return;
+      }
       try {
         await subject!.addResult<T>(
           taskId: widget.task.id,
@@ -47,7 +61,7 @@ class _QuestionnaireTaskWidgetState() extends State<QuestionnaireTaskWidget> {
         rethrow;
       }
     });
-    if (!context.mounted) return;
+    if (!context.mounted || !saved) return;
     context.pop(true);
   }
 

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -10,9 +8,9 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/services/restore_account_service.dart';
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/date_time_preferences.dart';
-import 'package:studyu_app/util/fitbit_handler.dart';
 import 'package:studyu_app/util/localization.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
+import 'package:studyu_app/util/study_local_cleanup.dart';
 import 'package:studyu_app/widgets/recovery_phrase_content.dart';
 import 'package:studyu_app/widgets/study_onboarding_description.dart';
 import 'package:studyu_app/widgets/title_description_layout.dart';
@@ -472,6 +470,29 @@ class const OptOutAlertDialog({super.key, required final StudySubject? subject})
   State<OptOutAlertDialog> createState() => _OptOutAlertDialogState();
 }
 
+Future<bool> confirmDiscardUnsyncedStudyData(BuildContext context) async {
+  if (!context.mounted) return false;
+  final l10n = AppLocalizations.of(context)!;
+  return await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.leave_unsynced_title),
+          content: Text(l10n.leave_unsynced_message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.leave_unsynced_confirm),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+}
+
 class _OptOutAlertDialogState() extends State<OptOutAlertDialog> {
   bool acknowledged = false;
 
@@ -521,9 +542,45 @@ class _OptOutAlertDialogState() extends State<OptOutAlertDialog> {
           ),
           onPressed: acknowledged
               ? () async {
+                  bool deleted;
                   try {
-                    await widget.subject!.softDelete();
-                  } on SocketException catch (_) {
+                    deleted = await deleteStudySubjectAndClearLocalData(
+                      subject: widget.subject!,
+                      synchronizeBeforeDelete: synchronizeBeforeSubjectDeletion,
+                      confirmDiscardUnsyncedData: () =>
+                          confirmDiscardUnsyncedStudyData(context),
+                      deleteRemoteSubject: () => widget.subject!.softDelete(),
+                      clearLocalIdentityRefs: deleteActiveStudyReference,
+                      onLocalDataCleared: () {
+                        if (!context.mounted) return;
+                        // Clear the in-memory active study state so the
+                        // participant can legitimately enroll in a new study.
+                        context.read<AppState>().clearAccountState();
+                      },
+                    );
+                  } catch (error) {
+                    final status = connectionStatusFromError(error);
+                    if (status != null) {
+                      appConnectionStatusController.setStatus(status);
+                    }
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            status != null
+                                ? AppLocalizations.of(context)!
+                                      .no_internet_connection
+                                : AppLocalizations.of(context)!
+                                      .error_occurred_with_message('$error'),
+                          ),
+                        ),
+                      );
+                    }
+                    return;
+                  }
+                  if (!deleted) {
+                    // Final sync before delete didn't complete — local data
+                    // is untouched and sync has resumed; don't delete.
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -536,17 +593,8 @@ class _OptOutAlertDialogState() extends State<OptOutAlertDialog> {
                     }
                     return;
                   }
-                  await deleteActiveStudyReference();
-                  await FitbitHandler.deleteFitbitCredentials(
-                    widget.subject!.studyId,
-                  );
                   if (context.mounted) await cancelNotifications(context);
-                  if (context.mounted) {
-                    // Clear the in-memory active study state so the
-                    // participant can legitimately enroll in a new study.
-                    context.read<AppState>().clearAccountState();
-                    context.pop(true);
-                  }
+                  if (context.mounted) context.pop(true);
                 }
               : null,
         ),
@@ -610,10 +658,56 @@ class _DeleteAlertDialogState() extends State<DeleteAlertDialog> {
           ),
           onPressed: acknowledged
               ? () async {
+                  bool deleted;
                   try {
-                    await widget.subject!.delete();
-                  } on SocketException catch (_) {
-                    // Device is offline — preserve local data so nothing is lost
+                    deleted = await deleteStudySubjectAndClearLocalData(
+                      subject: widget.subject!,
+                      synchronizeBeforeDelete: synchronizeBeforeSubjectDeletion,
+                      confirmDiscardUnsyncedData: () =>
+                          confirmDiscardUnsyncedStudyData(context),
+                      deleteRemoteSubject: () async {
+                        try {
+                          await widget.subject!.delete();
+                        } on PostgrestException catch (e) {
+                          // PGRST116: subject already gone from the DB —
+                          // treat as success and proceed with local cleanup.
+                          if (e.code != 'PGRST116') rethrow;
+                        }
+                      },
+                      clearLocalIdentityRefs: () async {
+                        RestoreAccountService.clearCache();
+                        await deleteLocalData();
+                      },
+                      onLocalDataCleared: () {
+                        if (!context.mounted) return;
+                        // Clear the in-memory active study state so the
+                        // participant can legitimately enroll in a new study.
+                        context.read<AppState>().clearAccountState();
+                      },
+                    );
+                  } catch (error) {
+                    final status = connectionStatusFromError(error);
+                    if (status != null) {
+                      appConnectionStatusController.setStatus(status);
+                    }
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            status != null
+                                ? AppLocalizations.of(context)!
+                                      .no_internet_connection
+                                : AppLocalizations.of(context)!
+                                      .error_occurred_with_message('$error'),
+                          ),
+                        ),
+                      );
+                    }
+                    return;
+                  }
+                  if (!deleted) {
+                    // Final sync before delete didn't complete — local data
+                    // is untouched and sync has resumed; don't delete.
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -625,36 +719,9 @@ class _DeleteAlertDialogState() extends State<DeleteAlertDialog> {
                       );
                     }
                     return;
-                  } on PostgrestException catch (e) {
-                    if (e.code != 'PGRST116') {
-                      // Unexpected DB error — don't clear local data
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              AppLocalizations.of(context)!
-                                  .error_occurred_with_message(e.message),
-                            ),
-                          ),
-                        );
-                      }
-                      return;
-                    }
-                    // PGRST116: subject already deleted from DB — proceed with local cleanup
                   }
-                  // Reached when delete succeeded or subject was already gone from DB
-                  RestoreAccountService.clearCache();
-                  await deleteLocalData();
-                  await FitbitHandler.deleteFitbitCredentials(
-                    widget.subject!.studyId,
-                  );
                   if (context.mounted) await cancelNotifications(context);
-                  if (context.mounted) {
-                    // Clear the in-memory active study state so the
-                    // participant can legitimately enroll in a new study.
-                    context.read<AppState>().clearAccountState();
-                    context.pop(true);
-                  }
+                  if (context.mounted) context.pop(true);
                 }
               : null,
         ),

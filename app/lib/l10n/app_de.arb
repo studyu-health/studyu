@@ -531,6 +531,11 @@
   "review_restored_answer_to_continue": "Überprüfe die wiederhergestellte Antwort, um fortzufahren.",
   "complete_task": "Aufgabe abschließen",
   "no_internet_connection": "Keine Internetverbindung. Bitte versuche es erneut, wenn du online bist.",
+  "leave_unsynced_title": "Ohne Synchronisierung verlassen?",
+  "leave_unsynced_message": "Einige Antworten konnten nicht synchronisiert werden. Wenn du fortfährst, werden alle nur auf diesem Gerät gespeicherten Antworten endgültig verworfen. Bereits an StudyU gesendete Antworten werden gemäß deiner gewählten Option behalten oder gelöscht.",
+  "leave_unsynced_confirm": "Ohne Synchronisierung fortfahren",
+  "connection_banner_device_offline": "Du bist offline. Zwischengespeicherte Studiendaten werden verwendet, Änderungen werden synchronisiert, sobald du wieder online bist.",
+  "connection_banner_backend_unavailable": "Der StudyU-Dienst ist derzeit nicht erreichbar. Zwischengespeicherte Studiendaten bleiben verfügbar, Änderungen werden später synchronisiert.",
   "error_occurred_with_message": "Ein Fehler ist aufgetreten: {message}",
   "@error_occurred_with_message": {
     "placeholders": {
@@ -636,5 +641,8 @@
   "system": "System",
   "time_format": "Zeitformat",
   "time_format_12_hour": "12-Stunden (2:30 PM)",
-  "time_format_24_hour": "24-Stunden (14:30)"
+  "time_format_24_hour": "24-Stunden (14:30)",
+  "fitbit_authorization_failed": "Die Fitbit-Autorisierung ist fehlgeschlagen. Bitte versuche es erneut.",
+  "fitbit_queue_full": "Zu viele Fitbit-Aufgaben warten auf die Synchronisierung. Synchronisiere sie, bevor du eine weitere Aufgabe abschließt.",
+  "fitbit_data_deferred": "Fitbit-Daten werden synchronisiert, sobald eine Verbindung verfügbar ist."
 }

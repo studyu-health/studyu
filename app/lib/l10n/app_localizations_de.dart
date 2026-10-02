@@ -1468,6 +1468,24 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine Internetverbindung. Bitte versuche es erneut, wenn du online bist.';
 
   @override
+  String get leave_unsynced_title => 'Ohne Synchronisierung verlassen?';
+
+  @override
+  String get leave_unsynced_message =>
+      'Einige Antworten konnten nicht synchronisiert werden. Wenn du fortfährst, werden alle nur auf diesem Gerät gespeicherten Antworten endgültig verworfen. Bereits an StudyU gesendete Antworten werden gemäß deiner gewählten Option behalten oder gelöscht.';
+
+  @override
+  String get leave_unsynced_confirm => 'Ohne Synchronisierung fortfahren';
+
+  @override
+  String get connection_banner_device_offline =>
+      'Du bist offline. Zwischengespeicherte Studiendaten werden verwendet, Änderungen werden synchronisiert, sobald du wieder online bist.';
+
+  @override
+  String get connection_banner_backend_unavailable =>
+      'Der StudyU-Dienst ist derzeit nicht erreichbar. Zwischengespeicherte Studiendaten bleiben verfügbar, Änderungen werden später synchronisiert.';
+
+  @override
   String error_occurred_with_message(String message) {
     return 'Ein Fehler ist aufgetreten: $message';
   }
@@ -1764,4 +1782,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get time_format_24_hour => '24-Stunden (14:30)';
+
+  @override
+  String get fitbit_authorization_failed =>
+      'Die Fitbit-Autorisierung ist fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get fitbit_queue_full =>
+      'Zu viele Fitbit-Aufgaben warten auf die Synchronisierung. Synchronisiere sie, bevor du eine weitere Aufgabe abschließt.';
+
+  @override
+  String get fitbit_data_deferred =>
+      'Fitbit-Daten werden synchronisiert, sobald eine Verbindung verfügbar ist.';
 }

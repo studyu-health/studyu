@@ -15,10 +15,13 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/app_onboarding/study_unavailable_screen.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
 import 'package:studyu_app/theme.dart' as app_theme;
+import 'package:studyu_app/util/active_subject_sync_controller.dart';
+import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/debug_screen.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @visibleForTesting
@@ -407,13 +410,41 @@ class _DashboardScreenState()
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.fast_forward_rounded),
                 onPressed: () async {
+                  await ActiveSubjectSyncController.instance.pauseAndWait();
+                  await Cache.pauseAndWaitSynchronization();
                   try {
+                    final pending = await Cache.loadDeferredFitbitRequests();
+                    if (pending.any(
+                      (request) => request.subjectId == subject!.id,
+                    )) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations.of(context)!
+                                  .fitbit_data_deferred,
+                            ),
+                          ),
+                        );
+                      }
+                      return;
+                    }
                     await subject!.setStartDateBackBy(days: 1);
+                    await Cache.storeSubject(subject, replaceProgress: true);
+                    if (!mounted) return;
                     setState(() {
                       scheduleToday = subject!.scheduleFor(DateTime.now());
                     });
                     unawaited(_startDashboardShowcaseIfNeeded());
-                  } on SocketException catch (_) {}
+                  } on SocketException catch (error) {
+                    final status = connectionStatusFromError(error);
+                    if (status != null) {
+                      appConnectionStatusController.setStatus(status);
+                    }
+                  } finally {
+                    Cache.resumeSynchronization();
+                    ActiveSubjectSyncController.instance.resume();
+                  }
                 },
                 label: Text(AppLocalizations.of(context)!.next_day),
                 style: ElevatedButton.styleFrom(

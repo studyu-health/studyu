@@ -433,7 +433,7 @@ class _LoadingScreenState() extends State<LoadingScreen> {
     }
     if (!mounted) return;
     if (subject != null) {
-      subject = await Cache.synchronize(subject);
+      subject = (await Cache.synchronize(subject)).subject;
       if (!mounted) return;
       if (!isStudyAvailableForTesting(subject.study)) {
         context.go('/${RouteNames.studyUnavailable}');
@@ -507,6 +507,10 @@ class _LoadingScreenState() extends State<LoadingScreen> {
         "Could not retrieve subject, maybe JWT is expired, try logging in: $e",
       );
     } catch (exception) {
+      final status = connectionStatusFromError(exception);
+      if (status != null) {
+        appConnectionStatusController.setStatus(status);
+      }
       StudyULogger.warning(
         "Could not retrieve subject, maybe JWT is expired, try logging in: $exception",
       );
@@ -522,6 +526,10 @@ class _LoadingScreenState() extends State<LoadingScreen> {
       StudyULogger.warning("Invalid credentials during re-login: $e");
       throw const SubjectDeletedException();
     } catch (exception) {
+      final status = connectionStatusFromError(exception);
+      if (status != null) {
+        appConnectionStatusController.setStatus(status);
+      }
       StudyULogger.warning(
         "Could not login and retrieve the study subject: $exception",
       );

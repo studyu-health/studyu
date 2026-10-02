@@ -1450,6 +1450,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'No internet connection. Please try again when online.';
 
   @override
+  String get leave_unsynced_title => 'Leave without syncing?';
+
+  @override
+  String get leave_unsynced_message =>
+      'Some answers could not sync. Continuing will permanently discard all answers saved only on this device. Answers already sent to StudyU follow your selected leave or delete option.';
+
+  @override
+  String get leave_unsynced_confirm => 'Continue without syncing';
+
+  @override
+  String get connection_banner_device_offline =>
+      'You are offline. Cached study data is in use and changes will sync when you are online again.';
+
+  @override
+  String get connection_banner_backend_unavailable =>
+      'StudyU service is currently unavailable. Cached study data remains available and changes will sync later.';
+
+  @override
   String error_occurred_with_message(String message) {
     return 'An error occurred: $message';
   }
@@ -1741,4 +1759,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get time_format_24_hour => '24-hour (14:30)';
+
+  @override
+  String get fitbit_authorization_failed =>
+      'Fitbit authorization failed. Please try again.';
+
+  @override
+  String get fitbit_queue_full =>
+      'Too many Fitbit tasks are waiting to sync. Sync pending tasks before completing another task.';
+
+  @override
+  String get fitbit_data_deferred =>
+      'Fitbit data will sync when a connection is available.';
 }

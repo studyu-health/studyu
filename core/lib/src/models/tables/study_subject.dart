@@ -313,7 +313,18 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
 
   Map<String, dynamic> toFullJson({Map<String, dynamic>? partialJson}) {
     final json = partialJson ?? toJson();
-    json['study'] = study.toJson();
+    final studyJson = study.toJson();
+    // study.fitbitCredentials is excluded from Study's own toJson()/fromJson()
+    // (it comes from a joined-query column, not a real `study` table column,
+    // and must never be sent back in a study.save() payload) — but it still
+    // needs to survive this cache round trip, so it's added/read here using
+    // the same `study_fitbit_credentials` key Study.fromJson already expects
+    // from a live joined query.
+    final fitbitCredentials = study.fitbitCredentials;
+    if (fitbitCredentials != null) {
+      studyJson['study_fitbit_credentials'] = fitbitCredentials.toJson();
+    }
+    json['study'] = studyJson;
     json['subject_progress'] = progress.map((p) => p.toJson()).toList();
     return json;
   }

@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:studyu_app/util/active_subject_sync_controller.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/notifications.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 /// Phases of the normal (non-preview) study enrollment flow, in guarded
 /// progression order.
@@ -24,11 +28,62 @@ enum StudyOnboardingPhase() {
 class AppState() with ChangeNotifier {
   Study? selectedStudy;
   List<Intervention>? selectedInterventions;
-  StudySubject? activeSubject;
+  StudySubject? _activeSubject;
+  StreamSubscription<StudySubject>? _cacheSubscription;
+  bool _cacheEnabled = false;
   String? inviteCode;
   List<String>? preselectedInterventionIds;
   StudyNotifications? studyNotifications;
   bool isPreview = false;
+
+  late final VoidCallback _connectionStatusListener;
+  AppConnectionStatus _connectionStatus = appConnectionStatusController.status;
+
+  this {
+    _connectionStatusListener = () {
+      _applyConnectionStatus(appConnectionStatusController.status);
+    };
+    appConnectionStatusController.addListener(_connectionStatusListener);
+  }
+
+  AppConnectionStatus get connectionStatus => _connectionStatus;
+
+  /// `activeSubject` is a plain field with no observable stream (see
+  /// spec.md Decision 2), so the sync controller is notified explicitly
+  /// here on every reassignment, however it happens, rather than requiring
+  /// every call site across the app to remember to do so itself.
+  StudySubject? get activeSubject => _activeSubject;
+
+  set activeSubject(StudySubject? subject) {
+    _replaceActiveSubject(subject);
+    ActiveSubjectSyncController.instance.onSynchronized = (updated) {
+      if (_activeSubject?.id != updated.id) return;
+      _replaceActiveSubject(updated);
+      notifyListeners();
+    };
+    ActiveSubjectSyncController.instance.onActiveSubjectChanged(subject);
+  }
+
+  void setConnectionStatus(AppConnectionStatus status) {
+    appConnectionStatusController.setStatus(status);
+  }
+
+  void _applyConnectionStatus(AppConnectionStatus status) {
+    if (_connectionStatus == status) return;
+    _connectionStatus = status;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    appConnectionStatusController.removeListener(_connectionStatusListener);
+    unawaited(_cacheSubscription?.cancel());
+    // Tears down any retry timer the sync controller armed for this
+    // AppState's subject — most relevant in tests, where each AppState's
+    // lifetime is much shorter than the controller singleton's.
+    ActiveSubjectSyncController.instance.onActiveSubjectChanged(null);
+    super.dispose();
+  }
 
   /// Transient phase of the normal (non-preview) enrollment flow.
   ///
@@ -101,6 +156,7 @@ class AppState() with ChangeNotifier {
   /// Clears all state that belongs to the signed-out participant.
   void clearAccountState() {
     activeSubject = null;
+    ActiveSubjectSyncController.instance.onAccountCleared();
     selectedStudy = null;
     selectedInterventions = null;
     inviteCode = null;
@@ -124,10 +180,30 @@ class AppState() with ChangeNotifier {
     initCache();
   }
 
-  void initCache() {
-    activeSubject!.onSave.listen((StudySubject subject) async {
-      await Cache.storeSubject(subject);
+  void _replaceActiveSubject(StudySubject? subject) {
+    if (identical(_activeSubject, subject)) return;
+    unawaited(_cacheSubscription?.cancel());
+    _cacheSubscription = null;
+    _activeSubject = subject;
+    if (_cacheEnabled) _subscribeToCache();
+  }
+
+  void _subscribeToCache() {
+    _cacheSubscription ??= activeSubject?.onSave.listen((subject) async {
+      if (subject.id == activeSubject?.id) {
+        try {
+          await Cache.storeSubject(subject);
+        } catch (error) {
+          StudyULogger.warning('Failed to cache saved subject: $error');
+          ActiveSubjectSyncController.instance.markSynchronizationPending();
+        }
+      }
     });
+  }
+
+  void initCache() {
+    _cacheEnabled = true;
+    _subscribeToCache();
   }
 
   void updateStudy(Study study) {

@@ -30,7 +30,25 @@ class _FitbitQuestionWidgetState() extends State<FitbitQuestionWidget> {
     value = [];
   }
 
+  void _deferFitbitData() {
+    if (!mounted) return;
+    setState(() {
+      value = [];
+      _isLoading = false;
+    });
+    widget.onDone(widget.question.constructAnswer(value));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.fitbit_data_deferred),
+      ),
+    );
+  }
+
   Future<void> _syncFitbitData() async {
+    if (appConnectionStatusController.status != AppConnectionStatus.healthy) {
+      _deferFitbitData();
+      return;
+    }
     try {
       setState(() {
         _isLoading = true;
@@ -43,6 +61,7 @@ class _FitbitQuestionWidgetState() extends State<FitbitQuestionWidget> {
         context.read<AppState>().activeSubject!,
       );
 
+      if (!mounted) return;
       setState(() {
         value = data;
         _isLoading = false;
@@ -61,6 +80,13 @@ class _FitbitQuestionWidgetState() extends State<FitbitQuestionWidget> {
 
       widget.onDone(widget.question.constructAnswer(value));
     } catch (e) {
+      final status = connectionStatusFromError(e);
+      if (status != null) {
+        appConnectionStatusController.setStatus(status);
+        _deferFitbitData();
+        return;
+      }
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });

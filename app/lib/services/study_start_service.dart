@@ -2,23 +2,108 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/app_router.dart';
+import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/services/pending_deep_link_service.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/dashboard_showcase.dart';
+import 'package:studyu_app/util/fitbit_handler.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Creates the study subject on the backend and navigates to the next screen
-/// (recovery phrase or dashboard).
-///
-/// Callers own the loading UI: show a spinner while this runs and treat a
-/// `false` result as failure. On success this method navigates away, so the
-/// calling screen is disposed.
+sealed class StudyStartResult();
+
+class StudyStartSuccess(final StudySubject subject) extends StudyStartResult;
+class StudyStartFitbitAuthFailed() extends StudyStartResult;
+class StudyStartNetworkFailed(final Object error) extends StudyStartResult;
+class StudyStartGenericFailed(final Object error) extends StudyStartResult;
+
+String studyStartFailureMessage(
+  StudyStartResult result,
+  AppLocalizations l10n,
+) => switch (result) {
+  StudyStartFitbitAuthFailed() => l10n.fitbit_authorization_failed,
+  StudyStartNetworkFailed() => l10n.no_internet_connection,
+  _ => l10n.error,
+};
+
 class const StudyStartService._() {
-  /// Returns `true` when the study was started and navigation happened;
-  /// `false` when the subject could not be created.
-  static Future<bool> startStudy(
+  @visibleForTesting
+  static Future<StudySubject> Function(StudySubject subject)?
+  debugSaveSubjectOverride;
+  @visibleForTesting
+  static Future<StudySubject?> Function(String id)? debugFetchSubjectOverride;
+  @visibleForTesting
+  static Future<StudyFitbitCredentials?> Function(StudySubject subject)?
+  debugLoadFitbitConfigurationOverride;
+
+  static Future<StudyFitbitCredentials?> _loadFitbitConfiguration(
+    StudySubject subject,
+  ) async {
+    final response = await Supabase.instance.client.rpc(
+      'get_enrollment_fitbit_configuration',
+      params: {
+        'p_study_id': subject.studyId,
+        'p_invite_code': subject.inviteCode,
+      },
+    );
+    return response == null
+        ? null
+        : StudyFitbitCredentials.fromJson(response as Map<String, dynamic>);
+  }
+
+  static StudyStartResult _failure(Object error) {
+    final status = connectionStatusFromError(error);
+    if (status != null) {
+      appConnectionStatusController.setStatus(status);
+      return StudyStartNetworkFailed(error);
+    }
+    return StudyStartGenericFailed(error);
+  }
+
+  static Future<StudyStartResult> createSubject(
+    StudySubject subject, {
+    bool requireFitbitAuthorization = true,
+  }) async {
+    final previousStart = subject.startedAt;
+    try {
+      if (requireFitbitAuthorization &&
+          FitbitHandler.requiredTypesForStudy(subject.study).isNotEmpty &&
+          subject.study.fitbitCredentials == null) {
+        subject.study.fitbitCredentials =
+            await (debugLoadFitbitConfigurationOverride ??
+                _loadFitbitConfiguration)(subject);
+        if (subject.study.fitbitCredentials == null) {
+          return StudyStartFitbitAuthFailed();
+        }
+      }
+      if (requireFitbitAuthorization &&
+          !await FitbitHandler.authorizeForOfflineParticipation(
+            subject.study,
+          )) {
+        return StudyStartFitbitAuthFailed();
+      }
+      final now = DateTime.now();
+      subject.startedAt = DateTime(now.year, now.month, now.day + 1).toUtc();
+      final saved = await (debugSaveSubjectOverride ?? (s) => s.save())(
+        subject,
+      );
+      final updated = await (debugFetchSubjectOverride ?? _fetchRemoteSubject)(
+        saved.id,
+      );
+      if (updated == null) {
+        throw StateError('Could not fetch the created subject.');
+      }
+      appConnectionStatusController.setStatus(AppConnectionStatus.healthy);
+      return StudyStartSuccess(updated);
+    } catch (error) {
+      subject.startedAt = previousStart;
+      return _failure(error);
+    }
+  }
+
+  static Future<StudyStartResult> startStudy(
     BuildContext context,
     StudySubject subject,
   ) async {
@@ -35,30 +120,41 @@ class const StudyStartService._() {
       if (context.mounted) {
         context.go(onboardingStepRoute(state.effectiveOnboardingPhase));
       }
-      return false;
+      return StudyStartGenericFailed(
+        StateError('Study start was interrupted.'),
+      );
     }
 
     try {
-      // Start study at the next day
-      final now = DateTime.now();
-      subject.startedAt = DateTime(now.year, now.month, now.day + 1).toUtc();
-      final saved = await subject.save();
-      final updated = await _fetchRemoteSubject(saved.id);
-      if (updated == null) {
-        throw StateError('Could not re-fetch subject ${saved.id} after saving');
+      final result = await createSubject(
+        subject,
+        requireFitbitAuthorization: !state.isPreview,
+      );
+      if (result is! StudyStartSuccess) return result;
+      final updated = result.subject;
+      if (!context.mounted) {
+        return StudyStartGenericFailed(
+          StateError('Study start was interrupted.'),
+        );
       }
-      if (!context.mounted) return false;
-      final state = context.read<AppState>();
       state.activeSubject = updated;
       state.init(context);
       await Cache.storeSubject(state.activeSubject);
       await storeActiveSubjectId(updated.id);
       await PendingDeepLinkService.clearStorage();
       state.clearPendingDeepLink();
-      if (!context.mounted) return false;
+      if (!context.mounted) {
+        return StudyStartGenericFailed(
+          StateError('Study start was interrupted.'),
+        );
+      }
       if (state.showParticipantRecovery) {
         await RecoveryPhraseStorage.markPending(updated.id);
-        if (!context.mounted) return false;
+        if (!context.mounted) {
+          return StudyStartGenericFailed(
+            StateError('Study start was interrupted.'),
+          );
+        }
         context.goNamed(
           RouteNames.recoveryPhrase,
           queryParameters: {'next': RouteNames.dashboard},
@@ -66,10 +162,10 @@ class const StudyStartService._() {
       } else {
         context.goNamed(RouteNames.dashboard);
       }
-      return true;
+      return StudyStartSuccess(updated);
     } catch (e) {
       StudyULogger.fatal('Failed creating subject: $e');
-      return false;
+      return _failure(e);
     }
   }
 

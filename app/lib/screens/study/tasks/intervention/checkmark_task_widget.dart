@@ -34,7 +34,9 @@ class _CheckmarkTaskWidgetState() extends State<CheckmarkTaskWidget> {
           _isLoading = true;
           _lastClickTime = DateTime.now();
         });
-        await handleTaskCompletion(context, (StudySubject? subject) async {
+        final saved = await handleTaskCompletion(context, (
+          StudySubject? subject,
+        ) async {
           try {
             await subject!.addResult<bool>(
               taskId: widget.task!.id,
@@ -55,7 +57,7 @@ class _CheckmarkTaskWidgetState() extends State<CheckmarkTaskWidget> {
         setState(() {
           _isLoading = false;
         });
-        if (!context.mounted) return;
+        if (!context.mounted || !saved) return;
         context.pop(true);
       },
       icon: _isLoading

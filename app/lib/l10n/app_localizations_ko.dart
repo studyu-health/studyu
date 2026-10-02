@@ -1406,6 +1406,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get no_internet_connection => '인터넷에 연결되어 있지 않습니다. 온라인 상태에서 다시 시도하십시오.';
 
   @override
+  String get leave_unsynced_title => '동기화하지 않고 나가시겠습니까?';
+
+  @override
+  String get leave_unsynced_message =>
+      '일부 답변을 동기화하지 못했습니다. 계속하면 이 기기에만 저장된 모든 답변이 영구적으로 삭제됩니다. StudyU에 이미 전송된 답변은 선택한 참여 종료 또는 삭제 옵션에 따라 처리됩니다.';
+
+  @override
+  String get leave_unsynced_confirm => '동기화하지 않고 계속';
+
+  @override
+  String get connection_banner_device_offline =>
+      '오프라인 상태입니다. 캐시된 연구 데이터가 사용되며, 다시 온라인 상태가 되면 변경 사항이 동기화됩니다.';
+
+  @override
+  String get connection_banner_backend_unavailable =>
+      'StudyU 서비스를 현재 사용할 수 없습니다. 캐시된 연구 데이터는 계속 사용할 수 있으며, 변경 사항은 나중에 동기화됩니다.';
+
+  @override
   String error_occurred_with_message(String message) {
     return '오류가 발생했습니다: $message';
   }
@@ -1679,4 +1697,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get time_format_24_hour => '24시간제 (14:30)';
+
+  @override
+  String get fitbit_authorization_failed => 'Fitbit 인증에 실패했습니다. 다시 시도해 주세요.';
+
+  @override
+  String get fitbit_queue_full =>
+      '동기화를 기다리는 Fitbit 작업이 너무 많습니다. 다른 작업을 완료하기 전에 대기 중인 작업을 동기화하세요.';
+
+  @override
+  String get fitbit_data_deferred => '연결이 가능해지면 Fitbit 데이터가 동기화됩니다.';
 }

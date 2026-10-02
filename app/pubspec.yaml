@@ -32,11 +32,13 @@ dependencies:
   flutter_native_splash: ^2.4.8
   flutter_svg: ^2.3.0
   flutter_timezone: ^5.1.0
+  flutter_web_auth_2: ^4.1.0
   flutter_web_plugins:
     sdk: flutter
   flutter_widget_from_html: ^0.17.4
   gauge_indicator: ^0.6.0
   go_router: ^18.0.1
+  http: ^1.6.0
   intersperse: ^2.0.0
   intl: ^0.20.3
   introduction_screen: ^5.0.1
@@ -72,6 +74,7 @@ dependencies:
 dev_dependencies:
   # flutter_launcher_icons: ^0.14.4
   # Deprecated? icons_launcher may be an alternative.
+  fake_async: ^1.3.3
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter

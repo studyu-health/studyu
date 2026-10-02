@@ -2731,6 +2731,36 @@ abstract class AppLocalizations {
   /// **'No internet connection. Please try again when online.'**
   String get no_internet_connection;
 
+  /// No description provided for @leave_unsynced_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave without syncing?'**
+  String get leave_unsynced_title;
+
+  /// No description provided for @leave_unsynced_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Some answers could not sync. Continuing will permanently discard all answers saved only on this device. Answers already sent to StudyU follow your selected leave or delete option.'**
+  String get leave_unsynced_message;
+
+  /// No description provided for @leave_unsynced_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without syncing'**
+  String get leave_unsynced_confirm;
+
+  /// No description provided for @connection_banner_device_offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Cached study data is in use and changes will sync when you are online again.'**
+  String get connection_banner_device_offline;
+
+  /// No description provided for @connection_banner_backend_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyU service is currently unavailable. Cached study data remains available and changes will sync later.'**
+  String get connection_banner_backend_unavailable;
+
   /// No description provided for @error_occurred_with_message.
   ///
   /// In en, this message translates to:
@@ -3228,6 +3258,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'24-hour (14:30)'**
   String get time_format_24_hour;
+
+  /// No description provided for @fitbit_authorization_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitbit authorization failed. Please try again.'**
+  String get fitbit_authorization_failed;
+
+  /// No description provided for @fitbit_queue_full.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many Fitbit tasks are waiting to sync. Sync pending tasks before completing another task.'**
+  String get fitbit_queue_full;
+
+  /// No description provided for @fitbit_data_deferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitbit data will sync when a connection is available.'**
+  String get fitbit_data_deferred;
 }
 
 class _AppLocalizationsDelegate

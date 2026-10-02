@@ -545,6 +545,11 @@
   "review_restored_answer_to_continue": "Review the restored answer to continue.",
   "complete_task": "Complete task",
   "no_internet_connection": "No internet connection. Please try again when online.",
+  "leave_unsynced_title": "Leave without syncing?",
+  "leave_unsynced_message": "Some answers could not sync. Continuing will permanently discard all answers saved only on this device. Answers already sent to StudyU follow your selected leave or delete option.",
+  "leave_unsynced_confirm": "Continue without syncing",
+  "connection_banner_device_offline": "You are offline. Cached study data is in use and changes will sync when you are online again.",
+  "connection_banner_backend_unavailable": "StudyU service is currently unavailable. Cached study data remains available and changes will sync later.",
   "error_occurred_with_message": "An error occurred: {message}",
   "@error_occurred_with_message": {
     "placeholders": {
@@ -650,5 +655,8 @@
   "system": "System",
   "time_format": "Time format",
   "time_format_12_hour": "12-hour (2:30 PM)",
-  "time_format_24_hour": "24-hour (14:30)"
+  "time_format_24_hour": "24-hour (14:30)",
+  "fitbit_authorization_failed": "Fitbit authorization failed. Please try again.",
+  "fitbit_queue_full": "Too many Fitbit tasks are waiting to sync. Sync pending tasks before completing another task.",
+  "fitbit_data_deferred": "Fitbit data will sync when a connection is available."
 }

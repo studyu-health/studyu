@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:studyu_core/core.dart';
@@ -51,6 +52,20 @@ class TemporaryStorageHandler(final String _studyId, final String _userId) {
     final uploadDirectory = await _getMultimodalUploadDirectory();
     final uploadFile = File(path.join(uploadDirectory.path, [blobId].join()));
     await stagingFile.rename(uploadFile.path);
+  }
+
+  static Future<void> deletePendingBlobFiles(
+    String studyId,
+    String userId,
+  ) async {
+    if (kIsWeb) return;
+    final directory = await _getMultimodalUploadDirectory();
+    final prefix = 'user-id_${userId}_study-id_${studyId}_';
+    await for (final file in directory.list(followLinks: false)) {
+      if (file is File && path.basename(file.path).startsWith(prefix)) {
+        await file.delete();
+      }
+    }
   }
 
   static Future<List<FutureBlobFile>> getFutureBlobFiles() async {

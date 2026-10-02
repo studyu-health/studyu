@@ -46,11 +46,15 @@ class _ConsentScreenState() extends State<ConsentScreen> {
   Future<void> _acceptConsent() async {
     setState(() => _isStarting = true);
     final started = await StudyStartService.startStudy(context, subject!);
-    if (started || !mounted) return;
+    if (started is StudyStartSuccess || !mounted) return;
     setState(() => _isStarting = false);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.error)),
+      SnackBar(
+        content: Text(
+          studyStartFailureMessage(started, AppLocalizations.of(context)!),
+        ),
+      ),
     );
   }
 

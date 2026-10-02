@@ -32,11 +32,15 @@ class _JourneyOverviewScreen() extends State<JourneyOverviewScreen> {
   Future<void> _startStudy(BuildContext context) async {
     setState(() => _isStartingStudy = true);
     final started = await StudyStartService.startStudy(context, subject!);
-    if (started || !mounted) return;
+    if (started is StudyStartSuccess || !mounted) return;
     setState(() => _isStartingStudy = false);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.error)),
+      SnackBar(
+        content: Text(
+          studyStartFailureMessage(started, AppLocalizations.of(context)!),
+        ),
+      ),
     );
   }
 
