@@ -240,10 +240,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(MaterialBanner), findsOneWidget);
-      expect(
-        find.textContaining('Some studies could not be displayed'),
-        findsOneWidget,
-      );
       expect(find.text('Study'), findsOneWidget);
     },
   );

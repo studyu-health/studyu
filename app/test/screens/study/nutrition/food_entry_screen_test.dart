@@ -169,6 +169,8 @@ class _TrackingTemplateRepository() extends FakeNutritionFoodRepository {
 }
 
 void main() {
+  final l10n = lookupAppLocalizations(const Locale('en'));
+
   testWidgets('shows database search outside the search flow', (tester) async {
     await openFoodEntry(tester);
 
@@ -228,7 +230,7 @@ void main() {
       expect(tester.widget<CheckboxListTile>(saveToMyItems).value, isTrue);
       expect(find.byTooltip('Search Food Database'), findsNothing);
 
-      await tester.enterText(inputWithLabel('Food Name'), 'Historical soup');
+      await tester.enterText(inputWithLabel(l10n.food_name), 'Historical soup');
       await tester.tap(
         find.widgetWithText(FilledButton, 'Save and add to Dinner'),
       );
@@ -274,7 +276,7 @@ void main() {
         isFalse,
       );
 
-      await tester.enterText(inputWithLabel('Food Name'), 'One-off soup');
+      await tester.enterText(inputWithLabel(l10n.food_name), 'One-off soup');
       await tester.tap(
         find.widgetWithText(FilledButton, 'Save and add to Dinner'),
       );
@@ -372,7 +374,7 @@ void main() {
       onResult: (value) => result = value,
     );
 
-    await tester.enterText(inputWithLabel('Food Name'), 'Edited product');
+    await tester.enterText(inputWithLabel(l10n.food_name), 'Edited product');
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
 
@@ -458,7 +460,7 @@ void main() {
 
     expect(
       tester
-          .widget<InputDecorator>(decoratorWithLabel('Food Name'))
+          .widget<InputDecorator>(decoratorWithLabel(l10n.food_name))
           .decoration
           .filled,
       isNot(true),

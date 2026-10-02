@@ -28,8 +28,7 @@ class AppState() with ChangeNotifier {
   String? inviteCode;
   List<String>? preselectedInterventionIds;
   StudyNotifications? studyNotifications;
-  // Temporary for PR #893; remove before merging into #853/dev.
-  bool isPreview = true;
+  bool isPreview = false;
 
   /// Transient phase of the normal (non-preview) enrollment flow.
   ///
@@ -118,7 +117,8 @@ class AppState() with ChangeNotifier {
   /// We always track the participant's progress except when the study is
   /// being viewed in test/preview mode while already launched (to avoid
   /// mixing results from test users with actual participants)
-  bool get trackParticipantProgress => !(isPreview && selectedStudy!.isRunning);
+  bool get trackParticipantProgress =>
+      !isPreview || selectedStudy?.isRunning == false;
 
   void init(BuildContext context) {
     scheduleNotifications(context);

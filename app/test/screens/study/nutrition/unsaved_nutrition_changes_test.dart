@@ -25,6 +25,8 @@ Finder field(String label) => find
     .first;
 
 void main() {
+  final l10n = lookupAppLocalizations(const Locale('en'));
+
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets('food draft asks before leaving', (tester) async {
@@ -45,7 +47,7 @@ void main() {
     );
     await tester.tap(find.text('Open food'));
     await tester.pumpAndSettle();
-    await tester.enterText(field('Food Name *'), 'Apple');
+    await tester.enterText(field(l10n.food_name), 'Apple');
 
     await tester.pageBack();
     await tester.pumpAndSettle();
@@ -78,7 +80,7 @@ void main() {
     );
     await tester.tap(find.text('Open meal creator'));
     await tester.pumpAndSettle();
-    await tester.enterText(field('Meal Name *'), 'Lunch bowl');
+    await tester.enterText(field(l10n.template_name_required), 'Lunch bowl');
 
     await tester.pageBack();
     await tester.pumpAndSettle();
@@ -120,8 +122,7 @@ void main() {
     await tester.tap(find.text('Create food'));
     await tester.pumpAndSettle();
 
-    await tester.enterText(field('Food Name *'), 'Apple');
-    await tester.tap(find.byType(Checkbox));
+    await tester.enterText(field(l10n.food_name), 'Apple');
     await tester.tap(find.text('Save and add to Lunch'));
     await tester.pumpAndSettle();
 

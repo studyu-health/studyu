@@ -15,6 +15,8 @@ Widget testApp(Widget home) => MaterialApp(
 );
 
 void main() {
+  final l10n = lookupAppLocalizations(const Locale('en'));
+
   testWidgets('nutrition summary distinguishes zero and unavailable values', (
     tester,
   ) async {
@@ -228,7 +230,11 @@ void main() {
       isFalse,
     );
 
-    for (final label in ['Meal Name *', 'Servings *', 'Description']) {
+    for (final label in [
+      l10n.template_name_required,
+      l10n.nutrition_servings_required,
+      l10n.description,
+    ]) {
       final field = tester.widget<TextField>(
         find.byWidgetPredicate(
           (widget) =>
@@ -242,7 +248,11 @@ void main() {
     await tester.tap(find.byTooltip('Add food manually'));
     await tester.pumpAndSettle();
 
-    for (final label in ['Name *', 'Qty', 'Calories (kcal)']) {
+    for (final label in [
+      l10n.food_name,
+      l10n.nutrition_quantity_short,
+      l10n.nutrition_calories_kcal,
+    ]) {
       final field = tester.widget<TextField>(
         find.byWidgetPredicate(
           (widget) =>
@@ -267,12 +277,12 @@ void main() {
 
     final nameField = find.byWidgetPredicate(
       (widget) =>
-          widget is TextField && widget.decoration?.labelText == 'Name *',
+          widget is TextField && widget.decoration?.labelText == l10n.food_name,
     );
     final caloriesField = find.byWidgetPredicate(
       (widget) =>
           widget is TextField &&
-          widget.decoration?.labelText == 'Calories (kcal)',
+          widget.decoration?.labelText == l10n.nutrition_calories_kcal,
     );
     await tester.enterText(nameField, 'Test ingredient');
     await tester.enterText(caloriesField, '100');
@@ -283,7 +293,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(NutritionSummaryCard), findsOneWidget);
-    expect(find.text('Nutrition per Serving'), findsOneWidget);
+    expect(find.text(l10n.nutrition_per_serving), findsOneWidget);
     expect(find.text('1 serving'), findsOneWidget);
     expect(find.text('100 kcal'), findsOneWidget);
     expect(find.text('0 g'), findsNWidgets(3));

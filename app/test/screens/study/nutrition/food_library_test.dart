@@ -16,6 +16,8 @@ import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_core/core.dart';
 
 void main() {
+  final l10n = lookupAppLocalizations(const Locale('en'));
+
   testWidgets('local and external matches appear together', (tester) async {
     final local = _food('local', 'Local Apple');
     final repository = _ExternalLibraryRepository([_template(local)]);
@@ -186,7 +188,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(requests, 1);
 
-    await tester.tap(find.widgetWithText(FilterChip, 'Meals'));
+    await tester.tap(
+      find.widgetWithText(FilterChip, l10n.nutrition_saved_meals_filter),
+    );
     await tester.pump();
     response.complete(
       UsdaSearchResponse(
@@ -480,7 +484,7 @@ void main() {
 
     expect(find.byType(MealCreatorScreen), findsOneWidget);
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Meal Name *'),
+      find.widgetWithText(TextFormField, l10n.template_name_required),
       'Updated bowl',
     );
     await tester.tap(find.byTooltip('Edit amount'));

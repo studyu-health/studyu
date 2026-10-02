@@ -962,7 +962,7 @@ class _FoodSearchScreenContentState()
                     children: [
                       const Icon(Icons.restaurant_outlined),
                       const SizedBox(width: 12),
-                      Text(l10n.add_food_action),
+                      Flexible(child: Text(l10n.add_food_action)),
                     ],
                   ),
                 ),
@@ -974,7 +974,7 @@ class _FoodSearchScreenContentState()
                       children: [
                         const Icon(Icons.restaurant_menu_outlined),
                         const SizedBox(width: 12),
-                        Text(l10n.nutrition_create_saved_meal),
+                        Flexible(child: Text(l10n.nutrition_create_saved_meal)),
                       ],
                     ),
                   ),
