@@ -1098,10 +1098,22 @@
   "form_survey_template_added_to_study": "Zur Studie hinzugefügt",
   "form_survey_template_apply": "Hinzufügen",
   "form_survey_template_add_selected_count": "{count, plural, =0{Messungen hinzufügen} =1{1 Messung hinzufügen} other{{count} Messungen hinzufügen}}",
-  "@form_survey_template_add_selected_count": {"placeholders": {"count": {"type": "int"}}},
+  "@form_survey_template_add_selected_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "form_survey_template_adding": "Wird hinzugefügt…",
   "form_survey_template_all_days": "Alle {count} Tage",
-  "@form_survey_template_all_days": {"placeholders": {"count": {"type": "int"}}},
+  "@form_survey_template_all_days": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "form_survey_template_select_every_survey": "Jeden Fragebogen dieser Messung auswählen",
   "form_survey_template_expand_days": "Fragebogentage anzeigen",
   "form_survey_template_collapse_days": "Fragebogentage ausblenden",
@@ -1109,9 +1121,21 @@
   "form_survey_template_add_and_edit": "Hinzufügen und bearbeiten",
   "form_survey_template_single_help": "1 bearbeitbarer Fragebogen",
   "form_survey_template_multi_day_help": "{count, plural, =1{1 Fragebogen · Täglich geplant} other{{count} Fragebögen · Täglich geplant}}",
-  "@form_survey_template_multi_day_help": {"placeholders": {"count": {"type": "int"}}},
+  "@form_survey_template_multi_day_help": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "form_survey_template_day_label": "Tag {day}",
-  "@form_survey_template_day_label": {"placeholders": {"day": {"type": "int"}}},
+  "@form_survey_template_day_label": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
   "form_survey_schedule_title": "Zeitplan für das Auftreten",
   "form_survey_schedule_active": "Ein Auftretensmuster ist aktiv",
   "form_survey_schedule_inactive": "Wenn die Auftretensplanung deaktiviert ist, wird der Fragebogen an jedem Studientag angezeigt. Integrierte Fragebögen zur Verzehrhäufigkeit erscheinen standardmäßig einmal.",
@@ -1122,27 +1146,72 @@
   "form_survey_schedule_per_cycle": "Pro Zyklus",
   "form_survey_schedule_select_days": "Studientage auswählen:",
   "form_survey_schedule_day_label": "Tag {day}",
-  "@form_survey_schedule_day_label": {"placeholders": {"day": {"type": "int"}}},
+  "@form_survey_schedule_day_label": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
   "form_survey_schedule_every_n_interval_label": "Alle",
   "form_survey_schedule_days_suffix": "Tage",
   "form_survey_schedule_every_n_delay_label": "Erstes Auftreten verzögern um",
   "form_survey_schedule_every_n_delay_suffix": "Tage nach dem ersten Studientag",
   "form_survey_schedule_every_n_delay_help": "Ohne Verzögerung erfolgt das erste Auftreten am ersten Studientag. Die Studie hat {totalDays} Tage.",
-  "@form_survey_schedule_every_n_delay_help": {"placeholders": {"totalDays": {"type": "int"}}},
+  "@form_survey_schedule_every_n_delay_help": {
+    "placeholders": {
+      "totalDays": {
+        "type": "int"
+      }
+    }
+  },
   "form_survey_schedule_per_cycle_delay_label": "Auftreten in jedem Zyklus verzögern um",
   "form_survey_schedule_per_cycle_delay_suffix": "Tage nach dem ersten Tag des Zyklus",
   "form_survey_schedule_per_cycle_help": "Jeder Zyklus dauert {cycleLengthDays} Tage ({phasesPerCycle} Phasen × {phaseDuration} Tage).",
-  "@form_survey_schedule_per_cycle_help": {"placeholders": {"cycleLengthDays": {"type": "int"}, "phasesPerCycle": {"type": "int"}, "phaseDuration": {"type": "int"}}},
+  "@form_survey_schedule_per_cycle_help": {
+    "placeholders": {
+      "cycleLengthDays": {
+        "type": "int"
+      },
+      "phasesPerCycle": {
+        "type": "int"
+      },
+      "phaseDuration": {
+        "type": "int"
+      }
+    }
+  },
   "form_survey_schedule_target_cycles": "Zielzyklen (leer lassen für alle):",
   "form_survey_schedule_cycle_label": "Zyklus {cycle}",
-  "@form_survey_schedule_cycle_label": {"placeholders": {"cycle": {"type": "int"}}},
+  "@form_survey_schedule_cycle_label": {
+    "placeholders": {
+      "cycle": {
+        "type": "int"
+      }
+    }
+  },
   "form_survey_schedule_include_baseline": "Baseline-Phase einbeziehen",
   "form_survey_schedule_summary_title": "Zeitplanübersicht",
   "form_survey_schedule_summary_empty": "Keine passenden Tage",
   "form_survey_schedule_summary_days": "Erscheint an: {days}",
-  "@form_survey_schedule_summary_days": {"placeholders": {"days": {"type": "String"}}},
+  "@form_survey_schedule_summary_days": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
   "form_survey_schedule_summary_occurrences": "{count, plural, =1{{count} Auftreten an {totalDays} Studientagen} other{{count} Auftreten an {totalDays} Studientagen}}",
-  "@form_survey_schedule_summary_occurrences": {"placeholders": {"count": {"type": "int"}, "totalDays": {"type": "int"}}},
+  "@form_survey_schedule_summary_occurrences": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "totalDays": {
+        "type": "int"
+      }
+    }
+  },
   "form_measurement_type_nutrition": "Ernährungserfassung",
   "form_measurement_type_nutrition_description": "Erfasse die Nahrungs- und Getränkeaufnahme mit einem strukturierten Tagebuch oder Fotos.",
   "form_field_nutrition_instructions": "Anweisungen",
@@ -1151,8 +1220,8 @@
   "form_field_nutrition_collect_meal_context_help": "Frage Teilnehmende, wo und mit wem sie gegessen haben.",
   "form_field_nutrition_allow_meals": "Gespeicherte Mahlzeiten in Mahlzeitenprotokollen erlauben",
   "form_field_nutrition_allow_meals_help": "Teilnehmende können beim Protokollieren gespeicherte Mahlzeiten neben einzelnen Lebensmitteln hinzufügen. Beim Erstellen einer neuen gespeicherten Mahlzeit aus einem Protokoll werden bestehende gespeicherte Mahlzeiten in ihre Lebensmittelzutaten aufgelöst.",
-  "form_field_nutrition_minimum_meals_required": "Mindestanzahl an Mahlzeiten",
-  "form_field_nutrition_minimum_meals_help": "Lege fest, wie viele nicht übersprungene Mahlzeiten vor Abschluss der Aufgabe erforderlich sind.",
+  "form_field_nutrition_minimum_meals_required": "Tägliches Mahlzeitenziel",
+  "form_field_nutrition_minimum_meals_help": "Empfohlene Anzahl nicht übersprungener Mahlzeiten pro Tag. Teilnehmende können auch unter diesem Ziel ihre Einträge speichern und die Aufgabe verlassen.",
   "form_field_nutrition_minimum_meals_hint": "Optional",
   "form_field_nutrition_default_title": "Ernährungserfassung",
   "form_field_nutrition_custom_meal_types": "Benutzerdefinierte Mahlzeittypen",

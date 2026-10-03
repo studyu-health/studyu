@@ -3742,7 +3742,7 @@ abstract class AppLocalizations {
   /// No description provided for @min_meals_required.
   ///
   /// In en, this message translates to:
-  /// **'Please record at least {count} meal(s)'**
+  /// **'Daily meal target: {count} meal(s)'**
   String min_meals_required(int count);
 
   /// No description provided for @recall_details.
@@ -5782,13 +5782,13 @@ abstract class AppLocalizations {
   /// No description provided for @min_meals_not_met_title.
   ///
   /// In en, this message translates to:
-  /// **'Minimum meals not reached'**
+  /// **'Daily meal target not reached'**
   String get min_meals_not_met_title;
 
   /// No description provided for @min_meals_not_met_message.
   ///
   /// In en, this message translates to:
-  /// **'This task requires at least {count} meal(s). You have recorded fewer than required. Leave anyway?'**
+  /// **'The daily meal target is {count} meal(s). You have recorded fewer meals. Leave anyway?'**
   String min_meals_not_met_message(int count);
 
   /// No description provided for @leave_anyway.

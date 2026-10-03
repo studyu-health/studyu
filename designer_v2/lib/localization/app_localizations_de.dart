@@ -3130,11 +3130,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get form_field_nutrition_minimum_meals_required =>
-      'Mindestanzahl an Mahlzeiten';
+      'Tägliches Mahlzeitenziel';
 
   @override
   String get form_field_nutrition_minimum_meals_help =>
-      'Lege fest, wie viele nicht übersprungene Mahlzeiten vor Abschluss der Aufgabe erforderlich sind.';
+      'Empfohlene Anzahl nicht übersprungener Mahlzeiten pro Tag. Teilnehmende können auch unter diesem Ziel ihre Einträge speichern und die Aufgabe verlassen.';
 
   @override
   String get form_field_nutrition_minimum_meals_hint => 'Optional';

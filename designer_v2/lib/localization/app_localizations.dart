@@ -5214,13 +5214,13 @@ abstract class AppLocalizations {
   /// No description provided for @form_field_nutrition_minimum_meals_required.
   ///
   /// In en, this message translates to:
-  /// **'Minimum meals required'**
+  /// **'Daily meal target'**
   String get form_field_nutrition_minimum_meals_required;
 
   /// No description provided for @form_field_nutrition_minimum_meals_help.
   ///
   /// In en, this message translates to:
-  /// **'Require this many non-skipped meals before participants can complete the task.'**
+  /// **'Suggested number of non-skipped meals per day. Participants can save their log and leave the task below this target.'**
   String get form_field_nutrition_minimum_meals_help;
 
   /// No description provided for @form_field_nutrition_minimum_meals_hint.

@@ -2054,7 +2054,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String min_meals_required(int count) {
-    return 'Bitte erfassen Sie mindestens $count Mahlzeit(en)';
+    return 'Tägliches Mahlzeitenziel: $count Mahlzeit(en)';
   }
 
   @override
@@ -3241,11 +3241,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get min_meals_not_met_title =>
-      'Mindestanzahl an Mahlzeiten nicht erreicht';
+      'Tägliches Mahlzeitenziel nicht erreicht';
 
   @override
   String min_meals_not_met_message(int count) {
-    return 'Diese Aufgabe erfordert mindestens $count Mahlzeit(en). Du hast weniger als erforderlich aufgezeichnet. Trotzdem verlassen?';
+    return 'Das tägliche Ziel ist $count Mahlzeit(en). Du hast weniger Mahlzeiten erfasst. Trotzdem verlassen?';
   }
 
   @override

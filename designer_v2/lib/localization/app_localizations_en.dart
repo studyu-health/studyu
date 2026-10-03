@@ -3095,12 +3095,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Participants can add saved meals alongside individual foods while logging. When creating a new saved meal from a log, existing saved meals are expanded into their food ingredients.';
 
   @override
-  String get form_field_nutrition_minimum_meals_required =>
-      'Minimum meals required';
+  String get form_field_nutrition_minimum_meals_required => 'Daily meal target';
 
   @override
   String get form_field_nutrition_minimum_meals_help =>
-      'Require this many non-skipped meals before participants can complete the task.';
+      'Suggested number of non-skipped meals per day. Participants can save their log and leave the task below this target.';
 
   @override
   String get form_field_nutrition_minimum_meals_hint => 'Optional';

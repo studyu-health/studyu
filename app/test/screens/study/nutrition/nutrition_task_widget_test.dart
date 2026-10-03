@@ -527,7 +527,7 @@ void main() {
     expect(result, isNull);
   });
 
-  testWidgets('warns before leaving without the minimum meals', (tester) async {
+  testWidgets('allows leaving below the advisory meal target', (tester) async {
     var didReturn = false;
     DailyRecall? result;
     await tester.pumpWidget(
@@ -554,7 +554,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    expect(find.text('Minimum meals not reached'), findsOneWidget);
+    expect(didReturn, isFalse);
     await tester.tap(find.text('Leave anyway'));
     await tester.pumpAndSettle();
 
@@ -818,7 +818,7 @@ void main() {
     expect(find.text('Close'), findsNothing);
   });
 
-  testWidgets('uses the default instructions and minimum meal requirement', (
+  testWidgets('uses the default instructions and configured meal target', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -834,7 +834,10 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('Please record at least 2 meal(s)'), findsOneWidget);
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(NutritionTaskWidget)),
+    )!;
+    expect(find.text(l10n.min_meals_required(2)), findsOneWidget);
   });
 
   testWidgets('groups unknown-time entries at the end', (tester) async {

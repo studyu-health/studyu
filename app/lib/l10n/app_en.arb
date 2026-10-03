@@ -771,7 +771,7 @@
   "daily_food_diary": "Daily Food Diary",
   "instructions": "Instructions",
   "nutrition_instructions_default": "Please record all the foods and beverages you consumed today. For each meal or snack, provide as much detail as possible including portion sizes and preparation methods.",
-  "min_meals_required": "Please record at least {count} meal(s)",
+  "min_meals_required": "Daily meal target: {count} meal(s)",
   "@min_meals_required": {
     "placeholders": {
       "count": {
@@ -1389,8 +1389,8 @@
       }
     }
   },
-  "min_meals_not_met_title": "Minimum meals not reached",
-  "min_meals_not_met_message": "This task requires at least {count} meal(s). You have recorded fewer than required. Leave anyway?",
+  "min_meals_not_met_title": "Daily meal target not reached",
+  "min_meals_not_met_message": "The daily meal target is {count} meal(s). You have recorded fewer meals. Leave anyway?",
   "@min_meals_not_met_message": {
     "placeholders": {
       "count": {

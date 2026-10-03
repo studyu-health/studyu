@@ -2028,7 +2028,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String min_meals_required(int count) {
-    return 'Please record at least $count meal(s)';
+    return 'Daily meal target: $count meal(s)';
   }
 
   @override
@@ -3202,11 +3202,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get min_meals_not_met_title => 'Minimum meals not reached';
+  String get min_meals_not_met_title => 'Daily meal target not reached';
 
   @override
   String min_meals_not_met_message(int count) {
-    return 'This task requires at least $count meal(s). You have recorded fewer than required. Leave anyway?';
+    return 'The daily meal target is $count meal(s). You have recorded fewer meals. Leave anyway?';
   }
 
   @override
