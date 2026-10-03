@@ -1,0 +1,7 @@
+name: studyu
+version: 1.0.0
+targets: [claude, copilot, codex, cursor, opencode, gemini]
+dependencies:
+  apm:
+    - studyu-health/studyu-agent-marketplace/plugins/studyu-skills#v0.1.0
+    - studyu-health/studyu-agent-marketplace/plugins/dart#v0.1.0

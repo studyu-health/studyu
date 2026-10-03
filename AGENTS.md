@@ -2,6 +2,7 @@
 
 This is a Flutter/Dart monorepo. Work from the repository root, not a package directory.
 These rules are a contract, not a replacement for source code, tests, or linked docs.
+The skills in `.agents/skills/` come from APM. If they are missing, run `apm install`.
 
 ## Working Principles
 
