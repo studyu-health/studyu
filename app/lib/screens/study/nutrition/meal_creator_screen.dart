@@ -382,20 +382,24 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     }
 
     final existing = widget.existingMeal;
+    final servings = double.parse(_servingsController.text);
     final components = [
       for (var index = 0; index < _foods.length; index++)
         FoodComposition(
           id: _foods[index].id,
           parentEntryId: '',
           foodId: _foods[index].foodId,
-          amount: _foods[index].amount,
+          amount: _foods[index].amount / servings,
           unit: _foods[index].unit,
           sortOrder: index,
         ),
     ];
     final snapshots = [
       for (var index = 0; index < _componentFoods.length; index++)
-        rescaleFoodAmount(_componentFoods[index], _foods[index].amount),
+        rescaleFoodAmount(
+          _componentFoods[index],
+          _foods[index].amount / servings,
+        ),
     ];
     final meal = existing == null
         ? FoodEntry.withId(
@@ -404,7 +408,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             description: _descriptionController.text.isEmpty
                 ? null
                 : _descriptionController.text,
-            amount: double.parse(_servingsController.text),
+            amount: 1,
             unit: 'serving',
             servingSizeGrams: servingSizeGrams,
             portionEstimationMethod: PortionEstimationMethod.householdMeasure,
@@ -427,7 +431,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             description: _descriptionController.text.isEmpty
                 ? null
                 : _descriptionController.text,
-            amount: double.parse(_servingsController.text),
+            amount: 1,
             unit: existing.unit,
             servingSizeGrams: servingSizeGrams,
             portionReference: existing.portionReference,
@@ -452,7 +456,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     for (final composition in meal.componentFoods!) {
       composition.parentEntryId = meal.id;
     }
-    return meal;
+    return rescaleFoodAmount(meal, servings);
   }
 
   Future<void> _saveMeal() async {
@@ -472,12 +476,11 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
               TemplateViewModel(
                 userId: appState.activeSubject?.id ?? 'anonymous',
               );
-          final normalized = snapshots
-              .normalizeCompositeNutritionFoodDefinition(meal);
+          final normalized = snapshots.normalizeNutritionFoodDefinition(meal);
           final servings = meal.amount;
           meal.templateId = await viewModel.saveFoodAsTemplate(
             name: meal.name,
-            food: meal,
+            food: normalized,
           );
           meal
             ..componentFoods = normalized.componentFoods
@@ -609,7 +612,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             TemplateViewModel(userId: userId);
         await viewModel.saveFoodAsTemplate(
           name: result.name,
-          food: meal,
+          food: snapshots.normalizeNutritionFoodDefinition(meal),
           tags: result.tags,
         );
         if (mounted) {

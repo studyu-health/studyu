@@ -60,10 +60,13 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
     required String subjectId,
     required Iterable<FoodEntry> foods,
   }) async {
-    final sourceById = {for (final food in foods) food.foodId: food};
+    final sourceById = <String, List<FoodEntry>>{};
+    for (final food in foods) {
+      (sourceById[food.foodId] ??= []).add(food);
+    }
     if (sourceById.isEmpty) return;
     final byId = {
-      for (final food in sourceById.values)
+      for (final food in sourceById.values.map((entries) => entries.last))
         food.foodId: food.entryType == FoodEntryType.meal
             ? normalizeCompositeNutritionFoodDefinition(food)
             : food,
@@ -79,7 +82,8 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
             row['current_version_id'] as String,
     };
     if (currentVersions.isNotEmpty) {
-      final localVersionIds = byId.values
+      final localVersionIds = sourceById.values
+          .expand((entries) => entries)
           .where((food) => currentVersions.containsKey(food.foodId))
           .map((food) => food.foodVersionId)
           .toList();
@@ -91,12 +95,12 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
         for (final row in versions as List<dynamic>)
           '${(row as Map<String, dynamic>)['food_id']}:${row['id']}',
       };
-      for (final food in byId.values.where(
-        (food) => currentVersions.containsKey(food.foodId),
-      )) {
+      for (final food
+          in sourceById.values
+              .expand((entries) => entries)
+              .where((food) => currentVersions.containsKey(food.foodId))) {
         if (!validLinkages.contains('${food.foodId}:${food.foodVersionId}')) {
-          sourceById[food.foodId]!.foodVersionId =
-              currentVersions[food.foodId]!;
+          food.foodVersionId = currentVersions[food.foodId]!;
         }
       }
     }
@@ -110,8 +114,9 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
         snapshot: food.toJson(),
         libraryVisible: false,
       );
-      sourceById[food.foodId]!.foodVersionId =
-          result.definition.currentVersionId;
+      for (final occurrence in sourceById[food.foodId]!) {
+        occurrence.foodVersionId = result.definition.currentVersionId;
+      }
     }
   }
 

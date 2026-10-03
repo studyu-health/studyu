@@ -11,6 +11,7 @@ import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
+import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_core/core.dart' as studyu;
 import 'package:studyu_core/core.dart';
 
@@ -818,7 +819,9 @@ class const FoodLibraryItemCard({
     if (edited == null || !context.mounted) return;
     await context.read<TemplateViewModel>().updateFoodTemplatePrototype(
       template.id,
-      edited,
+      edited.entryType == FoodEntryType.meal
+          ? normalizeNutritionFoodDefinition(edited)
+          : edited,
     );
   }
 

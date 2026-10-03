@@ -198,7 +198,7 @@ extension StudySubjectExtension on StudySubject {
       return existingRecall.studyDaySnapshot == null &&
           recall.studyDaySnapshot != null &&
           progress.completedAt != null &&
-          getDayOfStudyFor(progress.completedAt!.toLocal()) ==
+          nutritionStudyDayFor(this, progress.completedAt!) ==
               recall.studyDaySnapshot;
     } catch (_) {
       return false;

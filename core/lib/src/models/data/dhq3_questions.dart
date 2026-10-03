@@ -10,20 +10,20 @@ class Dhq3Questions() {
 
   /// Ordered list of survey titles (day 1 = index 0, etc.). Balanced cluster sizes (~16–34 questions each).
   static const List<String> surveyTitles = [
-    'About you and coffee/tea',
-    'Beverages – Juices and milk',
-    'Beverages – Soda, alcohol and tea',
+    'About you & coffee/tea',
+    'Beverages – Juices & milk',
+    'Beverages – Soda, alcohol & tea',
     'Fruits',
-    'Vegetables – Greens, carrots and beans',
-    'Vegetables – Broccoli, peppers and salads',
-    'Vegetables – Potatoes and other',
-    'Soups, rice, pasta and pizza',
-    'Cereal, breads and spreads',
-    'Cold cuts, eggs and snacks',
-    'Meat and poultry – Part 1',
-    'Meat, poultry and fish – Part 2',
-    'Dairy and sweets',
-    'Spreads, diet summary and supplements',
+    'Vegetables – Greens, carrots & beans',
+    'Vegetables – Broccoli, peppers & salads',
+    'Vegetables – Potatoes & other',
+    'Soups, rice, pasta & pizza',
+    'Cereal, breads & spreads',
+    'Cold cuts, eggs & snacks',
+    'Meat & poultry – Part 1',
+    'Meat & poultry & fish – Part 2',
+    'Dairy & sweets',
+    'Spreads, diet summary & supplements',
   ];
 
   static const String _introText =

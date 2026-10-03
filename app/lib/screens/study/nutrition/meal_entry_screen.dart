@@ -381,7 +381,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
             );
         final updatedTemplate = await viewModel.updateFoodTemplatePrototype(
           food.templateId!,
-          edited,
+          edited.entryType == FoodEntryType.meal
+              ? normalizeNutritionFoodDefinition(edited)
+              : edited,
         );
         if (updatedTemplate != null) {
           edited = cloneFoodEntry(edited)
@@ -462,7 +464,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     try {
       final result = await repository.mutateHistoricalDefinition(
         subjectId: subject.id,
-        snapshot: normalizeCompositeNutritionFoodDefinition(edited),
+        snapshot: normalizeNutritionFoodDefinition(edited),
         expectedVersionId: existingMeal.foodVersionId,
         entryId: existingMeal.id,
         target: historicalTarget.toJson(),

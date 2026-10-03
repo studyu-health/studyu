@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(94);
+SELECT plan(97);
 
 SELECT
     tests.create_supabase_user('nutrition_owner', 'nutrition_owner@studyu.health');
@@ -86,6 +86,40 @@ WHERE
 SET LOCAL session_replication_role = origin;
 
 SELECT tests.authenticate_as('nutrition_owner');
+
+SELECT set_config(
+    'studyu.nutrition_maintenance',
+    'advance:10000000-0000-0000-0000-000000000001', TRUE
+);
+SELECT throws_ok(
+    $$UPDATE public.study_subject SET started_at = started_at - interval '1 day'
+      WHERE id = '10000000-0000-0000-0000-000000000001'$$,
+    '22023', 'study subject clock and identity are immutable',
+    'caller-controlled settings cannot authorize clock maintenance'
+);
+SELECT set_config(
+    'studyu.nutrition_maintenance',
+    'mutation:10000000-0000-0000-0000-000000000001', TRUE
+);
+SELECT throws_ok(
+    $$UPDATE public.subject_progress SET result = result
+      WHERE subject_id = '10000000-0000-0000-0000-000000000001'
+        AND task_id = 'locked-task'$$,
+    '22023', 'nutrition recall study day is not writable',
+    'caller-controlled settings cannot authorize locked recall updates'
+);
+SELECT set_config(
+    'studyu.nutrition_maintenance',
+    'delete:10000000-0000-0000-0000-000000000001', TRUE
+);
+SELECT throws_ok(
+    $$DELETE FROM public.subject_progress
+      WHERE subject_id = '10000000-0000-0000-0000-000000000001'
+        AND task_id = 'locked-task'$$,
+    '22023', 'nutrition recall study day is not writable',
+    'caller-controlled settings cannot authorize locked recall deletion'
+);
+SELECT set_config('studyu.nutrition_maintenance', '', TRUE);
 
 CREATE TEMP TABLE nutrition_results (label text PRIMARY KEY, response jsonb);
 INSERT INTO nutrition_results VALUES (

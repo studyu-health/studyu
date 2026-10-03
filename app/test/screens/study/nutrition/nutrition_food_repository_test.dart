@@ -123,6 +123,44 @@ void main() {
     );
   });
 
+  for (final definitionExists in [false, true]) {
+    test(
+      'repairs every duplicate occurrence version ($definitionExists)',
+      () async {
+        final repository = NutritionFoodRepository(
+          client: _client((request) async {
+            if (request.url.path.endsWith('/nutrition_food_definition')) {
+              return _jsonResponse(
+                definitionExists
+                    ? [
+                        {
+                          'id': 'food-definition',
+                          'current_version_id': 'version-1',
+                        },
+                      ]
+                    : [],
+                request,
+              );
+            }
+            if (request.method == 'GET') return _jsonResponse([], request);
+            return _jsonResponse(_mutationResponse(), request);
+          }),
+        );
+        final foods = [
+          _food(id: 'first', versionId: 'provisional-1'),
+          _food(id: 'second', versionId: 'provisional-2'),
+        ];
+
+        await repository.ensureDefinitions(subjectId: 'subject', foods: foods);
+
+        expect(foods.map((food) => food.foodVersionId), [
+          'version-1',
+          'version-1',
+        ]);
+      },
+    );
+  }
+
   test('creates missing entry definitions through the mutation RPC', () async {
     final requests = <http.BaseRequest>[];
     final repository = NutritionFoodRepository(

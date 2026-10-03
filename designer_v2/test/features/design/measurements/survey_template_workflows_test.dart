@@ -16,6 +16,20 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 void main() {
   setUpAll(() => AppTranslation.setForTesting(AppLocalizationsEn()));
 
+  test('existing DHQ3 survey is not added again after loading', () {
+    final entry = SurveyTemplateRegistry.findById('dhq3_14day')!
+        .dayEntries!
+        .first;
+    final persisted = entry.buildTask()..title = 'About you & coffee/tea';
+    final measurements = _measurements(existingSurvey: persisted);
+
+    expect(measurements.applyTemplateDayEntry(entry), isNull);
+    expect(
+      measurements.measurementViewModelsCollection.retrievableViewModels,
+      hasLength(1),
+    );
+  });
+
   test('applies one single-survey template and prevents duplicates', () {
     final measurements = _measurements();
     final template = SurveyTemplateRegistry.findById('ffq_26')!;
@@ -148,7 +162,7 @@ void main() {
   });
 }
 
-MeasurementsFormViewModel _measurements() {
+MeasurementsFormViewModel _measurements({QuestionnaireTask? existingSurvey}) {
   final router = GoRouter(
     routes: [
       GoRoute(path: '/', builder: (_, _) => const SizedBox.shrink()),
@@ -160,9 +174,10 @@ MeasurementsFormViewModel _measurements() {
     ],
   );
   addTearDown(router.dispose);
+  final study = Study.withId('study-1')..observations = [?existingSurvey];
   return MeasurementsFormViewModel(
-    study: Study.withId('study-1'),
+    study: study,
     router: router,
-    formData: MeasurementsFormData(measurements: []),
+    formData: MeasurementsFormData.fromStudy(study),
   );
 }

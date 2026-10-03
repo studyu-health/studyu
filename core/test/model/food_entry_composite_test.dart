@@ -33,6 +33,44 @@ void main() {
     ]);
   });
 
+  test('legacy recipes preserve nutrition and available ingredient data', () {
+    final json = _food('recipe', 'Soup').toJson()
+      ..remove('foodId')
+      ..remove('foodVersionId')
+      ..remove('preparationDetails')
+      ..['entryType'] = 'recipe'
+      ..['recipeMetadata'] = {
+        'rawWeight': 300,
+        'cookedWeight': 250,
+        'yieldFactor': 250 / 300,
+        'preparationMethod': 'boiled',
+        'retentionFactors': <String, double>{},
+      }
+      ..['recipeIngredients'] = [
+        {
+          'id': 'composition',
+          'recipeId': '',
+          'ingredientId': 'ingredient-entry',
+          'amount': 2,
+          'unit': 'g',
+          'sortOrder': 0,
+        },
+      ];
+
+    final restored = FoodEntry.fromJson(json);
+
+    // Legacy recipes did not persist ingredient snapshots.
+    expect(restored.entryType, FoodEntryType.manualCustom);
+    expect(restored.nutrition.energyKcal, 100);
+    expect(restored.preparationDetails!.cookedWeight, 250);
+    expect(
+      restored.originalValues['_legacyRecipeIngredients'],
+      json['recipeIngredients'],
+    );
+    expect(FoodEntry.fromJson(restored.toJson()).toJson(), restored.toJson());
+    expect(json['entryType'], 'recipe');
+  });
+
   test('legacy JSON receives deterministic version identities', () {
     final legacyJson = _food('legacy', 'Legacy').toJson()
       ..remove('foodId')

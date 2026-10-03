@@ -111,16 +111,25 @@ class FoodEntry {
        createdAt = DateTime.now();
 
   factory fromJson(Map<String, dynamic> json) {
-    if (json.containsKey('foodId') && json.containsKey('foodVersionId')) {
-      return _$FoodEntryFromJson(json);
-    }
-
     final id = json['id'] as String;
+    final isLegacyRecipe = json['entryType'] == 'recipe';
     return _$FoodEntryFromJson({
       ...json,
       if (!json.containsKey('foodId')) 'foodId': _legacyIdentity('food', id),
       if (!json.containsKey('foodVersionId'))
         'foodVersionId': _legacyIdentity('version', id),
+      if (!json.containsKey('parentEntryId'))
+        'parentEntryId': json['parentRecipeId'],
+      if (!json.containsKey('preparationDetails'))
+        'preparationDetails': json['recipeMetadata'],
+      if (isLegacyRecipe) ...{
+        // Legacy recipes contain totals but no ingredient snapshots.
+        'entryType': 'manualCustom',
+        'originalValues': {
+          ...?json['originalValues'] as Map<String, dynamic>?,
+          '_legacyRecipeIngredients': json['recipeIngredients'],
+        },
+      },
     });
   }
 

@@ -83,7 +83,8 @@ class DailyRecallEntryViewModel({
     if (subject == null) return;
     if (!revalidateHistoricalEligibility()) return;
 
-    _studyDaySnapshot ??= subject!.getDayOfStudyFor(
+    _studyDaySnapshot ??= nutritionStudyDayFor(
+      subject!,
       _hasExistingRecall ? recall.date : DateTime.now(),
     );
     _interventionId ??=
@@ -157,7 +158,7 @@ class DailyRecallEntryViewModel({
           candidate.studyDaySnapshot ??
           (progress.completedAt == null
               ? null
-              : subject!.getDayOfStudyFor(progress.completedAt!.toLocal()));
+              : nutritionStudyDayFor(subject!, progress.completedAt!));
       if (candidateStudyDay != studyDay) continue;
 
       final candidateSavedAt =

@@ -8,6 +8,26 @@ import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 
 void main() {
+  test('new recall uses the authoritative UTC study day', () {
+    SharedPreferences.setMockInitialValues({});
+    final subject = _LocalDaySubject()
+      ..startedAt = DateTime.now().subtract(const Duration(days: 1))
+      ..study = (Study('study', 'owner')
+        ..schedule.numberOfCycles = 0
+        ..schedule.includeBaseline = true);
+    final viewModel = DailyRecallEntryViewModel(subject: subject);
+    addTearDown(viewModel.dispose);
+
+    expect(
+      viewModel.studyDaySnapshot,
+      nutritionStudyDayFor(subject, DateTime.now()),
+    );
+    expect(
+      viewModel.studyDaySnapshot,
+      isNot(subject.getDayOfStudyFor(DateTime.now())),
+    );
+  });
+
   test(
     'autosave keeps an incomplete recall local without completing progress',
     () async {
@@ -286,6 +306,13 @@ void main() {
       );
     },
   );
+}
+
+class _LocalDaySubject() extends StudySubject {
+  this : super('subject', 'study', 'user', []);
+
+  @override
+  int getDayOfStudyFor(DateTime date) => 20;
 }
 
 class _BlockingAutoSaveManager() extends NutritionRecallAutoSaveManager {
