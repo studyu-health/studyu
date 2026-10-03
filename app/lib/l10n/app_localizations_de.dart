@@ -3603,4 +3603,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String photoRecallDateInfo(Object date) {
     return 'Fotos vom $date';
   }
+
+  @override
+  String get not_added => 'Nicht hinzugefügt';
 }

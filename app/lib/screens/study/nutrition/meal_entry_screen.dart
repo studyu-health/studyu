@@ -64,7 +64,7 @@ class const _TimeSelection(
 );
 
 class const _MealDetailsSelection({
-  required final MealContext mealContext,
+  required final MealContext? mealContext,
   required final CompanyContext? companyContext,
   required final DistractionContext? distractionContext,
   required final String? locationDescription,
@@ -110,7 +110,7 @@ class const MealEntryScreen({
 class _MealEntryScreenState() extends State<MealEntryScreen> {
   late MealLog _meal;
   late MealType _mealType;
-  late MealContext _mealContext;
+  late MealContext? _mealContext;
   DateTime? _timestamp;
   late MealOccurrenceTimePrecision _timePrecision;
   late bool _hasSelectedTime;
@@ -160,7 +160,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       _customMealLabel = widget.initialCustomMealLabel;
       _isLabelExplicitlyUnset =
           _mealType == MealType.other && _customMealLabel == null;
-      _mealContext = MealContext.home;
+      _mealContext = null;
       _isSkipped = false;
       _meal = MealLog.withId(
         mealType: _mealType,
@@ -669,7 +669,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       locationDescription: clearDetails || _mealContext != MealContext.other
           ? null
           : _locationDescription?.trim(),
-      timestamp: _timestamp,
+      timestamp: _timePrecision == MealOccurrenceTimePrecision.unknown
+          ? null
+          : _timestamp,
       timePrecision: _timePrecision,
       timezone: _meal.timezone,
       isSkipped: _isSkipped,
@@ -686,8 +688,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
   bool get _hasUnsavedChanges => _mealSnapshot != _initialMealSnapshot;
 
   bool get _isMealValid =>
-      (!_isSkipped && _meal.foods.isNotEmpty && _hasSelectedTime) ||
-      (_isSkipped && _skipReason?.trim().isNotEmpty == true);
+      _buildMeal().isValidForSave(hasSelectedTime: _hasSelectedTime);
 
   String get _mealLabel {
     final customLabel = _customMealLabel?.trim();
@@ -884,14 +885,14 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       if (_mealContext == MealContext.other &&
           _locationDescription?.trim().isNotEmpty == true)
         _locationDescription!.trim()
-      else
-        _getMealContextLabel(_mealContext, l10n),
+      else if (_mealContext != null)
+        _getMealContextLabel(_mealContext!, l10n),
       if (_companyContext != null)
         _getCompanyContextLabel(_companyContext!, l10n),
       if (_distractionContext != null)
         _getDistractionContextLabel(_distractionContext!, l10n),
     ];
-    return details.join(' • ');
+    return details.isEmpty ? l10n.not_added : details.join(' • ');
   }
 
   Future<void> _selectTime() async {
@@ -1094,7 +1095,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilledButton(
-                onPressed: _saveMeal,
+                onPressed: _isSkipped || _isMealValid ? _saveMeal : null,
                 child: Text(
                   widget.existingMeal == null ? l10n.done_label : l10n.save,
                 ),
@@ -1175,7 +1176,11 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                   timestamp: _timestamp,
                   precision: _timePrecision,
                   hasSelection: _hasSelectedTime,
-                  showValidationError: _hasAttemptedSave && !_hasSelectedTime,
+                  showValidationError:
+                      _hasAttemptedSave &&
+                      !_buildMeal().hasValidTimeAnswer(
+                        hasSelectedTime: _hasSelectedTime,
+                      ),
                   onSelectTime: _selectTime,
                 ),
                 const SizedBox(height: 8),
@@ -1767,7 +1772,7 @@ class const _FoodCard({
 }
 
 class const _MealDetailsSheet({
-  required final MealContext mealContext,
+  required final MealContext? mealContext,
   required final CompanyContext? companyContext,
   required final DistractionContext? distractionContext,
   required final String? locationDescription,
@@ -1777,7 +1782,7 @@ class const _MealDetailsSheet({
 }
 
 class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
-  late MealContext _mealContext;
+  late MealContext? _mealContext;
   CompanyContext? _companyContext;
   DistractionContext? _distractionContext;
   late final TextEditingController _locationController;
@@ -1822,11 +1827,11 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
             _DropdownField<MealContext>(
               label: l10n.where_did_you_eat,
               value: _mealContext,
-              items: MealContext.values,
-              itemLabel: (value) => _getMealContextLabel(value!, l10n),
-              onChanged: (value) {
-                if (value != null) setState(() => _mealContext = value);
-              },
+              items: const [null, ...MealContext.values],
+              itemLabel: (value) => value == null
+                  ? l10n.not_added
+                  : _getMealContextLabel(value, l10n),
+              onChanged: (value) => setState(() => _mealContext = value),
             ),
             if (_mealContext == MealContext.other) ...[
               const SizedBox(height: 12),

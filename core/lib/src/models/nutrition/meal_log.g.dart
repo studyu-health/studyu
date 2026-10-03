@@ -11,7 +11,7 @@ MealLog _$MealLogFromJson(Map<String, dynamic> json) => MealLog(
   mealType: $enumDecode(_$MealTypeEnumMap, json['mealType']),
   customMealLabel: json['customMealLabel'] as String?,
   isLabelExplicitlyUnset: json['isLabelExplicitlyUnset'] as bool? ?? false,
-  mealContext: $enumDecode(_$MealContextEnumMap, json['mealContext']),
+  mealContext: $enumDecodeNullable(_$MealContextEnumMap, json['mealContext']),
   locationDescription: json['locationDescription'] as String?,
   timestamp: json['timestamp'] == null
       ? null
@@ -44,7 +44,7 @@ Map<String, dynamic> _$MealLogToJson(MealLog instance) => <String, dynamic>{
   'mealType': instance.mealType.toJson(),
   'customMealLabel': ?instance.customMealLabel,
   'isLabelExplicitlyUnset': instance.isLabelExplicitlyUnset,
-  'mealContext': instance.mealContext.toJson(),
+  'mealContext': ?instance.mealContext?.toJson(),
   'locationDescription': ?instance.locationDescription,
   'timestamp': ?instance.timestamp?.toIso8601String(),
   'timePrecision': instance.timePrecision.toJson(),

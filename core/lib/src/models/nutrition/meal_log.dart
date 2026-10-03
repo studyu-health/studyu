@@ -14,7 +14,7 @@ class MealLog {
   /// True when a meal intentionally has no category label.
   /// Missing serialized values remain false for legacy MealType.other records.
   bool isLabelExplicitlyUnset;
-  MealContext mealContext;
+  MealContext? mealContext;
   String? locationDescription;
   DateTime? timestamp;
   MealOccurrenceTimePrecision timePrecision;
@@ -31,7 +31,7 @@ class MealLog {
     required this.mealType,
     this.customMealLabel,
     this.isLabelExplicitlyUnset = false,
-    required this.mealContext,
+    this.mealContext,
     this.locationDescription,
     this.timestamp,
     this.timePrecision = MealOccurrenceTimePrecision.approximate,
@@ -48,7 +48,7 @@ class MealLog {
     required this.mealType,
     this.customMealLabel,
     this.isLabelExplicitlyUnset = false,
-    required this.mealContext,
+    this.mealContext,
     this.locationDescription,
     this.timestamp,
     this.timePrecision = MealOccurrenceTimePrecision.approximate,
@@ -60,6 +60,18 @@ class MealLog {
     this.templateId,
     required this.foods,
   }) : id = const Uuid().v4();
+
+  /// The editor must distinguish an unanswered time from an unknown answer.
+  bool hasValidTimeAnswer({required bool hasSelectedTime}) =>
+      hasSelectedTime &&
+      (timePrecision == MealOccurrenceTimePrecision.unknown
+          ? timestamp == null
+          : timestamp != null);
+
+  bool isValidForSave({required bool hasSelectedTime}) => isSkipped
+      ? skipReason?.trim().isNotEmpty == true
+      : foods.isNotEmpty &&
+            hasValidTimeAnswer(hasSelectedTime: hasSelectedTime);
 
   factory fromJson(Map<String, dynamic> json) => _$MealLogFromJson(json);
 

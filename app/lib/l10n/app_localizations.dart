@@ -6348,6 +6348,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Showing photos from {date}'**
   String photoRecallDateInfo(Object date);
+
+  /// No description provided for @not_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Not added'**
+  String get not_added;
 }
 
 class _AppLocalizationsDelegate

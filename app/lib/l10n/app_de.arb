@@ -1358,5 +1358,6 @@
   "nutrition_search_or_add_food_manually": "Suchen Sie nach Lebensmitteln oder fügen Sie sie manuell hinzu",
   "nutrition_unit_label": "Einheit",
   "nutrition_per_serving": "Nährwerte pro Portion",
-  "photoRecallDateInfo": "Fotos vom {date}"
+  "photoRecallDateInfo": "Fotos vom {date}",
+  "not_added": "Nicht hinzugefügt"
 }

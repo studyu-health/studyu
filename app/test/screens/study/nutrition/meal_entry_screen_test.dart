@@ -268,6 +268,12 @@ Future<_TrackingNutritionFoodRepository> _openValidNewHistoricalMeal(
   await tester.pumpAndSettle();
   await tester.tap(find.text('Add 1 item to Breakfast'));
   await tester.pumpAndSettle();
+  expect(
+    tester
+        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+        .onPressed,
+    isNull,
+  );
   await tester.tap(find.text('Select a time'));
   await tester.pumpAndSettle();
   await tester.tap(find.text("I don't remember"));
@@ -458,6 +464,161 @@ void main() {
     );
   });
 
+  test('meal clone preserves absent context and independent children', () {
+    final original = editableMeal()..mealContext = null;
+    final clone = cloneMealLog(original);
+    expect(clone.mealContext, isNull);
+    expect(clone.toJson().containsKey('mealContext'), isFalse);
+    expect(clone.foods.single.id, original.foods.single.id);
+    expect(identical(clone.foods.single, original.foods.single), isFalse);
+  });
+
+  testWidgets('canceling the time picker leaves a new answer unanswered', (
+    tester,
+  ) async {
+    await openMealEntry(tester, null);
+    await tester.tap(find.text('Select a time'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Exact time'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+          .onPressed,
+      isNull,
+    );
+    await tester.tap(find.text('Select a time'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<RadioGroup<MealOccurrenceTimePrecision>>(
+            find.byType(RadioGroup<MealOccurrenceTimePrecision>),
+          )
+          .groupValue,
+      isNull,
+    );
+  });
+
+  testWidgets('new occasion saves untouched context as absent', (tester) async {
+    MealLog? result;
+    await _openValidNewHistoricalMeal(
+      tester,
+      onResult: (value) => result = value,
+    );
+    await tester.ensureVisible(find.text('Meal details'));
+    expect(find.text('Not added'), findsOneWidget);
+    await tester.tap(find.text('Meal details'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apply'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+    await tester.pumpAndSettle();
+    expect(result, isNotNull);
+    expect(result!.mealContext, isNull);
+    expect(result!.toJson().containsKey('mealContext'), isFalse);
+    expect(result!.foods, isNotEmpty);
+    expect(MealLog.fromJson(result!.toJson()).mealContext, isNull);
+  });
+
+  testWidgets(
+    'clearing context removes the old location without changing the source',
+    (tester) async {
+      final original = editableMeal()
+        ..mealContext = MealContext.other
+        ..locationDescription = 'Park';
+      MealLog? result;
+      await openMealEntry(
+        tester,
+        original,
+        onResult: (value) => result = value,
+      );
+      await tester.ensureVisible(find.text('Meal details'));
+      await tester.tap(find.text('Meal details'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is DropdownButtonFormField &&
+              widget.decoration.labelText == 'Where did you eat?',
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Not added').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+      expect(find.text('Not added'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+      expect(result!.mealContext, isNull);
+      expect(result!.locationDescription, isNull);
+      expect(original.mealContext, MealContext.other);
+      expect(original.locationDescription, 'Park');
+    },
+  );
+
+  for (final precision in [
+    MealOccurrenceTimePrecision.exact,
+    MealOccurrenceTimePrecision.approximate,
+  ]) {
+    testWidgets('$precision without a timestamp disables Save until answered', (
+      tester,
+    ) async {
+      final original = editableMeal()
+        ..timestamp = null
+        ..timePrecision = precision;
+      MealLog? result;
+      await openMealEntry(
+        tester,
+        original,
+        onResult: (value) => result = value,
+      );
+      final save = find.widgetWithText(FilledButton, 'Save');
+      expect(tester.widget<FilledButton>(save).onPressed, isNull);
+      await tester.tap(find.text('Time'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("I don't remember"));
+      await tester.pumpAndSettle();
+      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(result!.timestamp, isNull);
+      expect(result!.timePrecision, MealOccurrenceTimePrecision.unknown);
+      expect(original.timePrecision, precision);
+    });
+  }
+
+  testWidgets(
+    'unknown answer clears a selected timestamp and labels remain optional',
+    (tester) async {
+      MealLog? result;
+      final original = editableMeal(customMealLabel: null)
+        ..isLabelExplicitlyUnset = true
+        ..mealContext = null;
+      await openMealEntry(
+        tester,
+        original,
+        onResult: (value) => result = value,
+      );
+      await tester.tap(find.text('Time'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("I don't remember"));
+      await tester.pumpAndSettle();
+      final save = find.widgetWithText(FilledButton, 'Save');
+      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(result!.timestamp, isNull);
+      expect(result!.timePrecision, MealOccurrenceTimePrecision.unknown);
+      expect(result!.customMealLabel, isNull);
+      expect(result!.isLabelExplicitlyUnset, isTrue);
+      expect(result!.mealContext, isNull);
+      expect(original.timestamp, isNotNull);
+    },
+  );
+
   testWidgets('new meal uses the requested initial meal type', (tester) async {
     await tester.pumpWidget(
       ChangeNotifierProvider(
@@ -482,9 +643,12 @@ void main() {
     expect(find.text('Delete meal'), findsNothing);
     expect(find.text('Select a time'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Done'));
-    await tester.pump();
-    expect(find.text('Required'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+          .onPressed,
+      isNull,
+    );
 
     await tester.tap(find.text('Select a time'));
     await tester.pumpAndSettle();
@@ -496,7 +660,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Time not remembered'), findsOneWidget);
-    expect(find.text('Required'), findsNothing);
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+          .onPressed,
+      isNull,
+    );
   });
 
   testWidgets('historical new meal saves reusable template by default', (
@@ -969,7 +1138,7 @@ void main() {
   });
 
   testWidgets(
-    'empty meal keeps validation beside food and does not auto-save',
+    'empty meal disables Save until food is added and does not auto-save',
     (tester) async {
       MealLog? result;
       await openMealEntry(
@@ -1003,7 +1172,7 @@ void main() {
       final saveButton = tester.widget<FilledButton>(
         find.widgetWithText(FilledButton, 'Save'),
       );
-      expect(saveButton.onPressed, isNotNull);
+      expect(saveButton.onPressed, isNull);
 
       await tester.tap(find.widgetWithText(FilledButton, 'Save'));
       await tester.pump();
@@ -1015,7 +1184,7 @@ void main() {
           of: emptyFoodState,
           matching: find.text('Add at least one food item before saving.'),
         ),
-        findsOneWidget,
+        findsNothing,
       );
 
       expect(find.text('Skipped this meal'), findsNothing);

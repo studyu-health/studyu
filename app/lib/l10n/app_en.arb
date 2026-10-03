@@ -1573,5 +1573,6 @@
   "nutrition_search_or_add_food_manually": "Search or add food manually to start",
   "nutrition_unit_label": "Unit",
   "nutrition_per_serving": "Nutrition per serving",
-  "photoRecallDateInfo": "Showing photos from {date}"
+  "photoRecallDateInfo": "Showing photos from {date}",
+  "not_added": "Not added"
 }
