@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/usda_models.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search/food_search_requests.dart';
 import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
@@ -51,6 +52,8 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
   }
 
   Future<void> _onBarcodeDetected(BarcodeCapture capture) async {
+    if (!mounted) return;
+    final languageCode = Localizations.localeOf(context).languageCode;
     final List<Barcode> barcodes = capture.barcodes;
     final l10n = AppLocalizations.of(context)!;
 
@@ -115,24 +118,13 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
       // Controller might already be stopped, ignore
     }
 
+    if (!mounted) return;
     try {
-      // Try OpenFoodFacts first
-      final productConfig = ProductQueryConfiguration(
+      // Try OpenFoodFacts first.
+      final result = await fetchOpenFoodFactsBarcode(
         code,
-        language: OpenFoodFactsLanguage.ENGLISH,
-        fields: [
-          ProductField.NAME,
-          ProductField.BRANDS,
-          ProductField.BARCODE,
-          ProductField.NUTRIMENTS,
-          ProductField.SERVING_SIZE,
-          ProductField.QUANTITY,
-          ProductField.IMAGE_FRONT_SMALL_URL,
-        ],
-        version: ProductQueryVersion.v3,
+        languageCode: languageCode,
       );
-
-      final result = await OpenFoodAPIClient.getProductV3(productConfig);
 
       if (!mounted) return;
 
@@ -145,7 +137,8 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
       // Not found in OpenFoodFacts, try USDA when configured.
       if (UsdaApiService.isConfigured) {
         try {
-          final usdaResult = await UsdaApiService.searchByBarcode(code);
+          final usdaResult = await UsdaApiService.searchByBarcode(code)
+              .timeout(foodProviderTimeout);
 
           if (!mounted) return;
 

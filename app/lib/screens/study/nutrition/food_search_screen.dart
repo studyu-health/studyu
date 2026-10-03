@@ -222,6 +222,14 @@ class _FoodSearchScreenContentState()
     _scrollController.addListener(_onScroll);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _searchViewModel.setLanguageCode(
+      Localizations.localeOf(context).languageCode,
+    );
+  }
+
   void _onSelectionChanged() {
     if (mounted) setState(() {});
   }
@@ -476,7 +484,9 @@ class _FoodSearchScreenContentState()
   void _onSearchChanged(String value, TemplateViewModel templateViewModel) {
     _removeTransfer();
     templateViewModel.setSearchQuery(value);
-    _searchViewModel.search(value);
+    _searchViewModel.search(
+      _selectedFilter == _FoodSearchFilter.myItems ? '' : value,
+    );
   }
 
   void _retrySearch(TemplateViewModel templateViewModel) {
@@ -485,6 +495,7 @@ class _FoodSearchScreenContentState()
   }
 
   void _loadMore() {
+    if (_selectedFilter == _FoodSearchFilter.myItems) return;
     _searchViewModel.loadMore(_searchController.text);
   }
 
@@ -898,9 +909,12 @@ class _FoodSearchScreenContentState()
       _FoodSearchFilter.myItems => personalResultCount,
       _FoodSearchFilter.database => results.length,
     };
+    final hasSearched =
+        search.hasSearched ||
+        (query.isNotEmpty && _selectedFilter == _FoodSearchFilter.myItems);
     final databaseComplete = search.offSearched && search.usdaSearched;
     final searchComplete =
-        search.hasSearched &&
+        hasSearched &&
         !search.isInitialLoading &&
         (_selectedFilter == _FoodSearchFilter.myItems || databaseComplete);
     final showSearchFallback =
@@ -917,7 +931,7 @@ class _FoodSearchScreenContentState()
       searchStatus = errorMessage;
     } else if (searchComplete && visibleResultCount == 0) {
       searchStatus = l10n.no_results_for_query(query);
-    } else if (search.hasSearched && visibleResultCount > 0) {
+    } else if (hasSearched && visibleResultCount > 0) {
       searchStatus = l10n.food_search_results_count(visibleResultCount);
     }
 
@@ -1059,7 +1073,7 @@ class _FoodSearchScreenContentState()
                       searchController: _searchController,
                       isInitialLoading: search.isInitialLoading,
                       isLoadingMore: search.isLoadingMore,
-                      hasSearched: search.hasSearched,
+                      hasSearched: hasSearched,
                       offSearched: search.offSearched,
                       usdaSearched: search.usdaSearched,
                       offHasMore: search.offHasMore,
@@ -1076,6 +1090,12 @@ class _FoodSearchScreenContentState()
                         });
                       },
                       onFilterChanged: (filter) {
+                        if (_selectedFilter == filter) return;
+                        _searchViewModel.search(
+                          filter == _FoodSearchFilter.myItems
+                              ? ''
+                              : _searchController.text,
+                        );
                         _removeTransfer();
                         setState(() {
                           _selectedFilter = filter;

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:studyu_app/models/unified_food_result.dart';
 import 'package:studyu_app/models/usda_models.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search/food_search_requests.dart';
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
@@ -22,10 +23,12 @@ final class FoodSearchViewModel({
   final OpenFoodFactsSearch? _openFoodFactsSearch,
   final UsdaFoodSearch? _usdaFoodSearch,
   final bool? _usdaConfigured,
+  String languageCode = 'en',
 }) extends ChangeNotifier {
   static const _debounceDuration = Duration(milliseconds: 400);
   static const _pageSize = 20;
 
+  String _languageCode = languageCode;
   Timer? _debounceTimer;
   final List<UnifiedFoodResult> _results = [];
   int _offPage = 1;
@@ -59,7 +62,14 @@ final class FoodSearchViewModel({
       _usdaFoodSearch != null ||
       (_usdaConfigured ?? UsdaApiService.isConfigured);
 
+  void setLanguageCode(String languageCode) {
+    if (_isDisposed || _languageCode == languageCode) return;
+    _languageCode = languageCode;
+    if (_activeQuery.isNotEmpty) search(_activeQuery);
+  }
+
   void search(String value) {
+    if (_isDisposed) return;
     _debounceTimer?.cancel();
     final query = value.trim();
     final generation = ++_searchGeneration;
@@ -70,6 +80,7 @@ final class FoodSearchViewModel({
   }
 
   Future<void> retry(String query) async {
+    if (_isDisposed) return;
     _debounceTimer?.cancel();
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) return;
@@ -77,7 +88,7 @@ final class FoodSearchViewModel({
   }
 
   Future<void> loadMore(String currentQuery) async {
-    if (_isLoadingMore || _isInitialLoading) return;
+    if (_isDisposed || _isLoadingMore || _isInitialLoading) return;
     if (!_offHasMore && !_usdaHasMore) return;
     if (_activeQuery.isEmpty || _activeQuery != currentQuery.trim()) return;
 
@@ -176,16 +187,8 @@ final class FoodSearchViewModel({
           PageNumber(page: page),
           const PageSize(size: _pageSize),
         ],
-        language: OpenFoodFactsLanguage.ENGLISH,
-        fields: [
-          ProductField.NAME,
-          ProductField.BRANDS,
-          ProductField.BARCODE,
-          ProductField.NUTRIMENTS,
-          ProductField.SERVING_SIZE,
-          ProductField.QUANTITY,
-          ProductField.IMAGE_FRONT_SMALL_URL,
-        ],
+        languages: openFoodFactsLanguages(_languageCode),
+        fields: openFoodFactsSearchFields,
         version: ProductQueryVersion.v3,
       ),
     );
@@ -213,11 +216,22 @@ final class FoodSearchViewModel({
     required int generation,
   }) async {
     try {
-      final searchResult = await _fetchOpenFoodFacts(query: query, page: page);
+      final searchResult = await _fetchOpenFoodFacts(
+        query: query,
+        page: page,
+      ).timeout(foodProviderTimeout);
       if (!_isCurrent(generation)) return;
 
       final products = searchResult.products ?? const <Product>[];
-      _results.addAll(products.map(_unifiedOpenFoodFactsResult));
+      _results.addAll(
+        products.map((product) {
+          product.productName = openFoodFactsProductName(
+            product,
+            _languageCode,
+          );
+          return _unifiedOpenFoodFactsResult(product);
+        }),
+      );
       _offSearched = true;
       _offFailed = false;
       _offPage = page + 1;
@@ -238,7 +252,10 @@ final class FoodSearchViewModel({
     required int generation,
   }) async {
     try {
-      final searchResult = await _fetchUsda(query: query, page: page);
+      final searchResult = await _fetchUsda(
+        query: query,
+        page: page,
+      ).timeout(foodProviderTimeout);
       if (!_isCurrent(generation)) return;
 
       _results.addAll(searchResult.foods.map(_unifiedUsdaResult));

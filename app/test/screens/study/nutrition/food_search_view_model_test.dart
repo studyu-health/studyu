@@ -8,6 +8,156 @@ import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
 void main() {
+  for (final slowOff in [true, false]) {
+    for (final pagination in [false, true]) {
+      testWidgets('${slowOff ? 'OFF' : 'USDA'} timeout preserves results on '
+          '${pagination ? 'pagination' : 'first page'}', (tester) async {
+        final offResponse = Completer<SearchResult>();
+        final usdaResponse = Completer<UsdaSearchResponse>();
+        final slowPage = pagination ? 2 : 1;
+        final viewModel = FoodSearchViewModel(
+          openFoodFactsSearch:
+              ({required query, required page, required pageSize}) =>
+                  slowOff && page == slowPage
+                  ? offResponse.future
+                  : Future.value(offPage(page, pageSize)),
+          usdaFoodSearch:
+              ({required query, required page, required pageSize}) =>
+                  !slowOff && page == slowPage
+                  ? usdaResponse.future
+                  : Future.value(usdaPage(page, pageSize)),
+        );
+        addTearDown(viewModel.dispose);
+
+        if (pagination) await viewModel.retry('food');
+        var completed = false;
+        final request = pagination
+            ? viewModel.loadMore('food')
+            : viewModel.retry('food');
+        unawaited(request.then((_) => completed = true));
+        await tester.pump();
+        final names = viewModel.results.map((result) => result.name).toList();
+        expect(names, hasLength(pagination ? 41 : 20));
+        expect(viewModel.hasError, isFalse);
+        expect(completed, isFalse);
+
+        await tester.pump(const Duration(seconds: 9));
+        expect(completed, isFalse);
+        await tester.pump(const Duration(seconds: 1));
+        expect(completed, isTrue);
+        expect(viewModel.isInitialLoading, isFalse);
+        expect(viewModel.isLoadingMore, isFalse);
+        expect(viewModel.offSearched, isTrue);
+        expect(viewModel.usdaSearched, isTrue);
+        expect(slowOff ? viewModel.offHasMore : viewModel.usdaHasMore, isFalse);
+        expect(viewModel.results.map((result) => result.name), names);
+        expect(viewModel.hasError, isFalse);
+
+        offResponse.complete(offPage(slowPage, 20));
+        usdaResponse.complete(usdaPage(slowPage, 20));
+        await tester.pump();
+        expect(viewModel.results.map((result) => result.name), names);
+      });
+    }
+  }
+
+  testWidgets('both provider timeouts keep neutral error and full retry', (
+    tester,
+  ) async {
+    var retry = false;
+    final requests = <String>[];
+    final viewModel = FoodSearchViewModel(
+      openFoodFactsSearch:
+          ({required query, required page, required pageSize}) {
+            requests.add('OFF:$query:$page');
+            return retry
+                ? Future.value(offPage(page, 1))
+                : Completer<SearchResult>().future;
+          },
+      usdaFoodSearch: ({required query, required page, required pageSize}) {
+        requests.add('USDA:$query:$page');
+        return retry
+            ? Future.value(usdaPage(page, 1))
+            : Completer<UsdaSearchResponse>().future;
+      },
+    );
+    addTearDown(viewModel.dispose);
+    unawaited(viewModel.retry('food'));
+    await tester.pump(const Duration(seconds: 10));
+    expect(viewModel.hasError, isTrue);
+    expect(viewModel.isInitialLoading, isFalse);
+    retry = true;
+    await viewModel.retry('food');
+    expect(viewModel.results, hasLength(2));
+    expect(viewModel.hasError, isFalse);
+    expect(requests, [
+      'OFF:food:1',
+      'USDA:food:1',
+      'OFF:food:1',
+      'USDA:food:1',
+    ]);
+  });
+
+  testWidgets('stale pagination response and timeout cannot change new query', (
+    tester,
+  ) async {
+    final offResponse = Completer<SearchResult>();
+    final viewModel = FoodSearchViewModel(
+      openFoodFactsSearch:
+          ({required query, required page, required pageSize}) =>
+              query == 'old' && page == 2
+              ? offResponse.future
+              : Future.value(
+                  query == 'old' ? offPage(page, pageSize) : offPage(page, 1),
+                ),
+      usdaFoodSearch: ({required query, required page, required pageSize}) =>
+          query == 'old' && page == 2
+          ? Completer<UsdaSearchResponse>().future
+          : Future.value(usdaPage(page, query == 'old' ? pageSize : 1)),
+    );
+    addTearDown(viewModel.dispose);
+    await viewModel.retry('old');
+    unawaited(viewModel.loadMore('old'));
+    await viewModel.retry('new');
+    final names = viewModel.results.map((result) => result.name).toList();
+    offResponse.complete(offPage(2, 1));
+    await tester.pump(const Duration(seconds: 10));
+    expect(viewModel.activeQuery, 'new');
+    expect(viewModel.results.map((result) => result.name), names);
+    expect(viewModel.hasError, isFalse);
+    expect(viewModel.isLoadingMore, isFalse);
+  });
+
+  testWidgets('dispose ignores pending response and timeout state', (
+    tester,
+  ) async {
+    final offResponse = Completer<SearchResult>();
+    final viewModel = FoodSearchViewModel(
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) => offResponse.future,
+      usdaFoodSearch: ({required query, required page, required pageSize}) =>
+          Completer<UsdaSearchResponse>().future,
+    );
+    var notifications = 0;
+    viewModel.addListener(() => notifications++);
+    unawaited(viewModel.retry('food'));
+    expect(notifications, 1);
+    viewModel.dispose();
+    offResponse.complete(offPage(1, 1));
+    await tester.pump(const Duration(seconds: 10));
+    expect(viewModel.results, isEmpty);
+    expect(viewModel.offSearched, isFalse);
+    expect(viewModel.usdaSearched, isFalse);
+    expect(notifications, 1);
+    viewModel.search('after dispose');
+    await viewModel.retry('after dispose');
+    await viewModel.loadMore('food');
+    expect(viewModel.activeQuery, 'food');
+  });
+
   test(
     'retry keeps successful provider results when the other fails',
     () async {
@@ -193,6 +343,24 @@ void main() {
     expect(first.originalValues, food.toJson());
   });
 }
+
+SearchResult offPage(int page, int pageSize) => SearchResult(
+  products: List.generate(
+    page == 1 ? pageSize : 1,
+    (index) =>
+        Product(barcode: '$page-$index', productName: 'OFF $page-$index'),
+  ),
+);
+
+UsdaSearchResponse usdaPage(int page, int pageSize) => UsdaSearchResponse(
+  totalHits: 21,
+  currentPage: page,
+  totalPages: 2,
+  foods: List.generate(
+    page == 1 ? pageSize : 1,
+    (index) => usdaFood(page * 100 + index, 'USDA $page-$index'),
+  ),
+);
 
 UsdaFoodItem usdaFood(int id, String description) => UsdaFoodItem(
   fdcId: id,

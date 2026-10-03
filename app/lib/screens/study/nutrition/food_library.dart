@@ -71,6 +71,18 @@ class _FoodLibraryState() extends State<FoodLibrary> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateExternalLocale();
+  }
+
+  void _updateExternalLocale() {
+    _externalViewModel?.setLanguageCode(
+      Localizations.localeOf(context).languageCode,
+    );
+  }
+
+  @override
   void didUpdateWidget(FoodLibrary oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.includeExternalLibrary != widget.includeExternalLibrary ||
@@ -78,6 +90,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         oldWidget.openFoodFactsSearch != widget.openFoodFactsSearch ||
         oldWidget.usdaFoodSearch != widget.usdaFoodSearch) {
       _setExternalViewModel();
+      _updateExternalLocale();
     }
   }
 
