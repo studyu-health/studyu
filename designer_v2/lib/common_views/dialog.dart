@@ -15,6 +15,7 @@ class const StandardDialog({
   final double? maxWidth,
   final double? maxHeight,
   final List<Widget> actionButtons = const [],
+  final bool scrollBody = true,
   final Color? backgroundColor,
   final double? borderRadius = 20.0,
   super.key,
@@ -87,7 +88,11 @@ class const StandardDialog({
                         SizedBox(height: padding.top * 2 / 3)
                       else
                         const SizedBox.shrink(),
-                      Expanded(child: SingleChildScrollView(child: body)),
+                      Expanded(
+                        child: scrollBody
+                            ? SingleChildScrollView(child: body)
+                            : body,
+                      ),
                       SizedBox(height: padding.bottom),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,

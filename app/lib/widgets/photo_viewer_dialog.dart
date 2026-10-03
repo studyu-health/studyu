@@ -11,10 +11,6 @@ class const PhotoViewerDialog({
 
   /// The date the photo was taken.
   required final DateTime photoDate,
-
-  /// Optional callback triggered when the user taps "Analyze Meal".
-  /// When provided, an analyze button is shown in the full-screen view.
-  final VoidCallback? onAnalyze,
   super.key,
 }) extends StatelessWidget {
   /// Creates a new [PhotoViewerDialog].
@@ -25,15 +21,10 @@ class const PhotoViewerDialog({
     BuildContext context, {
     required String photoId,
     required DateTime photoDate,
-    VoidCallback? onAnalyze,
   }) {
     return showDialog(
       context: context,
-      builder: (_) => PhotoViewerDialog(
-        photoId: photoId,
-        photoDate: photoDate,
-        onAnalyze: onAnalyze,
-      ),
+      builder: (_) => PhotoViewerDialog(photoId: photoId, photoDate: photoDate),
     );
   }
 
@@ -57,16 +48,6 @@ class const PhotoViewerDialog({
             style: const TextStyle(color: Colors.white),
           ),
         ),
-        floatingActionButton: onAnalyze != null
-            ? FloatingActionButton.extended(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onAnalyze!();
-                },
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('Analyze Meal'),
-              )
-            : null,
         body: InteractiveViewer(
           minScale: 0.5,
           maxScale: 4.0,

@@ -1951,32 +1951,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get daily_food_diary => 'Daily Food Diary';
 
   @override
-  String get saving => 'Saving...';
-
-  @override
-  String saved_ago(String time) {
-    return 'Saved $time ago';
-  }
-
-  @override
-  String get just_now => 'just now';
-
-  @override
-  String seconds_ago(int seconds) {
-    return '$seconds seconds ago';
-  }
-
-  @override
-  String minutes_ago(int minutes) {
-    return '$minutes minute(s) ago';
-  }
-
-  @override
-  String hours_ago(int hours) {
-    return '$hours hour(s) ago';
-  }
-
-  @override
   String get instructions => 'Instructions';
 
   @override
@@ -2021,7 +1995,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get add_meal => 'Add Meal';
+  String get add_meal => 'New meal';
 
   @override
   String get no_meals_recorded => 'No meals recorded yet';
@@ -2051,6 +2025,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get meal_type_other => 'Other';
 
   @override
+  String get meal_category_snacks => 'Snacks';
+
+  @override
+  String get meal_category_other => 'Other meals';
+
+  @override
+  String get no_foods_added => 'No foods added';
+
+  @override
+  String get log_food => 'Log food';
+
+  @override
   String food_items_count(int count) {
     return '$count food items';
   }
@@ -2059,13 +2045,109 @@ class AppLocalizationsKo extends AppLocalizations {
   String get meal_entry_title => 'Meal Entry';
 
   @override
+  String get add_meal_or_snack => 'Add meal or snack';
+
+  @override
+  String get meal_neutral_label => 'Meal';
+
+  @override
+  String get meal_suffix => 'meal';
+
+  @override
+  String get meal_label => 'Meal label';
+
+  @override
+  String get no_meal_label => 'No label';
+
+  @override
+  String get time_not_remembered => 'Time not remembered';
+
+  @override
+  String about_time(String time) {
+    return 'About $time';
+  }
+
+  @override
+  String get time_exact => 'Exact time';
+
+  @override
+  String get time_exact_description => 'I know the exact time';
+
+  @override
+  String get time_approximate => 'Approximate time';
+
+  @override
+  String get time_approximate_description => 'I know roughly when';
+
+  @override
+  String get time_unknown => 'I don\'t remember';
+
+  @override
+  String get set_time => 'Set time';
+
+  @override
   String get save => 'Save';
+
+  @override
+  String get new_item => 'New';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get unsaved_changes_title => 'Discard unsaved changes?';
+
+  @override
+  String get unsaved_changes_message =>
+      'Discard your changes or continue editing.';
+
+  @override
+  String get discard_meal_changes_title => 'Leave this meal?';
+
+  @override
+  String get discard_meal_changes_message =>
+      'Discard your changes or continue editing.';
+
+  @override
+  String get save_and_leave => 'Save and leave';
+
+  @override
+  String get discard_changes => 'Discard changes';
+
+  @override
+  String get continue_editing => 'Continue editing';
+
+  @override
+  String get delete_meal => 'Delete meal';
+
+  @override
+  String get delete_meal_title => 'Delete this meal?';
+
+  @override
+  String get delete_meal_message =>
+      'This meal will be removed from the nutrition log.';
+
+  @override
+  String get enter_skip_reason => 'Enter a reason before saving.';
+
+  @override
+  String get add_food_before_saving =>
+      'Add at least one food item before saving.';
 
   @override
   String get meal_information => 'Meal Information';
 
   @override
   String get meal_type_label => 'Meal Type';
+
+  @override
+  String get meal_details => 'Meal details';
+
+  @override
+  String get edit_meal_title => 'Edit meal';
+
+  @override
+  String get apply => 'Apply';
 
   @override
   String get custom_meal_label => 'Custom Meal Label';
@@ -2124,34 +2206,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String get context_other => 'Other';
 
   @override
-  String get company_alone => '👤 Alone';
+  String get company_alone => 'Alone';
 
   @override
-  String get company_family => '👨‍👩‍👧‍👦 Family';
+  String get company_family => 'Family';
 
   @override
-  String get company_friends => '👥 Friends';
+  String get company_friends => 'Friends';
 
   @override
-  String get company_colleagues => '💼 Colleagues';
+  String get company_colleagues => 'Colleagues';
 
   @override
-  String get company_other => '🤝 Other';
+  String get company_other => 'Other';
 
   @override
-  String get distraction_none => '🧘 None';
+  String get distraction_none => 'None';
 
   @override
-  String get distraction_tv => '📺 TV';
+  String get distraction_tv => 'TV';
 
   @override
-  String get distraction_phone => '📱 Phone';
+  String get distraction_phone => 'Phone';
 
   @override
-  String get distraction_work => '💻 Work';
+  String get distraction_work => 'Work';
 
   @override
-  String get distraction_other => '📖 Other';
+  String get distraction_other => 'Other';
 
   @override
   String get food_entry_title => 'Food Entry';
@@ -2163,7 +2245,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get entry_type => 'Entry Type';
 
   @override
-  String get food_name => 'Food Name *';
+  String get food_name => 'Food name *';
+
+  @override
+  String get nutrition_values_are_for => 'Nutrition values are for';
 
   @override
   String get brand_name => 'Brand Name';
@@ -2175,11 +2260,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get description_hint => 'Optional notes about this food';
 
   @override
-  String get recipe_info =>
-      'Recipe: Use Recipe Builder for better ingredient management';
+  String get meal_info => 'Meal: Use Meal Creator for combined food management';
 
   @override
-  String get open_recipe_builder => 'Open Recipe Builder';
+  String get open_meal_creator => 'Open Meal Creator';
 
   @override
   String get amount => 'Amount *';
@@ -2230,6 +2314,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fat_g => 'Fat (g)';
 
   @override
+  String get protein => 'Protein';
+
+  @override
+  String get carbohydrate => 'Carbohydrate';
+
+  @override
+  String get fat => 'Fat';
+
+  @override
+  String get optional => 'Optional';
+
+  @override
   String get saturated_fat_g => 'Sat. Fat (g)';
 
   @override
@@ -2251,16 +2347,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get enter_serving_size => 'Please enter serving size';
 
   @override
-  String get entry_type_single_ingredient => '🥕 Single Ingredient';
+  String get entry_type_single_ingredient => 'Single Ingredient';
 
   @override
-  String get entry_type_recipe => '📖 Recipe';
+  String get entry_type_meal => 'Meal';
 
   @override
-  String get entry_type_branded_product => '🏷️ Branded Product';
+  String get entry_type_branded_product => 'Branded Product';
 
   @override
-  String get entry_type_manual_entry => '✏️ Manual Entry';
+  String get entry_type_manual_entry => 'Manual Entry';
 
   @override
   String get portion_method_household => 'Household Measure';
@@ -2287,22 +2383,90 @@ class AppLocalizationsKo extends AppLocalizations {
   String get portion_state_as_served => 'As Served';
 
   @override
-  String get my_templates => 'My Templates';
+  String get my_templates => 'My items';
 
   @override
-  String get save_as_template => 'Save as Template';
+  String get manage_saved_items => 'Manage';
 
   @override
-  String get save_meal_template => 'Save Meal Template';
+  String get adjust_quantity => 'Adjust quantity';
 
   @override
-  String get save_food_template => 'Save Food Template';
+  String get edit_this_entry => 'Edit this entry';
 
   @override
-  String get save_recipe_template => 'Save Recipe Template';
+  String get library_edit_title => 'Update reusable item?';
 
   @override
-  String get template_name => 'Template Name';
+  String get library_edit_message =>
+      'This entry comes from your library. Choose where to save your changes.';
+
+  @override
+  String get library_edit_current_entry => 'Only this logged item';
+
+  @override
+  String get library_edit_current_entry_and_library =>
+      'This item and reusable library item';
+
+  @override
+  String get save_to_my_items_action => 'Save to My items';
+
+  @override
+  String get external_library_copy => 'Import';
+
+  @override
+  String external_library_copy_label(String name) {
+    return 'Review and add $name to My library';
+  }
+
+  @override
+  String get external_library_copy_saved => 'Added to My library';
+
+  @override
+  String get external_library_copy_save_error =>
+      'Could not add food to My library';
+
+  @override
+  String get remove_from_meal => 'Remove from meal';
+
+  @override
+  String get duplicate => 'Duplicate';
+
+  @override
+  String get save_as_template => 'Add to My items';
+
+  @override
+  String get save_meal => 'Save to library';
+
+  @override
+  String get done_label => 'Done';
+
+  @override
+  String get log_meal => 'Log meal';
+
+  @override
+  String get add_items => 'Add items';
+
+  @override
+  String add_items_to_meal(String meal) {
+    return 'Add items to $meal';
+  }
+
+  @override
+  String get save_as_reusable_meal => 'Save as reusable meal';
+
+  @override
+  String get save_as_reusable_meal_description =>
+      'Add this combination to My items so you can use it again.';
+
+  @override
+  String get save_food => 'Save food';
+
+  @override
+  String get template_name => 'Name';
+
+  @override
+  String get template_name_required => 'Meal name *';
 
   @override
   String get template_tags_optional => 'Tags (optional)';
@@ -2311,36 +2475,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get template_tags_hint => 'breakfast, quick, healthy';
 
   @override
-  String get template_saved => 'Template saved';
+  String get template_saved => 'Added to My items';
 
   @override
-  String get select_meal_template => 'Select Meal Template';
+  String get select_meal => 'My meals';
 
   @override
-  String get select_food_template => 'Select Food Template';
+  String get select_food => 'My foods';
 
   @override
-  String get search_templates => 'Search templates...';
+  String get food_library_search_hint =>
+      'Search My library and external library…';
 
   @override
-  String get no_templates_saved => 'No templates saved yet';
+  String get search_templates => 'Search saved foods and meals…';
+
+  @override
+  String get no_templates_saved => 'No items yet';
 
   @override
   String get save_templates_hint =>
-      'Save your favorite meals and foods as templates for quick access';
+      'Save your favorite meals and foods for quick access';
 
   @override
-  String get from_template => 'From Template';
+  String get from_template => 'From My items';
 
   @override
   String get add_new_food => 'Add New Food';
 
   @override
-  String get delete_template => 'Delete Template';
+  String get delete_template => 'Delete item';
 
   @override
   String get delete_template_confirmation =>
-      'Are you sure you want to delete this template?';
+      'Are you sure you want to delete this item?';
 
   @override
   String get filter_all => 'All';
@@ -2352,16 +2520,135 @@ class AppLocalizationsKo extends AppLocalizations {
   String get filter_foods => 'Foods';
 
   @override
-  String get filter_recipes => 'Recipes';
+  String items_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
 
   @override
-  String items_count(int count) {
-    return '$count items';
+  String get add => 'Add';
+
+  @override
+  String get food_selection_add_to_selection => 'Add to selection';
+
+  @override
+  String get food_selection_update_selection => 'Update selection';
+
+  @override
+  String get food_selection_selected_items => 'Selected items';
+
+  @override
+  String food_selection_view_more(int count) {
+    return 'View all $count items';
+  }
+
+  @override
+  String food_selection_increment(String name) {
+    return 'Increase $name';
+  }
+
+  @override
+  String food_selection_decrement(String name) {
+    return 'Decrease $name';
+  }
+
+  @override
+  String food_selection_delete(String name) {
+    return 'Delete $name';
+  }
+
+  @override
+  String get food_selection_item_removed => 'Item removed';
+
+  @override
+  String get food_selection_undo => 'Undo';
+
+  @override
+  String food_selection_selected(String name, int quantity) {
+    return '$name, selected, quantity $quantity';
+  }
+
+  @override
+  String food_selection_known_calories(String value, int count) {
+    return '$value kcal known · $count unavailable';
+  }
+
+  @override
+  String food_selection_unknown_calories(int count) {
+    return '— kcal · $count unavailable';
+  }
+
+  @override
+  String food_selection_calories_unavailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: 'one item',
+    );
+    return 'Calories unavailable for $_temp0';
+  }
+
+  @override
+  String food_selection_confirm(int count, String meal) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count items to $meal',
+      one: 'Add 1 item to $meal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String serving_amount(num amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      amount,
+      locale: localeName,
+      other: '$amount servings',
+      one: '1 serving',
+    );
+    return '$_temp0';
   }
 
   @override
   String kcal_value(String value) {
     return '$value kcal';
+  }
+
+  @override
+  String kcal_per_serving(String value) {
+    return '$value kcal / serving';
+  }
+
+  @override
+  String servings_value(String value) {
+    return '$value servings';
+  }
+
+  @override
+  String get custom => 'Custom';
+
+  @override
+  String get database => 'Database';
+
+  @override
+  String get no_recent_items => 'No recent items yet';
+
+  @override
+  String get brand => 'Brand';
+
+  @override
+  String get calorie_basis_100g => 'per 100 g';
+
+  @override
+  String calorie_basis_grams(String grams) {
+    return 'per $grams g';
   }
 
   @override
@@ -2371,10 +2658,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get template_type_food => 'Food';
 
   @override
-  String get template_type_recipe => 'Recipe';
-
-  @override
-  String get rename_template => 'Rename Template';
+  String get rename_template => 'Rename item';
 
   @override
   String get new_name => 'New Name';
@@ -2399,10 +2683,117 @@ class AppLocalizationsKo extends AppLocalizations {
   String get add_food_title => 'Add Food';
 
   @override
-  String get edit_food_title => 'Edit Food';
+  String add_food_to_meal(String meal) {
+    return 'Add food to $meal';
+  }
 
   @override
-  String get add_food_manually => 'Add Food Manually';
+  String get food_quantity_amount => 'Amount';
+
+  @override
+  String get food_quantity_weight => 'Weight';
+
+  @override
+  String get food_quantity_custom_weight => 'Custom';
+
+  @override
+  String food_quantity_library_serving(String weight) {
+    return 'Library serving: $weight g';
+  }
+
+  @override
+  String food_quantity_default_serving(String weight) {
+    return 'Default serving: $weight g';
+  }
+
+  @override
+  String get food_quantity_library_serving_unknown =>
+      'Library serving: weight unavailable';
+
+  @override
+  String get food_quantity_default_serving_unknown =>
+      'Default serving: weight unavailable';
+
+  @override
+  String get food_quantity_override_helper =>
+      'Changes only this meal selection. My Library and the source item remain unchanged.';
+
+  @override
+  String food_quantity_use_library_weight(String weight) {
+    return 'Use library weight ($weight g)';
+  }
+
+  @override
+  String food_quantity_use_default_weight(String weight) {
+    return 'Use default weight ($weight g)';
+  }
+
+  @override
+  String get food_quantity_invalid_amount =>
+      'Enter an amount greater than zero';
+
+  @override
+  String get food_quantity_serving => 'Serving';
+
+  @override
+  String food_quantity_serving_unit(num amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      amount,
+      locale: localeName,
+      other: 'servings',
+      one: 'serving',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String food_quantity_serving_value(String value, String unit) {
+    return '$value g per $unit';
+  }
+
+  @override
+  String get food_quantity_energy => 'Energy';
+
+  @override
+  String get food_quantity_protein => 'Protein';
+
+  @override
+  String get food_quantity_carbs => 'Carbs';
+
+  @override
+  String get food_quantity_fat => 'Fat';
+
+  @override
+  String food_quantity_add_to_meal(String meal) {
+    return 'Add to $meal';
+  }
+
+  @override
+  String get food_quantity_add_to_selection => 'Add item';
+
+  @override
+  String get food_quantity_add_meal_to_selection => 'Add meal to selection';
+
+  @override
+  String get food_quantity_update_selection => 'Save changes';
+
+  @override
+  String get food_quantity_nutrition_unavailable =>
+      'Nutrition information unavailable';
+
+  @override
+  String get save_to_my_items => 'Save to My items for future use';
+
+  @override
+  String save_and_add_to_meal(String meal) {
+    return 'Save and add to $meal';
+  }
+
+  @override
+  String get edit_food_title => 'Edit food';
+
+  @override
+  String get add_food_manually => 'Create food';
 
   @override
   String get basic_information => 'Basic Information';
@@ -2414,7 +2805,42 @@ class AppLocalizationsKo extends AppLocalizations {
   String get detailed_nutrients => 'Detailed Nutrients';
 
   @override
-  String get daily_nutrition_total => 'Daily Nutrition Total';
+  String get daily_nutrition_total => 'Nutrition summary';
+
+  @override
+  String get daily_summary => 'Daily summary';
+
+  @override
+  String get energy_by_macronutrient => 'Energy by macronutrient';
+
+  @override
+  String get total_energy => 'Total energy';
+
+  @override
+  String get show => 'Show';
+
+  @override
+  String get hide => 'Hide';
+
+  @override
+  String get carbohydrates => 'Carbohydrates';
+
+  @override
+  String get fibre => 'Fibre';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String some_values_unavailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'Some nutrient values are unavailable for $count $_temp0.';
+  }
 
   @override
   String get meal_nutrition => 'Meal Nutrition';
@@ -2429,28 +2855,81 @@ class AppLocalizationsKo extends AppLocalizations {
   String get more_options => 'More options';
 
   @override
-  String get search_food_hint => 'Search food (e.g., \"apple\", \"chicken\")';
+  String get search_food_hint => 'Search foods, meals or brands';
 
   @override
-  String get my_saved_items => 'My Saved Items';
+  String get my_saved_items => 'My library';
 
   @override
-  String get global_database => 'Global Database';
+  String get food_library => 'Food library';
+
+  @override
+  String get add_food_action => 'Create food';
+
+  @override
+  String get add_meal_action => 'Create meal';
+
+  @override
+  String get recent_foods => 'Recently added';
+
+  @override
+  String get frequently_used_foods => 'Frequently Used';
+
+  @override
+  String get global_database => 'Database';
+
+  @override
+  String get external_library => 'External library';
+
+  @override
+  String get external_library_loading => 'Searching external library…';
+
+  @override
+  String get external_library_error =>
+      'External library is unavailable. Please try again.';
+
+  @override
+  String external_library_results_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count external results found',
+      one: '1 external result found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get review_copied_food => 'Review food';
+
+  @override
+  String get external_library_copy_notice =>
+      'Review the details before adding this food to My library. Changes won’t affect the external library.';
+
+  @override
+  String get external_library_save_copy => 'Save to My library';
 
   @override
   String get quick_actions => 'Quick Actions';
 
   @override
-  String get create_recipe => 'Create Recipe';
+  String get create => 'Create';
 
   @override
-  String get create_recipe_subtitle => 'Build from multiple ingredients';
+  String get create_meal => 'Create meal';
 
   @override
-  String get add_manually => 'Add Manually';
+  String get create_meal_subtitle => 'Combine multiple foods';
+
+  @override
+  String get add_manually => 'Create food manually';
 
   @override
   String get add_manually_subtitle => 'Enter nutrition facts yourself';
+
+  @override
+  String get tap_item_to_choose_serving =>
+      'Tap a food to change the serving or amount.';
 
   @override
   String get scan_barcode => 'Scan Barcode';
@@ -2459,10 +2938,58 @@ class AppLocalizationsKo extends AppLocalizations {
   String get scan_barcode_subtitle => 'Find packaged products quickly';
 
   @override
+  String get barcode_scanner_guidance_initial => 'Point camera at barcode';
+
+  @override
+  String get barcode_scanner_no_barcode =>
+      'No barcode detected — adjust position';
+
+  @override
+  String get barcode_scanner_processing => 'Barcode detected! Processing…';
+
+  @override
+  String get barcode_scanner_invalid =>
+      'Invalid barcode — try a different angle';
+
+  @override
+  String get barcode_scanner_lookup => 'Valid barcode. Looking up…';
+
+  @override
+  String get barcode_scanner_distance_guidance =>
+      'Large barcode? Move back 15–30 cm\\nSmall barcode? Move closer';
+
+  @override
+  String get barcode_scanner_detected => 'DETECTED';
+
+  @override
+  String get barcode_scanner_lookup_progress => 'Looking up product…';
+
+  @override
+  String get barcode_scanner_toggle_flash => 'Toggle flash';
+
+  @override
+  String get barcode_scanner_switch_camera => 'Switch camera';
+
+  @override
+  String get barcode_scanner_not_found_title => 'Product not found';
+
+  @override
+  String barcode_scanner_not_found_message(String barcode) {
+    return 'No product found for barcode: $barcode\\n\\nThis product may not be in the external library yet. You can add it manually or scan another product.';
+  }
+
+  @override
+  String get barcode_scanner_scan_again => 'Scan again';
+
+  @override
+  String get barcode_scanner_error_title => 'Search unavailable';
+
+  @override
   String get search_for_food => 'Search for Food';
 
   @override
-  String get search_food_description => 'Type above to search global databases';
+  String get search_food_description =>
+      'Try “apple”, “oat milk”, or a brand name.';
 
   @override
   String get searching_databases => 'Searching databases...';
@@ -2474,7 +3001,35 @@ class AppLocalizationsKo extends AppLocalizations {
   String get no_results_found => 'No results found. Try different keywords.';
 
   @override
-  String get no_matching_templates => 'No matching templates';
+  String no_results_for_query(String query) {
+    return 'No results for “$query”';
+  }
+
+  @override
+  String get cant_find_it => 'Can’t find it?';
+
+  @override
+  String create_food_from_search(String query) {
+    return 'Create “$query” manually';
+  }
+
+  @override
+  String get food_search_error =>
+      'Food search is unavailable. Please try again.';
+
+  @override
+  String food_search_results_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results found',
+      one: '1 result found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get no_matching_templates => 'No matching items';
 
   @override
   String get detailed_nutrition => 'Detailed Nutrition';
@@ -2492,6 +3047,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get details => 'Details';
 
   @override
+  String get meal_context => 'Meal context';
+
+  @override
   String get search_food_database => 'Search Food Database';
 
   @override
@@ -2505,7 +3063,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get photoRecallTitle => 'Photo Recall';
 
   @override
-  String get photoRecallSubtitle => 'View photos from around this time';
+  String get photoRecallSubtitle =>
+      'Use photos from this day to remember what you ate.';
 
   @override
   String get photoRecallPermissionNeeded => 'Tap to enable photo access';
@@ -2522,15 +3081,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get photoRecallNoPhotosSubtitle =>
-      'We couldn\'t find any photos taken around this time';
+      'We couldn’t find any photos taken on this day';
 
   @override
   String get photoRecallTapToEnlarge => 'Tap a photo to view it full screen';
-
-  @override
-  String photoRecallTimeInfo(String time) {
-    return 'Showing photos from around $time (±2 hours)';
-  }
 
   @override
   String get grantPermission => 'Grant Permission';
@@ -2588,4 +3142,348 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get leave_anyway => 'Leave anyway';
+
+  @override
+  String get nutrition_tracking => 'Nutrition tracking';
+
+  @override
+  String get nutrition_statistics => 'Statistics';
+
+  @override
+  String get nutrition_recent_7_days => 'Recent 7 days';
+
+  @override
+  String get nutrition_recent_30_days => 'Recent 30 days';
+
+  @override
+  String nutrition_days_recorded(int recorded, int total) {
+    return '$recorded of $total days recorded';
+  }
+
+  @override
+  String nutrition_completed_days(int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      completed,
+      locale: localeName,
+      other: '$completed completed days',
+      one: '$completed completed day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nutrition_daily_average => 'Average across completed days';
+
+  @override
+  String get nutrition_energy_by_study_day => 'Energy by study day';
+
+  @override
+  String nutrition_average_value(String value) {
+    return 'Average $value across completed days';
+  }
+
+  @override
+  String get nutrition_tap_bar_hint =>
+      'Tap a bar to view its value or open that day.';
+
+  @override
+  String get nutrition_nutrient_trend => 'Nutrient trend';
+
+  @override
+  String get nutrition_carbs => 'Carbs';
+
+  @override
+  String nutrition_average_per_recorded_day(String value) {
+    return 'Average $value per completed day';
+  }
+
+  @override
+  String nutrition_compared_previous_days(int count) {
+    return 'Compared with the previous $count days';
+  }
+
+  @override
+  String get nutrition_record_more_comparisons =>
+      'Record more study days to see period comparisons.';
+
+  @override
+  String get nutrition_energy => 'Energy';
+
+  @override
+  String get nutrition_today_so_far => 'Today so far';
+
+  @override
+  String nutrition_chart_day_value(String date, String value) {
+    return '$date, $value';
+  }
+
+  @override
+  String nutrition_chart_day_missing(String date) {
+    return '$date, not recorded';
+  }
+
+  @override
+  String get nutrition_view_day_hint => 'Press Enter to view this day.';
+
+  @override
+  String get nutrition_statistics_help_message =>
+      'Averages include only completed study days. Today appears in charts as ‘Today so far’ and is excluded from averages until the diary is complete. Missing days are left blank.';
+
+  @override
+  String nutrition_kcal_per_day(String value) {
+    return '$value kcal/day';
+  }
+
+  @override
+  String nutrition_grams_per_day(String value) {
+    return '$value g/day';
+  }
+
+  @override
+  String get nutrition_recent_days => 'Recent days';
+
+  @override
+  String get nutrition_history => 'History';
+
+  @override
+  String get nutrition_history_empty => 'No past food diaries yet.';
+
+  @override
+  String get nutrition_history_latest_study_day => 'Latest study day';
+
+  @override
+  String get nutrition_history_latest_study_day_description =>
+      'Your latest study day remains editable so you can add or correct entries the following morning.';
+
+  @override
+  String get nutrition_history_previous_study_days => 'Previous study days';
+
+  @override
+  String get nutrition_history_no_foods_logged => 'No foods logged';
+
+  @override
+  String historical_editing_date(String date) {
+    return 'Editing $date';
+  }
+
+  @override
+  String get historical_edit_expired => 'This study day is no longer editable.';
+
+  @override
+  String get edit_food_definition => 'Edit reusable food';
+
+  @override
+  String get food_definition_edit_helper =>
+      'Serving description, weight, conversions, and nutrition update the reusable item and selected historical entry. You can also update matching entries in the current study day when available. Selected entry keeps its serving count.';
+
+  @override
+  String get nutrition_statistics_empty =>
+      'No nutrition data is available yet.';
+
+  @override
+  String get nutrition_editable => 'Editable';
+
+  @override
+  String get nutrition_read_only => 'Read-only';
+
+  @override
+  String get nutrition_logging_guidance =>
+      'Log each meal and drink as accurately as you can. Include portions and preparation details when you know them.';
+
+  @override
+  String get open_faq => 'Open FAQ';
+
+  @override
+  String get nutrition_calories => 'Calories';
+
+  @override
+  String get historical_edit_mode_heading => 'Editing a previous study day';
+
+  @override
+  String get historical_edit_mode_description =>
+      'On this History screen, you can update the meal log from your previous study day. Foods and meals you create here remain available for future meal logs.';
+
+  @override
+  String get update_current_day_entries =>
+      'Also update matching entries in current study day';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get current_meal_only_banner =>
+      'Changes apply only to this meal. For permanent changes, use Food Library.';
+
+  @override
+  String grams_per_serving(Object grams) {
+    return '$grams g per serving';
+  }
+
+  @override
+  String get open_food_facts_attribution => '(c) Open Food Facts contributors';
+
+  @override
+  String get open_food_facts_attribution_launch_error =>
+      'Could not open the Open Food Facts terms of use.';
+
+  @override
+  String get food_definition_updated_current_day_opt_out =>
+      'Reusable item updated. Matching entries in the current study day were not updated.';
+
+  @override
+  String get food_definition_updated_current_day_opt_in =>
+      'Reusable item updated. Matching entries in the current study day were also updated.';
+
+  @override
+  String get food_quantity_weight_per_serving => 'Weight per serving';
+
+  @override
+  String food_quantity_total_weight(String weight) {
+    return 'Total weight: $weight g';
+  }
+
+  @override
+  String get food_quantity_decrease_weight => 'Decrease weight per serving';
+
+  @override
+  String get food_quantity_increase_weight => 'Increase weight per serving';
+
+  @override
+  String get food_selection_collapse => 'Collapse selected items';
+
+  @override
+  String get food_quantity_edit_amount => 'Edit amount';
+
+  @override
+  String food_quantity_nutrition_for_amount(Object amount, Object unit) {
+    return 'Nutrition for $amount $unit';
+  }
+
+  @override
+  String food_selection_items_count(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nutrition_logged_foods_and_meals => 'Foods and saved meals';
+
+  @override
+  String get nutrition_add_food_or_saved_meal => 'Add food or saved meal';
+
+  @override
+  String get nutrition_add_food_or_choose_saved_meal =>
+      'Add a food or choose a saved meal';
+
+  @override
+  String get nutrition_food_badge => 'Food';
+
+  @override
+  String get nutrition_saved_meal_badge => 'Saved meal';
+
+  @override
+  String nutrition_add_foods_or_saved_meals_to_meal(Object meal) {
+    return 'Add foods or saved meals to $meal';
+  }
+
+  @override
+  String get nutrition_search_foods_saved_meals_or_brands =>
+      'Search foods, saved meals, or brands';
+
+  @override
+  String get nutrition_create_saved_meal => 'Create saved meal';
+
+  @override
+  String get nutrition_create_saved_meal_from_log =>
+      'Create saved meal from this log';
+
+  @override
+  String get nutrition_edit_saved_meal => 'Edit saved meal';
+
+  @override
+  String nutrition_ingredients_section(Object count) {
+    return 'Ingredients ($count)';
+  }
+
+  @override
+  String get nutrition_add_food_ingredient => 'Add food ingredient';
+
+  @override
+  String get nutrition_invalid_saved_meal =>
+      'This saved meal contains incomplete ingredients and cannot be saved. Add valid food ingredients and try again.';
+
+  @override
+  String get nutrition_saved_meals_filter => 'Saved meals';
+
+  @override
+  String nutrition_add_food_to_meal(Object meal) {
+    return 'Add food to $meal';
+  }
+
+  @override
+  String get nutrition_search_foods_or_brands => 'Search foods or brands';
+
+  @override
+  String get nutrition_saved_meals_expanded_notice =>
+      'Saved meals were expanded into food ingredients for review. Your new saved meal will contain food ingredients only.';
+
+  @override
+  String get enter_meal_name => 'Please enter a meal name';
+
+  @override
+  String get nutrition_servings_required => 'Servings *';
+
+  @override
+  String get nutrition_preparation_details => 'Preparation details';
+
+  @override
+  String get nutrition_preparation_details_subtitle =>
+      'Raw and cooked weights, preparation method';
+
+  @override
+  String get nutrition_raw_weight_grams => 'Raw weight (g)';
+
+  @override
+  String get nutrition_cooked_weight_grams => 'Cooked weight (g)';
+
+  @override
+  String get nutrition_preparation_method => 'Preparation method';
+
+  @override
+  String get nutrition_preparation_method_hint => 'e.g., baked, fried, steamed';
+
+  @override
+  String get nutrition_add_food_manually => 'Add food manually';
+
+  @override
+  String get nutrition_food_name_example => 'e.g., olive oil';
+
+  @override
+  String get nutrition_quantity_short => 'Qty';
+
+  @override
+  String get nutrition_calories_kcal => 'Calories (kcal)';
+
+  @override
+  String get nutrition_no_foods_yet => 'No foods yet';
+
+  @override
+  String get nutrition_search_or_add_food_manually =>
+      'Search or add food manually to start';
+
+  @override
+  String get nutrition_unit_label => 'Unit';
+
+  @override
+  String get nutrition_per_serving => 'Nutrition per serving';
+
+  @override
+  String photoRecallDateInfo(Object date) {
+    return 'Showing photos from $date';
+  }
 }

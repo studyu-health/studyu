@@ -37,6 +37,10 @@ class UsdaFoodItem({
 
   Map<String, dynamic> toJson() => _$UsdaFoodItemToJson(this);
 
+  bool hasNutrient(int nutrientId) => foodNutrients.any(
+    (nutrient) => nutrient.nutrientId == nutrientId && nutrient.value != null,
+  );
+
   /// Get nutrient value by nutrient ID
   /// Common IDs: 1008 (Energy/Calories), 1003 (Protein), 1005 (Carbs), 1004 (Fat)
   double? getNutrientValue(int nutrientId) {

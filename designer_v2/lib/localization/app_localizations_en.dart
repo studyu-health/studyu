@@ -460,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get study_settings_publish_results_tooltip =>
-      'Make your anonymized study results & data available in the study registry. \nOther researchers and clinicians will be able to access, export and \nanalyze the results from your study (the Analyze page will be available). \n This will automatically publish your study design to the registry.';
+      'Publish study results in the StudyU registry. Other researchers and clinicians can view, export, and analyze the shared data. Nutrition recall data is excluded from public sharing. Publishing results also publishes the study design.';
 
   @override
   String get action_button_study_launch => 'Launch';
@@ -1272,7 +1272,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get form_section_scheduling_description =>
-      'To improve compliance, you can set a limited window of time for participants to complete the task & send a reminder notification at the specified time.';
+      'Restrict daily access times and set reminder notifications to support timely task completion.';
 
   @override
   String get form_field_has_reminder => 'App reminder';
@@ -1292,7 +1292,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get form_field_time_restriction_tooltip =>
-      'Provide the hours of the day during which participants need to complete the task. Please note that the task will not \nbe available for completion outside these hours & will be considered as missed for the purpose of data collection.';
+      'Time restriction controls the daily window when participants can complete the task.';
+
+  @override
+  String get form_field_time_restriction_description =>
+      'Tasks are available from 00:00 to 23:59 by default; set a narrower window if needed.';
 
   @override
   String get form_field_time_restriction_start_hint => 'From';
@@ -1724,7 +1728,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get form_study_design_measurements_description =>
-      'Define the data that you want to gather from participants during the study - primarily to evaluate the effect of your interventions. The data will be self-reported by participants in one or more surveys served via the StudyU App on a daily basis. The collected data and results will be available on the Analyze page when the study is launched.';
+      'Define the data that you want to gather from participants during the study, primarily to evaluate the effect of your interventions. Participants can provide data through surveys and specialized tracking tasks in the StudyU App. The collected data and results will be available on the Analyze page when the study is launched.';
 
   @override
   String form_array_measurements_minlength(num count) {
@@ -1732,24 +1736,24 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'form_array_measurements_minlength',
-      one: 'You need to define at least one survey to determine the effect of your intervention(s).',
+      one: 'You need to define at least one measurement to determine the effect of your intervention(s).',
     );
     return '$_temp0';
   }
 
   @override
-  String get form_array_measurements_surveys => 'Surveys';
+  String get form_array_measurements_surveys => 'Measurements';
 
   @override
-  String get form_array_measurements_surveys_new => 'Add survey';
+  String get form_array_measurements_surveys_new => 'Add measurement';
 
   @override
   String get form_array_measurements_surveys_empty_title =>
-      'No surveys defined';
+      'No measurements defined';
 
   @override
   String get form_array_measurements_surveys_empty_description =>
-      'You need to define at least one survey to determine the effect of your intervention(s).';
+      'You need to define at least one measurement to determine the effect of your intervention(s).';
 
   @override
   String get form_field_measurement_survey_title => 'Survey title';
@@ -2859,28 +2863,213 @@ class AppLocalizationsEn extends AppLocalizations {
       'Custom: Define your own sequence pattern to meet specific study requirements.';
 
   @override
-  String get form_nutrition_tracking_title => 'Nutritional Tracking';
+  String get form_measurement_type_select => 'Add measurements';
 
   @override
-  String get form_nutrition_tracking_enable_hint =>
-      'Enable nutritional tracking for this study';
-
-  @override
-  String get form_measurement_type_select => 'Select Measurement Type';
-
-  @override
-  String get form_measurement_type_survey => 'Survey';
+  String get form_measurement_type_survey => 'Create custom survey';
 
   @override
   String get form_measurement_type_survey_description =>
-      'Collect self-reported data from participants using questions and scales.';
+      'Build a survey using questions and scales.';
 
   @override
-  String get form_measurement_type_nutrition => 'Nutrition Task';
+  String get form_measurement_type_template => 'Measurement library';
+
+  @override
+  String get form_measurement_category_all => 'All';
+
+  @override
+  String get form_measurement_category_all_heading => 'All measurements';
+
+  @override
+  String get form_measurement_category_nutrition => 'Nutrition';
+
+  @override
+  String get form_measurement_category_nutrition_heading =>
+      'Nutrition measurements';
+
+  @override
+  String get form_measurement_search_placeholder => 'Search measurements';
+
+  @override
+  String get form_survey_template_empty =>
+      'No predefined measurements available';
+
+  @override
+  String get form_survey_template_added => 'Added';
+
+  @override
+  String get form_survey_template_added_to_study => 'Added to study';
+
+  @override
+  String get form_survey_template_apply => 'Add';
+
+  @override
+  String form_survey_template_add_selected_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count measurements',
+      one: 'Add 1 measurement',
+      zero: 'Add measurements',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get form_survey_template_adding => 'Adding…';
+
+  @override
+  String form_survey_template_all_days(int count) {
+    return 'All $count days';
+  }
+
+  @override
+  String get form_survey_template_select_every_survey =>
+      'Select every survey in this measurement';
+
+  @override
+  String get form_survey_template_expand_days => 'Show survey days';
+
+  @override
+  String get form_survey_template_collapse_days => 'Hide survey days';
+
+  @override
+  String get form_survey_template_choose_day => 'Choose day';
+
+  @override
+  String get form_survey_template_add_and_edit => 'Add and edit';
+
+  @override
+  String get form_survey_template_single_help => '1 editable survey';
+
+  @override
+  String form_survey_template_multi_day_help(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count surveys · Scheduled daily',
+      one: '1 survey · Scheduled daily',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String form_survey_template_day_label(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get form_survey_schedule_title => 'Occurrence schedule';
+
+  @override
+  String get form_survey_schedule_active => 'One occurrence pattern is active';
+
+  @override
+  String get form_survey_schedule_inactive =>
+      'When occurrence scheduling is off, the survey appears every study day. Built-in food-frequency questionnaires appear once by default.';
+
+  @override
+  String get form_survey_schedule_separation_help =>
+      'Occurrence controls which study days show the survey.';
+
+  @override
+  String get form_survey_schedule_pattern_help =>
+      'Choose one pattern. Selecting another pattern replaces the current one.';
+
+  @override
+  String get form_survey_schedule_specific_days => 'Specific days';
+
+  @override
+  String get form_survey_schedule_every_n_days => 'Every N days';
+
+  @override
+  String get form_survey_schedule_per_cycle => 'Per cycle';
+
+  @override
+  String get form_survey_schedule_select_days => 'Select study days:';
+
+  @override
+  String form_survey_schedule_day_label(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get form_survey_schedule_every_n_interval_label => 'Every';
+
+  @override
+  String get form_survey_schedule_days_suffix => 'days';
+
+  @override
+  String get form_survey_schedule_every_n_delay_label =>
+      'Delay first occurrence by';
+
+  @override
+  String get form_survey_schedule_every_n_delay_suffix =>
+      'days after the first study day';
+
+  @override
+  String form_survey_schedule_every_n_delay_help(int totalDays) {
+    return 'With no delay, the first occurrence is on the first study day. The study has $totalDays days.';
+  }
+
+  @override
+  String get form_survey_schedule_per_cycle_delay_label =>
+      'Delay each cycle occurrence by';
+
+  @override
+  String get form_survey_schedule_per_cycle_delay_suffix =>
+      'days after the cycle\'s first day';
+
+  @override
+  String form_survey_schedule_per_cycle_help(
+    int cycleLengthDays,
+    int phasesPerCycle,
+    int phaseDuration,
+  ) {
+    return 'Each cycle is $cycleLengthDays days ($phasesPerCycle phases × $phaseDuration days).';
+  }
+
+  @override
+  String get form_survey_schedule_target_cycles =>
+      'Target cycles (leave empty for all):';
+
+  @override
+  String form_survey_schedule_cycle_label(int cycle) {
+    return 'Cycle $cycle';
+  }
+
+  @override
+  String get form_survey_schedule_include_baseline => 'Include baseline phase';
+
+  @override
+  String get form_survey_schedule_summary_title => 'Schedule summary';
+
+  @override
+  String get form_survey_schedule_summary_empty => 'No matching days';
+
+  @override
+  String form_survey_schedule_summary_days(String days) {
+    return 'Appears on: $days';
+  }
+
+  @override
+  String form_survey_schedule_summary_occurrences(int count, int totalDays) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count occurrences across $totalDays study days',
+      one: '$count occurrence across $totalDays study days',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get form_measurement_type_nutrition => 'Nutrition tracking';
 
   @override
   String get form_measurement_type_nutrition_description =>
-      'Track participant food and drink intake using a structured journal or photo capture.';
+      'Track food and drink intake with a structured journal or photos.';
 
   @override
   String get form_field_nutrition_instructions => 'Instructions';
@@ -2891,20 +3080,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get form_field_nutrition_collect_meal_context =>
-      'Collect Meal Context';
+      'Collect meal context';
 
   @override
-  String get form_field_nutrition_allow_recipes => 'Allow Recipes';
+  String get form_field_nutrition_collect_meal_context_help =>
+      'Ask participants where and with whom they ate.';
+
+  @override
+  String get form_field_nutrition_allow_meals =>
+      'Allow saved meals in meal logs';
+
+  @override
+  String get form_field_nutrition_allow_meals_help =>
+      'Participants can add saved meals alongside individual foods while logging. When creating a new saved meal from a log, existing saved meals are expanded into their food ingredients.';
 
   @override
   String get form_field_nutrition_minimum_meals_required =>
-      'Minimum Meals Required';
+      'Minimum meals required';
+
+  @override
+  String get form_field_nutrition_minimum_meals_help =>
+      'Require this many non-skipped meals before participants can complete the task.';
 
   @override
   String get form_field_nutrition_minimum_meals_hint => 'Optional';
 
   @override
-  String get form_field_nutrition_default_title => 'Nutrition Tracking';
+  String get form_field_nutrition_default_title => 'Nutrition tracking';
 
   @override
   String get form_field_nutrition_custom_meal_types => 'Custom Meal Types';

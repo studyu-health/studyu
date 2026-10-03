@@ -18,7 +18,7 @@ void main() {
               amount: 4,
               energy: 30,
               protein: 3,
-              entryType: FoodEntryType.recipe,
+              entryType: FoodEntryType.meal,
             ),
           ],
         ),
@@ -83,6 +83,8 @@ FoodEntry _food(
 }) {
   return FoodEntry(
     id: name,
+    foodId: '$name-food',
+    foodVersionId: '$name-version',
     entryType: entryType,
     name: name,
     amount: amount,

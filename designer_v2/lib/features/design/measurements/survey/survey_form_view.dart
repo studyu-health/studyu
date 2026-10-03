@@ -9,6 +9,7 @@ import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/common_views/sidesheet/sidesheet_form.dart';
 import 'package:studyu_designer_v2/common_views/styling_information.dart';
 import 'package:studyu_designer_v2/common_views/text_hyperlink.dart';
+import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
 import 'package:studyu_designer_v2/features/design/measurements/survey/survey_form_controller.dart';
 import 'package:studyu_designer_v2/features/design/shared/questionnaire/question/question_conditional_form_view.dart';
 import 'package:studyu_designer_v2/features/design/shared/questionnaire/question/question_form_controller.dart';
@@ -43,6 +44,7 @@ class _MeasurementSurveyFormViewState()
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormTableLayout(
           rows: [
@@ -157,11 +159,6 @@ class _MeasurementSurveyFormViewState()
           onDismissed: onDismissedCallback,
         ),
         const SizedBox(height: 28.0),
-
-        // --- Schedule Rule Editor ---
-        _ScheduleRuleEditor(formViewModel: widget.formViewModel),
-
-        const SizedBox(height: 28.0),
         ReactiveFormConsumer(
           // [ReactiveFormConsumer] is needed to to re-render when descendant controls are updated
           // By default, ReactiveFormArray only updates when adding/removing controls
@@ -249,9 +246,16 @@ class _MeasurementSurveyFormViewState()
           },
         ),
         const SizedBox(height: 28.0),
+        FormSectionHeader(title: tr.form_section_scheduling),
+        const SizedBox(height: 4.0),
+        TextParagraph(text: tr.form_section_scheduling_description),
+        const SizedBox(height: 16.0),
+        _ScheduleRuleEditor(formViewModel: widget.formViewModel),
+        const SizedBox(height: 16.0),
         ScheduleControls(
           formViewModel: widget.formViewModel,
           isReadonly: widget.formViewModel.isReadonly,
+          showSectionHeader: false,
         ),
       ],
     );
@@ -397,101 +401,39 @@ class const _ScheduleRuleEditor({
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return ReactiveFormConsumer(
       builder: (context, form, child) {
         final isScheduled = formViewModel.isScheduledControl.value ?? false;
 
-        return Card(
-          elevation: isScheduled ? 2.0 : 0.0,
-          color: isScheduled
-              ? colorScheme.surface
-              : colorScheme.surfaceContainerHighest,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            alignment: Alignment.topCenter,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Toggle header
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 12.0,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.event_note_rounded,
-                        color: isScheduled
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Schedule',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                color: colorScheme.onSurface,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              isScheduled
-                                  ? 'This survey appears on specific study days'
-                                  : 'Show on specific study days',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ReactiveSwitch(
-                        formControl: formViewModel.isScheduledControl,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Expanded editor
-                if (isScheduled) ...[
-                  Divider(
-                    height: 1,
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Schedule type selector
-                        _ScheduleTypeSelector(formViewModel: formViewModel),
-                        const SizedBox(height: 16),
-
-                        // Type-specific controls
-                        _ScheduleTypeControls(formViewModel: formViewModel),
-
-                        // Preview
-                        const SizedBox(height: 16),
-                        _SchedulePreview(formViewModel: formViewModel),
-                      ],
+        return FormTableLayout(
+          rows: [
+            FormTableRow(
+              control: formViewModel.isScheduledControl,
+              label: tr.form_survey_schedule_title,
+              labelHelpText: tr.form_survey_schedule_separation_help,
+              input: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ReactiveSwitch(formControl: formViewModel.isScheduledControl),
+                  if (isScheduled) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      '${tr.form_survey_schedule_inactive} '
+                      '${tr.form_survey_schedule_pattern_help}',
+                      style: theme.textTheme.bodySmall,
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    _ScheduleTypeSelector(formViewModel: formViewModel),
+                    const SizedBox(height: 16),
+                    _ScheduleTypeControls(formViewModel: formViewModel),
+                    const SizedBox(height: 16),
+                    _SchedulePreview(formViewModel: formViewModel),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
+          ],
         );
       },
     );
@@ -515,21 +457,21 @@ class const _ScheduleTypeSelector({
         final selectedType = formViewModel.selectedScheduleType;
 
         return SegmentedButton<TaskScheduleType>(
-          segments: const [
+          segments: [
             ButtonSegment(
               value: TaskScheduleType.specificDays,
-              label: Text('Specific days'),
-              icon: Icon(Icons.calendar_today_rounded, size: 18),
+              label: Text(tr.form_survey_schedule_specific_days),
+              icon: const Icon(Icons.calendar_today_rounded, size: 18),
             ),
             ButtonSegment(
               value: TaskScheduleType.everyNDays,
-              label: Text('Every N days'),
-              icon: Icon(Icons.repeat_rounded, size: 18),
+              label: Text(tr.form_survey_schedule_every_n_days),
+              icon: const Icon(Icons.repeat_rounded, size: 18),
             ),
             ButtonSegment(
               value: TaskScheduleType.perCycle,
-              label: Text('Per cycle'),
-              icon: Icon(Icons.loop_rounded, size: 18),
+              label: Text(tr.form_survey_schedule_per_cycle),
+              icon: const Icon(Icons.loop_rounded, size: 18),
             ),
           ],
           selected: {selectedType},
@@ -591,7 +533,7 @@ class const _SpecificDaysEditor({
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Select study days (1-indexed):',
+          tr.form_survey_schedule_select_days,
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -604,7 +546,7 @@ class const _SpecificDaysEditor({
             final isSelected = selectedDays.contains(index);
             return FilterChip(
               label: Text(
-                'Day ${index + 1}',
+                tr.form_survey_schedule_day_label(index + 1),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -658,7 +600,7 @@ class const _EveryNDaysEditor({
         Row(
           children: [
             Text(
-              'Every',
+              tr.form_survey_schedule_every_n_interval_label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurface,
               ),
@@ -683,7 +625,7 @@ class const _EveryNDaysEditor({
             ),
             const SizedBox(width: 8),
             Text(
-              'days',
+              tr.form_survey_schedule_days_suffix,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurface,
               ),
@@ -694,7 +636,7 @@ class const _EveryNDaysEditor({
         Row(
           children: [
             Text(
-              'Starting from day',
+              tr.form_survey_schedule_every_n_delay_label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurface,
               ),
@@ -705,6 +647,7 @@ class const _EveryNDaysEditor({
               child: ReactiveTextField<int>(
                 formControl: formViewModel.startDayOffsetControl,
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(
@@ -714,8 +657,15 @@ class const _EveryNDaysEditor({
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  helperText: '0-based',
-                  helperStyle: const TextStyle(fontSize: 10),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                tr.form_survey_schedule_every_n_delay_suffix,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
                 ),
               ),
             ),
@@ -723,7 +673,7 @@ class const _EveryNDaysEditor({
         ),
         const SizedBox(height: 4),
         Text(
-          'Study has $totalDays total days (0–${totalDays - 1})',
+          tr.form_survey_schedule_every_n_delay_help(totalDays),
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
             fontStyle: FontStyle.italic,
@@ -758,7 +708,7 @@ class const _PerCycleEditor({
         Row(
           children: [
             Text(
-              'Show on day',
+              tr.form_survey_schedule_per_cycle_delay_label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurface,
               ),
@@ -769,6 +719,7 @@ class const _PerCycleEditor({
               child: ReactiveTextField<int>(
                 formControl: formViewModel.dayOfCycleControl,
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(
@@ -778,23 +729,27 @@ class const _PerCycleEditor({
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  helperText: '0-based',
-                  helperStyle: const TextStyle(fontSize: 10),
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              'of each cycle',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
+            Expanded(
+              child: Text(
+                tr.form_survey_schedule_per_cycle_delay_suffix,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
         Text(
-          'Each cycle is $cycleLengthDays days ($phasesPerCycle phases × $phaseDuration days)',
+          tr.form_survey_schedule_per_cycle_help(
+            cycleLengthDays,
+            phasesPerCycle,
+            phaseDuration,
+          ),
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
             fontStyle: FontStyle.italic,
@@ -804,7 +759,7 @@ class const _PerCycleEditor({
 
         // Cycle selector
         Text(
-          'Target cycles (leave empty for all):',
+          tr.form_survey_schedule_target_cycles,
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -817,7 +772,7 @@ class const _PerCycleEditor({
             final isSelected = selectedCycles.contains(index);
             return FilterChip(
               label: Text(
-                'Cycle ${index + 1}',
+                tr.form_survey_schedule_cycle_label(index + 1),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -862,7 +817,7 @@ class const _PerCycleEditor({
               ),
               const SizedBox(width: 8),
               Text(
-                'Include baseline phase',
+                tr.form_survey_schedule_include_baseline,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurface,
                 ),
@@ -899,14 +854,14 @@ class const _SchedulePreview({
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.visibility_rounded, size: 18, color: colorScheme.primary),
+          Icon(Icons.event_available, size: 18, color: colorScheme.primary),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Preview',
+                  tr.form_survey_schedule_summary_title,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: colorScheme.primary,
                     fontWeight: FontWeight.w600,
@@ -915,8 +870,15 @@ class const _SchedulePreview({
                 const SizedBox(height: 4),
                 Text(
                   previewDays.isEmpty
-                      ? 'No matching days'
-                      : 'Appears on: ${previewDays.map((d) => 'Day ${d + 1}').join(', ')}',
+                      ? tr.form_survey_schedule_summary_empty
+                      : tr.form_survey_schedule_summary_days(
+                          previewDays
+                              .map(
+                                (day) =>
+                                    tr.form_survey_schedule_day_label(day + 1),
+                              )
+                              .join(', '),
+                        ),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurface,
                   ),
@@ -925,7 +887,10 @@ class const _SchedulePreview({
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
-                      '${previewDays.length} occurrence${previewDays.length == 1 ? '' : 's'} across ${formViewModel.studyLength} study days',
+                      tr.form_survey_schedule_summary_occurrences(
+                        previewDays.length,
+                        formViewModel.studyLength,
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         fontStyle: FontStyle.italic,

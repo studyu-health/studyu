@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
+import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/usda_models.dart';
-import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
@@ -24,7 +25,7 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
   String? _lastScannedCode;
   DateTime? _lastScanTime;
   String? _detectedCode;
-  String _guidanceMessage = 'Point camera at barcode';
+  String? _guidanceMessage;
 
   bool _isValidBarcode(String code) {
     // Remove any non-digit characters
@@ -44,19 +45,6 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    // Configure OpenFoodFacts User-Agent
-    OpenFoodAPIConfiguration.userAgent = UserAgent(
-      name: 'StudyU',
-      version: '1.0',
-      system: 'Flutter',
-      url: 'https://studyu.health',
-    );
-    OpenFoodAPIConfiguration.globalLanguages = [OpenFoodFactsLanguage.ENGLISH];
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -64,17 +52,18 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
 
   Future<void> _onBarcodeDetected(BarcodeCapture capture) async {
     final List<Barcode> barcodes = capture.barcodes;
+    final l10n = AppLocalizations.of(context)!;
 
     if (barcodes.isEmpty) {
       setState(() {
-        _guidanceMessage = 'No barcode detected - adjust position';
+        _guidanceMessage = l10n.barcode_scanner_no_barcode;
       });
       return;
     }
 
     // Update guidance based on detection
     setState(() {
-      _guidanceMessage = 'Barcode detected! Processing...';
+      _guidanceMessage = l10n.barcode_scanner_processing;
     });
 
     if (_isProcessing) {
@@ -91,13 +80,13 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
     // Validate barcode before processing
     if (!_isValidBarcode(code)) {
       setState(() {
-        _guidanceMessage = 'Invalid barcode - try different angle';
+        _guidanceMessage = l10n.barcode_scanner_invalid;
       });
       return;
     }
 
     setState(() {
-      _guidanceMessage = '✓ Valid barcode! Looking up...';
+      _guidanceMessage = l10n.barcode_scanner_lookup;
     });
 
     // Prevent duplicate scans within 2 seconds (reduced from 3 for faster scanning)
@@ -149,79 +138,26 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
 
       if (result.status == ProductResultV3.statusSuccess &&
           result.product != null) {
-        // Product found in OpenFoodFacts!
-        final foodEntry = _convertToFoodEntry(result.product!);
-
-        // Navigate to food entry screen for editing
-        final editedFood = await Navigator.push(
-          context,
-          FoodEntryScreen.route(existingFood: foodEntry),
-        );
-
-        if (editedFood != null && mounted) {
-          // Return the food entry
-          Navigator.pop(context, editedFood);
-        } else {
-          // User cancelled, resume scanning
-          if (mounted) {
-            setState(() {
-              _isProcessing = false;
-              _lastScannedCode = null;
-              _lastScanTime = null;
-              _detectedCode = null;
-            });
-            try {
-              await _controller.start();
-            } catch (e) {
-              // Ignore restart errors
-            }
-          }
-        }
-        return; // Success, exit early
+        Navigator.pop(context, _convertToFoodEntry(result.product!));
+        return;
       }
 
-      // Not found in OpenFoodFacts, try USDA
+      // Not found in OpenFoodFacts, try USDA when configured.
+      if (UsdaApiService.isConfigured) {
+        try {
+          final usdaResult = await UsdaApiService.searchByBarcode(code);
 
-      try {
-        final usdaResult = await UsdaApiService.searchByBarcode(code);
+          if (!mounted) return;
 
-        if (!mounted) return;
+          if (usdaResult.foods.isNotEmpty) {
+            final usdaFood = usdaResult.foods.first;
 
-        if (usdaResult.foods.isNotEmpty) {
-          final usdaFood = usdaResult.foods.first;
-
-          // Product found in USDA!
-          final foodEntry = _convertUsdaToFoodEntry(usdaFood);
-
-          // Navigate to food entry screen for editing
-          final editedFood = await Navigator.push(
-            context,
-            FoodEntryScreen.route(existingFood: foodEntry),
-          );
-
-          if (editedFood != null && mounted) {
-            // Return the food entry
-            Navigator.pop(context, editedFood);
-          } else {
-            // User cancelled, resume scanning
-            if (mounted) {
-              setState(() {
-                _isProcessing = false;
-                _lastScannedCode = null;
-                _lastScanTime = null;
-                _detectedCode = null;
-              });
-              try {
-                await _controller.start();
-              } catch (e) {
-                // Ignore restart errors
-              }
-            }
+            Navigator.pop(context, _convertUsdaToFoodEntry(usdaFood));
+            return;
           }
-          return; // Success, exit early
+        } catch (usdaError) {
+          // Continue to show "not found" dialog
         }
-      } catch (usdaError) {
-        // Continue to show "not found" dialog
       }
 
       // Not found in either database
@@ -229,8 +165,9 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
         _showProductNotFoundDialog(code);
       }
     } catch (e) {
+      studyu.StudyULogger.error('Error fetching barcode product: $e');
       if (mounted) {
-        _showErrorDialog('Error fetching product: $e');
+        _showErrorDialog();
       }
     }
   }
@@ -258,6 +195,14 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
     final sodium =
         (nutriments?.getValue(Nutrient.sodium, PerSize.oneHundredGrams) ?? 0) *
         1000;
+    bool isUnavailable(Nutrient nutrient) =>
+        nutriments?.getValue(nutrient, PerSize.oneHundredGrams) == null;
+    final unavailableNutrients = {
+      if (isUnavailable(Nutrient.energyKCal)) 'energyKcal',
+      if (isUnavailable(Nutrient.proteins)) 'protein',
+      if (isUnavailable(Nutrient.carbohydrates)) 'carbs',
+      if (isUnavailable(Nutrient.fat)) 'fat',
+    };
 
     // Parse serving size
     double servingSizeGrams = 100.0;
@@ -282,18 +227,19 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
       portionState: studyu.PortionState.asServed,
       yieldFactor: 1.0,
       nutrition: studyu.NutritionProfile(
-        energyKcal: energyKcal,
-        protein: protein,
-        carbs: carbs,
-        fat: fat,
-        sugars: sugars,
-        fiber: fiber,
-        saturatedFat: saturatedFat,
+        energyKcal: energyKcal * servingSizeGrams / 100,
+        protein: protein * servingSizeGrams / 100,
+        carbs: carbs * servingSizeGrams / 100,
+        fat: fat * servingSizeGrams / 100,
+        sugars: sugars * servingSizeGrams / 100,
+        fiber: fiber * servingSizeGrams / 100,
+        saturatedFat: saturatedFat * servingSizeGrams / 100,
         transFat: 0,
         cholesterol: 0,
-        sodium: sodium,
+        sodium: sodium * servingSizeGrams / 100,
         waterContent: 0,
         micros: {},
+        unavailableNutrients: unavailableNutrients,
       ),
       foodCode: product.barcode,
       externalId: product.barcode,
@@ -336,37 +282,35 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
         sodium: food.sodium100g * scale, // Already in mg
         waterContent: 0,
         micros: {},
+        unavailableNutrients: {
+          if (food.getNutrientValue(1008) == null) 'energyKcal',
+          if (food.getNutrientValue(1003) == null) 'protein',
+          if (food.getNutrientValue(1005) == null) 'carbs',
+          if (food.getNutrientValue(1004) == null) 'fat',
+        },
       ),
       foodCode: food.gtinUpc, // Barcode from USDA
       externalId: food.fdcId.toString(),
       source: studyu.FoodSource.usda,
       confidenceScore: 1.0,
-      originalValues: {
-        'fdcId': food.fdcId,
-        'dataType': food.dataType,
-        'description': food.description,
-      },
+      originalValues: food.toJson(),
     );
   }
 
   void _showProductNotFoundDialog(String barcode) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.search_off, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Product Not Found'),
+            const Icon(Icons.search_off, color: Colors.orange),
+            const SizedBox(width: 8),
+            Text(l10n.barcode_scanner_not_found_title),
           ],
         ),
-        content: Text(
-          'No product found for barcode: $barcode\n\n'
-          'This product might not be in the OpenFoodFacts or USDA database yet. '
-          "We searched both databases but couldn't find a match. "
-          'You can add it manually or try scanning another product.',
-        ),
+        content: Text(l10n.barcode_scanner_not_found_message(barcode)),
         actions: [
           TextButton(
             onPressed: () {
@@ -382,33 +326,34 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
                 // Ignore restart errors
               }
             },
-            child: const Text('Scan Again'),
+            child: Text(l10n.barcode_scanner_scan_again),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               Navigator.pop(context); // Go back to previous screen
             },
-            child: const Text('Add Manually'),
+            child: Text(l10n.add_manually),
           ),
         ],
       ),
     );
   }
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.error_outline, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Error'),
+            const Icon(Icons.error_outline, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(l10n.barcode_scanner_error_title),
           ],
         ),
-        content: Text(message),
+        content: Text(l10n.external_library_error),
         actions: [
           TextButton(
             onPressed: () {
@@ -424,14 +369,14 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
                 // Ignore restart errors
               }
             },
-            child: const Text('Try Again'),
+            child: Text(l10n.try_again),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -440,9 +385,10 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan Barcode'),
+        title: Text(l10n.scan_barcode),
         actions: [
           IconButton(
             icon: ValueListenableBuilder(
@@ -456,14 +402,18 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
               },
             ),
             onPressed: () => _controller.toggleTorch(),
-            tooltip: 'Toggle Flash',
+            tooltip: l10n.barcode_scanner_toggle_flash,
           ),
           IconButton(
             icon: const Icon(Icons.flip_camera_ios),
             onPressed: () => _controller.switchCamera(),
-            tooltip: 'Switch Camera',
+            tooltip: l10n.barcode_scanner_switch_camera,
           ),
         ],
+      ),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: OpenFoodFactsAttribution(),
       ),
       body: Stack(
         children: [
@@ -493,7 +443,7 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    _guidanceMessage,
+                    _guidanceMessage ?? l10n.barcode_scanner_guidance_initial,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -502,9 +452,9 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    '📦 Large barcode? Move back 15-30cm\n📏 Small barcode? Move closer',
-                    style: TextStyle(
+                  Text(
+                    l10n.barcode_scanner_distance_guidance,
+                    style: const TextStyle(
                       color: Colors.yellowAccent,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -524,9 +474,9 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
                       ),
                       child: Column(
                         children: [
-                          const Text(
-                            '✓ DETECTED',
-                            style: TextStyle(
+                          Text(
+                            l10n.barcode_scanner_detected,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -555,15 +505,15 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
           if (_isProcessing)
             ColoredBox(
               color: Colors.black.withValues(alpha: 0.7),
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(color: Colors.white),
+                    const SizedBox(height: 16),
                     Text(
-                      'Looking up product...',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      l10n.barcode_scanner_lookup_progress,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),

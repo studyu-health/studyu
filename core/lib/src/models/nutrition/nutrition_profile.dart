@@ -16,6 +16,14 @@ class NutritionProfile({
   required var double sodium,
   required var double waterContent,
   required var Map<String, double> micros,
+
+  /// Nutrients missing from the source data; deliberately not persisted.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  var Set<String> unavailableNutrients = const {},
+
+  /// Number of source items represented by this profile with missing data.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  var int unavailableItemCount = 0,
 }) {
   factory fromJson(Map<String, dynamic> json) =>
       _$NutritionProfileFromJson(json);

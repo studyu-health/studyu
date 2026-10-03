@@ -1,38 +1,38 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-part 'recipe_composition.g.dart';
+part 'food_composition.g.dart';
 
 @JsonSerializable()
-class RecipeComposition {
+class FoodComposition {
   String id;
-  String recipeId;
-  String ingredientId;
+  String parentEntryId;
+  String foodId;
   double amount;
   String unit;
   int? sortOrder;
 
   new({
     required this.id,
-    required this.recipeId,
-    required this.ingredientId,
+    required this.parentEntryId,
+    required this.foodId,
     required this.amount,
     required this.unit,
     this.sortOrder,
   });
 
   new withId({
-    required this.recipeId,
-    required this.ingredientId,
+    required this.parentEntryId,
+    required this.foodId,
     required this.amount,
     required this.unit,
     this.sortOrder,
   }) : id = const Uuid().v4();
 
   factory fromJson(Map<String, dynamic> json) =>
-      _$RecipeCompositionFromJson(json);
+      _$FoodCompositionFromJson(json);
 
-  Map<String, dynamic> toJson() => _$RecipeCompositionToJson(this);
+  Map<String, dynamic> toJson() => _$FoodCompositionToJson(this);
 
   @override
   String toString() => toJson().toString();

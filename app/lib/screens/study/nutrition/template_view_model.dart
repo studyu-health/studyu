@@ -1,17 +1,23 @@
+import 'dart:convert';
+
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:studyu_app/util/template_storage_manager.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_core/core.dart';
+import 'package:uuid/uuid.dart';
 
 enum TemplateFilter() {
   all,
-  meals,
   foods,
-  recipes,
+  meals,
 }
 
-class TemplateViewModel({required final String userId}) extends ChangeNotifier {
-  final TemplateStorageManager _storageManager = TemplateStorageManager();
-  List<SavedMealTemplate> _mealTemplates = [];
+class TemplateViewModel({
+  required final String userId,
+  NutritionFoodRepository? repository,
+}) extends ChangeNotifier {
+  final NutritionFoodRepository _repository =
+      repository ?? NutritionFoodRepository();
   List<SavedFoodTemplate> _foodTemplates = [];
 
   bool _isLoading = false;
@@ -28,57 +34,39 @@ class TemplateViewModel({required final String userId}) extends ChangeNotifier {
   TemplateFilter get currentFilter => _currentFilter;
   String get searchQuery => _searchQuery;
 
-  List<SavedMealTemplate> get mealTemplates => _mealTemplates;
   List<SavedFoodTemplate> get foodTemplates => _foodTemplates;
-
-  List<SavedFoodTemplate> get recipeTemplates => _foodTemplates
-      .where((t) => t.prototype.entryType == FoodEntryType.recipe)
+  List<SavedFoodTemplate> get mealTemplates => _foodTemplates
+      .where((template) => template.prototype.entryType == FoodEntryType.meal)
       .toList();
-
   List<SavedFoodTemplate> get foodOnlyTemplates => _foodTemplates
-      .where((t) => t.prototype.entryType != FoodEntryType.recipe)
+      .where((template) => template.prototype.entryType != FoodEntryType.meal)
       .toList();
 
-  List<dynamic> get filteredTemplates {
-    List<dynamic> results = [];
+  List<SavedFoodTemplate> get filteredTemplates {
+    final templates = switch (_currentFilter) {
+      TemplateFilter.all => _foodTemplates,
+      TemplateFilter.foods => foodOnlyTemplates,
+      TemplateFilter.meals => mealTemplates,
+    };
 
-    switch (_currentFilter) {
-      case TemplateFilter.all:
-        results = [..._mealTemplates, ..._foodTemplates];
-      case TemplateFilter.meals:
-        results = _mealTemplates;
-      case TemplateFilter.foods:
-        results = foodOnlyTemplates;
-      case TemplateFilter.recipes:
-        results = recipeTemplates;
-    }
-
-    if (_searchQuery.isNotEmpty) {
-      final lowerQuery = _searchQuery.toLowerCase();
-      results = results.where((template) {
-        if (template is SavedMealTemplate) {
-          return template.name.toLowerCase().contains(lowerQuery);
-        } else if (template is SavedFoodTemplate) {
-          return template.name.toLowerCase().contains(lowerQuery);
-        }
-        return false;
-      }).toList();
-    }
-
-    return results;
+    if (_searchQuery.isEmpty) return templates;
+    final lowerQuery = _searchQuery.toLowerCase();
+    return templates
+        .where((template) => template.name.toLowerCase().contains(lowerQuery))
+        .toList();
   }
 
-  Future<void> loadAllTemplates() async {
+  Future<void> loadAllTemplates({bool rethrowOnError = false}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _mealTemplates = await _storageManager.loadMealTemplates(userId);
-      _foodTemplates = await _storageManager.loadFoodTemplates(userId);
-    } catch (e) {
-      _error = e.toString();
-      StudyULogger.error('Failed to load templates: $e');
+      _foodTemplates = await _repository.loadTemplates(userId);
+    } catch (error, stackTrace) {
+      _error = error.toString();
+      StudyULogger.error('Failed to load templates: $error');
+      if (rethrowOnError) Error.throwWithStackTrace(error, stackTrace);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -90,80 +78,87 @@ class TemplateViewModel({required final String userId}) extends ChangeNotifier {
     required MealLog meal,
     List<String>? tags,
   }) async {
-    final template = SavedMealTemplate.withId(
-      userId: userId,
+    await saveFoodAsTemplate(
       name: name,
-      mealType: meal.mealType,
+      food: _buildMealEntry(name: name, foods: meal.foods),
       tags: tags,
-      isPublic: false,
-      prototypes: meal.foods.map(_cloneFoodEntry).toList(),
     );
-
-    await _storageManager.saveMealTemplate(template);
-    await loadAllTemplates();
   }
 
-  Future<void> saveFoodAsTemplate({
+  Future<String> saveFoodAsTemplate({
     required String name,
     required FoodEntry food,
     List<String>? tags,
   }) async {
-    final template = SavedFoodTemplate.withId(
-      userId: userId,
+    final template = await _repository.saveTemplate(
+      subjectId: userId,
       name: name,
+      food: _cloneFoodEntry(food),
       tags: tags,
-      isPublic: false,
-      prototype: _cloneFoodEntry(food),
     );
-
-    await _storageManager.saveFoodTemplate(template);
-    await loadAllTemplates();
+    food
+      ..foodId = template.prototype.foodId
+      ..foodVersionId = template.prototype.foodVersionId
+      ..templateId = template.id;
+    _foodTemplates = [
+      ..._foodTemplates.where((item) => item.id != template.id),
+      template,
+    ];
+    notifyListeners();
+    await loadAllTemplates(rethrowOnError: true);
+    return template.id;
   }
 
-  Future<void> deleteMealTemplate(String templateId) async {
-    await _storageManager.deleteMealTemplate(userId, templateId);
-    await loadAllTemplates();
-  }
-
-  Future<void> renameMealTemplate(String templateId, String newName) async {
-    final templates = await _storageManager.loadMealTemplates(userId);
-    final index = templates.indexWhere((t) => t.id == templateId);
-    if (index >= 0) {
-      templates[index].name = newName;
-      templates[index].updatedAt = DateTime.now();
-      await _storageManager.saveMealTemplate(templates[index]);
+  Future<SavedFoodTemplate?> updateFoodTemplatePrototype(
+    String templateId,
+    FoodEntry prototype,
+  ) async {
+    var template = _foodTemplates.firstWhereOrNull(
+      (item) => item.id == templateId,
+    );
+    if (template == null) {
       await loadAllTemplates();
+      template = _foodTemplates.firstWhereOrNull(
+        (item) => item.id == templateId,
+      );
     }
+    if (template == null) return null;
+    final updated = _cloneFoodEntry(prototype)..foodId = template.id;
+    final result = await _repository.saveTemplate(
+      subjectId: userId,
+      name: updated.name,
+      food: updated,
+      tags: template.tags,
+      expectedVersionId: template.prototype.foodVersionId,
+    );
+    await loadAllTemplates();
+    return result;
   }
 
-  Future<void> renameFoodTemplate(String templateId, String newName) async {
-    final templates = await _storageManager.loadFoodTemplates(userId);
-    final index = templates.indexWhere((t) => t.id == templateId);
-    if (index >= 0) {
-      templates[index].name = newName;
-      templates[index].updatedAt = DateTime.now();
-      await _storageManager.saveFoodTemplate(templates[index]);
-      await loadAllTemplates();
-    }
+  Future<void> duplicateFoodTemplate(String templateId) async {
+    final source = _foodTemplates.firstWhere(
+      (template) => template.id == templateId,
+    );
+    final duplicate = _cloneFoodEntry(source.prototype)
+      ..id = const Uuid().v4()
+      ..foodId = const Uuid().v4()
+      ..foodVersionId = const Uuid().v4();
+    await _repository.saveTemplate(
+      subjectId: userId,
+      name: source.name,
+      food: duplicate,
+      tags: source.tags == null ? null : List<String>.from(source.tags!),
+    );
+    await loadAllTemplates();
   }
 
   Future<void> deleteFoodTemplate(String templateId) async {
-    await _storageManager.deleteFoodTemplate(userId, templateId);
-    await loadAllTemplates();
-  }
-
-  MealLog applyMealTemplate(SavedMealTemplate template) {
-    return MealLog.withId(
-      mealType: template.mealType,
-      mealContext: MealContext.home,
-      timestamp: DateTime.now(),
-      timezone: DateTime.now().timeZoneName,
-      isSkipped: false,
-      templateId: template.id,
-      foods: template.prototypes
-          .map((f) => _createFoodFromPrototype(f, template.id))
-          .toList(),
+    final template = _foodTemplates.firstWhereOrNull(
+      (item) => item.id == templateId,
     );
+    if (template == null) return;
+    await _repository.deleteTemplate(subjectId: userId, template: template);
+    await loadAllTemplates();
   }
 
   FoodEntry applyFoodTemplate(SavedFoodTemplate template) {
@@ -185,28 +180,110 @@ class TemplateViewModel({required final String userId}) extends ChangeNotifier {
   }
 
   FoodEntry _createFoodFromPrototype(FoodEntry prototype, String templateId) {
-    return FoodEntry.withId(
-      entryType: prototype.entryType,
-      name: prototype.name,
-      brandName: prototype.brandName,
-      description: prototype.description,
-      amount: prototype.amount,
-      unit: prototype.unit,
-      servingSizeGrams: prototype.servingSizeGrams,
-      portionReference: prototype.portionReference,
-      portionEstimationMethod: prototype.portionEstimationMethod,
-      portionState: prototype.portionState,
-      yieldFactor: prototype.yieldFactor,
-      ediblePortion: prototype.ediblePortion,
-      nutrition: prototype.nutrition,
-      foodCode: prototype.foodCode,
-      externalId: prototype.externalId,
-      source: prototype.source,
-      confidenceScore: prototype.confidenceScore,
-      templateId: templateId,
-      originalValues: prototype.originalValues,
-      recipeMetadata: prototype.recipeMetadata,
-      recipeIngredients: prototype.recipeIngredients,
+    final food = _cloneFoodEntry(prototype)
+      ..id = const Uuid().v4()
+      ..originalValues = jsonDecode(
+        jsonEncode(prototype.originalValues),
+      ) as Map<String, dynamic>
+      ..templateId = templateId
+      ..createdAt = DateTime.now()
+      ..modifiedAt = null
+      ..parentEntryId = null;
+    food.componentFoods = food.componentFoods
+        ?.map(
+          (composition) => FoodComposition.withId(
+            parentEntryId: food.id,
+            foodId: composition.foodId,
+            amount: composition.amount,
+            unit: composition.unit,
+            sortOrder: composition.sortOrder,
+          ),
+        )
+        .toList();
+    return food;
+  }
+
+  FoodEntry _buildMealEntry({
+    required String name,
+    required List<FoodEntry> foods,
+  }) {
+    final nutrition = _sumNutrition(foods);
+    final meal = FoodEntry.withId(
+      entryType: FoodEntryType.meal,
+      name: name,
+      amount: 1,
+      unit: 'serving',
+      servingSizeGrams: foods.fold(
+        0,
+        (total, food) => total + food.servingSizeGrams * food.amount,
+      ),
+      portionEstimationMethod: PortionEstimationMethod.householdMeasure,
+      portionState: PortionState.asServed,
+      nutrition: nutrition,
+      source: FoodSource.manual,
+      confidenceScore: 0.9,
+      originalValues: {},
+      componentFoods: [],
+      componentSnapshots: foods.map(_cloneFoodEntry).toList(),
+    );
+    meal.componentFoods = foods
+        .map(
+          (food) => FoodComposition.withId(
+            parentEntryId: meal.id,
+            foodId: food.foodId,
+            amount: food.amount,
+            unit: food.unit,
+          ),
+        )
+        .toList();
+    return meal;
+  }
+
+  NutritionProfile _sumNutrition(List<FoodEntry> foods) {
+    final micros = <String, double>{};
+    var energy = 0.0;
+    var protein = 0.0;
+    var carbs = 0.0;
+    var fat = 0.0;
+    var sugars = 0.0;
+    var fiber = 0.0;
+    var saturatedFat = 0.0;
+    var transFat = 0.0;
+    var cholesterol = 0.0;
+    var sodium = 0.0;
+    var waterContent = 0.0;
+
+    for (final food in foods) {
+      final nutrition = food.nutrition;
+      energy += nutrition.energyKcal;
+      protein += nutrition.protein;
+      carbs += nutrition.carbs;
+      fat += nutrition.fat;
+      sugars += nutrition.sugars;
+      fiber += nutrition.fiber;
+      saturatedFat += nutrition.saturatedFat;
+      transFat += nutrition.transFat;
+      cholesterol += nutrition.cholesterol;
+      sodium += nutrition.sodium;
+      waterContent += nutrition.waterContent;
+      nutrition.micros.forEach((key, value) {
+        micros[key] = (micros[key] ?? 0) + value;
+      });
+    }
+
+    return NutritionProfile(
+      energyKcal: energy,
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+      sugars: sugars,
+      fiber: fiber,
+      saturatedFat: saturatedFat,
+      transFat: transFat,
+      cholesterol: cholesterol,
+      sodium: sodium,
+      waterContent: waterContent,
+      micros: micros,
     );
   }
 }

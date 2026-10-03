@@ -10,9 +10,14 @@ class MealLog {
   String id;
   MealType mealType;
   String? customMealLabel;
+
+  /// True when a meal intentionally has no category label.
+  /// Missing serialized values remain false for legacy MealType.other records.
+  bool isLabelExplicitlyUnset;
   MealContext mealContext;
   String? locationDescription;
-  DateTime timestamp;
+  DateTime? timestamp;
+  MealOccurrenceTimePrecision timePrecision;
   String timezone;
   bool isSkipped;
   String? skipReason;
@@ -25,9 +30,11 @@ class MealLog {
     required this.id,
     required this.mealType,
     this.customMealLabel,
+    this.isLabelExplicitlyUnset = false,
     required this.mealContext,
     this.locationDescription,
-    required this.timestamp,
+    this.timestamp,
+    this.timePrecision = MealOccurrenceTimePrecision.approximate,
     required this.timezone,
     required this.isSkipped,
     this.skipReason,
@@ -40,9 +47,11 @@ class MealLog {
   new withId({
     required this.mealType,
     this.customMealLabel,
+    this.isLabelExplicitlyUnset = false,
     required this.mealContext,
     this.locationDescription,
-    required this.timestamp,
+    this.timestamp,
+    this.timePrecision = MealOccurrenceTimePrecision.approximate,
     required this.timezone,
     required this.isSkipped,
     this.skipReason,

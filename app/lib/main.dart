@@ -9,6 +9,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:studyu_app/app.dart';
 import 'package:studyu_app/app_router.dart';
@@ -61,6 +62,14 @@ Future<void> main() async {
     // device could be offline
     debugPrint('Error loading env: $error');
   }
+  final configuredAppUrl = _optionalEnv(
+    'STUDYU_APP_URL',
+    const String.fromEnvironment('STUDYU_APP_URL'),
+  );
+  final fallbackContactEmail = _optionalEnv(
+    'STUDYU_DEVELOPER_EMAIL',
+    const String.fromEnvironment('STUDYU_DEVELOPER_EMAIL'),
+  );
   await _configureLocalTimeZone();
   await _storeE2eParticipantCredentials();
   final queryParameters = Uri.base.queryParameters;
@@ -83,6 +92,19 @@ Future<void> main() async {
     // device could be offline
     debugPrint('Error fetching app config: $error');
   }
+
+  final packageInfo = await PackageInfo.fromPlatform();
+  final appContactEmail = appConfig?.contact.email.trim();
+  OpenFoodAPIConfiguration.userAgent = UserAgent(
+    name: 'StudyU',
+    version: packageInfo.version,
+    system: defaultTargetPlatform.name,
+    url: configuredAppUrl,
+    comment: appContactEmail?.isNotEmpty == true
+        ? appContactEmail
+        : fallbackContactEmail,
+  );
+  OpenFoodAPIConfiguration.globalLanguages = [OpenFoodFactsLanguage.ENGLISH];
 
   if (appConfig != null && await isAppOutdated(appConfig)) {
     initialRoute = '/${RouteNames.appOutdated}';
@@ -116,6 +138,15 @@ Future<void> main() async {
       }
     },
   );
+}
+
+String? _optionalEnv(String name, String dartDefineValue) {
+  try {
+    return getEnv(name, optional: true) ??
+        (dartDefineValue.isEmpty ? null : dartDefineValue);
+  } catch (_) {
+    return dartDefineValue.isEmpty ? null : dartDefineValue;
+  }
 }
 
 /// Checks major and minor version of the app against the minimum version required by the backend

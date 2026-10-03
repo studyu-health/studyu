@@ -99,6 +99,8 @@ class _ConsentScreenState() extends State<ConsentScreen> {
   @override
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
+    final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     final nav = BottomOnboardingNavigation(
       backLabel: AppLocalizations.of(context)!.decline,
       showBackIcon: false,
@@ -202,14 +204,22 @@ class _ConsentScreenState() extends State<ConsentScreen> {
 
     // In shell mode the loading overlay is rendered by OnboardingShell so it
     // covers the full screen including the persistent bottom nav.
-    if (navNotifier != null) return scaffold;
+    final content = navNotifier != null
+        ? scaffold
+        : Stack(
+            children: [
+              scaffold,
+              if (_isStarting)
+                LoadingOverlay(
+                  message: AppLocalizations.of(context)!.starting_study,
+                ),
+            ],
+          );
 
-    return Stack(
-      children: [
-        scaffold,
-        if (_isStarting)
-          LoadingOverlay(message: AppLocalizations.of(context)!.starting_study),
-      ],
+    return Title(
+      title: localizations.consent,
+      color: theme.colorScheme.primary,
+      child: content,
     );
   }
 }
@@ -296,7 +306,7 @@ class const ConsentCard({
   }
 }
 
-class ConsentElement(
+class const ConsentElement(
   final String title,
   final String descriptionText,
   final String acknowledgmentText,

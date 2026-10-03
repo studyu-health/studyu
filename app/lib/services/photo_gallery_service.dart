@@ -6,11 +6,11 @@ import 'package:studyu_app/models/photo_reference.dart';
 
 /// Service for querying device photo gallery.
 class PhotoGalleryService() {
-  /// Time window around meal time to search for photos (in hours).
-  static const int _defaultTimeWindowHours = 2;
-
-  /// Maximum number of photos to return.
-  static const int _maxPhotos = 20;
+  /// Local midnight boundaries for the calendar date containing [date].
+  static ({DateTime start, DateTime end}) localDayRange(DateTime date) => (
+    start: DateTime(date.year, date.month, date.day),
+    end: DateTime(date.year, date.month, date.day + 1),
+  );
 
   /// Check if photo gallery permission is granted.
   Future<bool> hasPermission() async {
@@ -42,42 +42,30 @@ class PhotoGalleryService() {
     return state.isAuth || state == PermissionState.limited;
   }
 
-  /// Get photos taken within a time window around the specified time.
-  Future<List<PhotoReference>> getPhotosAroundTime(
-    DateTime centerTime, {
-    int windowHours = _defaultTimeWindowHours,
-  }) async {
+  /// Get all photos taken on the local calendar date.
+  Future<List<PhotoReference>> getPhotosForDate(DateTime date) async {
     final hasAccess = await hasPermission();
-    if (!hasAccess) {
-      return [];
-    }
+    if (!hasAccess) return [];
 
-    final startTime = centerTime.subtract(Duration(hours: windowHours));
-    final endTime = centerTime.add(Duration(hours: windowHours));
-
-    // Configure filter options for time range
+    final range = localDayRange(date);
     final filterOption = FilterOptionGroup(
-      createTimeCond: DateTimeCond(min: startTime, max: endTime),
+      createTimeCond: DateTimeCond(min: range.start, max: range.end),
       orders: [const OrderOption()],
     );
-
-    // Query only images
     final albums = await PhotoManager.getAssetPathList(
       type: RequestType.image,
       filterOption: filterOption,
     );
+    if (albums.isEmpty) return [];
 
-    if (albums.isEmpty) {
-      return [];
-    }
-
-    // Get assets from the first album (typically "Recent" or "All Photos")
-    final assets = await albums.first.getAssetListPaged(
-      page: 0,
-      size: _maxPhotos,
+    final album = albums.firstWhere(
+      (album) => album.isAll,
+      orElse: () => albums.first,
     );
+    final count = await album.assetCountAsync;
+    if (count == 0) return [];
+    final assets = await album.getAssetListPaged(page: 0, size: count);
 
-    // Convert to PhotoReference objects
     return assets
         .map(
           (asset) => PhotoReference(

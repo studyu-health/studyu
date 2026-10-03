@@ -74,9 +74,12 @@ List<Tuple<AbstractControl, String>> _collectValidationErrorMessages(
     // (i.e. a [FormGroup]), we want to skip these intermediary path
     // descriptors & collect the error at the child control instead where we
     // can resolve its validation error message correctly.
-    if (control is FormGroup) {
-      final isChildError = control.controls.containsKey(error.key);
-      if (isChildError) {
+    if (control is FormGroup && control.controls.containsKey(error.key)) {
+      continue;
+    }
+    if (control is FormArray) {
+      final childIndex = int.tryParse(error.key);
+      if (childIndex != null && childIndex < control.controls.length) {
         continue;
       }
     }

@@ -8,6 +8,8 @@ part of 'food_entry.dart';
 
 FoodEntry _$FoodEntryFromJson(Map<String, dynamic> json) => FoodEntry(
   id: json['id'] as String,
+  foodId: json['foodId'] as String,
+  foodVersionId: json['foodVersionId'] as String,
   entryType: $enumDecode(_$FoodEntryTypeEnumMap, json['entryType']),
   name: json['name'] as String,
   brandName: json['brandName'] as String?,
@@ -36,17 +38,24 @@ FoodEntry _$FoodEntryFromJson(Map<String, dynamic> json) => FoodEntry(
       ? null
       : DateTime.parse(json['modifiedAt'] as String),
   originalValues: json['originalValues'] as Map<String, dynamic>,
-  parentRecipeId: json['parentRecipeId'] as String?,
-  recipeMetadata: json['recipeMetadata'] == null
+  parentEntryId: json['parentEntryId'] as String?,
+  preparationDetails: json['preparationDetails'] == null
       ? null
-      : RecipeMetadata.fromJson(json['recipeMetadata'] as Map<String, dynamic>),
-  recipeIngredients: (json['recipeIngredients'] as List<dynamic>?)
-      ?.map((e) => RecipeComposition.fromJson(e as Map<String, dynamic>))
+      : PreparationDetails.fromJson(
+          json['preparationDetails'] as Map<String, dynamic>,
+        ),
+  componentFoods: (json['componentFoods'] as List<dynamic>?)
+      ?.map((e) => FoodComposition.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  componentSnapshots: (json['componentSnapshots'] as List<dynamic>?)
+      ?.map((e) => FoodEntry.fromJson(e as Map<String, dynamic>))
       .toList(),
 );
 
 Map<String, dynamic> _$FoodEntryToJson(FoodEntry instance) => <String, dynamic>{
   'id': instance.id,
+  'foodId': instance.foodId,
+  'foodVersionId': instance.foodVersionId,
   'entryType': instance.entryType.toJson(),
   'name': instance.name,
   'brandName': ?instance.brandName,
@@ -68,16 +77,17 @@ Map<String, dynamic> _$FoodEntryToJson(FoodEntry instance) => <String, dynamic>{
   'createdAt': instance.createdAt.toIso8601String(),
   'modifiedAt': ?instance.modifiedAt?.toIso8601String(),
   'originalValues': instance.originalValues,
-  'parentRecipeId': ?instance.parentRecipeId,
-  'recipeMetadata': ?instance.recipeMetadata?.toJson(),
-  'recipeIngredients': ?instance.recipeIngredients
+  'parentEntryId': ?instance.parentEntryId,
+  'preparationDetails': ?instance.preparationDetails?.toJson(),
+  'componentFoods': ?instance.componentFoods?.map((e) => e.toJson()).toList(),
+  'componentSnapshots': ?instance.componentSnapshots
       ?.map((e) => e.toJson())
       .toList(),
 };
 
 const _$FoodEntryTypeEnumMap = {
   FoodEntryType.singleIngredient: 'singleIngredient',
-  FoodEntryType.recipe: 'recipe',
+  FoodEntryType.meal: 'meal',
   FoodEntryType.brandedProduct: 'brandedProduct',
   FoodEntryType.manualCustom: 'manualCustom',
 };
