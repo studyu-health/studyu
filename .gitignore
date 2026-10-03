@@ -183,3 +183,23 @@ interview/
 
 .vscode/settings.json
 /.qwen/
+
+# APM agent setup: generated per developer (see CONTRIBUTING.md)
+apm_modules/
+/apm.lock.yaml
+/.mcp.json
+/.github/mcp.json
+/.codex/config.toml
+/.cursor/mcp.json
+/.gemini/settings.json
+/opencode.json
+/.agents/skills/asd-ste100/
+/.agents/skills/dependency-upgrade/
+/.agents/skills/flutter-platform-regeneration/
+/.agents/skills/manual-testing/
+/.agents/skills/pull-request/
+/.claude/skills/asd-ste100/
+/.claude/skills/dependency-upgrade/
+/.claude/skills/flutter-platform-regeneration/
+/.claude/skills/manual-testing/
+/.claude/skills/pull-request/

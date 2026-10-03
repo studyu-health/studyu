@@ -67,6 +67,37 @@ For Android Studio or IntelliJ:
 
 For project-specific diagnostics, run `fvm doctor` from the repository root.
 
+### Agent setup
+
+The StudyU agent skills and the Dart and Flutter MCP server come from the
+[StudyU Agent Marketplace](https://github.com/studyu-health/studyu-agent-marketplace).
+Install them with [APM](https://microsoft.github.io/apm/getting-started/installation/).
+The root [`apm.yml`](apm.yml) declares them. Change the skills in the marketplace,
+not in this repository.
+
+```bash
+brew install apm
+apm install
+```
+
+`apm install` writes the skills to `.agents/skills/` and `.claude/skills/`. It also
+writes the MCP configuration for the harnesses in `apm.yml`.
+This setup is per developer. Do not commit `apm.lock.yaml` or the generated
+files. Git ignores them. To configure only one harness, run
+`apm install --target <harness>,agent-skills`, for example
+`apm install --target claude,agent-skills`. Keep `agent-skills`: it writes the
+`.agents/skills/` paths that `AGENTS.md` uses.
+Pi reads `.mcp.json` through `pi-mcp-adapter`. Install it once with
+`pi install npm:pi-mcp-adapter`.
+
+To use the SonarQube MCP server, authenticate to SonarQube and install it for
+your user:
+
+```bash
+apm marketplace add studyu-health/studyu-agent-marketplace
+apm install -g sonarqube@studyu-agent-marketplace#v0.1.0 --target claude,codex,copilot
+```
+
 ## Repository Overview
 
 The StudyU platform is a Flutter/Dart monorepo with the following packages:
