@@ -206,9 +206,33 @@ class QuestionnaireController(final List<Question> questions)
     notifyListeners();
   }
 
-  bool visibleAnswersNeedReview() {
-    final visibleIds = visibleQuestions.map((q) => q.id).toSet();
-    return visibleIds.any((id) => needsReview(id));
+  /// Returns whether any answer in [questionIds] needs review.
+  ///
+  /// When omitted, checks all currently visible questions.
+  bool visibleAnswersNeedReview([Iterable<String>? questionIds]) {
+    final ids =
+        questionIds?.toSet() ??
+        visibleQuestions.map((question) => question.id).toSet();
+    return ids.any(needsReview);
+  }
+
+  /// Clears review flags for [questionIds].
+  ///
+  /// When omitted, clears flags for all currently visible questions.
+  /// Hidden answer metadata is left unchanged.
+  void markVisibleAnswersReviewed([Iterable<String>? questionIds]) {
+    final ids =
+        questionIds?.toSet() ??
+        visibleQuestions.map((question) => question.id).toSet();
+    var changed = false;
+    for (final id in ids) {
+      final metadata = _answers.answerMetadata[id];
+      if (metadata?.needsReview ?? false) {
+        metadata!.needsReview = false;
+        changed = true;
+      }
+    }
+    if (changed) notifyListeners();
   }
 
   String? firstVisibleAnswerNeedingReview() {
@@ -303,7 +327,11 @@ class QuestionnaireController(final List<Question> questions)
     final preserveDraftContext =
         question is FreeTextQuestion && _drafts.containsKey(answer.question);
     _answers.answers[answer.question] = answer;
-    _storeCurrentContext(question, preserveCacheContext: preserveDraftContext);
+    _storeCurrentContext(
+      question,
+      preserveNeedsReview: true,
+      preserveCacheContext: preserveDraftContext,
+    );
     _drafts.remove(answer.question);
     _applyHiddenDefaults();
     _markAnsweredDependentsForReview(answer.question);
