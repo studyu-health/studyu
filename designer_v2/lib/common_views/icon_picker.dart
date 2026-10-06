@@ -35,7 +35,12 @@ class IconPack() {
     if (name == null || name.isEmpty) {
       return null;
     }
-    return iconPack.firstWhere((element) => element.name == name);
+    for (final iconOption in iconPack) {
+      if (iconOption.name == name) {
+        return iconOption;
+      }
+    }
+    return null;
   }
 }
 
@@ -54,6 +59,9 @@ class ReactiveIconPicker({
   required List<IconOption> iconOptions,
   double? selectedIconSize = 20.0,
   double? galleryIconSize = 28.0,
+  double? squareFieldSize,
+  bool useSquareField = false,
+  bool showInlineRemove = false,
   bool readOnly = false,
   ReactiveFormFieldCallback<IconOption>? onSelect,
   super.formControl,
@@ -76,9 +84,12 @@ class ReactiveIconPicker({
             selectedOption: field.value,
             galleryIconSize: galleryIconSize,
             selectedIconSize: selectedIconSize,
+            squareFieldSize: squareFieldSize,
+            useSquareField: useSquareField,
+            showInlineRemove: showInlineRemove,
             onSelect: (iconOption) {
               if (isDisabled) return;
-              field.didChange(iconOption);
+              field.didChange(iconOption.isEmpty ? null : iconOption);
               onSelect?.call(field.control);
             },
           );
@@ -91,6 +102,9 @@ class const IconPicker({
   final IconOption? selectedOption,
   final double? selectedIconSize,
   final double? galleryIconSize = 28.0,
+  final double? squareFieldSize,
+  final bool useSquareField = false,
+  final bool showInlineRemove = false,
   final VoidCallbackOn<IconOption>? onSelect,
   final bool isDisabled = false,
   final FocusNode? focusNode,
@@ -103,6 +117,9 @@ class const IconPicker({
       selectedOption: selectedOption,
       selectedIconSize: selectedIconSize,
       galleryIconSize: galleryIconSize,
+      squareFieldSize: squareFieldSize,
+      useSquareField: useSquareField,
+      showInlineRemove: showInlineRemove,
       onSelect: onSelect,
       isDisabled: isDisabled,
       focusNode: focusNode,
@@ -115,45 +132,139 @@ class const IconPickerField({
   final IconOption? selectedOption,
   final double? selectedIconSize,
   final double? galleryIconSize,
+  final double? squareFieldSize,
+  final bool useSquareField = false,
+  final bool showInlineRemove = false,
   final VoidCallbackOn<IconOption>? onSelect,
   final bool isDisabled = false,
   final FocusNode? focusNode,
   super.key,
 }) extends StatelessWidget {
+  static const double controlSize = 46.0;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final actualGalleryIconSize =
-        galleryIconSize ?? Theme.of(context).iconTheme.size ?? 24.0;
+        galleryIconSize ?? theme.iconTheme.size ?? 24.0;
     final actualSelectedIconSize =
-        selectedIconSize ?? Theme.of(context).iconTheme.size ?? 16.0;
+        selectedIconSize ?? theme.iconTheme.size ?? 16.0;
 
     Future<void> openIconPicker() => showIconPickerDialog(
       context,
       iconOptions: iconOptions,
+      selectedOption: selectedOption,
       galleryIconSize: actualGalleryIconSize,
       onSelect: onSelect,
     );
 
-    if (selectedOption != null && !selectedOption!.isEmpty) {
-      final selectedIcon =
-          selectedOption?.icon ??
-          IconPack.resolveIconByName(
-            selectedOption!.name,
-            iconPack: iconOptions,
-          )!.icon;
-      return IconButton(
-        tooltip: tr.iconpicker_nonempty_prompt,
-        splashRadius: actualSelectedIconSize,
+    final hasSelectedIcon = selectedOption != null && !selectedOption!.isEmpty;
+    final selectedIcon = hasSelectedIcon
+        ? selectedOption?.icon ??
+              IconPack.resolveIconByName(
+                selectedOption!.name,
+                iconPack: iconOptions,
+              )?.icon ??
+              Icons.add
+        : Icons.add;
+
+    if (!useSquareField) {
+      if (hasSelectedIcon) {
+        return IconButton(
+          tooltip: tr.iconpicker_nonempty_prompt,
+          splashRadius: actualSelectedIconSize,
+          onPressed: isDisabled ? null : openIconPicker,
+          focusNode: focusNode,
+          icon: Icon(selectedIcon, size: actualSelectedIconSize),
+        );
+      }
+
+      return TextButton(
         onPressed: isDisabled ? null : openIconPicker,
         focusNode: focusNode,
-        icon: Icon(selectedIcon, size: actualSelectedIconSize),
+        child: Text(tr.iconpicker_empty_prompt),
       );
     }
 
-    return TextButton(
+    final resolvedSquareSize = squareFieldSize ?? controlSize;
+    final tooltipMessage = hasSelectedIcon
+        ? tr.iconpicker_nonempty_prompt
+        : tr.iconpicker_empty_prompt;
+    final squareButton = OutlinedButton(
       onPressed: isDisabled ? null : openIconPicker,
       focusNode: focusNode,
-      child: Text(tr.iconpicker_empty_prompt),
+      style:
+          OutlinedButton.styleFrom(
+            fixedSize: Size.square(resolvedSquareSize),
+            minimumSize: Size.zero,
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            backgroundColor: theme.inputDecorationTheme.fillColor,
+            foregroundColor: theme.colorScheme.primary,
+            disabledForegroundColor: theme.disabledColor,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+            ),
+            side:
+                (theme.inputDecorationTheme.enabledBorder
+                        as OutlineInputBorder?)
+                    ?.borderSide,
+          ).copyWith(
+            overlayColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.pressed)) {
+                return theme.colorScheme.primary.withValues(alpha: 0.12);
+              }
+              if (states.contains(WidgetState.hovered) ||
+                  states.contains(WidgetState.focused)) {
+                return theme.colorScheme.primary.withValues(alpha: 0.08);
+              }
+              return null;
+            }),
+            side: WidgetStateProperty.resolveWith((states) {
+              final decorationTheme = theme.inputDecorationTheme;
+              if (states.contains(WidgetState.disabled)) {
+                return (decorationTheme.disabledBorder as OutlineInputBorder?)
+                        ?.borderSide ??
+                    BorderSide(color: theme.disabledColor);
+              }
+              if (states.contains(WidgetState.focused)) {
+                return (decorationTheme.focusedBorder as OutlineInputBorder?)
+                        ?.borderSide ??
+                    BorderSide(color: theme.colorScheme.primary);
+              }
+              return (decorationTheme.enabledBorder as OutlineInputBorder?)
+                      ?.borderSide ??
+                  BorderSide(color: theme.colorScheme.outline);
+            }),
+          ),
+      child: Icon(selectedIcon, size: actualSelectedIconSize),
+    );
+
+    final squareControl = SizedBox.square(
+      dimension: resolvedSquareSize,
+      child: Tooltip(message: tooltipMessage, child: squareButton),
+    );
+
+    if (!showInlineRemove || !hasSelectedIcon) {
+      return squareControl;
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        squareControl,
+        SizedBox.square(
+          dimension: resolvedSquareSize,
+          child: IconButton(
+            tooltip: tr.action_remove,
+            splashRadius: actualSelectedIconSize,
+            onPressed: isDisabled
+                ? null
+                : () => onSelect?.call(const IconOption('')),
+            icon: Icon(Icons.clear, size: actualSelectedIconSize),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -197,11 +308,13 @@ class const IconPickerGallery({
 Future<void> showIconPickerDialog(
   BuildContext context, {
   required List<IconOption> iconOptions,
+  IconOption? selectedOption,
   double? galleryIconSize,
   VoidCallbackOn<IconOption>? onSelect,
   double minWidth = 300,
   double minHeight = 300,
 }) async {
+  final hasSelectedIcon = selectedOption != null && !selectedOption.isEmpty;
   final IconOption? iconPicked = await showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -225,6 +338,13 @@ Future<void> showIconPickerDialog(
             color: theme.colorScheme.onPrimaryContainer,
           ),
         ),
+        actionButtons: [
+          if (hasSelectedIcon)
+            TextButton(
+              onPressed: () => Navigator.pop(context, const IconOption('')),
+              child: Text(tr.action_remove),
+            ),
+        ],
       );
     },
   );
