@@ -1574,5 +1574,6 @@
   "nutrition_unit_label": "Unit",
   "nutrition_per_serving": "Nutrition per serving",
   "photoRecallDateInfo": "Showing photos from {date}",
-  "not_added": "Not added"
+  "not_added": "Not added",
+  "nutrition_partial": "partial"
 }

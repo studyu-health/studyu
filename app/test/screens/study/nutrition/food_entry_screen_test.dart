@@ -171,6 +171,70 @@ class _TrackingTemplateRepository() extends FakeNutritionFoodRepository {
 void main() {
   final l10n = lookupAppLocalizations(const Locale('en'));
 
+  testWidgets('name-only edits retain unknown and partial nutrients', (
+    tester,
+  ) async {
+    final food = existingOffFood({})
+      ..nutrition.unavailableNutrients = {'protein', 'transFat', 'micros.iron'}
+      ..nutrition.partialNutrients = {'energyKcal'};
+    FoodEntry? result;
+    await openFoodEntry(
+      tester,
+      existingFood: food,
+      onResult: (value) => result = value,
+    );
+    final proteinField = tester.widget<TextFormField>(
+      inputWithLabel(l10n.protein),
+    );
+    expect(proteinField.controller!.text, isEmpty);
+    await tester.enterText(inputWithLabel(l10n.food_name), 'Renamed');
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+    expect(result!.nutrition.unavailableNutrients, {
+      'protein',
+      'transFat',
+      'micros.iron',
+    });
+    expect(result!.nutrition.partialNutrients, {'energyKcal'});
+    expect(result!.nutrition.protein, 5);
+    expect(food.nutrition.protein, 5);
+    expect(food.name, 'Original product');
+  });
+
+  testWidgets('manual entered zero is known and blank fields are unknown', (
+    tester,
+  ) async {
+    FoodEntry? result;
+    await openFoodEntry(
+      tester,
+      historicalMode: true,
+      onResult: (value) => result = value,
+    );
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.enterText(inputWithLabel(l10n.food_name), 'Zero food');
+    await tester.enterText(inputWithLabel(l10n.energy_kcal), '0');
+    await tester.enterText(inputWithLabel(l10n.protein), '0');
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+    expect(result!.nutrition.energyKcal, 0);
+    expect(result!.nutrition.isKnown('energyKcal'), isTrue);
+    expect(result!.nutrition.isKnown('protein'), isTrue);
+    expect(
+      result!.nutrition.unavailableNutrients,
+      containsAll([
+        'carbs',
+        'fat',
+        'sugars',
+        'fiber',
+        'saturatedFat',
+        'sodium',
+        'transFat',
+        'cholesterol',
+        'waterContent',
+      ]),
+    );
+  });
+
   testWidgets('shows database search outside the search flow', (tester) async {
     await openFoodEntry(tester);
 

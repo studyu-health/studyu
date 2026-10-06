@@ -519,7 +519,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     List<Map<String, dynamic>> canonicalRows,
   ) {
     for (final row in canonicalRows) {
-      final canonical = SubjectProgress.fromJson(row);
+      final canonical = SupabaseQuery.extractSupabaseSingleRow<SubjectProgress>(
+        row,
+      );
       final index = subject.progress.indexWhere(
         (progress) =>
             progress.subjectId == canonical.subjectId &&
@@ -653,7 +655,13 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     final serving = food.unit.trim().isEmpty
         ? l10n.serving_amount(food.amount)
         : '$amount ${food.unit.trim()}';
-    return '$serving · ${l10n.kcal_value(food.nutrition.energyKcal.round().toString())}';
+    final energy = food.nutrition.isKnown('energyKcal')
+        ? l10n.kcal_value(food.nutrition.energyKcal.round().toString())
+        : '— kcal';
+    final partial = food.nutrition.isPartial('energyKcal')
+        ? ' (${l10n.nutrition_partial})'
+        : '';
+    return '$serving · $energy$partial';
   }
 
   MealLog _buildMeal({bool normalizeSkipped = false}) {

@@ -15,6 +15,49 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets(
+    'meal creator retains known partial zero across save and reload',
+    (tester) async {
+      final known = _food()..nutrition.energyKcal = 0;
+      final missing = _food()
+        ..nutrition.energyKcal = 999
+        ..nutrition.unavailableNutrients = {'energyKcal', 'protein'};
+      final repository = FakeNutritionFoodRepository();
+      final viewModel = TemplateViewModel(
+        userId: 'subject',
+        repository: repository,
+      );
+      addTearDown(viewModel.dispose);
+      FoodEntry? result;
+      await _pump(
+        tester,
+        () => MealCreatorScreen.route(
+          initialName: 'Meal',
+          initialFoods: [known, missing],
+          templateViewModel: viewModel,
+        ),
+        (food) => result = food,
+        viewModel,
+      );
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      expect(result!.nutrition.energyKcal, 0);
+      expect(result!.nutrition.isKnown('energyKcal'), isTrue);
+      expect(result!.nutrition.isPartial('energyKcal'), isTrue);
+      final stored = (await repository.loadTemplates('subject'))
+          .single
+          .prototype;
+      expect(stored.nutrition.isPartial('energyKcal'), isTrue);
+      expect(
+        stored.componentSnapshots!.last.nutrition.isKnown('energyKcal'),
+        isFalse,
+      );
+      expect(missing.nutrition.energyKcal, 999);
+    },
+  );
+
+  testWidgets(
     'repeated meal edits preserve serving nutrition and composition',
     (tester) async {
       final ingredient = _food();

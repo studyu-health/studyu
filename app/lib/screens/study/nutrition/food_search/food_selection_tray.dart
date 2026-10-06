@@ -647,7 +647,7 @@ String _selectionCaloriesSummary(
   final known = store.knownCalories().round();
   return store.unknownCaloriesCount == 0
       ? l10n.kcal_value(known.toString())
-      : known == 0
+      : !store.hasKnownCalories
       ? l10n.food_selection_unknown_calories(store.unknownCaloriesCount)
       : l10n.food_selection_known_calories(
           known.toString(),

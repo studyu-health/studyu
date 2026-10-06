@@ -4,6 +4,57 @@ import 'package:studyu_core/core.dart';
 
 void main() {
   test(
+    'availability survives normalization, replacement and nested hydration',
+    () {
+      final leaf =
+          _food(
+              id: 'leaf',
+              foodId: 'leaf-food',
+              versionId: 'leaf-v1',
+              name: 'Leaf',
+              amount: 2,
+              energy: 20,
+            )
+            ..nutrition.unavailableNutrients = {'protein', 'micros.iron'}
+            ..nutrition.partialNutrients = {'energyKcal'};
+      FoodEntry meal(String id, FoodEntry component, double amount) =>
+          _food(
+              id: id,
+              foodId: '$id-food',
+              versionId: '$id-v1',
+              name: id,
+              amount: amount,
+              energy: 20,
+            )
+            ..entryType = FoodEntryType.meal
+            ..componentFoods = [_composition('$id-component', id, component, 0)]
+            ..componentSnapshots = [component];
+      final nested = FoodEntry.fromJson(
+        meal('outer', meal('inner', leaf, 1), 3).toJson(),
+      );
+      final flattened = flattenNutritionFoodEntries([nested]);
+      expect(flattened.single.amount, 6);
+      expect(flattened.single.nutrition.energyKcal, 60);
+      expect(flattened.single.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
+      expect(flattened.single.nutrition.partialNutrients, {'energyKcal'});
+      final definition = normalizeNutritionFoodDefinition(leaf);
+      expect(definition.nutrition.energyKcal, 10);
+      final replaced = applyNutritionFoodSnapshot(leaf, definition);
+      expect(replaced.nutrition.energyKcal, 20);
+      expect(
+        replaced.nutrition.unavailableNutrients,
+        leaf.nutrition.unavailableNutrients,
+      );
+      expect(replaced.nutrition.partialNutrients, {'energyKcal'});
+      expect(leaf.nutrition.energyKcal, 20);
+      expect(leaf.amount, 2);
+    },
+  );
+
+  test(
     'definition normalization converts occurrence nutrition to one serving',
     () {
       final occurrence = _food(

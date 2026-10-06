@@ -4,6 +4,34 @@ import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart
 import 'package:studyu_core/core.dart' as studyu;
 
 void main() {
+  test(
+    'selection tracks known partial zero independently of missing calories',
+    () {
+      final store = FoodSelectionStore();
+      final known = food(id: 'zero', calories: 0);
+      final missing = food(id: 'unknown', calories: 999)
+        ..nutrition.unavailableNutrients = {'energyKcal'};
+      store
+        ..addOrIncrement('zero', known)
+        ..addOrIncrement('unknown', missing);
+      expect(store.knownCalories(), 0);
+      expect(store.hasKnownCalories, isTrue);
+      expect(store.unknownCaloriesCount, 1);
+      expect(store.materialize().last.nutrition.isKnown('energyKcal'), isFalse);
+      store.delete('zero');
+      expect(store.hasKnownCalories, isFalse);
+      final partial = food(id: 'partial', calories: 0)
+        ..nutrition.partialNutrients = {'energyKcal'};
+      store.addOrIncrement('partial', partial);
+      expect(store.hasKnownCalories, isTrue);
+      expect(store.unknownCaloriesCount, 2);
+      expect(
+        store.materialize().last.nutrition.isPartial('energyKcal'),
+        isTrue,
+      );
+    },
+  );
+
   test('selection store combines quantities and materializes scaled food', () {
     final store = FoodSelectionStore();
     final entry = food(id: 'apple', calories: 95);

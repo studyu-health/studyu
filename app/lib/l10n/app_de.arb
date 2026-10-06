@@ -1359,5 +1359,6 @@
   "nutrition_unit_label": "Einheit",
   "nutrition_per_serving": "Nährwerte pro Portion",
   "photoRecallDateInfo": "Fotos vom {date}",
-  "not_added": "Nicht hinzugefügt"
+  "not_added": "Nicht hinzugefügt",
+  "nutrition_partial": "unvollständig"
 }

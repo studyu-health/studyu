@@ -8,6 +8,87 @@ import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
 void main() {
+  test(
+    'USDA mapping preserves measured zero independently for each nutrient',
+    () {
+      final food = convertUsdaToFoodEntry(
+        UsdaFoodItem(
+          fdcId: 1,
+          servingSize: 50,
+          servingSizeUnit: 'g',
+          foodNutrients: [
+            UsdaFoodNutrient(nutrientId: 1008, value: 0),
+            UsdaFoodNutrient(nutrientId: 2000, value: 0),
+            UsdaFoodNutrient(nutrientId: 1257, value: 0),
+            UsdaFoodNutrient(nutrientId: 1253, value: 0),
+            UsdaFoodNutrient(nutrientId: 1051, value: 0),
+            UsdaFoodNutrient(nutrientId: 1093, value: 20),
+          ],
+        ),
+      );
+      for (final key in [
+        'energyKcal',
+        'sugars',
+        'transFat',
+        'cholesterol',
+        'waterContent',
+        'sodium',
+      ]) {
+        expect(food.nutrition.isKnown(key), isTrue, reason: key);
+      }
+      for (final key in ['protein', 'carbs', 'fat', 'fiber', 'saturatedFat']) {
+        expect(food.nutrition.isKnown(key), isFalse, reason: key);
+      }
+      expect(food.nutrition.sodium, 10);
+      expect(
+        studyu.FoodEntry.fromJson(food.toJson()).nutrition.unavailableNutrients,
+        food.nutrition.unavailableNutrients,
+      );
+    },
+  );
+
+  test('OFF mapping preserves null versus zero and sodium units', () {
+    final product = Product.fromJson({
+      'code': '123',
+      'product_name': 'Zero product',
+      'serving_size': '50 g',
+      'nutriments': {
+        'energy-kcal_100g': 0,
+        'proteins_100g': 0,
+        'sugars_100g': 0,
+        'trans-fat_100g': 0,
+        'cholesterol_100g': 0,
+        'sodium_100g': 0.1,
+      },
+    });
+    final food = convertOpenFoodFactsToFoodEntry(product);
+    for (final key in [
+      'energyKcal',
+      'protein',
+      'sugars',
+      'transFat',
+      'cholesterol',
+      'sodium',
+    ]) {
+      expect(food.nutrition.isKnown(key), isTrue, reason: key);
+    }
+    for (final key in [
+      'carbs',
+      'fat',
+      'fiber',
+      'saturatedFat',
+      'waterContent',
+    ]) {
+      expect(food.nutrition.isKnown(key), isFalse, reason: key);
+    }
+    expect(food.nutrition.sodium, 50);
+    expect(food.nutrition.energyKcal, 0);
+    expect(
+      studyu.FoodEntry.fromJson(food.toJson()).nutrition.unavailableNutrients,
+      food.nutrition.unavailableNutrients,
+    );
+  });
+
   for (final slowOff in [true, false]) {
     for (final pagination in [false, true]) {
       testWidgets('${slowOff ? 'OFF' : 'USDA'} timeout preserves results on '

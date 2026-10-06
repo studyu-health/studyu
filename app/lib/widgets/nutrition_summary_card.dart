@@ -172,6 +172,7 @@ class const NutritionSummaryView({
   required final double? protein,
   required final double? fat,
   final Set<String> unavailableNutrients = const {},
+  final Set<String> partialNutrients = const {},
   final bool energyUnavailable = false,
   final String Function(double)? formatEnergy,
   final String Function(double)? formatGrams,
@@ -182,17 +183,13 @@ class const NutritionSummaryView({
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final total = (carbs ?? 0) * 4 + (protein ?? 0) * 4 + (fat ?? 0) * 9;
-    final energyContradictory =
-        energyKcal != null && energyKcal! <= 0 && total > 0;
     final hideEnergy =
-        energyUnavailable ||
-        _isUnavailable('energyKcal', energyKcal) ||
-        energyContradictory;
+        energyUnavailable || _isUnavailable('energyKcal', energyKcal);
     final distributionUnavailable =
-        energyContradictory ||
         _isUnavailable('carbs', carbs) ||
         _isUnavailable('protein', protein) ||
-        _isUnavailable('fat', fat);
+        _isUnavailable('fat', fat) ||
+        {'carbs', 'protein', 'fat'}.any(partialNutrients.contains);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,8 +208,12 @@ class const NutritionSummaryView({
                   Text(
                     hideEnergy
                         ? '—'
-                        : formatEnergy?.call(energyKcal!) ??
-                              '${energyKcal!.round()} kcal',
+                        : _withAvailability(
+                            context,
+                            'energyKcal',
+                            formatEnergy?.call(energyKcal!) ??
+                                '${energyKcal!.round()} kcal',
+                          ),
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -281,7 +282,7 @@ class const NutritionSummaryView({
         children: [
           Expanded(child: Text(label)),
           Text(
-            _formatGrams(value, keyName),
+            _withAvailability(context, keyName, _formatGrams(value, keyName)),
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -290,6 +291,11 @@ class const NutritionSummaryView({
       ),
     );
   }
+
+  String _withAvailability(BuildContext context, String key, String value) =>
+      !_isUnavailable(key, 0) && partialNutrients.contains(key)
+      ? '$value (${AppLocalizations.of(context)!.nutrition_partial})'
+      : value;
 
   String _formatGrams(double? value, String key) {
     if (_isUnavailable(key, value)) return '—';
@@ -361,6 +367,7 @@ class _NutritionSummaryCardState() extends State<NutritionSummaryCard> {
                 protein: widget.nutrition.protein,
                 fat: widget.nutrition.fat,
                 unavailableNutrients: widget.nutrition.unavailableNutrients,
+                partialNutrients: widget.nutrition.partialNutrients,
               ),
             ],
           ),
@@ -485,9 +492,12 @@ class _NutritionSummaryCardState() extends State<NutritionSummaryCard> {
 
   String _format(double value, String unit, String key) {
     if (widget.nutrition.unavailableNutrients.contains(key)) return '—';
-    if (unit == 'mg') return '${value.round()} mg';
-    if (value == 0) return '0 g';
-    return '${value.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')} g';
+    final formatted = unit == 'mg'
+        ? '${value.round()} mg'
+        : '${value.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')} g';
+    return widget.nutrition.isPartial(key)
+        ? '$formatted (${AppLocalizations.of(context)!.nutrition_partial})'
+        : formatted;
   }
 }
 
@@ -535,56 +545,6 @@ class const MealNutritionSummaryCard({required final MealLog meal, super.key})
   );
 }
 
-NutritionProfile sumNutritionFoods(List<FoodEntry> foods) {
-  double energy = 0;
-  double protein = 0;
-  double carbs = 0;
-  double fat = 0;
-  double sugars = 0;
-  double fiber = 0;
-  double saturatedFat = 0;
-  double transFat = 0;
-  double cholesterol = 0;
-  double sodium = 0;
-  double water = 0;
-  final micros = <String, double>{};
-  final unavailable = <String>{};
-  var unavailableItems = 0;
-  for (final food in foods) {
-    final n = food.nutrition;
-    energy += n.energyKcal;
-    protein += n.protein;
-    carbs += n.carbs;
-    fat += n.fat;
-    sugars += n.sugars;
-    fiber += n.fiber;
-    saturatedFat += n.saturatedFat;
-    transFat += n.transFat;
-    cholesterol += n.cholesterol;
-    sodium += n.sodium;
-    water += n.waterContent;
-    n.micros.forEach((key, value) => micros[key] = (micros[key] ?? 0) + value);
-    unavailable.addAll(n.unavailableNutrients);
-    if (n.unavailableNutrients.isNotEmpty) {
-      unavailableItems += n.unavailableItemCount == 0
-          ? 1
-          : n.unavailableItemCount;
-    }
-  }
-  return NutritionProfile(
-    energyKcal: energy,
-    protein: protein,
-    carbs: carbs,
-    fat: fat,
-    sugars: sugars,
-    fiber: fiber,
-    saturatedFat: saturatedFat,
-    transFat: transFat,
-    cholesterol: cholesterol,
-    sodium: sodium,
-    waterContent: water,
-    micros: micros,
-    unavailableNutrients: unavailable,
-    unavailableItemCount: unavailableItems,
-  );
-}
+/// App snapshots already contain nutrition for the logged amount.
+NutritionProfile sumNutritionFoods(List<FoodEntry> foods) =>
+    sumNutritionProfiles(foods.map((food) => food.nutrition));

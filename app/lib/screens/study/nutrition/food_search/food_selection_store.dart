@@ -18,6 +18,10 @@ final class FoodSelectionItem({
   final bool baselineGramsKnown = true,
 }) {
   String get name => baseFood.name;
+  bool get hasKnownCalories =>
+      caloriesKnown && baseFood.nutrition.isKnown('energyKcal');
+  bool get hasMissingCalories =>
+      !hasKnownCalories || baseFood.nutrition.isPartial('energyKcal');
 
   bool get servingWeightOverridden =>
       gramsKnown &&
@@ -39,7 +43,9 @@ final class FoodSelectionStore() extends ChangeNotifier {
   int get servingCount =>
       _items.values.fold(0, (sum, item) => sum + item.quantity);
   int get unknownCaloriesCount =>
-      _items.values.where((item) => !item.caloriesKnown).length;
+      _items.values.where((item) => item.hasMissingCalories).length;
+  bool get hasKnownCalories =>
+      _items.values.any((item) => item.hasKnownCalories);
   bool get isEmpty => _items.isEmpty;
 
   FoodSelectionItem? itemFor(String key) => _items[key];
@@ -154,7 +160,7 @@ final class FoodSelectionStore() extends ChangeNotifier {
   }
 
   double knownCalories() => _items.values
-      .where((item) => item.caloriesKnown)
+      .where((item) => item.hasKnownCalories)
       .fold(
         0,
         (sum, item) => sum + item.baseFood.nutrition.energyKcal * item.quantity,

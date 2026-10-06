@@ -165,10 +165,20 @@ extension StudyExportX on Study {
 
           final nutrition = dailyRecall.totalNutrition;
 
-          row['total_calories'] = nutrition.energyKcal;
-          row['total_protein'] = nutrition.protein;
-          row['total_carbs'] = nutrition.carbs;
-          row['total_fat'] = nutrition.fat;
+          for (final entry in {
+            'total_calories': 'energyKcal',
+            'total_protein': 'protein',
+            'total_carbs': 'carbs',
+            'total_fat': 'fat',
+          }.entries) {
+            final known = nutrition.isKnown(entry.value);
+            row[entry.key] = known ? nutrition.valueFor(entry.value) : '';
+            row['${entry.key}_status'] = !known
+                ? 'unknown'
+                : nutrition.isPartial(entry.value)
+                ? 'partial'
+                : 'complete';
+          }
           row['meal_count'] = dailyRecall.meals
               .where((MealLog meal) => !meal.isSkipped)
               .length;

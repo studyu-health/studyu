@@ -8,6 +8,74 @@ import 'package:studyu_core/core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
+  test(
+    'repository mutation and library hydration preserve availability',
+    () async {
+      final food = _food()
+        ..nutrition.unavailableNutrients = {'protein', 'micros.iron'}
+        ..nutrition.partialNutrients = {'energyKcal'};
+      final repository = NutritionFoodRepository(
+        client: _client((request) async {
+          if (request.method == 'GET') {
+            final row = _definitionRow()
+              ..['nutrition_food_version'] = {
+                'snapshot': food.toJsonForStorage(),
+              };
+            return _jsonResponse([row], request);
+          }
+          final params = jsonDecode(request.body) as Map<String, dynamic>;
+          final snapshot = params['p_snapshot'] as Map<String, dynamic>;
+          expect(jsonEncode(snapshot), isNot(contains('availabilityVerified')));
+          expect(
+            snapshot[NutritionProfile.availabilityWriteIntentKey],
+            NutritionProfile.availabilityWriteIntent,
+          );
+          expect(
+            snapshot['nutrition'] as Map<String, dynamic>,
+            isNot(contains(NutritionProfile.availabilityWriteIntentKey)),
+          );
+          final sent = FoodEntry.fromJson(
+            params['p_snapshot'] as Map<String, dynamic>,
+          );
+          expect(
+            sent.nutrition.unavailableNutrients,
+            food.nutrition.unavailableNutrients,
+          );
+          expect(sent.nutrition.partialNutrients, {'energyKcal'});
+          return _jsonResponse(_mutationResponse(food: sent), request);
+        }),
+      );
+      final loaded = (await repository.loadTemplates('subject')).single;
+      expect(loaded.prototype.canWriteAvailability, isTrue);
+      expect(loaded.prototype.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
+      expect(loaded.prototype.nutrition.partialNutrients, {'energyKcal'});
+      final saved = await repository.saveTemplate(
+        subjectId: 'subject',
+        name: 'Food',
+        food: food,
+        expectedVersionId: 'version-1',
+      );
+      expect(saved.prototype.canWriteAvailability, isTrue);
+      expect(saved.prototype.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
+      final mutation = await repository.mutateHistoricalDefinition(
+        subjectId: 'subject',
+        snapshot: food,
+        expectedVersionId: 'version-1',
+        entryId: food.id,
+        target: {},
+      );
+      expect(mutation.definition.snapshot.nutrition.partialNutrients, {
+        'energyKcal',
+      });
+    },
+  );
+
   test('loads only active library-visible subject definitions', () async {
     late Uri requestedUri;
     final repository = NutritionFoodRepository(
@@ -204,7 +272,7 @@ Map<String, dynamic> _definitionRow() => {
   'deleted_at': null,
   'created_at': '2026-07-15T08:00:00.000Z',
   'updated_at': '2026-07-15T08:00:00.000Z',
-  'nutrition_food_version': {'snapshot': _food().toJson()},
+  'nutrition_food_version': {'snapshot': _food().toJsonForStorage()},
 };
 
 Map<String, dynamic> _mutationResponse({
@@ -217,7 +285,7 @@ Map<String, dynamic> _mutationResponse({
     'kind': kind,
     'currentVersionId': food?.foodVersionId ?? 'version-1',
     'deletedAt': null,
-    'snapshot': (food ?? _food()).toJson(),
+    'snapshot': (food ?? _food()).toJsonForStorage(),
     'createdAt': '2026-07-15T08:00:00.000Z',
     'updatedAt': '2026-07-15T08:00:00.000Z',
   },

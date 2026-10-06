@@ -143,28 +143,44 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       );
 
       _energyController = TextEditingController(
-        text: food.nutrition.energyKcal.toString(),
+        text: food.nutrition.isKnown('energyKcal')
+            ? food.nutrition.energyKcal.toString()
+            : '',
       );
       _proteinController = TextEditingController(
-        text: food.nutrition.protein.toString(),
+        text: food.nutrition.isKnown('protein')
+            ? food.nutrition.protein.toString()
+            : '',
       );
       _carbsController = TextEditingController(
-        text: food.nutrition.carbs.toString(),
+        text: food.nutrition.isKnown('carbs')
+            ? food.nutrition.carbs.toString()
+            : '',
       );
       _fatController = TextEditingController(
-        text: food.nutrition.fat.toString(),
+        text: food.nutrition.isKnown('fat')
+            ? food.nutrition.fat.toString()
+            : '',
       );
       _sugarsController = TextEditingController(
-        text: food.nutrition.sugars.toString(),
+        text: food.nutrition.isKnown('sugars')
+            ? food.nutrition.sugars.toString()
+            : '',
       );
       _fiberController = TextEditingController(
-        text: food.nutrition.fiber.toString(),
+        text: food.nutrition.isKnown('fiber')
+            ? food.nutrition.fiber.toString()
+            : '',
       );
       _saturatedFatController = TextEditingController(
-        text: food.nutrition.saturatedFat.toString(),
+        text: food.nutrition.isKnown('saturatedFat')
+            ? food.nutrition.saturatedFat.toString()
+            : '',
       );
       _sodiumController = TextEditingController(
-        text: food.nutrition.sodium.toString(),
+        text: food.nutrition.isKnown('sodium')
+            ? food.nutrition.sodium.toString()
+            : '',
       );
 
       _entryType = food.entryType;
@@ -350,7 +366,9 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     List<Map<String, dynamic>> canonicalRows,
   ) {
     for (final row in canonicalRows) {
-      final canonical = SubjectProgress.fromJson(row);
+      final canonical = SupabaseQuery.extractSupabaseSingleRow<SubjectProgress>(
+        row,
+      );
       final index = subject.progress.indexWhere(
         (progress) =>
             progress.subjectId == canonical.subjectId &&
@@ -403,20 +421,59 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     if (!_formKey.currentState!.validate()) return null;
 
     final existingNutrition = widget.existingFood?.nutrition;
+    double enteredValue(String key, TextEditingController controller) =>
+        double.tryParse(controller.text) ??
+        (existingNutrition != null && !existingNutrition.isKnown(key)
+            ? existingNutrition.valueFor(key)
+            : 0);
     final nutrition = NutritionProfile(
-      energyKcal: double.tryParse(_energyController.text) ?? 0,
-      protein: double.tryParse(_proteinController.text) ?? 0,
-      carbs: double.tryParse(_carbsController.text) ?? 0,
-      fat: double.tryParse(_fatController.text) ?? 0,
-      sugars: double.tryParse(_sugarsController.text) ?? 0,
-      fiber: double.tryParse(_fiberController.text) ?? 0,
-      saturatedFat: double.tryParse(_saturatedFatController.text) ?? 0,
+      energyKcal: enteredValue('energyKcal', _energyController),
+      protein: enteredValue('protein', _proteinController),
+      carbs: enteredValue('carbs', _carbsController),
+      fat: enteredValue('fat', _fatController),
+      sugars: enteredValue('sugars', _sugarsController),
+      fiber: enteredValue('fiber', _fiberController),
+      saturatedFat: enteredValue('saturatedFat', _saturatedFatController),
       transFat: existingNutrition?.transFat ?? 0,
       cholesterol: existingNutrition?.cholesterol ?? 0,
-      sodium: double.tryParse(_sodiumController.text) ?? 0,
+      sodium: enteredValue('sodium', _sodiumController),
       waterContent: existingNutrition?.waterContent ?? 0,
       micros: Map.of(existingNutrition?.micros ?? const {}),
+      unavailableNutrients: {
+        ...?existingNutrition?.unavailableNutrients,
+        if (existingNutrition == null) 'transFat',
+        if (existingNutrition == null) 'cholesterol',
+        if (existingNutrition == null) 'waterContent',
+      },
+      partialNutrients: {...?existingNutrition?.partialNutrients},
     );
+    final nutrientControllers = {
+      'energyKcal': _energyController,
+      'protein': _proteinController,
+      'carbs': _carbsController,
+      'fat': _fatController,
+      'sugars': _sugarsController,
+      'fiber': _fiberController,
+      'saturatedFat': _saturatedFatController,
+      'sodium': _sodiumController,
+    };
+    for (final entry in nutrientControllers.entries) {
+      final value = double.tryParse(entry.value.text);
+      if (value == null) {
+        nutrition.unavailableNutrients.add(entry.key);
+        nutrition.partialNutrients.remove(entry.key);
+      } else {
+        nutrition.unavailableNutrients.remove(entry.key);
+        // A name-only edit must retain an existing partial subtotal.
+        final originalText =
+            existingNutrition == null || !existingNutrition.isKnown(entry.key)
+            ? ''
+            : existingNutrition.valueFor(entry.key).toString();
+        if (entry.value.text != originalText) {
+          nutrition.partialNutrients.remove(entry.key);
+        }
+      }
+    }
 
     final existingFood = widget.existingFood;
     if (existingFood == null) {

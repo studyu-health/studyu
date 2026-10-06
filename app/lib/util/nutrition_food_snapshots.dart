@@ -107,6 +107,7 @@ FoodEntry normalizeCompositeNutritionFoodDefinition(FoodEntry meal) {
 /// Applies reusable fields while retaining occurrence-owned identity/quantity.
 FoodEntry applyNutritionFoodSnapshot(FoodEntry logged, FoodEntry definition) {
   final updated = FoodEntry.fromJson(definition.toJson());
+  if (!logged.canWriteAvailability) updated.setAvailabilityVerified(false);
   final definitionAmount = definition.amount;
   if (definitionAmount.isFinite && definitionAmount > 0) {
     _scaleNutrition(updated.nutrition, logged.amount / definitionAmount);

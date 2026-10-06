@@ -9,6 +9,33 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_statistics_view.dar
 import 'package:studyu_core/core.dart';
 
 void main() {
+  test('daily and period aggregation preserve partial and unknown zero', () {
+    final today = DateTime(2026, 1, 3);
+    final known = _record(date: today, studyDay: 3, energyKcal: 0);
+    final missing = _record(
+      date: addCalendarDays(today, -1),
+      studyDay: 2,
+      energyKcal: 999,
+      unavailableNutrients: {'energyKcal', 'protein'},
+    );
+    final days = nutritionStatisticsDays([known, missing]);
+    expect(days.first.nutrition.isKnown('energyKcal'), isFalse);
+    final period = nutritionStatisticsPeriod(days, endDate: today, dayCount: 3);
+    expect(period.averageFor('energyKcal'), 0);
+    expect(period.averageNutrition.isKnown('energyKcal'), isTrue);
+    expect(period.partialNutrients, contains('energyKcal'));
+    expect(period.unavailableNutrients, isNot(contains('energyKcal')));
+    final unknown = nutritionStatisticsPeriod(
+      [days.first],
+      endDate: today,
+      dayCount: 3,
+    );
+    expect(unknown.averageFor('energyKcal'), isNull);
+    expect(unknown.averageFor('protein'), isNull);
+    expect(unknown.averageFor('carbs'), isNotNull);
+    expect(missing.recall.meals.single.foods.single.nutrition.energyKcal, 999);
+  });
+
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets('shows localized averages for completed study days', (
@@ -223,7 +250,7 @@ void main() {
     );
 
     expect(period.recordedCount, 2);
-    expect(period.average((value) => value.energyKcal), 150);
+    expect(period.averageFor('energyKcal'), 150);
     expect(period.days.last.isRecorded, isFalse);
     expect(period.days.last.hasChartData, isTrue);
     expect(period.hasTodaySoFar, isTrue);
@@ -373,9 +400,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('hides contradictory zero energy from trend output', (
-    tester,
-  ) async {
+  testWidgets('retains measured zero energy in trend output', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(800, 1600);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -412,7 +437,7 @@ void main() {
     expect(
       find.descendant(
         of: energyCard,
-        matching: find.text('Durchschnitt — über abgeschlossene Tage'),
+        matching: find.text('Durchschnitt 0 kcal über abgeschlossene Tage'),
       ),
       findsOneWidget,
     );
@@ -421,10 +446,16 @@ void main() {
       findsNothing,
     );
     expect(
-      tester.widget<BarChart>(find.byType(BarChart)).data.barGroups[5].barRods,
-      isEmpty,
+      tester
+          .widget<BarChart>(
+            find.descendant(of: energyCard, matching: find.byType(BarChart)),
+          )
+          .data
+          .barGroups[5]
+          .barRods,
+      hasLength(1),
     );
-    expect(find.bySemanticsLabel(RegExp(r', —$')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r', 0 kcal$')), findsOneWidget);
     semantics.dispose();
     expect(tester.takeException(), isNull);
   });
@@ -456,7 +487,7 @@ void main() {
     final missing = period.days[5];
     expect(recordedZero.isRecorded, isTrue);
     expect(recordedZero.hasChartData, isTrue);
-    expect(period.average((nutrition) => nutrition.carbs), 0);
+    expect(period.averageFor('carbs'), 0);
     expect(incomplete.isRecorded, isFalse);
     expect(incomplete.hasChartData, isFalse);
     expect(missing.data, isNull);
@@ -508,8 +539,7 @@ void main() {
     expect(current.recordedCount, 2);
     expect(previous.recordedCount, 2);
     expect(
-      current.average((value) => value.energyKcal)! -
-          previous.average((value) => value.energyKcal)!,
+      current.averageFor('energyKcal')! - previous.averageFor('energyKcal')!,
       100,
     );
   });

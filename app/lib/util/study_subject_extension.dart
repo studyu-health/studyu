@@ -185,6 +185,7 @@ extension StudySubjectExtension on StudySubject {
       meals: recall.meals,
       studyDaySnapshot: studyDaySnapshot,
       lastAutoSavedAt: recall.lastAutoSavedAt,
+      availabilityVerified: recall.availabilityVerified,
     );
   }
 

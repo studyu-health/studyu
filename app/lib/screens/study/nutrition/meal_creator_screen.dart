@@ -240,6 +240,11 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         sodium: 0,
         waterContent: 0,
         micros: {},
+        unavailableNutrients: {
+          ...NutritionProfile.nutrientKeys.where((key) => key != 'energyKcal'),
+          if (double.tryParse(_quickCaloriesController.text) == null)
+            'energyKcal',
+        },
       ),
       source: FoodSource.manual,
       confidenceScore: 0.5,
@@ -290,59 +295,16 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   }
 
   NutritionProfile _calculateTotalNutrition() {
-    double totalEnergy = 0;
-    double totalProtein = 0;
-    double totalCarbs = 0;
-    double totalFat = 0;
-    double totalSugars = 0;
-    double totalFiber = 0;
-    double totalSaturatedFat = 0;
-    double totalTransFat = 0;
-    double totalCholesterol = 0;
-    double totalSodium = 0;
-    double totalWater = 0;
-    final Map<String, double> totalMicros = {};
-
-    for (int i = 0; i < _componentFoods.length; i++) {
-      final food = _componentFoods[i];
-      final composition = _foods[i];
-
-      final ratio = composition.amount / food.amount;
-
-      totalEnergy += food.nutrition.energyKcal * ratio;
-      totalProtein += food.nutrition.protein * ratio;
-      totalCarbs += food.nutrition.carbs * ratio;
-      totalFat += food.nutrition.fat * ratio;
-      totalSugars += food.nutrition.sugars * ratio;
-      totalFiber += food.nutrition.fiber * ratio;
-      totalSaturatedFat += food.nutrition.saturatedFat * ratio;
-      totalTransFat += food.nutrition.transFat * ratio;
-      totalCholesterol += food.nutrition.cholesterol * ratio;
-      totalSodium += food.nutrition.sodium * ratio;
-      totalWater += food.nutrition.waterContent * ratio;
-
-      food.nutrition.micros.forEach((key, value) {
-        totalMicros[key] = (totalMicros[key] ?? 0) + (value * ratio);
-      });
-    }
-
     final servings = double.tryParse(_servingsController.text) ?? 1;
-
-    return NutritionProfile(
-      energyKcal: totalEnergy / servings,
-      protein: totalProtein / servings,
-      carbs: totalCarbs / servings,
-      fat: totalFat / servings,
-      sugars: totalSugars / servings,
-      fiber: totalFiber / servings,
-      saturatedFat: totalSaturatedFat / servings,
-      transFat: totalTransFat / servings,
-      cholesterol: totalCholesterol / servings,
-      sodium: totalSodium / servings,
-      waterContent: totalWater / servings,
-      micros: totalMicros.map(
-        (nutrient, value) => MapEntry(nutrient, value / servings),
-      ),
+    return scaleNutritionProfile(
+      sumNutritionProfiles([
+        for (var index = 0; index < _componentFoods.length; index++)
+          scaleNutritionProfile(
+            _componentFoods[index].nutrition,
+            _foods[index].amount / _componentFoods[index].amount,
+          ),
+      ]),
+      1 / servings,
     );
   }
 
@@ -423,6 +385,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
           )
         : FoodEntry(
             id: existing.id,
+            availabilityVerified: existing.availabilityVerified,
             foodId: existing.foodId,
             foodVersionId: existing.foodVersionId,
             entryType: FoodEntryType.meal,
@@ -1257,7 +1220,7 @@ class const _FoodCard({
           ),
         ),
         subtitle: Text(
-          '${composition.amount} ${composition.unit} • ${l10n.kcal_value(food.nutrition.energyKcal.toStringAsFixed(0))}',
+          '${composition.amount} ${composition.unit} • ${food.nutrition.isKnown('energyKcal') ? l10n.kcal_value(food.nutrition.energyKcal.toStringAsFixed(0)) : '— kcal'}${food.nutrition.isPartial('energyKcal') ? ' (${l10n.nutrition_partial})' : ''}',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),

@@ -163,18 +163,13 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
             ),
             const SizedBox(height: 12),
             NutritionSummaryView(
-              energyKcal: current.average((nutrition) => nutrition.energyKcal),
+              energyKcal: current.averageFor('energyKcal'),
               energyUnavailable: current.hasUnavailableEnergy,
-              carbs: unavailable.contains('carbs')
-                  ? null
-                  : current.average((nutrition) => nutrition.carbs),
-              protein: unavailable.contains('protein')
-                  ? null
-                  : current.average((nutrition) => nutrition.protein),
-              fat: unavailable.contains('fat')
-                  ? null
-                  : current.average((nutrition) => nutrition.fat),
+              carbs: current.averageFor('carbs'),
+              protein: current.averageFor('protein'),
+              fat: current.averageFor('fat'),
               unavailableNutrients: unavailable,
+              partialNutrients: current.partialNutrients,
               formatEnergy: (value) => _calories(context, value),
               formatGrams: (value) => _grams(context, value),
             ),
@@ -188,7 +183,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     final l10n = AppLocalizations.of(context)!;
     final average = current.hasUnavailableEnergy
         ? null
-        : current.average((nutrition) => nutrition.energyKcal);
+        : current.averageFor('energyKcal');
     final values = [
       for (final day in current.days)
         if (day.hasChartData && !_energyUnavailable(day.data!.nutrition))
@@ -218,7 +213,15 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
               ],
             ),
             const SizedBox(height: 4),
-            Text(l10n.nutrition_average_value(_calories(context, average))),
+            Text(
+              l10n.nutrition_average_value(
+                _withPartial(
+                  context,
+                  _calories(context, average),
+                  current.partialNutrients.contains('energyKcal'),
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             SizedBox(
               height: 220,
@@ -326,7 +329,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
                       }
                       return BarTooltipItem(
                         '${_tooltipDate(context, day)} · '
-                        '${_calories(context, nutrition.energyKcal)}',
+                        '${_withPartial(context, _calories(context, nutrition.energyKcal), nutrition.isPartial('energyKcal'))}',
                         TextStyle(color: theme.colorScheme.onInverseSurface),
                       );
                     },
@@ -383,11 +386,15 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
           context,
           day,
           day.hasChartData
-              ? _calories(
+              ? _withPartial(
                   context,
-                  _energyUnavailable(day.data!.nutrition)
-                      ? null
-                      : day.data!.nutrition.energyKcal,
+                  _calories(
+                    context,
+                    _energyUnavailable(day.data!.nutrition)
+                        ? null
+                        : day.data!.nutrition.energyKcal,
+                  ),
+                  day.data!.nutrition.isPartial('energyKcal'),
                 )
               : null,
         ),
@@ -430,12 +437,11 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
   ) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final average = current.average(
-      (nutrition) => _nutrientValue(_selectedNutrient, nutrition),
-    );
+    final average = current.averageFor(_selectedNutrient.name);
     final values = [
       for (final day in current.days)
-        if (day.hasChartData)
+        if (day.hasChartData &&
+            day.data!.nutrition.isKnown(_selectedNutrient.name))
           _nutrientValue(_selectedNutrient, day.data!.nutrition),
     ];
     final maxY = _chartMax(values);
@@ -481,7 +487,13 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.nutrition_average_per_recorded_day(_grams(context, average)),
+              l10n.nutrition_average_per_recorded_day(
+                _withPartial(
+                  context,
+                  _grams(context, average),
+                  current.partialNutrients.contains(_selectedNutrient.name),
+                ),
+              ),
             ),
           ],
         ),
@@ -523,7 +535,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
                   for (final spot in spots)
                     LineTooltipItem(
                       '${_tooltipDate(context, current.days[spot.x.round()])} · '
-                      '${_grams(context, spot.y)}',
+                      '${_withPartial(context, _grams(context, spot.y), current.days[spot.x.round()].data!.nutrition.isPartial(_selectedNutrient.name))}',
                       TextStyle(color: theme.colorScheme.onInverseSurface),
                     ),
                 ],
@@ -558,21 +570,27 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
                   _changeRow(
                     context,
                     l10n.nutrition_energy,
-                    current.average((value) => value.energyKcal)! -
-                        previous.average((value) => value.energyKcal)!,
+                    _averageChange(current, previous, 'energyKcal'),
+                    partial:
+                        current.partialNutrients.contains('energyKcal') ||
+                        previous.partialNutrients.contains('energyKcal'),
                     calories: true,
                   ),
                   _changeRow(
                     context,
                     l10n.protein,
-                    current.average((value) => value.protein)! -
-                        previous.average((value) => value.protein)!,
+                    _averageChange(current, previous, 'protein'),
+                    partial:
+                        current.partialNutrients.contains('protein') ||
+                        previous.partialNutrients.contains('protein'),
                   ),
                   _changeRow(
                     context,
                     l10n.fibre,
-                    current.average((value) => value.fiber)! -
-                        previous.average((value) => value.fiber)!,
+                    _averageChange(current, previous, 'fiber'),
+                    partial:
+                        current.partialNutrients.contains('fiber') ||
+                        previous.partialNutrients.contains('fiber'),
                   ),
                 ],
               )
@@ -584,10 +602,19 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
   Widget _changeRow(
     BuildContext context,
     String label,
-    double change, {
+    double? change, {
     bool calories = false,
+    bool partial = false,
   }) {
     final l10n = AppLocalizations.of(context)!;
+    if (change == null) {
+      return Row(
+        children: [
+          Expanded(child: Text(label)),
+          const Text('—'),
+        ],
+      );
+    }
     final rounded = change.abs() < 0.05 ? 0.0 : change;
     final sign = rounded > 0 ? '+' : (rounded < 0 ? '−' : '');
     final magnitude = calories
@@ -612,7 +639,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: 4),
-          Text(value),
+          Text(_withPartial(context, value, partial)),
         ],
       ),
     );
@@ -696,7 +723,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
 
     for (var index = 0; index < period.days.length; index++) {
       final day = period.days[index];
-      if (!day.hasChartData) {
+      if (!day.hasChartData || !day.data!.nutrition.isKnown(nutrient.name)) {
         addSegment();
         continue;
       }
@@ -727,7 +754,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
       _Nutrient.fat => l10n.fat,
       _Nutrient.fiber => l10n.fibre,
     };
-    return '$nutrient. ${[for (final day in period.days) _accessibleDayLabel(context, day, day.hasChartData ? _grams(context, _nutrientValue(_selectedNutrient, day.data!.nutrition)) : null)].join('; ')}';
+    return '$nutrient. ${[for (final day in period.days) _accessibleDayLabel(context, day, day.hasChartData && day.data!.nutrition.isKnown(_selectedNutrient.name) ? _withPartial(context, _grams(context, _nutrientValue(_selectedNutrient, day.data!.nutrition)), day.data!.nutrition.isPartial(_selectedNutrient.name)) : null)].join('; ')}';
   }
 
   String _accessibleDayLabel(
@@ -767,6 +794,23 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     return '${DateFormat.yMMMd(locale).format(start)}–'
         '${DateFormat.yMMMd(locale).format(end)}';
   }
+
+  double? _averageChange(
+    NutritionStatisticsPeriod current,
+    NutritionStatisticsPeriod previous,
+    String key,
+  ) {
+    final currentValue = current.averageFor(key);
+    final previousValue = previous.averageFor(key);
+    return currentValue == null || previousValue == null
+        ? null
+        : currentValue - previousValue;
+  }
+
+  String _withPartial(BuildContext context, String value, bool partial) =>
+      partial
+      ? '$value (${AppLocalizations.of(context)!.nutrition_partial})'
+      : value;
 
   String _calories(BuildContext context, double? value) => value == null
       ? '—'
@@ -829,12 +873,8 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
   }
 }
 
-bool _energyUnavailable(NutritionProfile nutrition) {
-  final macroEnergy =
-      nutrition.carbs * 4 + nutrition.protein * 4 + nutrition.fat * 9;
-  return nutrition.unavailableNutrients.contains('energyKcal') ||
-      (nutrition.energyKcal <= 0 && macroEnergy > 0);
-}
+bool _energyUnavailable(NutritionProfile nutrition) =>
+    !nutrition.isKnown('energyKcal');
 
 class const NutritionStatisticsDay({
   required final int studyDaySnapshot,
@@ -860,25 +900,24 @@ class const NutritionStatisticsPeriod(
   DateTime get startDate => days.first.date;
   DateTime get endDate => days.last.date;
   int get recordedCount => days.where((day) => day.isRecorded).length;
-  Set<String> get unavailableNutrients => {
-    for (final day in days)
-      if (day.isRecorded) ...day.data!.nutrition.unavailableNutrients,
-  };
-  bool get hasUnavailableEnergy => days.any(
-    (day) => day.isRecorded && _energyUnavailable(day.data!.nutrition),
+  NutritionProfile get averageNutrition => scaleNutritionProfile(
+    sumNutritionProfiles([
+      for (final day in days)
+        if (day.isRecorded) day.data!.nutrition,
+    ]),
+    recordedCount == 0 ? 1 : 1 / recordedCount,
   );
+  Set<String> get unavailableNutrients => averageNutrition.unavailableNutrients;
+  Set<String> get partialNutrients => averageNutrition.partialNutrients;
+  bool get hasUnavailableEnergy => !averageNutrition.isKnown('energyKcal');
+
+  double? averageFor(String key) {
+    final nutrition = averageNutrition;
+    return nutrition.isKnown(key) ? nutrition.valueFor(key) : null;
+  }
+
   bool get hasTodaySoFar =>
       days.any((day) => day.isToday && !day.isRecorded && day.hasChartData);
-
-  double? average(double Function(NutritionProfile nutrition) value) {
-    final recordedDays = days.where((day) => day.isRecorded).toList();
-    if (recordedDays.isEmpty) return null;
-    return recordedDays.fold<double>(
-          0,
-          (sum, day) => sum + value(day.data!.nutrition),
-        ) /
-        recordedDays.length;
-  }
 }
 
 List<NutritionStatisticsDay> nutritionStatisticsDays(

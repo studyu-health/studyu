@@ -3606,4 +3606,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get not_added => 'Nicht hinzugefügt';
+
+  @override
+  String get nutrition_partial => 'unvollständig';
 }

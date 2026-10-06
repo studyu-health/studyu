@@ -14,6 +14,85 @@ void main() {
   });
 
   test(
+    'template storage, application and duplication preserve availability',
+    () async {
+      final food = _foodEntry(id: 'unknown-food', originalValues: {})
+        ..nutrition.unavailableNutrients = {'protein', 'micros.iron'}
+        ..nutrition.partialNutrients = {'energyKcal'};
+      final template = _template(
+        id: 'unknown-food',
+        name: 'Food',
+        prototype: food,
+      );
+      await TemplateStorageManager().saveFoodTemplate(template);
+      final stored = (await TemplateStorageManager().loadFoodTemplates(
+        'test-user',
+      )).single;
+      expect(stored.prototype.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
+      final repository = FakeNutritionFoodRepository([stored]);
+      final viewModel = TemplateViewModel(
+        userId: 'test-user',
+        repository: repository,
+      );
+      addTearDown(viewModel.dispose);
+      await viewModel.loadAllTemplates();
+      final applied = viewModel.applyFoodTemplate(stored);
+      expect(applied.nutrition.partialNutrients, {'energyKcal'});
+      expect(applied.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
+      await viewModel.duplicateFoodTemplate(stored.id);
+      final duplicates = await repository.loadTemplates('test-user');
+      expect(duplicates, hasLength(2));
+      expect(duplicates.last.prototype.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
+    },
+  );
+
+  test('meal template sums known subtotals and retains partial zero', () async {
+    final known = _foodEntry(id: 'known', originalValues: {})
+      ..nutrition.energyKcal = 0;
+    final missing = _foodEntry(id: 'missing', originalValues: {})
+      ..nutrition.energyKcal = 999
+      ..nutrition.unavailableNutrients = {'energyKcal'};
+    final repository = FakeNutritionFoodRepository();
+    final viewModel = TemplateViewModel(
+      userId: 'test-user',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    await viewModel.saveMealAsTemplate(
+      name: 'Meal',
+      meal: MealLog(
+        id: 'meal',
+        mealType: MealType.lunch,
+        mealContext: MealContext.home,
+        timestamp: DateTime(2026),
+        timezone: 'UTC',
+        isSkipped: false,
+        foods: [known, missing],
+      ),
+    );
+    final template = (await repository.loadTemplates('test-user')).single;
+    expect(template.prototype.nutrition.energyKcal, 0);
+    expect(template.prototype.nutrition.isKnown('energyKcal'), isTrue);
+    expect(template.prototype.nutrition.isPartial('energyKcal'), isTrue);
+    expect(
+      template.prototype.componentSnapshots!.last.nutrition.isKnown(
+        'energyKcal',
+      ),
+      isFalse,
+    );
+    expect(missing.nutrition.energyKcal, 999);
+  });
+
+  test(
     'custom food and saved meal templates round-trip across managers',
     () async {
       final manager = TemplateStorageManager();

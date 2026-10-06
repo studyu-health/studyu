@@ -268,7 +268,7 @@ String foodTotalMetadata(
   final hasCalories =
       caloriesKnown &&
       !food.nutrition.unavailableNutrients.contains('energyKcal');
-  return formatFoodMetadata(
+  final metadata = formatFoodMetadata(
     l10n,
     grams: gramsKnown ? food.servingSizeGrams * totalAmount : null,
     servingDescription: servingDescription,
@@ -279,6 +279,9 @@ String foodTotalMetadata(
                   : quantity)
         : null,
   );
+  return hasCalories && food.nutrition.isPartial('energyKcal')
+      ? '$metadata (${l10n.nutrition_partial})'
+      : metadata;
 }
 
 String? foodImageUrl(studyu.FoodEntry food) {

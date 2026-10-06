@@ -239,51 +239,6 @@ class TemplateViewModel({
     return meal;
   }
 
-  NutritionProfile _sumNutrition(List<FoodEntry> foods) {
-    final micros = <String, double>{};
-    var energy = 0.0;
-    var protein = 0.0;
-    var carbs = 0.0;
-    var fat = 0.0;
-    var sugars = 0.0;
-    var fiber = 0.0;
-    var saturatedFat = 0.0;
-    var transFat = 0.0;
-    var cholesterol = 0.0;
-    var sodium = 0.0;
-    var waterContent = 0.0;
-
-    for (final food in foods) {
-      final nutrition = food.nutrition;
-      energy += nutrition.energyKcal;
-      protein += nutrition.protein;
-      carbs += nutrition.carbs;
-      fat += nutrition.fat;
-      sugars += nutrition.sugars;
-      fiber += nutrition.fiber;
-      saturatedFat += nutrition.saturatedFat;
-      transFat += nutrition.transFat;
-      cholesterol += nutrition.cholesterol;
-      sodium += nutrition.sodium;
-      waterContent += nutrition.waterContent;
-      nutrition.micros.forEach((key, value) {
-        micros[key] = (micros[key] ?? 0) + value;
-      });
-    }
-
-    return NutritionProfile(
-      energyKcal: energy,
-      protein: protein,
-      carbs: carbs,
-      fat: fat,
-      sugars: sugars,
-      fiber: fiber,
-      saturatedFat: saturatedFat,
-      transFat: transFat,
-      cholesterol: cholesterol,
-      sodium: sodium,
-      waterContent: waterContent,
-      micros: micros,
-    );
-  }
+  NutritionProfile _sumNutrition(List<FoodEntry> foods) =>
+      sumNutritionProfiles(foods.map((food) => food.nutrition));
 }

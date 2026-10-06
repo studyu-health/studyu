@@ -6354,6 +6354,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not added'**
   String get not_added;
+
+  /// No description provided for @nutrition_partial.
+  ///
+  /// In en, this message translates to:
+  /// **'partial'**
+  String get nutrition_partial;
 }
 
 class _AppLocalizationsDelegate

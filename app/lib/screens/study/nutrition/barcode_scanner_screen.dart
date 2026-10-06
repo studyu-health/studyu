@@ -195,6 +195,13 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
       if (isUnavailable(Nutrient.proteins)) 'protein',
       if (isUnavailable(Nutrient.carbohydrates)) 'carbs',
       if (isUnavailable(Nutrient.fat)) 'fat',
+      if (isUnavailable(Nutrient.sugars)) 'sugars',
+      if (isUnavailable(Nutrient.fiber)) 'fiber',
+      if (isUnavailable(Nutrient.saturatedFat)) 'saturatedFat',
+      if (isUnavailable(Nutrient.sodium)) 'sodium',
+      if (isUnavailable(Nutrient.transFat)) 'transFat',
+      if (isUnavailable(Nutrient.cholesterol)) 'cholesterol',
+      'waterContent',
     };
 
     // Parse serving size
@@ -227,8 +234,20 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
         sugars: sugars * servingSizeGrams / 100,
         fiber: fiber * servingSizeGrams / 100,
         saturatedFat: saturatedFat * servingSizeGrams / 100,
-        transFat: 0,
-        cholesterol: 0,
+        transFat:
+            (nutriments?.getValue(Nutrient.transFat, PerSize.oneHundredGrams) ??
+                0) *
+            servingSizeGrams /
+            100,
+        cholesterol:
+            (nutriments?.getValue(
+                  Nutrient.cholesterol,
+                  PerSize.oneHundredGrams,
+                ) ??
+                0) *
+            1000 *
+            servingSizeGrams /
+            100,
         sodium: sodium * servingSizeGrams / 100,
         waterContent: 0,
         micros: {},
@@ -270,16 +289,23 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
         sugars: food.sugars100g * scale,
         fiber: food.fiber100g * scale,
         saturatedFat: food.saturatedFat100g * scale,
-        transFat: 0,
-        cholesterol: 0,
+        transFat: (food.getNutrientValue(1257) ?? 0) * scale,
+        cholesterol: (food.getNutrientValue(1253) ?? 0) * scale,
         sodium: food.sodium100g * scale, // Already in mg
-        waterContent: 0,
+        waterContent: (food.getNutrientValue(1051) ?? 0) * scale,
         micros: {},
         unavailableNutrients: {
           if (food.getNutrientValue(1008) == null) 'energyKcal',
           if (food.getNutrientValue(1003) == null) 'protein',
           if (food.getNutrientValue(1005) == null) 'carbs',
           if (food.getNutrientValue(1004) == null) 'fat',
+          if (food.getNutrientValue(2000) == null) 'sugars',
+          if (food.getNutrientValue(1079) == null) 'fiber',
+          if (food.getNutrientValue(1258) == null) 'saturatedFat',
+          if (food.getNutrientValue(1093) == null) 'sodium',
+          if (food.getNutrientValue(1257) == null) 'transFat',
+          if (food.getNutrientValue(1253) == null) 'cholesterol',
+          if (food.getNutrientValue(1051) == null) 'waterContent',
         },
       ),
       foodCode: food.gtinUpc, // Barcode from USDA

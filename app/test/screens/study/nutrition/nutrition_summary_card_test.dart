@@ -17,6 +17,36 @@ Widget testApp(Widget home) => MaterialApp(
 void main() {
   final l10n = lookupAppLocalizations(const Locale('en'));
 
+  testWidgets('summary exposes known partial zero and unknown independently', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final nutrition = NutritionProfile(
+      energyKcal: 0,
+      protein: 999,
+      carbs: 0,
+      fat: 0,
+      sugars: 0,
+      fiber: 0,
+      saturatedFat: 0,
+      transFat: 0,
+      cholesterol: 0,
+      sodium: 0,
+      waterContent: 0,
+      micros: {},
+      unavailableNutrients: {'protein'},
+      partialNutrients: {'energyKcal', 'carbs'},
+    );
+    await tester.pumpWidget(
+      testApp(Scaffold(body: NutritionSummaryCard(nutrition: nutrition))),
+    );
+    expect(find.bySemanticsLabel(RegExp('0 kcal.*partial')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('0 g.*partial')), findsOneWidget);
+    expect(find.text('—'), findsOneWidget);
+    expect(nutrition.protein, 999);
+    semantics.dispose();
+  });
+
   testWidgets('nutrition summary distinguishes zero and unavailable values', (
     tester,
   ) async {
@@ -147,7 +177,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('positive macros with nonpositive energy show placeholder', (
+  testWidgets('measured zero energy stays known despite positive macros', (
     tester,
   ) async {
     final nutrition = NutritionProfile(
@@ -174,8 +204,8 @@ void main() {
       ),
     );
 
-    expect(find.text('—'), findsOneWidget);
-    expect(find.text('0 kcal'), findsNothing);
+    expect(find.text('—'), findsNothing);
+    expect(find.text('0 kcal'), findsOneWidget);
     expect(find.text('Energy by macronutrient'), findsNothing);
   });
 
@@ -296,7 +326,7 @@ void main() {
     expect(find.text(l10n.nutrition_per_serving), findsOneWidget);
     expect(find.text('1 serving'), findsOneWidget);
     expect(find.text('100 kcal'), findsOneWidget);
-    expect(find.text('0 g'), findsNWidgets(3));
+    expect(find.text('—'), findsNWidgets(3));
     expect(find.text('0%'), findsNothing);
     expect(find.text('No data yet'), findsNothing);
   });

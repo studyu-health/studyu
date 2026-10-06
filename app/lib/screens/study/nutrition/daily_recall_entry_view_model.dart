@@ -328,6 +328,7 @@ class DailyRecallEntryViewModel({
       meals: copy.meals,
       studyDaySnapshot: _studyDaySnapshot,
       lastAutoSavedAt: copy.lastAutoSavedAt,
+      availabilityVerified: copy.availabilityVerified,
     );
   }
 
@@ -353,6 +354,7 @@ class DailyRecallEntryViewModel({
     meals: recall.meals,
     studyDaySnapshot: _studyDaySnapshot ?? recall.studyDaySnapshot,
     lastAutoSavedAt: lastAutoSavedAt ?? recall.lastAutoSavedAt,
+    availabilityVerified: recall.availabilityVerified,
   );
 
   /// Retained for existing callers; late corrections never call this path.

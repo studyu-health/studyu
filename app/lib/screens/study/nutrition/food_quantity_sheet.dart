@@ -237,6 +237,18 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
     return null;
   }
 
+  String _nutrientDisplay(
+    AppLocalizations l10n,
+    FoodEntry food,
+    String key,
+    String formatted,
+  ) {
+    if (!food.nutrition.isKnown(key)) return '—';
+    return food.nutrition.isPartial(key)
+        ? '$formatted (${l10n.nutrition_partial})'
+        : formatted;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -568,9 +580,13 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                             const SizedBox(width: 12),
                             Text(
                               caloriesKnown
-                                  ? l10n.kcal_value(
-                                      food.nutrition.energyKcal.toStringAsFixed(
-                                        0,
+                                  ? _nutrientDisplay(
+                                      l10n,
+                                      food,
+                                      'energyKcal',
+                                      l10n.kcal_value(
+                                        food.nutrition.energyKcal
+                                            .toStringAsFixed(0),
                                       ),
                                     )
                                   : '— kcal',
@@ -583,21 +599,30 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                           nutrients: [
                             (
                               l10n.food_quantity_protein,
-                              unavailable.contains('protein')
-                                  ? '—'
-                                  : '${food.nutrition.protein.toStringAsFixed(1)} g',
+                              _nutrientDisplay(
+                                l10n,
+                                food,
+                                'protein',
+                                '${food.nutrition.protein.toStringAsFixed(1)} g',
+                              ),
                             ),
                             (
                               l10n.food_quantity_carbs,
-                              unavailable.contains('carbs')
-                                  ? '—'
-                                  : '${food.nutrition.carbs.toStringAsFixed(1)} g',
+                              _nutrientDisplay(
+                                l10n,
+                                food,
+                                'carbs',
+                                '${food.nutrition.carbs.toStringAsFixed(1)} g',
+                              ),
                             ),
                             (
                               l10n.food_quantity_fat,
-                              unavailable.contains('fat')
-                                  ? '—'
-                                  : '${food.nutrition.fat.toStringAsFixed(1)} g',
+                              _nutrientDisplay(
+                                l10n,
+                                food,
+                                'fat',
+                                '${food.nutrition.fat.toStringAsFixed(1)} g',
+                              ),
                             ),
                           ],
                         ),

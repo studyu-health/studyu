@@ -371,7 +371,10 @@ class NutritionRecallAutoSaveManager({
               periodId: pending.periodId,
               studyDay: pending.studyDaySnapshot,
             )) {
-          await _deleteRecallIfUnchanged(pending);
+          // An ambiguous draft must not replace completed participant data.
+          if (pending.recall.canWriteAvailability) {
+            await _deleteRecallIfUnchanged(pending);
+          }
           continue;
         }
         final recall = isPreviousDay && pending.progressCompletedAt == null
@@ -511,6 +514,7 @@ class NutritionRecallAutoSaveManager({
       meals: recall.meals,
       studyDaySnapshot: recall.studyDaySnapshot ?? studyDaySnapshot,
       lastAutoSavedAt: recall.lastAutoSavedAt ?? recall.entryCompletedAt ?? now,
+      availabilityVerified: recall.availabilityVerified,
     );
   }
 
