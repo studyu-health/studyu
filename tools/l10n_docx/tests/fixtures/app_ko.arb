@@ -1,0 +1,7 @@
+{
+  "@@locale": "ko",
+  "brace_literal": "중괄호 {braces} 유지됨",
+  "greeting": "안녕하세요, {name}!",
+  "loading": "로딩 중",
+  "studies_count_total": "{total, plural, =1{1 study} other{{total} studies}}"
+}

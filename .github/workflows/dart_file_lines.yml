@@ -24,4 +24,4 @@ jobs:
       - name: Check Dart file lengths
         env:
           BASE_REF: ${{ github.event.pull_request.base.sha }}
-        run: scripts/check-dart-file-lengths "$BASE_REF"
+        run: tools/scripts/check-dart-file-lengths "$BASE_REF"

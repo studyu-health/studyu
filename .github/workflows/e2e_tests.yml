@@ -6,7 +6,7 @@ on:
       - ".github/workflows/e2e_tests.yml"
       - ".github/workflows/init-workspace/action.yml"
       - "supabase/**"
-      - "scripts/reset-test-db.sh"
+      - "tools/scripts/reset-test-db.sh"
       - "designer_v2/**"
       - "app/**"
       - "core/**"
@@ -50,7 +50,7 @@ jobs:
           supabase start -x studio,imgproxy
 
       - name: Reset Supabase database
-        run: ./scripts/reset-test-db.sh --yes
+        run: ./tools/scripts/reset-test-db.sh --yes
 
       - name: Configure local StudyU environment
         run: |
