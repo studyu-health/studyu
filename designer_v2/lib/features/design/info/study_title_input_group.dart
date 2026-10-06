@@ -14,22 +14,13 @@ class const StudyTitleInputGroup({
 }) extends StatelessWidget {
   static const double controlSpacing = 16.0;
   static const double controlHeight = IconPickerField.controlSize;
+  static const double iconActionWidth = 144.0;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ReactiveIconPicker(
-          key: const ValueKey('study_title_icon_picker'),
-          formControl: iconControl,
-          iconOptions: iconOptions ?? IconPack.material,
-          squareFieldSize: controlHeight,
-          useSquareField: true,
-          selectedIconSize: 24.0,
-          validationMessages: iconValidationMessages,
-        ),
-        const SizedBox(width: controlSpacing),
         Expanded(
           child: ReactiveTextField(
             key: const ValueKey('study_title_text_field'),
@@ -42,6 +33,18 @@ class const StudyTitleInputGroup({
             inputFormatters: [LengthLimitingTextInputFormatter(100)],
             validationMessages: titleValidationMessages,
           ),
+        ),
+        const SizedBox(width: controlSpacing),
+        ReactiveIconPicker(
+          key: const ValueKey('study_title_icon_picker'),
+          formControl: iconControl,
+          iconOptions: iconOptions ?? IconPack.material,
+          squareFieldSize: controlHeight,
+          labeledFieldWidth: iconActionWidth,
+          useSquareField: true,
+          showFieldLabel: true,
+          selectedIconSize: 24.0,
+          validationMessages: iconValidationMessages,
         ),
       ],
     );

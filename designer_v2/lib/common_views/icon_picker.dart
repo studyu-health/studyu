@@ -60,7 +60,9 @@ class ReactiveIconPicker({
   double? selectedIconSize = 20.0,
   double? galleryIconSize = 28.0,
   double? squareFieldSize,
+  double? labeledFieldWidth,
   bool useSquareField = false,
+  bool showFieldLabel = false,
   bool showInlineRemove = false,
   bool readOnly = false,
   ReactiveFormFieldCallback<IconOption>? onSelect,
@@ -85,7 +87,9 @@ class ReactiveIconPicker({
             galleryIconSize: galleryIconSize,
             selectedIconSize: selectedIconSize,
             squareFieldSize: squareFieldSize,
+            labeledFieldWidth: labeledFieldWidth,
             useSquareField: useSquareField,
+            showFieldLabel: showFieldLabel,
             showInlineRemove: showInlineRemove,
             onSelect: (iconOption) {
               if (isDisabled) return;
@@ -103,7 +107,9 @@ class const IconPicker({
   final double? selectedIconSize,
   final double? galleryIconSize = 28.0,
   final double? squareFieldSize,
+  final double? labeledFieldWidth,
   final bool useSquareField = false,
+  final bool showFieldLabel = false,
   final bool showInlineRemove = false,
   final VoidCallbackOn<IconOption>? onSelect,
   final bool isDisabled = false,
@@ -118,7 +124,9 @@ class const IconPicker({
       selectedIconSize: selectedIconSize,
       galleryIconSize: galleryIconSize,
       squareFieldSize: squareFieldSize,
+      labeledFieldWidth: labeledFieldWidth,
       useSquareField: useSquareField,
+      showFieldLabel: showFieldLabel,
       showInlineRemove: showInlineRemove,
       onSelect: onSelect,
       isDisabled: isDisabled,
@@ -133,7 +141,9 @@ class const IconPickerField({
   final double? selectedIconSize,
   final double? galleryIconSize,
   final double? squareFieldSize,
+  final double? labeledFieldWidth,
   final bool useSquareField = false,
+  final bool showFieldLabel = false,
   final bool showInlineRemove = false,
   final VoidCallbackOn<IconOption>? onSelect,
   final bool isDisabled = false,
@@ -190,14 +200,39 @@ class const IconPickerField({
     final tooltipMessage = hasSelectedIcon
         ? tr.iconpicker_nonempty_prompt
         : tr.iconpicker_empty_prompt;
+    final labelText = hasSelectedIcon
+        ? tr.iconpicker_nonempty_prompt
+        : tr.iconpicker_empty_prompt;
+    final resolvedFieldWidth = showFieldLabel
+        ? labeledFieldWidth ?? resolvedSquareSize * 3
+        : resolvedSquareSize;
+    final buttonChild = showFieldLabel
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(selectedIcon, size: actualSelectedIconSize),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  labelText,
+                  maxLines: 1,
+                  overflow: TextOverflow.fade,
+                ),
+              ),
+            ],
+          )
+        : Icon(selectedIcon, size: actualSelectedIconSize);
     final squareButton = OutlinedButton(
       onPressed: isDisabled ? null : openIconPicker,
       focusNode: focusNode,
       style:
           OutlinedButton.styleFrom(
-            fixedSize: Size.square(resolvedSquareSize),
+            fixedSize: Size(resolvedFieldWidth, resolvedSquareSize),
             minimumSize: Size.zero,
-            padding: EdgeInsets.zero,
+            padding: showFieldLabel
+                ? const EdgeInsets.symmetric(horizontal: 12)
+                : EdgeInsets.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             backgroundColor: theme.inputDecorationTheme.fillColor,
             foregroundColor: theme.colorScheme.primary,
@@ -237,11 +272,12 @@ class const IconPickerField({
                   BorderSide(color: theme.colorScheme.outline);
             }),
           ),
-      child: Icon(selectedIcon, size: actualSelectedIconSize),
+      child: buttonChild,
     );
 
-    final squareControl = SizedBox.square(
-      dimension: resolvedSquareSize,
+    final squareControl = SizedBox(
+      width: resolvedFieldWidth,
+      height: resolvedSquareSize,
       child: Tooltip(message: tooltipMessage, child: squareButton),
     );
 

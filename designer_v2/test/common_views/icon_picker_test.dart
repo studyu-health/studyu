@@ -84,6 +84,73 @@ void main() {
     );
   });
 
+  testWidgets('labeled square picker keeps same footprint', (tester) async {
+    const iconOption = IconOption('apple', Icons.apple);
+    const actionWidth = 144.0;
+
+    await tester.pumpWidget(
+      _buildHarness(
+        IconPickerField(
+          iconOptions: const [iconOption],
+          useSquareField: true,
+          showFieldLabel: true,
+          labeledFieldWidth: actionWidth,
+          onSelect: (_) {},
+        ),
+      ),
+    );
+    final emptySize = tester.getSize(_reservedLabeledPickerSlot(actionWidth));
+
+    expect(find.text(tr.iconpicker_empty_prompt), findsOneWidget);
+
+    await tester.pumpWidget(
+      _buildHarness(
+        IconPickerField(
+          iconOptions: const [iconOption],
+          selectedOption: iconOption,
+          useSquareField: true,
+          showFieldLabel: true,
+          labeledFieldWidth: actionWidth,
+          onSelect: (_) {},
+        ),
+      ),
+    );
+    final selectedSize = tester.getSize(
+      _reservedLabeledPickerSlot(actionWidth),
+    );
+
+    expect(emptySize, selectedSize);
+    expect(selectedSize.width, actionWidth);
+    expect(selectedSize.height, IconPickerField.controlSize);
+    expect(find.text(tr.iconpicker_nonempty_prompt), findsOneWidget);
+  });
+
+  testWidgets('disabled labeled icon picker disables whole action', (
+    tester,
+  ) async {
+    const iconOption = IconOption('apple', Icons.apple);
+
+    await tester.pumpWidget(
+      _buildHarness(
+        IconPickerField(
+          iconOptions: const [iconOption],
+          selectedOption: iconOption,
+          useSquareField: true,
+          showFieldLabel: true,
+          isDisabled: true,
+          onSelect: (_) {},
+        ),
+      ),
+    );
+
+    final changeButton = tester.widget<OutlinedButton>(
+      find.byType(OutlinedButton),
+    );
+
+    expect(changeButton.onPressed, isNull);
+    expect(find.text(tr.iconpicker_nonempty_prompt), findsOneWidget);
+  });
+
   testWidgets(
     'remove action in dialog returns empty icon and keeps size stable',
     (tester) async {
@@ -220,6 +287,14 @@ Finder _reservedPickerSlot() {
   return find.byWidgetPredicate((widget) {
     return widget is SizedBox &&
         widget.width == IconPickerField.controlSize &&
+        widget.height == IconPickerField.controlSize;
+  });
+}
+
+Finder _reservedLabeledPickerSlot(double width) {
+  return find.byWidgetPredicate((widget) {
+    return widget is SizedBox &&
+        widget.width == width &&
         widget.height == IconPickerField.controlSize;
   });
 }

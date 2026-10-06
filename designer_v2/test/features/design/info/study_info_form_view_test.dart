@@ -13,7 +13,7 @@ void main() {
     AppTranslation.setForTesting(AppLocalizationsEn());
   });
 
-  testWidgets('renders icon selector beside title field', (tester) async {
+  testWidgets('renders icon action after title field', (tester) async {
     final controls = _studyTitleControls();
 
     await tester.pumpWidget(_buildHarness(controls));
@@ -23,13 +23,23 @@ void main() {
     final iconSize = tester.getSize(find.byType(OutlinedButton));
     final fieldSize = tester.getSize(_titleFieldFinder());
 
-    expect(iconTopLeft.dx, lessThan(fieldTopLeft.dx));
+    expect(fieldTopLeft.dx, lessThan(iconTopLeft.dx));
     expect(iconTopLeft.dy, fieldTopLeft.dy);
-    expect(iconSize.width, StudyTitleInputGroup.controlHeight);
+    expect(iconSize.width, StudyTitleInputGroup.iconActionWidth);
     expect(iconSize.height, StudyTitleInputGroup.controlHeight);
     expect(fieldSize.height, StudyTitleInputGroup.controlHeight);
+    expect(find.text(tr.iconpicker_empty_prompt), findsOneWidget);
     expect(find.byType(ReactiveIconPicker), findsOneWidget);
     expect(_titleFieldFinder(), findsOneWidget);
+  });
+
+  testWidgets('selected icon state shows change label', (tester) async {
+    final controls = _studyTitleControls(icon: _favoriteIcon);
+
+    await tester.pumpWidget(_buildHarness(controls));
+
+    expect(find.text(tr.iconpicker_nonempty_prompt), findsOneWidget);
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
   });
 
   testWidgets('opens picker from icon selector and selects an icon', (
@@ -41,12 +51,16 @@ void main() {
     await tester.tap(find.byType(OutlinedButton));
     await tester.pumpAndSettle();
 
-    expect(find.text(tr.iconpicker_dialog_title), findsOneWidget);
+    expect(
+      find.widgetWithText(SelectableText, tr.iconpicker_dialog_title),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byIcon(Icons.favorite));
     await tester.pumpAndSettle();
 
     expect(controls.iconControl.value, _favoriteIcon);
+    expect(find.text(tr.iconpicker_nonempty_prompt), findsOneWidget);
   });
 
   testWidgets('removes icon from picker dialog', (tester) async {
@@ -96,10 +110,34 @@ void main() {
       StudyTitleInputGroup.controlHeight,
     );
     expect(
+      tester.getSize(find.byType(OutlinedButton)).width,
+      StudyTitleInputGroup.iconActionWidth,
+    );
+    expect(
       tester.getSize(_titleFieldFinder()).height,
       greaterThan(StudyTitleInputGroup.controlHeight),
     );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('title field width stays stable when icon changes', (
+    tester,
+  ) async {
+    final controls = _studyTitleControls();
+
+    await tester.pumpWidget(_buildHarness(controls));
+    final emptyFieldSize = tester.getSize(_titleFieldFinder());
+
+    await tester.tap(find.byType(OutlinedButton));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.favorite));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(_titleFieldFinder()), emptyFieldSize);
+    expect(
+      tester.getSize(find.byType(OutlinedButton)).width,
+      StudyTitleInputGroup.iconActionWidth,
+    );
   });
 
   testWidgets('title input group remains usable at narrow width', (
@@ -108,7 +146,10 @@ void main() {
     final controls = _studyTitleControls();
 
     await tester.pumpWidget(
-      _buildHarness(controls, width: StudyTitleInputGroup.controlHeight + 112),
+      _buildHarness(
+        controls,
+        width: StudyTitleInputGroup.iconActionWidth + 112,
+      ),
     );
 
     expect(find.byType(ReactiveIconPicker), findsOneWidget);
