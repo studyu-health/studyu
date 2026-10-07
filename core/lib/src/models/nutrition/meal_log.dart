@@ -10,9 +10,14 @@ class MealLog {
   String id;
   MealType mealType;
   String? customMealLabel;
-  MealContext mealContext;
+
+  /// True when a meal intentionally has no category label.
+  /// Missing serialized values remain false for legacy MealType.other records.
+  bool isLabelExplicitlyUnset;
+  MealContext? mealContext;
   String? locationDescription;
-  DateTime timestamp;
+  DateTime? timestamp;
+  MealOccurrenceTimePrecision timePrecision;
   String timezone;
   bool isSkipped;
   String? skipReason;
@@ -25,9 +30,11 @@ class MealLog {
     required this.id,
     required this.mealType,
     this.customMealLabel,
-    required this.mealContext,
+    this.isLabelExplicitlyUnset = false,
+    this.mealContext,
     this.locationDescription,
-    required this.timestamp,
+    this.timestamp,
+    this.timePrecision = MealOccurrenceTimePrecision.approximate,
     required this.timezone,
     required this.isSkipped,
     this.skipReason,
@@ -40,9 +47,11 @@ class MealLog {
   new withId({
     required this.mealType,
     this.customMealLabel,
-    required this.mealContext,
+    this.isLabelExplicitlyUnset = false,
+    this.mealContext,
     this.locationDescription,
-    required this.timestamp,
+    this.timestamp,
+    this.timePrecision = MealOccurrenceTimePrecision.approximate,
     required this.timezone,
     required this.isSkipped,
     this.skipReason,
@@ -51,6 +60,18 @@ class MealLog {
     this.templateId,
     required this.foods,
   }) : id = const Uuid().v4();
+
+  /// The editor must distinguish an unanswered time from an unknown answer.
+  bool hasValidTimeAnswer({required bool hasSelectedTime}) =>
+      hasSelectedTime &&
+      (timePrecision == MealOccurrenceTimePrecision.unknown
+          ? timestamp == null
+          : timestamp != null);
+
+  bool isValidForSave({required bool hasSelectedTime}) => isSkipped
+      ? skipReason?.trim().isNotEmpty == true
+      : foods.isNotEmpty &&
+            hasValidTimeAnswer(hasSelectedTime: hasSelectedTime);
 
   factory fromJson(Map<String, dynamic> json) => _$MealLogFromJson(json);
 

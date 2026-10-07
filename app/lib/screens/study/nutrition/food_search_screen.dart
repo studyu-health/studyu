@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
@@ -9,453 +10,888 @@ import 'package:studyu_app/models/unified_food_result.dart';
 import 'package:studyu_app/models/usda_models.dart';
 import 'package:studyu_app/screens/study/nutrition/barcode_scanner_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
-import 'package:studyu_app/screens/study/nutrition/recipe_builder_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
+import 'package:studyu_app/screens/study/nutrition/food_library.dart';
+import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_model.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search_bar.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search_history.dart';
+import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
-import 'package:studyu_app/services/usda_api_service.dart';
+import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
-class const FoodSearchScreen({final bool allowRecipes = true, super.key})
-    extends StatelessWidget {
+export 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_model.dart';
+
+part 'food_search/food_search_results_view.dart';
+part 'food_search/food_selection_store.dart';
+part 'food_search/food_selection_tray.dart';
+
+IconData _foodIcon(studyu.FoodEntry food) =>
+    food.entryType == studyu.FoodEntryType.meal
+    ? Icons.restaurant_menu_outlined
+    : Icons.restaurant_outlined;
+
+ImageInfo? _cachedTransferImage(BuildContext context, String? imageUrl) {
+  if (imageUrl == null || imageUrl.trim().isEmpty) return null;
+  final provider = NetworkImage(imageUrl);
+  final status = PaintingBinding.instance.imageCache.statusForKey(provider);
+  if (status.pending || (!status.live && !status.keepAlive)) return null;
+
+  ImageInfo? resolvedImage;
+  final stream = provider.resolve(createLocalImageConfiguration(context));
+  late final ImageStreamListener listener;
+  listener = ImageStreamListener((image, synchronousCall) {
+    if (synchronousCall) resolvedImage = image.clone();
+  });
+  stream.addListener(listener);
+  stream.removeListener(listener);
+  return resolvedImage;
+}
+
+Offset _quadraticPoint(
+  Offset start,
+  Offset control,
+  Offset end,
+  double progress,
+) {
+  final remaining = 1 - progress;
+  return start * (remaining * remaining) +
+      control * (2 * remaining * progress) +
+      end * (progress * progress);
+}
+
+enum _FoodSearchSection() {
+  recent,
+  myItems,
+}
+
+enum _FoodSearchFilter() {
+  all,
+  myItems,
+  database,
+}
+
+enum _FoodSearchAction() {
+  food,
+  meal,
+}
+
+class const FoodSearchScreen({
+  final bool allowMeals = true,
+  final String? mealLabel,
+  final OpenFoodFactsSearch? openFoodFactsSearch,
+  final UsdaFoodSearch? usdaFoodSearch,
+  final NutritionFoodRepository? repository,
+  final TemplateViewModel? templateViewModel,
+  final bool historicalMode = false,
+  super.key,
+}) extends StatelessWidget {
   static MaterialPageRoute<studyu.FoodEntry> route({
-    bool allowRecipes = true,
+    bool allowMeals = true,
+    bool historicalMode = false,
+    NutritionFoodRepository? repository,
+    TemplateViewModel? templateViewModel,
   }) => MaterialPageRoute(
-    builder: (_) => FoodSearchScreen(allowRecipes: allowRecipes),
+    builder: (_) => FoodSearchScreen(
+      allowMeals: allowMeals,
+      historicalMode: historicalMode,
+      repository: repository,
+      templateViewModel: templateViewModel,
+    ),
+  );
+
+  static Future<FoodSearchSelection?> show(
+    BuildContext context, {
+    required String mealLabel,
+    bool allowMeals = true,
+    OpenFoodFactsSearch? openFoodFactsSearch,
+    UsdaFoodSearch? usdaFoodSearch,
+    bool historicalMode = false,
+    NutritionFoodRepository? repository,
+    TemplateViewModel? templateViewModel,
+  }) => Navigator.of(context).push(
+    MaterialPageRoute<FoodSearchSelection>(
+      fullscreenDialog: true,
+      builder: (_) => FoodSearchScreen(
+        allowMeals: allowMeals,
+        mealLabel: mealLabel,
+        openFoodFactsSearch: openFoodFactsSearch,
+        usdaFoodSearch: usdaFoodSearch,
+        historicalMode: historicalMode,
+        repository: repository,
+        templateViewModel: templateViewModel,
+      ),
+    ),
   );
 
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context, listen: false);
-    final userId = appState.activeSubject?.id ?? 'anonymous';
+    final activeSubject = appState.activeSubject;
+    final userId = activeSubject?.id ?? 'anonymous';
+    final history = activeSubject == null
+        ? FoodSearchHistory.empty
+        : buildFoodSearchHistory(
+            activeSubject.progress,
+            subjectId: activeSubject.id,
+          );
 
+    final inheritedViewModel =
+        templateViewModel ?? Provider.of<TemplateViewModel?>(context);
+    final content = _FoodSearchScreenContent(
+      allowMeals: allowMeals,
+      mealLabel: mealLabel,
+      openFoodFactsSearch: openFoodFactsSearch,
+      usdaFoodSearch: usdaFoodSearch,
+      historicalMode: historicalMode,
+      history: history,
+    );
+    if (inheritedViewModel != null) {
+      return ChangeNotifierProvider.value(
+        value: inheritedViewModel,
+        child: content,
+      );
+    }
     return ChangeNotifierProvider(
-      create: (_) => TemplateViewModel(userId: userId),
-      child: _FoodSearchScreenContent(allowRecipes: allowRecipes),
+      create: (_) => TemplateViewModel(userId: userId, repository: repository),
+      child: content,
     );
   }
 }
 
-class const _FoodSearchScreenContent({final bool allowRecipes = true})
-    extends StatefulWidget {
+class const _FoodSearchScreenContent({
+  final bool allowMeals = true,
+  final String? mealLabel,
+  final OpenFoodFactsSearch? openFoodFactsSearch,
+  final UsdaFoodSearch? usdaFoodSearch,
+  required final bool historicalMode,
+  required final FoodSearchHistory history,
+}) extends StatefulWidget {
   @override
   State<_FoodSearchScreenContent> createState() =>
       _FoodSearchScreenContentState();
 }
 
-class _FoodSearchScreenContentState() extends State<_FoodSearchScreenContent> {
+class _FoodSearchScreenContentState()
+    extends State<_FoodSearchScreenContent>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
+  late final FoodSelectionStore? _selectionStore = widget.mealLabel == null
+      ? null
+      : FoodSelectionStore();
+  _FoodSearchSection _selectedSection = _FoodSearchSection.recent;
+  _FoodSearchFilter _selectedFilter = _FoodSearchFilter.all;
   final ScrollController _scrollController = ScrollController();
   final FocusNode _searchFocusNode = FocusNode();
+  final GlobalKey _trayAnchorKey = GlobalKey();
+  final GlobalKey _trayHeaderAnchorKey = GlobalKey();
+  final GlobalKey<_SelectionPeekTrayState> _selectionTrayKey =
+      GlobalKey<_SelectionPeekTrayState>();
+  final Map<String, GlobalKey> _rowAnchorKeys = {};
+  final Map<String, GlobalKey> _quantityAnchorKeys = {};
+  late final AnimationController _transferController;
+  OverlayEntry? _transferEntry;
+  int _transferGeneration = 0;
+  String? _activeTransferKey;
+  bool _activeTransferPending = false;
+  ImageInfo? _activeTransferImage;
 
-  // Debounce timer for live search
-  Timer? _debounceTimer;
-  static const _debounceDuration = Duration(milliseconds: 400);
-
-  // Combined results from all sources
-  List<UnifiedFoodResult> _combinedResults = [];
-
-  // Pagination state per source
-  int _offPage = 1;
-  int _usdaPage = 1;
-  bool _offHasMore = true;
-  bool _usdaHasMore = true;
-
-  // Loading states
-  bool _isInitialLoading = false;
-  bool _isLoadingMore = false;
-  bool _hasSearched = false;
-  String? _errorMessage;
-
-  // Track which sources have been searched
-  bool _offSearched = false;
-  bool _usdaSearched = false;
-
-  static const int _pageSize = 20;
+  late final FoodSearchViewModel _searchViewModel;
+  bool _showServingHint = true;
+  bool _isConfirming = false;
+  bool _allowPop = false;
+  bool _selectionSurfaceActive = false;
 
   @override
   void initState() {
     super.initState();
-    OpenFoodAPIConfiguration.userAgent = UserAgent(
-      name: 'StudyU',
-      version: '1.0',
-      system: 'Flutter',
-      url: 'https://studyu.health',
-    );
-    OpenFoodAPIConfiguration.globalLanguages = [OpenFoodFactsLanguage.ENGLISH];
-
+    _transferController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    )..addStatusListener(_onTransferStatus);
+    WidgetsBinding.instance.addObserver(this);
+    _selectionStore?.addListener(_onSelectionChanged);
+    _searchViewModel = FoodSearchViewModel(
+      openFoodFactsSearch: widget.openFoodFactsSearch,
+      usdaFoodSearch: widget.usdaFoodSearch,
+    )..addListener(_onSearchStateChanged);
     _scrollController.addListener(_onScroll);
+  }
 
-    // Auto-focus search field on load
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchFocusNode.requestFocus();
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _searchViewModel.setLanguageCode(
+      Localizations.localeOf(context).languageCode,
+    );
+  }
+
+  void _onSelectionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _onSelectionSurfaceActivityChanged(bool active) {
+    if (mounted && active != _selectionSurfaceActive) {
+      setState(() => _selectionSurfaceActive = active);
+    }
+  }
+
+  void _onSearchStateChanged() {
+    _removeTransfer();
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void didChangeMetrics() {
+    _removeTransfer();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) _removeTransfer();
   }
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _removeTransfer();
+    _transferController.dispose();
+    _selectionStore?.removeListener(_onSelectionChanged);
+    _selectionStore?.dispose();
+    _searchViewModel
+      ..removeListener(_onSearchStateChanged)
+      ..dispose();
     _searchController.dispose();
     _scrollController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
   }
 
+  void _onTransferStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _removeTransfer(stopController: false);
+    }
+  }
+
+  void _removeTransfer({bool stopController = true}) {
+    _transferGeneration++;
+    if (stopController) _transferController.stop();
+    _transferEntry?.remove();
+    _transferEntry = null;
+    _activeTransferImage?.dispose();
+    _activeTransferImage = null;
+    _activeTransferKey = null;
+    _activeTransferPending = false;
+  }
+
+  GlobalKey _rowAnchorFor(String key) =>
+      _rowAnchorKeys.putIfAbsent(key, GlobalKey.new);
+
+  GlobalKey _quantityAnchorFor(String key) =>
+      _quantityAnchorKeys.putIfAbsent(key, GlobalKey.new);
+
+  RenderBox? _renderBoxFor(GlobalKey? key) {
+    final renderObject = key?.currentContext?.findRenderObject();
+    return renderObject is RenderBox &&
+            renderObject.attached &&
+            renderObject.hasSize
+        ? renderObject
+        : null;
+  }
+
+  Offset? _transferDestination(
+    RenderBox overlayBox,
+    String key, {
+    required bool quantity,
+  }) {
+    final quantityBox = quantity
+        ? _renderBoxFor(_quantityAnchorKeys[key])
+        : null;
+    final rowBox = _renderBoxFor(_rowAnchorKeys[key]);
+    final headerBox = _renderBoxFor(_trayHeaderAnchorKey);
+    final trayBox = _renderBoxFor(_trayAnchorKey);
+    final destinationBox = quantityBox ?? rowBox ?? headerBox ?? trayBox;
+    if (destinationBox == null) return null;
+
+    final localDestination = destinationBox == trayBox
+        ? Offset(destinationBox.size.width / 2, 16)
+        : destinationBox.size.center(Offset.zero);
+    return overlayBox.globalToLocal(
+      destinationBox.localToGlobal(localDestination),
+    );
+  }
+
+  Widget _transferToken(
+    BuildContext context, {
+    required double size,
+    required IconData icon,
+    required ImageInfo? image,
+  }) {
+    final theme = Theme.of(context);
+    final fallback = fallbackFoodIcon(theme, icon, size: 20);
+    return Material(
+      elevation: 2,
+      color: theme.colorScheme.surfaceContainerHigh,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox.square(
+        dimension: size,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (image == null)
+              fallback
+            else
+              RawImage(
+                image: image.image,
+                scale: image.scale,
+                fit: BoxFit.cover,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _animateTransfer(
+    Offset? source, {
+    required String key,
+    required IconData icon,
+    required ImageInfo? image,
+    required bool firstSelection,
+    required bool isIncrement,
+  }) {
+    if (isIncrement &&
+        _activeTransferKey == key &&
+        (_activeTransferPending || _transferEntry != null)) {
+      image?.dispose();
+      return;
+    }
+
+    _removeTransfer();
+    if (!mounted || source == null || MediaQuery.disableAnimationsOf(context)) {
+      image?.dispose();
+      return;
+    }
+
+    _activeTransferImage = image;
+    _activeTransferKey = key;
+    _activeTransferPending = true;
+    final generation = _transferGeneration;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || generation != _transferGeneration) return;
+      try {
+        final overlay = Overlay.of(context, rootOverlay: true);
+        final overlayBox = overlay.context.findRenderObject();
+        if (overlayBox is! RenderBox ||
+            !overlayBox.attached ||
+            !overlayBox.hasSize) {
+          _removeTransfer();
+          return;
+        }
+
+        final start = overlayBox.globalToLocal(source);
+        final end = _transferDestination(
+          overlayBox,
+          key,
+          quantity: isIncrement,
+        );
+        if (end == null ||
+            !(Offset.zero & overlayBox.size).inflate(24).contains(start)) {
+          _removeTransfer();
+          return;
+        }
+
+        final distance = (end - start).distance;
+        final lift = (distance * 0.08).clamp(18.0, 32.0);
+        final upperY = start.dy < end.dy ? start.dy : end.dy;
+        final control = Offset((start.dx + end.dx) / 2, upperY - lift);
+        final size = isIncrement ? 32.0 : 34.0;
+        _transferController.duration = Duration(
+          milliseconds: isIncrement ? 250 : (firstSelection ? 320 : 300),
+        );
+        _activeTransferPending = false;
+        _transferEntry = OverlayEntry(
+          builder: (overlayContext) => AnimatedBuilder(
+            animation: _transferController,
+            builder: (context, _) {
+              final elapsed = _transferController.value;
+              final progress = Curves.easeOutCubic.transform(elapsed);
+              final destination =
+                  _transferDestination(
+                    overlayBox,
+                    key,
+                    quantity: isIncrement,
+                  ) ??
+                  end;
+              final position = _quadraticPoint(
+                start,
+                control,
+                destination,
+                progress,
+              );
+              final entrance = (elapsed / 0.12).clamp(0.0, 1.0);
+              final fade = ((elapsed - 0.75) / 0.25).clamp(0.0, 1.0);
+              return Positioned(
+                left: position.dx - size / 2,
+                top: position.dy - size / 2,
+                child: IgnorePointer(
+                  child: ExcludeSemantics(
+                    child: Opacity(
+                      opacity: entrance * (1 - fade),
+                      child: Transform.scale(
+                        scale: 1 - 0.3 * progress,
+                        child: _transferToken(
+                          context,
+                          size: size,
+                          icon: icon,
+                          image: image,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+        overlay.insert(_transferEntry!);
+        _transferController.forward(from: 0);
+      } catch (error) {
+        debugPrint('Selection transfer animation skipped: $error');
+        if (mounted && generation == _transferGeneration) {
+          _removeTransfer();
+        }
+      }
+    });
+  }
+
   void _onScroll() {
+    if (_transferEntry != null || _activeTransferPending) _removeTransfer();
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _loadMore();
     }
   }
 
-  /// Debounced search - triggers after user stops typing
   void _onSearchChanged(String value, TemplateViewModel templateViewModel) {
+    _removeTransfer();
     templateViewModel.setSearchQuery(value);
-    if (!mounted) return;
-    setState(() {});
-
-    _debounceTimer?.cancel();
-
-    if (value.trim().isEmpty) {
-      if (!mounted) return;
-      setState(() {
-        _combinedResults = [];
-        _hasSearched = false;
-        _errorMessage = null;
-      });
-      return;
-    }
-
-    _debounceTimer = Timer(_debounceDuration, () {
-      _searchFood(templateViewModel);
-    });
-  }
-
-  Future<void> _searchFood(TemplateViewModel templateViewModel) async {
-    final query = _searchController.text.trim();
-    templateViewModel.setSearchQuery(query);
-
-    if (query.isEmpty) {
-      if (!mounted) return;
-      setState(() {
-        _combinedResults = [];
-        _hasSearched = false;
-        _errorMessage = null;
-      });
-      return;
-    }
-
-    _offPage = 1;
-    _usdaPage = 1;
-    _offHasMore = true;
-    _usdaHasMore = true;
-    _offSearched = false;
-    _usdaSearched = false;
-
-    if (!mounted) return;
-    setState(() {
-      _isInitialLoading = true;
-      _hasSearched = true;
-      _errorMessage = null;
-      _combinedResults = [];
-    });
-
-    await Future.wait([
-      _searchOpenFoodFacts(query, isInitial: true),
-      _searchUsda(query, isInitial: true),
-    ]);
-
-    if (!mounted) return;
-    setState(() {
-      _isInitialLoading = false;
-    });
-  }
-
-  Future<void> _loadMore() async {
-    if (_isLoadingMore || _isInitialLoading) return;
-    if (!_offHasMore && !_usdaHasMore) return;
-
-    final query = _searchController.text.trim();
-    if (query.isEmpty) return;
-
-    if (!mounted) return;
-    setState(() {
-      _isLoadingMore = true;
-    });
-
-    final futures = <Future>[];
-
-    if (_offHasMore) {
-      futures.add(_searchOpenFoodFacts(query, isInitial: false));
-    }
-    if (_usdaHasMore) {
-      futures.add(_searchUsda(query, isInitial: false));
-    }
-
-    await Future.wait(futures);
-
-    if (!mounted) return;
-    setState(() {
-      _isLoadingMore = false;
-    });
-  }
-
-  Future<void> _searchOpenFoodFacts(
-    String query, {
-    required bool isInitial,
-  }) async {
-    try {
-      final searchResult = await OpenFoodAPIClient.searchProducts(
-        null,
-        ProductSearchQueryConfiguration(
-          parametersList: [
-            SearchTerms(terms: [query]),
-            PageNumber(page: _offPage),
-            const PageSize(size: _pageSize),
-          ],
-          language: OpenFoodFactsLanguage.ENGLISH,
-          fields: [
-            ProductField.NAME,
-            ProductField.BRANDS,
-            ProductField.BARCODE,
-            ProductField.NUTRIMENTS,
-            ProductField.SERVING_SIZE,
-            ProductField.QUANTITY,
-            ProductField.IMAGE_FRONT_SMALL_URL,
-          ],
-          version: ProductQueryVersion.v3,
-        ),
-      );
-
-      _offSearched = true;
-
-      if (!mounted) return;
-      if (searchResult.products != null && searchResult.products!.isNotEmpty) {
-        final newResults = searchResult.products!.map((product) {
-          final nutriments = product.nutriments;
-          final calories = nutriments?.getValue(
-            Nutrient.energyKCal,
-            PerSize.oneHundredGrams,
-          );
-
-          return UnifiedFoodResult(
-            id: product.barcode ?? '',
-            name: product.productName ?? 'Unknown',
-            brand: product.brands,
-            imageUrl: product.imageFrontSmallUrl,
-            calories: calories,
-            source: studyu.FoodSource.openfoodfacts,
-            originalData: product,
-          );
-        }).toList();
-
-        setState(() {
-          _combinedResults.addAll(newResults);
-          _offPage++;
-          _offHasMore = searchResult.products!.length >= _pageSize;
-        });
-      } else {
-        setState(() {
-          _offHasMore = false;
-        });
-      }
-    } catch (e) {
-      _offSearched = true;
-      debugPrint('OpenFoodFacts error: $e');
-    }
-  }
-
-  Future<void> _searchUsda(String query, {required bool isInitial}) async {
-    try {
-      final searchResult = await UsdaApiService.searchFoods(
-        query: query,
-        pageSize: _pageSize,
-        pageNumber: _usdaPage,
-      );
-
-      _usdaSearched = true;
-
-      if (!mounted) return;
-      if (searchResult.foods.isNotEmpty) {
-        final newResults = searchResult.foods.map((food) {
-          return UnifiedFoodResult(
-            id: food.fdcId.toString(),
-            name: food.description ?? 'Unknown',
-            brand: food.brandOwner ?? food.brandName,
-            calories: food.energyKcal100g,
-            source: studyu.FoodSource.usda,
-            originalData: food,
-          );
-        }).toList();
-
-        setState(() {
-          _combinedResults.addAll(newResults);
-          _usdaPage++;
-          _usdaHasMore = searchResult.foods.length >= _pageSize;
-        });
-      } else {
-        setState(() {
-          _usdaHasMore = false;
-        });
-      }
-    } catch (e) {
-      _usdaSearched = true;
-      debugPrint('USDA error: $e');
-    }
-  }
-
-  studyu.FoodEntry _convertUsdaToFoodEntry(UsdaFoodItem food) {
-    final servingSizeGrams = food.servingSize ?? 100.0;
-    final servingSizeUnit = food.servingSizeUnit ?? 'g';
-    final scale = servingSizeGrams / 100.0;
-
-    return studyu.FoodEntry.withId(
-      entryType: studyu.FoodEntryType.brandedProduct,
-      name: food.description ?? 'Unknown Food',
-      brandName: food.brandOwner ?? food.brandName,
-      description: food.ingredients,
-      amount: 1,
-      unit: servingSizeUnit,
-      servingSizeGrams: servingSizeGrams,
-      portionReference: food.householdServingFullText,
-      portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
-      portionState: studyu.PortionState.asServed,
-      yieldFactor: 1.0,
-      nutrition: studyu.NutritionProfile(
-        energyKcal: (food.energyKcal100g * scale).roundToDouble(),
-        protein: food.protein100g * scale,
-        carbs: food.carbohydrates100g * scale,
-        fat: food.fat100g * scale,
-        sugars: food.sugars100g * scale,
-        fiber: food.fiber100g * scale,
-        saturatedFat: food.saturatedFat100g * scale,
-        transFat: 0,
-        cholesterol: 0,
-        sodium: food.sodium100g * scale,
-        waterContent: 0,
-        micros: {},
-      ),
-      foodCode: food.gtinUpc,
-      externalId: food.fdcId.toString(),
-      source: studyu.FoodSource.usda,
-      confidenceScore: 1.0,
-      originalValues: {
-        'fdcId': food.fdcId,
-        'dataType': food.dataType,
-        'description': food.description,
-      },
+    _searchViewModel.search(
+      _selectedFilter == _FoodSearchFilter.myItems ? '' : value,
     );
   }
 
-  studyu.FoodEntry _convertToFoodEntry(Product product) {
-    final nutriments = product.nutriments;
-    final energyKcal =
-        nutriments?.getValue(Nutrient.energyKCal, PerSize.oneHundredGrams) ?? 0;
-    final protein =
-        nutriments?.getValue(Nutrient.proteins, PerSize.oneHundredGrams) ?? 0;
-    final carbs =
-        nutriments?.getValue(Nutrient.carbohydrates, PerSize.oneHundredGrams) ??
-        0;
-    final fat =
-        nutriments?.getValue(Nutrient.fat, PerSize.oneHundredGrams) ?? 0;
-    final sugars =
-        nutriments?.getValue(Nutrient.sugars, PerSize.oneHundredGrams) ?? 0;
-    final fiber =
-        nutriments?.getValue(Nutrient.fiber, PerSize.oneHundredGrams) ?? 0;
-    final saturatedFat =
-        nutriments?.getValue(Nutrient.saturatedFat, PerSize.oneHundredGrams) ??
-        0;
-    final sodium =
-        (nutriments?.getValue(Nutrient.sodium, PerSize.oneHundredGrams) ?? 0) *
-        1000;
+  void _retrySearch(TemplateViewModel templateViewModel) {
+    templateViewModel.setSearchQuery(_searchController.text.trim());
+    _searchViewModel.retry(_searchController.text);
+  }
 
-    double servingSizeGrams = 100.0;
-    if (product.servingSize != null) {
-      final match = RegExp(r'(\d+(?:\.\d+)?)\s*g')
-          .firstMatch(product.servingSize!);
-      if (match != null) {
-        servingSizeGrams = double.tryParse(match.group(1)!) ?? 100.0;
-      }
+  void _loadMore() {
+    if (_selectedFilter == _FoodSearchFilter.myItems) return;
+    _searchViewModel.loadMore(_searchController.text);
+  }
+
+  bool _isAllowedFood(studyu.FoodEntry food) {
+    return widget.allowMeals || food.entryType != studyu.FoodEntryType.meal;
+  }
+
+  void _selectHistoryItem(FoodSearchHistoryItem item) {
+    if (!_isAllowedFood(item.food)) return;
+    final food = item.createSelection();
+    if (_selectionStore == null) {
+      _showQuantity(food, action: FoodQuantityAction.addToMeal);
+      return;
     }
-
-    return studyu.FoodEntry.withId(
-      entryType: studyu.FoodEntryType.brandedProduct,
-      name: product.productName ?? 'Unknown Product',
-      brandName: product.brands,
-      description: product.genericName,
-      amount: 1,
-      unit: 'serving',
-      servingSizeGrams: servingSizeGrams,
-      portionReference: product.servingSize,
-      portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
-      portionState: studyu.PortionState.asServed,
-      yieldFactor: 1.0,
-      nutrition: studyu.NutritionProfile(
-        energyKcal: energyKcal,
-        protein: protein,
-        carbs: carbs,
-        fat: fat,
-        sugars: sugars,
-        fiber: fiber,
-        saturatedFat: saturatedFat,
-        transFat: 0,
-        cholesterol: 0,
-        sodium: sodium,
-        waterContent: 0,
-        micros: {},
-      ),
-      foodCode: product.barcode,
-      externalId: product.barcode,
-      source: studyu.FoodSource.openfoodfacts,
-      confidenceScore: 1.0,
-      originalValues: product.toJson(),
+    final key = canonicalFoodSelectionKey(food);
+    final selected = _selectionStore.itemFor(key);
+    _showQuantity(
+      selected?.baseFood ?? food,
+      key: key,
+      action: selected == null
+          ? FoodQuantityAction.addToSelection
+          : FoodQuantityAction.updateSelection,
     );
   }
+
+  void _addHistoryItem(FoodSearchHistoryItem item, Offset? source) {
+    if (!_isAllowedFood(item.food)) return;
+    final food = item.createSelection();
+    _addToSelection(food, key: canonicalFoodSelectionKey(food), source: source);
+  }
+
+  studyu.FoodEntry _foodEntryForResult(UnifiedFoodResult result) =>
+      convertFoodResultToFoodEntry(result);
+
+  bool _caloriesKnownForResult(UnifiedFoodResult result) =>
+      resultCaloriesKnown(result);
 
   void _selectResult(UnifiedFoodResult result) {
-    studyu.FoodEntry foodEntry;
-    if (result.source == studyu.FoodSource.openfoodfacts) {
-      foodEntry = _convertToFoodEntry(result.originalData as Product);
-    } else {
-      foodEntry = _convertUsdaToFoodEntry(result.originalData as UsdaFoodItem);
+    final foodEntry = _foodEntryForResult(result);
+    if (!_isAllowedFood(foodEntry)) return;
+    if (widget.mealLabel == null) {
+      _navigateToEdit(foodEntry);
+      return;
     }
-    _navigateToEdit(foodEntry);
+    final key = canonicalFoodSelectionKey(foodEntry);
+    final selected = _selectionStore!.itemFor(key);
+    _showQuantity(
+      selected?.baseFood ?? foodEntry,
+      key: key,
+      action: selected == null
+          ? FoodQuantityAction.addToSelection
+          : FoodQuantityAction.updateSelection,
+      caloriesKnown: _caloriesKnownForResult(result),
+      gramsKnown: result.servingSizeGrams != null,
+    );
   }
 
-  void _selectTemplate(studyu.SavedFoodTemplate template) {
-    Navigator.pop(context, template.prototype);
+  void _addResult(UnifiedFoodResult result, Offset? source) {
+    final food = _foodEntryForResult(result);
+    if (!_isAllowedFood(food)) return;
+    _addToSelection(
+      food,
+      key: canonicalFoodSelectionKey(food),
+      caloriesKnown: _caloriesKnownForResult(result),
+      gramsKnown: result.servingSizeGrams != null,
+      source: source,
+      imageUrl: result.imageUrl,
+    );
+  }
+
+  studyu.FoodEntry _foodEntryForTemplate(studyu.SavedFoodTemplate template) {
+    return Provider.of<TemplateViewModel>(
+      context,
+      listen: false,
+    ).applyFoodTemplate(template);
+  }
+
+  void _selectFoodTemplate(studyu.SavedFoodTemplate template) {
+    if (!_isAllowedFood(template.prototype)) return;
+    final foodEntry = _foodEntryForTemplate(template);
+    if (widget.mealLabel == null) {
+      _completeSingleSelection(foodEntry);
+      return;
+    }
+    final key = canonicalFoodSelectionKey(foodEntry);
+    final selected = _selectionStore!.itemFor(key);
+    _showQuantity(
+      selected?.baseFood ?? foodEntry,
+      key: key,
+      action: selected == null
+          ? FoodQuantityAction.addToSelection
+          : FoodQuantityAction.updateSelection,
+    );
+  }
+
+  void _addFoodTemplate(studyu.SavedFoodTemplate template, Offset? source) {
+    if (!_isAllowedFood(template.prototype)) return;
+    final food = _foodEntryForTemplate(template);
+    _addToSelection(food, key: canonicalFoodSelectionKey(food), source: source);
+  }
+
+  Future<void> _showQuantity(
+    studyu.FoodEntry foodEntry, {
+    String? key,
+    required FoodQuantityAction action,
+    bool caloriesKnown = true,
+    bool gramsKnown = true,
+  }) async {
+    _removeTransfer();
+    if (_showServingHint) {
+      setState(() => _showServingHint = false);
+    }
+    final store = _selectionStore;
+    if (store != null) {
+      _selectionTrayKey.currentState?.showDetails(
+        food: foodEntry,
+        key: key,
+        action: action,
+        caloriesKnown: caloriesKnown,
+        gramsKnown: gramsKnown,
+      );
+      if (mounted) setState(() {});
+      return;
+    }
+    final result = await FoodQuantitySheet.show(
+      context,
+      food: foodEntry,
+      mealLabel: widget.mealLabel,
+      action: action,
+      caloriesKnown: caloriesKnown,
+      gramsKnown: gramsKnown,
+    );
+    if (result == null || !mounted) return;
+    _completeSingleSelection(result);
+  }
+
+  void _onEmbeddedDetailsConfirmed(
+    studyu.FoodEntry result,
+    String? key,
+    FoodQuantityAction action,
+    studyu.FoodEntry sourceFood,
+    bool caloriesKnown,
+    bool gramsKnown,
+  ) {
+    final store = _selectionStore;
+    if (store == null) return;
+    final selected = key == null ? null : store.itemFor(key);
+    if (action == FoodQuantityAction.updateSelection && key != null) {
+      final weightChanged =
+          selected != null &&
+          (result.servingSizeGrams - selected.baseFood.servingSizeGrams).abs() >
+              0.000001;
+      store.replaceBase(
+        key,
+        result,
+        caloriesKnown: selected?.caloriesKnown ?? caloriesKnown,
+        gramsKnown:
+            selected?.gramsKnown == true ||
+            selected?.baselineGramsKnown == true ||
+            weightChanged,
+      );
+    } else {
+      final weightChanged =
+          (result.servingSizeGrams - sourceFood.servingSizeGrams).abs() >
+          0.000001;
+      _addToSelection(
+        result,
+        key: key ?? canonicalFoodSelectionKey(result),
+        sourceFood: sourceFood,
+        caloriesKnown: caloriesKnown,
+        gramsKnown: gramsKnown || weightChanged,
+        baselineGramsKnown: gramsKnown,
+      );
+    }
+  }
+
+  void _confirmSelection(FoodSelectionStore store) {
+    if (_isConfirming || store.isEmpty) return;
+    if (!widget.allowMeals &&
+        store.items.any(
+          (item) => item.baseFood.entryType == studyu.FoodEntryType.meal,
+        )) {
+      return;
+    }
+    _removeTransfer();
+    setState(() => _isConfirming = true);
+    _pop(FoodSearchSelection(store.materialize()));
+  }
+
+  void _pop([Object? result]) {
+    setState(() => _allowPop = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Navigator.of(context).pop(result);
+    });
+  }
+
+  Future<void> _confirmDiscard() async {
+    final store = _selectionStore;
+    if (store == null || store.isEmpty) {
+      _pop();
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+    final action = await showUnsavedChangesDialog(
+      context,
+      title: l10n.unsaved_changes_title,
+      message: l10n.unsaved_changes_message,
+      discardLabel: l10n.discard_changes,
+      continueLabel: l10n.continue_editing,
+    );
+    if (!mounted) return;
+
+    switch (action) {
+      case UnsavedChangesAction.discard:
+        _pop();
+      case null:
+        return;
+    }
+  }
+
+  void _addToSelection(
+    studyu.FoodEntry food, {
+    required String key,
+    studyu.FoodEntry? sourceFood,
+    bool caloriesKnown = true,
+    bool gramsKnown = true,
+    bool? baselineGramsKnown,
+    Offset? source,
+    String? imageUrl,
+  }) {
+    if (_selectionStore == null) {
+      _completeSingleSelection(food);
+      return;
+    }
+    final existing = _selectionStore.itemFor(key);
+    final firstSelection = _selectionStore.isEmpty;
+    final image = _cachedTransferImage(context, imageUrl ?? foodImageUrl(food));
+    _selectionStore.addOrIncrement(
+      key,
+      food,
+      sourceFood: sourceFood,
+      caloriesKnown: caloriesKnown,
+      gramsKnown: gramsKnown,
+      baselineGramsKnown: baselineGramsKnown,
+    );
+
+    try {
+      _animateTransfer(
+        source,
+        key: key,
+        icon: _foodIcon(food),
+        image: image,
+        firstSelection: firstSelection,
+        isIncrement: existing != null,
+      );
+    } catch (error) {
+      _removeTransfer();
+      debugPrint('Selection transfer animation skipped: $error');
+    }
+  }
+
+  void _selectTrayItem(FoodSelectionItem item) {
+    _showQuantity(
+      item.baseFood,
+      key: item.key,
+      action: FoodQuantityAction.updateSelection,
+      caloriesKnown: item.caloriesKnown,
+      gramsKnown: item.gramsKnown,
+    );
+  }
+
+  void _decrementSelection(String key) {
+    _removeTransfer();
+    _selectionStore?.decrement(key);
+  }
+
+  void _incrementTraySelection(String key, Offset? _) {
+    _selectionStore?.increment(key);
+  }
+
+  void _completeSingleSelection(studyu.FoodEntry foodEntry) {
+    if (!_isAllowedFood(foodEntry)) return;
+    _pop(
+      widget.mealLabel != null
+          ? FoodSearchSelection.single(foodEntry)
+          : foodEntry,
+    );
   }
 
   void _navigateToEdit(studyu.FoodEntry foodEntry) {
+    _removeTransfer();
     Navigator.push(
       context,
-      FoodEntryScreen.route(existingFood: foodEntry),
+      FoodEntryScreen.route(
+        existingFood: foodEntry,
+        showSearchAction: false,
+        templateViewModel: context.read<TemplateViewModel>(),
+      ),
     ).then((result) {
       if (result != null && mounted) {
-        Navigator.pop(context, result);
+        _completeSingleSelection(result);
       }
     });
   }
 
   void _addManually() {
-    Navigator.push(context, FoodEntryScreen.route()).then((result) {
-      if (result != null && mounted) {
-        Navigator.pop(context, result);
+    _removeTransfer();
+    final onSavedToSelection = _selectionStore == null
+        ? null
+        : (studyu.FoodEntry food, Offset? source) {
+            if (!mounted) return;
+            _addToSelection(
+              food,
+              key: canonicalFoodSelectionKey(food),
+              source: source,
+            );
+          };
+    Navigator.push(
+      context,
+      FoodEntryScreen.route(
+        showSearchAction: false,
+        mealLabel: widget.mealLabel,
+        historicalMode: widget.historicalMode,
+        templateViewModel: context.read<TemplateViewModel>(),
+        onSavedToSelection: onSavedToSelection,
+      ),
+    ).then((result) {
+      if (result != null && mounted && _selectionStore == null) {
+        _completeSingleSelection(result);
       }
     });
   }
 
-  void _createRecipe() {
-    Navigator.push(context, RecipeBuilderScreen.route()).then((result) {
-      if (result != null && mounted) {
-        Navigator.pop(context, result);
+  void _createMeal() {
+    _removeTransfer();
+    final onSavedToSelection = _selectionStore == null
+        ? null
+        : (studyu.FoodEntry food, Offset? source) {
+            if (!mounted) return;
+            _addToSelection(
+              food,
+              key: canonicalFoodSelectionKey(food),
+              source: source,
+            );
+          };
+    Navigator.push<studyu.FoodEntry>(
+      context,
+      MealCreatorScreen.route(
+        templateViewModel: context.read<TemplateViewModel>(),
+        onSavedToSelection: onSavedToSelection,
+      ),
+    ).then((result) {
+      if (result != null && mounted && _selectionStore == null) {
+        _completeSingleSelection(result);
       }
     });
   }
 
   Future<void> _scanBarcode() async {
-    final result = await Navigator.push(context, BarcodeScannerScreen.route());
-    if (result != null && mounted) {
-      Navigator.pop(context, result);
+    _removeTransfer();
+    final result = await Navigator.push<studyu.FoodEntry>(
+      context,
+      BarcodeScannerScreen.route(),
+    );
+    if (result == null || !mounted) return;
+    if (widget.mealLabel == null) {
+      _navigateToEdit(result);
+    } else {
+      final key = canonicalFoodSelectionKey(result);
+      final selected = _selectionStore!.itemFor(key);
+      await _showQuantity(
+        selected?.baseFood ?? result,
+        key: key,
+        action: selected == null
+            ? FoodQuantityAction.addToSelection
+            : FoodQuantityAction.updateSelection,
+      );
     }
+  }
+
+  bool _isAllowedTemplate(studyu.SavedFoodTemplate template) {
+    return widget.allowMeals ||
+        template.prototype.entryType != studyu.FoodEntryType.meal;
+  }
+
+  int _personalResultCount(TemplateViewModel templateViewModel) {
+    final query = _searchController.text.trim().toLowerCase();
+    if (query.isEmpty) return 0;
+    return templateViewModel.foodTemplates
+        .where(
+          (template) =>
+              _isAllowedTemplate(template) &&
+              template.name.toLowerCase().contains(query),
+        )
+        .length;
   }
 
   @override
@@ -463,56 +899,252 @@ class _FoodSearchScreenContentState() extends State<_FoodSearchScreenContent> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final templateViewModel = Provider.of<TemplateViewModel>(context);
+    final query = _searchController.text.trim();
+    final search = _searchViewModel;
+    final results = search.results;
+    final errorMessage = search.hasError ? l10n.food_search_error : null;
+    final personalResultCount = _personalResultCount(templateViewModel);
+    final visibleResultCount = switch (_selectedFilter) {
+      _FoodSearchFilter.all => personalResultCount + results.length,
+      _FoodSearchFilter.myItems => personalResultCount,
+      _FoodSearchFilter.database => results.length,
+    };
+    final hasSearched =
+        search.hasSearched ||
+        (query.isNotEmpty && _selectedFilter == _FoodSearchFilter.myItems);
+    final databaseComplete = search.offSearched && search.usdaSearched;
+    final searchComplete =
+        hasSearched &&
+        !search.isInitialLoading &&
+        (_selectedFilter == _FoodSearchFilter.myItems || databaseComplete);
+    final showSearchFallback =
+        query.isNotEmpty &&
+        searchComplete &&
+        visibleResultCount == 0 &&
+        (_selectedFilter == _FoodSearchFilter.myItems || errorMessage == null);
+    String? searchStatus;
+    if ((search.isInitialLoading || search.isLoadingMore) &&
+        _selectedFilter != _FoodSearchFilter.myItems) {
+      searchStatus = l10n.searching_databases;
+    } else if (errorMessage != null &&
+        _selectedFilter != _FoodSearchFilter.myItems) {
+      searchStatus = errorMessage;
+    } else if (searchComplete && visibleResultCount == 0) {
+      searchStatus = l10n.no_results_for_query(query);
+    } else if (hasSearched && visibleResultCount > 0) {
+      searchStatus = l10n.food_search_results_count(visibleResultCount);
+    }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.add_food_title)),
-      body: Column(
-        children: [
-          // Search Bar
-          _SearchBarHeader(
-            controller: _searchController,
-            focusNode: _searchFocusNode,
-            l10n: l10n,
-            onChanged: (val) => _onSearchChanged(val, templateViewModel),
-            onClear: () {
-              _debounceTimer?.cancel();
-              _searchController.clear();
-              templateViewModel.setSearchQuery('');
-              setState(() {
-                _combinedResults = [];
-                _hasSearched = false;
-                _errorMessage = null;
-              });
-            },
-          ),
-
-          // Content
-          Expanded(
-            child: _FoodSearchListView(
-              scrollController: _scrollController,
-              l10n: l10n,
-              theme: theme,
-              templateViewModel: templateViewModel,
-              searchController: _searchController,
-              isInitialLoading: _isInitialLoading,
-              isLoadingMore: _isLoadingMore,
-              hasSearched: _hasSearched,
-              offSearched: _offSearched,
-              usdaSearched: _usdaSearched,
-              offHasMore: _offHasMore,
-              usdaHasMore: _usdaHasMore,
-              errorMessage: _errorMessage,
-              combinedResults: _combinedResults,
-              onSelectTemplate: _selectTemplate,
-              onSelectResult: _selectResult,
-              onAddManually: _addManually,
-              onCreateRecipe: _createRecipe,
-              onScanBarcode: _scanBarcode,
-              allowRecipes: widget.allowRecipes,
+    final scaffold = Scaffold(
+      appBar: AppBar(
+        leading: widget.mealLabel == null ? null : const CloseButton(),
+        centerTitle: true,
+        title: Text(
+          widget.mealLabel == null
+              ? l10n.add_food_title
+              : widget.allowMeals
+              ? l10n.nutrition_add_foods_or_saved_meals_to_meal(
+                  widget.mealLabel!.toLowerCase(),
+                )
+              : l10n.nutrition_add_food_to_meal(
+                  widget.mealLabel!.toLowerCase(),
+                ),
+        ),
+        actions: [
+          if (widget.historicalMode)
+            IconButton(
+              tooltip: l10n.add_food_action,
+              onPressed: _addManually,
+              icon: const Icon(Icons.add),
+            )
+          else
+            PopupMenuButton<_FoodSearchAction>(
+              tooltip: l10n.create,
+              onSelected: (action) {
+                switch (action) {
+                  case _FoodSearchAction.food:
+                    _addManually();
+                  case _FoodSearchAction.meal:
+                    _createMeal();
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: _FoodSearchAction.food,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.restaurant_outlined),
+                      const SizedBox(width: 12),
+                      Flexible(child: Text(l10n.add_food_action)),
+                    ],
+                  ),
+                ),
+                if (widget.allowMeals)
+                  PopupMenuItem(
+                    value: _FoodSearchAction.meal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.restaurant_menu_outlined),
+                        const SizedBox(width: 12),
+                        Flexible(child: Text(l10n.nutrition_create_saved_meal)),
+                      ],
+                    ),
+                  ),
+              ],
+              icon: const Icon(Icons.add),
             ),
-          ),
         ],
       ),
+      body: LayoutBuilder(
+        builder: (context, bodyConstraints) {
+          final selectionSurface = AnimatedSwitcher(
+            duration: selectionAnimationDuration(context),
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.06),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  alignment: Alignment.bottomCenter,
+                  child: child,
+                ),
+              ),
+            ),
+            child: switch (_selectionStore) {
+              final store? => Visibility(
+                key: const ValueKey('selection-tray'),
+                visible: !store.isEmpty || _selectionSurfaceActive,
+                maintainState: true,
+                child: _SelectionPeekTray(
+                  key: _selectionTrayKey,
+                  anchorKey: _trayAnchorKey,
+                  headerAnchorKey: _trayHeaderAnchorKey,
+                  rowAnchorFor: _rowAnchorFor,
+                  quantityAnchorFor: _quantityAnchorFor,
+                  store: store,
+                  mealLabel: widget.mealLabel!,
+                  maxHeight: bodyConstraints.maxHeight,
+                  isConfirming: _isConfirming,
+                  onConfirm: () => _confirmSelection(store),
+                  onSelect: _selectTrayItem,
+                  onIncrement: _incrementTraySelection,
+                  onDecrement: _decrementSelection,
+                  onDetailsConfirmed: _onEmbeddedDetailsConfirmed,
+                  onActivityChanged: _onSelectionSurfaceActivityChanged,
+                ),
+              ),
+              _ => const SizedBox.shrink(key: ValueKey('empty-selection-tray')),
+            },
+          );
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  // Search Bar
+                  FoodSearchBar(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    hintText: widget.allowMeals
+                        ? l10n.nutrition_search_foods_saved_meals_or_brands
+                        : l10n.nutrition_search_foods_or_brands,
+                    onChanged: (val) =>
+                        _onSearchChanged(val, templateViewModel),
+                    onScanBarcode: _scanBarcode,
+                    barcodeTooltip: l10n.scan_barcode,
+                  ),
+                  Semantics(
+                    liveRegion: true,
+                    label: searchStatus,
+                    child: const SizedBox.shrink(),
+                  ),
+
+                  // Content
+                  Expanded(
+                    child: _FoodSearchListView(
+                      scrollController: _scrollController,
+                      l10n: l10n,
+                      theme: theme,
+                      templateViewModel: templateViewModel,
+                      searchController: _searchController,
+                      isInitialLoading: search.isInitialLoading,
+                      isLoadingMore: search.isLoadingMore,
+                      hasSearched: hasSearched,
+                      offSearched: search.offSearched,
+                      usdaSearched: search.usdaSearched,
+                      offHasMore: search.offHasMore,
+                      usdaHasMore: search.usdaHasMore,
+                      errorMessage: errorMessage,
+                      combinedResults: results,
+                      history: widget.history,
+                      selectedSection: _selectedSection,
+                      selectedFilter: _selectedFilter,
+                      onSectionChanged: (section) {
+                        _removeTransfer();
+                        setState(() {
+                          _selectedSection = section;
+                        });
+                      },
+                      onFilterChanged: (filter) {
+                        if (_selectedFilter == filter) return;
+                        _searchViewModel.search(
+                          filter == _FoodSearchFilter.myItems
+                              ? ''
+                              : _searchController.text,
+                        );
+                        _removeTransfer();
+                        setState(() {
+                          _selectedFilter = filter;
+                        });
+                      },
+                      onSelectHistory: _selectHistoryItem,
+                      onAddHistory: _addHistoryItem,
+                      onSelectFoodTemplate: _selectFoodTemplate,
+                      onAddFoodTemplate: _addFoodTemplate,
+                      onSelectResult: _selectResult,
+                      onAddResult: _addResult,
+                      onRetry: () => _retrySearch(templateViewModel),
+                      allowMeals: widget.allowMeals,
+                      showServingHint:
+                          _showServingHint && widget.mealLabel != null,
+                      selectionStore: _selectionStore,
+                      selectionKeyForResult: (result) =>
+                          canonicalFoodSelectionKey(
+                            _foodEntryForResult(result),
+                          ),
+                      onDecrementSelection: _decrementSelection,
+                    ),
+                  ),
+                  if (showSearchFallback)
+                    _SearchFallback(query: query, onAddManually: _addManually),
+                  if (!_selectionSurfaceActive) selectionSurface,
+                ],
+              ),
+              if (_selectionSurfaceActive)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: selectionSurface,
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return PopScope(
+      canPop: _allowPop,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (_selectionTrayKey.currentState?.handleSystemBack() == true) return;
+        _confirmDiscard();
+      },
+      child: scaffold,
     );
   }
 }
@@ -520,741 +1152,3 @@ class _FoodSearchScreenContentState() extends State<_FoodSearchScreenContent> {
 // ============================================================
 // WIDGETS
 // ============================================================
-
-class const _SearchBarHeader({
-  required final TextEditingController controller,
-  required final FocusNode focusNode,
-  required final AppLocalizations l10n,
-  required final ValueChanged<String> onChanged,
-  required final VoidCallback onClear,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-          ),
-        ),
-      ),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        autofocus: true,
-        decoration: InputDecoration(
-          hintText: l10n.search_food_hint,
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: controller.text.isNotEmpty
-              ? IconButton(icon: const Icon(Icons.clear), onPressed: onClear)
-              : null,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
-          filled: true,
-          fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
-            alpha: 0.5,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 14,
-          ),
-        ),
-        onSubmitted: (_) => focusNode.unfocus(),
-        onChanged: onChanged,
-      ),
-    );
-  }
-}
-
-class const _SectionHeader({
-  required final IconData icon,
-  required final String title,
-  required final Color iconColor,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Icon(icon, size: 16, color: iconColor),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          title,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class const _TemplateCard({
-  required final studyu.SavedFoodTemplate template,
-  required final VoidCallback onTap,
-  required final ThemeData theme,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final isRecipe =
-        template.prototype.entryType == studyu.FoodEntryType.recipe;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: isRecipe
-                ? Colors.orange.withValues(alpha: 0.12)
-                : theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            isRecipe ? Icons.menu_book_outlined : Icons.fastfood_outlined,
-            size: 22,
-            color: isRecipe
-                ? Colors.orange.shade700
-                : theme.colorScheme.primary,
-          ),
-        ),
-        title: Text(
-          template.name,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        subtitle: Text(
-          '${isRecipe ? "Recipe • " : ""}${template.prototype.nutrition.energyKcal.round()} kcal',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        trailing: Icon(
-          Icons.add_circle_outline,
-          color: theme.colorScheme.primary,
-        ),
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-class const _FoodResultCard({
-  required final UnifiedFoodResult result,
-  required final VoidCallback onTap,
-  required final ThemeData theme,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Image or fallback icon
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: result.imageUrl != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          result.imageUrl!,
-                          width: 48,
-                          height: 48,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) {
-                            return _buildFallbackIcon();
-                          },
-                        ),
-                      )
-                    : _buildFallbackIcon(),
-              ),
-              const SizedBox(width: 12),
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      result.name,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        _SourceBadge(source: result.source),
-                        if (result.brand != null &&
-                            result.brand!.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              result.brand!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // Calories
-              if (result.calories != null)
-                Column(
-                  children: [
-                    Text(
-                      '${result.calories!.round()}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    Text(
-                      'kcal',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFallbackIcon() {
-    final isOff = result.source == studyu.FoodSource.openfoodfacts;
-    return Center(
-      child: Icon(
-        isOff ? Icons.eco_outlined : Icons.agriculture_outlined,
-        size: 24,
-        color: isOff ? Colors.green.shade600 : Colors.orange.shade600,
-      ),
-    );
-  }
-}
-
-class const _SourceBadge({required final studyu.FoodSource source})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final isOff = source == studyu.FoodSource.openfoodfacts;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: isOff
-            ? Colors.green.withValues(alpha: 0.12)
-            : Colors.orange.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        isOff ? 'OFF' : 'USDA',
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: isOff ? Colors.green.shade700 : Colors.orange.shade700,
-          letterSpacing: 0.3,
-        ),
-      ),
-    );
-  }
-}
-
-class const _LoadingState({required final ThemeData theme})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(48),
-      child: Column(
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(
-            l10n.searching_databases,
-            style: const TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class const _ErrorMessage({required final String message})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(
-        message,
-        style: const TextStyle(color: Colors.red),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-}
-
-class const _EmptySectionMessage({required final String message})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(
-        message,
-        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-}
-
-class const _InitialPrompt({
-  required final VoidCallback onManualTap,
-  required final VoidCallback onRecipeTap,
-  required final VoidCallback onScanTap,
-  required final ThemeData theme,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          Icon(
-            Icons.search_outlined,
-            size: 64,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.search_for_food,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.search_food_description,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class const _QuickActionsCard({
-  required final VoidCallback onManualTap,
-  required final VoidCallback onRecipeTap,
-  required final VoidCallback onScanTap,
-  final bool allowRecipes = true,
-  required final ThemeData theme,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-      child: Column(
-        children: [
-          if (allowRecipes) ...[
-            _QuickActionTile(
-              icon: Icons.menu_book_outlined,
-              iconColor: Colors.orange,
-              title: l10n.create_recipe,
-              subtitle: l10n.create_recipe_subtitle,
-              onTap: onRecipeTap,
-              theme: theme,
-            ),
-            const Divider(height: 1, indent: 68),
-          ],
-          _QuickActionTile(
-            icon: Icons.edit_note_outlined,
-            iconColor: Colors.purple,
-            title: l10n.add_manually,
-            subtitle: l10n.add_manually_subtitle,
-            onTap: onManualTap,
-            theme: theme,
-          ),
-          const Divider(height: 1, indent: 68),
-          _QuickActionTile(
-            icon: Icons.qr_code_scanner_outlined,
-            iconColor: Colors.green,
-            title: l10n.scan_barcode,
-            subtitle: l10n.scan_barcode_subtitle,
-            onTap: onScanTap,
-            theme: theme,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class const _QuickActionTile({
-  required final IconData icon,
-  required final Color iconColor,
-  required final String title,
-  required final String subtitle,
-  required final VoidCallback onTap,
-  required final ThemeData theme,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 22, color: iconColor),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Optimized ListView.builder for food search results.
-/// Uses lazy loading for better performance with large result sets.
-class const _FoodSearchListView({
-  required final ScrollController scrollController,
-  required final AppLocalizations l10n,
-  required final ThemeData theme,
-  required final TemplateViewModel templateViewModel,
-  required final TextEditingController searchController,
-  required final bool isInitialLoading,
-  required final bool isLoadingMore,
-  required final bool hasSearched,
-  required final bool offSearched,
-  required final bool usdaSearched,
-  required final bool offHasMore,
-  required final bool usdaHasMore,
-  required final String? errorMessage,
-  required final List<UnifiedFoodResult> combinedResults,
-  required final void Function(studyu.SavedFoodTemplate) onSelectTemplate,
-  required final void Function(UnifiedFoodResult) onSelectResult,
-  required final VoidCallback onAddManually,
-  required final VoidCallback onCreateRecipe,
-  required final VoidCallback onScanBarcode,
-  final bool allowRecipes = true,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final filteredTemplates = templateViewModel.filteredTemplates
-        .whereType<studyu.SavedFoodTemplate>()
-        .where(
-          (t) =>
-              allowRecipes ||
-              t.prototype.entryType != studyu.FoodEntryType.recipe,
-        )
-        .toList();
-    final hasTemplates = templateViewModel.foodTemplates.isNotEmpty;
-    final showTemplates = hasTemplates && filteredTemplates.isNotEmpty;
-    final showNoMatchingTemplates =
-        hasTemplates &&
-        filteredTemplates.isEmpty &&
-        searchController.text.isNotEmpty;
-
-    // Calculate section offsets for itemBuilder
-    // Structure: [padding, templatesHeader, templatesList, globalHeader, content, quickActionsHeader, quickActions, bottomPadding]
-    const int paddingItem = 1;
-    final int templatesHeaderItems = hasTemplates ? 2 : 0; // header + spacing
-    final int templatesListItems = showTemplates ? filteredTemplates.length : 0;
-    final int noMatchingTemplateItem = showNoMatchingTemplates ? 1 : 0;
-    final int templatesSpacing = hasTemplates
-        ? 1
-        : 0; // SizedBox after templates
-    const int globalHeaderItems = 2; // header + spacing
-    final int contentItems = _getContentItemCount();
-    final int loadingMoreItem = isLoadingMore ? 1 : 0;
-    final int endOfResultsItem =
-        (hasSearched &&
-            combinedResults.isNotEmpty &&
-            !offHasMore &&
-            !usdaHasMore &&
-            !isLoadingMore)
-        ? 1
-        : 0;
-    const int quickActionsHeaderItems = 2; // header + spacing
-    const int quickActionsItem = 1;
-    const int bottomPadding = 1;
-
-    final totalItems =
-        paddingItem +
-        templatesHeaderItems +
-        templatesListItems +
-        noMatchingTemplateItem +
-        templatesSpacing +
-        globalHeaderItems +
-        contentItems +
-        loadingMoreItem +
-        endOfResultsItem +
-        quickActionsHeaderItems +
-        quickActionsItem +
-        bottomPadding;
-
-    return ListView.builder(
-      controller: scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: totalItems,
-      itemBuilder: (context, index) {
-        return _buildItem(
-          context,
-          index,
-          filteredTemplates,
-          hasTemplates,
-          showTemplates,
-          showNoMatchingTemplates,
-        );
-      },
-    );
-  }
-
-  int _getContentItemCount() {
-    if (isInitialLoading) return 1;
-    if (errorMessage != null) return 1;
-    if (!hasSearched && searchController.text.isEmpty) return 1;
-    if (combinedResults.isEmpty && hasSearched && offSearched && usdaSearched) {
-      return 1;
-    }
-    return combinedResults.length;
-  }
-
-  Widget _buildItem(
-    BuildContext context,
-    int index,
-    List<studyu.SavedFoodTemplate> filteredTemplates,
-    bool hasTemplates,
-    bool showTemplates,
-    bool showNoMatchingTemplates,
-  ) {
-    var currentIndex = 0;
-
-    // Initial padding
-    if (index == currentIndex++) {
-      return const SizedBox(height: 8);
-    }
-
-    // Templates section header
-    if (hasTemplates) {
-      if (index == currentIndex++) {
-        return _SectionHeader(
-          icon: Icons.bookmark_outline,
-          title: l10n.my_saved_items,
-          iconColor: theme.colorScheme.primary,
-        );
-      }
-      if (index == currentIndex++) {
-        return const SizedBox(height: 8);
-      }
-
-      // Templates list or empty message
-      if (showNoMatchingTemplates) {
-        if (index == currentIndex++) {
-          return _EmptySectionMessage(message: l10n.no_matching_templates);
-        }
-      } else if (showTemplates) {
-        final templateIndex = index - currentIndex;
-        if (templateIndex >= 0 && templateIndex < filteredTemplates.length) {
-          return _TemplateCard(
-            template: filteredTemplates[templateIndex],
-            onTap: () => onSelectTemplate(filteredTemplates[templateIndex]),
-            theme: theme,
-          );
-        }
-        currentIndex += filteredTemplates.length;
-      }
-
-      // Spacing after templates
-      if (index == currentIndex++) {
-        return const SizedBox(height: 16);
-      }
-    }
-
-    // Global database section header
-    if (index == currentIndex++) {
-      return _SectionHeader(
-        icon: Icons.public,
-        title: l10n.global_database,
-        iconColor: Colors.grey.shade700,
-      );
-    }
-    if (index == currentIndex++) {
-      return const SizedBox(height: 8);
-    }
-
-    // Content section
-    final contentItemCount = _getContentItemCount();
-    if (contentItemCount > 0) {
-      final contentIndex = index - currentIndex;
-      if (contentIndex >= 0 && contentIndex < contentItemCount) {
-        return _buildContentItem(contentIndex);
-      }
-      currentIndex += contentItemCount;
-    }
-
-    // Loading more indicator
-    if (isLoadingMore && index == currentIndex++) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    // End of results message
-    if (hasSearched &&
-        combinedResults.isNotEmpty &&
-        !offHasMore &&
-        !usdaHasMore &&
-        !isLoadingMore &&
-        index == currentIndex++) {
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Text(
-            l10n.end_of_results,
-            style: TextStyle(color: Colors.grey.shade500),
-          ),
-        ),
-      );
-    }
-
-    // Quick actions section
-    if (index == currentIndex++) {
-      return const SizedBox(height: 16);
-    }
-    if (index == currentIndex++) {
-      return _SectionHeader(
-        icon: Icons.add_circle_outline,
-        title: l10n.quick_actions,
-        iconColor: theme.colorScheme.secondary,
-      );
-    }
-    if (index == currentIndex++) {
-      return const SizedBox(height: 8);
-    }
-    if (index == currentIndex++) {
-      return _QuickActionsCard(
-        onManualTap: onAddManually,
-        onRecipeTap: onCreateRecipe,
-        onScanTap: onScanBarcode,
-        allowRecipes: allowRecipes,
-        theme: theme,
-      );
-    }
-    if (index == currentIndex++) {
-      return const SizedBox(height: 24);
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildContentItem(int contentIndex) {
-    if (isInitialLoading) {
-      return _LoadingState(theme: theme);
-    }
-    if (errorMessage != null) {
-      return _ErrorMessage(message: errorMessage!);
-    }
-    if (!hasSearched && searchController.text.isEmpty) {
-      return _InitialPrompt(
-        onManualTap: onAddManually,
-        onRecipeTap: onCreateRecipe,
-        onScanTap: onScanBarcode,
-        theme: theme,
-      );
-    }
-    if (combinedResults.isEmpty && hasSearched && offSearched && usdaSearched) {
-      return _EmptySectionMessage(message: l10n.no_results_found);
-    }
-
-    // Results
-    if (contentIndex < combinedResults.length) {
-      return _FoodResultCard(
-        result: combinedResults[contentIndex],
-        onTap: () => onSelectResult(combinedResults[contentIndex]),
-        theme: theme,
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-}

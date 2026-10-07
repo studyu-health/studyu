@@ -9,7 +9,6 @@ class SaveTemplateResult({
 enum TemplateType() {
   meal,
   food,
-  recipe,
 }
 
 class const SaveTemplateDialog({
@@ -56,11 +55,9 @@ class _SaveTemplateDialogState() extends State<SaveTemplateDialog> {
   String _getTitle(AppLocalizations l10n) {
     switch (widget.templateType) {
       case TemplateType.meal:
-        return l10n.save_meal_template;
+        return l10n.save_as_reusable_meal;
       case TemplateType.food:
-        return l10n.save_food_template;
-      case TemplateType.recipe:
-        return l10n.save_recipe_template;
+        return l10n.save_food;
     }
   }
 
@@ -68,15 +65,24 @@ class _SaveTemplateDialogState() extends State<SaveTemplateDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    final isMeal = widget.templateType == TemplateType.meal;
+
     return AlertDialog(
       title: Text(_getTitle(l10n)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (isMeal) ...[
+            Text(l10n.save_as_reusable_meal_description),
+            const SizedBox(height: 16),
+          ],
           TextField(
             controller: _nameController,
             decoration: InputDecoration(
-              labelText: l10n.template_name,
+              labelText: isMeal
+                  ? l10n.template_name_required
+                  : l10n.template_name,
               border: const OutlineInputBorder(),
             ),
             autofocus: true,
@@ -117,7 +123,7 @@ class _SaveTemplateDialogState() extends State<SaveTemplateDialog> {
               ),
             );
           },
-          child: Text(l10n.save),
+          child: Text(isMeal ? l10n.save_meal : l10n.save),
         ),
       ],
     );

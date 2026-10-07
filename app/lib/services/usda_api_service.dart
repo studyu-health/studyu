@@ -9,23 +9,19 @@ import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 class UsdaApiService() {
   static const String _baseUrl = 'https://api.nal.usda.gov/fdc/v1';
 
+  static bool get isConfigured => _apiKey != null;
+
   /// Get USDA API key from environment
   static String? get _apiKey {
-    // Try to get from environment file first
-    final envKey = getEnv('USDA_API_KEY', optional: true);
-    if (envKey != null && envKey.isNotEmpty) {
-      return envKey;
-    }
-    // Fallback to dart-define
     try {
-      const dartDefineKey = String.fromEnvironment('USDA_API_KEY');
-      if (dartDefineKey.isNotEmpty) {
-        return dartDefineKey;
-      }
-    } catch (e) {
-      // Ignore
+      final envKey = getEnv('USDA_API_KEY', optional: true);
+      if (envKey != null && envKey.isNotEmpty) return envKey;
+    } catch (_) {
+      // dotenv is not initialized in some tests and offline startup paths.
     }
-    return null;
+
+    const dartDefineKey = String.fromEnvironment('USDA_API_KEY');
+    return dartDefineKey.isEmpty ? null : dartDefineKey;
   }
 
   /// Search for foods in USDA database by barcode/GTIN

@@ -919,7 +919,7 @@ abstract class AppLocalizations {
   /// No description provided for @study_settings_publish_results_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Make your anonymized study results & data available in the study registry. \nOther researchers and clinicians will be able to access, export and \nanalyze the results from your study (the Analyze page will be available). \n This will automatically publish your study design to the registry.'**
+  /// **'Publish study results in the StudyU registry. Other researchers and clinicians can view, export, and analyze the shared data. Nutrition recall data is excluded from public sharing. Publishing results also publishes the study design.'**
   String get study_settings_publish_results_tooltip;
 
   /// No description provided for @action_button_study_launch.
@@ -2282,7 +2282,7 @@ abstract class AppLocalizations {
   /// No description provided for @form_section_scheduling_description.
   ///
   /// In en, this message translates to:
-  /// **'To improve compliance, you can set a limited window of time for participants to complete the task & send a reminder notification at the specified time.'**
+  /// **'Restrict daily access times and set reminder notifications to support timely task completion.'**
   String get form_section_scheduling_description;
 
   /// No description provided for @form_field_has_reminder.
@@ -2318,8 +2318,14 @@ abstract class AppLocalizations {
   /// No description provided for @form_field_time_restriction_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Provide the hours of the day during which participants need to complete the task. Please note that the task will not \nbe available for completion outside these hours & will be considered as missed for the purpose of data collection.'**
+  /// **'Time restriction controls the daily window when participants can complete the task.'**
   String get form_field_time_restriction_tooltip;
+
+  /// No description provided for @form_field_time_restriction_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks are available from 00:00 to 23:59 by default; set a narrower window if needed.'**
+  String get form_field_time_restriction_description;
 
   /// No description provided for @form_field_time_restriction_start_hint.
   ///
@@ -3026,37 +3032,37 @@ abstract class AppLocalizations {
   /// No description provided for @form_study_design_measurements_description.
   ///
   /// In en, this message translates to:
-  /// **'Define the data that you want to gather from participants during the study - primarily to evaluate the effect of your interventions. The data will be self-reported by participants in one or more surveys served via the StudyU App on a daily basis. The collected data and results will be available on the Analyze page when the study is launched.'**
+  /// **'Define the data that you want to gather from participants during the study, primarily to evaluate the effect of your interventions. Participants can provide data through surveys and specialized tracking tasks in the StudyU App. The collected data and results will be available on the Analyze page when the study is launched.'**
   String get form_study_design_measurements_description;
 
   /// No description provided for @form_array_measurements_minlength.
   ///
   /// In en, this message translates to:
-  /// **'{count,plural, =1{You need to define at least one survey to determine the effect of your intervention(s).} other{form_array_measurements_minlength}}'**
+  /// **'{count,plural, =1{You need to define at least one measurement to determine the effect of your intervention(s).} other{form_array_measurements_minlength}}'**
   String form_array_measurements_minlength(num count);
 
   /// No description provided for @form_array_measurements_surveys.
   ///
   /// In en, this message translates to:
-  /// **'Surveys'**
+  /// **'Measurements'**
   String get form_array_measurements_surveys;
 
   /// No description provided for @form_array_measurements_surveys_new.
   ///
   /// In en, this message translates to:
-  /// **'Add survey'**
+  /// **'Add measurement'**
   String get form_array_measurements_surveys_new;
 
   /// No description provided for @form_array_measurements_surveys_empty_title.
   ///
   /// In en, this message translates to:
-  /// **'No surveys defined'**
+  /// **'No measurements defined'**
   String get form_array_measurements_surveys_empty_title;
 
   /// No description provided for @form_array_measurements_surveys_empty_description.
   ///
   /// In en, this message translates to:
-  /// **'You need to define at least one survey to determine the effect of your intervention(s).'**
+  /// **'You need to define at least one measurement to determine the effect of your intervention(s).'**
   String get form_array_measurements_surveys_empty_description;
 
   /// No description provided for @form_field_measurement_survey_title.
@@ -4859,46 +4865,314 @@ abstract class AppLocalizations {
   /// **'Custom: Define your own sequence pattern to meet specific study requirements.'**
   String get study_schedule_custom_description;
 
-  /// No description provided for @form_nutrition_tracking_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Nutritional Tracking'**
-  String get form_nutrition_tracking_title;
-
-  /// No description provided for @form_nutrition_tracking_enable_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable nutritional tracking for this study'**
-  String get form_nutrition_tracking_enable_hint;
-
   /// No description provided for @form_measurement_type_select.
   ///
   /// In en, this message translates to:
-  /// **'Select Measurement Type'**
+  /// **'Add measurements'**
   String get form_measurement_type_select;
 
   /// No description provided for @form_measurement_type_survey.
   ///
   /// In en, this message translates to:
-  /// **'Survey'**
+  /// **'Create custom survey'**
   String get form_measurement_type_survey;
 
   /// No description provided for @form_measurement_type_survey_description.
   ///
   /// In en, this message translates to:
-  /// **'Collect self-reported data from participants using questions and scales.'**
+  /// **'Build a survey using questions and scales.'**
   String get form_measurement_type_survey_description;
+
+  /// No description provided for @form_measurement_type_template.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement library'**
+  String get form_measurement_type_template;
+
+  /// No description provided for @form_measurement_category_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get form_measurement_category_all;
+
+  /// No description provided for @form_measurement_category_all_heading.
+  ///
+  /// In en, this message translates to:
+  /// **'All measurements'**
+  String get form_measurement_category_all_heading;
+
+  /// No description provided for @form_measurement_category_nutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get form_measurement_category_nutrition;
+
+  /// No description provided for @form_measurement_category_nutrition_heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition measurements'**
+  String get form_measurement_category_nutrition_heading;
+
+  /// No description provided for @form_measurement_search_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search measurements'**
+  String get form_measurement_search_placeholder;
+
+  /// No description provided for @form_survey_template_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No predefined measurements available'**
+  String get form_survey_template_empty;
+
+  /// No description provided for @form_survey_template_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get form_survey_template_added;
+
+  /// No description provided for @form_survey_template_added_to_study.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to study'**
+  String get form_survey_template_added_to_study;
+
+  /// No description provided for @form_survey_template_apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get form_survey_template_apply;
+
+  /// No description provided for @form_survey_template_add_selected_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Add measurements} =1{Add 1 measurement} other{Add {count} measurements}}'**
+  String form_survey_template_add_selected_count(int count);
+
+  /// No description provided for @form_survey_template_adding.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding…'**
+  String get form_survey_template_adding;
+
+  /// No description provided for @form_survey_template_all_days.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} days'**
+  String form_survey_template_all_days(int count);
+
+  /// No description provided for @form_survey_template_select_every_survey.
+  ///
+  /// In en, this message translates to:
+  /// **'Select every survey in this measurement'**
+  String get form_survey_template_select_every_survey;
+
+  /// No description provided for @form_survey_template_expand_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Show survey days'**
+  String get form_survey_template_expand_days;
+
+  /// No description provided for @form_survey_template_collapse_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide survey days'**
+  String get form_survey_template_collapse_days;
+
+  /// No description provided for @form_survey_template_choose_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose day'**
+  String get form_survey_template_choose_day;
+
+  /// No description provided for @form_survey_template_add_and_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and edit'**
+  String get form_survey_template_add_and_edit;
+
+  /// No description provided for @form_survey_template_single_help.
+  ///
+  /// In en, this message translates to:
+  /// **'1 editable survey'**
+  String get form_survey_template_single_help;
+
+  /// No description provided for @form_survey_template_multi_day_help.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 survey · Scheduled daily} other{{count} surveys · Scheduled daily}}'**
+  String form_survey_template_multi_day_help(int count);
+
+  /// No description provided for @form_survey_template_day_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String form_survey_template_day_label(int day);
+
+  /// No description provided for @form_survey_schedule_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Occurrence schedule'**
+  String get form_survey_schedule_title;
+
+  /// No description provided for @form_survey_schedule_active.
+  ///
+  /// In en, this message translates to:
+  /// **'One occurrence pattern is active'**
+  String get form_survey_schedule_active;
+
+  /// No description provided for @form_survey_schedule_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'When occurrence scheduling is off, the survey appears every study day. Built-in food-frequency questionnaires appear once by default.'**
+  String get form_survey_schedule_inactive;
+
+  /// No description provided for @form_survey_schedule_separation_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Occurrence controls which study days show the survey.'**
+  String get form_survey_schedule_separation_help;
+
+  /// No description provided for @form_survey_schedule_pattern_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one pattern. Selecting another pattern replaces the current one.'**
+  String get form_survey_schedule_pattern_help;
+
+  /// No description provided for @form_survey_schedule_specific_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific days'**
+  String get form_survey_schedule_specific_days;
+
+  /// No description provided for @form_survey_schedule_every_n_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Every N days'**
+  String get form_survey_schedule_every_n_days;
+
+  /// No description provided for @form_survey_schedule_per_cycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Per cycle'**
+  String get form_survey_schedule_per_cycle;
+
+  /// No description provided for @form_survey_schedule_select_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Select study days:'**
+  String get form_survey_schedule_select_days;
+
+  /// No description provided for @form_survey_schedule_day_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String form_survey_schedule_day_label(int day);
+
+  /// No description provided for @form_survey_schedule_every_n_interval_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get form_survey_schedule_every_n_interval_label;
+
+  /// No description provided for @form_survey_schedule_days_suffix.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get form_survey_schedule_days_suffix;
+
+  /// No description provided for @form_survey_schedule_every_n_delay_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay first occurrence by'**
+  String get form_survey_schedule_every_n_delay_label;
+
+  /// No description provided for @form_survey_schedule_every_n_delay_suffix.
+  ///
+  /// In en, this message translates to:
+  /// **'days after the first study day'**
+  String get form_survey_schedule_every_n_delay_suffix;
+
+  /// No description provided for @form_survey_schedule_every_n_delay_help.
+  ///
+  /// In en, this message translates to:
+  /// **'With no delay, the first occurrence is on the first study day. The study has {totalDays} days.'**
+  String form_survey_schedule_every_n_delay_help(int totalDays);
+
+  /// No description provided for @form_survey_schedule_per_cycle_delay_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay each cycle occurrence by'**
+  String get form_survey_schedule_per_cycle_delay_label;
+
+  /// No description provided for @form_survey_schedule_per_cycle_delay_suffix.
+  ///
+  /// In en, this message translates to:
+  /// **'days after the cycle\'s first day'**
+  String get form_survey_schedule_per_cycle_delay_suffix;
+
+  /// No description provided for @form_survey_schedule_per_cycle_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Each cycle is {cycleLengthDays} days ({phasesPerCycle} phases × {phaseDuration} days).'**
+  String form_survey_schedule_per_cycle_help(
+    int cycleLengthDays,
+    int phasesPerCycle,
+    int phaseDuration,
+  );
+
+  /// No description provided for @form_survey_schedule_target_cycles.
+  ///
+  /// In en, this message translates to:
+  /// **'Target cycles (leave empty for all):'**
+  String get form_survey_schedule_target_cycles;
+
+  /// No description provided for @form_survey_schedule_cycle_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle {cycle}'**
+  String form_survey_schedule_cycle_label(int cycle);
+
+  /// No description provided for @form_survey_schedule_include_baseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Include baseline phase'**
+  String get form_survey_schedule_include_baseline;
+
+  /// No description provided for @form_survey_schedule_summary_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule summary'**
+  String get form_survey_schedule_summary_title;
+
+  /// No description provided for @form_survey_schedule_summary_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching days'**
+  String get form_survey_schedule_summary_empty;
+
+  /// No description provided for @form_survey_schedule_summary_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Appears on: {days}'**
+  String form_survey_schedule_summary_days(String days);
+
+  /// No description provided for @form_survey_schedule_summary_occurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} occurrence across {totalDays} study days} other{{count} occurrences across {totalDays} study days}}'**
+  String form_survey_schedule_summary_occurrences(int count, int totalDays);
 
   /// No description provided for @form_measurement_type_nutrition.
   ///
   /// In en, this message translates to:
-  /// **'Nutrition Task'**
+  /// **'Nutrition tracking'**
   String get form_measurement_type_nutrition;
 
   /// No description provided for @form_measurement_type_nutrition_description.
   ///
   /// In en, this message translates to:
-  /// **'Track participant food and drink intake using a structured journal or photo capture.'**
+  /// **'Track food and drink intake with a structured journal or photos.'**
   String get form_measurement_type_nutrition_description;
 
   /// No description provided for @form_field_nutrition_instructions.
@@ -4916,20 +5190,38 @@ abstract class AppLocalizations {
   /// No description provided for @form_field_nutrition_collect_meal_context.
   ///
   /// In en, this message translates to:
-  /// **'Collect Meal Context'**
+  /// **'Collect meal context'**
   String get form_field_nutrition_collect_meal_context;
 
-  /// No description provided for @form_field_nutrition_allow_recipes.
+  /// No description provided for @form_field_nutrition_collect_meal_context_help.
   ///
   /// In en, this message translates to:
-  /// **'Allow Recipes'**
-  String get form_field_nutrition_allow_recipes;
+  /// **'Ask participants where and with whom they ate.'**
+  String get form_field_nutrition_collect_meal_context_help;
+
+  /// No description provided for @form_field_nutrition_allow_meals.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow saved meals in meal logs'**
+  String get form_field_nutrition_allow_meals;
+
+  /// No description provided for @form_field_nutrition_allow_meals_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants can add saved meals alongside individual foods while logging. When creating a new saved meal from a log, existing saved meals are expanded into their food ingredients.'**
+  String get form_field_nutrition_allow_meals_help;
 
   /// No description provided for @form_field_nutrition_minimum_meals_required.
   ///
   /// In en, this message translates to:
-  /// **'Minimum Meals Required'**
+  /// **'Daily meal target'**
   String get form_field_nutrition_minimum_meals_required;
+
+  /// No description provided for @form_field_nutrition_minimum_meals_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested number of non-skipped meals per day. Participants can save their log and leave the task below this target.'**
+  String get form_field_nutrition_minimum_meals_help;
 
   /// No description provided for @form_field_nutrition_minimum_meals_hint.
   ///
@@ -4940,7 +5232,7 @@ abstract class AppLocalizations {
   /// No description provided for @form_field_nutrition_default_title.
   ///
   /// In en, this message translates to:
-  /// **'Nutrition Tracking'**
+  /// **'Nutrition tracking'**
   String get form_field_nutrition_default_title;
 
   /// No description provided for @form_field_nutrition_custom_meal_types.

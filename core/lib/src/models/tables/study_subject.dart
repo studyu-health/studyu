@@ -116,12 +116,21 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   );
 
   int getDayOfStudyFor(DateTime date) {
-    return date.differenceInDays(startedAt!);
+    final localDate = date.toLocal();
+    final localStartDate = startedAt!.toLocal();
+    return DateTime.utc(localDate.year, localDate.month, localDate.day)
+        .difference(
+          DateTime.utc(
+            localStartDate.year,
+            localStartDate.month,
+            localStartDate.day,
+          ),
+        )
+        .inDays;
   }
 
   int getInterventionIndexForDate(DateTime date) {
-    final test = date.differenceInDays(startedAt!);
-    return test ~/ study.schedule.phaseDuration;
+    return getDayOfStudyFor(date) ~/ study.schedule.phaseDuration;
   }
 
   Intervention? getInterventionForDate(DateTime date) {
@@ -210,6 +219,10 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
     DateTime dateTime,
   ) {
     return getTaskProgressForDay(taskId, dateTime).any((progress) {
+      final result = progress.result.result;
+      if (result is DailyRecall && result.entryCompletedAt == null) {
+        return false;
+      }
       if (progress.result.periodId == null) {
         // fallback to support studies without periodIds
         return progress.completedAt!.isSameDate(dateTime);
@@ -328,12 +341,20 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   }
 
   Future<void> setStartDateBackBy({required int days}) async {
-    await deleteProgress();
-    progress = await SupabaseQuery.batchUpsert<SubjectProgress>(
-      progress.map((p) => p.setStartDateBackBy(days: days).toJson()).toList(),
-    );
-    startedAt = startedAt!.subtract(Duration(days: days));
-    save(onlyUpdate: true);
+    try {
+      await env.client.rpc(
+        'advance_owned_study_subject_day',
+        params: {'p_subject_id': id, 'p_days': days},
+      );
+      for (final item in progress) {
+        item.setStartDateBackBy(days: days);
+      }
+      startedAt = startedAt!.subtract(Duration(days: days));
+      _controller.add(this);
+    } catch (error, stacktrace) {
+      SupabaseQuery.catchSupabaseException(error, stacktrace);
+      rethrow;
+    }
   }
 
   @override
@@ -368,10 +389,10 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
 
   Future<void> deleteProgress() async {
     try {
-      await env.client
-          .from(SubjectProgress.tableName)
-          .delete()
-          .eq('subject_id', id);
+      await env.client.rpc(
+        'delete_owned_subject_progress',
+        params: {'p_subject_id': id},
+      );
     } catch (error, stacktrace) {
       SupabaseQuery.catchSupabaseException(error, stacktrace);
       rethrow;

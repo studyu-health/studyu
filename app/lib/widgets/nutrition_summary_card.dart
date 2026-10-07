@@ -1,396 +1,550 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_core/core.dart';
 
-class const NutritionSummaryCard({
-  required final NutritionProfile nutrition,
-  final String? title,
+class const NutritionMacroDistributionBar({
+  required final double carbs,
+  required final double protein,
+  required final double fat,
+  final Set<String> unavailableNutrients = const {},
+  final String Function(double)? formatGrams,
   super.key,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final cardTitle = title ?? l10n.nutrition_summary;
-
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.pie_chart, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  cardTitle,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Calories
-            _buildMainNutrient(
-              context,
-              l10n.energy_kcal,
-              nutrition.energyKcal,
-              'kcal',
-              Icons.local_fire_department,
-              Colors.orange,
-            ),
-
-            const Divider(height: 24),
-
-            // Macronutrients
-            Text(
-              l10n.macronutrients,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMacroNutrient(
-                    context,
-                    l10n.protein_g,
-                    nutrition.protein,
-                    'g',
-                    Colors.blue,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildMacroNutrient(
-                    context,
-                    l10n.carbs_g,
-                    nutrition.carbs,
-                    'g',
-                    Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildMacroNutrient(
-                    context,
-                    l10n.fat_g,
-                    nutrition.fat,
-                    'g',
-                    Colors.purple,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Macronutrient Distribution Chart
-            _buildMacroDistributionBar(context),
-
-            const Divider(height: 24),
-
-            // Additional Nutrients
-            ExpansionTile(
-              title: Text(l10n.detailed_nutrients),
-              leading: const Icon(Icons.more_horiz),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      _buildDetailedNutrient(
-                        l10n.fiber_g,
-                        nutrition.fiber,
-                        'g',
-                      ),
-                      _buildDetailedNutrient(
-                        l10n.sugars_g,
-                        nutrition.sugars,
-                        'g',
-                      ),
-                      _buildDetailedNutrient(
-                        l10n.saturated_fat_g,
-                        nutrition.saturatedFat,
-                        'g',
-                      ),
-                      _buildDetailedNutrient(
-                        'Trans Fat',
-                        nutrition.transFat,
-                        'g',
-                      ),
-                      _buildDetailedNutrient(
-                        'Cholesterol',
-                        nutrition.cholesterol,
-                        'mg',
-                      ),
-                      _buildDetailedNutrient(
-                        l10n.sodium_mg,
-                        nutrition.sodium,
-                        'mg',
-                      ),
-                      _buildDetailedNutrient(
-                        'Water Content',
-                        nutrition.waterContent,
-                        'g',
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    final total = carbs * 4 + protein * 4 + fat * 9;
+    final distributionUnavailable = unavailableNutrients.any(
+      (key) => {'carbs', 'protein', 'fat'}.contains(key),
     );
-  }
+    if (total <= 0 || distributionUnavailable) return const SizedBox.shrink();
 
-  Widget _buildMainNutrient(
-    BuildContext context,
-    String label,
-    double value,
-    String unit,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: color.withValues(alpha: 0.8),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                '${value.toStringAsFixed(0)} $unit',
-                style: Theme.of(context).textTheme.headlineSmall
-                    ?.copyWith(color: color, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMacroNutrient(
-    BuildContext context,
-    String label,
-    double value,
-    String unit,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
+    final macros = _macros(context, total);
+    final contextLabel =
+        '${l10n.energy_by_macronutrient}: '
+        '${macros.map((macro) => '${macro.label} ${macro.percent.round()}%').join(', ')}';
+    return Semantics(
+      label: contextLabel,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall
-                ?.copyWith(color: color, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${value.toStringAsFixed(1)}$unit',
-            style: Theme.of(context).textTheme.titleMedium
-                ?.copyWith(color: color, fontWeight: FontWeight.bold),
-          ),
+          _legend(context, macros),
+          const SizedBox(height: 8),
+          _bar(context, macros),
         ],
       ),
     );
   }
 
-  Widget _buildMacroDistributionBar(BuildContext context) {
-    final totalCals =
-        (nutrition.protein * 4) + (nutrition.carbs * 4) + (nutrition.fat * 9);
+  List<_NutritionMacroData> _macros(BuildContext context, double total) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = Theme.of(context).colorScheme;
+    return [
+      _NutritionMacroData(
+        label: l10n.carbohydrates,
+        grams: carbs,
+        percent: carbs * 4 / total * 100,
+        color: colors.primary,
+      ),
+      _NutritionMacroData(
+        label: l10n.protein,
+        grams: protein,
+        percent: protein * 4 / total * 100,
+        color: colors.secondary,
+      ),
+      _NutritionMacroData(
+        label: l10n.fat,
+        grams: fat,
+        percent: fat * 9 / total * 100,
+        color: colors.tertiary,
+      ),
+    ];
+  }
 
-    if (totalCals == 0) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(
-            alpha: 0.3,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              Icons.info_outline,
-              size: 24,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.no_data_yet,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.start_tracking_nutrition,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.7,
+  Widget _bar(BuildContext context, List<_NutritionMacroData> macros) {
+    final colors = Theme.of(context).colorScheme;
+    final stackItems = <BarChartRodStackItem>[];
+    var fromY = 0.0;
+    for (final macro in macros) {
+      if (macro.percent <= 0) continue;
+
+      final toY = fromY + macro.percent;
+      stackItems.add(BarChartRodStackItem(fromY, toY, macro.color));
+      fromY = toY;
+    }
+    return SizedBox(
+      height: 24,
+      child: BarChart(
+        BarChartData(
+          minY: 0,
+          maxY: 100,
+          rotationQuarterTurns: 1,
+          alignment: BarChartAlignment.center,
+          borderData: FlBorderData(show: false),
+          gridData: const FlGridData(show: false),
+          titlesData: const FlTitlesData(show: false),
+          barGroups: [
+            BarChartGroupData(
+              x: 0,
+              barRods: [
+                BarChartRodData(
+                  toY: 100,
+                  width: 14,
+                  color: colors.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(4),
+                  rodStackItems: stackItems,
                 ),
-              ),
-              textAlign: TextAlign.center,
+              ],
             ),
           ],
+          barTouchData: const BarTouchData(enabled: false),
         ),
-      );
-    }
+        duration: Duration.zero,
+      ),
+    );
+  }
 
-    final proteinPercent = (nutrition.protein * 4 / totalCals) * 100;
-    final carbsPercent = (nutrition.carbs * 4 / totalCals) * 100;
-    final fatPercent = (nutrition.fat * 9 / totalCals) * 100;
+  Widget _legend(BuildContext context, List<_NutritionMacroData> macros) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        for (final macro in macros)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: macro.color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(macro.label)),
+                SizedBox(
+                  width: 64,
+                  child: Text(
+                    formatGrams?.call(macro.grams) ?? _formatGrams(macro.grams),
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    '${macro.percent.round()}%',
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _formatGrams(double value) {
+    final formatted = value == value.roundToDouble()
+        ? value.round().toString()
+        : value.toStringAsFixed(1);
+    return '$formatted g';
+  }
+}
+
+class const _NutritionMacroData({
+  required final String label,
+  required final double grams,
+  required final double percent,
+  required final Color color,
+});
+
+class const NutritionSummaryView({
+  required final double? energyKcal,
+  required final double? carbs,
+  required final double? protein,
+  required final double? fat,
+  final Set<String> unavailableNutrients = const {},
+  final Set<String> partialNutrients = const {},
+  final bool energyUnavailable = false,
+  final String Function(double)? formatEnergy,
+  final String Function(double)? formatGrams,
+  super.key,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final total = (carbs ?? 0) * 4 + (protein ?? 0) * 4 + (fat ?? 0) * 9;
+    final hideEnergy =
+        energyUnavailable || _isUnavailable('energyKcal', energyKcal);
+    final distributionUnavailable =
+        _isUnavailable('carbs', carbs) ||
+        _isUnavailable('protein', protein) ||
+        _isUnavailable('fat', fat) ||
+        {'carbs', 'protein', 'fat'}.any(partialNutrients.contains);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Row(
+          children: [
+            _nutritionIconBadge(
+              icon: Icons.local_fire_department_outlined,
+              color: theme.colorScheme.secondary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hideEnergy
+                        ? '—'
+                        : _withAvailability(
+                            context,
+                            'energyKcal',
+                            formatEnergy?.call(energyKcal!) ??
+                                '${energyKcal!.round()} kcal',
+                          ),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(l10n.total_energy),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
         Text(
-          AppLocalizations.of(context)!.calorie_distribution,
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(fontWeight: FontWeight.w500),
+          l10n.macronutrients,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: Row(
+        if (total <= 0 || distributionUnavailable) ...[
+          _macronutrientRow(
+            context,
+            label: l10n.carbohydrates,
+            value: carbs,
+            keyName: 'carbs',
+          ),
+          _macronutrientRow(
+            context,
+            label: l10n.protein,
+            value: protein,
+            keyName: 'protein',
+          ),
+          _macronutrientRow(
+            context,
+            label: l10n.fat,
+            value: fat,
+            keyName: 'fat',
+          ),
+        ] else ...[
+          const SizedBox(height: 4),
+          NutritionMacroDistributionBar(
+            carbs: carbs!,
+            protein: protein!,
+            fat: fat!,
+            unavailableNutrients: unavailableNutrients,
+            formatGrams: formatGrams,
+          ),
+        ],
+      ],
+    );
+  }
+
+  bool _isUnavailable(String key, double? value) =>
+      value == null || unavailableNutrients.contains(key);
+
+  Widget _macronutrientRow(
+    BuildContext context, {
+    required String label,
+    required double? value,
+    required String keyName,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          Text(
+            _withAvailability(context, keyName, _formatGrams(value, keyName)),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _withAvailability(BuildContext context, String key, String value) =>
+      !_isUnavailable(key, 0) && partialNutrients.contains(key)
+      ? '$value (${AppLocalizations.of(context)!.nutrition_partial})'
+      : value;
+
+  String _formatGrams(double? value, String key) {
+    if (_isUnavailable(key, value)) return '—';
+    if (formatGrams != null) return formatGrams!(value!);
+    if (value == 0) return '0 g';
+    return '${value!.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')} g';
+  }
+}
+
+class const NutritionSummaryCard({
+  required final NutritionProfile nutrition,
+  final String? title,
+  final String? subtitle,
+  final bool inCard = false,
+  final bool showTitle = true,
+  super.key,
+}) extends StatefulWidget {
+  @override
+  State<NutritionSummaryCard> createState() => _NutritionSummaryCardState();
+}
+
+class _NutritionSummaryCardState() extends State<NutritionSummaryCard> {
+  bool _detailsExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = _content(context, includeHeader: true);
+    if (!widget.inCard) return content;
+
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: content,
+      ),
+    );
+  }
+
+  Widget _content(BuildContext context, {required bool includeHeader}) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: includeHeader ? 16 : 0, bottom: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (proteinPercent > 0)
-                Expanded(
-                  flex: proteinPercent.round(),
-                  child: Container(
-                    height: 24,
-                    color: Colors.blue,
-                    alignment: Alignment.center,
-                    child: proteinPercent >= 15
-                        ? Text(
-                            '${proteinPercent.round()}%',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : null,
+              if (includeHeader && widget.showTitle) ...[
+                Text(
+                  widget.title ?? l10n.nutrition_summary,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              if (carbsPercent > 0)
-                Expanded(
-                  flex: carbsPercent.round(),
-                  child: Container(
-                    height: 24,
-                    color: Colors.green,
-                    alignment: Alignment.center,
-                    child: carbsPercent >= 15
-                        ? Text(
-                            '${carbsPercent.round()}%',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : null,
-                  ),
-                ),
-              if (fatPercent > 0)
-                Expanded(
-                  flex: fatPercent.round(),
-                  child: Container(
-                    height: 24,
-                    color: Colors.purple,
-                    alignment: Alignment.center,
-                    child: fatPercent >= 15
-                        ? Text(
-                            '${fatPercent.round()}%',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : null,
-                  ),
-                ),
+                if (widget.subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(widget.subtitle!, style: theme.textTheme.bodySmall),
+                ],
+                const SizedBox(height: 12),
+              ],
+              NutritionSummaryView(
+                energyKcal: widget.nutrition.energyKcal,
+                carbs: widget.nutrition.carbs,
+                protein: widget.nutrition.protein,
+                fat: widget.nutrition.fat,
+                unavailableNutrients: widget.nutrition.unavailableNutrients,
+                partialNutrients: widget.nutrition.partialNutrients,
+              ),
             ],
           ),
+        ),
+        const Divider(height: 1),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: _details(context),
         ),
       ],
     );
   }
 
-  Widget _buildDetailedNutrient(String label, double value, String unit) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(
-            '${value.toStringAsFixed(1)} $unit',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+  Widget _details(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          button: true,
+          toggled: _detailsExpanded,
+          label: l10n.detailed_nutrients,
+          hint: _detailsExpanded ? l10n.hide : l10n.show,
+          onTap: () => setState(() => _detailsExpanded = !_detailsExpanded),
+          child: InkWell(
+            onTap: () => setState(() => _detailsExpanded = !_detailsExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  _nutritionIconBadge(
+                    icon: Icons.eco_outlined,
+                    color: Colors.green.shade700,
+                    size: 32,
+                    iconSize: 18,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l10n.detailed_nutrients,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _detailsExpanded ? Icons.expand_less : Icons.expand_more,
+                  ),
+                ],
+              ),
+            ),
           ),
+        ),
+        if (widget.nutrition.unavailableItemCount > 0)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              l10n.some_values_unavailable(
+                widget.nutrition.unavailableItemCount,
+              ),
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+        if (_detailsExpanded) ...[
+          _group(context, l10n.carbohydrates, [
+            _row(l10n.fibre, widget.nutrition.fiber, 'g', 'fiber'),
+            _row(l10n.sugars_g, widget.nutrition.sugars, 'g', 'sugars'),
+          ]),
+          _group(context, l10n.fat, [
+            _row(
+              l10n.saturated_fat_g,
+              widget.nutrition.saturatedFat,
+              'g',
+              'saturatedFat',
+            ),
+            _row('Trans fat', widget.nutrition.transFat, 'g', 'transFat'),
+          ]),
+          _group(context, l10n.other, [
+            _row(
+              'Cholesterol',
+              widget.nutrition.cholesterol,
+              'mg',
+              'cholesterol',
+            ),
+            _row(l10n.sodium_mg, widget.nutrition.sodium, 'mg', 'sodium'),
+            _row('Water', widget.nutrition.waterContent, 'g', 'waterContent'),
+          ]),
+        ],
+      ],
+    );
+  }
+
+  Widget _group(BuildContext context, String title, List<Widget> rows) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          ...rows,
         ],
       ),
     );
   }
+
+  Widget _row(String label, double value, String unit, String key) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [Text(label), Text(_format(value, unit, key))],
+    ),
+  );
+
+  String _format(double value, String unit, String key) {
+    if (widget.nutrition.unavailableNutrients.contains(key)) return '—';
+    final formatted = unit == 'mg'
+        ? '${value.round()} mg'
+        : '${value.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')} g';
+    return widget.nutrition.isPartial(key)
+        ? '$formatted (${AppLocalizations.of(context)!.nutrition_partial})'
+        : formatted;
+  }
 }
+
+Widget _nutritionIconBadge({
+  required IconData icon,
+  required Color color,
+  double size = 40,
+  double iconSize = 22,
+}) => Container(
+  width: size,
+  height: size,
+  decoration: BoxDecoration(
+    color: color.withValues(alpha: 0.12),
+    shape: BoxShape.circle,
+  ),
+  child: ExcludeSemantics(
+    child: Icon(icon, color: color, size: iconSize),
+  ),
+);
 
 class const DailyNutritionSummaryCard({
   required final DailyRecall dailyRecall,
+  final bool showTitle = true,
   super.key,
 }) extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    final nutrition = dailyRecall.totalNutrition;
-    final l10n = AppLocalizations.of(context)!;
-    return NutritionSummaryCard(
-      nutrition: nutrition,
-      title: l10n.daily_nutrition_total,
-    );
-  }
+  Widget build(BuildContext context) => NutritionSummaryCard(
+    nutrition: sumNutritionFoods([
+      for (final meal in dailyRecall.meals)
+        if (!meal.isSkipped) ...meal.foods,
+    ]),
+    title: AppLocalizations.of(context)!.daily_nutrition_total,
+    inCard: true,
+    showTitle: showTitle,
+  );
 }
 
 class const MealNutritionSummaryCard({required final MealLog meal, super.key})
     extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    final nutrition = meal.totalNutrition;
-    final l10n = AppLocalizations.of(context)!;
-    return NutritionSummaryCard(
-      nutrition: nutrition,
-      title: l10n.meal_nutrition,
-    );
-  }
+  Widget build(BuildContext context) => NutritionSummaryCard(
+    nutrition: sumNutritionFoods(meal.foods),
+    title: AppLocalizations.of(context)!.meal_nutrition,
+    inCard: true,
+  );
 }
+
+/// App snapshots already contain nutrition for the logged amount.
+NutritionProfile sumNutritionFoods(List<FoodEntry> foods) =>
+    sumNutritionProfiles(foods.map((food) => food.nutrition));

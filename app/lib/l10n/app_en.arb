@@ -769,43 +769,9 @@
   "time_format_12_hour": "12-hour (2:30 PM)",
   "time_format_24_hour": "24-hour (14:30)",
   "daily_food_diary": "Daily Food Diary",
-  "saving": "Saving...",
-  "saved_ago": "Saved {time} ago",
-  "@saved_ago": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "just_now": "just now",
-  "seconds_ago": "{seconds} seconds ago",
-  "@seconds_ago": {
-    "placeholders": {
-      "seconds": {
-        "type": "int"
-      }
-    }
-  },
-  "minutes_ago": "{minutes} minute(s) ago",
-  "@minutes_ago": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "hours_ago": "{hours} hour(s) ago",
-  "@hours_ago": {
-    "placeholders": {
-      "hours": {
-        "type": "int"
-      }
-    }
-  },
   "instructions": "Instructions",
   "nutrition_instructions_default": "Please record all the foods and beverages you consumed today. For each meal or snack, provide as much detail as possible including portion sizes and preparation methods.",
-  "min_meals_required": "Please record at least {count} meal(s)",
+  "min_meals_required": "Daily meal target: {count} meal(s)",
   "@min_meals_required": {
     "placeholders": {
       "count": {
@@ -830,7 +796,7 @@
       }
     }
   },
-  "add_meal": "Add Meal",
+  "add_meal": "New meal",
   "no_meals_recorded": "No meals recorded yet",
   "edit": "Edit",
   "delete": "Delete",
@@ -840,6 +806,10 @@
   "meal_type_snack": "Snack",
   "meal_type_brunch": "Brunch",
   "meal_type_other": "Other",
+  "meal_category_snacks": "Snacks",
+  "meal_category_other": "Other meals",
+  "no_foods_added": "No foods added",
+  "log_food": "Log food",
   "food_items_count": "{count} food items",
   "@food_items_count": {
     "placeholders": {
@@ -849,9 +819,46 @@
     }
   },
   "meal_entry_title": "Meal Entry",
+  "add_meal_or_snack": "Add meal or snack",
+  "meal_neutral_label": "Meal",
+  "meal_suffix": "meal",
+  "meal_label": "Meal label",
+  "no_meal_label": "No label",
+  "time_not_remembered": "Time not remembered",
+  "about_time": "About {time}",
+  "@about_time": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "time_exact": "Exact time",
+  "time_exact_description": "I know the exact time",
+  "time_approximate": "Approximate time",
+  "time_approximate_description": "I know roughly when",
+  "time_unknown": "I don't remember",
+  "set_time": "Set time",
   "save": "Save",
+  "new_item": "New",
+  "discard": "Discard",
+  "unsaved_changes_title": "Discard unsaved changes?",
+  "unsaved_changes_message": "Discard your changes or continue editing.",
+  "discard_meal_changes_title": "Leave this meal?",
+  "discard_meal_changes_message": "Discard your changes or continue editing.",
+  "save_and_leave": "Save and leave",
+  "discard_changes": "Discard changes",
+  "continue_editing": "Continue editing",
+  "delete_meal": "Delete meal",
+  "delete_meal_title": "Delete this meal?",
+  "delete_meal_message": "This meal will be removed from the nutrition log.",
+  "enter_skip_reason": "Enter a reason before saving.",
+  "add_food_before_saving": "Add at least one food item before saving.",
   "meal_information": "Meal Information",
   "meal_type_label": "Meal Type",
+  "meal_details": "Meal details",
+  "edit_meal_title": "Edit meal",
+  "apply": "Apply",
   "custom_meal_label": "Custom Meal Label",
   "time": "Time",
   "where_did_you_eat": "Where did you eat?",
@@ -877,25 +884,26 @@
   "context_takeout": "Takeout",
   "context_vending": "Vending",
   "context_other": "Other",
-  "company_alone": "👤 Alone",
-  "company_family": "👨‍👩‍👧‍👦 Family",
-  "company_friends": "👥 Friends",
-  "company_colleagues": "💼 Colleagues",
-  "company_other": "🤝 Other",
-  "distraction_none": "🧘 None",
-  "distraction_tv": "📺 TV",
-  "distraction_phone": "📱 Phone",
-  "distraction_work": "💻 Work",
-  "distraction_other": "📖 Other",
+  "company_alone": "Alone",
+  "company_family": "Family",
+  "company_friends": "Friends",
+  "company_colleagues": "Colleagues",
+  "company_other": "Other",
+  "distraction_none": "None",
+  "distraction_tv": "TV",
+  "distraction_phone": "Phone",
+  "distraction_work": "Work",
+  "distraction_other": "Other",
   "food_entry_title": "Food Entry",
   "food_information": "Food Information",
   "entry_type": "Entry Type",
-  "food_name": "Food Name *",
+  "food_name": "Food name *",
+  "nutrition_values_are_for": "Nutrition values are for",
   "brand_name": "Brand Name",
   "description": "Description",
   "description_hint": "Optional notes about this food",
-  "recipe_info": "Recipe: Use Recipe Builder for better ingredient management",
-  "open_recipe_builder": "Open Recipe Builder",
+  "meal_info": "Meal: Use Meal Creator for combined food management",
+  "open_meal_creator": "Open Meal Creator",
   "amount": "Amount *",
   "unit": "Unit *",
   "serving_size": "Serving Size (grams) *",
@@ -912,6 +920,10 @@
   "protein_g": "Protein (g)",
   "carbs_g": "Carbs (g)",
   "fat_g": "Fat (g)",
+  "protein": "Protein",
+  "carbohydrate": "Carbohydrate",
+  "fat": "Fat",
+  "optional": "Optional",
   "saturated_fat_g": "Sat. Fat (g)",
   "sugars_g": "Sugars (g)",
   "fiber_g": "Fiber (g)",
@@ -919,10 +931,10 @@
   "required_error": "Required",
   "enter_food_name": "Please enter a food name",
   "enter_serving_size": "Please enter serving size",
-  "entry_type_single_ingredient": "🥕 Single Ingredient",
-  "entry_type_recipe": "📖 Recipe",
-  "entry_type_branded_product": "🏷️ Branded Product",
-  "entry_type_manual_entry": "✏️ Manual Entry",
+  "entry_type_single_ingredient": "Single Ingredient",
+  "entry_type_meal": "Meal",
+  "entry_type_branded_product": "Branded Product",
+  "entry_type_manual_entry": "Manual Entry",
   "portion_method_household": "Household Measure",
   "portion_method_photograph": "Photograph",
   "portion_method_standard_unit": "Standard Unit",
@@ -931,33 +943,162 @@
   "portion_state_raw": "Raw",
   "portion_state_cooked": "Cooked",
   "portion_state_as_served": "As Served",
-  "my_templates": "My Templates",
-  "save_as_template": "Save as Template",
-  "save_meal_template": "Save Meal Template",
-  "save_food_template": "Save Food Template",
-  "save_recipe_template": "Save Recipe Template",
-  "template_name": "Template Name",
+  "my_templates": "My items",
+  "manage_saved_items": "Manage",
+  "adjust_quantity": "Adjust quantity",
+  "edit_this_entry": "Edit this entry",
+  "library_edit_title": "Update reusable item?",
+  "library_edit_message": "This entry comes from your library. Choose where to save your changes.",
+  "library_edit_current_entry": "Only this logged item",
+  "library_edit_current_entry_and_library": "This item and reusable library item",
+  "save_to_my_items_action": "Save to My items",
+  "external_library_copy": "Import",
+  "external_library_copy_label": "Review and add {name} to My library",
+  "@external_library_copy_label": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "external_library_copy_saved": "Added to My library",
+  "external_library_copy_save_error": "Could not add food to My library",
+  "remove_from_meal": "Remove from meal",
+  "duplicate": "Duplicate",
+  "save_as_template": "Add to My items",
+  "save_meal": "Save to library",
+  "done_label": "Done",
+  "log_meal": "Log meal",
+  "add_items": "Add items",
+  "add_items_to_meal": "Add items to {meal}",
+  "@add_items_to_meal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "save_as_reusable_meal": "Save as reusable meal",
+  "save_as_reusable_meal_description": "Add this combination to My items so you can use it again.",
+  "save_food": "Save food",
+  "template_name": "Name",
+  "template_name_required": "Meal name *",
   "template_tags_optional": "Tags (optional)",
   "template_tags_hint": "breakfast, quick, healthy",
-  "template_saved": "Template saved",
-  "select_meal_template": "Select Meal Template",
-  "select_food_template": "Select Food Template",
-  "search_templates": "Search templates...",
-  "no_templates_saved": "No templates saved yet",
-  "save_templates_hint": "Save your favorite meals and foods as templates for quick access",
-  "from_template": "From Template",
+  "template_saved": "Added to My items",
+  "select_meal": "My meals",
+  "select_food": "My foods",
+  "food_library_search_hint": "Search My library and external library…",
+  "search_templates": "Search saved foods and meals…",
+  "no_templates_saved": "No items yet",
+  "save_templates_hint": "Save your favorite meals and foods for quick access",
+  "from_template": "From My items",
   "add_new_food": "Add New Food",
-  "delete_template": "Delete Template",
-  "delete_template_confirmation": "Are you sure you want to delete this template?",
+  "delete_template": "Delete item",
+  "delete_template_confirmation": "Are you sure you want to delete this item?",
   "filter_all": "All",
   "filter_meals": "Meals",
   "filter_foods": "Foods",
-  "filter_recipes": "Recipes",
-  "items_count": "{count} items",
+  "items_count": "{count, plural, =1 {1 item} other {{count} items}}",
   "@items_count": {
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "add": "Add",
+  "food_selection_add_to_selection": "Add to selection",
+  "food_selection_update_selection": "Update selection",
+  "food_selection_selected_items": "Selected items",
+  "food_selection_view_more": "View all {count} items",
+  "@food_selection_view_more": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_increment": "Increase {name}",
+  "@food_selection_increment": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "food_selection_decrement": "Decrease {name}",
+  "@food_selection_decrement": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "food_selection_delete": "Delete {name}",
+  "food_selection_item_removed": "Item removed",
+  "food_selection_undo": "Undo",
+  "@food_selection_delete": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "food_selection_selected": "{name}, selected, quantity {quantity}",
+  "@food_selection_selected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_known_calories": "{value} kcal known · {count} unavailable",
+  "@food_selection_known_calories": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_unknown_calories": "— kcal · {count} unavailable",
+  "@food_selection_unknown_calories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_calories_unavailable": "Calories unavailable for {count, plural, =1 {one item} other {{count} items}}",
+  "@food_selection_calories_unavailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_confirm": "{count, plural, =1 {Add 1 item to {meal}} other {Add {count} items to {meal}}}",
+  "@food_selection_confirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "serving_amount": "{amount, plural, =1 {1 serving} other {{amount} servings}}",
+  "@serving_amount": {
+    "placeholders": {
+      "amount": {
+        "type": "num"
       }
     }
   },
@@ -969,10 +1110,38 @@
       }
     }
   },
+  "kcal_per_serving": "{value} kcal / serving",
+  "@kcal_per_serving": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "servings_value": "{value} servings",
+  "@servings_value": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "custom": "Custom",
+  "database": "Database",
+  "no_recent_items": "No recent items yet",
+  "brand": "Brand",
+  "calorie_basis_100g": "per 100 g",
+  "calorie_basis_grams": "per {grams} g",
+  "@calorie_basis_grams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
   "template_type_meal": "Meal",
   "template_type_food": "Food",
-  "template_type_recipe": "Recipe",
-  "rename_template": "Rename Template",
+  "rename_template": "Rename item",
   "new_name": "New Name",
   "today": "Today",
   "meals": "Meals",
@@ -980,56 +1149,225 @@
   "tap_to_add_first_meal": "Tap the button above to add your first meal",
   "tap_to_add_food": "Tap to add food",
   "add_food_title": "Add Food",
-  "edit_food_title": "Edit Food",
-  "add_food_manually": "Add Food Manually",
+  "add_food_to_meal": "Add food to {meal}",
+  "@add_food_to_meal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "food_quantity_amount": "Amount",
+  "food_quantity_weight": "Weight",
+  "food_quantity_custom_weight": "Custom",
+  "food_quantity_library_serving": "Library serving: {weight} g",
+  "@food_quantity_library_serving": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "food_quantity_default_serving": "Default serving: {weight} g",
+  "@food_quantity_default_serving": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "food_quantity_library_serving_unknown": "Library serving: weight unavailable",
+  "food_quantity_default_serving_unknown": "Default serving: weight unavailable",
+  "food_quantity_override_helper": "Changes only this meal selection. My Library and the source item remain unchanged.",
+  "food_quantity_use_library_weight": "Use library weight ({weight} g)",
+  "@food_quantity_use_library_weight": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "food_quantity_use_default_weight": "Use default weight ({weight} g)",
+  "@food_quantity_use_default_weight": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "food_quantity_invalid_amount": "Enter an amount greater than zero",
+  "food_quantity_serving": "Serving",
+  "food_quantity_serving_unit": "{amount, plural, =1 {serving} other {servings}}",
+  "@food_quantity_serving_unit": {
+    "placeholders": {
+      "amount": {
+        "type": "num"
+      }
+    }
+  },
+  "food_quantity_serving_value": "{value} g per {unit}",
+  "@food_quantity_serving_value": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "food_quantity_energy": "Energy",
+  "food_quantity_protein": "Protein",
+  "food_quantity_carbs": "Carbs",
+  "food_quantity_fat": "Fat",
+  "food_quantity_add_to_meal": "Add to {meal}",
+  "food_quantity_add_to_selection": "Add item",
+  "food_quantity_add_meal_to_selection": "Add meal to selection",
+  "food_quantity_update_selection": "Save changes",
+  "food_quantity_nutrition_unavailable": "Nutrition information unavailable",
+  "save_to_my_items": "Save to My items for future use",
+  "save_and_add_to_meal": "Save and add to {meal}",
+  "@save_and_add_to_meal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "@food_quantity_add_to_meal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "edit_food_title": "Edit food",
+  "add_food_manually": "Create food",
   "basic_information": "Basic Information",
   "macronutrients": "Macronutrients",
   "detailed_nutrients": "Detailed Nutrients",
-  "daily_nutrition_total": "Daily Nutrition Total",
+  "daily_nutrition_total": "Nutrition summary",
+  "daily_summary": "Daily summary",
+  "energy_by_macronutrient": "Energy by macronutrient",
+  "total_energy": "Total energy",
+  "show": "Show",
+  "hide": "Hide",
+  "carbohydrates": "Carbohydrates",
+  "fibre": "Fibre",
+  "other": "Other",
+  "some_values_unavailable": "Some nutrient values are unavailable for {count} {count, plural, =1 {item} other {items}}.",
+  "@some_values_unavailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "meal_nutrition": "Meal Nutrition",
   "nutrition_summary": "Nutrition Summary",
   "calorie_distribution": "Calorie Distribution",
   "more_options": "More options",
-  "search_food_hint": "Search food (e.g., \"apple\", \"chicken\")",
-  "my_saved_items": "My Saved Items",
-  "global_database": "Global Database",
+  "search_food_hint": "Search foods, meals or brands",
+  "my_saved_items": "My library",
+  "food_library": "Food library",
+  "add_food_action": "Create food",
+  "add_meal_action": "Create meal",
+  "recent_foods": "Recently added",
+  "frequently_used_foods": "Frequently Used",
+  "global_database": "Database",
+  "external_library": "External library",
+  "external_library_loading": "Searching external library…",
+  "external_library_error": "External library is unavailable. Please try again.",
+  "external_library_results_count": "{count, plural, =1 {1 external result found} other {{count} external results found}}",
+  "@external_library_results_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "review_copied_food": "Review food",
+  "external_library_copy_notice": "Review the details before adding this food to My library. Changes won’t affect the external library.",
+  "external_library_save_copy": "Save to My library",
   "quick_actions": "Quick Actions",
-  "create_recipe": "Create Recipe",
-  "create_recipe_subtitle": "Build from multiple ingredients",
-  "add_manually": "Add Manually",
+  "create": "Create",
+  "create_meal": "Create meal",
+  "create_meal_subtitle": "Combine multiple foods",
+  "add_manually": "Create food manually",
   "add_manually_subtitle": "Enter nutrition facts yourself",
+  "tap_item_to_choose_serving": "Tap a food to change the serving or amount.",
   "scan_barcode": "Scan Barcode",
   "scan_barcode_subtitle": "Find packaged products quickly",
+  "barcode_scanner_guidance_initial": "Point camera at barcode",
+  "barcode_scanner_no_barcode": "No barcode detected — adjust position",
+  "barcode_scanner_processing": "Barcode detected! Processing…",
+  "barcode_scanner_invalid": "Invalid barcode — try a different angle",
+  "barcode_scanner_lookup": "Valid barcode. Looking up…",
+  "barcode_scanner_distance_guidance": "Large barcode? Move back 15–30 cm\\nSmall barcode? Move closer",
+  "barcode_scanner_detected": "DETECTED",
+  "barcode_scanner_lookup_progress": "Looking up product…",
+  "barcode_scanner_toggle_flash": "Toggle flash",
+  "barcode_scanner_switch_camera": "Switch camera",
+  "barcode_scanner_not_found_title": "Product not found",
+  "barcode_scanner_not_found_message": "No product found for barcode: {barcode}\\n\\nThis product may not be in the external library yet. You can add it manually or scan another product.",
+  "@barcode_scanner_not_found_message": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "barcode_scanner_scan_again": "Scan again",
+  "barcode_scanner_error_title": "Search unavailable",
   "search_for_food": "Search for Food",
-  "search_food_description": "Type above to search global databases",
+  "search_food_description": "Try “apple”, “oat milk”, or a brand name.",
   "searching_databases": "Searching databases...",
   "end_of_results": "End of results",
   "no_results_found": "No results found. Try different keywords.",
-  "no_matching_templates": "No matching templates",
+  "no_results_for_query": "No results for “{query}”",
+  "@no_results_for_query": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "cant_find_it": "Can’t find it?",
+  "create_food_from_search": "Create “{query}” manually",
+  "@create_food_from_search": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "food_search_error": "Food search is unavailable. Please try again.",
+  "food_search_results_count": "{count, plural, =1 {1 result found} other {{count} results found}}",
+  "@food_search_results_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "no_matching_templates": "No matching items",
   "detailed_nutrition": "Detailed Nutrition",
   "detailed_nutrition_subtitle": "Fiber, Sugar, Sodium",
   "advanced_options": "Advanced Options",
   "advanced_options_subtitle": "Food type, serving size, portions",
   "details": "Details",
+  "meal_context": "Meal context",
   "search_food_database": "Search Food Database",
   "no_data_yet": "No data yet",
   "start_tracking_nutrition": "Start tracking your nutrition by adding meals",
   "photoRecallTitle": "Photo Recall",
-  "photoRecallSubtitle": "View photos from around this time",
+  "photoRecallSubtitle": "Use photos from this day to remember what you ate.",
   "photoRecallPermissionNeeded": "Tap to enable photo access",
   "photoRecallPermissionTitle": "Enable Photo Access",
   "photoRecallPermissionDescription": "Access to your photos helps you recall what you ate. Photos are only displayed on your device.",
   "photoRecallNoPhotos": "No photos found",
-  "photoRecallNoPhotosSubtitle": "We couldn't find any photos taken around this time",
+  "photoRecallNoPhotosSubtitle": "We couldn’t find any photos taken on this day",
   "photoRecallTapToEnlarge": "Tap a photo to view it full screen",
-  "photoRecallTimeInfo": "Showing photos from around {time} (±2 hours)",
-  "@photoRecallTimeInfo": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
   "grantPermission": "Grant Permission",
   "analyzePhotoTooltip": "Analyze this food photo",
   "analyzingPhoto": "Analyzing photo...",
@@ -1051,8 +1389,8 @@
       }
     }
   },
-  "min_meals_not_met_title": "Minimum meals not reached",
-  "min_meals_not_met_message": "This task requires at least {count} meal(s). You have recorded fewer than required. Leave anyway?",
+  "min_meals_not_met_title": "Daily meal target not reached",
+  "min_meals_not_met_message": "The daily meal target is {count} meal(s). You have recorded fewer meals. Leave anyway?",
   "@min_meals_not_met_message": {
     "placeholders": {
       "count": {
@@ -1060,5 +1398,182 @@
       }
     }
   },
-  "leave_anyway": "Leave anyway"
+  "leave_anyway": "Leave anyway",
+  "nutrition_tracking": "Nutrition tracking",
+  "nutrition_statistics": "Statistics",
+  "nutrition_recent_7_days": "Recent 7 days",
+  "nutrition_recent_30_days": "Recent 30 days",
+  "nutrition_days_recorded": "{recorded} of {total} days recorded",
+  "@nutrition_days_recorded": {
+    "placeholders": {
+      "recorded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutrition_completed_days": "{completed, plural, =1{{completed} completed day} other{{completed} completed days}}",
+  "@nutrition_completed_days": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      }
+    }
+  },
+  "nutrition_daily_average": "Average across completed days",
+  "nutrition_energy_by_study_day": "Energy by study day",
+  "nutrition_average_value": "Average {value} across completed days",
+  "@nutrition_average_value": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_tap_bar_hint": "Tap a bar to view its value or open that day.",
+  "nutrition_nutrient_trend": "Nutrient trend",
+  "nutrition_carbs": "Carbs",
+  "nutrition_average_per_recorded_day": "Average {value} per completed day",
+  "@nutrition_average_per_recorded_day": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_compared_previous_days": "Compared with the previous {count} days",
+  "@nutrition_compared_previous_days": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutrition_record_more_comparisons": "Record more study days to see period comparisons.",
+  "nutrition_energy": "Energy",
+  "nutrition_today_so_far": "Today so far",
+  "nutrition_chart_day_value": "{date}, {value}",
+  "@nutrition_chart_day_value": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_chart_day_missing": "{date}, not recorded",
+  "@nutrition_chart_day_missing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_view_day_hint": "Press Enter to view this day.",
+  "nutrition_statistics_help_message": "Averages include only completed study days. Today appears in charts as ‘Today so far’ and is excluded from averages until the diary is complete. Missing days are left blank.",
+  "nutrition_kcal_per_day": "{value} kcal/day",
+  "@nutrition_kcal_per_day": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_grams_per_day": "{value} g/day",
+  "@nutrition_grams_per_day": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_recent_days": "Recent days",
+  "nutrition_history": "History",
+  "nutrition_history_empty": "No past food diaries yet.",
+  "nutrition_history_latest_study_day": "Latest study day",
+  "nutrition_history_latest_study_day_description": "Your latest study day remains editable so you can add or correct entries the following morning.",
+  "nutrition_history_previous_study_days": "Previous study days",
+  "nutrition_history_no_foods_logged": "No foods logged",
+  "historical_editing_date": "Editing {date}",
+  "@historical_editing_date": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "historical_edit_expired": "This study day is no longer editable.",
+  "edit_food_definition": "Edit reusable food",
+  "food_definition_edit_helper": "Serving description, weight, conversions, and nutrition update the reusable item and selected historical entry. You can also update matching entries in the current study day when available. Selected entry keeps its serving count.",
+  "nutrition_statistics_empty": "No nutrition data is available yet.",
+  "nutrition_editable": "Editable",
+  "nutrition_read_only": "Read-only",
+  "nutrition_logging_guidance": "Log each meal and drink as accurately as you can. Include portions and preparation details when you know them.",
+  "open_faq": "Open FAQ",
+  "nutrition_calories": "Calories",
+  "historical_edit_mode_heading": "Editing a previous study day",
+  "historical_edit_mode_description": "On this History screen, you can update the meal log from your previous study day. Foods and meals you create here remain available for future meal logs.",
+  "update_current_day_entries": "Also update matching entries in current study day",
+  "update": "Update",
+  "current_meal_only_banner": "Changes apply only to this meal. For permanent changes, use Food Library.",
+  "grams_per_serving": "{grams} g per serving",
+  "open_food_facts_attribution": "(c) Open Food Facts contributors",
+  "open_food_facts_attribution_launch_error": "Could not open the Open Food Facts terms of use.",
+  "food_definition_updated_current_day_opt_out": "Reusable item updated. Matching entries in the current study day were not updated.",
+  "food_definition_updated_current_day_opt_in": "Reusable item updated. Matching entries in the current study day were also updated.",
+  "food_quantity_weight_per_serving": "Weight per serving",
+  "food_quantity_total_weight": "Total weight: {weight} g",
+  "@food_quantity_total_weight": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "food_quantity_decrease_weight": "Decrease weight per serving",
+  "food_quantity_increase_weight": "Increase weight per serving",
+  "food_selection_collapse": "Collapse selected items",
+  "food_quantity_edit_amount": "Edit amount",
+  "food_quantity_nutrition_for_amount": "Nutrition for {amount} {unit}",
+  "food_selection_items_count": "{count, plural, =1 {1 item} other {{count} items}}",
+  "nutrition_logged_foods_and_meals": "Foods and saved meals",
+  "nutrition_add_food_or_saved_meal": "Add food or saved meal",
+  "nutrition_add_food_or_choose_saved_meal": "Add a food or choose a saved meal",
+  "nutrition_food_badge": "Food",
+  "nutrition_saved_meal_badge": "Saved meal",
+  "nutrition_add_foods_or_saved_meals_to_meal": "Add foods or saved meals to {meal}",
+  "nutrition_search_foods_saved_meals_or_brands": "Search foods, saved meals, or brands",
+  "nutrition_create_saved_meal": "Create saved meal",
+  "nutrition_create_saved_meal_from_log": "Create saved meal from this log",
+  "nutrition_edit_saved_meal": "Edit saved meal",
+  "nutrition_ingredients_section": "Ingredients ({count})",
+  "nutrition_add_food_ingredient": "Add food ingredient",
+  "nutrition_invalid_saved_meal": "This saved meal contains incomplete ingredients and cannot be saved. Add valid food ingredients and try again.",
+  "nutrition_saved_meals_filter": "Saved meals",
+  "nutrition_add_food_to_meal": "Add food to {meal}",
+  "nutrition_search_foods_or_brands": "Search foods or brands",
+  "nutrition_saved_meals_expanded_notice": "Saved meals were expanded into food ingredients for review. Your new saved meal will contain food ingredients only.",
+  "enter_meal_name": "Please enter a meal name",
+  "nutrition_servings_required": "Servings *",
+  "nutrition_preparation_details": "Preparation details",
+  "nutrition_preparation_details_subtitle": "Raw and cooked weights, preparation method",
+  "nutrition_raw_weight_grams": "Raw weight (g)",
+  "nutrition_cooked_weight_grams": "Cooked weight (g)",
+  "nutrition_preparation_method": "Preparation method",
+  "nutrition_preparation_method_hint": "e.g., baked, fried, steamed",
+  "nutrition_add_food_manually": "Add food manually",
+  "nutrition_food_name_example": "e.g., olive oil",
+  "nutrition_quantity_short": "Qty",
+  "nutrition_calories_kcal": "Calories (kcal)",
+  "nutrition_no_foods_yet": "No foods yet",
+  "nutrition_search_or_add_food_manually": "Search or add food manually to start",
+  "nutrition_unit_label": "Unit",
+  "nutrition_per_serving": "Nutrition per serving",
+  "photoRecallDateInfo": "Showing photos from {date}",
+  "not_added": "Not added",
+  "nutrition_partial": "partial"
 }

@@ -46,19 +46,19 @@ DECLARE
 BEGIN
     -- Get current user ID
     v_user_id := auth.uid();
-    
+
     IF v_user_id IS NULL THEN
         RETURN jsonb_build_object(
             'success', false,
             'error', 'Not authenticated'
         );
     END IF;
-    
+
     -- Try to get existing recovery_id
     SELECT recovery_id INTO v_recovery_id
     FROM public.user_recovery
     WHERE user_id = v_user_id;
-    
+
     -- If not found, create one
     IF v_recovery_id IS NULL THEN
         INSERT INTO public.user_recovery (user_id)
@@ -67,7 +67,7 @@ BEGIN
         RETURNING recovery_id INTO v_recovery_id;
         v_created := true;
     END IF;
-    
+
     RETURN jsonb_build_object(
         'success', true,
         'recovery_id', v_recovery_id,
@@ -153,7 +153,7 @@ BEGIN
     FROM public.user_recovery
     WHERE recovery_id = p_recovery_id
     FOR UPDATE;
-    
+
     IF v_user_id IS NULL THEN
         RETURN jsonb_build_object(
             'success', false,

@@ -60,10 +60,22 @@ code, tests, or linked project documentation.
   SDK is unavailable.
 - Prefer the existing root script catalog. For a targeted package check with no catalog entry,
   use a root-level `fvm dart run melos exec` command with the appropriate package filter.
-- The tracked `.githooks/pre-commit` hook runs `scripts/pre-commit-check` automatically.
-  Run that check manually before a PR only when the hook has not checked the current changes.
-- Do not use `fvm dart run melos qualitycheck` as the default pre-commit or pre-PR check. Use it for
-  a full CI-style workspace check or when explicitly requested.
+- Use `fvm dart pub get` to install dependencies and `fvm dart run melos bootstrap` to link
+  workspace packages. Use the catalog's `app`, `designer_v2`, `dev:*`, `local:*`, `test`,
+  `generate`, and `build:web` scripts rather than duplicating their command bodies here.
+- Before running any melos, Flutter, Dart, or FVM command, check whether `rtk` is installed
+  (`command -v rtk`) and prefix the command with `rtk` when available. This applies the
+  project's RTK output filters.
+- If `scripts/pre-commit-check` or a qualitycheck command prints
+  `[rtk] WARNING: untrusted project filters (.rtk/filters.toml)`, review `.rtk/filters.toml`.
+  If it only contains repository-owned output filters, run `rtk trust`, then rerun the same
+  command.
+- Before staging changes, committing, or opening a pull request, run
+  `scripts/pre-commit-check`. The tracked `.githooks/pre-commit` hook runs the same check
+  automatically; it formats and analyzes, and only generates files when staged files can affect
+  generated output.
+- Do not use the root qualitycheck script as the default pre-commit or pre-PR check. Use it for a
+  full CI-style workspace check or when explicitly requested.
 
 ## Environments
 
@@ -74,7 +86,17 @@ code, tests, or linked project documentation.
 - Treat environment, storage, authentication, and Supabase initialization changes as affecting
   both frontends when they touch `flutter_common/`.
 - Never add service-role keys, signing keys, OAuth secrets, store credentials, private keys, or
-  other privileged credentials to tracked client environment files.
+  other privileged credentials to tracked client environment files. Do not commit secrets.
+- Environment templates live in `flutter_common/lib/envs/`; select them with
+  `--dart-define=STUDYU_ENV=.env.dev` or `.env.local` when the selected root script does not
+  already choose the environment.
+
+## Coding Style
+
+- Follow Effective Dart and the shared `analysis_options.yaml`, which includes
+  `package:lint/strict.yaml`.
+- Use the configured formatter before committing. Keep Dart files `snake_case.dart`, classes and
+  widgets `UpperCamelCase`, and members `lowerCamelCase`.
 
 ## Generated Files And Dependencies
 
@@ -92,6 +114,14 @@ code, tests, or linked project documentation.
 - Determine which packages and boundaries are affected, then run the narrowest relevant checks.
 - Use `fvm dart run melos test` for workspace Flutter unit and widget tests. This does not cover
   Designer browser E2E tests or Supabase/pgTAP tests.
+- Place unit and widget tests under each package's `test/` directory and Designer integration
+  tests under `designer_v2/integration_test/`. Prefer names ending in `_test.dart`, matching the
+  feature or model.
+- Prefer tests for logic, behavior, state, navigation, and accessibility contracts. Do not add
+  or update widget assertions that merely mirror presentation details such as exact icons, colors,
+  typography, spacing, widget classes, or incidental copy. Do not add visual/golden coverage for
+  a purely visual change unless explicitly requested; only update existing goldens when their
+  established coverage requires it.
 - Run generation after model or annotation changes, and analyze/test affected packages after
   generated output is updated.
 - Changes under `supabase/` require the database test workflow described in `supabase/README.md`
@@ -139,7 +169,7 @@ of the target, environment, and data-loss impact:
 - Commands that push directly to `main` or `dev`.
 
 Markdown instructions are not a security boundary. Keep production credentials unavailable to
-routine agent sessions and use hooks, permissions, CI, and review gates for hard enforcement.
+routine agent sessions and use hooks, CI, and package permissions for hard enforcement.
 
 ## Area-Specific Rules
 
@@ -195,10 +225,17 @@ routine agent sessions and use hooks, permissions, CI, and review gates for hard
 ## Git And Pull Requests
 
 - Follow `CONTRIBUTING.md`; do not invent generic commit messages or duplicate its conventions.
+- Use Conventional Commits for all commits: `<type>(<scope>): <description>`. Allowed types are
+  `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, and `style`; allowed scopes are `app`,
+  `designer`, `core`, `flutter_common`, and `db`. Keep descriptions lowercase and do not end
+  them with a period.
 - When creating a pull request, use `.agents/skills/pull-request/SKILL.md` for the procedural
   workflow. It covers branch and commit validation, diff auditing, testing, and PR creation.
 - The pull-request skill must use `.github/pull_request_template.md` as the live PR body schema,
   complete it from the actual diff and verification, and remind the user about required UI
   screenshots or video.
+- When using the GitHub CLI (`gh`) to open a pull request, complete the `Description` and
+  `Testing Steps` sections from the actual diff, keep the checklist interactive, and check off
+  formatting and analyzer items only when those checks passed.
 - Do not revert unrelated changes. All worktrees must be created under `.worktrees/` relative to
   the repository root, for example `git worktree add .worktrees/<branch-name> <branch>`.

@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'recipe_metadata.dart';
+part of 'preparation_details.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-RecipeMetadata _$RecipeMetadataFromJson(Map<String, dynamic> json) =>
-    RecipeMetadata(
+PreparationDetails _$PreparationDetailsFromJson(Map<String, dynamic> json) =>
+    PreparationDetails(
       rawWeight: (json['rawWeight'] as num).toDouble(),
       cookedWeight: (json['cookedWeight'] as num).toDouble(),
       yieldFactor: (json['yieldFactor'] as num).toDouble(),
@@ -17,7 +17,7 @@ RecipeMetadata _$RecipeMetadataFromJson(Map<String, dynamic> json) =>
       ),
     );
 
-Map<String, dynamic> _$RecipeMetadataToJson(RecipeMetadata instance) =>
+Map<String, dynamic> _$PreparationDetailsToJson(PreparationDetails instance) =>
     <String, dynamic>{
       'rawWeight': instance.rawWeight,
       'cookedWeight': instance.cookedWeight,

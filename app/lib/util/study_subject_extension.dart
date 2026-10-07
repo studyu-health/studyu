@@ -5,14 +5,46 @@ import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 
+/// The immutable identity of an already persisted nutrition recall.
+///
+/// Keeping this with the upsert API prevents a correction from being treated
+/// as a new completion in a different period or intervention.
+int nutritionStudyDayFor(StudySubject subject, DateTime date) {
+  final current = date.toUtc();
+  final started = subject.startedAt!.toUtc();
+  return DateTime.utc(
+    current.year,
+    current.month,
+    current.day,
+  ).difference(DateTime.utc(started.year, started.month, started.day)).inDays;
+}
+
+class const NutritionRecallPersistenceTarget({
+  required final String taskId,
+  required final String periodId,
+  required final String interventionId,
+  required final DateTime completedAt,
+  required final int studyDaySnapshot,
+}) {
+  Map<String, dynamic> toJson() => {
+    'taskId': taskId,
+    'periodId': periodId,
+    'interventionId': interventionId,
+    'completedAt': completedAt.toUtc().toIso8601String(),
+    'studyDaySnapshot': studyDaySnapshot,
+  };
+}
+
 extension StudySubjectExtension on StudySubject {
-  /// Updates an existing completed recall or creates a completed result.
-  /// Draft recalls stay in local auto-save storage.
+  /// Upserts a DailyRecall result without changing an existing recall's
+  /// persistence identity.
   Future<void> upsertNutritionResult({
     required String taskId,
     required String periodId,
     required DailyRecall recall,
     DateTime? completionDateOverride,
+    NutritionRecallPersistenceTarget? persistenceTarget,
+    String? interventionIdOverride,
   }) async {
     if (recall.entryCompletedAt == null) {
       throw StateError(
@@ -20,15 +52,110 @@ extension StudySubjectExtension on StudySubject {
       );
     }
 
+    final target = persistenceTarget;
+    final effectiveTaskId = target?.taskId ?? taskId;
+    final effectivePeriodId = target?.periodId ?? periodId;
+    final effectiveRecall = _recallWithStudyDay(
+      recall,
+      target?.studyDaySnapshot ?? recall.studyDaySnapshot,
+    );
     final resultObject = Result<DailyRecall>.app(
       type: 'DailyRecall',
-      periodId: periodId,
-      result: recall,
+      periodId: effectivePeriodId,
+      result: effectiveRecall,
     );
 
-    String interventionId;
-    final completionDate = completionDateOverride ?? recall.entryCompletedAt!;
+    final matching = progress.where((progress) {
+      if (progress.taskId != effectiveTaskId ||
+          progress.resultType != 'DailyRecall') {
+        return false;
+      }
+      if (target != null) {
+        return progress.completedAt == target.completedAt;
+      }
+      return _isSameStudyDay(progress, effectiveRecall) &&
+          progress.result.periodId == effectivePeriodId;
+    }).toList();
 
+    SubjectProgress? existing;
+    if (target != null) {
+      existing = matching.isEmpty ? null : matching.first;
+    } else if (matching.length == 1) {
+      existing = matching.single;
+    } else if (matching.length > 1) {
+      throw StateError(
+        'Multiple nutrition recalls match task $effectiveTaskId, period '
+        '$effectivePeriodId and study day ${effectiveRecall.studyDaySnapshot}.',
+      );
+    } else {
+      final legacyMatches = progress.where((progress) {
+        return progress.taskId == effectiveTaskId &&
+            progress.resultType == 'DailyRecall' &&
+            progress.result.periodId == null &&
+            _isSameStudyDay(progress, effectiveRecall);
+      }).toList();
+      if (legacyMatches.length == 1) existing = legacyMatches.single;
+      if (legacyMatches.length > 1) {
+        throw StateError(
+          'Multiple legacy nutrition recalls match task $effectiveTaskId and '
+          'study day ${effectiveRecall.studyDaySnapshot}.',
+        );
+      }
+    }
+
+    final completionDate =
+        target?.completedAt ??
+        existing?.completedAt ??
+        completionDateOverride ??
+        effectiveRecall.entryCompletedAt ??
+        effectiveRecall.entryStartedAt ??
+        effectiveRecall.lastAutoSavedAt ??
+        DateTime.now();
+    final interventionId =
+        target?.interventionId ??
+        existing?.interventionId ??
+        interventionIdOverride ??
+        _interventionIdForRecall(effectiveRecall);
+
+    StudyULogger.debug(
+      '[upsertNutritionResult] task=$effectiveTaskId period=$effectivePeriodId '
+      'studyDay=${effectiveRecall.studyDaySnapshot} existing=${existing != null} '
+      'completionDate=$completionDate meals=${effectiveRecall.meals.length}',
+    );
+
+    final progressToSave = SubjectProgress(
+      subjectId: id,
+      interventionId: interventionId,
+      taskId: effectiveTaskId,
+      result: resultObject,
+      resultType: resultObject.type,
+    )..completedAt = target?.completedAt ?? completionDate.toUtc();
+
+    var updatedLocalProgress = false;
+    try {
+      final saved = await progressToSave.save();
+      if (existing != null) {
+        final index = progress.indexOf(existing);
+        if (index >= 0) progress[index] = saved;
+      } else {
+        progress.add(saved);
+      }
+      updatedLocalProgress = true;
+      await save(onlyUpdate: true);
+    } on SocketException {
+      if (!updatedLocalProgress) {
+        if (existing != null) {
+          final index = progress.indexOf(existing);
+          if (index >= 0) progress[index] = progressToSave;
+        } else {
+          progress.add(progressToSave);
+        }
+      }
+      rethrow;
+    }
+  }
+
+  String _interventionIdForRecall(DailyRecall recall) {
     final baseDate = startedAt;
     final snapshotDate = baseDate != null && recall.studyDaySnapshot != null
         ? baseDate.add(Duration(days: recall.studyDaySnapshot!))
@@ -39,82 +166,41 @@ extension StudySubjectExtension on StudySubject {
     if (intervention == null) {
       throw StateError('No intervention found for nutrition recall');
     }
-    interventionId = intervention.id;
+    return intervention.id;
+  }
 
-    // Find existing progress for this task on the same study day
-    final existingIndex = progress.indexWhere(
-      (p) => p.taskId == taskId && _isSameStudyDay(p, recall),
-    );
-
-    // Reuse the same completedAt key for updates to avoid duplicate rows
-    final existingCompletedAt = existingIndex >= 0
-        ? progress[existingIndex].completedAt
-        : null;
-
-    StudyULogger.debug(
-      '[upsertNutritionResult] task=$taskId period=$periodId studyDay=${recall.studyDaySnapshot} '
-      'completionDate=$completionDate completionDateOverride=$completionDateOverride '
-      'existingIndex=$existingIndex existingCompletedAt=$existingCompletedAt '
-      'meals=${recall.meals.length} progressLen=${progress.length}',
-    );
-
-    final progressToSave = SubjectProgress(
-      subjectId: id,
-      interventionId: interventionId,
-      taskId: taskId,
-      result: resultObject,
-      resultType: resultObject.type,
-    )..completedAt = (existingCompletedAt ?? completionDate).toUtc();
-
-    try {
-      final saved = await progressToSave.save();
-      if (existingIndex >= 0) {
-        progress[existingIndex] = saved;
-      } else {
-        progress.add(saved);
-      }
-      await save(onlyUpdate: true);
-    } on SocketException {
-      // Offline - just update local progress
-      if (existingIndex >= 0) {
-        progress[existingIndex] = progressToSave;
-      } else {
-        progress.add(progressToSave);
-      }
+  DailyRecall _recallWithStudyDay(DailyRecall recall, int? studyDaySnapshot) {
+    if (studyDaySnapshot == null ||
+        recall.studyDaySnapshot == studyDaySnapshot) {
+      return recall;
     }
-  }
-
-  bool hasNutritionResultForStudyDay({
-    required String taskId,
-    required DailyRecall recall,
-  }) {
-    return progress.any(
-      (p) => p.taskId == taskId && _isSameStudyDay(p, recall),
+    return DailyRecall(
+      id: recall.id,
+      date: recall.date,
+      isUsualIntakeDay: recall.isUsualIntakeDay,
+      specialOccasion: recall.specialOccasion,
+      recallMode: recall.recallMode,
+      entryStartedAt: recall.entryStartedAt,
+      entryCompletedAt: recall.entryCompletedAt,
+      meals: recall.meals,
+      studyDaySnapshot: studyDaySnapshot,
+      lastAutoSavedAt: recall.lastAutoSavedAt,
+      availabilityVerified: recall.availabilityVerified,
     );
   }
 
-  bool _isSameStudyDay(SubjectProgress p, DailyRecall recall) {
-    if (p.resultType != 'DailyRecall') return false;
+  bool _isSameStudyDay(SubjectProgress progress, DailyRecall recall) {
     try {
-      final existingResult = p.result.result;
-      if (existingResult is! DailyRecall) return false;
-      final existingRecall = existingResult;
-      var match = existingRecall.studyDaySnapshot == recall.studyDaySnapshot;
-
-      // Fallback: older rows may not have studyDaySnapshot set; compare by calculated study day.
-      if (!match &&
-          existingRecall.studyDaySnapshot == null &&
-          recall.studyDaySnapshot != null &&
-          p.completedAt != null) {
-        final existingDay = getDayOfStudyFor(p.completedAt!.toLocal());
-        match = existingDay == recall.studyDaySnapshot;
+      final existingRecall = progress.result.result;
+      if (existingRecall is! DailyRecall) return false;
+      if (existingRecall.studyDaySnapshot == recall.studyDaySnapshot) {
+        return true;
       }
-
-      StudyULogger.debug(
-        '[upsertNutritionResult] _isSameStudyDay? $match | existing=${existingRecall.studyDaySnapshot} '
-        'incoming=${recall.studyDaySnapshot} completedAt=${p.completedAt}',
-      );
-      return match;
+      return existingRecall.studyDaySnapshot == null &&
+          recall.studyDaySnapshot != null &&
+          progress.completedAt != null &&
+          nutritionStudyDayFor(this, progress.completedAt!) ==
+              recall.studyDaySnapshot;
     } catch (_) {
       return false;
     }
@@ -145,9 +231,7 @@ extension StudySubjectExtension on StudySubject {
       print('Unsupported question type: $T');
     }
 
-    // Skip multimodal file handling for web
     if (!kIsWeb) {
-      // Move multimodal files to upload directory
       if (resultObject.result is QuestionnaireState) {
         final questionnaireState = resultObject.result as QuestionnaireState;
         for (final answerEntry in questionnaireState.answers.entries.toList()) {
@@ -158,8 +242,6 @@ extension StudySubjectExtension on StudySubject {
               futureBlobFile.localFilePath,
               futureBlobFile.futureBlobId,
             );
-
-            // Replaces Answer<FutureBlobFile> with Answer<String>
             questionnaireState.answers[answerEntry.key] = Answer<String>(
               answer.question,
               answer.timestamp,
@@ -167,14 +249,8 @@ extension StudySubjectExtension on StudySubject {
           }
         }
       }
-      // Upload multimodal files
-      if (!offline) {
-        await Cache.uploadBlobFiles();
-      }
+      if (!offline) await Cache.uploadBlobFiles();
     }
-
-    String interventionId;
-    DateTime completionDate;
 
     final snapshotDate =
         startedAt != null &&
@@ -188,24 +264,23 @@ extension StudySubjectExtension on StudySubject {
     if (intervention == null) {
       throw StateError('No intervention found for result');
     }
-    interventionId = intervention.id;
-    completionDate = result is DailyRecall
+    final completionDate = result is DailyRecall
         ? result.entryCompletedAt ?? DateTime.now()
         : DateTime.now();
 
-    SubjectProgress p = SubjectProgress(
+    var progressToSave = SubjectProgress(
       subjectId: id,
-      interventionId: interventionId,
+      interventionId: intervention.id,
       taskId: taskId,
       result: resultObject,
       resultType: resultObject.type,
     );
     if (offline) {
-      p.completedAt = completionDate.toUtc();
-      progress.add(p);
+      progressToSave.completedAt = completionDate.toUtc();
+      progress.add(progressToSave);
     } else {
-      p = await p.save();
-      progress.add(p);
+      progressToSave = await progressToSave.save();
+      progress.add(progressToSave);
       await save(onlyUpdate: true);
     }
   }

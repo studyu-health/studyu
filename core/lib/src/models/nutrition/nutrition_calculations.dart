@@ -6,23 +6,27 @@ import 'package:studyu_core/src/models/nutrition/nutrition_profile.dart';
 extension FoodEntryNutritionCalculation on FoodEntry {
   /// Nutrition values describe one unit of this entry. [amount] is the number
   /// of those units consumed.
-  NutritionProfile get totalNutrition => _scaledNutrition(nutrition, amount);
+  NutritionProfile get totalNutrition =>
+      scaleNutritionProfile(nutrition, amount);
 }
 
 extension MealLogNutritionCalculation on MealLog {
   NutritionProfile get totalNutrition =>
-      _sumNutrition(foods.map((FoodEntry food) => food.totalNutrition));
+      sumNutritionProfiles(foods.map((FoodEntry food) => food.totalNutrition));
 }
 
 extension DailyRecallNutritionCalculation on DailyRecall {
-  NutritionProfile get totalNutrition => _sumNutrition(
+  NutritionProfile get totalNutrition => sumNutritionProfiles(
     meals
         .where((MealLog meal) => !meal.isSkipped)
         .map((MealLog meal) => meal.totalNutrition),
   );
 }
 
-NutritionProfile _scaledNutrition(NutritionProfile nutrition, double factor) {
+NutritionProfile scaleNutritionProfile(
+  NutritionProfile nutrition,
+  double factor,
+) {
   return NutritionProfile(
     energyKcal: nutrition.energyKcal * factor,
     protein: nutrition.protein * factor,
@@ -36,41 +40,67 @@ NutritionProfile _scaledNutrition(NutritionProfile nutrition, double factor) {
     sodium: nutrition.sodium * factor,
     waterContent: nutrition.waterContent * factor,
     micros: nutrition.micros.map((key, value) => MapEntry(key, value * factor)),
+    unavailableNutrients: {...nutrition.unavailableNutrients},
+    partialNutrients: {...nutrition.partialNutrients},
+    unavailableItemCount: nutrition.unavailableItemCount,
   );
 }
 
-NutritionProfile _sumNutrition(Iterable<NutritionProfile> profiles) {
-  final total = NutritionProfile(
-    energyKcal: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-    sugars: 0,
-    fiber: 0,
-    saturatedFat: 0,
-    transFat: 0,
-    cholesterol: 0,
-    sodium: 0,
-    waterContent: 0,
-    micros: {},
-  );
-
-  for (final profile in profiles) {
-    total.energyKcal += profile.energyKcal;
-    total.protein += profile.protein;
-    total.carbs += profile.carbs;
-    total.fat += profile.fat;
-    total.sugars += profile.sugars;
-    total.fiber += profile.fiber;
-    total.saturatedFat += profile.saturatedFat;
-    total.transFat += profile.transFat;
-    total.cholesterol += profile.cholesterol;
-    total.sodium += profile.sodium;
-    total.waterContent += profile.waterContent;
-    profile.micros.forEach((key, value) {
-      total.micros[key] = (total.micros[key] ?? 0) + value;
-    });
+/// Adds only known values and retains missing contributions at every level.
+NutritionProfile sumNutritionProfiles(Iterable<NutritionProfile> profiles) {
+  final sources = profiles.toList();
+  final keys = {
+    ...NutritionProfile.nutrientKeys,
+    for (final profile in sources) ...[
+      ...profile.micros.keys.map((key) => 'micros.$key'),
+      ...profile.unavailableNutrients.where((key) => key.startsWith('micros.')),
+      ...profile.partialNutrients.where((key) => key.startsWith('micros.')),
+    ],
+  };
+  final unavailable = <String>{};
+  final partial = <String>{};
+  final values = <String, double>{};
+  for (final key in keys) {
+    final known = sources.where((profile) => profile.isKnown(key)).toList();
+    values[key] = known.fold(
+      0.0,
+      (sum, profile) => sum + profile.valueFor(key),
+    );
+    if (known.isEmpty) {
+      unavailable.add(key);
+    } else if (known.length != sources.length ||
+        known.any((profile) => profile.isPartial(key))) {
+      partial.add(key);
+    }
   }
-
-  return total;
+  return NutritionProfile(
+    energyKcal: values['energyKcal']!,
+    protein: values['protein']!,
+    carbs: values['carbs']!,
+    fat: values['fat']!,
+    sugars: values['sugars']!,
+    fiber: values['fiber']!,
+    saturatedFat: values['saturatedFat']!,
+    transFat: values['transFat']!,
+    cholesterol: values['cholesterol']!,
+    sodium: values['sodium']!,
+    waterContent: values['waterContent']!,
+    micros: {
+      for (final key in keys.where((key) => key.startsWith('micros.')))
+        key.substring(7): values[key]!,
+    },
+    unavailableNutrients: unavailable,
+    partialNutrients: partial,
+    unavailableItemCount: sources.fold(
+      0,
+      (count, profile) =>
+          count +
+          (profile.unavailableItemCount > 0
+              ? profile.unavailableItemCount
+              : profile.unavailableNutrients.isNotEmpty ||
+                    profile.partialNutrients.isNotEmpty
+              ? 1
+              : 0),
+    ),
+  );
 }

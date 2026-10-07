@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:studyu_core/src/models/nutrition/daily_recall.dart';
+import 'package:studyu_core/src/models/nutrition/nutrition_profile.dart';
 import 'package:studyu_core/src/models/questionnaire/questionnaire_state.dart';
 import 'package:studyu_core/src/models/unknown_json_type_error.dart';
 
@@ -42,10 +43,21 @@ class Result<T> {
       'QuestionnaireState' => {
         keyResult: (result as QuestionnaireState).toJson(),
       },
-      'DailyRecall' => {keyResult: (result as DailyRecall).toJson()},
+      'DailyRecall' => {
+        keyResult: (result as DailyRecall).toJson(),
+        if ((result as DailyRecall).canWriteAvailability)
+          NutritionProfile.availabilityWriteIntentKey:
+              NutritionProfile.availabilityWriteIntent,
+      },
       'bool' => {keyResult: result},
       _ => throw ArgumentError('Unknown result type $type'),
     };
     return mergeMaps<String, dynamic>(_$ResultToJson(this), resultMap);
   }
+
+  Map<String, dynamic> toJsonForStorage() => toJson()
+    ..addAll({
+      if (result is DailyRecall)
+        keyResult: (result as DailyRecall).toJsonForStorage(),
+    });
 }
