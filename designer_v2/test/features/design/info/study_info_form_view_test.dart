@@ -69,7 +69,7 @@ void main() {
     await tester.pumpWidget(_buildHarness(controls));
     await tester.tap(find.byType(OutlinedButton));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(tr.action_remove));
+    await tester.tap(find.text(tr.iconpicker_remove_prompt));
     await tester.pumpAndSettle();
 
     expect(controls.iconControl.value, isNull);

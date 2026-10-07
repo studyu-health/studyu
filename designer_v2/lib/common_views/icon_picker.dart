@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:studyu_designer_v2/common_views/dialog.dart';
 import 'package:studyu_designer_v2/common_views/mouse_events.dart';
+import 'package:studyu_designer_v2/common_views/search.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/typings.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
@@ -308,13 +309,23 @@ class const IconPickerField({
 class const IconPickerGallery({
   required final List<IconOption> iconOptions,
   required final double iconSize,
+  final String searchQuery = '',
   final VoidCallbackOn<IconOption>? onSelect,
   super.key,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> iconWidgets = [];
-    for (final iconOption in iconOptions) {
+    final normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    final filteredIconOptions = normalizedSearchQuery.isEmpty
+        ? iconOptions
+        : iconOptions.where((iconOption) {
+            return iconOption.name.toLowerCase().contains(
+              normalizedSearchQuery,
+            );
+          });
+
+    for (final iconOption in filteredIconOptions) {
       final iconWidget = MouseEventsRegion(
         builder: (context, state) {
           final isHovered = state.contains(WidgetState.hovered);
@@ -357,30 +368,48 @@ Future<void> showIconPickerDialog(
       final theme = Theme.of(context);
       final dialogWidth = MediaQuery.of(context).size.width * 0.4;
       final dialogHeight = MediaQuery.of(context).size.height * 0.4;
+      String searchQuery = '';
 
-      return StandardDialog(
-        body: SizedBox(
-          width: max(dialogWidth, minWidth),
-          height: max(dialogHeight, minHeight),
-          child: IconPickerGallery(
-            iconOptions: iconOptions,
-            iconSize: galleryIconSize ?? 48.0,
-          ),
-        ),
-        title: SelectableText(
-          tr.iconpicker_dialog_title,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.normal,
-            color: theme.colorScheme.onPrimaryContainer,
-          ),
-        ),
-        actionButtons: [
-          if (hasSelectedIcon)
-            TextButton(
-              onPressed: () => Navigator.pop(context, const IconOption('')),
-              child: Text(tr.action_remove),
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return StandardDialog(
+            body: SizedBox(
+              width: max(dialogWidth, minWidth),
+              height: max(dialogHeight, minHeight),
+              child: Column(
+                children: [
+                  Search(
+                    onQueryChanged: (query) {
+                      setState(() => searchQuery = query);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: IconPickerGallery(
+                      iconOptions: iconOptions,
+                      iconSize: galleryIconSize ?? 48.0,
+                      searchQuery: searchQuery,
+                    ),
+                  ),
+                ],
+              ),
             ),
-        ],
+            title: SelectableText(
+              tr.iconpicker_dialog_title,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.normal,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+            actionButtons: [
+              if (hasSelectedIcon)
+                TextButton(
+                  onPressed: () => Navigator.pop(context, const IconOption('')),
+                  child: Text(tr.iconpicker_remove_prompt),
+                ),
+            ],
+          );
+        },
       );
     },
   );

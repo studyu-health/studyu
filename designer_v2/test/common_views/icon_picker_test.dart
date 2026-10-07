@@ -178,11 +178,11 @@ void main() {
 
       await tester.tap(find.byType(OutlinedButton));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(tr.action_remove));
+      await tester.tap(find.text(tr.iconpicker_remove_prompt));
       await tester.pumpAndSettle();
 
       expect(selectedOption, isNull);
-      expect(find.text(tr.action_remove), findsNothing);
+      expect(find.text(tr.iconpicker_remove_prompt), findsNothing);
       expect(tester.getSize(_reservedPickerSlot()), selectedSize);
     },
   );
@@ -231,7 +231,7 @@ void main() {
 
     await tester.tap(find.byType(OutlinedButton));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(tr.action_remove));
+    await tester.tap(find.text(tr.iconpicker_remove_prompt));
     await tester.pumpAndSettle();
 
     expect(iconControl.value, isNull);
@@ -274,6 +274,39 @@ void main() {
 
     expect(selectedOption, iconOption);
     expect(find.text(tr.iconpicker_dialog_title), findsNothing);
+  });
+
+  testWidgets('icon picker search filters available icons', (tester) async {
+    await tester.pumpWidget(
+      _buildHarness(
+        IconPickerField(
+          iconOptions: const [
+            IconOption('apple', Icons.apple),
+            IconOption('favorite', Icons.favorite),
+          ],
+          useSquareField: true,
+          onSelect: (_) {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(OutlinedButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.apple), findsOneWidget);
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(SearchBar),
+        matching: find.byType(EditableText),
+      ),
+      'fav',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.apple), findsNothing);
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
   });
 }
 

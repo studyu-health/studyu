@@ -4190,8 +4190,14 @@ abstract class AppLocalizations {
   /// No description provided for @iconpicker_empty_prompt.
   ///
   /// In en, this message translates to:
-  /// **'Pick an icon'**
+  /// **'Choose icon'**
   String get iconpicker_empty_prompt;
+
+  /// No description provided for @iconpicker_remove_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove icon'**
+  String get iconpicker_remove_prompt;
 
   /// No description provided for @iconpicker_dialog_title.
   ///
