@@ -948,6 +948,7 @@
   "sync_failed": "Änderungen konnten nicht gespeichert werden & könnten verloren gehen.",
   "iconpicker_nonempty_prompt": "Icon auswählen",
   "iconpicker_empty_prompt": "Icon auswählen",
+  "iconpicker_remove_prompt": "Icon entfernen",
   "iconpicker_dialog_title": "Icon auswählen",
   "dialog_unsaved_changes_title": "Ungespeicherte Änderungen verwerfen?",
   "dialog_unsaved_changes_description": "Wenn du jetzt gehst, werden deine letzten Änderungen dauerhaft gelöscht.",

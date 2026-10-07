@@ -2363,6 +2363,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get iconpicker_empty_prompt => '아이콘 선택';
 
   @override
+  String get iconpicker_remove_prompt => '아이콘 제거';
+
+  @override
   String get iconpicker_dialog_title => '아이콘 선택';
 
   @override

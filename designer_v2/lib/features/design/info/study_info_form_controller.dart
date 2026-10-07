@@ -47,7 +47,10 @@ class StudyInfoFormViewModel({
   @override
   void setControlsFrom(StudyInfoFormData data) {
     titleControl.value = data.title;
-    iconControl.value = IconOption(data.iconName);
+    iconControl.value = data.iconName.isEmpty
+        ? null
+        : IconPack.resolveIconByName(data.iconName) ??
+              IconOption(data.iconName);
     descriptionControl.value = data.description;
     organizationControl.value = data.contactInfoFormData.organization;
     reviewBoardControl.value =
