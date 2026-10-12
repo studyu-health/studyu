@@ -646,6 +646,7 @@ class _DashboardScreenState() extends ConsumerState<DashboardScreen> {
                 pinnedStudies: pinnedStudyIds,
                 pendingStudyIds: state.pendingStudyIds,
                 highlightedStudyId: state.highlightedStudyId,
+                copiedStudyId: state.copiedStudy?.id,
                 dashboardController: ref.watch(
                   dashboardControllerProvider.notifier,
                 ),

@@ -52,7 +52,7 @@ class DashboardController()
   Timer? _searchDebounce;
   Timer? _highlightTimer;
   static const _searchDebounceDuration = Duration(milliseconds: 300);
-  static const _copyHighlightDuration = Duration(seconds: 4);
+  static const _copyHighlightDuration = Duration(milliseconds: 1500);
 
   /// Monotonic counter used to discard responses from stale fetches when the
   /// user changes filter/sort/search faster than the network responds.
@@ -166,7 +166,10 @@ class DashboardController()
         currentUser: state.currentUser,
         searchQuery: state.query,
         advancedFilter: state.activeFilter,
-        excludeIds: pinnedIds.toList(),
+        excludeIds: [
+          ...pinnedIds,
+          if (state.copiedStudy case final copied?) copied.id,
+        ],
       );
 
       if (!ref.mounted || token != _fetchToken) return;
@@ -253,8 +256,10 @@ class DashboardController()
         state.loadedStudies.length - updatedLoadedStudies.length;
     final retainedContainsStudy =
         state.retainedStudies?.any((study) => study.id == studyId) ?? false;
+    final removedCopy = state.copiedStudy?.id == studyId;
     if (removedPinnedCount + removedLoadedCount == 0 &&
-        !retainedContainsStudy) {
+        !retainedContainsStudy &&
+        !removedCopy) {
       return;
     }
 
@@ -268,6 +273,8 @@ class DashboardController()
         .toList();
 
     state = state.copyWith(
+      copiedStudy: removedCopy ? () => null : null,
+      highlightedStudyId: removedCopy ? () => null : null,
       pinnedStudiesList: () => updatedPinnedStudies,
       loadedStudies: () => updatedLoadedStudies,
       retainedStudies: () => updatedRetainedStudies,
@@ -288,7 +295,10 @@ class DashboardController()
         ascending: state.sortAscending,
         preset: state.studiesFilter ?? DashboardState.defaultFilter,
         currentUser: state.currentUser,
-        excludeIds: pinnedIds.toList(),
+        excludeIds: [
+          ...pinnedIds,
+          if (state.copiedStudy case final copied?) copied.id,
+        ],
       );
 
       if (!ref.mounted || token != _fetchToken) return null;
@@ -330,6 +340,8 @@ class DashboardController()
     final activeSort = _resolveActiveSort(pageKey);
 
     state = state.copyWith(
+      copiedStudy: newFilter == StudiesFilter.owned ? null : () => null,
+      highlightedStudyId: newFilter == StudiesFilter.owned ? null : () => null,
       studiesFilter: () => newFilter,
       activeFilter: () => active.filterGroup,
       selectedSavedFilterId: () => active.presetId,
@@ -341,30 +353,36 @@ class DashboardController()
 
   Future<void> _showCopiedDraft(Study draft) async {
     _highlightTimer?.cancel();
-    _dispatchMyStudies();
-    await setStudiesFilter(StudiesFilter.owned);
-    if (!ref.mounted || state.loadError != null) return;
-
-    final highlightedLoaded = state.loadedStudies.any(
-      (study) => study.id == draft.id,
-    );
+    _searchDebounce?.cancel();
+    ++_fetchToken;
+    final alreadyOwned = state.studiesFilter == StudiesFilter.owned;
     state = state.copyWith(
-      loadedStudies: highlightedLoaded
-          ? null
-          : () => [draft, ...state.loadedStudies],
+      copiedStudy: () => draft,
       highlightedStudyId: () => draft.id,
+      studiesFilter: () => StudiesFilter.owned,
+      loadedStudies: alreadyOwned ? null : () => const [],
+      pinnedStudiesList: alreadyOwned ? null : () => const [],
+      retainedStudies: () => null,
+      totalCount: alreadyOwned ? null : 0,
+      pageTotalCount: alreadyOwned ? null : 0,
     );
     _highlightTimer = Timer(_copyHighlightDuration, () {
-      if (!ref.mounted) return;
-      if (state.highlightedStudyId == draft.id) {
-        state = state.copyWith(highlightedStudyId: () => null);
-      }
+      if (ref.mounted) state = state.copyWith(highlightedStudyId: () => null);
     });
+    if (alreadyOwned) {
+      await _refreshAfterMutation();
+    } else {
+      _dispatchMyStudies();
+    }
   }
 
   Future<void> updateFilter(FilterGroup filter, {String? presetId}) async {
     state = state.copyWith(
-      retainedStudies: () => state.displayedStudies.asData?.value,
+      retainedStudies: () => state.displayedStudies.asData?.value
+          .where((study) => study.id != state.copiedStudy?.id)
+          .toList(),
+      copiedStudy: () => null,
+      highlightedStudyId: () => null,
       activeFilter: () => filter,
       selectedSavedFilterId: () => presetId,
     );
@@ -472,7 +490,11 @@ class DashboardController()
 
   void setSorting(StudiesTableColumn sortByColumn, bool ascending) {
     state = state.copyWith(
-      retainedStudies: () => state.displayedStudies.asData?.value,
+      retainedStudies: () => state.displayedStudies.asData?.value
+          .where((study) => study.id != state.copiedStudy?.id)
+          .toList(),
+      copiedStudy: () => null,
+      highlightedStudyId: () => null,
       sortByColumn: sortByColumn,
       sortAscending: ascending,
     );
@@ -514,7 +536,11 @@ class DashboardController()
     if (newQuery == state.query) return;
     ++_fetchToken;
     state = state.copyWith(
-      retainedStudies: () => state.displayedStudies.asData?.value,
+      retainedStudies: () => state.displayedStudies.asData?.value
+          .where((study) => study.id != state.copiedStudy?.id)
+          .toList(),
+      copiedStudy: () => null,
+      highlightedStudyId: () => null,
       query: newQuery,
       isRefreshing:
           !state.isLoadingInitial && state.displayedStudies.asData != null,
@@ -594,7 +620,9 @@ class DashboardController()
           action,
           () => _runStudyAction(model.id, () async {
             final loadedStudyCountBeforeRefresh = state.loadedStudies.length;
-            final copiedDraft = type == StudyActionType.duplicateDraft
+            final copiedDraft =
+                type == StudyActionType.duplicateDraft ||
+                    type == StudyActionType.duplicate
                 ? await _studyRepository.duplicateAndSave(model)
                 : null;
             if (copiedDraft == null) {
