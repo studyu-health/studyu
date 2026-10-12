@@ -113,6 +113,7 @@
   "studies_list_header_participants_enrolled": "Angemeldet",
   "studies_list_header_participants_active": "Aktiv",
   "studies_list_header_participants_completed": "Abgeschlossen",
+  "studies_copied_draft": "Als Entwurf kopiert",
   "studies_not_found": "Es konnten keine Studien gefunden werden",
   "modify_query": "Verändere deine Suchanfrage, um mehr Studien in die Suche miteinzubeziehen",
   "studies_count_total": "{total, plural, =1{1 Studie} other{{total} Studien}}",

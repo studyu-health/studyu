@@ -43,6 +43,7 @@ class const StudiesTable({
   required final Iterable<String> pinnedStudies,
   required final DashboardController dashboardController,
   final Set<String> pendingStudyIds = const {},
+  final String? copiedStudyId,
   final String? highlightedStudyId,
   final bool isLoadingMore = false,
   final bool hasMore = false,
@@ -64,7 +65,10 @@ class const StudiesTable({
 
   @override
   Widget build(BuildContext context) {
-    if (advancedFilterUnsupported) {
+    if (advancedFilterUnsupported &&
+        (copiedStudyId == null ||
+            studies.isEmpty ||
+            studies.first.id != copiedStudyId)) {
       return _AdvancedFilterUnsupportedNotice(onRetry: onRetry);
     }
     if (studies.isEmpty && loadError != null) {
@@ -224,6 +228,8 @@ class const StudiesTable({
               ),
             ),
             SizedBox(height: rowSpacing),
+            if (advancedFilterUnsupported)
+              _AdvancedFilterUnsupportedNotice(onRetry: onRetry),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -236,7 +242,9 @@ class const StudiesTable({
                     behavior: ScrollConfiguration.of(context)
                         .copyWith(scrollbars: true),
                     child: ListView.builder(
-                      key: const ValueKey('studies_table_rows'),
+                      key: copiedStudyId == null
+                          ? const ValueKey('studies_table_rows')
+                          : ValueKey('studies_table_rows_$copiedStudyId'),
                       prototypeItem: StudiesTableItem.prototype(
                         columnSizes: columnDefinitionsMap.values.toList(),
                         itemHeight: itemHeight,
@@ -269,6 +277,7 @@ class const StudiesTable({
                             isPinned: pinnedStudies.contains(item.id),
                             isBusy: pendingStudyIds.contains(item.id),
                             isHighlighted: highlightedStudyId == item.id,
+                            isCopied: copiedStudyId == item.id,
                             itemHeight: itemHeight,
                             itemPadding: itemPadding,
                             rowSpacing: rowSpacing,
