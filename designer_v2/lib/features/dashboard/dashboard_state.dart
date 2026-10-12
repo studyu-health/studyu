@@ -43,6 +43,9 @@ class const DashboardState({
   /// Study actions remain disabled until their requests and refreshes finish.
   final Set<String> pendingStudyIds = const {},
 
+  /// The study row that should receive transient post-copy emphasis.
+  final String? highlightedStudyId,
+
   /// Whether more pages remain on the server.
   final bool hasMore = true,
 
@@ -120,6 +123,7 @@ class const DashboardState({
     bool? isRefreshing,
     List<Study>? Function()? retainedStudies,
     Set<String>? pendingStudyIds,
+    String? Function()? highlightedStudyId,
     bool? hasMore,
     Object? Function()? loadError,
     bool? advancedFilterUnsupported,
@@ -150,6 +154,9 @@ class const DashboardState({
           ? retainedStudies()
           : this.retainedStudies,
       pendingStudyIds: pendingStudyIds ?? this.pendingStudyIds,
+      highlightedStudyId: highlightedStudyId != null
+          ? highlightedStudyId()
+          : this.highlightedStudyId,
       hasMore: hasMore ?? this.hasMore,
       loadError: loadError != null ? loadError() : this.loadError,
       advancedFilterUnsupported:
@@ -184,6 +191,7 @@ class const DashboardState({
     isRefreshing,
     retainedStudies,
     pendingStudyIds,
+    highlightedStudyId,
     hasMore,
     loadError,
     advancedFilterUnsupported,

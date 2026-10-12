@@ -28,9 +28,11 @@ class DashboardController()
     _authRepository = ref.watch(authRepositoryProvider);
     _userRepository = ref.watch(userRepositoryProvider);
     _dispatch = ref.watch(dashboardDispatchProvider);
+    _dispatchMyStudies = ref.watch(dashboardMyStudiesDispatchProvider);
 
     ref.onDispose(() {
       _searchDebounce?.cancel();
+      _highlightTimer?.cancel();
     });
 
     _loadInitial();
@@ -45,9 +47,12 @@ class DashboardController()
   late final IAuthRepository _authRepository;
   late final IUserRepository _userRepository;
   late final DashboardDispatch _dispatch;
+  late final DashboardMyStudiesDispatch _dispatchMyStudies;
 
   Timer? _searchDebounce;
+  Timer? _highlightTimer;
   static const _searchDebounceDuration = Duration(milliseconds: 300);
+  static const _copyHighlightDuration = Duration(seconds: 4);
 
   /// Monotonic counter used to discard responses from stale fetches when the
   /// user changes filter/sort/search faster than the network responds.
@@ -334,6 +339,29 @@ class DashboardController()
     await _resetAndReload(clearStudies: true);
   }
 
+  Future<void> _showCopiedDraft(Study draft) async {
+    _highlightTimer?.cancel();
+    _dispatchMyStudies();
+    await setStudiesFilter(StudiesFilter.owned);
+    if (!ref.mounted || state.loadError != null) return;
+
+    final highlightedLoaded = state.loadedStudies.any(
+      (study) => study.id == draft.id,
+    );
+    state = state.copyWith(
+      loadedStudies: highlightedLoaded
+          ? null
+          : () => [draft, ...state.loadedStudies],
+      highlightedStudyId: () => draft.id,
+    );
+    _highlightTimer = Timer(_copyHighlightDuration, () {
+      if (!ref.mounted) return;
+      if (state.highlightedStudyId == draft.id) {
+        state = state.copyWith(highlightedStudyId: () => null);
+      }
+    });
+  }
+
   Future<void> updateFilter(FilterGroup filter, {String? presetId}) async {
     state = state.copyWith(
       retainedStudies: () => state.displayedStudies.asData?.value,
@@ -566,12 +594,21 @@ class DashboardController()
           action,
           () => _runStudyAction(model.id, () async {
             final loadedStudyCountBeforeRefresh = state.loadedStudies.length;
-            await action.onExecute();
+            final copiedDraft = type == StudyActionType.duplicateDraft
+                ? await _studyRepository.duplicateAndSave(model)
+                : null;
+            if (copiedDraft == null) {
+              await action.onExecute();
+            }
             if (!ref.mounted) return;
             if (type == StudyActionType.delete) _removeStudyLocally(model.id);
-            await _refreshAfterMutation(
-              targetLoadedStudyCount: loadedStudyCountBeforeRefresh,
-            );
+            if (copiedDraft != null) {
+              await _showCopiedDraft(copiedDraft);
+            } else {
+              await _refreshAfterMutation(
+                targetLoadedStudyCount: loadedStudyCountBeforeRefresh,
+              );
+            }
           }),
         );
       }

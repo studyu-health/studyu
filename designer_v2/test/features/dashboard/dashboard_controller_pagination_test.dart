@@ -111,6 +111,9 @@ class _Harness({
         authRepositoryProvider.overrideWithValue(authRepo),
         userRepositoryProvider.overrideWithValue(userRepo),
         dashboardDispatchProvider.overrideWithValue((_) {}),
+        dashboardMyStudiesDispatchProvider.overrideWithValue(() {
+          myStudiesDispatchCount++;
+        }),
       ],
     );
     addTearDown(container.dispose);
@@ -136,6 +139,7 @@ class _Harness({
   late final MockUser user;
   late final StudyUUser studyUUser;
   late final ProviderContainer container;
+  int myStudiesDispatchCount = 0;
 
   DashboardController get controller =>
       container.read(dashboardControllerProvider.notifier);
@@ -415,6 +419,221 @@ void main() {
         await execution;
         expect(h.state.pendingStudyIds, isEmpty);
         expect(h.state.displayedStudies.requireValue, hasLength(2));
+      },
+    );
+
+    test(
+      'copy as draft switches to my studies and highlights copied draft',
+      () async {
+        final publicStudy = _study('public')..status = StudyStatus.running;
+        final copiedDraft = _study('copy');
+        final h = _Harness(
+          initialFilter: StudiesFilter.public,
+          initialPage: StudiesPage(studies: [publicStudy], totalCount: 1),
+        );
+        await h.settle();
+        clearInteractions(h.studyRepo);
+        when(h.studyRepo.duplicateAndSave(publicStudy))
+            .thenAnswer((_) async => copiedDraft);
+        when(
+          h.studyRepo.fetchPage(
+            offset: anyNamed('offset'),
+            limit: anyNamed('limit'),
+            sortBy: anyNamed('sortBy'),
+            ascending: anyNamed('ascending'),
+            preset: anyNamed('preset'),
+            currentUser: anyNamed('currentUser'),
+            searchQuery: anyNamed('searchQuery'),
+            advancedFilter: anyNamed('advancedFilter'),
+            excludeIds: anyNamed('excludeIds'),
+          ),
+        ).thenAnswer(
+          (_) async => const StudiesPage(studies: [], totalCount: 0),
+        );
+        when(h.studyRepo.availableActions(publicStudy)).thenReturn([
+          ModelAction(
+            type: StudyActionType.duplicateDraft,
+            label: 'copy as draft',
+            onExecute: () {
+              fail('controller should use duplicateAndSave return value');
+            },
+          ),
+        ]);
+
+        final action = h.controller
+            .availableActions(publicStudy)
+            .firstWhere(
+              (action) => action.type == StudyActionType.duplicateDraft,
+            );
+
+        await action.onExecute();
+        await h.settle();
+
+        expect(h.myStudiesDispatchCount, 1);
+        expect(h.state.studiesFilter, StudiesFilter.owned);
+        expect(h.state.loadedStudies.first, copiedDraft);
+        expect(h.state.highlightedStudyId, copiedDraft.id);
+        verify(
+          h.studyRepo.fetchPage(
+            offset: 0,
+            limit: DashboardState.pageSize,
+            sortBy: anyNamed('sortBy'),
+            ascending: anyNamed('ascending'),
+            preset: StudiesFilter.owned,
+            currentUser: h.user,
+            searchQuery: '',
+            advancedFilter: anyNamed('advancedFilter'),
+            excludeIds: anyNamed('excludeIds'),
+          ),
+        ).called(greaterThanOrEqualTo(1));
+      },
+    );
+
+    test(
+      'copy as draft failure stays on public studies without highlight',
+      () async {
+        final publicStudy = _study('public')..status = StudyStatus.running;
+        final error = StateError('copy failed');
+        final h = _Harness(
+          initialFilter: StudiesFilter.public,
+          initialPage: StudiesPage(studies: [publicStudy], totalCount: 1),
+        );
+        await h.settle();
+        when(h.studyRepo.duplicateAndSave(publicStudy))
+            .thenAnswer((_) => Future<Study>.error(error));
+        when(h.studyRepo.availableActions(publicStudy)).thenReturn([
+          ModelAction(
+            type: StudyActionType.duplicateDraft,
+            label: 'copy as draft',
+            onExecute: () {
+              fail('controller should use duplicateAndSave return value');
+            },
+          ),
+        ]);
+
+        final action = h.controller
+            .availableActions(publicStudy)
+            .firstWhere(
+              (action) => action.type == StudyActionType.duplicateDraft,
+            );
+
+        await action.onExecute();
+        await h.settle();
+
+        expect(h.myStudiesDispatchCount, 0);
+        expect(h.state.studiesFilter, StudiesFilter.public);
+        expect(h.state.loadError, same(error));
+        expect(h.state.highlightedStudyId, isNull);
+      },
+    );
+
+    test('copy as draft highlight clears after four seconds', () {
+      fakeAsync((async) {
+        final publicStudy = _study('public')..status = StudyStatus.running;
+        final copiedDraft = _study('copy');
+        final h = _Harness(
+          initialFilter: StudiesFilter.public,
+          initialPage: StudiesPage(studies: [publicStudy], totalCount: 1),
+        );
+        async.flushMicrotasks();
+        when(h.studyRepo.duplicateAndSave(publicStudy))
+            .thenAnswer((_) async => copiedDraft);
+        when(
+          h.studyRepo.fetchPage(
+            offset: anyNamed('offset'),
+            limit: anyNamed('limit'),
+            sortBy: anyNamed('sortBy'),
+            ascending: anyNamed('ascending'),
+            preset: anyNamed('preset'),
+            currentUser: anyNamed('currentUser'),
+            searchQuery: anyNamed('searchQuery'),
+            advancedFilter: anyNamed('advancedFilter'),
+            excludeIds: anyNamed('excludeIds'),
+          ),
+        ).thenAnswer(
+          (_) async => const StudiesPage(studies: [], totalCount: 0),
+        );
+        when(h.studyRepo.availableActions(publicStudy)).thenReturn([
+          ModelAction(
+            type: StudyActionType.duplicateDraft,
+            label: 'copy as draft',
+            onExecute: () {
+              fail('controller should use duplicateAndSave return value');
+            },
+          ),
+        ]);
+
+        final action = h.controller
+            .availableActions(publicStudy)
+            .firstWhere(
+              (action) => action.type == StudyActionType.duplicateDraft,
+            );
+
+        var completed = false;
+        Future<void>.sync(action.onExecute).then((_) => completed = true);
+        async.flushMicrotasks();
+
+        expect(completed, isTrue);
+        expect(h.state.highlightedStudyId, copiedDraft.id);
+
+        async.elapse(const Duration(seconds: 4));
+        async.flushMicrotasks();
+
+        expect(h.state.highlightedStudyId, isNull);
+      });
+    });
+
+    test(
+      'copy as draft does not highlight when my studies reload fails',
+      () async {
+        final publicStudy = _study('public')..status = StudyStatus.running;
+        final copiedDraft = _study('copy');
+        final error = StateError('reload failed');
+        final h = _Harness(
+          initialFilter: StudiesFilter.public,
+          initialPage: StudiesPage(studies: [publicStudy], totalCount: 1),
+        );
+        await h.settle();
+        clearInteractions(h.studyRepo);
+        when(h.studyRepo.duplicateAndSave(publicStudy))
+            .thenAnswer((_) async => copiedDraft);
+        when(
+          h.studyRepo.fetchPage(
+            offset: anyNamed('offset'),
+            limit: anyNamed('limit'),
+            sortBy: anyNamed('sortBy'),
+            ascending: anyNamed('ascending'),
+            preset: anyNamed('preset'),
+            currentUser: anyNamed('currentUser'),
+            searchQuery: anyNamed('searchQuery'),
+            advancedFilter: anyNamed('advancedFilter'),
+            excludeIds: anyNamed('excludeIds'),
+          ),
+        ).thenThrow(error);
+        when(h.studyRepo.availableActions(publicStudy)).thenReturn([
+          ModelAction(
+            type: StudyActionType.duplicateDraft,
+            label: 'copy as draft',
+            onExecute: () {
+              fail('controller should use duplicateAndSave return value');
+            },
+          ),
+        ]);
+
+        final action = h.controller
+            .availableActions(publicStudy)
+            .firstWhere(
+              (action) => action.type == StudyActionType.duplicateDraft,
+            );
+
+        await action.onExecute();
+        await h.settle();
+
+        expect(h.myStudiesDispatchCount, 1);
+        expect(h.state.studiesFilter, StudiesFilter.owned);
+        expect(h.state.loadError, same(error));
+        expect(h.state.loadedStudies, isEmpty);
+        expect(h.state.highlightedStudyId, isNull);
       },
     );
 
@@ -779,6 +998,7 @@ void main() {
           authRepositoryProvider.overrideWithValue(authRepo),
           userRepositoryProvider.overrideWithValue(userRepo),
           dashboardDispatchProvider.overrideWithValue((_) {}),
+          dashboardMyStudiesDispatchProvider.overrideWithValue(() {}),
         ],
       );
       final subscription = container.listen(

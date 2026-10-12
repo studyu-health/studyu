@@ -63,4 +63,36 @@ void main() {
 
     expect(loadMoreCalls, greaterThan(0));
   });
+
+  testWidgets('highlighted study exposes a semantic cue and requests focus', (
+    tester,
+  ) async {
+    final highlightedStudy = _study(1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StudiesTable(
+            studies: [highlightedStudy],
+            onSelect: (_) {},
+            getActions: (_) => const [],
+            emptyWidget: const SizedBox.shrink(),
+            pinnedStudies: const [],
+            dashboardController: _DashboardController(),
+            highlightedStudyId: highlightedStudy.id,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.bySemanticsLabel('Copied draft: ${highlightedStudy.title}'),
+      findsOneWidget,
+    );
+    expect(
+      FocusManager.instance.primaryFocus?.debugLabel,
+      'study_row_${highlightedStudy.id}',
+    );
+  });
 }

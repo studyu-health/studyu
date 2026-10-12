@@ -163,7 +163,7 @@ void main() {
       final study = _study('study');
       when(h.apiClient.fetchStudy(study.id)).thenAnswer((_) async => study);
       final persistence = Completer<Study>();
-      late Study duplicate;
+      Study? duplicate;
       when(h.apiClient.saveStudy(any)).thenAnswer((invocation) {
         duplicate = invocation.positionalArguments.single as Study;
         return persistence.future;
@@ -173,12 +173,27 @@ void main() {
       final duplication = h.repository.duplicateAndSave(study).then((_) {
         completed = true;
       });
-      await Future<void>.delayed(Duration.zero);
+      for (var i = 0; i < 5 && duplicate == null; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
 
       expect(completed, isFalse);
-      persistence.complete(duplicate);
+      expect(duplicate, isNotNull);
+      persistence.complete(duplicate!);
       await duplication;
       expect(completed, isTrue);
     },
   );
+
+  test('duplicateAndSave returns persisted draft when available', () async {
+    final h = _Harness();
+    final study = _study('study');
+    final savedDraft = _study('saved-draft');
+    when(h.apiClient.fetchStudy(study.id)).thenAnswer((_) async => study);
+    when(h.apiClient.saveStudy(any)).thenAnswer((_) async => savedDraft);
+
+    final result = await h.repository.duplicateAndSave(study);
+
+    expect(result, same(savedDraft));
+  });
 }

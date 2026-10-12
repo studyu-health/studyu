@@ -71,7 +71,7 @@ abstract class IModelRepository<T>() implements IModelActionProvider<T> {
   Future<WrappedModel<T>> fetch(ModelID modelId);
   Future<WrappedModel<T>?> save(T model); // upsert
   Future<void> delete(ModelID modelId);
-  Future<void> duplicateAndSave(T model);
+  Future<T> duplicateAndSave(T model);
 
   // Future<void> duplicateAndSaveFromRemote(ModelID modelId);
   Stream<WrappedModel<T>> watch(
@@ -186,6 +186,7 @@ abstract class ModelRepository<T>(
   Future<WrappedModel<T>?> save(T model, {bool runOptimistically = true}) {
     final modelId = getKey(model);
     final prevModel = get(modelId)?.model;
+    WrappedModel<T>? savedWrappedModel;
 
     final saveOperation = OptimisticUpdate(
       applyOptimistic: () {
@@ -197,6 +198,7 @@ abstract class ModelRepository<T>(
         final savedModel = await delegate.save(model);
         final wrappedModel = upsertLocally(savedModel);
         wrappedModel.markAsSaved();
+        savedWrappedModel = wrappedModel;
         emitModelEvent(IsSaved(modelId, model));
       },
       rollback: () {
@@ -219,7 +221,9 @@ abstract class ModelRepository<T>(
       completeFutureOptimistically: runOptimistically,
     );
 
-    return saveOperation.execute().then((_) => get(modelId));
+    return saveOperation.execute().then(
+      (_) => savedWrappedModel ?? get(modelId),
+    );
   }
 
   @override
@@ -261,9 +265,10 @@ abstract class ModelRepository<T>(
   }
 
   @override
-  Future<void> duplicateAndSave(T model) {
+  Future<T> duplicateAndSave(T model) async {
     final duplicateModel = delegate.createDuplicate(model);
-    return save(duplicateModel);
+    final savedModel = await save(duplicateModel, runOptimistically: false);
+    return savedModel?.model ?? duplicateModel;
   }
 
   /*@override

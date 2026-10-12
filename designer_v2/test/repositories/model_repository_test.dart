@@ -4,6 +4,8 @@ import 'package:studyu_designer_v2/repositories/model_repository.dart';
 class const _Model(final String id);
 
 class _Delegate() implements IModelRepositoryDelegate<_Model> {
+  _Model? savedDuplicate;
+
   @override
   _Model createDuplicate(_Model model) => _Model('${model.id}-copy');
 
@@ -23,19 +25,17 @@ class _Delegate() implements IModelRepositoryDelegate<_Model> {
   void onError(Object error, StackTrace? stackTrace) {}
 
   @override
-  Future<_Model> save(_Model model) async => model;
+  Future<_Model> save(_Model model) async => savedDuplicate ?? model;
 }
 
-class _Repository() extends ModelRepository<_Model> {
-  this : super(_Delegate());
-
+class _Repository(_Delegate super.delegate) extends ModelRepository<_Model> {
   @override
   ModelID getKey(_Model model) => model.id;
 }
 
 void main() {
   test('non-optimistic delete propagates persistence errors', () async {
-    final repository = _Repository();
+    final repository = _Repository(_Delegate());
     repository.upsertLocally(const _Model('study')).markAsFetched();
 
     await expectLater(
@@ -44,4 +44,18 @@ void main() {
     );
     expect(repository.get('study'), isNotNull);
   });
+
+  test(
+    'duplicateAndSave returns saved model when persistence returns one',
+    () async {
+      final delegate = _Delegate()..savedDuplicate = const _Model('saved-copy');
+      final repository = _Repository(delegate);
+
+      final duplicate = await repository.duplicateAndSave(
+        const _Model('study'),
+      );
+
+      expect(duplicate.id, 'saved-copy');
+    },
+  );
 }
