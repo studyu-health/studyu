@@ -1443,22 +1443,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get continue_label => 'Weiter';
 
   @override
-  String get restored_answer_needs_review =>
-      'Wiederhergestellte Antwort muss überprüft werden';
+  String get questionnaire_review_title => 'Überprüfe deine Antworten';
 
   @override
-  String get restored_answer_review_description =>
-      'Die Aufgabe kann erst nach der Überprüfung abgeschlossen werden.';
+  String get questionnaire_review_description =>
+      'Du hast eine frühere Antwort geändert. Überprüfe deine späteren Antworten, bevor du den Fragebogen abschließt.';
 
   @override
-  String get mark_answer_reviewed => 'Ich habe diese Antwort überprüft';
-
-  @override
-  String get answer_reviewed => 'Antwort überprüft';
-
-  @override
-  String get review_restored_answer_to_continue =>
-      'Überprüfe die wiederhergestellte Antwort, um fortzufahren.';
+  String get questionnaire_review_confirmation =>
+      'Ich habe meine Antworten überprüft';
 
   @override
   String get complete_task => 'Aufgabe abschließen';

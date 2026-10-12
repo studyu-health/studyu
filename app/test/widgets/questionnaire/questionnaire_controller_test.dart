@@ -1019,6 +1019,89 @@ void main() {
           },
         );
 
+        test('markVisibleAnswersReviewed clears all visible flags once', () {
+          final q1 = ScaleQuestion.withId()
+            ..id = 'q1'
+            ..prompt = 'Rate your pain'
+            ..minimum = 0
+            ..maximum = 10
+            ..step = 1;
+          final q2 = boolQuestion('q2', 'Have you taken painkillers?');
+          final q3 = boolQuestion('q3', 'Any other symptoms?');
+          final controller = QuestionnaireController([q1, q2, q3]);
+          var notifyCount = 0;
+          controller.addListener(() => notifyCount++);
+
+          controller.submitAnswer(q1.constructAnswer(6));
+          controller.submitAnswer(q2.constructAnswer(true));
+          controller.submitAnswer(q3.constructAnswer(true));
+          controller.submitAnswer(q1.constructAnswer(7));
+          notifyCount = 0;
+
+          expect(controller.needsReview('q2'), isTrue);
+          expect(controller.needsReview('q3'), isTrue);
+          controller.markVisibleAnswersReviewed();
+
+          expect(controller.needsReview('q2'), isFalse);
+          expect(notifyCount, 1);
+        });
+
+        test(
+          'markVisibleAnswersReviewed leaves hidden review metadata intact',
+          () {
+            final q0 = ScaleQuestion.withId()
+              ..id = 'q0'
+              ..prompt = 'Rate your pain'
+              ..minimum = 0
+              ..maximum = 10
+              ..step = 1;
+            final q1 = boolQuestion('q1', 'Show follow-up?');
+            final q2 = boolQuestion('q2', 'Follow-up')
+              ..conditional = shownWhenQ1True<bool>();
+            final q3 = boolQuestion('q3', 'Always visible');
+            final controller = QuestionnaireController([q0, q1, q2, q3]);
+
+            controller.submitAnswer(q0.constructAnswer(6));
+            controller.submitAnswer(q1.constructAnswer(true));
+            controller.submitAnswer(q2.constructAnswer(true));
+            controller.submitAnswer(q3.constructAnswer(true));
+            controller.submitAnswer(q0.constructAnswer(7));
+            controller.submitAnswer(q1.constructAnswer(false));
+
+            expect(controller.needsReview('q2'), isTrue);
+            expect(controller.needsReview('q3'), isTrue);
+            controller.markVisibleAnswersReviewed();
+
+            expect(controller.needsReview('q2'), isTrue);
+            expect(controller.needsReview('q3'), isFalse);
+          },
+        );
+
+        test(
+          'earlier answer edits can require review again after clearing',
+          () {
+            final q1 = ScaleQuestion.withId()
+              ..id = 'q1'
+              ..prompt = 'Rate your pain'
+              ..minimum = 0
+              ..maximum = 10
+              ..step = 1;
+            final q2 = boolQuestion('q2', 'Have you taken painkillers?');
+            final controller = QuestionnaireController([q1, q2]);
+
+            controller.submitAnswer(q1.constructAnswer(6));
+            controller.submitAnswer(q2.constructAnswer(true));
+            controller.submitAnswer(q1.constructAnswer(7));
+            expect(controller.needsReview('q2'), isTrue);
+
+            controller.markVisibleAnswersReviewed();
+            expect(controller.needsReview('q2'), isFalse);
+
+            controller.submitAnswer(q1.constructAnswer(8));
+            expect(controller.needsReview('q2'), isTrue);
+          },
+        );
+
         test('reviewing restored answer clears needsReview', () {
           final q1 = boolQuestion('q1', 'Breakfast?');
           final q2 = freeTextQuestion('q2', 'What did you eat?')
