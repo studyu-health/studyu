@@ -89,6 +89,7 @@ class DashboardController()
         : state.displayedStudies.asData?.value;
     state = state.copyWith(
       loadedStudies: () => clearStudies ? const [] : state.loadedStudies,
+      fetchedStudyCount: clearStudies ? 0 : state.fetchedStudyCount,
       pinnedStudiesList: () =>
           clearStudies ? const [] : state.pinnedStudiesList,
       retainedStudies: () => retainedStudies,
@@ -154,7 +155,7 @@ class DashboardController()
   }) async {
     try {
       final pinnedIds = state.pinnedStudiesList.map((study) => study.id);
-      final offset = isInitial ? 0 : state.loadedStudies.length;
+      final offset = isInitial ? 0 : state.fetchedStudyCount;
       final fetchLimit = limit ?? DashboardState.pageSize;
 
       final page = await _studyRepository.fetchPage(
@@ -177,10 +178,14 @@ class DashboardController()
       final updatedLoaded = isInitial
           ? page.studies
           : [...state.loadedStudies, ...page.studies];
-      final hasMore = updatedLoaded.length < page.totalCount;
+      final fetchedStudyCount = isInitial
+          ? page.studies.length
+          : state.fetchedStudyCount + page.studies.length;
+      final hasMore = fetchedStudyCount < page.totalCount;
 
       state = state.copyWith(
         loadedStudies: () => updatedLoaded,
+        fetchedStudyCount: fetchedStudyCount,
         retainedStudies: () => null,
         totalCount: page.totalCount,
         isLoadingMore: false,
@@ -192,6 +197,7 @@ class DashboardController()
       if (!ref.mounted || token != _fetchToken) return;
       state = state.copyWith(
         loadedStudies: () => const [],
+        fetchedStudyCount: 0,
         retainedStudies: () => null,
         totalCount: 0,
         isLoadingMore: false,
@@ -268,6 +274,10 @@ class DashboardController()
       state.pageTotalCount - removedLoadedCount,
       0,
     );
+    final updatedFetchedStudyCount = max(
+      state.fetchedStudyCount - removedLoadedCount,
+      0,
+    );
     final updatedRetainedStudies = state.retainedStudies
         ?.where((study) => study.id != studyId)
         .toList();
@@ -277,10 +287,11 @@ class DashboardController()
       highlightedStudyId: removedCopy ? () => null : null,
       pinnedStudiesList: () => updatedPinnedStudies,
       loadedStudies: () => updatedLoadedStudies,
+      fetchedStudyCount: updatedFetchedStudyCount,
       retainedStudies: () => updatedRetainedStudies,
       totalCount: updatedTotalCount,
       pageTotalCount: updatedPageTotalCount,
-      hasMore: updatedLoadedStudies.length < updatedTotalCount,
+      hasMore: updatedFetchedStudyCount < updatedTotalCount,
       loadError: () => null,
     );
   }
@@ -466,15 +477,17 @@ class DashboardController()
     final updatedPageTotalCount = state.pageTotalCount > 0
         ? state.pageTotalCount - 1
         : 0;
+    final updatedFetchedStudyCount = max(state.fetchedStudyCount - 1, 0);
     state = state.copyWith(
       loadedStudies: () => updatedLoaded,
+      fetchedStudyCount: updatedFetchedStudyCount,
       pinnedStudiesList: () => [
         ...state.pinnedStudiesList,
         state.loadedStudies[studyIndex],
       ],
       totalCount: updatedTotalCount,
       pageTotalCount: updatedPageTotalCount,
-      hasMore: updatedLoaded.length < updatedTotalCount,
+      hasMore: updatedFetchedStudyCount < updatedTotalCount,
       retainedStudies: () => null,
     );
   });
