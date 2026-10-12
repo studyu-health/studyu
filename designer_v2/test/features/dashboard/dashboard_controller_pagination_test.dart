@@ -668,6 +668,34 @@ void main() {
       ]);
     });
 
+    test('copy retains earlier drafts until retry replaces the rows', () async {
+      final h = _Harness();
+      await h.settle();
+      final first = _study('copy-1');
+      final second = _study('copy-2');
+      await h.copyDraft(_study('source'), first);
+
+      final page = h.holdPage();
+      final copying = h.copyDraft(_study('source'), second);
+      await h.settle();
+      expect(h.state.displayedStudies.requireValue, [second, first]);
+      expect(h.state.fetchedStudyCount, 0);
+      page.completeError(StateError('reload failed'));
+      await copying;
+      expect(h.state.displayedStudies.requireValue, [second, first]);
+
+      final replacement = h.holdPage();
+      final retry = h.controller.retry();
+      expect(h.state.displayedStudies.requireValue, [second, first]);
+      replacement.complete(StudiesPage(studies: [first], totalCount: 1));
+      await retry;
+      expect(h.state.retainedStudies, isNull);
+      expect(h.state.loadError, isNull);
+      expect(h.state.displayedStudies.requireValue, [second, first]);
+      expect(h.state.fetchedStudyCount, 1);
+      expect(h.state.displayTotalStudyCount, 2);
+    });
+
     test('new copy highlight expires after a failed reload', () {
       fakeAsync((async) {
         final publicStudy = _study('public')..status = StudyStatus.running;
@@ -731,7 +759,10 @@ void main() {
         async.flushMicrotasks();
         expect(h.state.loadError, same(error));
         expect(h.state.highlightedStudyId, secondDraft.id);
-        expect(h.state.displayedStudies.requireValue.first, same(secondDraft));
+        expect(h.state.displayedStudies.requireValue, [
+          secondDraft,
+          firstDraft,
+        ]);
 
         async.elapse(const Duration(milliseconds: 500));
         expect(h.state.highlightedStudyId, secondDraft.id);

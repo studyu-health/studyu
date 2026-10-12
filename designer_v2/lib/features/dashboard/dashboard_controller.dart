@@ -367,13 +367,16 @@ class DashboardController()
     _searchDebounce?.cancel();
     ++_fetchToken;
     final alreadyOwned = state.studiesFilter == StudiesFilter.owned;
+    final retainedStudies = alreadyOwned
+        ? state.displayedStudies.asData?.value
+        : null;
     state = state.copyWith(
       copiedStudy: () => draft,
       highlightedStudyId: () => draft.id,
       studiesFilter: () => StudiesFilter.owned,
       loadedStudies: alreadyOwned ? null : () => const [],
       pinnedStudiesList: alreadyOwned ? null : () => const [],
-      retainedStudies: () => null,
+      retainedStudies: () => retainedStudies,
       totalCount: alreadyOwned ? null : 0,
       pageTotalCount: alreadyOwned ? null : 0,
     );
