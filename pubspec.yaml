@@ -17,8 +17,17 @@ melos:
   scripts:
     fix:
       run: |
-        dart run melos exec -c 6 -- \
-          "dart fix --apply"
+        rtk_prefix=""
+        if [ "${CI:-}" != "true" ] && command -v rtk >/dev/null 2>&1; then
+          rtk_prefix="rtk "
+        fi
+        if [ "$CI" = "true" ]; then
+          dart_cmd="dart"
+        else
+          dart_cmd="fvm dart"
+        fi
+        ${dart_cmd} run melos exec -c 6 -- \
+          "${rtk_prefix}${dart_cmd} fix --apply"
       description: Fix auto-fixable lint errors
 
     outdated:
