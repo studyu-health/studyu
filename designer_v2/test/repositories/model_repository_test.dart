@@ -4,8 +4,6 @@ import 'package:studyu_designer_v2/repositories/model_repository.dart';
 class const _Model(final String id);
 
 class _Delegate() implements IModelRepositoryDelegate<_Model> {
-  _Model? savedDuplicate;
-
   @override
   _Model createDuplicate(_Model model) => _Model('${model.id}-copy');
 
@@ -22,10 +20,10 @@ class _Delegate() implements IModelRepositoryDelegate<_Model> {
   Future<List<_Model>> fetchAll() async => const [];
 
   @override
-  void onError(Object error, StackTrace? stackTrace) {}
+  Future<_Model> save(_Model model) async => model;
 
   @override
-  Future<_Model> save(_Model model) async => savedDuplicate ?? model;
+  void onError(Object error, StackTrace? stackTrace) {}
 }
 
 class _Repository(_Delegate super.delegate) extends ModelRepository<_Model> {
@@ -44,18 +42,4 @@ void main() {
     );
     expect(repository.get('study'), isNotNull);
   });
-
-  test(
-    'duplicateAndSave returns saved model when persistence returns one',
-    () async {
-      final delegate = _Delegate()..savedDuplicate = const _Model('saved-copy');
-      final repository = _Repository(delegate);
-
-      final duplicate = await repository.duplicateAndSave(
-        const _Model('study'),
-      );
-
-      expect(duplicate.id, 'saved-copy');
-    },
-  );
 }

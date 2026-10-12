@@ -185,15 +185,23 @@ void main() {
     },
   );
 
-  test('duplicateAndSave returns persisted draft when available', () async {
+  test('duplicateAndSave returns the distinct persisted draft', () async {
     final h = _Harness();
     final study = _study('study');
-    final savedDraft = _study('saved-draft');
     when(h.apiClient.fetchStudy(study.id)).thenAnswer((_) async => study);
-    when(h.apiClient.saveStudy(any)).thenAnswer((_) async => savedDraft);
+    Study? duplicate;
+    Study? savedDraft;
+    when(h.apiClient.saveStudy(any)).thenAnswer((invocation) async {
+      duplicate = invocation.positionalArguments.single as Study;
+      savedDraft = _study(duplicate!.id)..title = 'Persisted title';
+      return savedDraft!;
+    });
 
     final result = await h.repository.duplicateAndSave(study);
 
     expect(result, same(savedDraft));
+    expect(result, isNot(same(duplicate)));
+    expect(result.id, duplicate!.id);
+    expect(result.title, 'Persisted title');
   });
 }
