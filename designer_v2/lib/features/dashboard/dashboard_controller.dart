@@ -340,7 +340,6 @@ class DashboardController()
   }
 
   Future<void> _showCopiedDraft(Study draft) async {
-    _highlightTimer?.cancel();
     _dispatchMyStudies();
     await setStudiesFilter(StudiesFilter.owned);
     if (!ref.mounted || state.loadError != null) return;
@@ -348,6 +347,7 @@ class DashboardController()
     final highlightedLoaded = state.loadedStudies.any(
       (study) => study.id == draft.id,
     );
+    _highlightTimer?.cancel();
     state = state.copyWith(
       loadedStudies: highlightedLoaded
           ? null

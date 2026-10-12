@@ -637,6 +637,76 @@ void main() {
       },
     );
 
+    test('failed reload leaves existing highlight timer active', () {
+      fakeAsync((async) {
+        final publicStudy = _study('public')..status = StudyStatus.running;
+        final firstDraft = _study('copy-1');
+        final secondDraft = _study('copy-2');
+        final error = StateError('reload failed');
+        final h = _Harness(
+          initialFilter: StudiesFilter.public,
+          initialPage: StudiesPage(studies: [publicStudy], totalCount: 1),
+        );
+        async.flushMicrotasks();
+        clearInteractions(h.studyRepo);
+
+        var duplicateCount = 0;
+        when(h.studyRepo.duplicateAndSave(publicStudy)).thenAnswer((_) async {
+          duplicateCount++;
+          return duplicateCount == 1 ? firstDraft : secondDraft;
+        });
+        var reloadCount = 0;
+        when(
+          h.studyRepo.fetchPage(
+            offset: anyNamed('offset'),
+            limit: anyNamed('limit'),
+            sortBy: anyNamed('sortBy'),
+            ascending: anyNamed('ascending'),
+            preset: anyNamed('preset'),
+            currentUser: anyNamed('currentUser'),
+            searchQuery: anyNamed('searchQuery'),
+            advancedFilter: anyNamed('advancedFilter'),
+            excludeIds: anyNamed('excludeIds'),
+          ),
+        ).thenAnswer((_) {
+          reloadCount++;
+          if (reloadCount <= 2) {
+            return Future.value(const StudiesPage(studies: [], totalCount: 0));
+          }
+          return Future<StudiesPage>.error(error);
+        });
+        when(h.studyRepo.availableActions(publicStudy)).thenReturn([
+          ModelAction(
+            type: StudyActionType.duplicateDraft,
+            label: 'copy as draft',
+            onExecute: () {
+              fail('controller should use duplicateAndSave return value');
+            },
+          ),
+        ]);
+
+        final action = h.controller
+            .availableActions(publicStudy)
+            .firstWhere(
+              (action) => action.type == StudyActionType.duplicateDraft,
+            );
+
+        Future<void>.sync(action.onExecute);
+        async.flushMicrotasks();
+        expect(h.state.highlightedStudyId, firstDraft.id);
+
+        Future<void>.sync(action.onExecute);
+        async.flushMicrotasks();
+        expect(h.state.loadError, same(error));
+        expect(h.state.highlightedStudyId, firstDraft.id);
+
+        async.elapse(const Duration(seconds: 4));
+        async.flushMicrotasks();
+
+        expect(h.state.highlightedStudyId, isNull);
+      });
+    });
+
     test('hasMore is false when total <= loaded', () async {
       final h = _Harness(
         initialPage: StudiesPage(
