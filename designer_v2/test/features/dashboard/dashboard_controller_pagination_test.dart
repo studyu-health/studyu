@@ -489,6 +489,81 @@ void main() {
       },
     );
 
+    test('copy as draft does not advance loadMore offset', () async {
+      final publicStudy = _study('public')..status = StudyStatus.running;
+      final copiedDraft = _study('copy');
+      final h = _Harness(
+        initialFilter: StudiesFilter.public,
+        initialPage: StudiesPage(studies: [publicStudy], totalCount: 1),
+      );
+      await h.settle();
+      clearInteractions(h.studyRepo);
+      when(h.studyRepo.duplicateAndSave(publicStudy))
+          .thenAnswer((_) async => copiedDraft);
+      when(
+        h.studyRepo.fetchPage(
+          offset: anyNamed('offset'),
+          limit: anyNamed('limit'),
+          sortBy: anyNamed('sortBy'),
+          ascending: anyNamed('ascending'),
+          preset: anyNamed('preset'),
+          currentUser: anyNamed('currentUser'),
+          searchQuery: anyNamed('searchQuery'),
+          advancedFilter: anyNamed('advancedFilter'),
+          excludeIds: anyNamed('excludeIds'),
+        ),
+      ).thenAnswer((inv) async {
+        final offset = inv.namedArguments[#offset] as int;
+        final limit = inv.namedArguments[#limit] as int;
+        return StudiesPage(
+          studies: List.generate(limit, (i) => _study('s${offset + i}')),
+          totalCount: 60,
+        );
+      });
+      when(h.studyRepo.availableActions(publicStudy)).thenReturn([
+        ModelAction(
+          type: StudyActionType.duplicateDraft,
+          label: 'copy as draft',
+          onExecute: () {
+            fail('controller should use duplicateAndSave return value');
+          },
+        ),
+      ]);
+
+      final action = h.controller
+          .availableActions(publicStudy)
+          .firstWhere(
+            (action) => action.type == StudyActionType.duplicateDraft,
+          );
+
+      await action.onExecute();
+      await h.settle();
+
+      expect(h.state.loadedStudies.map((study) => study.id).take(3), [
+        copiedDraft.id,
+        's0',
+        's1',
+      ]);
+
+      await h.controller.loadMore();
+      await h.settle();
+
+      verify(
+        h.studyRepo.fetchPage(
+          offset: DashboardState.pageSize,
+          limit: DashboardState.pageSize,
+          sortBy: anyNamed('sortBy'),
+          ascending: anyNamed('ascending'),
+          preset: StudiesFilter.owned,
+          currentUser: h.user,
+          searchQuery: '',
+          advancedFilter: anyNamed('advancedFilter'),
+          excludeIds: anyNamed('excludeIds'),
+        ),
+      ).called(1);
+      expect(h.state.loadedStudies[DashboardState.pageSize + 1].id, 's20');
+    });
+
     test(
       'copy as draft failure stays on public studies without highlight',
       () async {

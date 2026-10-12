@@ -13,6 +13,11 @@ class const DashboardState({
   /// Paginated studies fetched so far (excludes pinned, which render above).
   final List<Study> loadedStudies = const [],
 
+  /// Number of rows fetched from server for pagination offset calculations.
+  /// This can differ from [loadedStudies.length] when a copied draft is
+  /// prepended locally before it appears in a fetched page.
+  final int fetchedStudyCount = 0,
+
   /// Pinned studies fetched separately, always shown above the paginated list.
   final List<Study> pinnedStudiesList = const [],
 
@@ -114,6 +119,7 @@ class const DashboardState({
 
   DashboardState copyWith({
     List<Study> Function()? loadedStudies,
+    int? fetchedStudyCount,
     List<Study> Function()? pinnedStudiesList,
     int? totalCount,
     int? pageTotalCount,
@@ -141,6 +147,7 @@ class const DashboardState({
       loadedStudies: loadedStudies != null
           ? loadedStudies()
           : this.loadedStudies,
+      fetchedStudyCount: fetchedStudyCount ?? this.fetchedStudyCount,
       pinnedStudiesList: pinnedStudiesList != null
           ? pinnedStudiesList()
           : this.pinnedStudiesList,
@@ -182,6 +189,7 @@ class const DashboardState({
   @override
   List<Object?> get props => [
     loadedStudies,
+    fetchedStudyCount,
     pinnedStudiesList,
     totalCount,
     pageTotalCount,
