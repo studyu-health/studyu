@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/patrol_finders.dart';
+import 'package:studyu_designer_v2/common_views/icon_picker.dart';
+import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
 class const StudyDesignRobot(final PatrolTester $) {
@@ -38,6 +40,32 @@ class const StudyDesignRobot(final PatrolTester $) {
 
   Future<void> tapMyStudiesButton() async {
     await $(tr.navlink_my_studies).tap();
+  }
+
+  Future<void> selectStudyIcon() async {
+    await $(const ValueKey('study_title_icon_picker')).tap();
+    await $(tr.iconpicker_dialog_title).waitUntilVisible();
+
+    final iconFinder = find.descendant(
+      of: find.byType(IconPickerGallery),
+      matching: find.byType(Icon),
+    );
+    await $.tester.tap(iconFinder.first);
+    await $.pumpAndSettle();
+  }
+
+  Future<void> waitForPublishButtonEnabled() async {
+    await $(PrimaryButton)
+        .which<PrimaryButton>(
+          (button) =>
+              button.text == tr.action_button_study_launch &&
+              !button.isDisabled,
+        )
+        .waitUntilVisible();
+  }
+
+  Future<void> waitForPublishConfirmationDialog() async {
+    await $(tr.study_launch_title).waitUntilVisible();
   }
 
   Future<void> tapPublishButton() async {

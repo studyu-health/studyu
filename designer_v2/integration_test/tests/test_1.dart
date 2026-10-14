@@ -61,6 +61,10 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
     );
     await _step('draft study: fill info page', controller.fillInfoPage);
     await _step(
+      'draft study: select study icon',
+      studyDesignRobot.selectStudyIcon,
+    );
+    await _step(
       'draft study: navigate participation screen',
       studyDesignRobot.navigateToParticipationScreen,
     );
@@ -90,8 +94,16 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
     );
 
     await _step(
+      'publish study: verify publish button enabled',
+      studyDesignRobot.waitForPublishButtonEnabled,
+    );
+    await _step(
       'publish study: tap publish button',
       studyDesignRobot.tapPublishButton,
+    );
+    await _step(
+      'publish study: verify confirmation dialog',
+      studyDesignRobot.waitForPublishConfirmationDialog,
     );
     await _step(
       'publish study: confirm publish',
@@ -99,7 +111,7 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
     );
     await _step('publish study: skip follow-up', () async {
       final finder = find.byKey(const ValueKey('post_publish_followup_skip'));
-      final timeout = const Duration(seconds: 120);
+      const timeout = Duration(seconds: 120);
       final deadline = DateTime.now().add(timeout);
       while (DateTime.now().isBefore(deadline)) {
         await $.pump(const Duration(milliseconds: 250));
