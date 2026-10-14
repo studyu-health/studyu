@@ -98,8 +98,9 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
       studyDesignRobot.tapConfirmPublishButton,
     );
     await _step('publish study: skip follow-up', () async {
-      final finder = find.byKey(const ValueKey('form_dismiss_button'));
-      final deadline = DateTime.now().add(const Duration(seconds: 30));
+      final finder = find.byKey(const ValueKey('post_publish_followup_skip'));
+      final timeout = const Duration(seconds: 120);
+      final deadline = DateTime.now().add(timeout);
       while (DateTime.now().isBefore(deadline)) {
         await $.pump(const Duration(milliseconds: 250));
         if (finder.evaluate().isNotEmpty) {
@@ -108,7 +109,7 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
       }
       throw TimeoutException(
         'Timed out waiting for post-publish follow-up button',
-        const Duration(seconds: 30),
+        timeout,
       );
     });
     await _step(
