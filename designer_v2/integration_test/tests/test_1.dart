@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/src/custom_finders/patrol_tester.dart';
 import 'package:studyu_core/src/env/env.dart' as env;
@@ -94,10 +96,20 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
       'publish study: confirm publish',
       studyDesignRobot.tapConfirmPublishButton,
     );
-    await _step(
-      'publish study: skip follow-up',
-      studyDesignRobot.tapSkipForNowButton,
-    );
+    await _step('publish study: skip follow-up', () async {
+      final finder = find.byKey(const ValueKey('form_dismiss_button'));
+      final deadline = DateTime.now().add(const Duration(seconds: 30));
+      while (DateTime.now().isBefore(deadline)) {
+        await $.pump(const Duration(milliseconds: 250));
+        if (finder.evaluate().isNotEmpty) {
+          return studyDesignRobot.tapSkipForNowButton();
+        }
+      }
+      throw TimeoutException(
+        'Timed out waiting for post-publish follow-up button',
+        const Duration(seconds: 30),
+      );
+    });
     await _step(
       'publish study: validate live status',
       studyDesignRobot.validateStudyPublished,

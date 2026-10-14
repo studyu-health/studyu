@@ -40,6 +40,11 @@ jobs:
           dart pub get
           dart run melos bootstrap
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v3
         with:
@@ -47,7 +52,15 @@ jobs:
 
       - name: Start Supabase
         run: |
-          supabase start -x studio,imgproxy
+          for attempt in 1 2 3; do
+            if supabase start -x studio,imgproxy; then
+              exit 0
+            fi
+            supabase stop || true
+            sleep $((attempt * 10))
+          done
+          echo 'Supabase failed to start after 3 attempts.' >&2
+          exit 1
 
       - name: Reset Supabase database
         run: ./scripts/reset-test-db.sh --yes

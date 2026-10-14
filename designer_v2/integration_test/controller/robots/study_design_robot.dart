@@ -49,6 +49,6 @@ class const StudyDesignRobot(final PatrolTester $) {
   }
 
   Future<void> tapSkipForNowButton() async {
-    await $(tr.action_button_post_launch_followup_skip).tap();
+    await $(const ValueKey('form_dismiss_button')).tap();
   }
 }
