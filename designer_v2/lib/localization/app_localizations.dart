@@ -730,6 +730,12 @@ abstract class AppLocalizations {
   /// **'Completed'**
   String get studies_list_header_participants_completed;
 
+  /// No description provided for @studies_copied_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied draft'**
+  String get studies_copied_draft;
+
   /// No description provided for @studies_not_found.
   ///
   /// In en, this message translates to:

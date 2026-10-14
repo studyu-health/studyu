@@ -343,6 +343,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studies_list_header_participants_completed => 'Completed';
 
   @override
+  String get studies_copied_draft => 'Copied draft';
+
+  @override
   String get studies_not_found => 'No Studies found';
 
   @override

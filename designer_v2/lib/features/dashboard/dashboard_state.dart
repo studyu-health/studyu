@@ -13,6 +13,11 @@ class const DashboardState({
   /// Paginated studies fetched so far (excludes pinned, which render above).
   final List<Study> loadedStudies = const [],
 
+  /// Number of rows fetched from server for pagination offset calculations.
+  /// This can differ from [loadedStudies.length] when a copied draft is
+  /// prepended locally before it appears in a fetched page.
+  final int fetchedStudyCount = 0,
+
   /// Pinned studies fetched separately, always shown above the paginated list.
   final List<Study> pinnedStudiesList = const [],
 
@@ -42,6 +47,12 @@ class const DashboardState({
 
   /// Study actions remain disabled until their requests and refreshes finish.
   final Set<String> pendingStudyIds = const {},
+
+  /// The study row that should receive transient post-copy emphasis.
+  final String? highlightedStudyId,
+
+  /// The copied draft shown separately from paginated results.
+  final Study? copiedStudy,
 
   /// Whether more pages remain on the server.
   final bool hasMore = true,
@@ -85,32 +96,46 @@ class const DashboardState({
   static const defaultFilter = StudiesFilter.owned;
   static const pageSize = 20;
 
-  /// Studies actually rendered: pinned first, then the paginated list.
+  /// Studies actually rendered: copied draft, pinned rows, then paginated rows.
   /// Wrapped in [AsyncValue] for backwards-compatible UI scaffolding that
   /// expects a loading/data state for the initial fetch. Errors stay in
   /// [loadError] and are rendered by the studies table's error notices, so
   /// they keep the unsupported-filter and retry affordances even with an
   /// empty list.
   AsyncValue<List<Study>> get displayedStudies {
-    if (retainedStudies != null) return AsyncValue.data(retainedStudies!);
-
+    final copied = studiesFilter == StudiesFilter.owned ? copiedStudy : null;
+    final retained = retainedStudies;
+    if (retained != null) {
+      return AsyncValue.data([
+        ?copied,
+        ...retained.where((study) => study.id != copied?.id),
+      ]);
+    }
     final pinnedStudies = pinnedStudiesList
+        .where((study) => study.id != copied?.id)
         .where(_matchesPagePreset)
         .where(_matchesSearchQuery)
         .where(_matchesActiveFilter)
         .toList();
 
-    if (isLoadingInitial && loadedStudies.isEmpty && pinnedStudies.isEmpty) {
+    if (isLoadingInitial &&
+        loadedStudies.isEmpty &&
+        pinnedStudies.isEmpty &&
+        copied == null) {
       return const AsyncValue.loading();
     }
     return AsyncValue.data([
+      ?copied,
       ...pinnedStudies,
-      ...loadedStudies.where(_matchesSearchQuery),
+      ...loadedStudies
+          .where((study) => study.id != copied?.id)
+          .where(_matchesSearchQuery),
     ]);
   }
 
   DashboardState copyWith({
     List<Study> Function()? loadedStudies,
+    int? fetchedStudyCount,
     List<Study> Function()? pinnedStudiesList,
     int? totalCount,
     int? pageTotalCount,
@@ -120,6 +145,8 @@ class const DashboardState({
     bool? isRefreshing,
     List<Study>? Function()? retainedStudies,
     Set<String>? pendingStudyIds,
+    String? Function()? highlightedStudyId,
+    Study? Function()? copiedStudy,
     bool? hasMore,
     Object? Function()? loadError,
     bool? advancedFilterUnsupported,
@@ -137,6 +164,7 @@ class const DashboardState({
       loadedStudies: loadedStudies != null
           ? loadedStudies()
           : this.loadedStudies,
+      fetchedStudyCount: fetchedStudyCount ?? this.fetchedStudyCount,
       pinnedStudiesList: pinnedStudiesList != null
           ? pinnedStudiesList()
           : this.pinnedStudiesList,
@@ -150,6 +178,10 @@ class const DashboardState({
           ? retainedStudies()
           : this.retainedStudies,
       pendingStudyIds: pendingStudyIds ?? this.pendingStudyIds,
+      highlightedStudyId: highlightedStudyId != null
+          ? highlightedStudyId()
+          : this.highlightedStudyId,
+      copiedStudy: copiedStudy != null ? copiedStudy() : this.copiedStudy,
       hasMore: hasMore ?? this.hasMore,
       loadError: loadError != null ? loadError() : this.loadError,
       advancedFilterUnsupported:
@@ -175,6 +207,7 @@ class const DashboardState({
   @override
   List<Object?> get props => [
     loadedStudies,
+    fetchedStudyCount,
     pinnedStudiesList,
     totalCount,
     pageTotalCount,
@@ -184,6 +217,8 @@ class const DashboardState({
     isRefreshing,
     retainedStudies,
     pendingStudyIds,
+    highlightedStudyId,
+    copiedStudy,
     hasMore,
     loadError,
     advancedFilterUnsupported,
@@ -215,20 +250,35 @@ extension DashboardStateSafeViewProps on DashboardState {
     return FilterEvaluator.evaluate(activeFilter!, study, currentUser);
   }
 
-  int get pagePinnedStudyCount =>
-      pinnedStudiesList.where(_matchesPagePreset).length;
+  int get pagePinnedStudyCount => pinnedStudiesList
+      .where((study) => study.id != copiedStudy?.id)
+      .where(_matchesPagePreset)
+      .length;
 
   int get filteredPinnedStudyCount => pinnedStudiesList
+      .where((study) => study.id != copiedStudy?.id)
       .where(_matchesPagePreset)
       .where(_matchesSearchQuery)
       .where(_matchesActiveFilter)
       .length;
 
-  int get filteredStudyCount => totalCount + filteredPinnedStudyCount;
+  int get filteredStudyCount {
+    final copied = copiedStudy;
+    final copiedMatches =
+        copied != null &&
+        _matchesPagePreset(copied) &&
+        _matchesSearchQuery(copied) &&
+        _matchesActiveFilter(copied);
+    return totalCount + filteredPinnedStudyCount + (copiedMatches ? 1 : 0);
+  }
 
-  int get visibleStudyCount => filteredPinnedStudyCount + loadedStudies.length;
+  int get visibleStudyCount =>
+      filteredPinnedStudyCount +
+      loadedStudies.length +
+      (copiedStudy == null ? 0 : 1);
 
-  int get displayTotalStudyCount => pageTotalCount + pagePinnedStudyCount;
+  int get displayTotalStudyCount =>
+      pageTotalCount + pagePinnedStudyCount + (copiedStudy == null ? 0 : 1);
 
   bool get hasAppliedFilter =>
       activeFilter != null && activeFilter!.children.isNotEmpty;

@@ -337,6 +337,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get studies_list_header_participants_completed => '완료 인원';
 
   @override
+  String get studies_copied_draft => '초안 복사본';
+
+  @override
   String get studies_not_found => '연구를 찾을 수 없습니다';
 
   @override
