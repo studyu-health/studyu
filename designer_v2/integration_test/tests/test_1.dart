@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueKey;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/src/custom_finders/patrol_tester.dart';
 import 'package:studyu_core/src/env/env.dart' as env;
@@ -102,7 +103,7 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
       while (DateTime.now().isBefore(deadline)) {
         await $.pump(const Duration(milliseconds: 250));
         if (finder.evaluate().isNotEmpty) {
-          return studyDesignRobot.tapSkipForNowButton();
+          return await studyDesignRobot.tapSkipForNowButton();
         }
       }
       throw TimeoutException(

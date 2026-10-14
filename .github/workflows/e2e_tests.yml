@@ -46,7 +46,7 @@ jobs:
           node-version: 20
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v3
+        uses: supabase/setup-cli@v2
         with:
           version: latest
 
