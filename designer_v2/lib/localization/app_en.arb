@@ -118,6 +118,7 @@
   "studies_list_header_participants_enrolled": "Enrolled",
   "studies_list_header_participants_active": "Active",
   "studies_list_header_participants_completed": "Completed",
+  "studies_copied_draft": "Copied draft",
   "studies_not_found": "No Studies found",
   "modify_query": "Modify your query",
   "studies_count_total": "{total, plural, =1{1 study} other{{total} studies}}",

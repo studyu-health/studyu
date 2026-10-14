@@ -37,6 +37,11 @@ Future<void> main() async {
                       .read(routerProvider)
                       .dispatch(RoutingIntents.studyEdit(studyId)),
             ),
+            dashboardMyStudiesDispatchProvider.overrideWith(
+              (ref) =>
+                  () =>
+                      ref.read(routerProvider).dispatch(RoutingIntents.studies),
+            ),
           ],
           child: const App(),
         ),

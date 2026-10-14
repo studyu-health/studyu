@@ -349,6 +349,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get studies_list_header_participants_completed => 'Abgeschlossen';
 
   @override
+  String get studies_copied_draft => 'Als Entwurf kopiert';
+
+  @override
   String get studies_not_found => 'Es konnten keine Studien gefunden werden';
 
   @override

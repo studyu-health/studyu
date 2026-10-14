@@ -108,12 +108,13 @@ class StudyRepository({
   /// Since the Study object in the dashboard is fetched with limited columns (no intervention or measurement data),
   /// we need to fetch the full columns in order to duplicate it correctly.
   @override
-  Future<void> duplicateAndSave(Study model) async {
+  Future<Study> duplicateAndSave(Study model) async {
     final Study completeModel = await apiClient.fetchStudy(model.id);
     final duplicate = completeModel.duplicateAsDraft(
       authRepository.currentUser!.id,
     );
-    await save(duplicate, runOptimistically: false);
+    final savedDraft = await save(duplicate, runOptimistically: false);
+    return savedDraft?.model ?? duplicate;
   }
 
   @override
