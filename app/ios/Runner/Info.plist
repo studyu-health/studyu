@@ -43,6 +43,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>StudyU Health uses the camera to scan study invitation QR codes and take photos for study tasks.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Access to your photo library helps you recall meals by showing photos taken around meal times. Selected photos may be uploaded for food analysis when you request it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

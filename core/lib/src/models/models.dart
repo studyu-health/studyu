@@ -1,11 +1,17 @@
 export 'consent/consent_item.dart';
 export 'contact.dart';
 export 'data/data_reference.dart';
+export 'data/dhq3_questions.dart';
+export 'data/ffq_questions.dart';
+export 'data/survey_template.dart';
+export 'data/survey_template_registry.dart';
+export 'data/survey_template_repository.dart';
 export 'eligibility/eligibility_criterion.dart';
 export 'expressions/expression.dart';
 export 'expressions/types/types.dart';
 export 'fitbit/fitbit_models.dart';
 export 'interventions/interventions.dart';
+export 'nutrition/nutrition_models.dart';
 export 'observations/observations.dart';
 export 'questionnaire/questionnaire_models.dart';
 export 'report/report_models.dart';

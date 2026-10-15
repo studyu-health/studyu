@@ -80,14 +80,16 @@ void main() {
     final measurements = MeasurementsFormViewModel(
       study: Study.withId('test-user'),
       router: router,
-      formData: MeasurementsFormData(surveyMeasurements: []),
+      formData: MeasurementsFormData(measurements: []),
     );
     await Future<void>.delayed(Duration.zero);
 
     measurements.onNewItem();
     await Future<void>.delayed(Duration.zero);
 
-    final survey = measurements.measurementViewModels.single;
+    final survey =
+        measurements.measurementViewModels.single
+            as MeasurementSurveyFormViewModel;
     expect(
       router.routeInformationProvider.value.uri.pathSegments.last,
       survey.measurementId,
@@ -105,12 +107,10 @@ void main() {
     await question.save();
 
     expect(survey.isDirty, isTrue);
-    expect(measurements.formData!.surveyMeasurements, isEmpty);
+    expect(measurements.formData!.measurements, isEmpty);
     expect(
-      measurements
-          .buildFormData()
-          .surveyMeasurements
-          .single
+      (measurements.buildFormData().measurements.single
+              as MeasurementSurveyFormData)
           .questionnaireFormData
           .questionsData!
           .single
@@ -121,7 +121,7 @@ void main() {
     await survey.cancel();
 
     expect(measurements.measurementViewModels, isEmpty);
-    expect(measurements.buildFormData().surveyMeasurements, isEmpty);
+    expect(measurements.buildFormData().measurements, isEmpty);
   });
 }
 

@@ -14,6 +14,7 @@ import 'package:studyu_designer_v2/features/design/reports/section/report_item_f
 import 'package:studyu_designer_v2/features/design/shared/questionnaire/question/question_form_controller.dart';
 import 'package:studyu_designer_v2/features/design/study_form_controller.dart';
 import 'package:studyu_designer_v2/features/design/study_form_validation.dart';
+import 'package:studyu_designer_v2/features/forms/form_view_model_collection.dart';
 import 'package:studyu_designer_v2/features/study/study_controller.dart';
 import 'package:studyu_designer_v2/repositories/auth_repository.dart';
 import 'package:studyu_designer_v2/repositories/fitbit_credentials_repository.dart';
@@ -96,13 +97,14 @@ MeasurementsFormViewModel measurementsFormViewModel(Ref ref, StudyID studyId) {
 }
 
 @riverpod
-MeasurementSurveyFormViewModel surveyFormViewModel(
+ManagedFormViewModel measurementFormViewModel(
   Ref ref,
   MeasurementFormRouteArgs args,
 ) {
   return ref
-      .watch(measurementsFormViewModelProvider(args.studyId))
-      .provide(args);
+          .watch(measurementsFormViewModelProvider(args.studyId))
+          .provideWithType(args, args.queryParams['type'])
+      as ManagedFormViewModel;
 }
 
 @riverpod
@@ -110,7 +112,9 @@ QuestionFormViewModel surveyQuestionFormViewModel(
   Ref ref,
   SurveyQuestionFormRouteArgs args,
 ) {
-  return ref.watch(surveyFormViewModelProvider(args)).provide(args);
+  return (ref.watch(
+    measurementFormViewModelProvider(args),
+  ) as MeasurementSurveyFormViewModel).provide(args);
 }
 
 // - Reports

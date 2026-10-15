@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:studyu_core/src/models/interventions/intervention_task.dart';
 import 'package:studyu_core/src/models/tables/subject_progress.dart';
 import 'package:studyu_core/src/models/tasks/schedule.dart';
+import 'package:studyu_core/src/models/tasks/task_schedule_rule.dart';
 
 part 'checkmark_task.g.dart';
 
