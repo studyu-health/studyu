@@ -1,0 +1,13 @@
+{
+  "@@locale": "en",
+  "@section_sep": {},
+  "@__________________GENERAL__________________": {},
+  "loading": "Loading",
+  "greeting": "Hello, {name}!",
+  "studies_count_total": "{total, plural, =1{1 study} other{{total} studies}}",
+  "only_in_en": "This key is missing in Korean",
+  "@only_in_en": {
+    "description": "Metadata only lives in English"
+  },
+  "brace_literal": "Curly {braces} survive"
+}

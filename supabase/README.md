@@ -28,7 +28,7 @@ private and secure.
 
 - `supabase/migrations/`: canonical schema and production-safe database changes.
 - `supabase/seeds/dev/`: local development data loaded by normal `supabase db reset`.
-- `supabase/seeds/test/`: deterministic baseline loaded by `scripts/reset-test-db.sh` before database tests.
+- `supabase/seeds/test/`: deterministic baseline loaded by `tools/scripts/reset-test-db.sh` before database tests.
 - `supabase/tests/_helpers/`: test-only SQL helpers.
 
 ### Production deployments
@@ -68,11 +68,11 @@ Database tests use a clean test baseline instead of development seed data. The r
 the local Supabase database before applying test seeds.
 
 ```bash
-./scripts/reset-test-db.sh
+./tools/scripts/reset-test-db.sh
 supabase test db supabase/tests
 ```
 
-Use `./scripts/reset-test-db.sh --yes` in CI or other non-interactive environments.
+Use `./tools/scripts/reset-test-db.sh --yes` in CI or other non-interactive environments.
 
 ## What's more?
 

@@ -31,10 +31,10 @@ class CoverageFormatException(final String message) implements Exception {
   String toString() => message;
 }
 
-/// Returns the repository root (parent of the `scripts` directory).
+/// Returns the repository root (parent of the `tools/scripts` directory).
 String get repoRoot {
   final script = File(Platform.script.toFilePath());
-  return script.parent.parent.path;
+  return script.parent.parent.parent.path;
 }
 
 /// Returns `true` if [path] looks like an absolute path.
@@ -234,7 +234,7 @@ void normalizeCoverage({required String repoRoot, required String outputPath}) {
 }
 
 // ---------------------------------------------------------------------------
-// Built-in regression checks (dart scripts/normalize_lcov.dart --check)
+// Built-in regression checks (dart tools/scripts/normalize_lcov.dart --check)
 // ---------------------------------------------------------------------------
 
 String _writeLcov(String repoRoot, String package, String content) {

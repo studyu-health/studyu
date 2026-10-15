@@ -31,7 +31,7 @@ jobs:
 
       - name: Reset Supabase test database
         run: |
-          ./scripts/reset-test-db.sh --yes
+          ./tools/scripts/reset-test-db.sh --yes
 
       - name: Run Supabase Tests
         run: |

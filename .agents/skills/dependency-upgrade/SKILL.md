@@ -341,7 +341,7 @@ Start the local Supabase services from the current workflow:
 supabase start -x studio,imgproxy
 ```
 
-Validate the same effective database URL that `scripts/reset-test-db.sh` uses.
+Validate the same effective database URL that `tools/scripts/reset-test-db.sh` uses.
 The script uses `SUPABASE_DB_URL` when it is non-empty. Otherwise, it uses
 `postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
 
@@ -433,10 +433,10 @@ default_db_url="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 if [ "$effective_db_url" = "$default_db_url" ]; then
   (
     unset SUPABASE_DB_URL
-    ./scripts/reset-test-db.sh --yes
+    ./tools/scripts/reset-test-db.sh --yes
   )
 else
-  SUPABASE_DB_URL="$effective_db_url" ./scripts/reset-test-db.sh --yes
+  SUPABASE_DB_URL="$effective_db_url" ./tools/scripts/reset-test-db.sh --yes
 fi
 ```
 
