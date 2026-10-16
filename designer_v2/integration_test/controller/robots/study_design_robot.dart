@@ -43,7 +43,7 @@ class const StudyDesignRobot(final PatrolTester $) {
   }
 
   Future<void> selectStudyIcon() async {
-    await $(const ValueKey('study_title_icon_picker')).tap();
+    await $(const ValueKey('study_title_icon_picker')).scrollTo().tap();
     await $(tr.iconpicker_dialog_title).waitUntilVisible();
 
     final iconFinder = find.descendant(
