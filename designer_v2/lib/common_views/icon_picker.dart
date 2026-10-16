@@ -279,7 +279,9 @@ class const IconPickerField({
     final squareControl = SizedBox(
       width: resolvedFieldWidth,
       height: resolvedSquareSize,
-      child: Tooltip(message: tooltipMessage, child: squareButton),
+      child: showFieldLabel
+          ? squareButton
+          : Tooltip(message: tooltipMessage, child: squareButton),
     );
 
     if (!showInlineRemove || !hasSelectedIcon) {

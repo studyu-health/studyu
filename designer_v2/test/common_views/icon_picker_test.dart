@@ -125,6 +125,23 @@ void main() {
     expect(find.text(tr.iconpicker_nonempty_prompt), findsOneWidget);
   });
 
+  testWidgets('labeled square picker does not add a tooltip', (tester) async {
+    const iconOption = IconOption('apple', Icons.apple);
+
+    await tester.pumpWidget(
+      _buildHarness(
+        IconPickerField(
+          iconOptions: const [iconOption],
+          useSquareField: true,
+          showFieldLabel: true,
+          onSelect: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.byTooltip(tr.iconpicker_empty_prompt), findsNothing);
+  });
+
   testWidgets('disabled labeled icon picker disables whole action', (
     tester,
   ) async {
