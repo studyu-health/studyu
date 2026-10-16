@@ -61,7 +61,6 @@ class MockupStudies() {
       // ..participation = Participation.invite
       // ..resultSharing
       ..contact = mockContact
-      ..iconName = 'abTesting'
       ..status = StudyStatus.running
       ..registryPublished = true
       //..questionnaire = mockQuestionnaireA

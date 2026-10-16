@@ -32,6 +32,7 @@ class StudyIntegrationController(super.$, final Study Function() _mockStudyRef)
     mockupLoader = MockupLoader(userID, _mockStudyRef);
     _intermediateMockStudy = mockupLoader.emptyMockupStudy();
     mockStudy = MockupStudies.study;
+    mockStudy.iconName = 'abTesting';
   }
 
   @override
