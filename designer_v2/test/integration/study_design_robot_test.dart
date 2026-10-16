@@ -64,7 +64,7 @@ void main() {
     expect(picker.hitTestable(), findsNothing);
     expect(iconControl.value, isNull);
 
-    await robot.selectStudyIcon();
+    await robot.selectStudyIcon(favoriteIcon);
 
     expect(picker.hitTestable(), findsOneWidget);
     expect(iconControl.value, favoriteIcon);

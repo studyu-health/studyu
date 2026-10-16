@@ -1,5 +1,7 @@
 import 'package:studyu_core/core.dart';
 
+const mockStudyIconName = 'abTesting';
+
 class MockupStudies() {
   static late Study study;
 
@@ -61,6 +63,7 @@ class MockupStudies() {
       // ..participation = Participation.invite
       // ..resultSharing
       ..contact = mockContact
+      //..iconName
       ..status = StudyStatus.running
       ..registryPublished = true
       //..questionnaire = mockQuestionnaireA

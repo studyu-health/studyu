@@ -76,14 +76,13 @@ class StudyRepository({
         emitError(modelStreamControllers[study.id], e, stackTrace);
       },
       rethrowErrors: true,
-      completeFutureOptimistically: false,
     );
 
     return deleteParticipantsOperation.execute();
   }
 
   @override
-  Future<void> launch(Study study) async {
+  Future<void> launch(Study study) {
     final wrappedModel = get(study.id);
     if (wrappedModel == null) {
       throw ModelNotFoundException();
@@ -96,12 +95,13 @@ class StudyRepository({
       apply: () => save(publishedCopy, runOptimistically: false),
       rollback: () {}, // nothing to do here
       onUpdate: () => emitUpdate(),
-      rethrowErrors: true,
-      completeFutureOptimistically: false,
+      onError: (e, stackTrace) {
+        emitError(modelStreamControllers[study.id], e, stackTrace);
+      },
     );
 
-    await deleteParticipants(study);
-    await publishOperation.execute();
+    deleteParticipants(study);
+    return publishOperation.execute();
   }
 
   /// This method fetches the full study object, duplicates it and saves it as a draft.

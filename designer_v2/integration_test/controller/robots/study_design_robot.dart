@@ -42,7 +42,7 @@ class const StudyDesignRobot(final PatrolTester $) {
     await $(tr.navlink_my_studies).tap();
   }
 
-  Future<void> selectStudyIcon() async {
+  Future<void> selectStudyIcon(IconOption iconOption) async {
     final picker = $(const ValueKey('study_title_icon_picker'));
     await picker.waitUntilExists();
     await $.tester.ensureVisible(picker);
@@ -50,11 +50,15 @@ class const StudyDesignRobot(final PatrolTester $) {
     await picker.tap();
     await $(tr.iconpicker_dialog_title).waitUntilVisible();
 
+    if (iconOption.icon == null) {
+      throw StateError('The selected test icon has no icon data.');
+    }
+
     final iconFinder = find.descendant(
       of: find.byType(IconPickerGallery),
-      matching: find.byType(Icon),
+      matching: find.byIcon(iconOption.icon!),
     );
-    await $.tester.tap(iconFinder.first);
+    await $.tester.tap(iconFinder);
     await $.pumpAndSettle();
   }
 
@@ -81,6 +85,8 @@ class const StudyDesignRobot(final PatrolTester $) {
   }
 
   Future<void> tapSkipForNowButton() async {
-    await $(const ValueKey('post_publish_followup_skip')).tap();
+    final skipButton = $(const ValueKey('post_publish_followup_skip'));
+    await skipButton.waitUntilVisible();
+    await skipButton.tap();
   }
 }

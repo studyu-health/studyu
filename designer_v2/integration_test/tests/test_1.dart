@@ -1,9 +1,7 @@
-import 'dart:async';
-
-import 'package:flutter/foundation.dart' show ValueKey;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/src/custom_finders/patrol_tester.dart';
 import 'package:studyu_core/src/env/env.dart' as env;
+import 'package:studyu_designer_v2/common_views/icon_picker.dart';
 
 import '../mockup/mockup_studies.dart';
 import '../test_log.dart';
@@ -60,9 +58,13 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
       studiesRobot.tapOnExistingStudy,
     );
     await _step('draft study: fill info page', controller.fillInfoPage);
+    final studyIcon = IconPack.resolveIconByName(mockStudyIconName);
+    if (studyIcon == null) {
+      throw StateError('The configured study test icon is unavailable.');
+    }
     await _step(
       'draft study: select study icon',
-      studyDesignRobot.selectStudyIcon,
+      () => studyDesignRobot.selectStudyIcon(studyIcon),
     );
     await _step(
       'draft study: navigate participation screen',
@@ -109,21 +111,10 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
       'publish study: confirm publish',
       studyDesignRobot.tapConfirmPublishButton,
     );
-    await _step('publish study: skip follow-up', () async {
-      final finder = find.byKey(const ValueKey('post_publish_followup_skip'));
-      const timeout = Duration(seconds: 120);
-      final deadline = DateTime.now().add(timeout);
-      while (DateTime.now().isBefore(deadline)) {
-        await $.pump(const Duration(milliseconds: 250));
-        if (finder.evaluate().isNotEmpty) {
-          return await studyDesignRobot.tapSkipForNowButton();
-        }
-      }
-      throw TimeoutException(
-        'Timed out waiting for post-publish follow-up button',
-        timeout,
-      );
-    });
+    await _step(
+      'publish study: skip follow-up',
+      studyDesignRobot.tapSkipForNowButton,
+    );
     await _step(
       'publish study: validate live status',
       studyDesignRobot.validateStudyPublished,
