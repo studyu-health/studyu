@@ -16,7 +16,7 @@ can select compatible transitive releases younger than seven days.
    that each publication date is at least seven days old.
 5. Confirm that the `fitbitter` resolved Git commit did not change.
 6. Confirm that workspace packages remain workspace dependencies.
-7. Run `fvm dart run melos test` and open a lockfile-only pull request.
+7. Run `fvm dart run melos run test` and open a lockfile-only pull request.
 
 Reject the refresh when an age check, Git revision check, workspace check, or
 validation check fails. Require human review before merging.
