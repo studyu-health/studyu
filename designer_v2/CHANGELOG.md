@@ -1,5 +1,6 @@
 ## 1.19.0
 
+ - **FIX**(designer): keep copied drafts visible when reload fails, expire their highlight, and preserve pagination offsets.
  - **REFACTOR**(designer): introduce dashboardDispatch indirection.
  - **FIX**(designer): keep error notices on empty dashboard.
  - **FIX**(designer): remove flags from language picker.

@@ -20,22 +20,20 @@ class _Delegate() implements IModelRepositoryDelegate<_Model> {
   Future<List<_Model>> fetchAll() async => const [];
 
   @override
-  void onError(Object error, StackTrace? stackTrace) {}
+  Future<_Model> save(_Model model) async => model;
 
   @override
-  Future<_Model> save(_Model model) async => model;
+  void onError(Object error, StackTrace? stackTrace) {}
 }
 
-class _Repository() extends ModelRepository<_Model> {
-  this : super(_Delegate());
-
+class _Repository(_Delegate super.delegate) extends ModelRepository<_Model> {
   @override
   ModelID getKey(_Model model) => model.id;
 }
 
 void main() {
   test('non-optimistic delete propagates persistence errors', () async {
-    final repository = _Repository();
+    final repository = _Repository(_Delegate());
     repository.upsertLocally(const _Model('study')).markAsFetched();
 
     await expectLater(
