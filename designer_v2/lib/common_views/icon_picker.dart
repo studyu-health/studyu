@@ -364,13 +364,13 @@ Future<void> showIconPickerDialog(
   double minHeight = 300,
 }) async {
   final hasSelectedIcon = selectedOption != null && !selectedOption.isEmpty;
+  String searchQuery = '';
   final IconOption? iconPicked = await showDialog(
     context: context,
     builder: (BuildContext context) {
       final theme = Theme.of(context);
       final dialogWidth = MediaQuery.of(context).size.width * 0.4;
       final dialogHeight = MediaQuery.of(context).size.height * 0.4;
-      String searchQuery = '';
 
       return StatefulBuilder(
         builder: (context, setState) {
