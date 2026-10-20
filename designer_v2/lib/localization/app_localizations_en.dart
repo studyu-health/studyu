@@ -2455,7 +2455,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get iconpicker_nonempty_prompt => 'Change icon';
 
   @override
-  String get iconpicker_empty_prompt => 'Pick an icon';
+  String get iconpicker_empty_prompt => 'Choose icon';
+
+  @override
+  String get iconpicker_remove_prompt => 'Remove icon';
 
   @override
   String get iconpicker_dialog_title => 'Pick an icon';

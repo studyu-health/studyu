@@ -64,6 +64,7 @@ class const PublishSuccessDialog(super.studyId, {super.key})
                     ),
                     const SizedBox(height: 8.0),
                     DismissButton(
+                      key: const ValueKey('post_publish_followup_skip'),
                       text: tr.action_button_post_launch_followup_skip,
                       onPressed: () => Navigator.maybePop(context),
                     ),
