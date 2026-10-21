@@ -678,6 +678,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get value => '값';
 
   @override
+  String get scale_labels => '척도 설명';
+
+  @override
   String get show_colorless_gauges => '접근성을 높인 차트 사용';
 
   @override

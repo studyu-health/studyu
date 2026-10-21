@@ -231,6 +231,7 @@
   "day": "Tag",
   "no_data_available_yet": "Noch keine Daten verfügbar",
   "value": "Wert",
+  "scale_labels": "Skalenbeschriftungen",
   "show_colorless_gauges": "Barrierefreie Diagramme anzeigen",
   "mean": "Mittelwert",
   "t_statistic": "t-Wert",
