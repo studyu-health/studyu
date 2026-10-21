@@ -245,7 +245,7 @@
   "day": "Day",
   "no_data_available_yet": "No data available yet",
   "value": "Value",
-  "scale_labels": "Scale labels",
+  "scale_labels": "About this scale",
   "show_colorless_gauges": "Enable accessible charts",
   "mean": "mean",
   "t_statistic": "t-statistic",

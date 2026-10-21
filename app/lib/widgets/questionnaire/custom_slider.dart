@@ -68,7 +68,9 @@ class const CustomSlider({
       return Expanded(
         child: Text(
           annotation,
-          style: theme.textTheme.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
           textAlign: alignment,
         ),
       );
@@ -81,7 +83,11 @@ class const CustomSlider({
     final labelStyle = theme.textTheme.bodyMedium!;
     final trackHeight = SliderTheme.of(context).trackHeight ?? 16;
 
-    Size measure(String text, TextStyle style) {
+    Size measure(
+      String text,
+      TextStyle style, {
+      double maxWidth = double.infinity,
+    }) {
       final painter = TextPainter(
         text: TextSpan(
           text: text,
@@ -92,7 +98,7 @@ class const CustomSlider({
         textDirection: direction,
         textScaler: textScaler,
         locale: Localizations.localeOf(context),
-      )..layout();
+      )..layout(maxWidth: maxWidth);
       final size = painter.size;
       painter.dispose();
       return size;
@@ -175,53 +181,65 @@ class const CustomSlider({
             (showInlineLabels && selectedAnnotation.isNotEmpty) ||
             value == minValue ||
             value == maxValue;
+        final reserveReadout =
+            !showInlineLabels || labels.length < divisions + 1;
+        final readoutStyle = theme.textTheme.titleMedium!.copyWith(
+          color: theme.colorScheme.onSurface,
+        );
+
+        String readout(double number) {
+          final formatted = numberFormat.format(number);
+          final score = !showInlineLabels && minValue == 0
+              ? '$formatted/$maxNumber'
+              : formatted;
+          final annotation = annotationFor(number);
+          return !showInlineLabels &&
+                  number != minValue &&
+                  number != maxValue &&
+                  annotation.isNotEmpty &&
+                  annotation.trim() != formatted
+              ? '$score · $annotation'
+              : score;
+        }
+
+        final readoutHeight =
+            [
+                  value!,
+                  minValue!,
+                  maxValue!,
+                  ...annotations.map(
+                    (annotation) => annotation.value.toDouble(),
+                  ),
+                ]
+                .map(
+                  (number) => measure(
+                    readout(number),
+                    readoutStyle,
+                    maxWidth: constraints.maxWidth,
+                  ).height,
+                )
+                .reduce((a, b) => a > b ? a : b);
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (showHelp)
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: Tooltip(
-                  message: l10n.scale_labels,
-                  excludeFromSemantics: true,
-                  child: TextButton.icon(
-                    key: const ValueKey('slider_scale_labels'),
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(48, 48),
-                    ),
-                    onPressed: () => showDialog<void>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(l10n.scale_labels),
-                        scrollable: true,
-                        content: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            for (final annotation in annotations)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: Text(
-                                  '${numberFormat.format(annotation.value)}: '
-                                  '${annotation.annotation}',
-                                ),
-                              ),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(l10n.close),
-                          ),
-                        ],
-                      ),
-                    ),
-                    icon: const Icon(Icons.info_outline),
-                    label: Text(l10n.scale_labels),
-                  ),
+            if (reserveReadout) ...[
+              SizedBox(
+                height: readoutHeight,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: !showInlineLabels || !selectedLabelIsVisible
+                      ? Text(
+                          readout(value!),
+                          key: const ValueKey('slider_selected_value'),
+                          style: readoutStyle,
+                          textAlign: TextAlign.center,
+                        )
+                      : null,
                 ),
               ),
+              const SizedBox(height: 8),
+            ],
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 year2023: false,
@@ -269,7 +287,7 @@ class const CustomSlider({
                 (annotationFor(minValue!).isNotEmpty ||
                     annotationFor(maxValue!).isNotEmpty))
               Padding(
-                padding: EdgeInsets.fromLTRB(trackPadding, 4, trackPadding, 0),
+                padding: EdgeInsets.fromLTRB(trackPadding, 8, trackPadding, 0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -279,18 +297,47 @@ class const CustomSlider({
                   ],
                 ),
               ),
-            if (!selectedLabelIsVisible)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(
-                  key: const ValueKey('slider_selected_value'),
-                  selectedAnnotation.isEmpty
-                      ? numberFormat.format(value)
-                      : selectedAnnotation,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.primary,
+            if (showHelp)
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: Tooltip(
+                  message: l10n.scale_labels,
+                  excludeFromSemantics: true,
+                  child: TextButton.icon(
+                    key: const ValueKey('slider_scale_labels'),
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(48, 48),
+                    ),
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(l10n.scale_labels),
+                        scrollable: true,
+                        content: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (final annotation in annotations)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Text(
+                                  '${numberFormat.format(annotation.value)}: '
+                                  '${annotation.annotation}',
+                                ),
+                              ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(l10n.close),
+                          ),
+                        ],
+                      ),
+                    ),
+                    icon: const Icon(Icons.info_outline),
+                    label: Text(l10n.scale_labels),
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
           ],

@@ -705,7 +705,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get value => 'Value';
 
   @override
-  String get scale_labels => 'Scale labels';
+  String get scale_labels => 'About this scale';
 
   @override
   String get show_colorless_gauges => 'Enable accessible charts';

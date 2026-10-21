@@ -111,7 +111,10 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
         final question = scale()
-          ..prompt = 'Rate your average pain today on a scale of 0 to 10.'
+          ..prompt =
+              '<p>Rate your average pain today on a scale of 0 to 10.</p> '
+              '<p>Consider how pain affected your usual activities.</p>'
+          ..rationale = 'Use your average pain during the past 24 hours.'
           ..annotations = [
             annotation(0, 'No pain or discomfort at any time today'),
             annotation(
@@ -159,9 +162,15 @@ void main() {
           expect(rect.left, greaterThanOrEqualTo(0));
           expect(rect.right, lessThanOrEqualTo(size.width));
         }
-        await tester.ensureVisible(find.byTooltip('Scale labels'));
+        final selected = find.byKey(const ValueKey('slider_selected_value'));
+        expect(
+          tester.getTopLeft(find.byType(Slider)).dy -
+              tester.getBottomLeft(selected).dy,
+          closeTo(8, 0.01),
+        );
+        await tester.ensureVisible(find.byTooltip('About this scale'));
         await tester.pumpAndSettle();
-        await tester.tap(find.byTooltip('Scale labels'));
+        await tester.tap(find.byTooltip('About this scale'));
         await tester.pumpAndSettle();
         expect(find.byType(AlertDialog), findsOneWidget);
         await tester.tap(find.text('Close'));
@@ -180,7 +189,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final slider = find.byType(Slider);
-    expectSelected(tester, '4');
+    expectSelected(tester, '4/10');
     for (final label in ['No pain', 'Worst pain imaginable']) {
       expect(find.text(label), findsOneWidget);
       expect(
@@ -188,8 +197,41 @@ void main() {
         greaterThan(tester.getBottomLeft(slider).dy),
       );
     }
-    expect(find.byTooltip('Scale labels'), findsNothing);
+    expect(find.byTooltip('About this scale'), findsNothing);
     expect(tester.widget<Slider>(slider).divisions, 10);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('selected description uses neutral text close to the slider', (
+    tester,
+  ) async {
+    final question = scale()..annotations.add(annotation(4, 'Moderate pain'));
+    await tester.pumpWidget(
+      setup(ScaleQuestionWidget(question: question, onDone: (_) {})),
+    );
+    await tester.pumpAndSettle();
+
+    final selected = find.byKey(const ValueKey('slider_selected_value'));
+    final theme = Theme.of(tester.element(selected));
+    final selectedText = tester.widget<Text>(selected);
+    expect(selectedText.style?.color, theme.colorScheme.onSurface);
+    expect(selectedText.style?.color, isNot(theme.colorScheme.primary));
+    expect(
+      tester.getTopLeft(find.byType(Slider)).dy -
+          tester.getBottomLeft(selected).dy,
+      closeTo(8, 0.01),
+    );
+    for (final label in ['No pain', 'Worst pain imaginable']) {
+      expect(
+        tester.getTopLeft(find.text(label)).dy -
+            tester.getBottomLeft(find.text('0')).dy,
+        closeTo(8, 0.01),
+      );
+      expect(
+        tester.widget<Text>(find.text(label)).style?.color,
+        theme.colorScheme.onSurfaceVariant,
+      );
+    }
     expect(tester.takeException(), isNull);
   });
 
@@ -231,7 +273,7 @@ void main() {
           greaterThan(tester.getRect(find.text(labels[i - 1])).right),
         );
       }
-      expect(find.byTooltip('Scale labels'), findsNothing);
+      expect(find.byTooltip('About this scale'), findsNothing);
       expect(find.byKey(const ValueKey('slider_selected_value')), findsNothing);
       expect(tester.takeException(), isNull);
     });
@@ -255,10 +297,10 @@ void main() {
       await tester.pumpAndSettle();
       if (textScale == 1) {
         expect(find.text('22'), findsOneWidget);
-        expect(find.byTooltip('Scale labels'), findsNothing);
+        expect(find.byTooltip('About this scale'), findsNothing);
       } else {
         expect(find.text('22'), findsNothing);
-        await tester.tap(find.byTooltip('Scale labels'));
+        await tester.tap(find.byTooltip('About this scale'));
         await tester.pumpAndSettle();
         for (var i = 1; i <= 5; i++) {
           expect(find.text('$i: $i$i'), findsOneWidget);
@@ -280,12 +322,20 @@ void main() {
     expect(find.text('0'), findsOneWidget);
     expect(find.text('OK'), findsOneWidget);
     expect(find.text('10'), findsOneWidget);
-    expect(find.byTooltip('Scale labels'), findsNothing);
+    expect(find.byTooltip('About this scale'), findsNothing);
     expect(find.byKey(const ValueKey('slider_selected_value')), findsNothing);
 
-    await tester.tap(find.byType(Slider));
+    final slider = find.byType(Slider);
+    final bounds = tester.getRect(slider);
+    await tester.tap(slider);
     await tester.pumpAndSettle();
     expectSelected(tester, '5');
+    expect(tester.getRect(slider), bounds);
+
+    await tester.drag(slider, Offset(-bounds.width, 0));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('slider_selected_value')), findsNothing);
+    expect(tester.getRect(slider), bounds);
   });
 
   testWidgets('numeric annotations do not repeat the selected number', (
@@ -310,7 +360,7 @@ void main() {
   });
 
   testWidgets(
-    'scale help appears above the slider apart from question rationale',
+    'scale help appears below the endpoints apart from question rationale',
     (tester) async {
       final question = scale()
         ..prompt = 'Rate your pain'
@@ -329,10 +379,12 @@ void main() {
       await tester.pumpAndSettle();
       final scaleHelp = find.byKey(const ValueKey('slider_scale_labels'));
       expect(
-        tester.getBottomLeft(scaleHelp).dy,
-        lessThanOrEqualTo(tester.getTopLeft(find.byType(Slider)).dy),
+        tester.getTopLeft(scaleHelp).dy,
+        greaterThanOrEqualTo(
+          tester.getBottomLeft(find.text('Worst pain imaginable')).dy,
+        ),
       );
-      expect(find.text('Scale labels'), findsOneWidget);
+      expect(find.text('About this scale'), findsOneWidget);
       expect(find.byType(IconButton), findsOneWidget);
 
       await tester.tap(find.byType(IconButton));
@@ -366,7 +418,7 @@ void main() {
     await tester.pumpAndSettle();
     final slider = find.byType(Slider);
     final bounds = tester.getRect(slider);
-    expectSelected(tester, 'Moderate pain');
+    expectSelected(tester, '4/10 · Moderate pain');
 
     for (final endpoint in [
       (offset: -bounds.width, text: 'No pain'),
@@ -375,7 +427,7 @@ void main() {
       await tester.drag(slider, Offset(endpoint.offset, 0));
       await tester.pumpAndSettle();
       expect(find.text(endpoint.text), findsOneWidget);
-      expect(find.byKey(const ValueKey('slider_selected_value')), findsNothing);
+      expectSelected(tester, endpoint.offset < 0 ? '0/10' : '10/10');
       expect(tester.getRect(slider), bounds);
     }
   });
@@ -433,7 +485,7 @@ void main() {
 
     expectSelected(
       tester,
-      'Pain that sometimes interferes with daily activities',
+      '5/10 · Pain that sometimes interferes with daily activities',
     );
     expect(tester.getSize(readout).height, greaterThan(initialHeight));
     expect(tester.getRect(slider), bounds);
@@ -493,9 +545,9 @@ void main() {
       setup(ScaleQuestionWidget(question: question, onDone: answers.add)),
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byTooltip('Scale labels'));
+    await tester.ensureVisible(find.byTooltip('About this scale'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Scale labels'));
+    await tester.tap(find.byTooltip('About this scale'));
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);
@@ -515,7 +567,7 @@ void main() {
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
-    expectSelected(tester, 'Moderate pain');
+    expectSelected(tester, '4/10 · Moderate pain');
     expect(answers, isEmpty);
   });
 
@@ -538,9 +590,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byTooltip('Scale labels'));
+    await tester.ensureVisible(find.byTooltip('About this scale'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Scale labels'));
+    await tester.tap(find.byTooltip('About this scale'));
     await tester.pumpAndSettle();
     final scrollable = find.descendant(
       of: find.byType(AlertDialog),
@@ -606,7 +658,7 @@ void main() {
     await tester.pump();
     final current = tester.widget<Slider>(slider).value;
     expect(current, greaterThan(4));
-    expectSelected(tester, '${current.toInt()}');
+    expectSelected(tester, '${current.toInt()}/10');
     expect(answers, isEmpty);
     await gesture.up();
     await tester.pumpAndSettle();
@@ -638,7 +690,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expectSelected(tester, 'Moderate pain');
+      expectSelected(tester, '4/10 · Moderate pain');
       expect(
         find.semantics.byValue('4, Moderate pain').evaluate().single,
         matchesSemantics(
@@ -656,10 +708,9 @@ void main() {
       );
       final sliderBounds = tester.getRect(find.byType(Slider));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
-      expectSelected(tester, 'Severe pain');
+      expectSelected(tester, '6/10 · Severe pain');
       expect(answers.single.response, closeTo(6, 1e-9));
       expect(find.text('Moderate pain'), findsNothing);
       expect(tester.getRect(find.byType(Slider)), sliderBounds);
@@ -680,9 +731,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expectSelected(tester, 'A full description for the configured value');
+      expectSelected(
+        tester,
+        '4/10 · A full description for the configured value',
+      );
       expect(
-        find.byTooltip(locale == 'de' ? 'Skalenbeschriftungen' : '척도 설명'),
+        find.byTooltip(locale == 'de' ? 'Über diese Skala' : '이 척도 정보'),
         findsOneWidget,
       );
     });

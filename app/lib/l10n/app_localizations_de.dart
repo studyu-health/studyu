@@ -714,7 +714,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get value => 'Wert';
 
   @override
-  String get scale_labels => 'Skalenbeschriftungen';
+  String get scale_labels => 'Über diese Skala';
 
   @override
   String get show_colorless_gauges => 'Barrierefreie Diagramme anzeigen';
