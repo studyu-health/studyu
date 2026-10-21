@@ -77,7 +77,7 @@ class const CustomSlider({
     }
 
     final selectedAnnotation = annotationFor(value!);
-    final divisions = (steps!.maximum - steps!.minimum) ~/ steps!.step;
+    final divisions = ((steps!.maximum - steps!.minimum) / steps!.step).round();
     final direction = Directionality.of(context);
     final textScaler = MediaQuery.textScalerOf(context);
     final labelStyle = theme.textTheme.bodyMedium!;

@@ -644,6 +644,37 @@ void main() {
     });
   }
 
+  testWidgets('decimal steps retain every division and answer', (tester) async {
+    final question = scale()
+      ..minimum = 0
+      ..maximum = 0.3
+      ..step = 0.1
+      ..initial = 0
+      ..annotations = [];
+    final answers = <Answer>[];
+    await tester.pumpWidget(
+      setup(ScaleQuestionWidget(question: question, onDone: answers.add)),
+    );
+    await tester.pumpAndSettle();
+    final slider = tester.widget<Slider>(find.byType(Slider));
+    expect(slider.min, 0);
+    expect(slider.max, 0.3);
+    expect(slider.divisions, 3);
+    expect(question.step, 0.1);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    for (final expected in [0.1, 0.2, 0.3]) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<Slider>(find.byType(Slider)).value,
+        closeTo(expected, 1e-9),
+      );
+      expect(answers.last.response, closeTo(expected, 1e-9));
+    }
+    expect(answers, hasLength(3));
+  });
+
   testWidgets('drag updates the readout and submits only on release', (
     tester,
   ) async {
