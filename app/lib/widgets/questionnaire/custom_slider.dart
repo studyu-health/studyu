@@ -183,7 +183,7 @@ class const CustomSlider({
             value == maxValue;
         final reserveReadout =
             !showInlineLabels || labels.length < divisions + 1;
-        final readoutStyle = theme.textTheme.titleMedium!.copyWith(
+        final readoutStyle = theme.textTheme.bodyLarge!.copyWith(
           color: theme.colorScheme.onSurface,
         );
 
@@ -303,7 +303,7 @@ class const CustomSlider({
                 child: Tooltip(
                   message: l10n.scale_labels,
                   excludeFromSemantics: true,
-                  child: TextButton.icon(
+                  child: TextButton(
                     key: const ValueKey('slider_scale_labels'),
                     style: TextButton.styleFrom(
                       minimumSize: const Size(48, 48),
@@ -335,8 +335,7 @@ class const CustomSlider({
                         ],
                       ),
                     ),
-                    icon: const Icon(Icons.info_outline),
-                    label: Text(l10n.scale_labels),
+                    child: Text(l10n.scale_labels),
                   ),
                 ),
               ),

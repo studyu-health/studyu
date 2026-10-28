@@ -613,32 +613,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get form_question_readonly => 'View Question';
 
   @override
-  String get form_field_question => 'Your question';
+  String get form_field_question => 'Question title';
 
   @override
   String get form_field_question_tooltip =>
-      'Enter the question that the participant will be prompted with in the app';
+      'Enter the question title shown to participants in the app';
 
   @override
   String get form_field_question_required => 'Your question must not be empty';
 
   @override
-  String get form_field_question_help_text => 'Question help text';
+  String get form_field_question_help_text => 'Question description';
 
   @override
   String get form_field_question_help_text_tooltip =>
-      'Enter a text that is shown with a help icon next to the question in the app';
+      'Enter a description shown below the question title in the app';
 
   @override
   String get form_field_question_help_text_hint =>
-      'Provide additional context, help or instructions for the question';
+      'Provide additional context or instructions for the question';
 
   @override
-  String get form_field_question_help_text_add => 'Add a help text';
+  String get form_field_question_help_text_add => 'Add a question description';
 
   @override
   String get form_field_question_help_text_add_tooltip =>
-      'Add a text that is shown with a help icon next to the question in the app';
+      'Add a description below the question title in the app';
 
   @override
   String get form_field_question_response_options => 'Response options';

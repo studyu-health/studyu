@@ -4,6 +4,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 class const HtmlText(
   final String? text, {
   final TextStyle? style,
+  final CustomStylesBuilder? customStylesBuilder,
   final bool centered = false,
   super.key,
 }) extends StatelessWidget {
@@ -12,6 +13,7 @@ class const HtmlText(
     final Widget htmlWidget = HtmlWidget(
       text ?? '',
       textStyle: style,
+      customStylesBuilder: customStylesBuilder,
       // these callbacks are called when a complicated element is loading
       // or failed to render allowing the app to render progress indicator
       // and fallback widget

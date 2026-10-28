@@ -5,6 +5,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/theme.dart' as studyu;
 import 'package:studyu_app/widgets/questionnaire/custom_slider.dart';
 import 'package:studyu_app/widgets/questionnaire/question_container.dart';
+import 'package:studyu_app/widgets/questionnaire/question_header.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/annotated_scale_question_widget.dart';
 import 'package:studyu_app/widgets/questionnaire/questions/scale_question_widget.dart';
 import 'package:studyu_core/core.dart';
@@ -164,6 +165,11 @@ void main() {
         }
         final selected = find.byKey(const ValueKey('slider_selected_value'));
         expect(
+          tester.getTopLeft(find.byType(CustomSlider)).dy -
+              tester.getBottomLeft(find.byType(QuestionHeader)).dy,
+          closeTo(16, 0.01),
+        );
+        expect(
           tester.getTopLeft(find.byType(Slider)).dy -
               tester.getBottomLeft(selected).dy,
           closeTo(8, 0.01),
@@ -216,6 +222,7 @@ void main() {
     final selectedText = tester.widget<Text>(selected);
     expect(selectedText.style?.color, theme.colorScheme.onSurface);
     expect(selectedText.style?.color, isNot(theme.colorScheme.primary));
+    expect(selectedText.style?.fontWeight, FontWeight.normal);
     expect(
       tester.getTopLeft(find.byType(Slider)).dy -
           tester.getBottomLeft(selected).dy,
@@ -360,7 +367,7 @@ void main() {
   });
 
   testWidgets(
-    'scale help appears below the endpoints apart from question rationale',
+    'scale help appears below the endpoints with question help inline',
     (tester) async {
       final question = scale()
         ..prompt = 'Rate your pain'
@@ -380,23 +387,33 @@ void main() {
       final scaleHelp = find.byKey(const ValueKey('slider_scale_labels'));
       expect(
         tester.getTopLeft(scaleHelp).dy,
-        greaterThanOrEqualTo(
+        closeTo(
           tester.getBottomLeft(find.text('Worst pain imaginable')).dy,
+          0.01,
         ),
       );
+      expect(
+        tester.getTopRight(scaleHelp).dx,
+        closeTo(tester.getTopRight(find.byType(CustomSlider)).dx, 0.01),
+      );
       expect(find.text('About this scale'), findsOneWidget);
-      expect(find.byType(IconButton), findsOneWidget);
+      expect(find.byType(IconButton), findsNothing);
+      expect(find.byIcon(Icons.info_outline), findsNothing);
+      expect(tester.getSize(scaleHelp).height, greaterThanOrEqualTo(48));
 
-      await tester.tap(find.byType(IconButton));
-      await tester.pumpAndSettle();
-      expect(find.text('Information'), findsOneWidget);
       expect(
         find.text('This question measures pain.', findRichText: true),
         findsOneWidget,
       );
+      expect(
+        tester
+            .getBottomLeft(
+              find.text('This question measures pain.', findRichText: true),
+            )
+            .dy,
+        lessThan(tester.getTopLeft(find.byType(Slider)).dy),
+      );
       expect(find.text('4: Moderate pain'), findsNothing);
-      Navigator.of(tester.element(find.byType(AlertDialog))).pop();
-      await tester.pumpAndSettle();
 
       await tester.tap(scaleHelp);
       await tester.pumpAndSettle();
@@ -745,6 +762,13 @@ void main() {
       expect(answers.single.response, closeTo(6, 1e-9));
       expect(find.text('Moderate pain'), findsNothing);
       expect(tester.getRect(find.byType(Slider)), sliderBounds);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      expect(
+        FocusManager.instance.primaryFocus?.context
+            ?.findAncestorWidgetOfExactType<TextButton>()
+            ?.key,
+        const ValueKey('slider_scale_labels'),
+      );
       semantics.dispose();
     },
   );

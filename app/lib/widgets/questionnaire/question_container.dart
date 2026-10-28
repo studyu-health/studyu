@@ -129,7 +129,7 @@ class const QuestionContainer({
               subtitle: questionBody.subtitle,
               rationale: question.rationale,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: question is AnnotatedScaleQuestion ? 16 : 24),
             questionBody,
           ],
         ),
