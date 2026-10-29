@@ -104,7 +104,7 @@ Hard limits for the short form:
 Some changes cannot be tested on the branch under review. Detect these and produce a **merge-gated short form** instead of a normal checklist:
 
 - The diff IS the workflow that posts this QA (e.g. `.github/workflows/manual-qa*`), and the workflow is not yet merged to the default branch — every end-to-end check ("post a checklist", "edit triggers regen") requires the workflow to exist first.
-- The diff adds or modifies a CI tool, hook, linter, generator, or script that the test steps rely on (`scripts/pre-commit-check`, `melos` command, `fvm` setup, build-runner config, code generator with `*.g.dart` consumers).
+- The diff adds or modifies a CI tool, linter, generator, or script that the test steps rely on (`melos` command, `fvm` setup, build-runner config, code generator with `*.g.dart` consumers).
 - The diff changes infrastructure QA cannot reach from the source branch (deployment scripts, Supabase migrations applied only post-merge, feature flags toggled at deploy time).
 - The diff updates or replaces a dependency, lockfile, or build configuration whose effects only show after `fvm dart run melos bootstrap` runs against the merged state.
 

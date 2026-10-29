@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/main.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_core/core.dart';
 
 class NotificationValidators(
@@ -36,7 +37,7 @@ class StudyNotifications._create(
     false,
   );
 
-  static const bool debug = kDebugMode; //kDebugMode;
+  static const bool debug = isDebugMode;
   static String? scheduledNotificationsDebug;
 
   /// Private constructor

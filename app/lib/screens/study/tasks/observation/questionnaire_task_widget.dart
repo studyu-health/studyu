@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:studyu_app/screens/study/tasks/task_screen.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/misc.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
@@ -58,7 +58,7 @@ class _QuestionnaireTaskWidgetState() extends State<QuestionnaireTaskWidget> {
   }
 
   Future<void> _handleCompletion(QuestionnaireState? qs) async {
-    if (kDebugMode) {
+    if (isDebugMode) {
       debugPrint('Questionnaire completed with response: $qs');
     }
     // Only a non-null payload (all visible questions answered) submits.

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +6,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
 import 'package:studyu_app/util/dashboard_showcase.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
 import 'package:studyu_app/widgets/onboarding_shell.dart';
 import 'package:studyu_app/widgets/recovery_phrase_content.dart';
@@ -24,7 +24,7 @@ class const RecoveryPhraseScreen({
 }
 
 class _RecoveryPhraseScreenState() extends State<RecoveryPhraseScreen> {
-  bool _isChecked = kDebugMode;
+  bool _isChecked = isDebugMode;
   bool _isRevealed = false;
 
   @override

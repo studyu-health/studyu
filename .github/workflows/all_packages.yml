@@ -10,6 +10,7 @@ on:
       - "tools/study_data_docs/**"
       - "tools/studyu_mcp/**"
       - "tools/studyu_validator/**"
+      - "scripts/**"
       - '*.gitignore'
       - 'pubspec.yaml'
       - 'pubspec.lock'

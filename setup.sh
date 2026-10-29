@@ -25,8 +25,4 @@ fvm dart pub get
 echo "Bootstrapping Melos packages via fvm dart run melos..."
 fvm dart run melos bootstrap
 
-# Configure Git to use the tracked hooks.
-echo "Configuring Git hooks via fvm dart run melos..."
-fvm dart run melos setup
-
 echo "Setup complete!"

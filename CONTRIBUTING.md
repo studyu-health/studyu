@@ -5,7 +5,7 @@
 1. Install [FVM](https://fvm.app/documentation/getting-started/installation).
 2. Clone this repository and open its root directory.
 3. Run `./setup.sh` to install the pinned Flutter SDK, resolve Melos from the lockfile,
-   dependencies, workspace links, and tracked Git hooks.
+   dependencies, and workspace links.
 
 The root [`pubspec.yaml`](pubspec.yaml) is the command catalog. Run its Melos
 scripts as `fvm dart run melos <script>`.
@@ -33,9 +33,9 @@ fvm dart --version
 
 `./setup.sh` reads `.fvmrc`, installs the pinned Flutter SDK, and creates the ignored
 `.fvm/flutter_sdk` link to the cached project SDK. It also installs Melos, bootstraps the
-workspace, fetches root dependencies, creates `.env.local` from `.env.local.example` when
-needed, and configures the tracked Git hooks. The root `pubspec.yaml` points Melos to the same
-SDK through `melos.sdkPath`; no manual `MELOS_SDK_PATH` export is required.
+workspace, fetches root dependencies, and creates `.env.local` from `.env.local.example` when
+needed. The root `pubspec.yaml` points Melos to the same SDK through `melos.sdkPath`; no manual
+`MELOS_SDK_PATH` export is required.
 
 Use the project SDK for development commands:
 
@@ -159,13 +159,9 @@ resolution.
 ## Code Style
 
 The shared Dart and Flutter lint rules are defined in [`analysis_options.yaml`](analysis_options.yaml).
-The tracked pre-commit hook runs [`scripts/pre-commit-check`](scripts/pre-commit-check), which
-formats, generates affected output, and analyzes the workspace. The Git hooks are configured by
-`./setup.sh`. If you develop manually without the automated pre-commit check running your
-changes, run `fvm dart run melos qualitycheck` instead; it checks formatting and
-analyzes the workspace without writing files. Run `fvm dart run melos generate` separately when
-code generation is required. Use `fvm dart run melos qualitycheck` for a full CI-style workspace
-check or when explicitly requested.
+Before committing, run `fvm dart run melos qualitycheck`; it checks formatting and analyzes the
+workspace without writing files. Run `fvm dart format .` to apply formatting fixes and
+`fvm dart run melos generate` separately when code generation is required.
 
 ## Frontend
 

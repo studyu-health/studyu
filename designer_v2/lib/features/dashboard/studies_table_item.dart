@@ -6,6 +6,7 @@ import 'package:studyu_designer_v2/common_views/mouse_events.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_table.dart';
 import 'package:studyu_designer_v2/features/study/study_participation_badge.dart';
 import 'package:studyu_designer_v2/features/study/study_status_badge.dart';
+import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/theme.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
@@ -17,6 +18,8 @@ class const StudiesTableItem({
   required final List<StudiesTableColumnSize> columnSizes,
   required final bool isPinned,
   final bool isBusy = false,
+  final bool isCopied = false,
+  final bool isHighlighted = false,
   final void Function(Study, bool)? onPinnedChanged,
   final void Function(Study)? onTap,
   final double itemHeight = 60.0,
@@ -60,6 +63,10 @@ class const StudiesTableItem({
 class _StudiesTableItemState() extends State<StudiesTableItem> {
   bool isHovering = false;
   bool isHoveringPin = false;
+  bool isFocused = false;
+  late final FocusNode _focusNode;
+
+  String get _studyTitle => widget.study.title ?? '[Missing study title]';
 
   @override
   Widget build(BuildContext context) {
@@ -81,21 +88,32 @@ class _StudiesTableItemState() extends State<StudiesTableItem> {
       }
     }
 
+    final baseColor = theme.colorScheme.onPrimary;
+    final highlightColor = Color.alphaBlend(
+      theme.colorScheme.primary.withValues(alpha: 0.08),
+      baseColor,
+    );
     return Container(
       height: widget.itemHeight,
       margin: EdgeInsets.only(bottom: widget.rowSpacing),
       child: Material(
-        color: theme.colorScheme.onPrimary,
+        color: widget.isHighlighted ? highlightColor : baseColor,
         shape: RoundedRectangleBorder(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
           side: BorderSide(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.9),
-            width: isHovering ? 1.5 : 0.75,
+            color: widget.isHighlighted || isFocused
+                ? theme.colorScheme.primary
+                : theme.colorScheme.primaryContainer.withValues(alpha: 0.9),
+            width: widget.isHighlighted || isFocused || isHovering ? 1.5 : 0.75,
           ),
         ),
         child: InkWell(
           key: ValueKey('study_row_ink_${widget.study.id}'),
+          focusNode: _focusNode,
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
           splashColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          onFocusChange: (focused) => setState(() => isFocused = focused),
           onTap: widget.isBusy ? null : () => widget.onTap?.call(widget.study),
           onHover: (hover) {
             if (isHovering == hover) return;
@@ -103,7 +121,7 @@ class _StudiesTableItemState() extends State<StudiesTableItem> {
               isHovering = hover;
             });
           },
-          hoverColor: theme.colorScheme.onPrimary,
+          hoverColor: widget.isHighlighted ? highlightColor : baseColor,
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: widget.itemPadding),
             child: Row(
@@ -131,11 +149,31 @@ class _StudiesTableItemState() extends State<StudiesTableItem> {
                       : widget.columnSpacing,
                 ),
                 widget.columnSizes[1].createContainer(
-                  child: Text(
-                    widget.study.title ?? '[Missing study title]',
-                    maxLines: 3,
-                    overflow: TextOverflow.fade,
-                  ),
+                  child: widget.isCopied
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _studyTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              tr.studies_copied_draft,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.hintColor,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          _studyTitle,
+                          maxLines: 3,
+                          overflow: TextOverflow.fade,
+                        ),
                 ),
                 SizedBox(
                   width: widget.columnSizes[1].collapsed
@@ -240,6 +278,27 @@ class _StudiesTableItemState() extends State<StudiesTableItem> {
     );
   }
 
+  @override
+  void didUpdateWidget(covariant StudiesTableItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.isHighlighted && widget.isHighlighted) {
+      _scrollHighlightedIntoView();
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _scrollHighlightedIntoView();
+  }
+
   Widget _buildActionMenu(BuildContext context, List<ModelAction> actions) {
     final theme = Theme.of(context);
 
@@ -255,5 +314,23 @@ class _StudiesTableItemState() extends State<StudiesTableItem> {
         position: PopupMenuPosition.over,
       ),
     );
+  }
+
+  void _scrollHighlightedIntoView() {
+    if (!widget.isHighlighted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final disableAnimations =
+          MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+      _focusNode.requestFocus();
+      Scrollable.ensureVisible(
+        context,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        duration: disableAnimations
+            ? Duration.zero
+            : const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 }

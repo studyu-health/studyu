@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,7 @@ import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/onboarding/onboarding_progress.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/widgets/bottom_onboarding_navigation.dart';
 import 'package:studyu_app/widgets/intervention_card.dart';
 import 'package:studyu_app/widgets/onboarding_shell.dart';
@@ -30,7 +30,7 @@ class _InterventionSelectionScreenState()
   void initState() {
     super.initState();
     selectedStudy = context.read<AppState>().selectedStudy;
-    if (kDebugMode && selectedStudy != null) {
+    if (isDebugMode && selectedStudy != null) {
       selectedInterventionIds.addAll(
         selectedStudy!.interventions
             .take(2)
