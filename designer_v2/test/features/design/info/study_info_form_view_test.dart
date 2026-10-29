@@ -6,6 +6,8 @@ import 'package:studyu_designer_v2/features/design/info/study_title_input_group.
 import 'package:studyu_designer_v2/localization/app_localizations_en.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
+import '../../../utils/designer_test_theme.dart';
+
 const _favoriteIcon = IconOption('favorite', Icons.favorite);
 
 void main() {
@@ -154,6 +156,7 @@ void main() {
 
     expect(find.byType(ReactiveIconPicker), findsOneWidget);
     expect(_titleFieldFinder(), findsOneWidget);
+    expect(tester.getSize(_titleFieldFinder()).width, greaterThanOrEqualTo(96));
     expect(tester.takeException(), isNull);
   });
 }
@@ -180,6 +183,7 @@ Widget _buildHarness(
   );
 
   return MaterialApp(
+    theme: designerTestTheme(),
     home: Scaffold(
       body: Center(
         child: width == null ? group : SizedBox(width: width, child: group),

@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:studyu_designer_v2/common_views/icon_picker.dart';
+import 'package:studyu_designer_v2/localization/app_localizations_de.dart';
 import 'package:studyu_designer_v2/localization/app_localizations_en.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
+import '../utils/designer_test_theme.dart';
+
 void main() {
-  setUpAll(() {
+  setUp(() {
     AppTranslation.setForTesting(AppLocalizationsEn());
   });
 
@@ -125,7 +128,10 @@ void main() {
     expect(find.text(tr.iconpicker_nonempty_prompt), findsOneWidget);
   });
 
-  testWidgets('labeled square picker does not add a tooltip', (tester) async {
+  testWidgets('labeled picker tooltip exposes the full German label', (
+    tester,
+  ) async {
+    AppTranslation.setForTesting(AppLocalizationsDe());
     const iconOption = IconOption('apple', Icons.apple);
 
     await tester.pumpWidget(
@@ -139,7 +145,7 @@ void main() {
       ),
     );
 
-    expect(find.byTooltip(tr.iconpicker_empty_prompt), findsNothing);
+    expect(find.byTooltip(tr.iconpicker_empty_prompt), findsOneWidget);
   });
 
   testWidgets('disabled labeled icon picker disables whole action', (
@@ -181,6 +187,7 @@ void main() {
                 iconOptions: const [IconOption('apple', Icons.apple)],
                 selectedOption: selectedOption,
                 useSquareField: true,
+                allowRemove: true,
                 onSelect: (iconOption) {
                   setState(() {
                     selectedOption = iconOption.isEmpty ? null : iconOption;
@@ -204,9 +211,7 @@ void main() {
     },
   );
 
-  testWidgets('disabled icon picker disables picker and clear actions', (
-    tester,
-  ) async {
+  testWidgets('disabled icon picker disables picker action', (tester) async {
     const iconOption = IconOption('apple', Icons.apple);
 
     await tester.pumpWidget(
@@ -241,6 +246,7 @@ void main() {
             formControl: iconControl,
             iconOptions: const [iconOption],
             useSquareField: true,
+            allowRemove: true,
           ),
         ),
       ),
@@ -318,17 +324,90 @@ void main() {
         of: find.byType(SearchBar),
         matching: find.byType(EditableText),
       ),
-      'fav',
+      ' FAV ',
     );
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.apple), findsNothing);
     expect(find.byIcon(Icons.favorite), findsOneWidget);
+
+    addTearDown(tester.view.resetPhysicalSize);
+    tester.view.physicalSize = const Size(1000, 800);
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.apple), findsNothing);
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(
+              of: find.byType(SearchBar),
+              matching: find.byType(EditableText),
+            ),
+          )
+          .controller
+          .text,
+      ' FAV ',
+    );
+  });
+
+  testWidgets('default picker does not offer unsupported icon removal', (
+    tester,
+  ) async {
+    const iconOption = IconOption('apple', Icons.apple);
+    final iconControl = FormControl<IconOption>(value: iconOption);
+    final form = FormGroup({'icon': iconControl});
+    addTearDown(form.dispose);
+
+    await tester.pumpWidget(
+      _buildHarness(
+        ReactiveForm(
+          formGroup: form,
+          child: ReactiveIconPicker(
+            formControl: iconControl,
+            iconOptions: const [iconOption],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(IconPickerGallery), findsOneWidget);
+    expect(find.text(tr.iconpicker_remove_prompt), findsNothing);
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(iconControl.value, iconOption);
+  });
+
+  testWidgets('unknown icon name keeps its value and shows a fallback', (
+    tester,
+  ) async {
+    const iconOption = IconOption('legacyIcon');
+    final iconControl = FormControl<IconOption>(value: iconOption);
+    final form = FormGroup({'icon': iconControl});
+    addTearDown(form.dispose);
+
+    await tester.pumpWidget(
+      _buildHarness(
+        ReactiveForm(
+          formGroup: form,
+          child: ReactiveIconPicker(
+            formControl: iconControl,
+            iconOptions: const [],
+          ),
+        ),
+      ),
+    );
+    expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(iconControl.value?.name, 'legacyIcon');
+    expect(tester.takeException(), isNull);
   });
 }
 
 Widget _buildHarness(Widget child) {
   return MaterialApp(
+    theme: designerTestTheme(),
     home: Scaffold(body: Center(child: child)),
   );
 }

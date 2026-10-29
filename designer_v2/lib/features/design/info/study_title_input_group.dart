@@ -29,6 +29,10 @@ class const StudyTitleInputGroup({
               hintText: tr.form_field_study_title,
               constraints: const BoxConstraints(minHeight: controlHeight),
               isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
             inputFormatters: [LengthLimitingTextInputFormatter(100)],
             validationMessages: titleValidationMessages,
@@ -43,6 +47,7 @@ class const StudyTitleInputGroup({
           labeledFieldWidth: iconActionWidth,
           useSquareField: true,
           showFieldLabel: true,
+          allowRemove: true,
           selectedIconSize: 24.0,
           validationMessages: iconValidationMessages,
         ),

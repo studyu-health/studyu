@@ -64,7 +64,7 @@ class ReactiveIconPicker({
   double? labeledFieldWidth,
   bool useSquareField = false,
   bool showFieldLabel = false,
-  bool showInlineRemove = false,
+  bool allowRemove = false,
   bool readOnly = false,
   ReactiveFormFieldCallback<IconOption>? onSelect,
   super.formControl,
@@ -91,7 +91,7 @@ class ReactiveIconPicker({
             labeledFieldWidth: labeledFieldWidth,
             useSquareField: useSquareField,
             showFieldLabel: showFieldLabel,
-            showInlineRemove: showInlineRemove,
+            allowRemove: allowRemove,
             onSelect: (iconOption) {
               if (isDisabled) return;
               field.didChange(iconOption.isEmpty ? null : iconOption);
@@ -111,7 +111,7 @@ class const IconPicker({
   final double? labeledFieldWidth,
   final bool useSquareField = false,
   final bool showFieldLabel = false,
-  final bool showInlineRemove = false,
+  final bool allowRemove = false,
   final VoidCallbackOn<IconOption>? onSelect,
   final bool isDisabled = false,
   final FocusNode? focusNode,
@@ -128,7 +128,7 @@ class const IconPicker({
       labeledFieldWidth: labeledFieldWidth,
       useSquareField: useSquareField,
       showFieldLabel: showFieldLabel,
-      showInlineRemove: showInlineRemove,
+      allowRemove: allowRemove,
       onSelect: onSelect,
       isDisabled: isDisabled,
       focusNode: focusNode,
@@ -145,7 +145,7 @@ class const IconPickerField({
   final double? labeledFieldWidth,
   final bool useSquareField = false,
   final bool showFieldLabel = false,
-  final bool showInlineRemove = false,
+  final bool allowRemove = false,
   final VoidCallbackOn<IconOption>? onSelect,
   final bool isDisabled = false,
   final FocusNode? focusNode,
@@ -165,6 +165,7 @@ class const IconPickerField({
       context,
       iconOptions: iconOptions,
       selectedOption: selectedOption,
+      allowRemove: allowRemove,
       galleryIconSize: actualGalleryIconSize,
       onSelect: onSelect,
     );
@@ -276,34 +277,10 @@ class const IconPickerField({
       child: buttonChild,
     );
 
-    final squareControl = SizedBox(
+    return SizedBox(
       width: resolvedFieldWidth,
       height: resolvedSquareSize,
-      child: showFieldLabel
-          ? squareButton
-          : Tooltip(message: tooltipMessage, child: squareButton),
-    );
-
-    if (!showInlineRemove || !hasSelectedIcon) {
-      return squareControl;
-    }
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        squareControl,
-        SizedBox.square(
-          dimension: resolvedSquareSize,
-          child: IconButton(
-            tooltip: tr.action_remove,
-            splashRadius: actualSelectedIconSize,
-            onPressed: isDisabled
-                ? null
-                : () => onSelect?.call(const IconOption('')),
-            icon: Icon(Icons.clear, size: actualSelectedIconSize),
-          ),
-        ),
-      ],
+      child: Tooltip(message: tooltipMessage, child: squareButton),
     );
   }
 }
@@ -358,6 +335,7 @@ Future<void> showIconPickerDialog(
   BuildContext context, {
   required List<IconOption> iconOptions,
   IconOption? selectedOption,
+  bool allowRemove = false,
   double? galleryIconSize,
   VoidCallbackOn<IconOption>? onSelect,
   double minWidth = 300,
@@ -404,7 +382,7 @@ Future<void> showIconPickerDialog(
               ),
             ),
             actionButtons: [
-              if (hasSelectedIcon)
+              if (allowRemove && hasSelectedIcon)
                 TextButton(
                   onPressed: () => Navigator.pop(context, const IconOption('')),
                   child: Text(tr.iconpicker_remove_prompt),
