@@ -251,22 +251,82 @@ class const CustomSlider({
                     ? _GradientSliderTrackShape(minColor!, maxColor!)
                     : null,
               ),
-              child: Slider(
-                value: value!,
-                min: minValue!,
-                max: maxValue!,
-                divisions: divisions > 0 ? divisions : null,
-                padding: EdgeInsets.symmetric(
-                  horizontal: trackPadding,
-                  vertical: 2,
-                ),
-                onChanged: onChanged,
-                onChangeEnd: onChangeEnd,
-                label: numberFormat.format(value),
-                semanticFormatterCallback: semanticValue,
+              child: Stack(
+                children: [
+                  Slider(
+                    value: value!,
+                    min: minValue!,
+                    max: maxValue!,
+                    divisions: divisions > 0 ? divisions : null,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: trackPadding,
+                      vertical: 2,
+                    ),
+                    onChanged: onChanged,
+                    onChangeEnd: onChangeEnd,
+                    label: numberFormat.format(value),
+                    semanticFormatterCallback: semanticValue,
+                  ),
+                  if (divisions > 0)
+                    for (var i = 0; i <= divisions; i++)
+                      Builder(
+                        builder: (context) {
+                          final number =
+                              minValue! +
+                              (maxValue! - minValue!) * i / divisions;
+                          final diameter =
+                              ((constraints.maxWidth - 2 * stopInset) /
+                                      divisions)
+                                  .clamp(0.0, 24.0);
+                          final selected =
+                              ((value! - number) / (maxValue! - minValue!))
+                                  .abs() <
+                              1e-9;
+                          return Positioned(
+                            left: position(number) - diameter / 2,
+                            top: 0,
+                            bottom: 0,
+                            child: IgnorePointer(
+                              child: ExcludeSemantics(
+                                child: Center(
+                                  child: Container(
+                                    key: ValueKey('slider_division_$i'),
+                                    width: diameter,
+                                    height: diameter,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: selected
+                                          ? (thumbColor ??
+                                                theme.colorScheme.primary)
+                                          : theme
+                                                .colorScheme
+                                                .surfaceContainerHighest,
+                                    ),
+                                    child: Center(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          numberFormat.format(number),
+                                          style: numberStyle.copyWith(
+                                            color: selected
+                                                ? theme.colorScheme.onPrimary
+                                                : theme.colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                ],
               ),
             ),
             SizedBox(
+              key: const ValueKey('slider_labels'),
               height: labelHeight,
               child: Stack(
                 children: [

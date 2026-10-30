@@ -23,6 +23,10 @@ ScaleQuestion scale() => ScaleQuestion.withId()
     annotation(0, 'No pain'),
     annotation(10, 'Worst pain imaginable'),
   ];
+Finder sliderLabel(String text) => find.descendant(
+  of: find.byKey(const ValueKey('slider_labels')),
+  matching: find.text(text),
+);
 
 void expectSelected(WidgetTester tester, String text) {
   final readout = tester.widget<Text>(
@@ -94,6 +98,53 @@ Widget setup(
 );
 
 void main() {
+  for (final direction in TextDirection.values) {
+    for (final crowded in [false, true]) {
+      testWidgets(
+        'division circles show values in $direction, crowded: $crowded',
+        (tester) async {
+          final question = scale()
+            ..minimum = 1
+            ..maximum = 5
+            ..initial = 3
+            ..annotations = [
+              for (var i = 1; i <= 5; i++)
+                annotation(
+                  i,
+                  crowded ? 'Long description for value $i' : 'L$i',
+                ),
+            ];
+          await tester.pumpWidget(
+            setup(
+              ScaleQuestionWidget(question: question, onDone: (_) {}),
+              width: crowded ? 320 : 600,
+              direction: direction,
+            ),
+          );
+          await tester.pumpAndSettle();
+          for (var i = 0; i < 5; i++) {
+            final circle = find.byKey(ValueKey('slider_division_$i'));
+            expect(
+              find.descendant(of: circle, matching: find.text('${i + 1}')),
+              findsOneWidget,
+            );
+            expect(
+              tester.getCenter(circle).dy,
+              closeTo(tester.getCenter(find.byType(Slider)).dy, 0.01),
+            );
+          }
+          expect(
+            find.byTooltip('About this scale'),
+            crowded ? findsOneWidget : findsNothing,
+          );
+          await tester.tap(find.byType(Slider));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   for (final size in [
     const Size(320, 568),
     const Size(360, 800),
@@ -231,7 +282,7 @@ void main() {
     for (final label in ['No pain', 'Worst pain imaginable']) {
       expect(
         tester.getTopLeft(find.text(label)).dy -
-            tester.getBottomLeft(find.text('0')).dy,
+            tester.getBottomLeft(sliderLabel('0')).dy,
         closeTo(8, 0.01),
       );
       expect(
@@ -269,15 +320,15 @@ void main() {
 
       final bounds = tester.getRect(find.byType(CustomSlider));
       for (final label in labels) {
-        expect(find.text(label), findsOneWidget);
-        final rect = tester.getRect(find.text(label));
+        expect(sliderLabel(label), findsOneWidget);
+        final rect = tester.getRect(sliderLabel(label));
         expect(rect.left, greaterThanOrEqualTo(bounds.left));
         expect(rect.right, lessThanOrEqualTo(bounds.right));
       }
       for (var i = 1; i < labels.length; i++) {
         expect(
-          tester.getRect(find.text(labels[i])).left,
-          greaterThan(tester.getRect(find.text(labels[i - 1])).right),
+          tester.getRect(sliderLabel(labels[i])).left,
+          greaterThan(tester.getRect(sliderLabel(labels[i - 1])).right),
         );
       }
       expect(find.byTooltip('About this scale'), findsNothing);
@@ -326,9 +377,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('0'), findsOneWidget);
+    expect(sliderLabel('0'), findsOneWidget);
     expect(find.text('OK'), findsOneWidget);
-    expect(find.text('10'), findsOneWidget);
+    expect(sliderLabel('10'), findsOneWidget);
     expect(find.byTooltip('About this scale'), findsNothing);
     expect(find.byKey(const ValueKey('slider_selected_value')), findsNothing);
 
@@ -359,7 +410,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('3'), findsOneWidget);
+    expect(sliderLabel('3'), findsOneWidget);
     expect(find.byKey(const ValueKey('slider_selected_value')), findsNothing);
     expect(find.semantics.byValue('3'), findsOneWidget);
     expect(find.semantics.byValue('3, 3'), findsNothing);
@@ -468,14 +519,14 @@ void main() {
       await tester.pumpAndSettle();
       final leftValue = direction == TextDirection.ltr ? '0' : '10';
       expect(
-        tester.getCenter(find.text(leftValue)).dx,
+        tester.getCenter(sliderLabel(leftValue)).dx,
         closeTo(track.thumbCenterOnScreen!.dx, 0.01),
       );
       await tester.drag(slider, Offset(bounds.width, 0));
       await tester.pumpAndSettle();
       final rightValue = direction == TextDirection.ltr ? '10' : '0';
       expect(
-        tester.getCenter(find.text(rightValue)).dx,
+        tester.getCenter(sliderLabel(rightValue)).dx,
         closeTo(track.thumbCenterOnScreen!.dx, 0.01),
       );
     });
@@ -815,8 +866,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(tester.widget<Slider>(find.byType(Slider)).value, 5);
-      final minX = tester.getCenter(find.text('0')).dx;
-      final maxX = tester.getCenter(find.text('10')).dx;
+      final minX = tester.getCenter(sliderLabel('0')).dx;
+      final maxX = tester.getCenter(sliderLabel('10')).dx;
       expect(minX < maxX, direction == TextDirection.ltr);
     });
   }
