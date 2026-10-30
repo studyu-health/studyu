@@ -78,6 +78,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   lint: ^2.14.0
+  # Test-only: exercises the same UI flow registered by the MCP server.
+  studyu_mcp: ^0.1.0
 
 flutter:
   generate: true

@@ -1,0 +1,51 @@
+name: Schema Validate
+
+on:
+  push:
+    paths:
+      - core/**
+      - tools/studyu_validator/**
+      - .github/workflows/schema-validate.yml
+      - pubspec.yaml
+      - pubspec.lock
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+        with:
+          cache: false
+      - name: Install workspace dependencies
+        run: dart pub get
+      - name: Test schema and serializer compatibility
+        working-directory: tools/studyu_validator
+        run: dart test
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - name: Validate portable fixture with AJV
+        run: |
+          dart run \
+            tools/studyu_validator/bin/studyu_validator.dart schema \
+            > /tmp/study.schema.json
+          npm install ajv ajv-formats
+          node -e "
+          const Ajv = require('ajv');
+          const addFormats = require('ajv-formats');
+          const fs = require('fs');
+          const schemaPath = '/tmp/study.schema.json';
+          const fixturePath =
+            'tools/studyu_validator/test/fixtures/valid_study.json';
+          const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+          const data = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
+          const ajv = new Ajv({allErrors: true, strict: false});
+          addFormats(ajv);
+          const validate = ajv.compile(schema);
+          if (!validate(data)) {
+            console.error(JSON.stringify(validate.errors, null, 2));
+            process.exit(1);
+          }
+          "

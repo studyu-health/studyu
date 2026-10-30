@@ -90,6 +90,8 @@ class _TermsScreenState() extends State<TermsScreen> {
           title: AppLocalizations.of(context)!.terms,
           description: AppLocalizations.of(context)!.terms_content,
           acknowledgment: AppLocalizations.of(context)!.terms_agree,
+          checkboxKey: const ValueKey('terms_checkbox'),
+          checkedKey: const ValueKey('terms_checkbox_checked'),
           isChecked: _acceptedTerms,
           onChanged: (val) => setState(() => _acceptedTerms = val ?? false),
           icon: const Icon(MdiIcons.fileDocumentEdit),
@@ -101,6 +103,8 @@ class _TermsScreenState() extends State<TermsScreen> {
           title: AppLocalizations.of(context)!.privacy,
           description: AppLocalizations.of(context)!.privacy_content,
           acknowledgment: AppLocalizations.of(context)!.privacy_agree,
+          checkboxKey: const ValueKey('privacy_checkbox'),
+          checkedKey: const ValueKey('privacy_checkbox_checked'),
           isChecked: _acceptedPrivacy,
           onChanged: (val) => setState(() => _acceptedPrivacy = val ?? false),
           icon: const Icon(MdiIcons.shieldLock),
@@ -170,6 +174,8 @@ class const LegalSection({
   final String? acknowledgment,
   final bool? isChecked,
   final ValueChanged<bool?>? onChanged,
+  final Key? checkboxKey,
+  final Key? checkedKey,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -188,7 +194,7 @@ class const LegalSection({
                   width: 40,
                   child: IconTheme(
                     data: IconThemeData(color: theme.primaryColor, size: 40),
-                    child: icon!,
+                    child: icon ?? const Icon(Icons.description),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -238,6 +244,7 @@ class const LegalSection({
                               child: Align(
                                 alignment: Alignment.centerLeft,
                                 child: Checkbox(
+                                  key: checkboxKey,
                                   materialTapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                   value: isChecked,
@@ -248,6 +255,7 @@ class const LegalSection({
                             const SizedBox(width: 8),
                             Expanded(
                               child: InkWell(
+                                key: isChecked ?? false ? checkedKey : null,
                                 onTap: onChanged == null
                                     ? null
                                     : () => onChanged!(!(isChecked ?? false)),

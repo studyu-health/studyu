@@ -46,10 +46,12 @@ class _InterventionSelectionScreenState()
     }
 
     return ListView.builder(
+      key: const ValueKey('intervention_selection_list'),
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: interventions.length,
       itemBuilder: (context, index) => Card(
+        key: ValueKey('intervention_card_${interventions[index].id}'),
         child: InterventionCard(
           interventions[index],
           showCheckbox: true,
@@ -106,6 +108,7 @@ class _InterventionSelectionScreenState()
   @override
   Widget build(BuildContext context) {
     final nav = BottomOnboardingNavigation(
+      nextButtonKey: const ValueKey('intervention_selection_continue'),
       onBack: context.canPop() ? _goBack : null,
       onNext: selectedInterventionIds.length == 2 ? onFinished : null,
       progress: OnboardingProgress.forPage(
@@ -122,6 +125,7 @@ class _InterventionSelectionScreenState()
     );
 
     return Scaffold(
+      key: const ValueKey('intervention_selection_screen'),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,

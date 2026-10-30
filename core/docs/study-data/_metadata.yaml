@@ -1,0 +1,422 @@
+# Study data documentation metadata.
+# - title: Display title for the page (must match the first H1 heading).
+# - ignored_fields: Field names to skip in drift checks (runtime, Supabase-join, or UI-only).
+# - links: Canonical page paths this page links to.
+# - fields: Field descriptions keyed by Dart field name. Use {} for abstract/discriminator pages.
+type_links:
+  StudyUTimeOfDay: shared/scalars.md#time-of-day
+  TemporalAggregation: shared/enums.md#temporalaggregation
+  ImprovementDirection: shared/enums.md#improvementdirection
+  DateInputType: shared/enums.md#dateinputtype
+  DateFormatPreset: shared/enums.md#dateformatpreset
+  TimeFormatPreset: shared/enums.md#timeformatpreset
+  DefaultDateOption: shared/enums.md#defaultdateoption
+  FreeTextQuestionType: shared/enums.md#freetextquestiontype
+  FitbitQuestionType: shared/enums.md#fitbitquestiontype
+  PhaseSequence: shared/enums.md#phasesequence
+  DateTime: shared/scalars.md#datetime
+  CompletionPeriod: schedules/task-schedule.md#completionperiod
+
+
+pages:
+  study/index.md:
+    title: Study
+    ignored_fields: [published, fitbitCredentials, participantCount, endedCount, activeSubjectCount, missedDays, repo, invites, participants, participantsProgress, createdAt]
+    fields:
+      id: Unique study identifier (UUID).
+      title: Display title shown to participants.
+      description: Long-form description of the study.
+      userId: ID of the researcher who owns this study.
+      participation: Whether the study is open or invite-only. One of `open`, `invite`.
+      resultSharing: Who can see results. One of `public`, `private`, `organization`.
+      contact: Contact information for the lead researcher.
+      iconName: Material icon name shown in the participant app.
+      status: Lifecycle state of the study. One of `draft`, `running`, `closed`.
+      questionnaire: Eligibility and baseline questionnaire configuration.
+      eligibilityCriteria: List of eligibility rules participants must satisfy.
+      consent: Consent items participants must acknowledge before enrolling.
+      interventions: List of intervention arms in the study.
+      observations: List of observation tasks (e.g. questionnaires) assigned during the study.
+      schedule: Phase and cycle schedule configuration.
+      reportSpecification: Report sections shown to participants after the study.
+      results: Study-level result definitions.
+      collaboratorEmails: Email addresses of co-researchers who can edit the study.
+      registryPublished: Whether the study is listed in the public registry.
+    links:
+      - study/contact.md
+      - study/eligibility.md
+      - study/consent.md
+      - questionnaire/index.md
+      - interventions/intervention.md
+      - schedules/study-schedule.md
+      - reports/report-specification.md
+
+  study/contact.md:
+    title: Contact
+    fields:
+      organization: Name of the affiliated organization or institution.
+      institutionalReviewBoard: Name of the ethics/IRB board that approved the study.
+      institutionalReviewBoardNumber: Approval number issued by the IRB.
+      researchers: Names of the research team members.
+      email: Contact email address.
+      website: Optional website URL for the study or research group.
+      phone: Optional phone number.
+      additionalInfo: Any other contact details or notes.
+
+  study/eligibility.md:
+    title: Eligibility Criterion
+    fields:
+      id: Unique criterion identifier (UUID).
+      reason: Human-readable explanation of why this criterion exists.
+      condition: The expression evaluated against the participant's questionnaire responses to determine eligibility.
+
+  study/consent.md:
+    title: Consent Item
+    fields:
+      id: Unique consent item identifier (UUID).
+      title: Short title displayed above the consent text.
+      description: Full consent text the participant must read.
+      iconName: Material icon name accompanying this consent item.
+
+  questionnaire/index.md:
+    title: StudyUQuestionnaire
+    fields: {}
+
+  questionnaire/question-types/boolean.md:
+    title: Boolean Question
+    fields:
+      type: Fixed value `boolean`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+
+  questionnaire/question-types/choice.md:
+    title: Choice Question
+    fields:
+      type: Fixed value `choice`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+      choices: Answer options; stored answers contain choice IDs, not labels.
+      multiple: Whether participants may select more than one choice.
+
+  questionnaire/question-types/scale.md:
+    title: Scale Question
+    fields:
+      type: Fixed value `scale`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+      minimum: Lowest selectable numeric value on the scale.
+      maximum: Highest selectable numeric value on the scale.
+      step: Distance between selectable values. `0` means the app chooses intermediate values.
+      initial:
+        description: Numeric value selected when the question first appears.
+        type: double?
+        virtual: true
+      annotations: Labels attached to specific scale values.
+      minColor: ARGB color integer for the minimum end of the scale.
+      maxColor: ARGB color integer for the maximum end of the scale.
+
+  questionnaire/question-types/annotated-scale.md:
+    title: Annotated Scale Question
+    fields:
+      type: Fixed value `annotatedScale`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+      minimum: Lowest selectable numeric value.
+      maximum: Highest selectable numeric value.
+      step: Distance between selectable values.
+      initial:
+        description: Numeric value selected when the question first appears.
+        type: double?
+        virtual: true
+      annotations: Labels attached to specific scale values.
+
+  questionnaire/question-types/visual-analogue.md:
+    title: Visual Analogue Question
+    fields:
+      type: Fixed value `visualAnalogue`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+      minimum: Lowest slider value.
+      maximum: Highest slider value.
+      step: Distance between selectable slider values.
+      initial:
+        description: Numeric value selected when the question first appears.
+        type: double?
+        virtual: true
+      minimumColor: ARGB color integer for the left/minimum end.
+      maximumColor: ARGB color integer for the right/maximum end.
+      minimumAnnotation: Label shown at the minimum end.
+      maximumAnnotation: Label shown at the maximum end.
+
+  questionnaire/question-types/image-capturing.md:
+    title: Image Capturing Question
+    fields:
+      type: Fixed value `ImageCapturingQuestion`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+
+  questionnaire/question-types/audio-recording.md:
+    title: Audio Recording Question
+    fields:
+      type: Fixed value `AudioRecordingQuestion`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+      maxRecordingDurationSeconds: Maximum recording length in seconds.
+
+  questionnaire/question-types/date.md:
+    title: Date Question
+    fields:
+      type: Fixed value `date`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+      inputType: Input widget style. One of `date`, `time`, `dateTime`.
+      minDate: Earliest selectable date when `inputType` includes a date.
+      maxDate: Latest selectable date when `inputType` includes a date.
+      minTime: Earliest selectable time when `inputType` includes a time.
+      maxTime: Latest selectable time when `inputType` includes a time.
+      dateFormatPreset: Display format for date values.
+      timeFormatPreset: Display format for time values.
+      defaultOption: Strategy for the pre-filled value. One of `none`, `today`, `now`, `specific`.
+      defaultSpecificDate: Date used when `defaultOption` is `specific`.
+      defaultSpecificTime: Time used when `defaultOption` is `specific`.
+
+  questionnaire/question-types/free-text.md:
+    title: Free Text Question
+    fields:
+      type: Fixed value `freeText`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+      lengthRange: Allowed answer length as `[min, max]` characters.
+      textType: Text validator. One of `any`, `alphanumeric`, `numeric`, `custom`.
+      customTypeExpression: Regex used when `textType` is `custom`.
+
+  questionnaire/question-types/fitbit.md:
+    title: Fitbit Question
+    fields:
+      type: Fixed value `FitbitQuestion`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+      types: Fitbit data streams requested for this question.
+
+  questionnaire/question-types/pain.md:
+    title: Pain Question
+    fields:
+      type: Fixed value `pain`.
+      id: Stable question identifier used by answers, conditions, and data references.
+      prompt: Participant-facing question text rendered as HTML in the app.
+      rationale: Extra HTML shown behind the question's information icon.
+      conditional: Visibility rule evaluated against earlier questionnaire answers.
+
+  questionnaire/question-types/body-pain.md:
+    title: Body Pain Models
+    fields:
+      painLevel: Numeric pain intensity value for a body part.
+      type: Pain type identifier string.
+      id: Unique identifier.
+      name: Display name of the body part or pain type.
+      pain: Pain record associated with a body region.
+      children: Child body parts nested within this body region.
+      parts: List of body parts making up this body model.
+
+  observations/questionnaire-task.md:
+    title: Questionnaire Task
+    fields:
+      type: Fixed value `questionnaire`.
+      id: Unique task identifier.
+      title: Short display title.
+      header: Optional header text shown above the task.
+      footer: Optional footer text shown below the task.
+      schedule: When this task is presented to the participant.
+      questions: The ordered list of questions in this task.
+
+  interventions/intervention.md:
+    title: Intervention
+    fields:
+      id: Unique intervention identifier (UUID).
+      name: Display name of the intervention arm.
+      description: Optional description of what participants do in this arm.
+      icon: Material icon name for this intervention.
+      tasks: List of tasks participants perform during each day of this intervention.
+
+  interventions/checkmark-task.md:
+    title: Checkmark Task
+    fields:
+      type: Fixed value `checkmark`.
+      id: Unique task identifier.
+      title: Short display title.
+      header: Optional header text.
+      footer: Optional footer text.
+      schedule: When this task is presented.
+
+  schedules/task-schedule.md:
+    title: Schedule
+    fields:
+      completionPeriods: Time windows within a day during which the task can be completed.
+      reminders: Optional reminder times for this task.
+      id: Unique completion-period identifier used to track completion for this daily task window.
+      unlockTime: Local time when this completion period opens.
+      lockTime: Local time when this completion period closes.
+
+  schedules/study-schedule.md:
+    title: Study Schedule
+    fields:
+      numberOfCycles: How many A/B cycles the study runs.
+      phaseDuration: Length of each intervention phase in days.
+      includeBaseline: Whether a baseline phase precedes the first intervention.
+      sequence: Phase ordering strategy. One of `alternating`, `counterBalanced`, `randomized`, `customized`.
+      sequenceCustom: Custom phase sequence string (e.g. `AABB`). Only used when `sequence` is `customized`.
+
+  invites/study-invite.md:
+    title: Study Invite
+    fields:
+      code: Invite code participants enter to enrol.
+      studyId: ID of the study this invite belongs to.
+      preselectedInterventionIds: Optional list of intervention IDs pre-assigned to the invited participant.
+
+  participants/study-subject.md:
+    title: Study Subject
+    ignored_fields: [study, progress]
+    fields:
+      id: Unique participant identifier (UUID).
+      studyId: ID of the study this subject is enrolled in.
+      userId: ID of the authenticated user account.
+      startedAt: UTC timestamp when the participant started the study.
+      selectedInterventionIds: Ordered list of intervention IDs assigned to this participant.
+      inviteCode: Invite code used to enrol, if any.
+      isDeleted: Whether this subject has been soft-deleted.
+
+  participants/subject-progress.md:
+    title: Subject Progress
+    ignored_fields: [startedAt]
+    fields:
+      completedAt: UTC timestamp when the task was completed.
+      subjectId: ID of the study subject who completed the task.
+      interventionId: ID of the active intervention phase when the task was completed.
+      taskId: ID of the task that was completed.
+      resultType: String discriminator for the result payload type.
+      result: The serialized task result payload.
+
+  reports/report-specification.md:
+    title: Report Specification
+    fields:
+      primary: The main highlighted report section shown at the top.
+      secondary: Additional report sections shown below the primary section.
+    links:
+      - reports/sections/average.md
+      - reports/sections/linear-regression.md
+      - reports/sections/textual-summary.md
+      - reports/sections/gauge-comparison.md
+      - reports/sections/descriptive-stats.md
+
+  reports/sections/average.md:
+    title: Average Section
+    fields:
+      type: Fixed value `average`.
+      id: Unique section identifier (UUID).
+      title: Report card title shown above the chart.
+      description: Report card body text shown below the title.
+      aggregate: How values are averaged before plotting. One of `day`, `phase`, `intervention`.
+      resultProperty: Numeric task result used for the average chart.
+
+  reports/sections/linear-regression.md:
+    title: Linear Regression Section
+    fields:
+      type: Fixed value `linearRegression`.
+      id: Unique section identifier (UUID).
+      title: Report card title shown above the regression result.
+      description: Report card body text shown below the title.
+      resultProperty: Numeric task result used as the regression outcome.
+      alpha: Significance threshold for the regression test.
+      improvement: Direction that counts as improvement. One of `positive`, `negative`.
+
+  reports/sections/textual-summary.md:
+    title: Textual Summary Section
+    fields:
+      type: Fixed value `textual_summary`.
+      id: Unique section identifier (UUID).
+      title: Report card title shown above the textual summary.
+      description: Report card body text shown below the title.
+      resultProperty: Numeric task result summarized by intervention.
+
+  reports/sections/gauge-comparison.md:
+    title: Gauge Comparison Section
+    fields:
+      type: Fixed value `gauge_comparison`.
+      id: Unique section identifier (UUID).
+      title: Report card title shown above the gauges.
+      description: Report card body text shown below the title.
+      resultProperty: Numeric task result compared between interventions.
+
+  reports/sections/descriptive-stats.md:
+    title: Descriptive Stats Section
+    fields:
+      type: Fixed value `descriptive_stats`.
+      id: Unique section identifier (UUID).
+      title: Report card title shown above descriptive statistics.
+      description: Report card body text shown below the title.
+      resultProperty: Numeric task result used for summary statistics.
+
+  results/intervention-result.md:
+    title: Intervention Result
+    fields:
+      type: Fixed value `intervention`.
+      id: Unique result identifier (UUID).
+      filename: CSV export filename for this result type.
+
+  results/numeric-result.md:
+    title: Numeric Result
+    fields:
+      type: Fixed value `numeric`.
+      id: Unique result identifier (UUID).
+      filename: CSV export filename for this result type.
+      resultProperty: Reference to the numeric property this result captures.
+
+  questionnaire/nested-objects.md:
+    title: Questionnaire Nested Objects
+    fields:
+      id: Unique choice identifier used in choice answers.
+      text: Participant-facing choice label.
+      value: Numeric scale value that receives an annotation.
+      annotation: Label shown for the annotated scale value.
+
+  shared/question-conditional.md:
+    title: Question Conditional
+    fields: { }
+
+
+  shared/data-reference.md:
+    title: Data Reference
+    fields:
+      task: ID of the task this reference points to.
+      property: Name of the specific property within the task result to reference.
+
+  shared/expressions.md:
+    title: Expressions
+    fields: {}
+
+
+manual_pages:
+  shared/enums.md:
+    title: Enum Values
+  shared/scalars.md:
+    title: Scalar Formats
