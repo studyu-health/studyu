@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
-import 'package:studyu_app/widgets/questionnaire/custom_slider.dart';
 import 'package:studyu_app/widgets/questionnaire/image_capturing_question_widget.dart';
 import 'package:studyu_app/widgets/questionnaire/question_container.dart';
 import 'package:studyu_app/widgets/questionnaire/questionnaire_widget.dart';
@@ -2523,9 +2522,15 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('yes'));
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(CustomSlider));
+      await tester.ensureVisible(find.byType(Slider));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Slider));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('yes').last);
       await tester.pumpAndSettle();
       await tester.tap(find.text('yes').last);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byType(Slider));
       await tester.pumpAndSettle();
 
       final scrollables = find
@@ -2543,10 +2548,12 @@ void main() {
             : second,
       );
       final before = scrollable.position.pixels;
-      final slider = find.byType(CustomSlider).first;
-      await tester.tapAt(tester.getCenter(slider));
+      final slider = find.byType(Slider);
+      final previousValue = tester.widget<Slider>(slider).value;
+      await tester.tapAt(tester.getCenter(slider) + const Offset(20, 0));
       await tester.pumpAndSettle();
 
+      expect(tester.widget<Slider>(slider).value, isNot(previousValue));
       expect(scrollable.position.pixels, closeTo(before, 0.1));
     },
   );

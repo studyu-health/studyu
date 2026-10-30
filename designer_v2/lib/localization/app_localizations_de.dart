@@ -623,33 +623,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get form_question_readonly => 'Frage';
 
   @override
-  String get form_field_question => 'Frage an Teilnehmer';
+  String get form_field_question => 'Fragetitel';
 
   @override
   String get form_field_question_tooltip =>
-      'Gib die Frage ein, die von Teilnehmern in der App beantwortet werden soll';
+      'Gib den Fragetitel ein, der Teilnehmern in der App angezeigt wird';
 
   @override
   String get form_field_question_required =>
       'Die Frage an Teilnehmer darf nicht leer sein';
 
   @override
-  String get form_field_question_help_text => 'Erläuterungen zur Frage';
+  String get form_field_question_help_text => 'Fragebeschreibung';
 
   @override
   String get form_field_question_help_text_tooltip =>
-      'Gib einen zusätzlichen Hilfstext ein, der in der App mit einem Hilfs-Icon neben der Frage angezeigt wird';
+      'Gib eine Beschreibung ein, die in der App unter dem Fragetitel angezeigt wird';
 
   @override
   String get form_field_question_help_text_hint =>
-      'Gib zusätzliche Informationen oder Erklärungen zur Frage';
+      'Gib zusätzliche Informationen oder Anweisungen zur Frage ein';
 
   @override
-  String get form_field_question_help_text_add => 'Hilftext hinzufügen';
+  String get form_field_question_help_text_add =>
+      'Fragebeschreibung hinzufügen';
 
   @override
   String get form_field_question_help_text_add_tooltip =>
-      'Gib einen zusätzlichen Hilfstext ein, der in der App mit einem Hilfs-Icon neben der Frage angezeigt wird';
+      'Füge eine Beschreibung unter dem Fragetitel in der App hinzu';
 
   @override
   String get form_field_question_response_options => 'Antwortoptionen';
