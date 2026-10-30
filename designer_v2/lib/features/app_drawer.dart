@@ -52,9 +52,9 @@ class const AppDrawer({
   final int width = 250,
   final bool autoCloseDrawer = true,
   final double leftPaddingEntries = 28.0,
-  final double logoPaddingVertical = 24.0,
+  final double logoPaddingVertical = 15.0,
   final double logoPaddingHorizontal = 48.0,
-  final double logoMaxHeight = 30,
+  final double logoMaxHeight = 75,
   final double logoSectionMinHeight = 110,
   final double logoSectionMaxHeight = double.infinity,
   super.key,
@@ -211,32 +211,24 @@ class _AppDrawerState() extends ConsumerState<AppDrawer> {
 
     return Theme(
       data: theme.copyWith(splashColor: Colors.transparent), // disable splash
-      child: Drawer(
+      child: SizedBox(
         width: widget.width.toDouble(),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: NavigationDrawer(
           children: [
-            Expanded(
-              child: ListTileTheme(
-                selectedColor: theme.colorScheme.primary,
-                selectedTileColor: theme.colorScheme.primary.withValues(
-                  alpha: 0.1,
-                ),
-                child: ListView(
-                  // Important: Remove any padding from the ListView.
-                  padding: EdgeInsets.zero,
-                  children: [
-                    _buildLogo(context),
-                    ..._buildTopMenuItems(context),
-                  ],
-                ),
+            ListTileTheme(
+              selectedColor: theme.colorScheme.primary,
+              selectedTileColor: theme.colorScheme.primary.withValues(
+                alpha: 0.1,
+              ),
+              child: Column(
+                children: [_buildLogo(context), ..._buildTopMenuItems(context)],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
-              child: Column(children: _buildBottomMenuItems(context)),
-            ),
           ],
+          footer: Padding(
+            padding: const EdgeInsets.only(bottom: 24.0),
+            child: Column(children: _buildBottomMenuItems(context)),
+          ),
         ),
       ),
     );
@@ -248,22 +240,23 @@ class _AppDrawerState() extends ConsumerState<AppDrawer> {
         minHeight: widget.logoSectionMinHeight,
         maxHeight: widget.logoSectionMaxHeight,
       ),
-      child: Container(
-        constraints: BoxConstraints(maxHeight: widget.logoMaxHeight),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: widget.logoPaddingHorizontal,
-            vertical: widget.logoPaddingVertical,
-          ),
-          child: GestureDetector(
-            onTap: () => ref.read(routerProvider).dispatch(RoutingIntents.root),
-            child: Container(
-              foregroundDecoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary
-                    .withValues(alpha: 0.4),
-                backgroundBlendMode: BlendMode.color,
-              ),
-              child: Image.asset(Assets.logoWide, fit: BoxFit.cover),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: widget.logoPaddingHorizontal,
+          vertical: widget.logoPaddingVertical,
+        ),
+        child: GestureDetector(
+          onTap: () => ref.read(routerProvider).dispatch(RoutingIntents.root),
+          child: Container(
+            foregroundDecoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary
+                  .withValues(alpha: 0.4),
+              backgroundBlendMode: BlendMode.color,
+            ),
+            child: Image.asset(
+              Assets.logoWide,
+              height: widget.logoMaxHeight,
+              fit: BoxFit.contain,
             ),
           ),
         ),
@@ -333,6 +326,8 @@ class _AppDrawerState() extends ConsumerState<AppDrawer> {
         style: isSelected ? const TextStyle(fontWeight: FontWeight.bold) : null,
       ),
       contentPadding: EdgeInsets.only(left: widget.leftPaddingEntries),
+      selectedColor: theme.colorScheme.primary,
+      selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.1),
       selected: isSelected,
       enabled: entry.enabled,
       onTap: () => entry.onClick(context, ref),
