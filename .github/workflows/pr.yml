@@ -28,4 +28,4 @@ jobs:
     if: github.event.action == 'opened' || github.event.action == 'reopened'
     runs-on: ubuntu-latest
     steps:
-      - uses: toshimaru/auto-author-assign@v3.1.0
+      - uses: toshimaru/auto-author-assign@v3.1.1
