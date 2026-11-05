@@ -87,6 +87,11 @@ class FormViewModelCollection<
     stagedViewModels.add(formViewModel);
   }
 
+  /// Removes a previously staged [FormViewModel] without committing it.
+  bool unstage(T formViewModel) {
+    return stagedViewModels.remove(formViewModel);
+  }
+
   T commit(T formViewModel) {
     if (contains(formViewModel)) {
       return formViewModel; // don't recommit existing

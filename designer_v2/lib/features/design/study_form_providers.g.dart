@@ -713,55 +713,55 @@ final class MeasurementsFormViewModelFamily extends $Family
   String toString() => r'measurementsFormViewModelProvider';
 }
 
-@ProviderFor(surveyFormViewModel)
-final surveyFormViewModelProvider = SurveyFormViewModelFamily._();
+@ProviderFor(measurementFormViewModel)
+final measurementFormViewModelProvider = MeasurementFormViewModelFamily._();
 
-final class SurveyFormViewModelProvider
+final class MeasurementFormViewModelProvider
     extends
         $FunctionalProvider<
-          MeasurementSurveyFormViewModel,
-          MeasurementSurveyFormViewModel,
-          MeasurementSurveyFormViewModel
+          ManagedFormViewModel<dynamic>,
+          ManagedFormViewModel<dynamic>,
+          ManagedFormViewModel<dynamic>
         >
-    with $Provider<MeasurementSurveyFormViewModel> {
-  SurveyFormViewModelProvider._({
-    required SurveyFormViewModelFamily super.from,
+    with $Provider<ManagedFormViewModel<dynamic>> {
+  MeasurementFormViewModelProvider._({
+    required MeasurementFormViewModelFamily super.from,
     required MeasurementFormRouteArgs super.argument,
   }) : super(
          retry: null,
-         name: r'surveyFormViewModelProvider',
+         name: r'measurementFormViewModelProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$surveyFormViewModelHash();
+  String debugGetCreateSourceHash() => _$measurementFormViewModelHash();
 
   @override
   String toString() {
-    return r'surveyFormViewModelProvider'
+    return r'measurementFormViewModelProvider'
         ''
         '($argument)';
   }
 
   @$internal
   @override
-  $ProviderElement<MeasurementSurveyFormViewModel> $createElement(
+  $ProviderElement<ManagedFormViewModel<dynamic>> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  MeasurementSurveyFormViewModel create(Ref ref) {
+  ManagedFormViewModel<dynamic> create(Ref ref) {
     final argument = this.argument as MeasurementFormRouteArgs;
-    return surveyFormViewModel(ref, argument);
+    return measurementFormViewModel(ref, argument);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(MeasurementSurveyFormViewModel value) {
+  Override overrideWithValue(ManagedFormViewModel<dynamic> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<MeasurementSurveyFormViewModel>(
+      providerOverride: $SyncValueProvider<ManagedFormViewModel<dynamic>>(
         value,
       ),
     );
@@ -769,7 +769,8 @@ final class SurveyFormViewModelProvider
 
   @override
   bool operator ==(Object other) {
-    return other is SurveyFormViewModelProvider && other.argument == argument;
+    return other is MeasurementFormViewModelProvider &&
+        other.argument == argument;
   }
 
   @override
@@ -778,29 +779,29 @@ final class SurveyFormViewModelProvider
   }
 }
 
-String _$surveyFormViewModelHash() =>
-    r'2cc4aef41c732ff379675a5ce4d5969a04c737ad';
+String _$measurementFormViewModelHash() =>
+    r'd7f03d3ee393a340e31754453f1c757165c6ca44';
 
-final class SurveyFormViewModelFamily extends $Family
+final class MeasurementFormViewModelFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          MeasurementSurveyFormViewModel,
+          ManagedFormViewModel<dynamic>,
           MeasurementFormRouteArgs
         > {
-  SurveyFormViewModelFamily._()
+  MeasurementFormViewModelFamily._()
     : super(
         retry: null,
-        name: r'surveyFormViewModelProvider',
+        name: r'measurementFormViewModelProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  SurveyFormViewModelProvider call(MeasurementFormRouteArgs args) =>
-      SurveyFormViewModelProvider._(argument: args, from: this);
+  MeasurementFormViewModelProvider call(MeasurementFormRouteArgs args) =>
+      MeasurementFormViewModelProvider._(argument: args, from: this);
 
   @override
-  String toString() => r'surveyFormViewModelProvider';
+  String toString() => r'measurementFormViewModelProvider';
 }
 
 @ProviderFor(surveyQuestionFormViewModel)
@@ -869,7 +870,7 @@ final class SurveyQuestionFormViewModelProvider
 }
 
 String _$surveyQuestionFormViewModelHash() =>
-    r'd2b779f1b025110501edde497b421a479b1e059d';
+    r'82e72be80d9cdba26c42e8f33a8aa420207685e3';
 
 final class SurveyQuestionFormViewModelFamily extends $Family
     with
