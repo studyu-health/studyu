@@ -117,7 +117,7 @@ class _StudyOverviewScreen() extends State<StudyOverviewScreen> {
         }
         unawaited(_returnToStudySelection(appState));
       },
-      nextButtonKey: const ValueKey('study_overview_continue'),
+      nextButtonKey: const ValueKey('study_overview_next'),
       onNext: () => _continueOnboarding(context),
       progress: OnboardingProgress.forPage(appState, OnboardingStep.overview),
     );
@@ -130,6 +130,7 @@ class _StudyOverviewScreen() extends State<StudyOverviewScreen> {
     );
 
     return Scaffold(
+      key: const ValueKey('study_overview_screen'),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
@@ -165,8 +166,10 @@ class const StudyDetailsView({required final Study? study, super.key})
     final theme = Theme.of(context);
     final studyLength = study!.studyLength;
     return Column(
+      key: const ValueKey('study_details'),
       children: [
         ListTile(
+          key: const ValueKey('study_duration_tile'),
           title: Text(
             AppLocalizations.of(context)!.intervention_phase_duration,
           ),
@@ -180,6 +183,7 @@ class const StudyDetailsView({required final Study? study, super.key})
           ),
         ),
         ListTile(
+          key: const ValueKey('study_length_tile'),
           title: Text(AppLocalizations.of(context)!.study_length),
           subtitle: Text('$studyLength ${AppLocalizations.of(context)!.days}'),
           leading: Icon(
@@ -190,6 +194,7 @@ class const StudyDetailsView({required final Study? study, super.key})
         ),
         const SizedBox(height: 16),
         ContactWidget(
+          key: const ValueKey('study_publisher_contact'),
           contact: study!.contact,
           title: AppLocalizations.of(context)!.study_publisher,
           color: theme.colorScheme.secondary,

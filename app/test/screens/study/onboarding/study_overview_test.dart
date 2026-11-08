@@ -68,7 +68,7 @@ void main() {
     expect(find.byType(BackButton), findsNothing);
     expect(find.byKey(const ValueKey('study_overview_back')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('study_overview_continue')));
+    await tester.tap(find.byKey(const ValueKey('study_overview_next')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('terms_test_screen')), findsOneWidget);
@@ -149,7 +149,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('study_overview_continue')));
+    await tester.tap(find.byKey(const ValueKey('study_overview_next')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('accept_terms_test')));
     await tester.pumpAndSettle();
@@ -167,10 +167,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('back_from_terms_test')));
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey('study_overview_continue')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('study_overview_next')), findsOneWidget);
   });
 
   testWidgets('regular bottom back clears selection and opens study list', (
