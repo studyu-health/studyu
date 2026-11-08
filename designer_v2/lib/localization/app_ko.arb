@@ -540,6 +540,7 @@
   "iconpicker_dialog_title": "아이콘 선택",
   "iconpicker_empty_prompt": "아이콘 선택",
   "iconpicker_nonempty_prompt": "아이콘 변경",
+  "iconpicker_remove_prompt": "아이콘 제거",
   "imprint": "법적 고지",
   "language": "언어",
   "language_select_tooltip": "언어 선택",

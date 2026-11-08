@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/src/custom_finders/patrol_tester.dart';
 import 'package:studyu_core/src/env/env.dart' as env;
+import 'package:studyu_designer_v2/common_views/icon_picker.dart';
 
 import '../mockup/mockup_studies.dart';
 import '../test_log.dart';
@@ -57,6 +58,14 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
       studiesRobot.tapOnExistingStudy,
     );
     await _step('draft study: fill info page', controller.fillInfoPage);
+    final studyIcon = IconPack.resolveIconByName(mockStudyIconName);
+    if (studyIcon == null) {
+      throw StateError('The configured study test icon is unavailable.');
+    }
+    await _step(
+      'draft study: select study icon',
+      () => studyDesignRobot.selectStudyIcon(studyIcon),
+    );
     await _step(
       'draft study: navigate participation screen',
       studyDesignRobot.navigateToParticipationScreen,
@@ -87,8 +96,16 @@ class Test1.go(PatrolTester $) extends StudyBaseTest {
     );
 
     await _step(
+      'publish study: verify publish button enabled',
+      studyDesignRobot.waitForPublishButtonEnabled,
+    );
+    await _step(
       'publish study: tap publish button',
       studyDesignRobot.tapPublishButton,
+    );
+    await _step(
+      'publish study: verify confirmation dialog',
+      studyDesignRobot.waitForPublishConfirmationDialog,
     );
     await _step(
       'publish study: confirm publish',

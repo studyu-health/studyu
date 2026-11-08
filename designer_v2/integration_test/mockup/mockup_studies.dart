@@ -1,5 +1,7 @@
 import 'package:studyu_core/core.dart';
 
+const mockStudyIconName = 'abTesting';
+
 class MockupStudies() {
   static late Study study;
 
