@@ -446,7 +446,10 @@ void _addDefinitions(Map<String, Schema> definitions) {
   definitions['QuestionConditional'] = {
     'type': 'object',
     'additionalProperties': false,
-    'properties': {'condition': _ref('CompositeExpression')},
+    'properties': {
+      'condition': _ref('CompositeExpression'),
+      'defaultValue': <String, dynamic>{},
+    },
     'required': ['condition'],
   };
 
@@ -749,6 +752,7 @@ Schema _questionVariantSchema(String questionTypeConst) {
         properties: {
           ..._questionBaseProperties(),
           'multiple': {'type': 'boolean'},
+          'selectionRequired': {'type': 'boolean'},
           'choices': _listOf(_ref('Choice')),
         },
         required: [..._questionBaseRequired(), 'multiple', 'choices'],

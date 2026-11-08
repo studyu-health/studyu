@@ -100,9 +100,18 @@ void main() {
   test('schema accepts representative serialized subtypes', () {
     final study = StudyFixtures.fullValid();
     study.questionnaire.questions = [
-      BooleanQuestion.withId()..prompt = 'Boolean?',
+      BooleanQuestion.withId()
+        ..prompt = 'Boolean?'
+        ..conditional = QuestionConditional.withCondition(
+          CompositeExpression(
+            logicType: LogicType.and,
+            expressions: [BooleanExpression()..target = 'other-question'],
+          ),
+          defaultValue: true,
+        ),
       ChoiceQuestion.withId()
         ..prompt = 'Choose'
+        ..selectionRequired = true
         ..choices = [Choice.withText(text: 'One')],
       ScaleQuestion.withId()
         ..prompt = 'Scale'
