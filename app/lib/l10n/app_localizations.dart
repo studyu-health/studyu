@@ -1354,6 +1354,12 @@ abstract class AppLocalizations {
   /// **'Value'**
   String get value;
 
+  /// No description provided for @scale_labels.
+  ///
+  /// In en, this message translates to:
+  /// **'About this scale'**
+  String get scale_labels;
+
   /// No description provided for @show_colorless_gauges.
   ///
   /// In en, this message translates to:

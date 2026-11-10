@@ -604,31 +604,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get form_question_readonly => '문항 보기';
 
   @override
-  String get form_field_question => '문항 내용';
+  String get form_field_question => '문항 제목';
 
   @override
-  String get form_field_question_tooltip => '앱에서 참여자에게 제시할 문항을 입력하세요.';
+  String get form_field_question_tooltip => '앱에서 참여자에게 표시할 문항 제목을 입력하세요.';
 
   @override
   String get form_field_question_required => '문항 내용을 입력하세요.';
 
   @override
-  String get form_field_question_help_text => '문항 도움말';
+  String get form_field_question_help_text => '문항 설명';
 
   @override
   String get form_field_question_help_text_tooltip =>
-      '앱에서 문항 옆 도움말 아이콘과 함께 표시할 내용을 입력하세요.';
+      '앱에서 문항 제목 아래에 표시할 설명을 입력하세요.';
 
   @override
-  String get form_field_question_help_text_hint =>
-      '문항에 대한 추가 설명이나 응답 방법을 입력하세요';
+  String get form_field_question_help_text_hint => '문항에 대한 추가 정보나 응답 방법을 입력하세요';
 
   @override
-  String get form_field_question_help_text_add => '도움말 추가';
+  String get form_field_question_help_text_add => '문항 설명 추가';
 
   @override
   String get form_field_question_help_text_add_tooltip =>
-      '앱에서 문항 옆 도움말 아이콘과 함께 표시할 내용을 추가하세요.';
+      '앱에서 문항 제목 아래에 표시할 설명을 추가하세요.';
 
   @override
   String get form_field_question_response_options => '응답 항목';

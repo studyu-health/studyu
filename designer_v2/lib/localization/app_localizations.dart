@@ -1177,13 +1177,13 @@ abstract class AppLocalizations {
   /// No description provided for @form_field_question.
   ///
   /// In en, this message translates to:
-  /// **'Your question'**
+  /// **'Question title'**
   String get form_field_question;
 
   /// No description provided for @form_field_question_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Enter the question that the participant will be prompted with in the app'**
+  /// **'Enter the question title shown to participants in the app'**
   String get form_field_question_tooltip;
 
   /// No description provided for @form_field_question_required.
@@ -1195,31 +1195,31 @@ abstract class AppLocalizations {
   /// No description provided for @form_field_question_help_text.
   ///
   /// In en, this message translates to:
-  /// **'Question help text'**
+  /// **'Question description'**
   String get form_field_question_help_text;
 
   /// No description provided for @form_field_question_help_text_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Enter a text that is shown with a help icon next to the question in the app'**
+  /// **'Enter a description shown below the question title in the app'**
   String get form_field_question_help_text_tooltip;
 
   /// No description provided for @form_field_question_help_text_hint.
   ///
   /// In en, this message translates to:
-  /// **'Provide additional context, help or instructions for the question'**
+  /// **'Provide additional context or instructions for the question'**
   String get form_field_question_help_text_hint;
 
   /// No description provided for @form_field_question_help_text_add.
   ///
   /// In en, this message translates to:
-  /// **'Add a help text'**
+  /// **'Add a question description'**
   String get form_field_question_help_text_add;
 
   /// No description provided for @form_field_question_help_text_add_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Add a text that is shown with a help icon next to the question in the app'**
+  /// **'Add a description below the question title in the app'**
   String get form_field_question_help_text_add_tooltip;
 
   /// No description provided for @form_field_question_response_options.

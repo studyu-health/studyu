@@ -11,45 +11,50 @@ class const QuestionHeader({
     if (subtitle == null || subtitle!.isEmpty) return [];
     return [
       const SizedBox(height: 8),
-      Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
-    ];
-  }
-
-  List<Widget> _buildRationaleButton(BuildContext context) {
-    if (rationale == null || rationale!.isEmpty) return [];
-    return [
-      const SizedBox(width: 8),
-      IconButton(
-        icon: const Icon(Icons.info_outline),
-        color: Theme.of(context).primaryColor,
-        onPressed: () => showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Information'),
-            content: HtmlText(rationale),
-          ),
-        ),
+      Text(
+        subtitle!,
+        style: Theme.of(context).textTheme.bodySmall
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final theme = Theme.of(context);
+    return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              HtmlText(prompt, style: Theme.of(context).textTheme.titleMedium),
-              ..._buildSubtitle(context),
-            ],
-          ),
+        HtmlText(
+          prompt,
+          style: theme.textTheme.titleMedium,
+          customStylesBuilder: (element) => element.localName == 'p'
+              ? {
+                  'margin': '0',
+                  if (element.previousElementSibling != null)
+                    'margin-top': '8px',
+                }
+              : null,
         ),
-        ..._buildRationaleButton(context),
+        ..._buildSubtitle(context),
+        if (rationale != null && rationale!.trim().isNotEmpty) ...[
+          const SizedBox(height: 8),
+          HtmlText(
+            rationale,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.normal,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            customStylesBuilder: (element) => element.localName == 'p'
+                ? {
+                    'margin': '0',
+                    if (element.previousElementSibling != null)
+                      'margin-top': '8px',
+                  }
+                : null,
+          ),
+        ],
       ],
     );
   }
