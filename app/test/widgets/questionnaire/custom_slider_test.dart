@@ -842,7 +842,7 @@ void main() {
         '4/10 · A full description for the configured value',
       );
       expect(
-        find.byTooltip(locale == 'de' ? 'Über diese Skala' : '이 척도 정보'),
+        find.byTooltip(locale == 'de' ? 'Infos zu dieser Skala' : '이 척도 정보'),
         findsOneWidget,
       );
     });
