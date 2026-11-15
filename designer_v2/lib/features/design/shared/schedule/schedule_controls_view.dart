@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:studyu_designer_v2/common_views/form_consumer_widget.dart';
 import 'package:studyu_designer_v2/common_views/form_control_label.dart';
 import 'package:studyu_designer_v2/common_views/form_table_layout.dart';
 import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
@@ -12,27 +13,77 @@ import 'package:studyu_designer_v2/utils/time_of_day.dart';
 class const ScheduleControls({
   required final WithScheduleControls formViewModel,
   super.key,
-}) extends FormConsumerWidget {
+}) extends StatefulWidget {
   @override
-  Widget build(BuildContext context, FormGroup form) {
-    formViewModel.reminderTimePickerControl.valueChanges.listen((event) {
-      formViewModel.reminderTimeControl.value = Time.fromTimeOfDay(
-        formViewModel.reminderTimePickerControl.value!,
-      );
-    });
+  State<ScheduleControls> createState() => _ScheduleControlsState();
+}
 
-    formViewModel.restrictedTimeStartPickerControl.valueChanges.listen((event) {
-      formViewModel.restrictedTimeStartControl.value = Time.fromTimeOfDay(
-        formViewModel.restrictedTimeStartPickerControl.value!,
-      );
-    });
+class _ScheduleControlsState() extends State<ScheduleControls> {
+  final List<StreamSubscription<TimeOfDay?>> _pickerSubscriptions = [];
+  WithScheduleControls get formViewModel => widget.formViewModel;
 
-    formViewModel.restrictedTimeEndPickerControl.valueChanges.listen((event) {
-      formViewModel.restrictedTimeEndControl.value = Time.fromTimeOfDay(
-        formViewModel.restrictedTimeEndPickerControl.value!,
-      );
-    });
+  @override
+  void initState() {
+    super.initState();
+    _bindPickers();
+  }
 
+  @override
+  void didUpdateWidget(ScheduleControls oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.formViewModel, formViewModel)) {
+      _unbindPickers();
+      _bindPickers();
+    }
+  }
+
+  void _bindPickers() {
+    void bind(FormControl<TimeOfDay> picker, FormControl<Time> field) {
+      _pickerSubscriptions.add(
+        picker.valueChanges.listen((value) {
+          if (value != null) field.value = Time.fromTimeOfDay(value);
+        }),
+      );
+    }
+
+    bind(
+      formViewModel.reminderTimePickerControl,
+      formViewModel.reminderTimeControl,
+    );
+    bind(
+      formViewModel.restrictedTimeStartPickerControl,
+      formViewModel.restrictedTimeStartControl,
+    );
+    bind(
+      formViewModel.restrictedTimeEndPickerControl,
+      formViewModel.restrictedTimeEndControl,
+    );
+  }
+
+  void _unbindPickers() {
+    for (final subscription in _pickerSubscriptions) {
+      subscription.cancel();
+    }
+    _pickerSubscriptions.clear();
+  }
+
+  @override
+  void dispose() {
+    _unbindPickers();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => ReactiveValueListenableBuilder<bool>(
+    key: ObjectKey(formViewModel),
+    formControl: formViewModel.hasReminderControl,
+    builder: (context, control, child) => ReactiveValueListenableBuilder<bool>(
+      formControl: formViewModel.isTimeRestrictedControl,
+      builder: (context, control, child) => _buildControls(context),
+    ),
+  );
+
+  Widget _buildControls(BuildContext context) {
     return SelectionArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,6 +131,15 @@ class const ScheduleControls({
                                         formControl:
                                             formViewModel.reminderTimeControl,
                                         valueAccessor: TimeValueAccessor(),
+                                        inputFormatters:
+                                            TimeValueAccessor.inputFormatters,
+                                        keyboardType: TextInputType.datetime,
+                                        showErrors: (control) =>
+                                            control.invalid,
+                                        validationMessages: {
+                                          ValidationMessage.required: (_) =>
+                                              tr.form_field_time_of_day_invalid,
+                                        },
                                         decoration: InputDecoration(
                                           hintText:
                                               tr.form_field_time_of_day_hint,
@@ -87,7 +147,15 @@ class const ScheduleControls({
                                             color: Colors.transparent,
                                             child: IconButton(
                                               splashRadius: 18.0,
-                                              onPressed: picker.showPicker,
+                                              onPressed: () {
+                                                picker.control.updateValue(
+                                                  formViewModel
+                                                      .reminderTimeControl
+                                                      .value,
+                                                  emitEvent: false,
+                                                );
+                                                picker.showPicker();
+                                              },
                                               icon: const Icon(
                                                 Icons.access_time,
                                               ),
@@ -145,6 +213,13 @@ class const ScheduleControls({
                         return ReactiveTextField<Time>(
                           formControl: formViewModel.restrictedTimeStartControl,
                           valueAccessor: TimeValueAccessor(),
+                          inputFormatters: TimeValueAccessor.inputFormatters,
+                          keyboardType: TextInputType.datetime,
+                          showErrors: (control) => control.invalid,
+                          validationMessages: {
+                            ValidationMessage.required: (_) =>
+                                tr.form_field_time_of_day_invalid,
+                          },
                           decoration:
                               (formViewModel.restrictedTimeStartControl.enabled)
                               ? InputDecoration(
@@ -156,7 +231,15 @@ class const ScheduleControls({
                                     color: Colors.transparent,
                                     child: IconButton(
                                       splashRadius: 18.0,
-                                      onPressed: picker.showPicker,
+                                      onPressed: () {
+                                        picker.control.updateValue(
+                                          formViewModel
+                                              .restrictedTimeStartControl
+                                              .value,
+                                          emitEvent: false,
+                                        );
+                                        picker.showPicker();
+                                      },
                                       icon: const Icon(Icons.access_time),
                                     ),
                                   ),
@@ -182,6 +265,13 @@ class const ScheduleControls({
                         return ReactiveTextField<Time>(
                           formControl: formViewModel.restrictedTimeEndControl,
                           valueAccessor: TimeValueAccessor(),
+                          inputFormatters: TimeValueAccessor.inputFormatters,
+                          keyboardType: TextInputType.datetime,
+                          showErrors: (control) => control.invalid,
+                          validationMessages: {
+                            ValidationMessage.required: (_) =>
+                                tr.form_field_time_of_day_invalid,
+                          },
                           decoration:
                               (formViewModel.restrictedTimeEndControl.enabled)
                               ? InputDecoration(
@@ -193,7 +283,15 @@ class const ScheduleControls({
                                     color: Colors.transparent,
                                     child: IconButton(
                                       splashRadius: 18.0,
-                                      onPressed: picker.showPicker,
+                                      onPressed: () {
+                                        picker.control.updateValue(
+                                          formViewModel
+                                              .restrictedTimeEndControl
+                                              .value,
+                                          emitEvent: false,
+                                        );
+                                        picker.showPicker();
+                                      },
                                       icon: const Icon(Icons.access_time),
                                     ),
                                   ),

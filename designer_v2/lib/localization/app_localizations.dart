@@ -2141,6 +2141,12 @@ abstract class AppLocalizations {
   /// **'hh:mm'**
   String get form_field_time_of_day_hint;
 
+  /// No description provided for @form_field_time_of_day_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid time (00:00–23:59).'**
+  String get form_field_time_of_day_invalid;
+
   /// No description provided for @form_field_time_restriction.
   ///
   /// In en, this message translates to:

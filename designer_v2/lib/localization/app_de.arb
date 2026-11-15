@@ -464,6 +464,7 @@
   "form_field_has_reminder_tooltip": "Wähle diese Option, um Teilnehmer zur gegebenen Zeit über eine Benachrichtigung (Notification)\nan die Erfüllung der Aufgabe in der StudyU App zu erinnern.",
   "form_field_has_reminder_label": "Teilnehmer benachrichtigen",
   "form_field_time_of_day_hint": "hh:mm",
+  "form_field_time_of_day_invalid": "Gib eine gültige Uhrzeit ein (00:00–23:59).",
   "form_field_time_restriction": "Zeitbeschränkung",
   "form_field_time_restriction_tooltip": "Gib die Tageszeiten an, zu denen die Aufgabe von Teilnehmern erfüllt werden muss. Die Aufgabe kann außerhalb \ndieses Zeitfensters nicht abgeschlossen werden, d.h. es werden für diesen Tag dann keine Daten erhoben.",
   "form_field_time_restriction_start_hint": "Von",

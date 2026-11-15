@@ -49,13 +49,16 @@ class InterventionTaskFormViewModel({
   };
 
   @override
-  late final FormGroup form = FormGroup({
-    'taskId': taskIdControl, // hidden
-    'taskTitle': taskTitleControl,
-    'taskDescription': taskDescriptionControl,
-    'markAsCompleted': markAsCompletedControl,
-    ...scheduleFormControls,
-  });
+  late final FormGroup form = FormGroup(
+    {
+      'taskId': taskIdControl, // hidden
+      'taskTitle': taskTitleControl,
+      'taskDescription': taskDescriptionControl,
+      'markAsCompleted': markAsCompletedControl,
+      ...scheduleFormControls,
+    },
+    validators: [scheduleValidator],
+  );
 
   FormControlValidation get titleRequired => FormControlValidation(
     control: taskTitleControl,
