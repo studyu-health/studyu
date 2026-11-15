@@ -1,4 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:studyu_designer_v2/constants.dart';
 import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/features/design/enrollment/consent_item_form_controller.dart';
 import 'package:studyu_designer_v2/features/design/enrollment/enrollment_form_controller.dart';
@@ -155,9 +157,10 @@ StudyFormViewModel studyPublishValidator(Ref ref, StudyID studyId) {
 @riverpod
 StudyFormViewModel studyTestValidator(Ref ref, StudyID studyId) {
   final formViewModel = ref.watch(studyFormViewModelProvider(studyId));
-  final subscription = formViewModel.form.valueChanges.listen(
-    (_) => ref.invalidateSelf(),
-  );
+  // Rebuilding the full study validator on each edit blocks text input.
+  final subscription = formViewModel.form.valueChanges
+      .debounceTime(const Duration(milliseconds: Config.formAutosaveDebounce))
+      .listen((_) => ref.invalidateSelf());
   ref.onDispose(subscription.cancel);
 
   return StudyFormViewModel(

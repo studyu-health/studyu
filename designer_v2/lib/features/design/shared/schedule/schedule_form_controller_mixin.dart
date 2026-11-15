@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:studyu_designer_v2/domain/schedule.dart';
 import 'package:studyu_designer_v2/features/design/shared/schedule/schedule_form_data.dart';
+import 'package:studyu_designer_v2/features/forms/form_validation.dart';
+import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/time_of_day.dart';
 
 mixin WithScheduleControls {
@@ -27,6 +29,8 @@ mixin WithScheduleControls {
   );
   final FormControl<Time> reminderTimeControl = FormControl();
   final FormControl<TimeOfDay> reminderTimePickerControl = FormControl();
+
+  late final Validator scheduleValidator = _ScheduleTimeValidator(this);
 
   bool get hasReminder => hasReminderControl.value!;
   bool get isTimeRestricted => isTimeRestrictedControl.value!;
@@ -68,5 +72,36 @@ mixin WithScheduleControls {
         reminderTimeControl.markAsEnabled();
       }
     });
+  }
+}
+
+class _ScheduleTimeValidator(final WithScheduleControls controls)
+    extends Validator<dynamic> {
+  @override
+  Map<String, dynamic>? validate(AbstractControl<dynamic> control) {
+    _requireTime(controls.reminderTimeControl, controls.hasReminder);
+    _requireTime(
+      controls.restrictedTimeStartControl,
+      controls.isTimeRestricted,
+    );
+    _requireTime(controls.restrictedTimeEndControl, controls.isTimeRestricted);
+    return null;
+  }
+
+  void _requireTime(FormControl<Time> control, bool required) {
+    control.validationMessages = {
+      ...control.validationMessages,
+      ValidationMessage.required: (_) => tr.form_field_time_of_day_invalid,
+    };
+    if (required && control.enabled && control.value == null) {
+      if (!control.hasError(ValidationMessage.required)) {
+        control.setErrors({
+          ...control.errors,
+          ValidationMessage.required: true,
+        }, markAsDirty: false);
+      }
+    } else if (control.hasError(ValidationMessage.required)) {
+      control.removeError(ValidationMessage.required);
+    }
   }
 }

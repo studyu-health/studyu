@@ -74,14 +74,17 @@ class MeasurementSurveyFormViewModel({
   );
 
   @override
-  late final FormGroup form = FormGroup({
-    'measurementId': measurementIdControl, // hidden
-    'surveyTitle': surveyTitleControl,
-    'surveyIntroText': surveyIntroTextControl,
-    'surveyOutroText': surveyOutroTextControl,
-    ...questionnaireControls,
-    ...scheduleFormControls,
-  });
+  late final FormGroup form = FormGroup(
+    {
+      'measurementId': measurementIdControl, // hidden
+      'surveyTitle': surveyTitleControl,
+      'surveyIntroText': surveyIntroTextControl,
+      'surveyOutroText': surveyOutroTextControl,
+      ...questionnaireControls,
+      ...scheduleFormControls,
+    },
+    validators: [scheduleValidator],
+  );
 
   @override
   void setControlsFrom(MeasurementSurveyFormData data) {

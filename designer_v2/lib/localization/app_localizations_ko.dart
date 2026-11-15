@@ -1152,6 +1152,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get form_field_time_of_day_hint => 'hh:mm';
 
   @override
+  String get form_field_time_of_day_invalid => '올바른 시간을 입력하세요(00:00–23:59).';
+
+  @override
   String get form_field_time_restriction => '과제 수행 시간 제한';
 
   @override

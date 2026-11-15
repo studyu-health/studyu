@@ -157,10 +157,11 @@ class _MeasurementSurveyFormViewState()
           onDismissed: onDismissedCallback,
         ),
         const SizedBox(height: 28.0),
-        ReactiveFormConsumer(
-          // [ReactiveFormConsumer] is needed to to re-render when descendant controls are updated
-          // By default, ReactiveFormArray only updates when adding/removing controls
-          builder: (context, form, child) {
+        ReactiveValueListenableBuilder(
+          key: ObjectKey(widget.formViewModel.questionsArray),
+          formControl: widget.formViewModel.questionsArray,
+          // Listen to question edits without rebuilding for unrelated survey fields.
+          builder: (context, control, child) {
             return ReactiveFormArray(
               formArray: widget.formViewModel.questionsArray,
               builder: (context, formArray, child) {

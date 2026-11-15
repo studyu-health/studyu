@@ -463,6 +463,7 @@
   "form_field_study_title_required": "연구 제목을 입력하세요.",
   "form_field_study_title_tooltip": "StudyU 앱에 표시할 연구 제목을 입력하세요.",
   "form_field_time_of_day_hint": "hh:mm",
+  "form_field_time_of_day_invalid": "올바른 시간을 입력하세요(00:00–23:59).",
   "form_field_time_restriction": "과제 수행 시간 제한",
   "form_field_time_restriction_end_hint": "종료 시간",
   "form_field_time_restriction_start_hint": "시작 시간",

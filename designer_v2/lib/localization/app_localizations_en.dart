@@ -1182,6 +1182,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get form_field_time_of_day_hint => 'hh:mm';
 
   @override
+  String get form_field_time_of_day_invalid =>
+      'Enter a valid time (00:00–23:59).';
+
+  @override
   String get form_field_time_restriction => 'Time restriction';
 
   @override

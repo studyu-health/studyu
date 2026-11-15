@@ -469,6 +469,7 @@
   "form_field_has_reminder_tooltip": "Select this option to send a reminder notification from the StudyU App to the participant's phone at the time specified.",
   "form_field_has_reminder_label": "Send notification",
   "form_field_time_of_day_hint": "hh:mm",
+  "form_field_time_of_day_invalid": "Enter a valid time (00:00–23:59).",
   "form_field_time_restriction": "Time restriction",
   "form_field_time_restriction_tooltip": "Provide the hours of the day during which participants need to complete the task. Please note that the task will not \nbe available for completion outside these hours & will be considered as missed for the purpose of data collection.",
   "form_field_time_restriction_start_hint": "From",
