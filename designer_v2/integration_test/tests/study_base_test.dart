@@ -35,6 +35,10 @@ abstract class StudyBaseTest.go(
                     .read(routerProvider)
                     .dispatch(RoutingIntents.studyEdit(studyId)),
           ),
+          dashboardMyStudiesDispatchProvider.overrideWith(
+            (ref) =>
+                () => ref.read(routerProvider).dispatch(RoutingIntents.studies),
+          ),
         ],
         child: const ExcludeSemantics(child: App()),
       ),

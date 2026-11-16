@@ -46,6 +46,7 @@ code, tests, or linked project documentation.
 - Hook, CI, and package configuration files are authoritative for what tools actually enforce.
 - `supabase/README.md` is authoritative for local backend setup, migrations, seeds, and database
   tests.
+- `docs/sonarqube.md` is authoritative for SonarQube gate rules and local coverage checks.
 - When prose conflicts with executable configuration, inspect and reconcile the conflict rather
   than guessing.
 
@@ -60,22 +61,21 @@ code, tests, or linked project documentation.
   SDK is unavailable.
 - Prefer the existing root script catalog. For a targeted package check with no catalog entry,
   use a root-level `fvm dart run melos exec` command with the appropriate package filter.
+  `--scope` requires the package name, such as `studyu_app`, not its directory name.
+  An incorrect name can select no packages and report success.
 - Use `fvm dart pub get` to install dependencies and `fvm dart run melos bootstrap` to link
   workspace packages. Use the catalog's `app`, `designer_v2`, `dev:*`, `local:*`, `test`,
   `generate`, and `build:web` scripts rather than duplicating their command bodies here.
 - Before running any melos, Flutter, Dart, or FVM command, check whether `rtk` is installed
   (`command -v rtk`) and prefix the command with `rtk` when available. This applies the
   project's RTK output filters.
-- If `scripts/pre-commit-check` or a qualitycheck command prints
+- If a command prints
   `[rtk] WARNING: untrusted project filters (.rtk/filters.toml)`, review `.rtk/filters.toml`.
   If it only contains repository-owned output filters, run `rtk trust`, then rerun the same
   command.
-- Before staging changes, committing, or opening a pull request, run
-  `scripts/pre-commit-check`. The tracked `.githooks/pre-commit` hook runs the same check
-  automatically; it formats and analyzes, and only generates files when staged files can affect
-  generated output.
 - Do not use the root qualitycheck script as the default pre-commit or pre-PR check. Use it for a
   full CI-style workspace check or when explicitly requested.
+- Before committing, run `fvm dart run melos fix` to apply automatic lint fixes.
 
 ## Environments
 
@@ -131,6 +131,11 @@ code, tests, or linked project documentation.
   require the relevant platform validation when available.
 - For bugs, add or identify a regression test when practical. Do not weaken tests or expected
   behavior merely to obtain a passing result.
+- Before pushing, run `sonar analyze --staged` or `sonar analyze --base dev` for new SonarQube
+  issues. This command does not compute coverage.
+- Before pushing, run `fvm dart run melos test:coverage`, then
+  `fvm dart scripts/normalize_lcov.dart coverage/sonar/lcov.info` for local coverage checks.
+  The 80%-on-new-code gate runs only in CI. See `docs/sonarqube.md`.
 - Before reporting completion, inspect the final diff and state exactly which checks ran, which
   passed, and what could not be verified.
 

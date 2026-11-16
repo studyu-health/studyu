@@ -5,6 +5,9 @@ part 'dashboard_navigation.g.dart';
 /// Navigates the user to a study editor page for the given study id.
 typedef DashboardDispatch = void Function(String studyId);
 
+/// Navigates the user to the My Studies dashboard page.
+typedef DashboardMyStudiesDispatch = void Function();
+
 /// Indirection between the dashboard controller and the app router.
 ///
 /// The dashboard controller depends on this provider rather than the full
@@ -16,5 +19,13 @@ typedef DashboardDispatch = void Function(String studyId);
 DashboardDispatch dashboardDispatch(Ref ref) {
   throw UnimplementedError(
     'dashboardDispatchProvider must be overridden by the host application.',
+  );
+}
+
+@Riverpod(keepAlive: true)
+DashboardMyStudiesDispatch dashboardMyStudiesDispatch(Ref ref) {
+  throw UnimplementedError(
+    'dashboardMyStudiesDispatchProvider must be overridden by the host '
+    'application.',
   );
 }

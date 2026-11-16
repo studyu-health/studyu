@@ -25,7 +25,8 @@ keep_lines_matching = [
   "^\\s*[A-Za-z0-9_./:-]+:\\d+",
   "^Formatted \\d+ files? \\([1-9]\\d* changed\\)",
   "^dart analyze: No issues found$",
-  "^flutter analyze: No issues found$"
+  "^flutter analyze: No issues found$",
+  "^(unused l10n key: |\\d+ unused l10n keys? found)"
 ]
 max_lines = 120
 on_empty = "qualitycheck: ok"
@@ -54,6 +55,15 @@ Error on line 6, column 3 of pubspec.yaml: pubspec.yaml refers to an unknown sdk
   ╵
 """
 expected = "Error on line 6, column 3 of pubspec.yaml: pubspec.yaml refers to an unknown sdk 'broken_yaml'."
+
+[[tests.melos-qualitycheck]]
+name = "qualitycheck keeps unused l10n keys"
+input = """
+app: 526 l10n keys in 155 dart files
+unused l10n key: app/zzStaleProbe
+1 unused l10n keys found. (120 ms)
+"""
+expected = "unused l10n key: app/zzStaleProbe\n1 unused l10n keys found. (120 ms)"
 
 [[tests.fvm-melos-bootstrap]]
 name = "bootstrap success is empty"
