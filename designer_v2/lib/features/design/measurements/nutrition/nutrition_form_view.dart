@@ -109,8 +109,10 @@ class const _CustomMealTypesSection({
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 16,
           children: [
             Text(
               tr.form_field_nutrition_custom_meal_types,
