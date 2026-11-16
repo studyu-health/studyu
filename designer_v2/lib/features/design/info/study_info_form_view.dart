@@ -5,8 +5,8 @@ import 'package:reactive_forms/reactive_forms.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_designer_v2/common_views/async_value_widget.dart';
 import 'package:studyu_designer_v2/common_views/form_table_layout.dart';
-import 'package:studyu_designer_v2/common_views/icon_picker.dart';
 import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
+import 'package:studyu_designer_v2/features/design/info/study_title_input_group.dart';
 import 'package:studyu_designer_v2/features/design/study_design_page_view.dart';
 import 'package:studyu_designer_v2/features/design/study_form_providers.dart';
 import 'package:studyu_designer_v2/features/forms/form_validation.dart';
@@ -38,38 +38,13 @@ class const StudyDesignInfoFormView(super.studyId, {super.key})
                     control: formViewModel.titleControl,
                     label: tr.form_field_study_title,
                     labelHelpText: tr.form_field_study_title_tooltip,
-                    input: Row(
-                      children: [
-                        // TODO: responsive layout (input field gets too small)
-                        Expanded(
-                          child: ReactiveTextField(
-                            formControl: formViewModel.titleControl,
-                            decoration: InputDecoration(
-                              hintText: tr.form_field_study_title,
-                            ),
-                            inputFormatters: [
-                              LengthLimitingTextInputFormatter(100),
-                            ],
-                            validationMessages:
-                                formViewModel.titleControl.validationMessages,
-                          ),
-                        ),
-                        ReactiveFormConsumer(
-                          builder: (context, form, child) {
-                            return (formViewModel.iconControl.value != null)
-                                ? const SizedBox(width: 4.0)
-                                : const SizedBox(width: 8.0);
-                          },
-                        ),
-                        IntrinsicWidth(
-                          child: ReactiveIconPicker(
-                            formControl: formViewModel.iconControl,
-                            iconOptions: IconPack.material,
-                            validationMessages:
-                                formViewModel.iconControl.validationMessages,
-                          ),
-                        ),
-                      ],
+                    input: StudyTitleInputGroup(
+                      titleControl: formViewModel.titleControl,
+                      iconControl: formViewModel.iconControl,
+                      titleValidationMessages:
+                          formViewModel.titleControl.validationMessages,
+                      iconValidationMessages:
+                          formViewModel.iconControl.validationMessages,
                     ),
                   ),
                   FormTableRow(

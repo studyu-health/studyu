@@ -77,3 +77,52 @@ final class DashboardDispatchProvider
 }
 
 String _$dashboardDispatchHash() => r'122c53248779409958b8e02528465067a7c9b4c9';
+
+@ProviderFor(dashboardMyStudiesDispatch)
+final dashboardMyStudiesDispatchProvider =
+    DashboardMyStudiesDispatchProvider._();
+
+final class DashboardMyStudiesDispatchProvider
+    extends
+        $FunctionalProvider<
+          DashboardMyStudiesDispatch,
+          DashboardMyStudiesDispatch,
+          DashboardMyStudiesDispatch
+        >
+    with $Provider<DashboardMyStudiesDispatch> {
+  DashboardMyStudiesDispatchProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dashboardMyStudiesDispatchProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dashboardMyStudiesDispatchHash();
+
+  @$internal
+  @override
+  $ProviderElement<DashboardMyStudiesDispatch> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  DashboardMyStudiesDispatch create(Ref ref) {
+    return dashboardMyStudiesDispatch(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DashboardMyStudiesDispatch value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DashboardMyStudiesDispatch>(value),
+    );
+  }
+}
+
+String _$dashboardMyStudiesDispatchHash() =>
+    r'1b862c2340e093521ba1497228e76e24523b319d';

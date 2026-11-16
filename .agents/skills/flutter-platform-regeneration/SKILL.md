@@ -134,13 +134,12 @@ root, not the source worktree. Run these commands there when required:
 cd <exact-temporary-worktree-path>
 fvm install
 ./setup.sh
-fvm exec melos setup
 ```
 
-Run `./setup.sh` and `fvm exec melos setup` only when the selected Flutter SDK or repository
-state requires setup. Ask for approval before setup or cache mutation. Do not alter the source
-worktree. The approved `fvm flutter create --platforms=android,ios --overwrite app` command
-and its immediate status and diff review also run from this exact temporary worktree root.
+Run `./setup.sh` only when the selected Flutter SDK or repository state requires setup. Ask for
+approval before setup or cache mutation. Do not alter the source worktree. The approved
+`fvm flutter create --platforms=android,ios --overwrite app` command and its immediate status
+and diff review also run from this exact temporary worktree root.
 
 After preparation, record the full temporary-worktree baseline before regeneration:
 

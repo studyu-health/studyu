@@ -22,6 +22,8 @@ enum StudiesTableColumn() {
 }
 
 abstract class IStudyRepository() implements ModelRepository<Study> {
+  @override
+  Future<Study> duplicateAndSave(Study model);
   Future<void> launch(Study study);
   Future<void> deleteParticipants(Study study);
   Future<void> close(Study study);

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol_finders/patrol_finders.dart';
+import 'package:studyu_designer_v2/common_views/icon_picker.dart';
+import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
 class const StudyDesignRobot(final PatrolTester $) {
@@ -40,6 +42,40 @@ class const StudyDesignRobot(final PatrolTester $) {
     await $(tr.navlink_my_studies).tap();
   }
 
+  Future<void> selectStudyIcon(IconOption iconOption) async {
+    final picker = $(const ValueKey('study_title_icon_picker'));
+    await picker.waitUntilExists();
+    await $.tester.ensureVisible(picker);
+    await $.pumpAndSettle();
+    await picker.tap();
+    await $(tr.iconpicker_dialog_title).waitUntilVisible();
+
+    if (iconOption.icon == null) {
+      throw StateError('The selected test icon has no icon data.');
+    }
+
+    final iconFinder = find.descendant(
+      of: find.byType(IconPickerGallery),
+      matching: find.byIcon(iconOption.icon!),
+    );
+    await $.tester.tap(iconFinder);
+    await $.pumpAndSettle();
+  }
+
+  Future<void> waitForPublishButtonEnabled() async {
+    await $(PrimaryButton)
+        .which<PrimaryButton>(
+          (button) =>
+              button.text == tr.action_button_study_launch &&
+              !button.isDisabled,
+        )
+        .waitUntilVisible();
+  }
+
+  Future<void> waitForPublishConfirmationDialog() async {
+    await $(tr.study_launch_title).waitUntilVisible();
+  }
+
   Future<void> tapPublishButton() async {
     await $(tr.action_button_study_launch).tap();
   }
@@ -49,6 +85,8 @@ class const StudyDesignRobot(final PatrolTester $) {
   }
 
   Future<void> tapSkipForNowButton() async {
-    await $(tr.action_button_post_launch_followup_skip).tap();
+    final skipButton = $(const ValueKey('post_publish_followup_skip'));
+    await skipButton.waitUntilVisible();
+    await skipButton.tap();
   }
 }
