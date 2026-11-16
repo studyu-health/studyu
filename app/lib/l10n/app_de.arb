@@ -566,22 +566,6 @@
       "max": {}
     }
   },
-  "date_picker_validation_min_date": "Das Datum muss nach {minDate} liegen",
-  "@date_picker_validation_min_date": {
-    "placeholders": {
-      "minDate": {
-        "type": "String"
-      }
-    }
-  },
-  "date_picker_validation_max_date": "Das Datum muss vor {maxDate} liegen",
-  "@date_picker_validation_max_date": {
-    "placeholders": {
-      "maxDate": {
-        "type": "String"
-      }
-    }
-  },
   "my_templates": "Meine Elemente",
   "manage_saved_items": "Verwalten",
   "adjust_quantity": "Menge anpassen",
