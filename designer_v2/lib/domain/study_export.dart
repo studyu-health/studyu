@@ -7,7 +7,8 @@ abstract class ResultTypes();
 
 class MeasurementResultTypes() extends ResultTypes {
   static const String questionnaire = 'QuestionnaireState';
-  static List<String> get values => [questionnaire];
+  static const String nutrition = 'DailyRecall';
+  static List<String> get values => [questionnaire, nutrition];
 }
 
 class InterventionResultTypes() extends ResultTypes {
@@ -66,8 +67,13 @@ extension StudyExportX on Study {
     final Map<String, Question> questionById = {};
     final mediaIndices = [];
 
-    for (var i = 1; i < observations.length + 1; i++) {
-      final surveyMeasurement = observations[i - 1] as QuestionnaireTask;
+    // Filter observations to only include QuestionnaireTask instances
+    final questionnaireTasks = observations
+        .whereType<QuestionnaireTask>()
+        .toList();
+
+    for (var i = 1; i < questionnaireTasks.length + 1; i++) {
+      final surveyMeasurement = questionnaireTasks[i - 1];
       final surveyQuestions = surveyMeasurement.questions.questions;
       surveyColumns['survey${i}_id'] = surveyMeasurement.id;
       surveyColumns['survey${i}_name'] = surveyMeasurement.title;
@@ -153,6 +159,21 @@ extension StudyExportX on Study {
               }
             }
           }
+        } else if (record.resultType == MeasurementResultTypes.nutrition) {
+          // Add nutrition columns
+          final dailyRecall = record.result.result as DailyRecall;
+
+          final nutrition = dailyRecall.totalNutrition;
+
+          row['total_calories'] = nutrition.energyKcal;
+          row['total_protein'] = nutrition.protein;
+          row['total_carbs'] = nutrition.carbs;
+          row['total_fat'] = nutrition.fat;
+          row['meal_count'] = dailyRecall.meals
+              .where((MealLog meal) => !meal.isSkipped)
+              .length;
+          row['entry_completed_at'] =
+              dailyRecall.entryCompletedAt?.toString() ?? '';
         }
         measurementsData.add(row);
       } else if (isIntervention) {

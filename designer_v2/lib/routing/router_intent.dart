@@ -80,12 +80,17 @@ class RoutingIntents() {
     params: {RouteParams.studyId: studyId},
   );
   static final studyEditMeasurement =
-      (StudyID studyId, MeasurementID measurementId) => RoutingIntent(
+      (
+        StudyID studyId,
+        MeasurementID measurementId, {
+        Map<String, String>? queryParameters,
+      }) => RoutingIntent(
         route: RouterConf.route(studyEditMeasurementRouteName),
         params: {
           RouteParams.studyId: studyId,
           RouteParams.measurementId: measurementId,
         },
+        queryParams: queryParameters ?? {},
       );
   static RoutingIntent studyTest(StudyID studyId, {String? appRoute}) =>
       RoutingIntent(
