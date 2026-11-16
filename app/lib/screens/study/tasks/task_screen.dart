@@ -55,7 +55,7 @@ class _TaskScreenState() extends State<TaskScreen> {
       case final QuestionnaireTask questionnaireTask:
         return QuestionnaireTaskWidget(
           task: questionnaireTask,
-          key: UniqueKey(),
+          key: ValueKey(taskInstance.id),
           completionPeriod: taskInstance.completionPeriod,
         );
       default:
