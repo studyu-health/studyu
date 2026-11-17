@@ -439,9 +439,10 @@ class DashboardController()
     _dispatch(study.id);
   }
 
-  void onClickNewStudy() {
+  Future<void> onClickNewStudy() async {
     final Study newStudy = _studyRepository.delegate.createNewInstance();
-    newStudy.save();
+    await newStudy.save();
+    if (!ref.mounted) return;
     _dispatch(newStudy.id);
   }
 

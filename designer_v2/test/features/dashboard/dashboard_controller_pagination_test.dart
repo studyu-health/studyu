@@ -25,6 +25,7 @@ import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_type
 import 'package:studyu_designer_v2/localization/app_localizations_en.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/repositories/auth_repository.dart';
+import 'package:studyu_designer_v2/repositories/model_repository.dart';
 import 'package:studyu_designer_v2/repositories/study_repository.dart';
 import 'package:studyu_designer_v2/repositories/user_repository.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
@@ -51,7 +52,23 @@ Study _study(String id, {String? title}) {
     ..endedCount = 0;
 }
 
+class _PendingStudy(final Completer<Study> saved) extends Study {
+  this : super.withId('new-study');
+
+  @override
+  Future<Study> save({bool onlyUpdate = false}) => saved.future;
+}
+
+class _NewStudyDelegate(final Study study)
+    extends Fake
+    implements IModelRepositoryDelegate<Study> {
+  @override
+  Study createNewInstance() => study;
+}
+
 class _Harness({
+  Study? newStudy,
+  DashboardDispatch? onDispatch,
   Set<String> pinnedIds = const {},
   StudiesPage? initialPage,
   List<Study> initialPinned = const [],
@@ -64,6 +81,9 @@ class _Harness({
 }) {
   this {
     studyRepo = MockStudyRepository();
+    if (newStudy != null) {
+      when(studyRepo.delegate).thenReturn(_NewStudyDelegate(newStudy));
+    }
     authRepo = MockAuthRepository();
     userRepo = MockUserRepository();
     user = MockUser();
@@ -110,14 +130,14 @@ class _Harness({
         studyRepositoryProvider.overrideWithValue(studyRepo),
         authRepositoryProvider.overrideWithValue(authRepo),
         userRepositoryProvider.overrideWithValue(userRepo),
-        dashboardDispatchProvider.overrideWithValue((_) {}),
+        dashboardDispatchProvider.overrideWithValue(onDispatch ?? (_) {}),
         dashboardMyStudiesDispatchProvider.overrideWithValue(() {
           myStudiesDispatchCount++;
           unawaited(controller.setStudiesFilter(null));
         }),
       ],
     );
-    addTearDown(container.dispose);
+    addTearDown(dispose);
 
     container.listen(
       dashboardControllerProvider,
@@ -141,6 +161,13 @@ class _Harness({
   late final StudyUUser studyUUser;
   late final ProviderContainer container;
   int myStudiesDispatchCount = 0;
+  bool _disposed = false;
+
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    container.dispose();
+  }
 
   DashboardController get controller =>
       container.read(dashboardControllerProvider.notifier);
@@ -189,6 +216,52 @@ class _Harness({
 
 void main() {
   setUpAll(() => AppTranslation.setForTesting(AppLocalizationsEn()));
+
+  group('DashboardController study creation', () {
+    test('opens the editor only after the study is saved', () async {
+      final saved = Completer<Study>();
+      final study = _PendingStudy(saved);
+      final openedStudies = <String>[];
+      final h = _Harness(newStudy: study, onDispatch: openedStudies.add);
+      addTearDown(() {
+        if (!saved.isCompleted) saved.complete(study);
+      });
+
+      final creation = Future<void>.sync(h.controller.onClickNewStudy);
+      expect(openedStudies, isEmpty);
+
+      saved.complete(study);
+      await creation;
+      expect(openedStudies, [study.id]);
+    });
+
+    test('does not open the editor when saving fails', () async {
+      final saved = Completer<Study>();
+      final study = _PendingStudy(saved);
+      final openedStudies = <String>[];
+      final h = _Harness(newStudy: study, onDispatch: openedStudies.add);
+      final error = StateError('save failed');
+
+      final creation = Future<void>.sync(h.controller.onClickNewStudy);
+      final failure = expectLater(creation, throwsA(same(error)));
+      saved.completeError(error);
+      await failure;
+      expect(openedStudies, isEmpty);
+    });
+
+    test('does not navigate after the dashboard is disposed', () async {
+      final saved = Completer<Study>();
+      final study = _PendingStudy(saved);
+      final openedStudies = <String>[];
+      final h = _Harness(newStudy: study, onDispatch: openedStudies.add);
+
+      final creation = Future<void>.sync(h.controller.onClickNewStudy);
+      h.dispose();
+      saved.complete(study);
+      await creation;
+      expect(openedStudies, isEmpty);
+    });
+  });
 
   group('DashboardController pagination', () {
     test('initial fetch requests page 0 with default params', () async {
