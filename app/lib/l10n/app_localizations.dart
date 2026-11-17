@@ -844,6 +844,24 @@ abstract class AppLocalizations {
   /// **'Take a photo'**
   String get take_a_photo;
 
+  /// No description provided for @review_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Review photo'**
+  String get review_photo;
+
+  /// No description provided for @retake_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get retake_photo;
+
+  /// No description provided for @use_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Use photo'**
+  String get use_photo;
+
   /// No description provided for @start_recording.
   ///
   /// In en, this message translates to:

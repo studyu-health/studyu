@@ -426,6 +426,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get take_a_photo => 'Take a photo';
 
   @override
+  String get review_photo => 'Review photo';
+
+  @override
+  String get retake_photo => 'Retake';
+
+  @override
+  String get use_photo => 'Use photo';
+
+  @override
   String get start_recording => 'Start recording';
 
   @override

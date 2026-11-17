@@ -433,6 +433,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get take_a_photo => 'Foto aufnehmen';
 
   @override
+  String get review_photo => 'Foto prüfen';
+
+  @override
+  String get retake_photo => 'Erneut aufnehmen';
+
+  @override
+  String get use_photo => 'Foto verwenden';
+
+  @override
   String get start_recording => 'Starte eine Aufnahme';
 
   @override
