@@ -413,6 +413,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get take_a_photo => '사진 촬영';
 
   @override
+  String get review_photo => '사진 확인';
+
+  @override
+  String get retake_photo => '다시 촬영';
+
+  @override
+  String get use_photo => '사진 사용';
+
+  @override
   String get start_recording => '녹음 시작';
 
   @override

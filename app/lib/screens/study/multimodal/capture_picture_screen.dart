@@ -24,6 +24,7 @@ class _CapturePictureScreenState()
   List<CameraDescription>? _cameras;
   int _jumpToNextCameraTaps = 0;
   bool _isTakingPicture = false;
+  FutureBlobFile? _capturedImage;
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _CapturePictureScreenState()
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _cameraController?.dispose();
+    unawaited(_discardImage(_capturedImage));
     super.dispose();
   }
 
@@ -160,13 +162,85 @@ class _CapturePictureScreenState()
 
     await imageFile.rename(stagingImageFile.localFilePath);
 
+    if (!mounted) {
+      await _discardImage(stagingImageFile);
+      return;
+    }
+    setState(() {
+      _capturedImage = stagingImageFile;
+      _isTakingPicture = false;
+    });
+  }
+
+  Future<void> _discardImage(FutureBlobFile? image) async {
+    if (image == null) return;
+    try {
+      final file = File(image.localFilePath);
+      if (await file.exists()) await file.delete();
+    } on FileSystemException catch (error, stackTrace) {
+      StudyULogger.error(
+        'Failed to delete discarded photo',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  Future<void> _retakePicture() async {
+    final image = _capturedImage;
+    if (image == null || _isTakingPicture) return;
+    setState(() {
+      _capturedImage = null;
+      _isTakingPicture = true;
+    });
+    await _discardImage(image);
     if (!mounted) return;
-    context.pop(stagingImageFile);
+    setState(() => _isTakingPicture = false);
+  }
+
+  void _usePhoto() {
+    final image = _capturedImage;
+    if (image == null || _isTakingPicture) return;
+    _capturedImage = null;
+    context.pop(image);
   }
 
   @override
   Widget build(BuildContext context) {
     final cameraController = _cameraController;
+    final image = _capturedImage;
+    if (image != null) {
+      final loc = AppLocalizations.of(context)!;
+      final media = MediaQuery.of(context);
+      return Scaffold(
+        appBar: AppBar(title: Text(loc.review_photo)),
+        body: SafeArea(
+          child: Center(
+            child: Image.file(
+              File(image.localFilePath),
+              fit: BoxFit.contain,
+              cacheWidth: (media.size.width * media.devicePixelRatio).round(),
+              semanticLabel: loc.review_photo,
+            ),
+          ),
+        ),
+        bottomNavigationBar: SafeArea(
+          minimum: const EdgeInsets.all(16),
+          child: OverflowBar(
+            alignment: MainAxisAlignment.end,
+            spacing: 8,
+            overflowSpacing: 8,
+            children: [
+              OutlinedButton(
+                onPressed: _retakePicture,
+                child: Text(loc.retake_photo),
+              ),
+              FilledButton(onPressed: _usePhoto, child: Text(loc.use_photo)),
+            ],
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.take_a_photo)),
       body: cameraController == null
