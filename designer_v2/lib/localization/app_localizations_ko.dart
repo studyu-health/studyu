@@ -398,6 +398,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get studies_load_failed => '연구를 불러올 수 없습니다. 다시 시도하세요.';
 
   @override
+  String get study_creation_failed => '연구를 만들 수 없습니다. 다시 시도하세요.';
+
+  @override
   String get navlink_learn => '알아보기';
 
   @override

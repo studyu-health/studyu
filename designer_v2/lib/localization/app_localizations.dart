@@ -814,6 +814,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load studies. Try again.'**
   String get studies_load_failed;
 
+  /// No description provided for @study_creation_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The study could not be created. Please try again.'**
+  String get study_creation_failed;
+
   /// No description provided for @navlink_learn.
   ///
   /// In en, this message translates to:

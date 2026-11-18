@@ -42,7 +42,7 @@ final class DashboardControllerProvider
 }
 
 String _$dashboardControllerHash() =>
-    r'e2dcd6b475effb0dd830116620a5b09071038aae';
+    r'93f652117396702dac839bf47092608d81a17869';
 
 abstract class _$DashboardController extends $Notifier<DashboardState> {
   DashboardState build();
