@@ -87,6 +87,7 @@ class _ImageCapturingQuestionWidgetState()
         'userId': appState.activeSubject!.userId,
       },
     );
+    if (!mounted) return;
     if (imageFile != null) {
       setState(() {
         _hasCaptured = true;

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
@@ -55,7 +57,10 @@ class _TaskScreenState() extends State<TaskScreen> {
       case final QuestionnaireTask questionnaireTask:
         return QuestionnaireTaskWidget(
           task: questionnaireTask,
-          key: ValueKey(taskInstance.id),
+          key: ValueKey((
+            taskInstance.id,
+            jsonEncode(questionnaireTask.questions.toJson()),
+          )),
           completionPeriod: taskInstance.completionPeriod,
         );
       default:
