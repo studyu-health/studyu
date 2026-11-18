@@ -413,6 +413,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Studien konnten nicht geladen werden. Bitte versuche es erneut.';
 
   @override
+  String get study_creation_failed =>
+      'Die Studie konnte nicht erstellt werden. Bitte versuche es erneut.';
+
+  @override
   String get navlink_learn => 'Lernen';
 
   @override

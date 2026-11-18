@@ -339,12 +339,16 @@ abstract class ModelRepository<T>(
     if (fetchOnSubscribe) {
       if (!(wrappedModel != null && wrappedModel.isLocalOnly) ||
           wrappedModel.isMarkedForRefresh) {
-        fetch(modelId).catchError((Object e) {
-          if (!modelController.isClosed) {
-            modelController.addError(e);
-          }
-          return e as WrappedModel<T>;
-        });
+        unawaited(
+          fetch(modelId).then<void>(
+            (_) {},
+            onError: (Object error, StackTrace stackTrace) {
+              if (!modelController.isClosed) {
+                modelController.addError(error, stackTrace);
+              }
+            },
+          ),
+        );
       }
     }
     if (wrappedModel?.isMarkedForRefresh ?? false) {

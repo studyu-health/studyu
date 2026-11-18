@@ -144,6 +144,7 @@
   "studies_empty_shared_description": "Es wurden noch keine Studien mit dir geteilt.",
   "studies_end_of_list": "Alle Studien geladen.",
   "studies_load_failed": "Studien konnten nicht geladen werden. Bitte versuche es erneut.",
+  "study_creation_failed": "Die Studie konnte nicht erstellt werden. Bitte versuche es erneut.",
   "@__________________STUDYPAGE__________________": {},
   "navlink_learn": "Lernen",
   "navlink_study_design": "Entwerfen",

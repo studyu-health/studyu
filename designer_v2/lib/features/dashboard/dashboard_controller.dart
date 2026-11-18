@@ -11,9 +11,11 @@ import 'package:studyu_designer_v2/features/dashboard/studies_filter.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_to_postgrest.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_types.dart';
 import 'package:studyu_designer_v2/features/study/study_actions.dart';
+import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/repositories/auth_repository.dart';
 import 'package:studyu_designer_v2/repositories/study_repository.dart';
 import 'package:studyu_designer_v2/repositories/user_repository.dart';
+import 'package:studyu_designer_v2/services/notification_service.dart';
 import 'package:studyu_designer_v2/utils/model_action.dart';
 
 part 'dashboard_controller.g.dart';
@@ -49,6 +51,7 @@ class DashboardController()
   late final DashboardDispatch _dispatch;
   late final DashboardMyStudiesDispatch _dispatchMyStudies;
 
+  bool _isCreatingStudy = false;
   Timer? _searchDebounce;
   Timer? _highlightTimer;
   static const _searchDebounceDuration = Duration(milliseconds: 300);
@@ -439,10 +442,22 @@ class DashboardController()
     _dispatch(study.id);
   }
 
-  void onClickNewStudy() {
-    final Study newStudy = _studyRepository.delegate.createNewInstance();
-    newStudy.save();
-    _dispatch(newStudy.id);
+  Future<void> onClickNewStudy() async {
+    if (_isCreatingStudy) return;
+    _isCreatingStudy = true;
+    try {
+      final Study newStudy = _studyRepository.delegate.createNewInstance();
+      await newStudy.save();
+      if (!ref.mounted) return;
+      _dispatch(newStudy.id);
+    } catch (_) {
+      if (!ref.mounted) return;
+      ref
+          .read(notificationServiceProvider)
+          .showMessage(tr.study_creation_failed);
+    } finally {
+      _isCreatingStudy = false;
+    }
   }
 
   Future<void> pinStudy(String modelId) => _runStudyAction(modelId, () async {

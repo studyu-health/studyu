@@ -405,6 +405,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studies_load_failed => 'Couldn\'t load studies. Try again.';
 
   @override
+  String get study_creation_failed =>
+      'The study could not be created. Please try again.';
+
+  @override
   String get navlink_learn => 'Learn';
 
   @override
