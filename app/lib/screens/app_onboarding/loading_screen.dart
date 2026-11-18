@@ -477,7 +477,9 @@ class _LoadingScreenState() extends State<LoadingScreen> {
     );
 
     if (!mounted) return;
-    _iFrameHelper.postPreviewStatus(status: 'loaded');
+    if (state.isPreview) {
+      _iFrameHelper.postPreviewStatus(status: 'loaded');
+    }
     context.go(route);
   }
 
