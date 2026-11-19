@@ -401,28 +401,31 @@ INSERT INTO public.subject_progress (
 UPDATE public.subject_progress
 SET
     result = jsonb_set(
-        result,
-        '{result,meals,0,foods}',
-        (result #> '{result,meals,0,foods}') || jsonb_build_array(
-            (result #> '{result,meals,0,foods,0}') || jsonb_build_object(
-                'id', 'current-composite-entry-second',
-                'amount', 3,
-                'nutrition', jsonb_build_object(
-                    'energyKcal', 300,
-                    'protein', 3,
-                    'carbs', 3,
-                    'fat', 3,
-                    'sugars', 0,
-                    'fiber', 0,
-                    'saturatedFat', 0,
-                    'transFat', 0,
-                    'cholesterol', 0,
-                    'sodium', 0,
-                    'waterContent', 0,
-                    'micros', '{}'::jsonb
+        jsonb_set(
+            result,
+            '{result,meals,0,foods}',
+            (result #> '{result,meals,0,foods}') || jsonb_build_array(
+                (result #> '{result,meals,0,foods,0}') || jsonb_build_object(
+                    'id', 'current-composite-entry-second',
+                    'amount', 3,
+                    'nutrition', jsonb_build_object(
+                        'energyKcal', 300,
+                        'protein', 3,
+                        'carbs', 3,
+                        'fat', 3,
+                        'sugars', 0,
+                        'fiber', 0,
+                        'saturatedFat', 0,
+                        'transFat', 0,
+                        'cholesterol', 0,
+                        'sodium', 0,
+                        'waterContent', 0,
+                        'micros', '{}'::jsonb
+                    )
                 )
             )
-        )
+        ),
+        '{result,lastAutoSavedAt}', to_jsonb(GREATEST(now(), completed_at) + interval '1 second')
     )
 WHERE task_id = 'current-composite-task';
 
@@ -738,7 +741,10 @@ SELECT throws_ok(
 );
 SELECT lives_ok(
     $$UPDATE public.subject_progress
-      SET result = jsonb_set(result, '{result,specialOccasion}', '"holiday"')
+      SET result = jsonb_set(
+        jsonb_set(result, '{result,specialOccasion}', '"holiday"'),
+        '{result,lastAutoSavedAt}', to_jsonb(GREATEST(now(), completed_at) + interval '1 second')
+      )
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'historical-task'$$,
     'direct entry-local writes remain allowed for the latest historical day'

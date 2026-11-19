@@ -110,7 +110,17 @@ CREATE FUNCTION tests.availability_write_recall(
 )
 RETURNS void LANGUAGE sql AS $$
   INSERT INTO public.subject_progress (subject_id, completed_at, task_id, intervention_id, result_type, result)
-  VALUES ('a1000000-0000-0000-0000-000000000001', p_time, 'availability-task', 'availability-intervention', 'DailyRecall', p_result)
+  VALUES (
+    'a1000000-0000-0000-0000-000000000001', p_time, 'availability-task',
+    'availability-intervention', 'DailyRecall',
+    jsonb_set(p_result, '{result,lastAutoSavedAt}', to_jsonb(
+      COALESCE((
+        SELECT (result #>> '{result,lastAutoSavedAt}')::timestamptz
+        FROM public.subject_progress
+        WHERE subject_id = 'a1000000-0000-0000-0000-000000000001' AND completed_at = p_time
+      ), p_time) + interval '1 second'
+    ))
+  )
   ON CONFLICT (subject_id, completed_at) DO UPDATE SET result = EXCLUDED.result;
 $$;
 CREATE FUNCTION tests.availability_mutate(
@@ -213,8 +223,8 @@ CROSS JOIN (
     VALUES ('null'::jsonb), ('0'::jsonb), ('"protein"'::jsonb), ('{}'::jsonb),
     ('[0]'::jsonb), ('[{}]'::jsonb), ('[null]'::jsonb)
 ) AS invalid_values (invalid);
-SELECT is((SELECT count(*)::integer FROM public.subject_progress), 1, 'invalid recalls insert no progress');
-SELECT is((SELECT result FROM public.subject_progress), tests.availability_recall(tests.availability_current()), 'invalid recalls leave existing progress unchanged');
+SELECT is((SELECT count(*)::integer FROM public.subject_progress WHERE result_type = 'DailyRecall'), 1, 'invalid recalls insert no progress');
+SELECT is((SELECT result #- '{result,lastAutoSavedAt}' FROM public.subject_progress WHERE result_type = 'DailyRecall'), tests.availability_recall(tests.availability_current()), 'invalid recalls leave existing progress unchanged');
 SELECT throws_ok($sql$ SELECT tests.availability_mutate(tests.availability_intent(tests.availability_meal(
   jsonb_set(tests.availability_current(), '{nutrition,partialNutrients}', '[0]')
 ))) $sql$, '22023', 'invalid nutrition availability metadata', 'nested definition metadata is validated');
@@ -257,7 +267,7 @@ SELECT throws_ok(
     'provisional version cannot bypass a metadata-bearing definition'
 );
 
-SELECT lives_ok($sql$ SELECT tests.availability_write_recall(tests.availability_intent(tests.availability_recall(tests.availability_current())), '2026-10-04 13:00:00+00') $sql$, 'supported first recall stores availability');
+SELECT lives_ok($sql$ SELECT tests.availability_write_recall(tests.availability_intent(jsonb_set(tests.availability_recall(tests.availability_current()), '{periodId}', '"availability-first"')), '2026-10-04 13:00:00+00') $sql$, 'supported first recall stores availability');
 SELECT is((
     SELECT result #> '{result,meals,0,foods,0,nutrition,unavailableNutrients}'
     FROM public.subject_progress
@@ -274,8 +284,8 @@ $sql$, 'supported conflict-ignore write remains valid');
 SELECT throws_ok($sql$ UPDATE public.subject_progress SET result = tests.availability_recall(tests.availability_old_food(tests.availability_current()))
   WHERE subject_id = 'a1000000-0000-0000-0000-000000000001' AND completed_at = '2026-10-04 12:00:00+00'
 $sql$, '22023', 'nutrition availability write intent is required', 'conflict-ignore intent does not authorize a later unsupported update');
-SELECT ok(NOT (SELECT result ? 'nutritionAvailabilityWriteIntent' FROM public.subject_progress), 'recall write intent is transient');
-SELECT is((SELECT result #> '{result,meals,0,foods,0,nutrition,partialNutrients}' FROM public.subject_progress), '["energyKcal"]'::jsonb, 'partial state survives recall reload');
+SELECT ok(NOT (SELECT result ? 'nutritionAvailabilityWriteIntent' FROM public.subject_progress WHERE result_type = 'DailyRecall'), 'recall write intent is transient');
+SELECT is((SELECT result #> '{result,meals,0,foods,0,nutrition,partialNutrients}' FROM public.subject_progress WHERE result_type = 'DailyRecall'), '["energyKcal"]'::jsonb, 'partial state survives recall reload');
 SELECT lives_ok($sql$ SELECT tests.availability_write_recall(tests.availability_intent(jsonb_set(
   tests.availability_recall(jsonb_set(jsonb_set(tests.availability_current(), '{amount}', '2'), '{nutrition,energyKcal}', '200')),
   '{result,studyDaySnapshot}', '1'
@@ -337,7 +347,7 @@ SELECT throws_ok(
 );
 
 SELECT lives_ok($sql$ SELECT tests.availability_write_recall(tests.availability_intent(tests.availability_recall(tests.availability_old_food(tests.availability_current())))) $sql$, 'supported recall can intentionally clear both states');
-SELECT is((SELECT result #>> '{result,meals,0,foods,0,nutrition,protein}' FROM public.subject_progress), '0', 'intentional recall clearing preserves known zero');
+SELECT is((SELECT result #>> '{result,meals,0,foods,0,nutrition,protein}' FROM public.subject_progress WHERE result_type = 'DailyRecall'), '0', 'intentional recall clearing preserves known zero');
 SELECT lives_ok($sql$ SELECT tests.availability_mutate(tests.availability_intent(tests.availability_old_food(tests.availability_current()))) $sql$, 'supported mutation can intentionally clear both states');
 SELECT is(tests.availability_current() -> 'nutrition', tests.availability_food() -> 'nutrition', 'intentional definition clearing restores complete zero');
 SELECT lives_ok($sql$ SELECT tests.availability_mutate(tests.availability_current()) $sql$, 'ordinary older definition write resumes for metadata-free data');
@@ -424,7 +434,7 @@ $sql$, '42501', 'nutrition definition subject is not owned by caller', 'cross-su
 RESET ROLE;
 SELECT is((SELECT count(*)::integer FROM studyu_private.nutrition_maintenance_context), 0, 'successful and rejected writes leave no transaction context');
 SELECT is((SELECT count(*)::integer FROM studyu_private.nutrition_recall_write_intent), 0, 'successful and rejected upserts leave no recall intent');
-SELECT is((SELECT count(*)::integer FROM public.subject_progress), 1, 'rejected first writes create no progress');
+SELECT is((SELECT count(*)::integer FROM public.subject_progress WHERE result_type = 'DailyRecall'), 1, 'rejected first writes create no progress');
 -- Direct service writes also validate availability at the version storage boundary.
 SELECT throws_ok(
     $sql$ UPDATE public.nutrition_food_version SET snapshot = jsonb_set(snapshot, '{nutrition,unavailableNutrients}', '[null]') WHERE food_id = 'a2000000-0000-0000-0000-000000000001' $sql$,
