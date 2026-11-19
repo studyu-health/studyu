@@ -315,6 +315,23 @@ class NutritionRecallAutoSaveManager({
     }
   });
 
+  Future<void> deleteSubjectDrafts(String subjectId) =>
+      _mutateForSubject(subjectId, () async {
+        final prefs = await _getPrefs();
+        final draftPrefix = '${_keyPrefix}_${subjectId}_';
+        for (final key in prefs.getKeys().where(
+          (key) => key.startsWith(draftPrefix),
+        )) {
+          await _removeKey(prefs, key);
+        }
+        for (final key in [
+          '${_keyPrefix}_index_$subjectId',
+          '${_keyPrefix}_last_study_day_$subjectId',
+        ]) {
+          if (prefs.containsKey(key)) await _removeKey(prefs, key);
+        }
+      });
+
   Future<void> _deleteRecallIfUnchanged(PendingRecall pending) {
     return _mutateForSubject(pending.subjectId, () async {
       final prefs = await _getPrefs();

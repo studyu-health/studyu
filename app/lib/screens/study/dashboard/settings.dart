@@ -12,6 +12,7 @@ import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/date_time_preferences.dart';
 import 'package:studyu_app/util/fitbit_handler.dart';
 import 'package:studyu_app/util/localization.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_app/widgets/recovery_phrase_content.dart';
 import 'package:studyu_app/widgets/study_onboarding_description.dart';
@@ -643,6 +644,25 @@ class _DeleteAlertDialogState() extends State<DeleteAlertDialog> {
                     // PGRST116: subject already deleted from DB — proceed with local cleanup
                   }
                   // Reached when delete succeeded or subject was already gone from DB
+                  try {
+                    await NutritionRecallAutoSaveManager().deleteSubjectDrafts(
+                      widget.subject!.id,
+                    );
+                  } catch (error) {
+                    StudyULogger.warning(
+                      'Could not remove local nutrition drafts: $error',
+                    );
+                    if (!context.mounted) return;
+                    final l10n = AppLocalizations.of(context)!;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          l10n.error_occurred_with_message('$error'),
+                        ),
+                      ),
+                    );
+                    return;
+                  }
                   RestoreAccountService.clearCache();
                   await deleteLocalData();
                   await FitbitHandler.deleteFitbitCredentials(

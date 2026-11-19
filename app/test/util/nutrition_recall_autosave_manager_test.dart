@@ -13,6 +13,23 @@ import 'package:studyu_core/core.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  test('deleting a subject removes indexed and orphaned drafts', () async {
+    const prefix = 'studyu_nutrition_autosave';
+    const orphan = '${prefix}_subject_old_task_2';
+    const other = '${prefix}_another_subject_task_period_3';
+    SharedPreferences.setMockInitialValues({orphan: 'invalid', other: 'keep'});
+    final prefs = await SharedPreferences.getInstance();
+    final manager = NutritionRecallAutoSaveManager(preferences: prefs);
+    await _save(manager, _recall('draft', studyDay: 3));
+    await manager.updateLastKnownStudyDay('subject', 3);
+
+    await manager.deleteSubjectDrafts('subject');
+
+    expect(await manager.scanPendingRecalls('subject'), isEmpty);
+    expect(await manager.getLastKnownStudyDay('subject'), isNull);
+    expect(prefs.getKeys(), {other});
+  });
+
   test('add, edit, and delete cache the full recall immediately', () async {
     final prefs = await SharedPreferences.getInstance();
     final manager = NutritionRecallAutoSaveManager(preferences: prefs);
