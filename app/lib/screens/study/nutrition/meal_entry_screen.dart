@@ -1521,6 +1521,7 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
             const SizedBox(height: 16),
             _DropdownField<MealContext>(
               label: l10n.where_did_you_eat,
+              icon: Icons.place_outlined,
               value: _mealContext,
               items: const [null, ...MealContext.values],
               itemLabel: (value) => value == null
@@ -1542,6 +1543,7 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
             const SizedBox(height: 12),
             _DropdownField<CompanyContext>(
               label: l10n.who_were_you_with,
+              icon: Icons.group_outlined,
               value: _companyContext,
               items: const [null, ...CompanyContext.values],
               itemLabel: (value) => value == null
@@ -1552,6 +1554,7 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
             const SizedBox(height: 12),
             _DropdownField<DistractionContext>(
               label: l10n.distractions_during_meal,
+              icon: Icons.notifications_outlined,
               value: _distractionContext,
               items: const [null, ...DistractionContext.values],
               itemLabel: (value) => value == null
@@ -1662,6 +1665,7 @@ String _getDistractionContextLabel(
 
 class const _DropdownField<T>({
   required final String label,
+  required final IconData icon,
   required final T? value,
   required final List<T?> items,
   required final String Function(T?) itemLabel,
@@ -1671,8 +1675,10 @@ class const _DropdownField<T>({
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T?>(
       initialValue: value,
+      isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
+        prefixIcon: Icon(icon),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
