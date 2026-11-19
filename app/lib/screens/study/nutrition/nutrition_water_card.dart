@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 
 class const NutritionWaterCard({
@@ -95,12 +98,12 @@ class const NutritionWaterCard({
 bool isValidWaterCupSize(int sizeMl) => sizeMl >= 1 && sizeMl <= 9999;
 
 Future<int?> showWaterCupSizeDialog(BuildContext context, int currentSizeMl) {
+  final l10n = AppLocalizations.of(context)!;
   final formKey = GlobalKey<FormState>();
   var input = currentSizeMl.toString();
   return showDialog<int>(
     context: context,
     builder: (context) {
-      final l10n = AppLocalizations.of(context)!;
       return AlertDialog(
         scrollable: true,
         title: Text(l10n.nutrition_water_cup_size),
@@ -135,5 +138,50 @@ Future<int?> showWaterCupSizeDialog(BuildContext context, int currentSizeMl) {
         ],
       );
     },
+  );
+}
+
+PreviewLocalizationsData nutritionWaterPreviewLocalizations() =>
+    const PreviewLocalizationsData(
+      locale: Locale('en'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+    );
+
+PreviewThemeData nutritionWaterPreviewTheme() =>
+    const _NutritionWaterPreviewTheme();
+
+final class const _NutritionWaterPreviewTheme() extends PreviewThemeData {
+  @override
+  Widget apply(BuildContext context, Widget child) => Theme(
+    data: ThemeData(brightness: MediaQuery.platformBrightnessOf(context)),
+    child: child,
+  );
+}
+
+@Preview(
+  group: 'Nutrition',
+  name: 'Water tracking',
+  size: Size.fromWidth(390),
+  localizations: nutritionWaterPreviewLocalizations,
+  theme: nutritionWaterPreviewTheme,
+)
+Widget nutritionWaterCardPreview() {
+  var totalMl = 500;
+  var cupSizeMl = 250;
+  return StatefulBuilder(
+    builder: (context, setState) => NutritionWaterCard(
+      waterIntakeMl: totalMl,
+      cupSizeMl: cupSizeMl,
+      readOnly: false,
+      onAdjust: (deltaMl) => setState(() {
+        totalMl = max(0, totalMl + deltaMl);
+      }),
+      onEditCupSize: () async {
+        final newSizeMl = await showWaterCupSizeDialog(context, cupSizeMl);
+        if (!context.mounted || newSizeMl == null) return;
+        setState(() => cupSizeMl = newSizeMl);
+      },
+    ),
   );
 }
