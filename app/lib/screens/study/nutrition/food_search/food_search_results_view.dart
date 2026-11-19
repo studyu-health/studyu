@@ -433,9 +433,7 @@ class const _SearchFallback({
                 child: FilledButton.tonal(
                   onPressed: onAddManually,
                   child: Text(
-                    query.isEmpty
-                        ? l10n.add_manually
-                        : l10n.create_food_from_search(query),
+                    l10n.create_food_from_search(query),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

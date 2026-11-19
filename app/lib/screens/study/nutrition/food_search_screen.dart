@@ -1212,7 +1212,11 @@ class _FoodSearchScreenContentState()
                         onDecrementSelection: _decrementSelection,
                       ),
                     ),
-                    _SearchFallback(query: query, onAddManually: _addManually),
+                    if (showNoResults)
+                      _SearchFallback(
+                        query: query,
+                        onAddManually: _addManually,
+                      ),
                   ],
                 ),
               ),

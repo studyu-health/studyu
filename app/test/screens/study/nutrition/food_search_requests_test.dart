@@ -228,7 +228,7 @@ void main() {
 
       final l10n = lookupAppLocalizations(const Locale('en'));
       expect(find.text(l10n.no_results_for_query('apple')), findsNothing);
-      expect(find.text(l10n.cant_find_it).hitTestable(), findsOneWidget);
+      expect(find.text(l10n.cant_find_it), findsNothing);
       expect(find.text(l10n.try_again), findsNothing);
       expect(transport.requests, hasLength(1));
 
@@ -241,7 +241,7 @@ void main() {
         expect(transport.requests, hasLength(3));
         expect(find.text(l10n.no_results_for_query('apple')), findsNothing);
         expect(find.text(l10n.food_search_error), findsOneWidget);
-        expect(find.text(l10n.cant_find_it).hitTestable(), findsOneWidget);
+        expect(find.text(l10n.cant_find_it), findsNothing);
         await tester.tap(find.text(l10n.try_again));
       }
       await tester.pumpAndSettle();

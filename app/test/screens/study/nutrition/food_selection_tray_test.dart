@@ -19,7 +19,7 @@ import 'fake_nutrition_food_repository.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('manual entry is available before and after finding food', (
+  testWidgets('manual entry prompt appears only after an empty search', (
     tester,
   ) async {
     _setSurfaceSize(tester);
@@ -27,13 +27,17 @@ void main() {
     final l10n = lookupAppLocalizations(const Locale('en'));
     final prompt = find.text(l10n.cant_find_it);
 
-    expect(prompt.hitTestable(), findsOneWidget);
-    expect(find.text(l10n.add_manually).hitTestable(), findsOneWidget);
+    expect(prompt, findsNothing);
 
     await tester.enterText(find.byType(TextField), 'apple');
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pumpAndSettle();
     expect(find.text('External Apple'), findsOneWidget);
+    expect(prompt, findsNothing);
+
+    await tester.tap(find.widgetWithText(FilterChip, l10n.my_saved_items));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.no_results_for_query('apple')), findsOneWidget);
     expect(prompt.hitTestable(), findsOneWidget);
 
     await tester.tap(find.text(l10n.create_food_from_search('apple')));
