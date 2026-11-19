@@ -2162,14 +2162,21 @@ void main() {
     expect(result!.foods.single.nutrition.energyKcal, 104);
   });
 
-  testWidgets('food menu omits the Library save action', (tester) async {
+  testWidgets('food menu removes food from the meal draft immediately', (
+    tester,
+  ) async {
     await openMealEntry(tester, editableMeal());
+    expect(find.text('Apple'), findsOneWidget);
 
     await tester.tap(find.byTooltip('More options'));
     await tester.pumpAndSettle();
 
     expect(find.text('Save to My items'), findsNothing);
-    expect(find.text('Remove from meal'), findsOneWidget);
+    await tester.tap(find.text('Remove from meal'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('Apple'), findsNothing);
   });
 
   testWidgets('reopened basket updates the same meal item', (tester) async {
