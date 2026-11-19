@@ -5862,6 +5862,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exit'**
   String get nutrition_exit;
+
+  /// No description provided for @nutrition_water.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get nutrition_water;
+
+  /// No description provided for @nutrition_water_unlogged.
+  ///
+  /// In en, this message translates to:
+  /// **'No water logged'**
+  String get nutrition_water_unlogged;
+
+  /// No description provided for @nutrition_water_add_cup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a cup of water'**
+  String get nutrition_water_add_cup;
+
+  /// No description provided for @nutrition_water_remove_cup.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove a cup of water'**
+  String get nutrition_water_remove_cup;
+
+  /// No description provided for @nutrition_water_cup_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Cup size'**
+  String get nutrition_water_cup_size;
+
+  /// No description provided for @nutrition_water_cup_size_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1 to 9999 mL.'**
+  String get nutrition_water_cup_size_invalid;
+
+  /// No description provided for @nutrition_water_cup_size_save_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the cup size.'**
+  String get nutrition_water_cup_size_save_error;
 }
 
 class _AppLocalizationsDelegate

@@ -3224,3 +3224,24 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get nutrition_exit => '나가기';
 }
+
+  @override
+  String get nutrition_water => '물';
+
+  @override
+  String get nutrition_water_unlogged => '기록된 물 없음';
+
+  @override
+  String get nutrition_water_add_cup => '물 한 컵 추가';
+
+  @override
+  String get nutrition_water_remove_cup => '물 한 컵 빼기';
+
+  @override
+  String get nutrition_water_cup_size => '컵 용량';
+
+  @override
+  String get nutrition_water_cup_size_invalid => '1~9999mL를 입력하세요.';
+
+  @override
+  String get nutrition_water_cup_size_save_error => '컵 용량을 저장하지 못했습니다.';

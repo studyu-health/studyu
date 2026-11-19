@@ -3284,3 +3284,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nutrition_exit => 'Exit';
 }
+
+  @override
+  String get nutrition_water => 'Water';
+
+  @override
+  String get nutrition_water_unlogged => 'No water logged';
+
+  @override
+  String get nutrition_water_add_cup => 'Add a cup of water';
+
+  @override
+  String get nutrition_water_remove_cup => 'Remove a cup of water';
+
+  @override
+  String get nutrition_water_cup_size => 'Cup size';
+
+  @override
+  String get nutrition_water_cup_size_invalid => 'Enter 1 to 9999 mL.';
+
+  @override
+  String get nutrition_water_cup_size_save_error =>
+      'Could not save the cup size.';

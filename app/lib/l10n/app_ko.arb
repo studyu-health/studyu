@@ -545,5 +545,12 @@
   "current_meal_only_banner": "변경 사항은 이 식사에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요.",
   "create_meal": "식사 만들기",
   "nutrition_create_saved_meal_from_log": "이 기록에서 식사 만들기",
-  "nutrition_exit": "나가기"
+  "nutrition_exit": "나가기",
+  "nutrition_water": "물",
+  "nutrition_water_unlogged": "기록된 물 없음",
+  "nutrition_water_add_cup": "물 한 컵 추가",
+  "nutrition_water_remove_cup": "물 한 컵 빼기",
+  "nutrition_water_cup_size": "컵 용량",
+  "nutrition_water_cup_size_invalid": "1~9999mL를 입력하세요.",
+  "nutrition_water_cup_size_save_error": "컵 용량을 저장하지 못했습니다."
 }

@@ -3329,3 +3329,25 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nutrition_exit => 'Verlassen';
 }
+
+  @override
+  String get nutrition_water => 'Wasser';
+
+  @override
+  String get nutrition_water_unlogged => 'Kein Wasser erfasst';
+
+  @override
+  String get nutrition_water_add_cup => 'Ein Glas Wasser hinzufügen';
+
+  @override
+  String get nutrition_water_remove_cup => 'Ein Glas Wasser abziehen';
+
+  @override
+  String get nutrition_water_cup_size => 'Glasgröße';
+
+  @override
+  String get nutrition_water_cup_size_invalid => 'Gib 1 bis 9999 mL ein.';
+
+  @override
+  String get nutrition_water_cup_size_save_error =>
+      'Die Glasgröße konnte nicht gespeichert werden.';

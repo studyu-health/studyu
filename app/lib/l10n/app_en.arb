@@ -1457,5 +1457,12 @@
     }
   },
   "food_selection_remove": "Remove",
-  "nutrition_exit": "Exit"
+  "nutrition_exit": "Exit",
+  "nutrition_water": "Water",
+  "nutrition_water_unlogged": "No water logged",
+  "nutrition_water_add_cup": "Add a cup of water",
+  "nutrition_water_remove_cup": "Remove a cup of water",
+  "nutrition_water_cup_size": "Cup size",
+  "nutrition_water_cup_size_invalid": "Enter 1 to 9999 mL.",
+  "nutrition_water_cup_size_save_error": "Could not save the cup size."
 }

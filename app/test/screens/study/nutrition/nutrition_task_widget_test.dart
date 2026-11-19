@@ -246,6 +246,54 @@ void main() {
         .setMockMethodCallHandler(_photoManagerChannel, null);
   });
 
+  testWidgets('water controls use the saved cup size for future adjustments', (
+    tester,
+  ) async {
+    final addCup = find.byTooltip('Add a cup of water');
+    final removeCup = find.byWidgetPredicate(
+      (widget) =>
+          widget is IconButton && widget.tooltip == 'Remove a cup of water',
+    );
+    await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getTopLeft(find.text('Water')).dy,
+      greaterThan(tester.getBottomLeft(find.text('No meals recorded yet')).dy),
+    );
+    expect(tester.widget<IconButton>(removeCup).onPressed, isNull);
+    await tester.tap(addCup);
+    await tester.pumpAndSettle();
+    expect(find.text('250 mL'), findsOneWidget);
+
+    await tester.tap(find.text('Cup size · 250 mL'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), '0');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField), '400');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('250 mL'), findsOneWidget);
+    await tester.tap(addCup);
+    await tester.pumpAndSettle();
+    expect(find.text('650 mL'), findsOneWidget);
+    await tester.tap(removeCup);
+    await tester.tap(removeCup);
+    await tester.pumpAndSettle();
+    expect(find.text('0 mL'), findsOneWidget);
+    expect(tester.widget<IconButton>(removeCup).onPressed, isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
+    await tester.pumpAndSettle();
+    await tester.tap(addCup);
+    await tester.pumpAndSettle();
+    expect(find.text('400 mL'), findsOneWidget);
+  });
+
   testWidgets('historical mode shows context and hides workspace navigation', (
     tester,
   ) async {
@@ -295,7 +343,7 @@ void main() {
               MealType.breakfast,
               foods: [food('food', 'Apple', 100)],
             ),
-          ]),
+          ])..waterIntakeMl = 600,
           historicalDate: DateTime(2026, 7, 15),
           readOnly: true,
         ),
@@ -309,6 +357,9 @@ void main() {
       expect(find.byIcon(Icons.history_outlined), findsNothing);
       expect(find.byIcon(Icons.help_outline), findsNothing);
       expect(find.text('Log meal'), findsNothing);
+      expect(find.text('600 mL'), findsOneWidget);
+      expect(find.byTooltip('Add a cup of water'), findsNothing);
+      expect(find.byTooltip('Remove a cup of water'), findsNothing);
 
       await tester.tap(find.text('Apple'));
       await tester.pumpAndSettle();

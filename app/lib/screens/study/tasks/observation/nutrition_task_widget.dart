@@ -18,6 +18,7 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_help_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_statistics_view.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_water_card.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/widgets/html_text.dart';
@@ -67,19 +68,63 @@ class _NutritionTaskWidgetState()
     extends State<NutritionTaskWidget>
     with WidgetsBindingObserver {
   static const _exitDestination = 3;
+  static const _cupSizeKey = 'nutrition_water_cup_size_ml';
+  static const _defaultCupSizeMl = 250;
 
   DailyRecallEntryViewModel? _viewModel;
   TemplateViewModel? _templateViewModel;
   int _selectedDestination = 0;
   bool _didHandleExpiredHistoricalEdit = false;
+  int? _cupSizeMl;
+  bool _isSavingCupSize = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (!widget.readOnly) unawaited(_loadCupSize());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_showInstructionsIfNeeded());
     });
+  }
+
+  Future<void> _loadCupSize() async {
+    int? savedSize;
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      savedSize = preferences.getInt(_cupSizeKey);
+    } catch (error) {
+      StudyULogger.warning('Could not load the water cup size: $error');
+    }
+    if (!mounted) return;
+    setState(() {
+      _cupSizeMl = savedSize != null && isValidWaterCupSize(savedSize)
+          ? savedSize
+          : _defaultCupSizeMl;
+    });
+  }
+
+  Future<void> _editCupSize(BuildContext context, int cupSizeMl) async {
+    final size = await showWaterCupSizeDialog(context, cupSizeMl);
+    if (size == null || size == cupSizeMl || !context.mounted) return;
+    setState(() => _isSavingCupSize = true);
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      if (!await preferences.setInt(_cupSizeKey, size)) {
+        throw StateError('Could not save the water cup size.');
+      }
+      if (mounted) setState(() => _cupSizeMl = size);
+    } catch (error) {
+      StudyULogger.warning('Could not save the water cup size: $error');
+      if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.nutrition_water_cup_size_save_error)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSavingCupSize = false);
+    }
   }
 
   Future<void> _showInstructionsIfNeeded() async {
@@ -428,6 +473,18 @@ class _NutritionTaskWidgetState()
             const SizedBox(height: 16),
           ],
           _buildMealsSection(context, model, recall, theme, l10n),
+          const SizedBox(height: 24),
+          NutritionWaterCard(
+            waterIntakeMl: recall.waterIntakeMl,
+            cupSizeMl: _cupSizeMl ?? _defaultCupSizeMl,
+            readOnly: widget.readOnly,
+            onAdjust: _cupSizeMl == null || _isSavingCupSize
+                ? null
+                : (deltaMl) => unawaited(model.adjustWaterIntake(deltaMl)),
+            onEditCupSize: _cupSizeMl == null || _isSavingCupSize
+                ? null
+                : () => _editCupSize(context, _cupSizeMl!),
+          ),
           if (!_isHistoricalMode && !widget.readOnly && !kIsWeb) ...[
             const SizedBox(height: 24),
             Card(
@@ -526,6 +583,7 @@ class _NutritionTaskWidgetState()
       ),
     );
     if (!context.mounted) return;
+    await _loadCupSize();
     await _templateViewModel?.loadAllTemplates();
     if (canEdit &&
         context.mounted &&
