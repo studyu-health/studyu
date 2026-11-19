@@ -1204,10 +1204,6 @@ class const _MealTypeSheet({
               label: l10n.no_meal_label,
               icon: Icons.label_off_outlined,
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel),
-            ),
           ],
         ),
       ),

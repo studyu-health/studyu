@@ -810,6 +810,21 @@ void main() {
     );
   });
 
+  testWidgets('meal label picker closes when tapped outside', (tester) async {
+    await openMealEntry(tester, editableMeal());
+    await tester.tap(find.text('Meal label'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.text('Cancel'), findsNothing);
+
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.text('Supper'), findsOneWidget);
+  });
+
   testWidgets('existing meal wins over requested initial values', (
     tester,
   ) async {
