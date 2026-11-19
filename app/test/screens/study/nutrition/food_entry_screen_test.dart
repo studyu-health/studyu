@@ -188,7 +188,7 @@ void main() {
     );
     expect(proteinField.controller!.text, isEmpty);
     await tester.enterText(inputWithLabel(l10n.food_name), 'Renamed');
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(result!.nutrition.unavailableNutrients, {
       'protein',
@@ -440,7 +440,7 @@ void main() {
     );
 
     await tester.enterText(inputWithLabel(l10n.food_name), 'Edited product');
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);

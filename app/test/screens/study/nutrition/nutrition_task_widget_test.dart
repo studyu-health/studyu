@@ -812,7 +812,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(FoodSearchScreen), findsOneWidget);
     await _selectSavedSoup(tester);
-    await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(find.byType(MealEntryScreen), findsNothing);

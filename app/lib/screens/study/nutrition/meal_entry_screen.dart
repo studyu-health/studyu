@@ -15,6 +15,7 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
@@ -966,29 +967,18 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         if (!didPop) _confirmDiscard();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(_pageTitle),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: FilledButton.icon(
-                onPressed: _isSkipped || _isMealValid ? _saveMeal : null,
-                icon: widget.existingMeal == null
-                    ? null
-                    : const Icon(Icons.save_outlined),
-                label: Text(
-                  widget.existingMeal == null ? l10n.done_label : l10n.save,
-                ),
-              ),
-            ),
-          ],
+        appBar: AppBar(title: Text(_pageTitle)),
+        floatingActionButton: NutritionSaveButton(
+          onPressed: _isSkipped || _isMealValid ? _saveMeal : null,
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
             16,
             16,
             16,
-            16 + MediaQuery.paddingOf(context).bottom,
+            16 +
+                NutritionSaveButton.scrollClearance +
+                MediaQuery.paddingOf(context).bottom,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

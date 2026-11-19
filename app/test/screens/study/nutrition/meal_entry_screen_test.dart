@@ -266,7 +266,7 @@ Future<_TrackingNutritionFoodRepository> _openValidNewHistoricalMeal(
   await tester.pumpAndSettle();
   expect(
     tester
-        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+        .widget<FloatingActionButton>(find.byType(FloatingActionButton))
         .onPressed,
     isNull,
   );
@@ -474,7 +474,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+          .widget<FloatingActionButton>(find.byType(FloatingActionButton))
           .onPressed,
       isNull,
     );
@@ -502,7 +502,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Apply'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(result, isNotNull);
     expect(result!.mealContext, isNull);
@@ -539,7 +539,7 @@ void main() {
       await tester.tap(find.text('Apply'));
       await tester.pumpAndSettle();
       expect(find.text('Not added'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
       expect(result!.mealContext, isNull);
       expect(result!.locationDescription, isNull);
@@ -564,13 +564,13 @@ void main() {
         original,
         onResult: (value) => result = value,
       );
-      final save = find.widgetWithText(FilledButton, 'Save');
-      expect(tester.widget<FilledButton>(save).onPressed, isNull);
+      final save = find.byType(FloatingActionButton);
+      expect(tester.widget<FloatingActionButton>(save).onPressed, isNull);
       await tester.tap(find.text('Time'));
       await tester.pumpAndSettle();
       await tester.tap(find.text("I don't remember"));
       await tester.pumpAndSettle();
-      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+      expect(tester.widget<FloatingActionButton>(save).onPressed, isNotNull);
       await tester.tap(save);
       await tester.pumpAndSettle();
       expect(result!.timestamp, isNull);
@@ -595,8 +595,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text("I don't remember"));
       await tester.pumpAndSettle();
-      final save = find.widgetWithText(FilledButton, 'Save');
-      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+      final save = find.byType(FloatingActionButton);
+      expect(tester.widget<FloatingActionButton>(save).onPressed, isNotNull);
       await tester.tap(save);
       await tester.pumpAndSettle();
       expect(result!.timestamp, isNull);
@@ -628,13 +628,13 @@ void main() {
       find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
       findsOneWidget,
     );
-    expect(find.widgetWithText(FilledButton, 'Done'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
     expect(find.text('Delete meal'), findsNothing);
     expect(find.text('Select a time'), findsOneWidget);
 
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+          .widget<FloatingActionButton>(find.byType(FloatingActionButton))
           .onPressed,
       isNull,
     );
@@ -651,7 +651,7 @@ void main() {
     expect(find.text('Time not remembered'), findsOneWidget);
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+          .widget<FloatingActionButton>(find.byType(FloatingActionButton))
           .onPressed,
       isNull,
     );
@@ -672,7 +672,7 @@ void main() {
     );
     expect(tester.widget<CheckboxListTile>(saveToMyItems).value, isTrue);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(repository.savedTemplateTypes, [FoodEntryType.meal]);
@@ -689,7 +689,7 @@ void main() {
         onResult: (value) => result = value,
       );
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(repository.savedTemplateTypes, [FoodEntryType.meal]);
@@ -698,7 +698,7 @@ void main() {
       expect(find.text('Could not save results'), findsOneWidget);
 
       await tester.tap(find.text('Save to My items for future use'));
-      await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(repository.savedTemplateTypes, [FoodEntryType.meal]);
@@ -717,7 +717,7 @@ void main() {
 
     await tester.tap(find.text('Save to My items for future use'));
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(repository.savedTemplateTypes, isEmpty);
@@ -748,7 +748,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -766,7 +766,7 @@ void main() {
     await chooseMealTime(tester, 'Exact time', hour: '9', minute: '15');
     await chooseMealTime(tester, 'Exact time', hour: '10', minute: '30');
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -789,7 +789,7 @@ void main() {
     await chooseMealTime(tester, 'Approximate time', hour: '9', minute: '15');
     await chooseMealTime(tester, 'Approximate time', hour: '10', minute: '30');
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -877,7 +877,7 @@ void main() {
       findsNothing,
     );
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isA<SavedMealEntryResult>());
@@ -909,7 +909,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Evening snack'), findsWidgets);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     final meal = (result! as SavedMealEntryResult).meal;
@@ -955,7 +955,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Log meal'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     final meal = (result! as SavedMealEntryResult).meal;
@@ -1027,7 +1027,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Home • Family'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(
       (result! as SavedMealEntryResult).meal.companyContext,
@@ -1089,7 +1089,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     final meal = (result! as SavedMealEntryResult).meal;
@@ -1108,12 +1108,12 @@ void main() {
     var reasonField = tester.widget<TextField>(find.byType(TextField));
     expect(reasonField.decoration?.errorText, isNull);
 
-    final saveButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Save'),
+    final saveButton = tester.widget<FloatingActionButton>(
+      find.byType(FloatingActionButton),
     );
     expect(saveButton.onPressed, isNotNull);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pump();
 
     reasonField = tester.widget<TextField>(find.byType(TextField));
@@ -1147,12 +1147,12 @@ void main() {
         find.text('Add at least one food item before saving.'),
         findsNothing,
       );
-      final saveButton = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Save'),
+      final saveButton = tester.widget<FloatingActionButton>(
+        find.byType(FloatingActionButton),
       );
       expect(saveButton.onPressed, isNull);
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pump();
 
       expect(result, isNull);
@@ -1311,14 +1311,14 @@ void main() {
 
     await tester.enterText(foodEditorInput('Food Name'), 'Local apple');
     await tester.enterText(foodEditorInput('Nutrition values are for'), '75');
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(repository.mutationCalls, 0);
     expect(find.text('Local apple'), findsOneWidget);
     expect(find.text('Apple'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -1385,7 +1385,7 @@ void main() {
         findsOneWidget,
       );
       await tester.enterText(foodEditorInput('Food Name'), 'Updated apple');
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(repository.propagatedStudyDays, [null]);
@@ -1468,7 +1468,7 @@ void main() {
         find.text('Also update matching entries in current study day'),
       );
       await tester.enterText(foodEditorInput('Food Name'), 'Updated apple');
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(repository.propagatedStudyDays, [currentStudyDay]);
@@ -1519,7 +1519,7 @@ void main() {
       await tester.tap(
         find.text('Also update matching entries in current study day'),
       );
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(repository.propagatedStudyDays, [currentStudyDay]);
@@ -1597,7 +1597,7 @@ void main() {
       );
       await tester.enterText(foodEditorInput('Food Name'), 'Reusable apple');
       await tester.enterText(foodEditorInput('Nutrition values are for'), '80');
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(repository.mutationCalls, 1);
@@ -1614,7 +1614,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(result, isA<SavedMealEntryResult>());
@@ -1707,7 +1707,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       final savedMeal = (result! as SavedMealEntryResult).meal;
@@ -1788,9 +1788,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Edit reusable food'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(repository.mutationCalls, 2);
@@ -1849,7 +1849,7 @@ void main() {
     await tester.pumpAndSettle();
     final subject = setup.appState.activeSubject!;
     subject.startedAt = subject.startedAt!.subtract(const Duration(days: 1));
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(repository.mutationCalls, 0);
@@ -1886,7 +1886,7 @@ void main() {
     await tester.tap(
       find.text('Also update matching entries in current study day'),
     );
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(repository.mutationCalls, 1);
@@ -1951,7 +1951,7 @@ void main() {
 
     expect(await recipeResult, isNull);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2025,7 +2025,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2117,7 +2117,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2188,7 +2188,7 @@ void main() {
 
       expect(result, isNull);
       expect(original.foods.single.amount, 1);
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
       expect(result!.foods.single.amount, 2);
     },
@@ -2259,7 +2259,7 @@ void main() {
     await tester.tap(find.text('Discard changes'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2282,7 +2282,7 @@ void main() {
 
     await tester.tap(find.text('Skipped this meal'));
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2298,7 +2298,7 @@ void main() {
     final original = skippedMeal(reason: 'Not hungry');
     await openMealEntry(tester, original, onResult: (value) => result = value);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);

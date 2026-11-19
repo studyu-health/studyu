@@ -9,6 +9,7 @@ import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
@@ -569,6 +570,8 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.existingFood != null;
+    final useSaveButton = isEditing && !widget.isExternalLibraryCopy;
+    final saveFood = _isSaving ? null : _saveFood;
 
     final scaffold = Scaffold(
       appBar: AppBar(
@@ -601,27 +604,37 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: FilledButton.icon(
-            key: _saveButtonKey,
-            onPressed: _isSaving ? null : _saveFood,
-            icon: const Icon(Icons.check),
-            label: Text(
-              widget.isExternalLibraryCopy
-                  ? l10n.external_library_save_copy
-                  : widget.mealLabel != null
-                  ? l10n.save_and_add_to_meal(widget.mealLabel!)
-                  : l10n.save,
+      floatingActionButton: useSaveButton
+          ? NutritionSaveButton(key: _saveButtonKey, onPressed: saveFood)
+          : null,
+      bottomNavigationBar: useSaveButton
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: FilledButton.icon(
+                  key: _saveButtonKey,
+                  onPressed: saveFood,
+                  icon: const Icon(Icons.check),
+                  label: Text(
+                    widget.isExternalLibraryCopy
+                        ? l10n.external_library_save_copy
+                        : widget.mealLabel != null
+                        ? l10n.save_and_add_to_meal(widget.mealLabel!)
+                        : l10n.save,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            16 + (useSaveButton ? NutritionSaveButton.scrollClearance : 0),
+          ),
           children: [
             // ========== AI ESTIMATION BANNER ==========
             if (_isAiAnalyzed)

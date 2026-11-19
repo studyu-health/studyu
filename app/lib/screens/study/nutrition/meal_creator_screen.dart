@@ -8,6 +8,7 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart' as snapshots;
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
@@ -626,14 +627,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         ],
       ),
       floatingActionButton: canSave
-          ? FloatingActionButton.extended(
-              key: _saveButtonKey,
-              onPressed: _saveMeal,
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-              icon: const Icon(Icons.check),
-              label: Text(l10n.save),
-            )
+          ? NutritionSaveButton(key: _saveButtonKey, onPressed: _saveMeal)
           : null,
       body: Form(
         key: _formKey,
@@ -773,8 +767,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
                 subtitle: l10n.serving_amount(servingsCount),
               ),
 
-            // Bottom padding for FAB
-            const SizedBox(height: 80),
+            const SizedBox(height: NutritionSaveButton.scrollClearance),
           ],
         ),
       ),
