@@ -3312,4 +3312,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String nutrition_water_per_cup(Object volume) {
     return '$volume per cup';
   }
+
+  @override
+  String get nutrition_current_day_ended =>
+      'This nutrition day has ended. Open the nutrition task again to continue.';
+
+  @override
+  String get nutrition_food_definition_conflict =>
+      'A newer version of this item is available. Open the editor again to edit the current version.';
+
+  @override
+  String get nutrition_invalid_calories =>
+      'Enter zero or a positive number of calories.';
 }

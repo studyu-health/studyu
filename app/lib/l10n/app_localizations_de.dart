@@ -3357,4 +3357,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String nutrition_water_per_cup(Object volume) {
     return '$volume pro Glas';
   }
+
+  @override
+  String get nutrition_current_day_ended =>
+      'Dieser Ernährungstag ist beendet. Öffnen Sie die Ernährungsaufgabe erneut, um fortzufahren.';
+
+  @override
+  String get nutrition_food_definition_conflict =>
+      'Eine neuere Version dieses Lebensmittels ist verfügbar. Öffnen Sie den Eintrag erneut, um die aktuelle Version zu bearbeiten.';
+
+  @override
+  String get nutrition_invalid_calories =>
+      'Geben Sie null oder eine positive Kalorienzahl ein.';
 }

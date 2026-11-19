@@ -5910,6 +5910,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{volume} per cup'**
   String nutrition_water_per_cup(Object volume);
+
+  /// No description provided for @nutrition_current_day_ended.
+  ///
+  /// In en, this message translates to:
+  /// **'This nutrition day has ended. Open the nutrition task again to continue.'**
+  String get nutrition_current_day_ended;
+
+  /// No description provided for @nutrition_food_definition_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'A newer version of this item is available. Open the editor again to edit the current version.'**
+  String get nutrition_food_definition_conflict;
+
+  /// No description provided for @nutrition_invalid_calories.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter zero or a positive number of calories.'**
+  String get nutrition_invalid_calories;
 }
 
 class _AppLocalizationsDelegate

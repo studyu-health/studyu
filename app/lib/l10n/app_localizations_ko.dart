@@ -3250,4 +3250,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String nutrition_water_per_cup(Object volume) {
     return '컵당 $volume';
   }
+
+  @override
+  String get nutrition_current_day_ended =>
+      '이 영양 기록일이 끝났습니다. 계속하려면 영양 기록 과제를 다시 여세요.';
+
+  @override
+  String get nutrition_food_definition_conflict =>
+      '이 항목의 새 버전이 있습니다. 현재 버전을 수정하려면 편집기를 다시 여세요.';
+
+  @override
+  String get nutrition_invalid_calories => '칼로리는 0 또는 양수로 입력하세요.';
 }
