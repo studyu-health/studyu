@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:studyu_app/widgets/confirmation_dialog.dart';
 
 enum UnsavedChangesAction() {
   discard,
@@ -10,25 +11,14 @@ Future<UnsavedChangesAction?> showUnsavedChangesDialog(
   required String message,
   required String discardLabel,
   required String continueLabel,
-}) => showDialog<UnsavedChangesAction>(
-  context: context,
-  builder: (dialogContext) => AlertDialog(
-    title: Text(title),
-    content: Text(message),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(dialogContext),
-        child: Text(continueLabel),
-      ),
-      FilledButton(
-        onPressed: () =>
-            Navigator.pop(dialogContext, UnsavedChangesAction.discard),
-        style: FilledButton.styleFrom(
-          backgroundColor: Theme.of(dialogContext).colorScheme.error,
-          foregroundColor: Theme.of(dialogContext).colorScheme.onError,
-        ),
-        child: Text(discardLabel),
-      ),
-    ],
-  ),
-);
+}) async {
+  final discard = await showConfirmationDialog(
+    context,
+    title: title,
+    message: message,
+    cancelLabel: continueLabel,
+    confirmLabel: discardLabel,
+    isDestructive: true,
+  );
+  return discard ? UnsavedChangesAction.discard : null;
+}
