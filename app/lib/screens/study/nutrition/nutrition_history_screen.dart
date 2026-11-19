@@ -57,6 +57,14 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
       body: FutureBuilder<List<NutritionRecallRecord>>(
         future: _records,
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: FilledButton(
+                onPressed: () => setState(() => _records = _loadRecords()),
+                child: Text(l10n.try_again),
+              ),
+            );
+          }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
