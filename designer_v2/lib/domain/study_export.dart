@@ -46,15 +46,27 @@ extension StudyExportX on Study {
     }).toList();
   }
 
+  static int _utcStudyDay(DateTime date, DateTime startedAt) {
+    final utcDate = date.toUtc();
+    final utcStart = startedAt.toUtc();
+    return DateTime.utc(utcDate.year, utcDate.month, utcDate.day)
+        .difference(DateTime.utc(utcStart.year, utcStart.month, utcStart.day))
+        .inDays;
+  }
+
   StudyExportData get exportData {
     final List<Map<String, dynamic>> measurementsData = [];
     final List<Map<String, dynamic>> interventionsData = [];
     final List<String> mediaData = [];
 
-    final List<SubjectProgress> records = participantsProgress ?? [];
+    final records = [...?participantsProgress];
     records.sort(
       (b, a) => a.completedAt!.compareTo(b.completedAt!),
     ); // descending
+    final inviteCodeByParticipant = {
+      for (final participant in participants ?? <StudySubject>[])
+        participant.id: participant.inviteCode,
+    };
 
     // Key used as a placeholder for values that cannot be resolved by their
     // id anymore (e.g. because the study design has changed meanwhile)
@@ -95,16 +107,17 @@ extension StudyExportX on Study {
     }
 
     for (final record in records) {
+      final dailyRecall = record.resultType == MeasurementResultTypes.nutrition
+          ? record.result.result as DailyRecall
+          : null;
+      final recallCompletion = dailyRecall?.entryCompletedAt;
+      if (dailyRecall != null && recallCompletion == null) continue;
+
       final intervention = getIntervention(record.interventionId);
       final Map<String, dynamic> rowShared = {
         'participant_id': record.subjectId,
         'participant_started_at': record.startedAt!.toString(),
-        'invite_code':
-            participants!
-                .where((element) => element.id == record.subjectId)
-                .firstWhereOrNull((_) => true)
-                ?.inviteCode ??
-            '',
+        'invite_code': inviteCodeByParticipant[record.subjectId] ?? '',
         'current_day_of_study': record.completedAt!
             .difference(record.startedAt!)
             .inDays
@@ -159,10 +172,7 @@ extension StudyExportX on Study {
               }
             }
           }
-        } else if (record.resultType == MeasurementResultTypes.nutrition) {
-          // Add nutrition columns
-          final dailyRecall = record.result.result as DailyRecall;
-
+        } else if (dailyRecall != null) {
           final nutrition = dailyRecall.totalNutrition;
 
           for (final entry in {
@@ -182,8 +192,12 @@ extension StudyExportX on Study {
           row['meal_count'] = dailyRecall.meals
               .where((MealLog meal) => !meal.isSkipped)
               .length;
-          row['entry_completed_at'] =
-              dailyRecall.entryCompletedAt?.toString() ?? '';
+          row['entry_completed_at'] = recallCompletion!.toString();
+          row['current_day_of_study'] =
+              (dailyRecall.studyDaySnapshot ??
+                      _utcStudyDay(record.completedAt!, record.startedAt!))
+                  .toString();
+          row['water_intake_ml'] = dailyRecall.waterIntakeMl;
         }
         measurementsData.add(row);
       } else if (isIntervention) {

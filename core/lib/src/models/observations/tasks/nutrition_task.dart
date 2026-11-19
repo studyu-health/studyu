@@ -51,6 +51,8 @@ class NutritionTask extends Observation {
     final extracted = <DateTime, T>{};
     for (final e in sourceResults) {
       final result = (e.result as Result<DailyRecall>).result;
+      final completionTime = result.entryCompletedAt;
+      if (completionTime == null) continue;
 
       final nutrition = result.totalNutrition;
 
@@ -82,7 +84,7 @@ class NutritionTask extends Observation {
         case 'mealCount':
           value = result.meals.where((MealLog meal) => !meal.isSkipped).length;
         case 'completionTime':
-          value = result.entryCompletedAt;
+          value = completionTime;
         default:
           throw ArgumentError(
             "Nutrition task does not support property '$property'.",

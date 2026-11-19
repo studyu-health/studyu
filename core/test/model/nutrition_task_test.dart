@@ -2,6 +2,40 @@ import 'package:studyu_core/core.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('report extraction excludes legacy drafts', () {
+    final task = NutritionTask.withId();
+    final completedAt = DateTime.utc(2026, 9, 22, 18);
+    final progress = [
+      for (final isComplete in [false, true])
+        SubjectProgress(
+            subjectId: 'subject',
+            interventionId: 'intervention',
+            taskId: task.id,
+            resultType: 'DailyRecall',
+            result: Result<DailyRecall>.app(
+              type: 'DailyRecall',
+              periodId: 'period',
+              result: DailyRecall.withId(
+                date: completedAt,
+                recallMode: RecallMode.realtimeRecord,
+                entryCompletedAt: isComplete ? completedAt : null,
+                meals: [],
+              ),
+            ),
+          )
+          ..completedAt = isComplete
+              ? completedAt
+              : completedAt.subtract(const Duration(hours: 1)),
+    ];
+
+    expect(task.extractPropertyResults<int>('mealCount', progress), {
+      completedAt: 0,
+    });
+    expect(task.extractPropertyResults<DateTime>('completionTime', progress), {
+      completedAt: completedAt,
+    });
+  });
+
   test('water tracking defaults to off for older nutrition tasks', () {
     final json = NutritionTask.withId().toJson()..remove('trackWaterIntake');
 

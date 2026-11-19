@@ -10,7 +10,9 @@ void main() {
       final zero = _food(0);
       final missing = _food(999)
         ..nutrition.unavailableNutrients = {'energyKcal'};
-      final partial = _food(10)..nutrition.partialNutrients = {'energyKcal'};
+      final partial = _food(10)
+        ..amount = 2
+        ..nutrition.partialNutrients = {'energyKcal'};
       study.participantsProgress = [
         for (final (index, foods) in <List<FoodEntry>>[
           [zero],
@@ -30,6 +32,7 @@ void main() {
                   id: 'recall-$index',
                   date: DateTime(2026, 1, index + 1),
                   recallMode: RecallMode.realtimeRecord,
+                  entryCompletedAt: DateTime(2026, 1, index + 1, 18),
                   meals: [
                     MealLog(
                       id: 'meal',
@@ -71,7 +74,83 @@ void main() {
       expect(partialZero['total_protein'], 999);
     },
   );
+
+  test('exports the saved study day and uses UTC dates for legacy recalls', () {
+    final study = Study('study', 'owner')..participants = [];
+    final startedAt = DateTime.utc(2026, 1, 1, 23);
+    final completedAt = DateTime.utc(2026, 1, 2, 8);
+    study.participantsProgress = [
+      _recallProgress(startedAt, completedAt, studyDay: 0),
+      _recallProgress(startedAt, completedAt.add(const Duration(hours: 1))),
+    ];
+
+    final rows = study.exportData.measurementsData;
+    expect(rows.map((row) => row['current_day_of_study']), ['1', '0']);
+  });
+
+  test('exports zero water and keeps unanswered water empty', () {
+    final study = Study('study', 'owner')..participants = [];
+    final startedAt = DateTime.utc(2026);
+    final completedAt = DateTime.utc(2026, 1, 2);
+    study.participantsProgress = [
+      _recallProgress(startedAt, completedAt),
+      _recallProgress(
+        startedAt,
+        completedAt.add(const Duration(days: 1)),
+        waterIntakeMl: 0,
+      ),
+    ];
+
+    final rows = study.exportData.measurementsData;
+    expect(rows.first['water_intake_ml'], 0);
+    expect(rows.last, containsPair('water_intake_ml', null));
+  });
+
+  test('excludes legacy nutrition drafts from measurement exports', () {
+    final study = Study('study', 'owner')..participants = [];
+    final startedAt = DateTime.utc(2026);
+    final completedAt = DateTime.utc(2026, 1, 2);
+    study.participantsProgress = [
+      _recallProgress(startedAt, completedAt),
+      _recallProgress(
+        startedAt,
+        completedAt.add(const Duration(hours: 1)),
+        isComplete: false,
+      ),
+    ];
+
+    final row = study.exportData.measurementsData.single;
+    expect(row['entry_completed_at'], completedAt.toString());
+  });
 }
+
+SubjectProgress _recallProgress(
+  DateTime startedAt,
+  DateTime completedAt, {
+  int? studyDay,
+  int? waterIntakeMl,
+  bool isComplete = true,
+}) =>
+    SubjectProgress(
+        subjectId: 'subject',
+        interventionId: Study.baselineID,
+        taskId: 'nutrition',
+        resultType: 'DailyRecall',
+        result: Result<DailyRecall>.app(
+          type: 'DailyRecall',
+          periodId: 'period',
+          result: DailyRecall.withId(
+            date: completedAt,
+            recallMode: RecallMode.realtimeRecord,
+            entryCompletedAt: isComplete ? completedAt : null,
+            waterIntakeMl: waterIntakeMl,
+            studyDaySnapshot: studyDay,
+            meals: [],
+          ),
+        ),
+      )
+      ..startedAt = startedAt
+      ..completedAt = completedAt;
 
 FoodEntry _food(double energy) => FoodEntry.withId(
   entryType: FoodEntryType.manualCustom,
