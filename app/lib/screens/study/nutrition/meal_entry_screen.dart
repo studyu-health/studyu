@@ -11,6 +11,7 @@ import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
@@ -37,7 +38,7 @@ final class const DeletedMealEntryResult() extends MealEntryResult;
 final class const DiscardedMealEntryResult() extends MealEntryResult;
 
 enum _FoodAction() {
-  details,
+  editAmount,
   edit,
   editDefinition,
   saveTemplate,
@@ -519,81 +520,46 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
 
   Future<void> _showFoodActions(FoodEntry food) async {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final action = await showModalBottomSheet<_FoodAction>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    food.name,
-                    style: theme.textTheme.titleLarge,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _foodActionSubtitle(food, l10n),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: Text(l10n.details),
-              onTap: () => Navigator.pop(sheetContext, _FoodAction.details),
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: Text(l10n.edit_this_entry),
-              onTap: () => Navigator.pop(sheetContext, _FoodAction.edit),
-            ),
-            if (widget.historicalTarget != null)
-              ListTile(
-                leading: const Icon(Icons.sync_outlined),
-                title: Text(l10n.edit_food_definition),
-                onTap: () =>
-                    Navigator.pop(sheetContext, _FoodAction.editDefinition),
-              ),
-            if (food.templateId == null &&
-                widget.historicalTarget == null &&
-                (_allowMeals || food.entryType != FoodEntryType.meal))
-              ListTile(
-                leading: const Icon(Icons.bookmark_add_outlined),
-                title: Text(l10n.save_to_my_items_action),
-                onTap: () =>
-                    Navigator.pop(sheetContext, _FoodAction.saveTemplate),
-              ),
-            const Divider(height: 1),
-            ListTile(
-              leading: Icon(
-                Icons.delete_outline,
-                color: theme.colorScheme.error,
-              ),
-              title: Text(
-                l10n.remove_from_meal,
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
-              onTap: () => Navigator.pop(sheetContext, _FoodAction.remove),
-            ),
-          ],
+    final action = await showNutritionActionSheet<_FoodAction>(
+      context,
+      title: food.name,
+      subtitle: _foodActionSubtitle(food, l10n),
+      actions: [
+        NutritionSheetAction(
+          value: _FoodAction.editAmount,
+          label: l10n.food_quantity_edit_amount,
+          icon: Icons.tune,
         ),
-      ),
+        NutritionSheetAction(
+          value: _FoodAction.edit,
+          label: l10n.edit_this_entry,
+          icon: Icons.edit_outlined,
+        ),
+        if (widget.historicalTarget != null)
+          NutritionSheetAction(
+            value: _FoodAction.editDefinition,
+            label: l10n.edit_food_definition,
+            icon: Icons.sync_outlined,
+          ),
+        if (food.templateId == null &&
+            widget.historicalTarget == null &&
+            (_allowMeals || food.entryType != FoodEntryType.meal))
+          NutritionSheetAction(
+            value: _FoodAction.saveTemplate,
+            label: l10n.save_to_my_items_action,
+            icon: Icons.bookmark_add_outlined,
+          ),
+        NutritionSheetAction(
+          value: _FoodAction.remove,
+          label: l10n.remove_from_meal,
+          icon: Icons.delete_outline,
+          isDestructive: true,
+        ),
+      ],
     );
     if (!mounted) return;
     switch (action) {
-      case _FoodAction.details:
-        // The menu is already dismissed before the quantity sheet opens.
+      case _FoodAction.editAmount:
         await _adjustFoodQuantity(food);
       case _FoodAction.edit:
         await _editFood(food);

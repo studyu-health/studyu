@@ -935,7 +935,20 @@ void main() {
 
     await tester.tap(find.byTooltip('More options'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Delete'));
+    final actions = find.byType(BottomSheet);
+    final deleteAction = find.descendant(
+      of: actions,
+      matching: find.text('Delete'),
+    );
+    expect(
+      find.descendant(of: actions, matching: find.text('Breakfast')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: actions, matching: find.text('Edit')),
+      findsOneWidget,
+    );
+    await tester.tap(deleteAction);
     await tester.pumpAndSettle();
 
     expect(find.text('Delete this meal?'), findsOneWidget);
@@ -945,7 +958,7 @@ void main() {
 
     await tester.tap(find.byTooltip('More options'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Delete'));
+    await tester.tap(deleteAction);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();

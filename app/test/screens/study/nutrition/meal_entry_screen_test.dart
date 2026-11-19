@@ -2156,8 +2156,8 @@ void main() {
       await tester.tap(find.byTooltip('More options'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Details'), findsOneWidget);
-      await tester.tap(find.text('Details'));
+      expect(find.text('Edit amount'), findsOneWidget);
+      await tester.tap(find.text('Edit amount'));
       await tester.pumpAndSettle();
 
       expect(find.byType(FoodQuantitySheet), findsOneWidget);
