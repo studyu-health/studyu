@@ -40,7 +40,7 @@ class const FoodLibrary({
   final FoodLibrarySelectionAction? onAdd,
   final bool addOnTap = false,
   final bool Function(studyu.SavedFoodTemplate)? isSelected,
-  final int Function(studyu.SavedFoodTemplate)? selectedQuantity,
+  final num? Function(studyu.SavedFoodTemplate)? selectedQuantity,
   final FoodLibrarySelectionAction? onIncrement,
   final ValueChanged<studyu.SavedFoodTemplate>? onDecrement,
   final bool showManagementActions = true,
@@ -311,7 +311,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
               onAdd: widget.onAdd,
               addOnTap: widget.addOnTap,
               isSelected: widget.isSelected?.call(template) ?? false,
-              selectedQuantity: widget.selectedQuantity?.call(template) ?? 1,
+              selectedQuantity: widget.selectedQuantity?.call(template),
               onIncrement: widget.onIncrement == null
                   ? null
                   : (source) => widget.onIncrement!(template, source),
@@ -430,7 +430,7 @@ class const FoodLibraryItemCard({
   final FoodLibrarySelectionAction? onAdd,
   final bool addOnTap = false,
   final bool isSelected = false,
-  final int selectedQuantity = 1,
+  final num? selectedQuantity,
   final ValueChanged<Offset?>? onIncrement,
   final VoidCallback? onDecrement,
   final bool showManagementActions = true,
@@ -447,7 +447,9 @@ class const FoodLibraryItemCard({
     final icon = _isMeal
         ? Icons.restaurant_menu_outlined
         : Icons.restaurant_outlined;
-    final quantity = isSelected ? selectedQuantity : 1;
+    final baseAmount = template.prototype.amount;
+    final amount = selectedQuantity ?? baseAmount;
+    final quantity = isSelected && baseAmount > 0 ? amount / baseAmount : 1;
     final metadata = foodTotalMetadata(
       l10n,
       template.prototype,
@@ -478,7 +480,7 @@ class const FoodLibraryItemCard({
         if (isSelected && onIncrement != null && onDecrement != null)
           SelectionQuantityControl(
             name: template.name,
-            quantity: selectedQuantity,
+            quantity: amount,
             onIncrement: onIncrement!,
             onDecrement: onDecrement!,
           )

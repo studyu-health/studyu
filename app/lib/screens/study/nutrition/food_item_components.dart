@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
@@ -153,7 +154,7 @@ class const SelectionFeedbackCard({
 }
 
 class const SelectionQuantityText({
-  required final int quantity,
+  required final num quantity,
   final TextStyle? style,
   super.key,
 }) extends StatefulWidget {
@@ -195,7 +196,9 @@ class _SelectionQuantityTextState() extends State<SelectionQuantityText> {
           );
         },
         child: Text(
-          '${widget.quantity}',
+          NumberFormat.decimalPattern(
+            Localizations.localeOf(context).toLanguageTag(),
+          ).format(widget.quantity),
           key: ValueKey(widget.quantity),
           style: widget.style,
         ),
@@ -296,7 +299,7 @@ class _SelectionQuantityButtonState() extends State<SelectionQuantityButton> {
 
 class const SelectionQuantityControl({
   required final String name,
-  required final int quantity,
+  required final num quantity,
   required final ValueChanged<Offset?> onIncrement,
   required final VoidCallback onDecrement,
   final GlobalKey? quantityAnchorKey,
@@ -309,7 +312,8 @@ class const SelectionQuantityControl({
     return Semantics(
       container: true,
       selected: true,
-      label: l10n.food_selection_selected(name, quantity),
+      label:
+          '$name, ${l10n.serving_amount(foodServingAmount(quantity.toDouble()))}',
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -363,7 +367,7 @@ String formatFoodMetadata(
 String foodTotalMetadata(
   AppLocalizations l10n,
   studyu.FoodEntry food,
-  int quantity, {
+  num quantity, {
   bool gramsKnown = true,
   bool caloriesKnown = true,
 }) {

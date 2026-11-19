@@ -89,7 +89,7 @@ class const _HistoryFoodCard({
         if (selected != null)
           SelectionQuantityControl(
             name: food.name,
-            quantity: selected.quantity,
+            quantity: selected.amount,
             quantityStyle: theme.textTheme.titleMedium,
             onIncrement: onIncrement,
             onDecrement: onDecrement,
@@ -141,7 +141,7 @@ class const _FoodResultCard({
       trailing: switch (selected) {
         final item? => SelectionQuantityControl(
           name: result.name,
-          quantity: item.quantity,
+          quantity: item.amount,
           quantityStyle: theme.textTheme.titleMedium,
           onIncrement: onIncrement,
           onDecrement: onDecrement,
@@ -275,7 +275,7 @@ class const _FoodSearchListView({
       onAdd: onAddFoodTemplate,
       addOnTap: selectionStore != null,
       isSelected: selected != null,
-      selectedQuantity: selected?.quantity ?? 1,
+      selectedQuantity: selected?.amount,
       onIncrement: (source) => onAddFoodTemplate(template, source),
       onDecrement: () => onDecrementSelection(key),
       showManagementActions: false,
@@ -322,7 +322,7 @@ class const _FoodSearchListView({
         isSelected: (template) =>
             selectionStore?.itemFor(_templateKey(template)) != null,
         selectedQuantity: (template) =>
-            selectionStore?.itemFor(_templateKey(template))?.quantity ?? 1,
+            selectionStore?.itemFor(_templateKey(template))?.amount,
         onIncrement: onAddFoodTemplate,
         onDecrement: (template) => onDecrementSelection(_templateKey(template)),
         showManagementActions: false,

@@ -429,7 +429,7 @@ class const _SelectionPreviewRow({
               ),
               SelectionQuantityControl(
                 name: item.name,
-                quantity: item.quantity,
+                quantity: item.amount,
                 quantityAnchorKey: quantityAnchorKey,
                 quantityStyle: theme.textTheme.titleMedium,
                 onDecrement: () => onDecrement(item.key),

@@ -344,50 +344,50 @@ void main() {
     expect(find.text('1 item · 78 kcal'), findsOneWidget);
   });
 
-  testWidgets('saved servings normalize into quantity before increment', (
-    tester,
-  ) async {
-    FoodSearchSelection? selection;
-    await _pumpSearch(tester, onResult: (value) => selection = value);
+  testWidgets(
+    'serving labels follow fractional amounts through both controls',
+    (tester) async {
+      FoodSearchSelection? selection;
+      await _pumpSearch(tester, onResult: (value) => selection = value);
 
-    await _addExternalApple(tester);
-    await tester.tap(_basketEdit());
-    await tester.pumpAndSettle();
-    await tester.enterText(_amountField(), '2');
-    await tester.pump();
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+      await _addExternalApple(tester);
+      await tester.tap(_basketEdit());
+      await tester.pumpAndSettle();
+      await tester.enterText(_amountField(), '1.5');
+      await tester.pump();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('selection-tray')),
-        matching: find.text('2'),
-      ),
-      findsOneWidget,
-    );
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const ValueKey('selection-tray')),
-        matching: find.byTooltip('Increase External Apple'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('selection-tray')),
-        matching: find.text('3'),
-      ),
-      findsOneWidget,
-    );
+      final basket = find.byKey(const ValueKey('selection-tray'));
+      Finder servingLabel(String amount) =>
+          find.descendant(of: basket, matching: find.text(amount));
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Add 1 item to Lunch'));
-    await tester.pumpAndSettle();
+      expect(servingLabel('1.5'), findsOneWidget);
+      for (final (control, amount) in [
+        ('Increase', '2.5'),
+        ('Decrease', '1.5'),
+      ]) {
+        await tester.tap(
+          find.descendant(
+            of: basket,
+            matching: find.byTooltip('$control External Apple'),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(servingLabel(amount), findsOneWidget);
+      }
 
-    final food = selection!.foods.single;
-    expect(food.amount, 3);
-    expect(food.servingSizeGrams, 150);
-    expect(food.nutrition.energyKcal, 234);
-  });
+      await tester.tap(
+        find.widgetWithText(FilledButton, 'Add 1 item to Lunch'),
+      );
+      await tester.pumpAndSettle();
+
+      final food = selection!.foods.single;
+      expect(food.amount, 1.5);
+      expect(food.servingSizeGrams, 150);
+      expect(food.nutrition.energyKcal, 117);
+    },
+  );
 
   testWidgets('details stay bounded and confirmable above keyboard', (
     tester,
