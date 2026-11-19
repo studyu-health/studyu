@@ -15,6 +15,8 @@ class DailyRecall {
   DateTime? entryStartedAt;
   DateTime? entryCompletedAt;
   List<MealLog> meals;
+  @JsonKey(includeIfNull: false)
+  int? waterIntakeMl;
   int? studyDaySnapshot;
   DateTime? lastAutoSavedAt;
 
@@ -31,6 +33,7 @@ class DailyRecall {
     this.entryStartedAt,
     this.entryCompletedAt,
     required this.meals,
+    this.waterIntakeMl,
     this.studyDaySnapshot,
     this.lastAutoSavedAt,
     this.availabilityVerified = true,
@@ -44,6 +47,7 @@ class DailyRecall {
     this.entryStartedAt,
     this.entryCompletedAt,
     required this.meals,
+    this.waterIntakeMl,
     this.studyDaySnapshot,
     this.lastAutoSavedAt,
     this.availabilityVerified = true,
