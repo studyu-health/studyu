@@ -1283,8 +1283,6 @@
   "leave_anyway": "Leave anyway",
   "nutrition_tracking": "Nutrition tracking",
   "nutrition_statistics": "Statistics",
-  "nutrition_recent_7_days": "Recent 7 days",
-  "nutrition_recent_30_days": "Recent 30 days",
   "nutrition_days_recorded": "{recorded} of {total} days recorded",
   "@nutrition_days_recorded": {
     "placeholders": {
@@ -1457,5 +1455,12 @@
   "nutrition_per_serving": "Nutrition per serving",
   "photoRecallDateInfo": "Showing photos from {date}",
   "not_added": "Not added",
-  "nutrition_partial": "partial"
+  "nutrition_partial": "partial",
+  "nutrition_statistics_week": "Week",
+  "nutrition_statistics_month": "Month",
+  "nutrition_statistics_previous_period": "Previous period",
+  "nutrition_statistics_next_period": "Next period",
+  "nutrition_statistics_go_to_today": "Jump to today",
+  "nutrition_statistics_day_empty": "No nutrition entries for this day.",
+  "nutrition_energy_change_from_previous_day": "{value} vs. previous day"
 }

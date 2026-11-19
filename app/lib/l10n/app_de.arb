@@ -1078,8 +1078,6 @@
   "today": "Heute",
   "nutrition_tracking": "Ernährungserfassung",
   "nutrition_statistics": "Statistik",
-  "nutrition_recent_7_days": "Letzte 7 Tage",
-  "nutrition_recent_30_days": "Letzte 30 Tage",
   "nutrition_days_recorded": "{recorded} von {total} Tagen erfasst",
   "@nutrition_days_recorded": {
     "placeholders": {
@@ -1249,5 +1247,12 @@
   "nutrition_per_serving": "Nährwerte pro Portion",
   "photoRecallDateInfo": "Fotos vom {date}",
   "not_added": "Nicht hinzugefügt",
-  "nutrition_partial": "unvollständig"
+  "nutrition_partial": "unvollständig",
+  "nutrition_statistics_week": "Woche",
+  "nutrition_statistics_month": "Monat",
+  "nutrition_statistics_previous_period": "Vorheriger Zeitraum",
+  "nutrition_statistics_next_period": "Nächster Zeitraum",
+  "nutrition_statistics_go_to_today": "Zu heute springen",
+  "nutrition_statistics_day_empty": "Für diesen Tag sind keine Ernährungseinträge vorhanden.",
+  "nutrition_energy_change_from_previous_day": "{value} zum Vortag"
 }

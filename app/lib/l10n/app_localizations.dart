@@ -5311,18 +5311,6 @@ abstract class AppLocalizations {
   /// **'Statistics'**
   String get nutrition_statistics;
 
-  /// No description provided for @nutrition_recent_7_days.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent 7 days'**
-  String get nutrition_recent_7_days;
-
-  /// No description provided for @nutrition_recent_30_days.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent 30 days'**
-  String get nutrition_recent_30_days;
-
   /// No description provided for @nutrition_days_recorded.
   ///
   /// In en, this message translates to:
@@ -5862,6 +5850,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'partial'**
   String get nutrition_partial;
+
+  /// No description provided for @nutrition_statistics_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get nutrition_statistics_week;
+
+  /// No description provided for @nutrition_statistics_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get nutrition_statistics_month;
+
+  /// No description provided for @nutrition_statistics_previous_period.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous period'**
+  String get nutrition_statistics_previous_period;
+
+  /// No description provided for @nutrition_statistics_next_period.
+  ///
+  /// In en, this message translates to:
+  /// **'Next period'**
+  String get nutrition_statistics_next_period;
+
+  /// No description provided for @nutrition_statistics_go_to_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to today'**
+  String get nutrition_statistics_go_to_today;
+
+  /// No description provided for @nutrition_statistics_day_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No nutrition entries for this day.'**
+  String get nutrition_statistics_day_empty;
+
+  /// No description provided for @nutrition_energy_change_from_previous_day.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} vs. previous day'**
+  String nutrition_energy_change_from_previous_day(Object value);
 }
 
 class _AppLocalizationsDelegate

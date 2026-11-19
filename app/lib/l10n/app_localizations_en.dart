@@ -2941,12 +2941,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nutrition_statistics => 'Statistics';
 
   @override
-  String get nutrition_recent_7_days => 'Recent 7 days';
-
-  @override
-  String get nutrition_recent_30_days => 'Recent 30 days';
-
-  @override
   String nutrition_days_recorded(int recorded, int total) {
     return '$recorded of $total days recorded';
   }
@@ -3283,4 +3277,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_partial => 'partial';
+
+  @override
+  String get nutrition_statistics_week => 'Week';
+
+  @override
+  String get nutrition_statistics_month => 'Month';
+
+  @override
+  String get nutrition_statistics_previous_period => 'Previous period';
+
+  @override
+  String get nutrition_statistics_next_period => 'Next period';
+
+  @override
+  String get nutrition_statistics_go_to_today => 'Jump to today';
+
+  @override
+  String get nutrition_statistics_day_empty =>
+      'No nutrition entries for this day.';
+
+  @override
+  String nutrition_energy_change_from_previous_day(Object value) {
+    return '$value vs. previous day';
+  }
 }

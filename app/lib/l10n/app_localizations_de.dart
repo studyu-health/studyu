@@ -2977,12 +2977,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nutrition_statistics => 'Statistik';
 
   @override
-  String get nutrition_recent_7_days => 'Letzte 7 Tage';
-
-  @override
-  String get nutrition_recent_30_days => 'Letzte 30 Tage';
-
-  @override
   String nutrition_days_recorded(int recorded, int total) {
     return '$recorded von $total Tagen erfasst';
   }
@@ -3328,4 +3322,28 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_partial => 'unvollständig';
+
+  @override
+  String get nutrition_statistics_week => 'Woche';
+
+  @override
+  String get nutrition_statistics_month => 'Monat';
+
+  @override
+  String get nutrition_statistics_previous_period => 'Vorheriger Zeitraum';
+
+  @override
+  String get nutrition_statistics_next_period => 'Nächster Zeitraum';
+
+  @override
+  String get nutrition_statistics_go_to_today => 'Zu heute springen';
+
+  @override
+  String get nutrition_statistics_day_empty =>
+      'Für diesen Tag sind keine Ernährungseinträge vorhanden.';
+
+  @override
+  String nutrition_energy_change_from_previous_day(Object value) {
+    return '$value zum Vortag';
+  }
 }

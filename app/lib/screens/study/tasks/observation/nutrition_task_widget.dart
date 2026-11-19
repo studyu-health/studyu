@@ -230,6 +230,7 @@ class _NutritionTaskWidgetState()
                         NutritionStatisticsView(
                           subject: appState.activeSubject,
                           taskId: widget.task?.id,
+                          isVisible: _selectedDestination == 1,
                           activeRecall: model.recall,
                           activeStudyDay: model.studyDaySnapshot,
                           activePeriodId:
@@ -417,15 +418,17 @@ class _NutritionTaskWidgetState()
           ],
           const SizedBox(height: 24),
           _buildMealsSection(context, model, recall, theme, l10n),
-          const SizedBox(height: 24),
-          Text(
-            l10n.daily_summary,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+          if (_isHistoricalMode) ...[
+            const SizedBox(height: 24),
+            Text(
+              l10n.daily_summary,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          DailyNutritionSummaryCard(dailyRecall: recall, showTitle: false),
+            const SizedBox(height: 12),
+            DailyNutritionSummaryCard(dailyRecall: recall, showTitle: false),
+          ],
           if (!_isHistoricalMode && widget.task?.footer != null) ...[
             const SizedBox(height: 16),
             HtmlText(widget.task!.footer, centered: true),

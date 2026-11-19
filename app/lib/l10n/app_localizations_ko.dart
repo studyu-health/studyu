@@ -2886,12 +2886,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_statistics => 'Statistics';
 
   @override
-  String get nutrition_recent_7_days => 'Recent 7 days';
-
-  @override
-  String get nutrition_recent_30_days => 'Recent 30 days';
-
-  @override
   String nutrition_days_recorded(int recorded, int total) {
     return '$recorded of $total days recorded';
   }
@@ -3228,4 +3222,27 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_partial => 'partial';
+
+  @override
+  String get nutrition_statistics_week => '주';
+
+  @override
+  String get nutrition_statistics_month => '월';
+
+  @override
+  String get nutrition_statistics_previous_period => '이전 기간';
+
+  @override
+  String get nutrition_statistics_next_period => '다음 기간';
+
+  @override
+  String get nutrition_statistics_go_to_today => '오늘로 이동';
+
+  @override
+  String get nutrition_statistics_day_empty => '이 날짜에는 식사 기록이 없습니다.';
+
+  @override
+  String nutrition_energy_change_from_previous_day(Object value) {
+    return '전날 대비 $value';
+  }
 }

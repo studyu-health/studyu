@@ -17,6 +17,7 @@ class const NutritionStatisticsView({
   final int? activeStudyDay,
   final String? activePeriodId,
   final Future<void> Function(NutritionRecallRecord record)? onOpenRecall,
+  final bool isVisible = true,
   super.key,
 }) extends StatefulWidget {
   @override
@@ -25,8 +26,9 @@ class const NutritionStatisticsView({
 }
 
 enum _StatisticsPeriod(final int days) {
-  recent7(7),
-  recent30(30),
+  day(1),
+  week(7),
+  month(30),
 }
 
 enum _Nutrient() {
@@ -37,22 +39,34 @@ enum _Nutrient() {
 }
 
 class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
-  late Future<List<NutritionRecallRecord>> _records;
-  _StatisticsPeriod _selectedPeriod = _StatisticsPeriod.recent7;
+  Future<List<NutritionRecallRecord>>? _records;
+  _StatisticsPeriod _selectedPeriod = _StatisticsPeriod.day;
+  int _periodsBack = 0;
   _Nutrient _selectedNutrient = _Nutrient.carbs;
   int? _focusedEnergyDay;
 
   @override
   void initState() {
     super.initState();
-    _records = _loadRecords();
+    if (widget.isVisible) _records = _loadRecords();
   }
 
   @override
   void didUpdateWidget(covariant NutritionStatisticsView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.subject != widget.subject ||
-        oldWidget.taskId != widget.taskId) {
+    final sourceChanged =
+        oldWidget.subject?.id != widget.subject?.id ||
+        oldWidget.taskId != widget.taskId;
+    if (sourceChanged) {
+      _selectedPeriod = _StatisticsPeriod.day;
+      _periodsBack = 0;
+      _focusedEnergyDay = null;
+      _records = null;
+    }
+    if (widget.isVisible &&
+        (sourceChanged ||
+            !oldWidget.isVisible ||
+            !identical(oldWidget.subject, widget.subject))) {
       _records = _loadRecords();
     }
   }
@@ -67,36 +81,49 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (_records == null) return const SizedBox.shrink();
     return FutureBuilder<List<NutritionRecallRecord>>(
+      key: ValueKey((widget.subject?.id, widget.taskId)),
       future: _records,
       builder: (context, snapshot) {
+        if (snapshot.hasError) return Center(child: Text(l10n.error));
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        final now = DateTime.now();
+        final today = DateUtils.dateOnly(DateTime.now());
         final statisticsDays = nutritionStatisticsDays(
           snapshot.data!,
           activeRecall: widget.activeRecall,
           activeStudyDay: widget.activeStudyDay,
           activePeriodId: widget.activePeriodId,
-          today: now,
         );
+        final periodDays = _selectedPeriod.days;
+        final earliest = statisticsDays.firstOrNull?.date ?? today;
+        final daysSinceEarliest =
+            DateTime.utc(today.year, today.month, today.day)
+                .difference(
+                  DateTime.utc(earliest.year, earliest.month, earliest.day),
+                )
+                .inDays;
+        final maxPeriodsBack = math.max(0, daysSinceEarliest ~/ periodDays);
+        final periodsBack = math.min(_periodsBack, maxPeriodsBack);
+        final endDate = addCalendarDays(today, -periodsBack * periodDays);
         final current = nutritionStatisticsPeriod(
           statisticsDays,
-          endDate: now,
-          dayCount: _selectedPeriod.days,
-          today: now,
+          endDate: endDate,
+          dayCount: periodDays,
+          today: today,
         );
+        final isDaily = _selectedPeriod == _StatisticsPeriod.day;
         final previous = nutritionStatisticsPeriod(
           statisticsDays,
-          endDate: addCalendarDays(
-            DateUtils.dateOnly(now),
-            -_selectedPeriod.days,
-          ),
-          dayCount: _selectedPeriod.days,
-          today: now,
+          endDate: addCalendarDays(endDate, -periodDays),
+          dayCount: periodDays,
+          today: today,
         );
         final hasData = current.days.any((day) => day.hasChartData);
+        final canCompare =
+            current.recordedCount >= 2 && previous.recordedCount >= 2;
 
         return ListView(
           padding: const EdgeInsets.all(16),
@@ -104,40 +131,64 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
             SegmentedButton<_StatisticsPeriod>(
               segments: [
                 ButtonSegment(
-                  value: _StatisticsPeriod.recent7,
-                  label: Text(l10n.nutrition_recent_7_days),
+                  value: _StatisticsPeriod.day,
+                  label: Text(l10n.day),
                 ),
                 ButtonSegment(
-                  value: _StatisticsPeriod.recent30,
-                  label: Text(l10n.nutrition_recent_30_days),
+                  value: _StatisticsPeriod.week,
+                  label: Text(l10n.nutrition_statistics_week),
+                ),
+                ButtonSegment(
+                  value: _StatisticsPeriod.month,
+                  label: Text(l10n.nutrition_statistics_month),
                 ),
               ],
               selected: {_selectedPeriod},
               showSelectedIcon: false,
-              onSelectionChanged: (selection) =>
-                  setState(() => _selectedPeriod = selection.single),
+              onSelectionChanged: (selection) => setState(() {
+                _selectedPeriod = selection.single;
+                _periodsBack = 0;
+                _focusedEnergyDay = null;
+              }),
             ),
             const SizedBox(height: 12),
-            Text(
-              '${_periodLabel(context, current.startDate, current.endDate)} · '
-              '${l10n.nutrition_completed_days(current.recordedCount)}'
-              '${current.hasTodaySoFar ? ' · ${l10n.nutrition_today_so_far}' : ''}',
-              style: Theme.of(context).textTheme.bodyMedium,
+            _dateNavigation(
+              context,
+              current,
+              periodsBack: periodsBack,
+              canGoBack: periodsBack < maxPeriodsBack,
             ),
-            const SizedBox(height: 16),
-            if (!hasData)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 48),
-                child: Center(child: Text(l10n.nutrition_statistics_empty)),
-              )
-            else ...[
-              _overviewCard(context, current),
-              const SizedBox(height: 12),
-              _energyCard(context, current),
-              const SizedBox(height: 12),
-              _nutrientCard(context, current),
-              const SizedBox(height: 12),
-              _comparisonCard(context, current, previous),
+            if (isDaily) ...[
+              const SizedBox(height: 16),
+              _dailySummary(context, current.days.single, previous.days.single),
+            ] else ...[
+              Text(
+                '${l10n.nutrition_completed_days(current.recordedCount)}'
+                '${current.hasTodaySoFar ? ' · ${l10n.nutrition_today_so_far}' : ''}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              if (!hasData)
+                _emptyStatistics(l10n.nutrition_statistics_empty)
+              else ...[
+                _aggregateOverview(
+                  context,
+                  current,
+                  previous,
+                  canCompare: canCompare,
+                ),
+                const SizedBox(height: 12),
+                _energyCard(context, current),
+                const SizedBox(height: 12),
+                _nutrientCard(context, current),
+                const SizedBox(height: 12),
+                _comparisonCard(
+                  context,
+                  current,
+                  previous,
+                  canCompare: canCompare,
+                ),
+              ],
             ],
           ],
         );
@@ -145,37 +196,237 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     );
   }
 
-  Widget _overviewCard(
+  Widget _dateNavigation(
     BuildContext context,
-    NutritionStatisticsPeriod current,
-  ) {
+    NutritionStatisticsPeriod period, {
+    required int periodsBack,
+    required bool canGoBack,
+  }) {
     final l10n = AppLocalizations.of(context)!;
-    final unavailable = current.unavailableNutrients;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.nutrition_daily_average,
+    final isLatest = periodsBack == 0;
+    final label = _selectedPeriod == _StatisticsPeriod.day
+        ? (isLatest
+              ? l10n.today
+              : DateFormat.yMMMd(Localizations.localeOf(context).toString())
+                    .format(period.endDate))
+        : _periodLabel(context, period.startDate, period.endDate);
+    return Row(
+      children: [
+        Expanded(
+          child: Semantics(
+            liveRegion: true,
+            child: Text(
+              label,
+              textAlign: TextAlign.start,
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 12),
-            NutritionSummaryView(
-              energyKcal: current.averageFor('energyKcal'),
-              energyUnavailable: current.hasUnavailableEnergy,
-              carbs: current.averageFor('carbs'),
-              protein: current.averageFor('protein'),
-              fat: current.averageFor('fat'),
-              unavailableNutrients: unavailable,
-              partialNutrients: current.partialNutrients,
-              formatEnergy: (value) => _calories(context, value),
-              formatGrams: (value) => _grams(context, value),
-            ),
+          ),
+        ),
+        if (canGoBack || !isLatest) const SizedBox(width: 8),
+        Wrap(
+          spacing: 4,
+          children: [
+            if (canGoBack)
+              IconButton.filledTonal(
+                icon: const Icon(Icons.chevron_left),
+                tooltip: l10n.nutrition_statistics_previous_period,
+                onPressed: () => _selectDate(periodsBack + 1),
+              ),
+            if (!isLatest) ...[
+              IconButton.filledTonal(
+                icon: const Icon(Icons.chevron_right),
+                tooltip: l10n.nutrition_statistics_next_period,
+                onPressed: () => _selectDate(periodsBack - 1),
+              ),
+              IconButton.filledTonal(
+                icon: const Icon(Icons.settings_backup_restore),
+                tooltip: l10n.nutrition_statistics_go_to_today,
+                onPressed: () => _selectDate(0),
+              ),
+            ],
           ],
         ),
-      ),
+      ],
+    );
+  }
+
+  void _selectDate(int periodsBack) => setState(() {
+    _periodsBack = periodsBack;
+    _focusedEnergyDay = null;
+  });
+
+  Widget _dailySummary(
+    BuildContext context,
+    NutritionStatisticsPeriodDay day,
+    NutritionStatisticsPeriodDay previous,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final data = day.data;
+    if (data == null || (!data.hasData && !data.isRecorded)) {
+      return _emptyStatistics(l10n.nutrition_statistics_day_empty);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _energyHeadline(
+          context,
+          label: day.isToday && !data.isRecorded
+              ? l10n.nutrition_today_so_far
+              : l10n.total_energy,
+          nutrition: data.nutrition,
+          change: _dailyNutritionEnergyChange(day, previous),
+        ),
+        const SizedBox(height: 16),
+        NutritionSummaryCard(
+          key: ValueKey(day.date),
+          nutrition: data.nutrition,
+          title: l10n.daily_summary,
+          inCard: true,
+          showEnergy: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _energyHeadline(
+    BuildContext context, {
+    required String label,
+    required NutritionProfile nutrition,
+    required int? change,
+    bool partialChange = false,
+  }) {
+    final theme = Theme.of(context);
+    final energy = _energyUnavailable(nutrition) ? null : nutrition.energyKcal;
+    final value = _withPartial(
+      context,
+      _calories(context, energy),
+      nutrition.isPartial('energyKcal'),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: theme.textTheme.titleSmall),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          semanticsLabel:
+              '${AppLocalizations.of(context)!.nutrition_energy}, $value',
+          style: theme.textTheme.displaySmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        if (change != null) ...[
+          const SizedBox(height: 8),
+          _energyChange(context, change, partial: partialChange),
+        ],
+      ],
+    );
+  }
+
+  Widget _energyChange(
+    BuildContext context,
+    int change, {
+    required bool partial,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final sign = change > 0 ? '+' : (change < 0 ? '−' : '');
+    final value =
+        '$sign${_numberFormat(context, maximumFractionDigits: 0).format(change.abs())}';
+    final isDaily = _selectedPeriod == _StatisticsPeriod.day;
+    final changeLabel = isDaily
+        ? l10n.nutrition_energy_change_from_previous_day('$value kcal')
+        : l10n.nutrition_kcal_per_day(value);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.secondaryContainer,
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ExcludeSemantics(
+                  child: Icon(
+                    _changeIcon(change),
+                    size: 16,
+                    color: colors.onSecondaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    _withPartial(context, changeLabel, partial),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colors.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (!isDaily)
+          Text(l10n.nutrition_compared_previous_days(_selectedPeriod.days)),
+      ],
+    );
+  }
+
+  Widget _emptyStatistics(String message) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 48),
+    child: Center(child: Text(message, textAlign: TextAlign.center)),
+  );
+
+  Widget _aggregateOverview(
+    BuildContext context,
+    NutritionStatisticsPeriod current,
+    NutritionStatisticsPeriod previous, {
+    required bool canCompare,
+  }) {
+    final nutrition = current.averageNutrition;
+    final baseline = canCompare ? previous.averageNutrition : null;
+    final change =
+        baseline == null ||
+            _energyUnavailable(nutrition) ||
+            _energyUnavailable(baseline)
+        ? null
+        : (nutrition.energyKcal - baseline.energyKcal).round();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _energyHeadline(
+          context,
+          label: AppLocalizations.of(context)!.nutrition_daily_average,
+          nutrition: nutrition,
+          change: change,
+          partialChange:
+              nutrition.isPartial('energyKcal') ||
+              (baseline?.isPartial('energyKcal') ?? false),
+        ),
+        const SizedBox(height: 16),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: NutritionSummaryView(
+              energyKcal: null,
+              showEnergy: false,
+              carbs: nutrition.carbs,
+              protein: nutrition.protein,
+              fat: nutrition.fat,
+              unavailableNutrients: nutrition.unavailableNutrients,
+              partialNutrients: nutrition.partialNutrients,
+              formatGrams: (value) => _grams(context, value),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -550,15 +801,14 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
   Widget _comparisonCard(
     BuildContext context,
     NutritionStatisticsPeriod current,
-    NutritionStatisticsPeriod previous,
-  ) {
+    NutritionStatisticsPeriod previous, {
+    required bool canCompare,
+  }) {
     final l10n = AppLocalizations.of(context)!;
-    final enoughData =
-        current.recordedCount >= 2 && previous.recordedCount >= 2;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: enoughData
+        child: canCompare
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -567,15 +817,6 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
-                  _changeRow(
-                    context,
-                    l10n.nutrition_energy,
-                    _averageChange(current, previous, 'energyKcal'),
-                    partial:
-                        current.partialNutrients.contains('energyKcal') ||
-                        previous.partialNutrients.contains('energyKcal'),
-                    calories: true,
-                  ),
                   _changeRow(
                     context,
                     l10n.protein,
@@ -603,7 +844,6 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     BuildContext context,
     String label,
     double? change, {
-    bool calories = false,
     bool partial = false,
   }) {
     final l10n = AppLocalizations.of(context)!;
@@ -617,24 +857,18 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     }
     final rounded = change.abs() < 0.05 ? 0.0 : change;
     final sign = rounded > 0 ? '+' : (rounded < 0 ? '−' : '');
-    final magnitude = calories
-        ? _numberFormat(context, maximumFractionDigits: 0).format(rounded.abs())
-        : _numberFormat(
-            context,
-            maximumFractionDigits: 1,
-          ).format(rounded.abs());
-    final value = calories
-        ? l10n.nutrition_kcal_per_day('$sign$magnitude')
-        : l10n.nutrition_grams_per_day('$sign$magnitude');
+    final magnitude = _numberFormat(
+      context,
+      maximumFractionDigits: 1,
+    ).format(rounded.abs());
+    final value = l10n.nutrition_grams_per_day('$sign$magnitude');
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
           Expanded(child: Text(label)),
           Icon(
-            rounded > 0
-                ? Icons.arrow_upward
-                : (rounded < 0 ? Icons.arrow_downward : Icons.remove),
+            _changeIcon(rounded),
             size: 16,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -784,15 +1018,10 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
 
   String _periodLabel(BuildContext context, DateTime start, DateTime end) {
     final locale = Localizations.localeOf(context).toString();
-    if (start.year == end.year && start.month == end.month) {
-      return '${start.day}–${end.day} ${DateFormat.MMMM(locale).format(end)}';
-    }
-    if (start.year == end.year) {
-      return '${DateFormat('d MMM', locale).format(start)}–'
-          '${DateFormat('d MMM', locale).format(end)}';
-    }
-    return '${DateFormat.yMMMd(locale).format(start)}–'
-        '${DateFormat.yMMMd(locale).format(end)}';
+    final dateFormat = start.year == end.year && end.year == DateTime.now().year
+        ? DateFormat.MMMd(locale)
+        : DateFormat.yMMMd(locale);
+    return '${dateFormat.format(start)} – ${dateFormat.format(end)}';
   }
 
   double? _averageChange(
@@ -876,8 +1105,34 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
 bool _energyUnavailable(NutritionProfile nutrition) =>
     !nutrition.isKnown('energyKcal');
 
+IconData _changeIcon(num change) => change > 0
+    ? Icons.arrow_upward
+    : (change < 0 ? Icons.arrow_downward : Icons.remove);
+
+int? _dailyNutritionEnergyChange(
+  NutritionStatisticsPeriodDay day,
+  NutritionStatisticsPeriodDay previous,
+) {
+  final currentData = day.data;
+  final previousData = previous.data;
+  if (currentData == null ||
+      previousData == null ||
+      (!day.isToday && !currentData.isRecorded) ||
+      !previousData.isRecorded) {
+    return null;
+  }
+  final current = currentData.nutrition;
+  final baseline = previousData.nutrition;
+  if (_energyUnavailable(current) ||
+      _energyUnavailable(baseline) ||
+      current.isPartial('energyKcal') ||
+      baseline.isPartial('energyKcal')) {
+    return null;
+  }
+  return (current.energyKcal - baseline.energyKcal).round();
+}
+
 class const NutritionStatisticsDay({
-  required final int studyDaySnapshot,
   required final DateTime date,
   required final NutritionProfile nutrition,
   required final bool isRecorded,
@@ -925,59 +1180,66 @@ List<NutritionStatisticsDay> nutritionStatisticsDays(
   DailyRecall? activeRecall,
   int? activeStudyDay,
   String? activePeriodId,
-  DateTime? today,
 }) {
-  final mergedRecords = [...records];
   final activeDay = activeStudyDay ?? activeRecall?.studyDaySnapshot;
-  if (activeRecall != null && activeDay != null) {
-    bool matchesActiveRecord(NutritionRecallRecord record) =>
-        record.studyDaySnapshot == activeDay &&
-        (activePeriodId != null
-            ? record.periodId == activePeriodId
-            : record.recall.id == activeRecall.id);
+  bool matchesActiveRecord(NutritionRecallRecord record) =>
+      activeRecall != null &&
+      (activeDay != null && activePeriodId != null
+          ? record.studyDaySnapshot == activeDay &&
+                record.periodId == activePeriodId
+          : record.recall.id == activeRecall.id);
 
-    NutritionRecallRecord? replaced;
-    for (final record in mergedRecords) {
-      if (matchesActiveRecord(record)) {
-        replaced = record;
-        break;
-      }
+  final byDate = <DateTime, List<NutritionRecallRecord>>{};
+  final activeDate = activeRecall == null
+      ? null
+      : DateUtils.dateOnly(activeRecall.date.toLocal());
+  NutritionRecallRecord? replaced;
+  for (final record in records) {
+    if (matchesActiveRecord(record)) {
+      replaced ??= record;
+      continue;
     }
-    mergedRecords.removeWhere(matchesActiveRecord);
-    mergedRecords.add(
-      NutritionRecallRecord(
-        recall: activeRecall,
-        taskId: replaced?.taskId ?? '',
-        periodId: activePeriodId,
-        interventionId: replaced?.interventionId ?? '',
-        studyDaySnapshot: activeDay,
-        progress: replaced?.progress,
-      ),
-    );
+    final date = DateUtils.dateOnly(record.recall.date.toLocal());
+    byDate.putIfAbsent(date, () => []).add(record);
   }
-
-  final byDay = <int, List<NutritionRecallRecord>>{};
-  for (final record in mergedRecords) {
-    byDay.putIfAbsent(record.studyDaySnapshot, () => []).add(record);
+  final activeSnapshot = activeDay ?? replaced?.studyDaySnapshot;
+  if (activeDate != null && activeRecall != null) {
+    final dateRecords = byDate.putIfAbsent(activeDate, () => []);
+    if (activeSnapshot != null) {
+      dateRecords.add(
+        NutritionRecallRecord(
+          recall: activeRecall,
+          taskId: replaced?.taskId ?? '',
+          periodId: activePeriodId ?? replaced?.periodId,
+          interventionId: replaced?.interventionId ?? '',
+          studyDaySnapshot: activeSnapshot,
+          progress: replaced?.progress,
+        ),
+      );
+    }
   }
-  final days = byDay.entries.map((entry) {
-    final recordsForDay = entry.value;
-    final date = DateUtils.dateOnly(recordsForDay.first.recall.date.toLocal());
+  final days = byDate.entries.map((entry) {
+    final date = entry.key;
+    final recordsForDate = entry.value;
+    final recalls = [
+      for (final record in recordsForDate) record.recall,
+      if (activeRecall != null && activeSnapshot == null && date == activeDate)
+        activeRecall,
+    ];
     final foods = [
-      for (final record in recordsForDay)
-        for (final meal in record.recall.meals)
+      for (final recall in recalls)
+        for (final meal in recall.meals)
           if (!meal.isSkipped) ...meal.foods,
     ];
-    final completed = recordsForDay.where(
-      (record) => record.recall.entryCompletedAt != null,
-    );
+    final completedRecord = recordsForDate
+        .where((record) => record.recall.entryCompletedAt != null)
+        .firstOrNull;
     return NutritionStatisticsDay(
-      studyDaySnapshot: entry.key,
       date: date,
       nutrition: sumNutritionFoods(foods),
-      isRecorded: completed.isNotEmpty,
+      isRecorded: recalls.every((recall) => recall.entryCompletedAt != null),
       hasData: foods.isNotEmpty,
-      record: completed.isNotEmpty ? completed.first : recordsForDay.first,
+      record: completedRecord ?? recordsForDate.firstOrNull,
     );
   }).toList()..sort((left, right) => left.date.compareTo(right.date));
   return days;
@@ -993,14 +1255,13 @@ NutritionStatisticsPeriod nutritionStatisticsPeriod(
   final start = addCalendarDays(end, -(dayCount - 1));
   final currentDate = DateUtils.dateOnly(today ?? DateTime.now());
   final byDate = {
-    for (final day in statisticsDays)
-      _dateKey(DateUtils.dateOnly(day.date)): day,
+    for (final day in statisticsDays) DateUtils.dateOnly(day.date): day,
   };
   return NutritionStatisticsPeriod([
     for (var offset = 0; offset < dayCount; offset++)
       NutritionStatisticsPeriodDay(
         date: addCalendarDays(start, offset),
-        data: byDate[_dateKey(addCalendarDays(start, offset))],
+        data: byDate[addCalendarDays(start, offset)],
         isToday: DateUtils.isSameDay(
           addCalendarDays(start, offset),
           currentDate,
@@ -1011,5 +1272,3 @@ NutritionStatisticsPeriod nutritionStatisticsPeriod(
 
 DateTime addCalendarDays(DateTime date, int days) =>
     DateTime(date.year, date.month, date.day + days);
-
-String _dateKey(DateTime date) => '${date.year}-${date.month}-${date.day}';

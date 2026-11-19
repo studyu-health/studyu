@@ -464,17 +464,29 @@ void main() {
   });
 
   testWidgets(
-    'statistics destination uses statistics help and no history action',
+    'moves the daily summary to statistics and retains the period selection',
     (tester) async {
       await tester.pumpWidget(
         nutritionTaskApp(
           nutritionTask(),
-          existingRecall: recall([meal('meal', MealType.breakfast)]),
+          existingRecall: recall([
+            meal(
+              'meal',
+              MealType.breakfast,
+              foods: [food('apple', 'Apple', 100)],
+            ),
+          ])..date = DateTime.now(),
         ),
       );
       await tester.pump();
+      expect(find.text('Daily summary'), findsNothing);
 
-      await tester.tap(find.text('Statistics'));
+      final navigation = find.byType(NavigationBar);
+      final statistics = find.descendant(
+        of: navigation,
+        matching: find.text('Statistics'),
+      );
+      await tester.tap(statistics);
       await tester.pumpAndSettle();
 
       expect(
@@ -485,6 +497,8 @@ void main() {
         findsOneWidget,
       );
       expect(find.byTooltip('History'), findsNothing);
+      expect(find.text('Daily summary'), findsOneWidget);
+      expect(find.text('100 kcal'), findsOneWidget);
 
       await tester.tap(find.byTooltip('Help'));
       await tester.pumpAndSettle();
@@ -493,6 +507,21 @@ void main() {
         find.textContaining('Averages include only completed study days'),
         findsOneWidget,
       );
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Week'));
+      await tester.pumpAndSettle();
+      expect(find.text('Energy by study day'), findsOneWidget);
+      await tester.tap(
+        find.descendant(of: navigation, matching: find.text('Today')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Daily summary'), findsNothing);
+
+      await tester.tap(statistics);
+      await tester.pumpAndSettle();
+      expect(find.text('Energy by study day'), findsOneWidget);
     },
   );
 

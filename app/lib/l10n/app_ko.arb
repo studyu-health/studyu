@@ -519,5 +519,12 @@
   "time_format_24_hour": "24시간제 (14:30)",
   "questionnaire_review_title": "답변 검토",
   "questionnaire_review_description": "이전 답변을 변경했습니다. 설문을 완료하기 전에 이후 답변을 검토하세요.",
-  "questionnaire_review_confirmation": "답변을 검토했습니다"
+  "questionnaire_review_confirmation": "답변을 검토했습니다",
+  "nutrition_statistics_week": "주",
+  "nutrition_statistics_month": "월",
+  "nutrition_statistics_previous_period": "이전 기간",
+  "nutrition_statistics_next_period": "다음 기간",
+  "nutrition_statistics_go_to_today": "오늘로 이동",
+  "nutrition_statistics_day_empty": "이 날짜에는 식사 기록이 없습니다.",
+  "nutrition_energy_change_from_previous_day": "전날 대비 {value}"
 }

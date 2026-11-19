@@ -173,8 +173,7 @@ class const NutritionSummaryView({
   required final double? fat,
   final Set<String> unavailableNutrients = const {},
   final Set<String> partialNutrients = const {},
-  final bool energyUnavailable = false,
-  final String Function(double)? formatEnergy,
+  final bool showEnergy = true,
   final String Function(double)? formatGrams,
   super.key,
 }) extends StatelessWidget {
@@ -183,8 +182,7 @@ class const NutritionSummaryView({
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final total = (carbs ?? 0) * 4 + (protein ?? 0) * 4 + (fat ?? 0) * 9;
-    final hideEnergy =
-        energyUnavailable || _isUnavailable('energyKcal', energyKcal);
+    final hideEnergy = _isUnavailable('energyKcal', energyKcal);
     final distributionUnavailable =
         _isUnavailable('carbs', carbs) ||
         _isUnavailable('protein', protein) ||
@@ -194,38 +192,39 @@ class const NutritionSummaryView({
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            _nutritionIconBadge(
-              icon: Icons.local_fire_department_outlined,
-              color: theme.colorScheme.secondary,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    hideEnergy
-                        ? '—'
-                        : _withAvailability(
-                            context,
-                            'energyKcal',
-                            formatEnergy?.call(energyKcal!) ??
-                                '${energyKcal!.round()} kcal',
-                          ),
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(l10n.total_energy),
-                ],
+        if (showEnergy) ...[
+          Row(
+            children: [
+              _nutritionIconBadge(
+                icon: Icons.local_fire_department_outlined,
+                color: theme.colorScheme.secondary,
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hideEnergy
+                          ? '—'
+                          : _withAvailability(
+                              context,
+                              'energyKcal',
+                              '${energyKcal!.round()} kcal',
+                            ),
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(l10n.total_energy),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
         Text(
           l10n.macronutrients,
           style: theme.textTheme.titleSmall?.copyWith(
@@ -311,6 +310,7 @@ class const NutritionSummaryCard({
   final String? subtitle,
   final bool inCard = false,
   final bool showTitle = true,
+  final bool showEnergy = true,
   super.key,
 }) extends StatefulWidget {
   @override
@@ -368,6 +368,7 @@ class _NutritionSummaryCardState() extends State<NutritionSummaryCard> {
                 fat: widget.nutrition.fat,
                 unavailableNutrients: widget.nutrition.unavailableNutrients,
                 partialNutrients: widget.nutrition.partialNutrients,
+                showEnergy: widget.showEnergy,
               ),
             ],
           ),
