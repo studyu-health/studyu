@@ -117,6 +117,7 @@ class _FoodSearchLayoutDelegate({required final bool trayOverlapsContent})
 class const FoodSearchScreen({
   final bool allowMeals = true,
   final String? mealLabel,
+  final List<studyu.FoodEntry> initialFoods = const [],
   final OpenFoodFactsSearch? openFoodFactsSearch,
   final UsdaFoodSearch? usdaFoodSearch,
   final NutritionFoodRepository? repository,
@@ -141,6 +142,7 @@ class const FoodSearchScreen({
   static Future<FoodSearchSelection?> show(
     BuildContext context, {
     required String mealLabel,
+    List<studyu.FoodEntry> initialFoods = const [],
     bool allowMeals = true,
     OpenFoodFactsSearch? openFoodFactsSearch,
     UsdaFoodSearch? usdaFoodSearch,
@@ -153,6 +155,7 @@ class const FoodSearchScreen({
       builder: (_) => FoodSearchScreen(
         allowMeals: allowMeals,
         mealLabel: mealLabel,
+        initialFoods: initialFoods,
         openFoodFactsSearch: openFoodFactsSearch,
         usdaFoodSearch: usdaFoodSearch,
         historicalMode: historicalMode,
@@ -179,6 +182,7 @@ class const FoodSearchScreen({
     final content = _FoodSearchScreenContent(
       allowMeals: allowMeals,
       mealLabel: mealLabel,
+      initialFoods: initialFoods,
       openFoodFactsSearch: openFoodFactsSearch,
       usdaFoodSearch: usdaFoodSearch,
       historicalMode: historicalMode,
@@ -200,6 +204,7 @@ class const FoodSearchScreen({
 class const _FoodSearchScreenContent({
   final bool allowMeals = true,
   final String? mealLabel,
+  required final List<studyu.FoodEntry> initialFoods,
   final OpenFoodFactsSearch? openFoodFactsSearch,
   final UsdaFoodSearch? usdaFoodSearch,
   required final bool historicalMode,
@@ -216,7 +221,7 @@ class _FoodSearchScreenContentState()
   final TextEditingController _searchController = TextEditingController();
   late final FoodSelectionStore? _selectionStore = widget.mealLabel == null
       ? null
-      : FoodSelectionStore();
+      : (FoodSelectionStore()..seed(widget.initialFoods));
   _FoodSearchSection _selectedSection = _FoodSearchSection.recent;
   _FoodSearchFilter _selectedFilter = _FoodSearchFilter.all;
   final ScrollController _scrollController = ScrollController();
@@ -238,7 +243,9 @@ class _FoodSearchScreenContentState()
   bool _isConfirming = false;
   bool _isConfirmingRemoval = false;
   bool _allowPop = false;
+  bool _selectionChanged = false;
   bool _selectionSurfaceActive = false;
+  bool get _updatesExistingMeal => widget.initialFoods.isNotEmpty;
 
   @override
   void initState() {
@@ -265,7 +272,7 @@ class _FoodSearchScreenContentState()
   }
 
   void _onSelectionChanged() {
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _selectionChanged = true);
   }
 
   void _onSelectionSurfaceActivityChanged(bool active) {
@@ -602,13 +609,7 @@ class _FoodSearchScreenContentState()
   }
 
   void _confirmSelection(FoodSelectionStore store) {
-    if (_isConfirming || store.isEmpty) return;
-    if (!widget.allowMeals &&
-        store.items.any(
-          (item) => item.baseFood.entryType == studyu.FoodEntryType.meal,
-        )) {
-      return;
-    }
+    if (_isConfirming || (store.isEmpty && !_updatesExistingMeal)) return;
     _removeTransfer();
     setState(() => _isConfirming = true);
     _pop(FoodSearchSelection(store.materialize()));
@@ -622,8 +623,8 @@ class _FoodSearchScreenContentState()
   }
 
   Future<void> _confirmDiscard() async {
-    final store = _selectionStore;
-    if (store == null || store.isEmpty) {
+    if (!_selectionChanged ||
+        (!_updatesExistingMeal && _selectionStore!.isEmpty)) {
       _pop();
       return;
     }
@@ -654,6 +655,7 @@ class _FoodSearchScreenContentState()
     Offset? source,
     String? imageUrl,
   }) {
+    if (!_isAllowedFood(food)) return;
     if (_selectionStore == null) {
       _completeSingleSelection(food);
       return;
@@ -687,15 +689,15 @@ class _FoodSearchScreenContentState()
     final store = _selectionStore!;
     _removeTransfer();
     _searchFocusNode.unfocus();
-    final result = await FoodQuantitySheet.show(
-      context,
-      food: item.baseFood,
-      baselineFood: item.baselineFood,
-      action: FoodQuantityAction.updateSelection,
-      initialAmount: item.baseFood.amount * item.quantity,
-      caloriesKnown: item.caloriesKnown,
-      gramsKnown: item.gramsKnown,
-      baselineGramsKnown: item.baselineGramsKnown,
+    final food = rescaleFoodAmount(item.baseFood, item.amount);
+    final result = await Navigator.of(context).push(
+      food.entryType == studyu.FoodEntryType.meal
+          ? MealCreatorScreen.route(existingMeal: food, editLoggedAmount: true)
+          : FoodEntryScreen.route(
+              existingFood: food,
+              showSearchAction: false,
+              editLoggedAmount: true,
+            ),
     );
     if (result == null || !mounted) return;
 
@@ -705,8 +707,8 @@ class _FoodSearchScreenContentState()
     store.replaceBase(
       item.key,
       result,
-      caloriesKnown: item.caloriesKnown,
-      gramsKnown: item.gramsKnown || item.baselineGramsKnown || weightChanged,
+      caloriesKnown: result.nutrition.isKnown('energyKcal'),
+      gramsKnown: item.gramsKnown || weightChanged,
     );
   }
 
@@ -716,7 +718,7 @@ class _FoodSearchScreenContentState()
     if (store == null || item == null || _isConfirmingRemoval) return;
 
     _removeTransfer();
-    if (item.quantity > 1) {
+    if (item.canDecrement) {
       store.decrement(key);
       return;
     }
@@ -743,7 +745,7 @@ class _FoodSearchScreenContentState()
     if (!mounted ||
         shouldRemove != true ||
         store.itemFor(key) != item ||
-        item.quantity != 1) {
+        item.canDecrement) {
       return;
     }
     store.delete(key);
@@ -921,6 +923,8 @@ class _FoodSearchScreenContentState()
         title: Text(
           widget.mealLabel == null
               ? l10n.add_food_title
+              : _updatesExistingMeal
+              ? l10n.food_selection_update_selection
               : widget.allowMeals
               ? l10n.nutrition_add_foods_or_saved_meals_to_meal(
                   widget.mealLabel!.toLowerCase(),
@@ -965,7 +969,7 @@ class _FoodSearchScreenContentState()
             child: switch (_selectionStore) {
               final store? => Visibility(
                 key: const ValueKey('selection-tray'),
-                visible: !store.isEmpty,
+                visible: _updatesExistingMeal || !store.isEmpty,
                 maintainState: true,
                 child: _SelectionPeekTray(
                   key: _selectionTrayKey,
@@ -975,6 +979,7 @@ class _FoodSearchScreenContentState()
                   quantityAnchorFor: _quantityAnchorFor,
                   store: store,
                   mealLabel: widget.mealLabel!,
+                  updatesExistingMeal: _updatesExistingMeal,
                   maxHeight: bodyConstraints.maxHeight,
                   isConfirming: _isConfirming,
                   onConfirm: () => _confirmSelection(store),

@@ -7,6 +7,7 @@ class const _SelectionPeekTray({
   required final GlobalKey Function(String key) quantityAnchorFor,
   required final FoodSelectionStore store,
   required final String mealLabel,
+  required final bool updatesExistingMeal,
   required final double maxHeight,
   required final bool isConfirming,
   required final VoidCallback onConfirm,
@@ -165,36 +166,21 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
               )
             else
               _compactRows(context),
-            if (!_isExpanded &&
-                MediaQuery.viewInsetsOf(context).bottom == 0 &&
-                widget.store.itemCount >
-                    widget.store.recentItems
-                        .take(
-                          MediaQuery.textScalerOf(context).scale(1) > 1.3
-                              ? 1
-                              : 2,
-                        )
-                        .length)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: () => _setExpanded(true),
-                  child: Text(
-                    l10n.food_selection_view_more(widget.store.itemCount),
-                  ),
-                ),
-              ),
             Padding(
               padding: EdgeInsets.fromLTRB(16, 8, 16, _isExpanded ? 8 : 12),
               child: FilledButton(
-                onPressed: widget.isConfirming || widget.store.isEmpty
+                onPressed:
+                    widget.isConfirming ||
+                        (widget.store.isEmpty && !widget.updatesExistingMeal)
                     ? null
                     : widget.onConfirm,
                 child: Text(
-                  l10n.food_selection_confirm(
-                    widget.store.itemCount,
-                    widget.mealLabel,
-                  ),
+                  widget.updatesExistingMeal
+                      ? l10n.food_selection_update_selection
+                      : l10n.food_selection_confirm(
+                          widget.store.itemCount,
+                          widget.mealLabel,
+                        ),
                 ),
               ),
             ),
@@ -224,14 +210,10 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
   }
 
   Widget _compactRows(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final previewLimit = mediaQuery.viewInsets.bottom > 0
-        ? 0
-        : (mediaQuery.textScaler.scale(1) > 1.3 ? 1 : 2);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: widget.maxHeight * 0.25),
       child: _SelectionPreviewRows(
-        items: widget.store.recentItems.take(previewLimit).toList(),
+        items: widget.store.items.toList(),
         rowAnchorFor: widget.rowAnchorFor,
         quantityAnchorFor: widget.quantityAnchorFor,
         onEdit: widget.onEdit,
@@ -342,8 +324,8 @@ class _SelectionPreviewRowsState() extends State<_SelectionPreviewRows> {
       key: _listKey,
       initialItemCount: _items.length,
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
+      primary: false,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       itemBuilder: (context, index, animation) =>
           _buildRow(_items[index], animation),
     );
@@ -438,9 +420,11 @@ class const _SelectionPreviewRow({
               ),
               const SizedBox(width: 8),
               SelectionQuantityButton(
-                tooltip: l10n.food_quantity_edit_amount,
+                tooltip: item.baseFood.entryType == studyu.FoodEntryType.meal
+                    ? l10n.nutrition_edit_saved_meal
+                    : l10n.edit_food_title,
                 onPressed: () => onEdit(item),
-                icon: Icons.tune,
+                icon: Icons.edit_outlined,
                 visualDensity: VisualDensity.compact,
               ),
               SelectionQuantityControl(

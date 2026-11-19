@@ -7,7 +7,6 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/models/photo_reference.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
-import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
@@ -38,7 +37,6 @@ final class const DeletedMealEntryResult() extends MealEntryResult;
 final class const DiscardedMealEntryResult() extends MealEntryResult;
 
 enum _FoodAction() {
-  editAmount,
   edit,
   editDefinition,
   remove,
@@ -180,6 +178,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     final result = await FoodSearchScreen.show(
       context,
       mealLabel: _mealLabel,
+      initialFoods: _meal.foods,
       allowMeals: widget.task?.allowMeals ?? true,
       historicalMode: widget.historicalTarget != null,
       repository: widget.foodRepository,
@@ -190,7 +189,11 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     );
     if (!mounted || !_revalidateHistoricalEligibility()) return;
     if (result != null) {
-      setState(() => _addSelectedFoods(result.foods));
+      setState(() {
+        _meal.foods
+          ..clear()
+          ..addAll(result.foods);
+      });
     }
   }
 
@@ -300,6 +303,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       result = await Navigator.of(context).push(
         MealCreatorScreen.route(
           existingMeal: food,
+          editLoggedAmount: true,
           showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
         ),
       );
@@ -307,6 +311,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       result = await Navigator.of(context).push(
         FoodEntryScreen.route(
           existingFood: food,
+          editLoggedAmount: !editReusableDefinition,
           showSearchAction: false,
           historicalTarget: widget.historicalTarget,
           editReusableDefinition: editReusableDefinition,
@@ -335,9 +340,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
             );
         final updatedTemplate = await viewModel.updateFoodTemplatePrototype(
           food.templateId!,
-          edited.entryType == FoodEntryType.meal
-              ? normalizeNutritionFoodDefinition(edited)
-              : edited,
+          normalizeNutritionFoodDefinition(edited),
         );
         if (updatedTemplate != null) {
           edited = cloneFoodEntry(edited)
@@ -496,21 +499,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     setState(() => _meal.foods.removeAt(index));
   }
 
-  Future<void> _adjustFoodQuantity(FoodEntry food) async {
-    final result = await FoodQuantitySheet.show(
-      context,
-      food: food,
-      mealLabel: _mealLabel,
-      action: FoodQuantityAction.update,
-    );
-    if (!mounted || !_revalidateHistoricalEligibility()) return;
-    if (result == null) return;
-
-    final index = _foodIndex(food.id);
-    if (index == -1) return;
-    setState(() => _meal.foods[index] = result);
-  }
-
   Future<void> _showFoodActions(FoodEntry food) async {
     final l10n = AppLocalizations.of(context)!;
     final action = await showNutritionActionSheet<_FoodAction>(
@@ -519,13 +507,12 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       subtitle: _foodActionSubtitle(food, l10n),
       actions: [
         NutritionSheetAction(
-          value: _FoodAction.editAmount,
-          label: l10n.food_quantity_edit_amount,
-          icon: Icons.tune,
-        ),
-        NutritionSheetAction(
           value: _FoodAction.edit,
-          label: l10n.edit_this_entry,
+          label: widget.historicalTarget != null
+              ? l10n.edit_this_entry
+              : food.entryType == FoodEntryType.meal
+              ? l10n.nutrition_edit_saved_meal
+              : l10n.edit_food_title,
           icon: Icons.edit_outlined,
         ),
         if (widget.historicalTarget != null)
@@ -544,8 +531,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     );
     if (!mounted) return;
     switch (action) {
-      case _FoodAction.editAmount:
-        await _adjustFoodQuantity(food);
       case _FoodAction.edit:
         await _editFood(food);
       case _FoodAction.editDefinition:
@@ -958,7 +943,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                   showValidationError: _hasAttemptedSave && _meal.foods.isEmpty,
                   allowMeals: _allowMeals,
                   onAddFood: _openFoodSearch,
-                  onFoodTap: _adjustFoodQuantity,
+                  onFoodTap: _editFood,
                   onFoodActions: _showFoodActions,
                   onSaveToLibrary:
                       widget.historicalTarget == null && _allowMeals
@@ -1280,13 +1265,19 @@ class const _FoodListSection({
                 ),
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: constraints.maxWidth / 2),
-                child: NutritionAddButton(
-                  label: l10n.add_food,
-                  tooltip: allowMeals
-                      ? l10n.nutrition_add_food_or_saved_meal
-                      : null,
-                  onPressed: onAddFood,
-                ),
+                child: meal.foods.isEmpty
+                    ? NutritionAddButton(
+                        label: l10n.add_food,
+                        tooltip: allowMeals
+                            ? l10n.nutrition_add_food_or_saved_meal
+                            : null,
+                        onPressed: onAddFood,
+                      )
+                    : TextButton.icon(
+                        onPressed: onAddFood,
+                        icon: const Icon(Icons.edit_outlined),
+                        label: Text(l10n.edit),
+                      ),
               ),
             ],
           ),

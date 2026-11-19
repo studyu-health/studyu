@@ -18,6 +18,8 @@ final class FoodSelectionItem({
   final bool baselineGramsKnown = true,
 }) {
   String get name => baseFood.name;
+  double get amount => baseFood.amount * quantity;
+  bool get canDecrement => amount > baselineFood.amount + 0.000001;
   bool get hasKnownCalories =>
       caloriesKnown && baseFood.nutrition.isKnown('energyKcal');
   bool get hasMissingCalories =>
@@ -33,12 +35,8 @@ final class FoodSelectionItem({
 /// Temporary, route-scoped state for the multi-select Add items flow.
 final class FoodSelectionStore() extends ChangeNotifier {
   final LinkedHashMap<String, FoodSelectionItem> _items = LinkedHashMap();
-  final List<String> _recentKeys = [];
 
   Iterable<FoodSelectionItem> get items => _items.values;
-  Iterable<FoodSelectionItem> get recentItems => _recentKeys.reversed
-      .map((key) => _items[key])
-      .whereType<FoodSelectionItem>();
   int get itemCount => _items.length;
   int get servingCount =>
       _items.values.fold(0, (sum, item) => sum + item.quantity);
@@ -49,6 +47,22 @@ final class FoodSelectionStore() extends ChangeNotifier {
   bool get isEmpty => _items.isEmpty;
 
   FoodSelectionItem? itemFor(String key) => _items[key];
+
+  void seed(Iterable<studyu.FoodEntry> foods) {
+    for (final food in foods) {
+      final canonicalKey = canonicalFoodSelectionKey(food);
+      // Preserve distinct occurrences already stored under the same identity.
+      final key = _items.containsKey(canonicalKey)
+          ? '$canonicalKey:occurrence:${food.id}'
+          : canonicalKey;
+      addOrIncrement(
+        key,
+        food,
+        sourceFood: rescaleFoodAmount(food, 1),
+        gramsKnown: food.servingSizeGrams.isFinite && food.servingSizeGrams > 0,
+      );
+    }
+  }
 
   void addOrIncrement(
     String key,
@@ -65,7 +79,7 @@ final class FoodSelectionStore() extends ChangeNotifier {
       final sourceAmount = sourceFood?.amount;
       if (sourceAmount != null && sourceAmount.isFinite && sourceAmount > 0) {
         final servings = food.amount / sourceAmount;
-        final roundedServings = servings.round();
+        final roundedServings = servings.isFinite ? servings.round() : 0;
         if (servings.isFinite &&
             roundedServings > 0 &&
             (servings - roundedServings).abs() < 0.000001) {
@@ -83,11 +97,8 @@ final class FoodSelectionStore() extends ChangeNotifier {
         baselineGramsKnown: baselineGramsKnown ?? gramsKnown,
       );
     } else {
-      existing.quantity++;
+      _setAmount(existing, existing.amount + existing.baselineFood.amount);
     }
-    _recentKeys
-      ..remove(key)
-      ..add(key);
     notifyListeners();
   }
 
@@ -102,34 +113,29 @@ final class FoodSelectionStore() extends ChangeNotifier {
       gramsKnown: item.gramsKnown,
       baselineGramsKnown: item.baselineGramsKnown,
     );
-    _recentKeys
-      ..remove(item.key)
-      ..add(item.key);
     notifyListeners();
   }
 
   void increment(String key) {
     final item = _items[key];
     if (item == null) return;
-    item.quantity++;
+    _setAmount(item, item.amount + item.baselineFood.amount);
     notifyListeners();
   }
 
   void decrement(String key) {
     final item = _items[key];
     if (item == null) return;
-    if (item.quantity <= 1) {
+    if (!item.canDecrement) {
       _items.remove(key);
-      _recentKeys.remove(key);
     } else {
-      item.quantity--;
+      _setAmount(item, item.amount - item.baselineFood.amount);
     }
     notifyListeners();
   }
 
   void delete(String key) {
     if (_items.remove(key) == null) return;
-    _recentKeys.remove(key);
     notifyListeners();
   }
 
@@ -141,22 +147,29 @@ final class FoodSelectionStore() extends ChangeNotifier {
   }) {
     final item = _items[key];
     if (item == null) return;
-    final servings = food.amount / item.baseFood.amount;
-    final roundedServings = servings.round();
+    _setFood(item, food, food.amount);
+    item.caloriesKnown = caloriesKnown;
+    if (gramsKnown != null) item.gramsKnown = gramsKnown;
+    notifyListeners();
+  }
+
+  void _setAmount(FoodSelectionItem item, double amount) =>
+      _setFood(item, item.baseFood, amount);
+
+  void _setFood(FoodSelectionItem item, studyu.FoodEntry food, double amount) {
+    final servings = amount / item.baselineFood.amount;
+    final roundedServings = servings.isFinite ? servings.round() : 0;
     if (servings.isFinite &&
         roundedServings > 0 &&
         (servings - roundedServings).abs() < 0.000001) {
       item
-        ..baseFood = rescaleFoodAmount(food, food.amount / roundedServings)
+        ..baseFood = rescaleFoodAmount(food, amount / roundedServings)
         ..quantity = roundedServings;
     } else {
       item
-        ..baseFood = cloneFoodEntry(food)
+        ..baseFood = rescaleFoodAmount(food, amount)
         ..quantity = 1;
     }
-    item.caloriesKnown = caloriesKnown;
-    if (gramsKnown != null) item.gramsKnown = gramsKnown;
-    notifyListeners();
   }
 
   double knownCalories() => _items.values
@@ -169,7 +182,7 @@ final class FoodSelectionStore() extends ChangeNotifier {
   List<studyu.FoodEntry> materialize() {
     final result = <studyu.FoodEntry>[];
     for (final item in _items.values) {
-      final amount = item.baseFood.amount * item.quantity;
+      final amount = item.amount;
       if (!amount.isFinite || amount <= 0) {
         throw ArgumentError.value(amount, 'amount', 'Must be positive');
       }
@@ -198,7 +211,6 @@ String canonicalFoodSelectionKey(studyu.FoodEntry food) {
     normalizeFoodSearchText(food.name),
     normalizeFoodSearchText(food.brandName ?? ''),
     normalizeFoodSearchText(food.unit),
-    food.amount.toString(),
     food.servingSizeGrams.toString(),
   ].join('|');
 }

@@ -382,12 +382,7 @@ String foodTotalMetadata(
     l10n,
     grams: gramsKnown ? food.servingSizeGrams * totalAmount : null,
     servingDescription: servingDescription,
-    calories: hasCalories
-        ? food.nutrition.energyKcal *
-              (food.entryType == studyu.FoodEntryType.meal
-                  ? totalAmount
-                  : quantity)
-        : null,
+    calories: hasCalories ? food.nutrition.energyKcal * quantity : null,
   );
   return hasCalories && food.nutrition.isPartial('energyKcal')
       ? '$metadata (${l10n.nutrition_partial})'

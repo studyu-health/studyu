@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
-import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
@@ -400,7 +399,9 @@ Future<void> selectMealType(WidgetTester tester, String label) async {
 }
 
 Future<void> openFoodSearchFromMeal(WidgetTester tester) async {
-  final addFood = find.widgetWithText(TextButton, 'Add Food');
+  final addFood = find.widgetWithText(TextButton, 'Add Food').evaluate().isEmpty
+      ? find.widgetWithText(TextButton, 'Edit')
+      : find.widgetWithText(TextButton, 'Add Food');
   await tester.ensureVisible(addFood);
   await tester.tap(addFood);
   await tester.pumpAndSettle();
@@ -1221,7 +1222,7 @@ void main() {
   });
 
   testWidgets('the Add Food button opens search directly', (tester) async {
-    await openMealEntry(tester, editableMeal());
+    await openMealEntry(tester, editableMeal()..foods.clear());
 
     await tester.tap(find.widgetWithText(TextButton, 'Add Food'));
     await tester.pumpAndSettle();
@@ -1910,7 +1911,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('More options'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit this entry'));
+    await tester.tap(find.text('Edit food'));
     await tester.pumpAndSettle();
 
     expect(find.byType(FoodEntryScreen), findsOneWidget);
@@ -1992,18 +1993,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.loadCalls, 1);
-    await tester.tap(find.byTooltip('Edit amount'));
+    await tester.tap(find.byTooltip('Edit food').last);
     await tester.pumpAndSettle();
     await tester.enterText(
-      find
-          .descendant(
-            of: find.byType(FoodQuantitySheet),
-            matching: find.byType(TextField),
-          )
-          .first,
+      find.widgetWithText(TextFormField, 'Servings *'),
       '2',
     );
-    await tester.tap(find.widgetWithText(FilledButton, 'Save changes'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
@@ -2130,52 +2126,41 @@ void main() {
     expect(original.foods, hasLength(1));
   });
 
-  testWidgets(
-    'food actions show contextual sheet and close before quantity edit',
-    (tester) async {
-      final original = editableMeal();
-      MealLog? result;
-      await openMealEntry(
-        tester,
-        original,
-        onResult: (value) => result = value,
-      );
+  testWidgets('food menu and row open the editor with logged servings', (
+    tester,
+  ) async {
+    final original = editableMeal();
+    MealLog? result;
+    await openMealEntry(tester, original, onResult: (value) => result = value);
 
-      await tester.tap(find.byTooltip('More options'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('More options'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edit amount'), findsNothing);
+    await tester.tap(find.text('Edit food'));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Edit amount'));
-      await tester.pumpAndSettle();
+    final servings = find.widgetWithText(TextFormField, 'Servings *');
+    expect(servings, findsOneWidget);
+    await tester.enterText(servings, '3');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discard changes'));
+    await tester.pumpAndSettle();
 
-      final amountSheet = find.byType(FoodQuantitySheet);
-      final amountField = find.descendant(
-        of: amountSheet,
-        matching: find.byType(TextField),
-      );
-      expect(amountSheet, findsOneWidget);
-      expect(find.text('Remove from meal'), findsNothing);
-      await tester.enterText(amountField, '3');
-      await tester.tap(
-        find.descendant(of: amountSheet, matching: find.byTooltip('Close')),
-      );
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Apple'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextFormField>(servings).controller!.text, '1.0');
+    await tester.enterText(servings, '2');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Apple'));
-      await tester.pumpAndSettle();
-      expect(amountSheet, findsOneWidget);
-      expect(tester.widget<TextField>(amountField).controller!.text, '1');
-      await tester.enterText(amountField, '2');
-      await tester.pump();
-      await tester.tap(find.widgetWithText(FilledButton, 'Save changes'));
-      await tester.pumpAndSettle();
-
-      expect(result, isNull);
-      expect(original.foods.single.amount, 1);
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
-      expect(result!.foods.single.amount, 2);
-    },
-  );
+    expect(result, isNull);
+    expect(original.foods.single.amount, 1);
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(result!.foods.single.amount, 2);
+    expect(result!.foods.single.nutrition.energyKcal, 104);
+  });
 
   testWidgets('food menu omits the Library save action', (tester) async {
     await openMealEntry(tester, editableMeal());
@@ -2185,6 +2170,54 @@ void main() {
 
     expect(find.text('Save to My items'), findsNothing);
     expect(find.text('Remove from meal'), findsOneWidget);
+  });
+
+  testWidgets('reopened basket updates the same meal item', (tester) async {
+    final prototype = testFood()..name = 'Pear';
+    final repository = FakeNutritionFoodRepository([
+      SavedFoodTemplate(
+        id: 'saved-pear',
+        userId: 'anonymous',
+        name: 'Pick a pear',
+        isPublic: false,
+        createdAt: DateTime(2026, 7, 15),
+        prototype: prototype,
+      ),
+    ]);
+    MealLog? result;
+    await openMealEntry(
+      tester,
+      editableMeal()..foods.clear(),
+      foodRepository: repository,
+      onResult: (value) => result = value,
+    );
+    final basket = find.byKey(const ValueKey('selection-tray'));
+    final update = find.widgetWithText(FilledButton, 'Update selection');
+
+    for (final existing in [false, true]) {
+      await openFoodSearchFromMeal(tester);
+      if (existing) {
+        expect(
+          find.descendant(of: basket, matching: find.text('Pear')),
+          findsOneWidget,
+        );
+        expect(update, findsOneWidget);
+      }
+      await tester.tap(find.text('Library'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pick a pear'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(of: basket, matching: find.byType(FilledButton)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text('Pear'), findsOneWidget);
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(result!.foods.single.amount, 2);
+    expect(result!.foods.single.nutrition.energyKcal, 104);
   });
 
   testWidgets('canceling template or quantity selection adds no food', (
@@ -2222,14 +2255,9 @@ void main() {
     await tester.tap(find.text('Saved Pear Template'));
     await tester.pumpAndSettle();
     expect(repository.loadCalls, 2);
-    await tester.tap(find.byTooltip('Edit amount'));
+    await tester.tap(find.byTooltip('Edit food').last);
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(FoodQuantitySheet),
-        matching: find.byTooltip('Close'),
-      ),
-    );
+    await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.tap(find.byType(CloseButton));
     await tester.pumpAndSettle();

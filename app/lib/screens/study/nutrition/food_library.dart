@@ -560,7 +560,10 @@ class const FoodLibraryItemCard({
     final edited = await Navigator.push<studyu.FoodEntry>(
       context,
       _isMeal
-          ? MealCreatorScreen.route(existingMeal: prototype)
+          ? MealCreatorScreen.route(
+              existingMeal: prototype,
+              showServings: false,
+            )
           : FoodEntryScreen.route(
               existingFood: prototype,
               showSearchAction: false,

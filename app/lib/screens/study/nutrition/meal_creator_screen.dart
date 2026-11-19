@@ -22,6 +22,8 @@ class const MealCreatorScreen({
   final String? initialName,
   final bool showCurrentDayPropagationOption = false,
   final bool showCurrentMealOnlyNotice = false,
+  final bool showServings = true,
+  final bool editLoggedAmount = false,
   final bool showExpansionNotice = false,
   final ValueChanged<bool>? onCurrentDayPropagationChanged,
   final TemplateViewModel? templateViewModel,
@@ -34,6 +36,8 @@ class const MealCreatorScreen({
     String? initialName,
     bool showCurrentDayPropagationOption = false,
     bool showCurrentMealOnlyNotice = false,
+    bool showServings = true,
+    bool editLoggedAmount = false,
     bool showExpansionNotice = false,
     ValueChanged<bool>? onCurrentDayPropagationChanged,
     TemplateViewModel? templateViewModel,
@@ -45,6 +49,8 @@ class const MealCreatorScreen({
       initialName: initialName,
       showCurrentDayPropagationOption: showCurrentDayPropagationOption,
       showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
+      showServings: showServings,
+      editLoggedAmount: editLoggedAmount,
       showExpansionNotice: showExpansionNotice,
       onCurrentDayPropagationChanged: onCurrentDayPropagationChanged,
       templateViewModel: templateViewModel,
@@ -112,7 +118,10 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       }
 
       try {
-        final flattened = snapshots.flattenNutritionFoodEntries([meal]);
+        final recipe = widget.editLoggedAmount
+            ? snapshots.normalizeNutritionFoodDefinition(meal)
+            : meal;
+        final flattened = snapshots.flattenNutritionFoodEntries([recipe]);
         _componentFoods.addAll(flattened);
         _foods = [
           for (var index = 0; index < flattened.length; index++)
@@ -295,8 +304,13 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     });
   }
 
+  double get _ingredientServings {
+    if (widget.editLoggedAmount) return 1;
+    final servings = double.tryParse(_servingsController.text);
+    return servings != null && servings.isFinite && servings > 0 ? servings : 1;
+  }
+
   NutritionProfile _calculateTotalNutrition() {
-    final servings = double.tryParse(_servingsController.text) ?? 1;
     return scaleNutritionProfile(
       sumNutritionProfiles([
         for (var index = 0; index < _componentFoods.length; index++)
@@ -305,7 +319,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             _foods[index].amount / _componentFoods[index].amount,
           ),
       ]),
-      1 / servings,
+      1 / _ingredientServings,
     );
   }
 
@@ -314,8 +328,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       for (var index = 0; index < _componentFoods.length; index++)
         _componentFoods[index].servingSizeGrams * _foods[index].amount,
     ].fold<double>(0, (total, grams) => total + grams);
-    final servings = double.parse(_servingsController.text);
-    return totalGrams / servings;
+    return totalGrams / _ingredientServings;
   }
 
   FoodEntry? _buildMeal() {
@@ -352,7 +365,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
           id: _foods[index].id,
           parentEntryId: '',
           foodId: _foods[index].foodId,
-          amount: _foods[index].amount / servings,
+          amount: _foods[index].amount / _ingredientServings,
           unit: _foods[index].unit,
           sortOrder: index,
         ),
@@ -361,7 +374,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       for (var index = 0; index < _componentFoods.length; index++)
         rescaleFoodAmount(
           _componentFoods[index],
-          _foods[index].amount / servings,
+          _foods[index].amount / _ingredientServings,
         ),
     ];
     final meal = existing == null
@@ -607,8 +620,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         !_invalidComponents &&
         _nameController.text.isNotEmpty &&
         _foods.isNotEmpty;
-    final servingsCount = (double.tryParse(_servingsController.text) ?? 1)
-        .toInt();
+    final servingsCount = double.tryParse(_servingsController.text) ?? 1;
 
     final scaffold = Scaffold(
       appBar: AppBar(
@@ -658,7 +670,9 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             _MealInfoCard(
               nameController: _nameController,
               descriptionController: _descriptionController,
-              servingsController: _servingsController,
+              servingsController: widget.showServings
+                  ? _servingsController
+                  : null,
               theme: theme,
               l10n: l10n,
             ),
@@ -764,7 +778,9 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
               NutritionSummaryCard(
                 nutrition: nutrition,
                 title: l10n.nutrition_per_serving,
-                subtitle: l10n.serving_amount(servingsCount),
+                subtitle: widget.showServings
+                    ? l10n.serving_amount(servingsCount)
+                    : null,
               ),
 
             const SizedBox(height: NutritionSaveButton.scrollClearance),
@@ -795,7 +811,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
 class const _MealInfoCard({
   required final TextEditingController nameController,
   required final TextEditingController descriptionController,
-  required final TextEditingController servingsController,
+  final TextEditingController? servingsController,
   required final ThemeData theme,
   required final AppLocalizations l10n,
 }) extends StatelessWidget {
@@ -852,30 +868,36 @@ class const _MealInfoCard({
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: servingsController,
-                    decoration: InputDecoration(
-                      labelText: l10n.nutrition_servings_required,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.people_outline),
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,2}'),
+                if (servingsController != null) ...[
+                  Expanded(
+                    child: TextFormField(
+                      controller: servingsController,
+                      decoration: InputDecoration(
+                        labelText: l10n.nutrition_servings_required,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.people_outline),
                       ),
-                    ],
-                    validator: (value) {
-                      final servings = double.tryParse(value ?? '');
-                      if (servings == null || servings <= 0) {
-                        return l10n.required_error;
-                      }
-                      return null;
-                    },
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}'),
+                        ),
+                      ],
+                      validator: (value) {
+                        final servings = double.tryParse(value ?? '');
+                        if (servings == null ||
+                            !servings.isFinite ||
+                            servings <= 0) {
+                          return l10n.food_quantity_invalid_amount;
+                        }
+                        return null;
+                      },
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
+                  const SizedBox(width: 12),
+                ],
                 Expanded(
                   flex: 2,
                   child: TextFormField(

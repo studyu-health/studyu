@@ -7,6 +7,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
@@ -26,6 +27,7 @@ class const FoodEntryScreen({
   final double? confidenceScore,
   final bool showSearchAction = true,
   final String? mealLabel,
+  final bool editLoggedAmount = false,
   final bool historicalMode = false,
   final NutritionRecallPersistenceTarget? historicalTarget,
   final bool editReusableDefinition = false,
@@ -46,6 +48,7 @@ class const FoodEntryScreen({
     double? confidenceScore,
     bool showSearchAction = true,
     String? mealLabel,
+    bool editLoggedAmount = false,
     bool historicalMode = false,
     NutritionRecallPersistenceTarget? historicalTarget,
     bool editReusableDefinition = false,
@@ -61,6 +64,7 @@ class const FoodEntryScreen({
       confidenceScore: confidenceScore,
       showSearchAction: showSearchAction,
       mealLabel: mealLabel,
+      editLoggedAmount: editLoggedAmount,
       historicalMode: historicalMode,
       historicalTarget: historicalTarget,
       editReusableDefinition: editReusableDefinition,
@@ -118,6 +122,14 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   bool get _isLowConfidence =>
       widget.confidenceScore != null && widget.confidenceScore! < 0.6;
 
+  bool get _showServings => widget.editLoggedAmount || widget.mealLabel != null;
+
+  late final FoodEntry? _nutritionBasis = switch (widget.existingFood) {
+    final food? when _showServings && food.amount.isFinite && food.amount > 0 =>
+      rescaleFoodAmount(food, 1),
+    final food => food,
+  };
+
   @override
   void initState() {
     super.initState();
@@ -143,45 +155,34 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
         text: food.ediblePortion?.toString() ?? '',
       );
 
+      final nutrition = _nutritionBasis!.nutrition;
       _energyController = TextEditingController(
-        text: food.nutrition.isKnown('energyKcal')
-            ? food.nutrition.energyKcal.toString()
+        text: nutrition.isKnown('energyKcal')
+            ? nutrition.energyKcal.toString()
             : '',
       );
       _proteinController = TextEditingController(
-        text: food.nutrition.isKnown('protein')
-            ? food.nutrition.protein.toString()
-            : '',
+        text: nutrition.isKnown('protein') ? nutrition.protein.toString() : '',
       );
       _carbsController = TextEditingController(
-        text: food.nutrition.isKnown('carbs')
-            ? food.nutrition.carbs.toString()
-            : '',
+        text: nutrition.isKnown('carbs') ? nutrition.carbs.toString() : '',
       );
       _fatController = TextEditingController(
-        text: food.nutrition.isKnown('fat')
-            ? food.nutrition.fat.toString()
-            : '',
+        text: nutrition.isKnown('fat') ? nutrition.fat.toString() : '',
       );
       _sugarsController = TextEditingController(
-        text: food.nutrition.isKnown('sugars')
-            ? food.nutrition.sugars.toString()
-            : '',
+        text: nutrition.isKnown('sugars') ? nutrition.sugars.toString() : '',
       );
       _fiberController = TextEditingController(
-        text: food.nutrition.isKnown('fiber')
-            ? food.nutrition.fiber.toString()
-            : '',
+        text: nutrition.isKnown('fiber') ? nutrition.fiber.toString() : '',
       );
       _saturatedFatController = TextEditingController(
-        text: food.nutrition.isKnown('saturatedFat')
-            ? food.nutrition.saturatedFat.toString()
+        text: nutrition.isKnown('saturatedFat')
+            ? nutrition.saturatedFat.toString()
             : '',
       );
       _sodiumController = TextEditingController(
-        text: food.nutrition.isKnown('sodium')
-            ? food.nutrition.sodium.toString()
-            : '',
+        text: nutrition.isKnown('sodium') ? nutrition.sodium.toString() : '',
       );
 
       _entryType = food.entryType;
@@ -334,10 +335,15 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
             widget.templateViewModel ??
             Provider.of<TemplateViewModel?>(context, listen: false) ??
             TemplateViewModel(userId: userId, repository: widget.repository);
-        food.templateId = await viewModel.saveFoodAsTemplate(
+        final definition = normalizeNutritionFoodDefinition(food);
+        final templateId = await viewModel.saveFoodAsTemplate(
           name: food.name,
-          food: food,
+          food: definition,
         );
+        food
+          ..templateId = templateId
+          ..foodId = definition.foodId
+          ..foodVersionId = definition.foodVersionId;
       } catch (error, stackTrace) {
         StudyULogger.error(
           'Failed to save food to My items: $error\n$stackTrace',
@@ -421,7 +427,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   FoodEntry? _buildFoodEntry() {
     if (!_formKey.currentState!.validate()) return null;
 
-    final existingNutrition = widget.existingFood?.nutrition;
+    final existingNutrition = _nutritionBasis?.nutrition;
     double enteredValue(String key, TextEditingController controller) =>
         double.tryParse(controller.text) ??
         (existingNutrition != null && !existingNutrition.isKnown(key)
@@ -476,6 +482,10 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       }
     }
 
+    final amount = double.parse(_amountController.text);
+    final savedNutrition = _showServings
+        ? scaleNutritionProfile(nutrition, amount)
+        : nutrition;
     final existingFood = widget.existingFood;
     if (existingFood == null) {
       return FoodEntry.withId(
@@ -485,7 +495,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
         description: _descriptionController.text.isEmpty
             ? null
             : _descriptionController.text,
-        amount: double.parse(_amountController.text),
+        amount: amount,
         unit: _unitController.text,
         servingSizeGrams: double.parse(_servingSizeController.text),
         portionReference: _portionReferenceController.text.isEmpty
@@ -499,7 +509,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
         ediblePortion: _ediblePortionController.text.isEmpty
             ? null
             : double.tryParse(_ediblePortionController.text),
-        nutrition: nutrition,
+        nutrition: savedNutrition,
         source: _source,
         confidenceScore: 1.0,
         originalValues: {},
@@ -517,7 +527,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       ..description = _descriptionController.text.isEmpty
           ? null
           : _descriptionController.text
-      ..amount = double.parse(_amountController.text)
+      ..amount = amount
       ..unit = _unitController.text
       ..servingSizeGrams = double.parse(_servingSizeController.text)
       ..portionReference = _portionReferenceController.text.isEmpty
@@ -531,7 +541,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       ..ediblePortion = _ediblePortionController.text.isEmpty
           ? null
           : double.tryParse(_ediblePortionController.text)
-      ..nutrition = nutrition
+      ..nutrition = savedNutrition
       ..modifiedAt = DateTime.now();
   }
 
@@ -723,6 +733,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
             // ========== ESSENTIAL FIELDS ==========
             _EssentialFieldsCard(
               nameController: _nameController,
+              amountController: _showServings ? _amountController : null,
               servingSizeController: _servingSizeController,
               energyController: _energyController,
               proteinController: _proteinController,
@@ -899,6 +910,7 @@ class const _AiEstimationBanner({
 
 class const _EssentialFieldsCard({
   required final TextEditingController nameController,
+  final TextEditingController? amountController,
   required final TextEditingController servingSizeController,
   required final TextEditingController energyController,
   required final TextEditingController proteinController,
@@ -966,6 +978,26 @@ class const _EssentialFieldsCard({
             ),
             const SizedBox(height: 12),
 
+            if (amountController != null) ...[
+              TextFormField(
+                controller: amountController,
+                decoration: InputDecoration(
+                  labelText: l10n.nutrition_servings_required,
+                  border: const OutlineInputBorder(),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (value) {
+                  final amount = double.tryParse(value ?? '');
+                  return amount == null || !amount.isFinite || amount <= 0
+                      ? l10n.food_quantity_invalid_amount
+                      : null;
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+
             TextFormField(
               controller: servingSizeController,
               decoration: InputDecoration(
@@ -1019,10 +1051,12 @@ class const _EssentialFieldsCard({
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  l10n.macronutrients,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    l10n.macronutrients,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],

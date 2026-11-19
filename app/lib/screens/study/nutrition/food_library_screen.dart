@@ -41,6 +41,7 @@ class const FoodLibraryScreen({
     onCreateMeal: () => Navigator.push<FoodEntry>(
       context,
       MealCreatorScreen.route(
+        showServings: false,
         templateViewModel: context.read<TemplateViewModel>(),
       ),
     ),

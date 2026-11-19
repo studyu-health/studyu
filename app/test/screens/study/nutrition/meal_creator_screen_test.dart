@@ -83,22 +83,34 @@ void main() {
         repository: repository,
       );
       addTearDown(viewModel.dispose);
+      var editingLog = true;
       await _pump(
         tester,
-        () => MealCreatorScreen.route(existingMeal: meal),
+        () => MealCreatorScreen.route(
+          existingMeal: meal,
+          editLoggedAmount: editingLog,
+          showServings: editingLog,
+        ),
         (result) => meal = result,
         viewModel,
       );
 
-      for (var edit = 0; edit < 2; edit++) {
+      final servingsField = find.widgetWithText(TextFormField, 'Servings *');
+      for (final edit in [true, false]) {
+        editingLog = edit;
         await tester.tap(find.text('Open'));
         await tester.pumpAndSettle();
+        if (editingLog) {
+          await tester.enterText(servingsField, '3');
+        } else {
+          expect(servingsField, findsNothing);
+        }
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();
-        expect(meal.amount, 2);
-        expect(meal.nutrition.energyKcal, 200);
+        expect(meal.amount, 3);
+        expect(meal.nutrition.energyKcal, 300);
         expect(meal.componentFoods!.single.amount, 1);
-        expect(flattenNutritionFoodEntries([meal]).single.amount, 2);
+        expect(flattenNutritionFoodEntries([meal]).single.amount, 3);
       }
     },
   );
