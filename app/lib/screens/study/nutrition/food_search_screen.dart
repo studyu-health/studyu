@@ -22,6 +22,7 @@ import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
+import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
@@ -728,25 +729,16 @@ class _FoodSearchScreenContentState()
 
     final l10n = AppLocalizations.of(context)!;
     _isConfirmingRemoval = true;
-    final shouldRemove = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.food_selection_remove_title(item.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.food_selection_remove),
-          ),
-        ],
-      ),
+    final shouldRemove = await showConfirmationDialog(
+      context,
+      title: l10n.food_selection_remove_title(item.name),
+      cancelLabel: l10n.cancel,
+      confirmLabel: l10n.food_selection_remove,
+      isDestructive: true,
     );
     _isConfirmingRemoval = false;
     if (!mounted ||
-        shouldRemove != true ||
+        !shouldRemove ||
         store.itemFor(key) != item ||
         item.canDecrement) {
       return;
