@@ -153,6 +153,7 @@ class const _CustomMealTypesSection({
               children: List.generate(
                 formArray.controls.length,
                 (index) => Padding(
+                  key: ObjectKey(formArray.controls[index]),
                   padding: const EdgeInsets.only(top: 8),
                   child: Row(
                     children: [

@@ -111,4 +111,42 @@ void main() {
       isFalse,
     );
   });
+
+  testWidgets('removing a custom meal type preserves the next field', (
+    tester,
+  ) async {
+    final viewModel = NutritionFormViewModel(study: Study.withId('study-1'));
+    viewModel.customMealTypesControl.add(
+      FormControl<String>(value: 'First meal'),
+    );
+    viewModel.customMealTypesControl.add(
+      FormControl<String>(value: 'Second meal'),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ReactiveForm(
+              formGroup: viewModel.form,
+              child: NutritionFormView(formViewModel: viewModel),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final firstRemove = find.byTooltip('Remove').first;
+    await tester.ensureVisible(firstRemove);
+    await tester.tap(firstRemove);
+    await tester.pumpAndSettle();
+    expect(find.text('Second meal'), findsOneWidget);
+    expect(find.text('First meal'), findsNothing);
+
+    final survivingField = find.ancestor(
+      of: find.text('Second meal'),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(survivingField, 'Updated meal');
+    expect(viewModel.buildFormData().customMealTypes, ['Updated meal']);
+  });
 }
