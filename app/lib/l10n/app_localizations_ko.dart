@@ -2638,7 +2638,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get create => 'Create';
 
   @override
-  String get create_meal => 'Create meal';
+  String get create_meal => '식사 만들기';
 
   @override
   String get create_meal_subtitle => 'Combine multiple foods';
@@ -3103,11 +3103,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_search_foods_saved_meals_or_brands => '식품 또는 식사 검색';
 
   @override
-  String get nutrition_create_saved_meal => 'Create saved meal';
-
-  @override
-  String get nutrition_create_saved_meal_from_log =>
-      'Create saved meal from this log';
+  String get nutrition_create_saved_meal_from_log => '이 기록에서 식사 만들기';
 
   @override
   String get nutrition_edit_saved_meal => 'Edit saved meal';

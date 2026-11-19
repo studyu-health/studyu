@@ -3161,11 +3161,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Search foods or meals';
 
   @override
-  String get nutrition_create_saved_meal => 'Create saved meal';
-
-  @override
   String get nutrition_create_saved_meal_from_log =>
-      'Create saved meal from this log';
+      'Create meal from this log';
 
   @override
   String get nutrition_edit_saved_meal => 'Edit saved meal';

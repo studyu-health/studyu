@@ -36,7 +36,7 @@ void main() {
 
     await tester.tap(create);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Create saved meal'));
+    await tester.tap(find.text('Create meal'));
     await tester.pumpAndSettle();
     expect(find.byType(MealCreatorScreen), findsOneWidget);
 

@@ -613,14 +613,14 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       appBar: AppBar(
         title: Text(
           widget.existingMeal == null
-              ? l10n.nutrition_create_saved_meal
+              ? l10n.create_meal
               : l10n.nutrition_edit_saved_meal,
         ),
         actions: [
           if (_foods.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.bookmark_add_outlined),
-              tooltip: l10n.nutrition_create_saved_meal,
+              tooltip: l10n.create_meal,
               onPressed: _saveAsTemplate,
             ),
         ],

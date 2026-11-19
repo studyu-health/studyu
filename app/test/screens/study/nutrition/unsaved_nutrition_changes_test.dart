@@ -119,7 +119,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Create'));
     await tester.pumpAndSettle();
-    expect(find.text('Create saved meal'), findsOneWidget);
+    expect(find.text('Create meal'), findsOneWidget);
     await tester.tap(find.text('Create food'));
     await tester.pumpAndSettle();
 

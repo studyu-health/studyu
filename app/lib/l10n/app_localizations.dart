@@ -5647,16 +5647,10 @@ abstract class AppLocalizations {
   /// **'Search foods or meals'**
   String get nutrition_search_foods_saved_meals_or_brands;
 
-  /// No description provided for @nutrition_create_saved_meal.
-  ///
-  /// In en, this message translates to:
-  /// **'Create saved meal'**
-  String get nutrition_create_saved_meal;
-
   /// No description provided for @nutrition_create_saved_meal_from_log.
   ///
   /// In en, this message translates to:
-  /// **'Create saved meal from this log'**
+  /// **'Create meal from this log'**
   String get nutrition_create_saved_meal_from_log;
 
   /// No description provided for @nutrition_edit_saved_meal.

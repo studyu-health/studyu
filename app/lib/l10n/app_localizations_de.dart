@@ -3204,11 +3204,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Lebensmittel oder Mahlzeiten suchen';
 
   @override
-  String get nutrition_create_saved_meal => 'Gespeicherte Mahlzeit erstellen';
-
-  @override
   String get nutrition_create_saved_meal_from_log =>
-      'Gespeicherte Mahlzeit aus diesem Protokoll erstellen';
+      'Mahlzeit aus diesem Protokoll erstellen';
 
   @override
   String get nutrition_edit_saved_meal => 'Gespeicherte Mahlzeit bearbeiten';

@@ -542,5 +542,7 @@
   "external_library_copy_notice": "라이브러리에 저장하기 전에 식품 정보를 확인하세요. 수정 사항은 저장한 사본에 적용됩니다.",
   "external_library_save_copy": "라이브러리에 저장",
   "food_quantity_override_helper": "변경 사항은 이 식사에서 선택한 항목에만 적용됩니다.",
-  "current_meal_only_banner": "변경 사항은 이 식사에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요."
+  "current_meal_only_banner": "변경 사항은 이 식사에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요.",
+  "create_meal": "식사 만들기",
+  "nutrition_create_saved_meal_from_log": "이 기록에서 식사 만들기"
 }

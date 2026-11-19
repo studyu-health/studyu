@@ -875,7 +875,7 @@ class _FoodSearchScreenContentState()
             ),
             ListTile(
               leading: const Icon(Icons.restaurant_menu_outlined),
-              title: Text(l10n.nutrition_create_saved_meal),
+              title: Text(l10n.create_meal),
               onTap: () => Navigator.pop(sheetContext, _FoodSearchAction.meal),
             ),
           ],

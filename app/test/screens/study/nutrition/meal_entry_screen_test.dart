@@ -1945,7 +1945,7 @@ void main() {
     ).push<FoodEntry>(MealCreatorScreen.route());
     await tester.pumpAndSettle();
 
-    expect(find.text('Create saved meal'), findsOneWidget);
+    expect(find.text('Create meal'), findsOneWidget);
     await tester.pageBack();
     await tester.pumpAndSettle();
 
