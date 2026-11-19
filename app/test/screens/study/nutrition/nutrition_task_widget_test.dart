@@ -1056,7 +1056,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Delete this meal?'), findsOneWidget);
-    await tester.tap(find.text('Continue'));
+    await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Apple'), findsOneWidget);
 

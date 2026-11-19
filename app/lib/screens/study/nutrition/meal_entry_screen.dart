@@ -19,6 +19,7 @@ import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
+import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_app/widgets/photo_viewer_dialog.dart';
 import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
@@ -688,28 +689,15 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
 
   Future<void> _confirmDelete() async {
     final l10n = AppLocalizations.of(context)!;
-    final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.delete_meal_title),
-        content: Text(l10n.delete_meal_message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.continue_label),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(dialogContext).colorScheme.error,
-              foregroundColor: Theme.of(dialogContext).colorScheme.onError,
-            ),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
+    final shouldDelete = await showConfirmationDialog(
+      context,
+      title: l10n.delete_meal_title,
+      message: l10n.delete_meal_message,
+      cancelLabel: l10n.cancel,
+      confirmLabel: l10n.delete,
+      isDestructive: true,
     );
-    if (shouldDelete == true && mounted && _revalidateHistoricalEligibility()) {
+    if (shouldDelete && mounted && _revalidateHistoricalEligibility()) {
       _pop(const DeletedMealEntryResult());
     }
   }

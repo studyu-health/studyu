@@ -21,6 +21,7 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_statistics_view.dar
 import 'package:studyu_app/screens/study/nutrition/nutrition_water_card.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
+import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_app/widgets/photo_recall_section.dart';
@@ -938,28 +939,15 @@ class _NutritionTaskWidgetState()
     String mealId,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.delete_meal_title),
-        content: Text(l10n.delete_meal_message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(l10n.continue_label),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(dialogContext).colorScheme.error,
-              foregroundColor: Theme.of(dialogContext).colorScheme.onError,
-            ),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmationDialog(
+      context,
+      title: l10n.delete_meal_title,
+      message: l10n.delete_meal_message,
+      cancelLabel: l10n.cancel,
+      confirmLabel: l10n.delete,
+      isDestructive: true,
     );
-    if (confirmed == true) model.removeMealById(mealId);
+    if (confirmed && context.mounted) model.removeMealById(mealId);
   }
 
   DateTime? _knownTimestamp(MealLog meal) =>
