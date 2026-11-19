@@ -114,6 +114,9 @@ class _DashboardScreenState()
       if (!mounted) return;
       await _submitPendingNutritionRecalls();
       if (mounted) {
+        setState(() {
+          scheduleToday = subject?.scheduleFor(DateTime.now());
+        });
         _scheduleMidnightSubmitTimer();
       }
     });
