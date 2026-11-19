@@ -4,15 +4,13 @@ import 'package:studyu_core/src/models/nutrition/meal_log.dart';
 import 'package:studyu_core/src/models/nutrition/nutrition_profile.dart';
 
 extension FoodEntryNutritionCalculation on FoodEntry {
-  /// Nutrition values describe one unit of this entry. [amount] is the number
-  /// of those units consumed.
-  NutritionProfile get totalNutrition =>
-      scaleNutritionProfile(nutrition, amount);
+  /// The stored profile already accounts for the logged amount.
+  NutritionProfile get totalNutrition => scaleNutritionProfile(nutrition, 1);
 }
 
 extension MealLogNutritionCalculation on MealLog {
   NutritionProfile get totalNutrition =>
-      sumNutritionProfiles(foods.map((FoodEntry food) => food.totalNutrition));
+      sumNutritionProfiles(foods.map((FoodEntry food) => food.nutrition));
 }
 
 extension DailyRecallNutritionCalculation on DailyRecall {

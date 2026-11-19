@@ -32,7 +32,7 @@ void main() {
   test('numeric extraction retains only complete values for each nutrient', () {
     final entries = [
       _food('legacy zero', amount: 1, energy: 0, protein: 0),
-      _food('known', amount: 2, energy: 10, protein: 3),
+      _food('known', amount: 2, energy: 20, protein: 6),
       _food('unknown', amount: 1, energy: 99, protein: 4)
         ..nutrition.unavailableNutrients = {'energyKcal'},
       _food('partial', amount: 1, energy: 5, protein: 5)
@@ -81,22 +81,23 @@ void main() {
     );
   });
 
-  test('nutrition totals scale each entry by amount and drive extraction', () {
+  test('nutrition totals use the stored amounts and drive extraction', () {
     final recall = DailyRecall(
       id: 'recall',
       date: DateTime(2026, 9, 22),
       recallMode: RecallMode.realtimeRecord,
+      entryCompletedAt: DateTime(2026, 9, 22, 18),
       meals: [
         _meal(
           'meal',
           foods: [
             _food('single serving', amount: 1, energy: 10, protein: 1),
-            _food('two servings', amount: 2, energy: 20, protein: 2),
+            _food('two servings', amount: 2, energy: 40, protein: 4),
             _food(
               'recipe servings',
               amount: 4,
-              energy: 30,
-              protein: 3,
+              energy: 120,
+              protein: 12,
               entryType: FoodEntryType.meal,
             ),
           ],
