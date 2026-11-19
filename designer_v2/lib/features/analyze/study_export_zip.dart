@@ -53,14 +53,14 @@ extension StudyExportZipX on StudyExportData {
 extension StudyExportX on Study {
   bool canExport(User user) =>
       (canEdit(user) || publishedToRegistryResults) &&
-      (participants?.isNotEmpty ?? false);
+      (participants?.isNotEmpty ?? participantCount > 0);
 
   String? exportDisabledReason(User user) {
     if (canExport(user)) return null;
     if (!canEdit(user) && !publishedToRegistryResults) {
       return tr.study_export_unavailable_no_permission_tooltip;
     }
-    if (participants?.isEmpty ?? true) {
+    if (participants?.isEmpty ?? participantCount == 0) {
       return tr.study_export_unavailable_empty_tooltip;
     }
     return null;

@@ -198,6 +198,13 @@ class MockStudyRepository extends _i1.Mock implements _i9.StudyRepository {
   ) as String);
 
   @override
+  _i13.Future<void> exportResults(String? studyId) => (super.noSuchMethod(
+    Invocation.method(#exportResults, [studyId]),
+    returnValue: _i13.Future<void>.value(),
+    returnValueForMissingStub: _i13.Future<void>.value(),
+  ) as _i13.Future<void>);
+
+  @override
   _i13.Future<void> deleteParticipants(_i5.Study? study) => (super.noSuchMethod(
     Invocation.method(#deleteParticipants, [study]),
     returnValue: _i13.Future<void>.value(),
