@@ -13,6 +13,7 @@ import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library.dart';
 import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search/food_search_result_widgets.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_bar.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_history.dart';
@@ -20,7 +21,6 @@ import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
-import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
 import 'package:studyu_core/core.dart' as studyu;
@@ -1074,13 +1074,8 @@ class _FoodSearchScreenContentState()
                         theme: theme,
                         templateViewModel: templateViewModel,
                         query: query,
-                        isInitialLoading: search.isInitialLoading,
-                        isLoadingMore: search.isLoadingMore,
-                        hasSearched: hasSearched,
-                        databaseComplete: databaseComplete,
+                        search: search,
                         showNoResults: showNoResults,
-                        offHasMore: search.offHasMore,
-                        usdaHasMore: search.usdaHasMore,
                         errorMessage: errorMessage,
                         combinedResults: results,
                         recentMatches: recentMatches,

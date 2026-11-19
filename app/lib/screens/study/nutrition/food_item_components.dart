@@ -17,6 +17,113 @@ Offset? globalCenter(BuildContext context) {
   return renderObject.localToGlobal(renderObject.size.center(Offset.zero));
 }
 
+class const FoodItemCard({
+  required final String name,
+  required final String metadata,
+  required final IconData icon,
+  final String? imageUrl,
+  final String? typeLabel,
+  final TextStyle? titleStyle,
+  final bool selected = false,
+  final String? tapLabel,
+  final ValueChanged<Offset?>? onTap,
+  final List<Widget> actions = const [],
+  super.key,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final fallback = fallbackFoodIcon(theme, icon, size: 24);
+    final content = Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: imageUrl == null
+                        ? fallback
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.network(
+                              imageUrl!,
+                              width: 48,
+                              height: 48,
+                              fit: BoxFit.cover,
+                              excludeFromSemantics: true,
+                              errorBuilder: (_, _, _) => fallback,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (typeLabel case final label?)
+                          Text(label, style: theme.textTheme.labelSmall),
+                        Text(
+                          name,
+                          style:
+                              titleStyle ??
+                              theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        AnimatedSwitcher(
+                          duration: selectionAnimationDuration(context),
+                          child: Text(
+                            metadata,
+                            key: ValueKey(metadata),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ...actions,
+        ],
+      ),
+    );
+
+    return SelectionFeedbackCard(
+      selected: selected,
+      child: onTap == null
+          ? content
+          : Semantics(
+              button: true,
+              label: tapLabel,
+              child: InkWell(
+                onTap: () => onTap!(globalCenter(context)),
+                borderRadius: BorderRadius.circular(12),
+                overlayColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.pressed)
+                      ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                      : null,
+                ),
+                child: content,
+              ),
+            ),
+    );
+  }
+}
+
 class const SelectionFeedbackCard({
   required final bool selected,
   required final Widget child,

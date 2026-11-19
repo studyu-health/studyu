@@ -5,11 +5,11 @@ import 'package:studyu_app/models/unified_food_result.dart';
 import 'package:studyu_app/screens/study/nutrition/barcode_scanner_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search/food_search_result_widgets.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_bar.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
-import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_core/core.dart' as studyu;
@@ -288,27 +288,19 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         viewModel.currentFilter != TemplateFilter.meals;
     final children = <Widget>[];
 
+    final showingMeals = viewModel.currentFilter == TemplateFilter.meals;
     if (viewModel.isLoading && templates.isEmpty) {
       children.add(const Center(child: CircularProgressIndicator()));
-    } else if (viewModel.currentFilter != TemplateFilter.meals) {
-      if (widget.showLibraryHeading) {
+    } else {
+      if (!showingMeals && widget.showLibraryHeading) {
         children.add(
-          _FoodLibrarySectionHeader(
+          FoodSearchSectionHeader(
             title: l10n.my_saved_items,
             icon: Icons.bookmark_outline,
           ),
         );
       }
-      if (templates.isEmpty && !showExternal) {
-        children.add(
-          FoodLibraryEmptyState(
-            icon: _templateFilterIcon(viewModel.currentFilter),
-            message: query.isEmpty
-                ? l10n.no_templates_saved
-                : l10n.no_matching_templates,
-          ),
-        );
-      } else if (templates.isNotEmpty) {
+      if (templates.isNotEmpty) {
         children.addAll(
           templates.map(
             (template) => FoodLibraryItemCard(
@@ -328,101 +320,54 @@ class _FoodLibraryState() extends State<FoodLibrary> {
             ),
           ),
         );
-      }
-    } else if (templates.isEmpty) {
-      children.add(
-        FoodLibraryEmptyState(
-          icon: _templateFilterIcon(viewModel.currentFilter),
-          message: l10n.no_matching_templates,
-        ),
-      );
-    } else {
-      children.addAll(
-        templates.map(
-          (template) => FoodLibraryItemCard(
-            template: template,
-            onTap: widget.onTap,
-            onAdd: widget.onAdd,
-            addOnTap: widget.addOnTap,
-            isSelected: widget.isSelected?.call(template) ?? false,
-            selectedQuantity: widget.selectedQuantity?.call(template) ?? 1,
-            onIncrement: widget.onIncrement == null
-                ? null
-                : (source) => widget.onIncrement!(template, source),
-            onDecrement: widget.onDecrement == null
-                ? null
-                : () => widget.onDecrement!(template),
-            showManagementActions: widget.showManagementActions,
+      } else if (!showExternal) {
+        children.add(
+          FoodLibraryEmptyState(
+            icon: _templateFilterIcon(viewModel.currentFilter),
+            message: showingMeals || query.isNotEmpty
+                ? l10n.no_matching_templates
+                : l10n.no_templates_saved,
           ),
-        ),
-      );
+        );
+      }
     }
 
     if (showExternal) {
-      children.add(const SizedBox(height: 16));
-      children.add(
-        _FoodLibrarySectionHeader(
+      children.addAll([
+        const SizedBox(height: 12),
+        FoodSearchSectionHeader(
           title: l10n.external_library,
-          icon: Icons.public_outlined,
+          icon: Icons.public,
         ),
-      );
-      if (external.isInitialLoading && external.results.isEmpty) {
-        children.add(
-          Semantics(
-            liveRegion: true,
-            label: l10n.external_library_loading,
-            child: const Padding(
-              padding: EdgeInsets.all(20),
-              child: Center(child: CircularProgressIndicator()),
+        ...buildFoodDatabaseResults(
+          search: external,
+          results: external.results,
+          buildResult: (result) => FoodSearchResultCard(
+            result: result,
+            showBrand: true,
+            trailing: Tooltip(
+              message: l10n.external_library_copy_label(result.name),
+              child: TextButton(
+                onPressed: _copyInProgress
+                    ? null
+                    : () => _copyExternalResult(result),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  tapTargetSize: MaterialTapTargetSize.padded,
+                ),
+                child: Text(l10n.external_library_copy),
+              ),
             ),
           ),
-        );
-      }
-      if (external.results.isNotEmpty) {
-        children.add(
-          Semantics(
-            liveRegion: true,
-            label: l10n.external_library_results_count(external.results.length),
-            child: const SizedBox(height: 1),
-          ),
-        );
-      }
-      children.addAll(
-        external.results.map(
-          (result) => FoodLibraryExternalResultCard(
-            result: result,
-            busy: _copyInProgress,
-            onCopy: () => _copyExternalResult(result),
-          ),
+          errorMessage: external.hasError ? l10n.external_library_error : null,
+          onRetry: () => external.retry(query),
+          emptyMessage: external.hasSearched
+              ? l10n.no_matching_templates
+              : null,
+          loadingLabel: l10n.external_library_loading,
+          resultsLabel: l10n.external_library_results_count,
         ),
-      );
-      if (external.results.any(
-        (result) => result.source == studyu.FoodSource.openfoodfacts,
-      )) {
-        children.add(const OpenFoodFactsAttribution());
-      }
-      if (external.hasError) {
-        children.add(
-          _FoodLibraryInlineError(
-            message: l10n.external_library_error,
-            onRetry: () => external.retry(query),
-          ),
-        );
-      } else if (external.hasSearched &&
-          !external.isInitialLoading &&
-          external.results.isEmpty) {
-        children.add(
-          _FoodLibraryInlineMessage(message: l10n.no_matching_templates),
-        );
-      }
-      if (external.isLoadingMore) {
-        children.add(
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-        );
-      }
+      ]);
     }
 
     return Column(
@@ -461,8 +406,8 @@ class _FoodLibraryState() extends State<FoodLibrary> {
             },
             child: ListView(
               controller: widget.scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [...children, const SizedBox(height: 24)],
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              children: children,
             ),
           ),
         ),
@@ -475,164 +420,6 @@ enum _CopySaveFailureAction() {
   retry,
   continueEditing,
   discard,
-}
-
-class const _FoodLibrarySectionHeader({
-  required final String title,
-  required final IconData icon,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Semantics(
-      container: true,
-      header: true,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: theme.colorScheme.primary),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class const _FoodLibraryInlineMessage({required final String message})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      liveRegion: true,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Text(message, textAlign: TextAlign.center),
-      ),
-    );
-  }
-}
-
-class const _FoodLibraryInlineError({
-  required final String message,
-  required final VoidCallback onRetry,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    return Semantics(
-      liveRegion: true,
-      container: true,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                message,
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
-            ),
-            TextButton(onPressed: onRetry, child: Text(l10n.try_again)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class const FoodLibraryExternalResultCard({
-  required final UnifiedFoodResult result,
-  required final VoidCallback onCopy,
-  final bool busy = false,
-  super.key,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final brand = result.brand?.trim();
-    final metadata = formatFoodMetadata(
-      l10n,
-      grams: result.servingSizeGrams,
-      servingDescription: l10n.serving_amount(1),
-      calories: result.calories,
-    );
-    final details = [
-      if (brand != null && brand.isNotEmpty) brand,
-      metadata,
-    ].join(' · ');
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: result.imageUrl == null
-                  ? fallbackFoodIcon(theme, Icons.restaurant_outlined)
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        result.imageUrl!,
-                        fit: BoxFit.cover,
-                        excludeFromSemantics: true,
-                        errorBuilder: (_, _, _) =>
-                            fallbackFoodIcon(theme, Icons.restaurant_outlined),
-                      ),
-                    ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    result.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    details,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Tooltip(
-              message: l10n.external_library_copy_label(result.name),
-              child: TextButton(
-                onPressed: busy ? null : onCopy,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                  tapTargetSize: MaterialTapTargetSize.padded,
-                ),
-                child: Text(l10n.external_library_copy),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class const FoodLibraryItemCard({
@@ -652,14 +439,12 @@ class const FoodLibraryItemCard({
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final typeLabel = _isMeal
         ? l10n.nutrition_saved_meal_badge
         : l10n.nutrition_food_badge;
     final icon = _isMeal
         ? Icons.restaurant_menu_outlined
         : Icons.restaurant_outlined;
-    final imageUrl = foodImageUrl(template.prototype);
     final quantity = isSelected ? selectedQuantity : 1;
     final metadata = foodTotalMetadata(
       l10n,
@@ -669,139 +454,66 @@ class const FoodLibraryItemCard({
           .contains('energyKcal'),
     );
 
-    return SelectionFeedbackCard(
+    return FoodItemCard(
+      name: template.name,
+      metadata: metadata,
+      icon: icon,
+      imageUrl: foodImageUrl(template.prototype),
+      typeLabel: typeLabel,
       selected: isSelected,
-      child: Semantics(
-        button: true,
-        label:
-            '$typeLabel, ${template.name}, ${addOnTap ? l10n.food_quantity_add_to_selection : l10n.details}',
-        child: InkWell(
-          onTap: () {
-            if (addOnTap) {
-              onAdd?.call(template, globalCenter(context));
-            } else if (onTap case final onTap?) {
-              onTap(template);
-            } else {
-              _edit(context);
-            }
-          },
-          borderRadius: BorderRadius.circular(12),
-          overlayColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.pressed)
-                ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 48),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: imageUrl == null
-                                ? fallbackFoodIcon(theme, icon)
-                                : ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      imageUrl,
-                                      fit: BoxFit.cover,
-                                      excludeFromSemantics: true,
-                                      errorBuilder: (_, _, _) =>
-                                          fallbackFoodIcon(theme, icon),
-                                    ),
-                                  ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  typeLabel,
-                                  style: theme.textTheme.labelSmall,
-                                ),
-                                Text(
-                                  template.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                AnimatedSwitcher(
-                                  duration: selectionAnimationDuration(context),
-                                  child: Text(
-                                    metadata,
-                                    key: ValueKey(metadata),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                if (isSelected && onIncrement != null && onDecrement != null)
-                  SelectionQuantityControl(
-                    name: template.name,
-                    quantity: selectedQuantity,
-                    onIncrement: onIncrement!,
-                    onDecrement: onDecrement!,
-                  )
-                else if (!addOnTap && !isSelected && onAdd != null)
-                  Builder(
-                    builder: (buttonContext) => TextButton(
-                      onPressed: () => onAdd!(
-                        template,
-                        globalCenter(buttonContext) ?? globalCenter(context),
-                      ),
-                      child: Text(l10n.add),
-                    ),
-                  ),
-                if (showManagementActions)
-                  PopupMenuButton<_FoodLibraryAction>(
-                    onSelected: (action) => _handleAction(context, action),
-                    itemBuilder: (_) => [
-                      if (!addOnTap && onAdd != null && !isSelected)
-                        PopupMenuItem(
-                          value: _FoodLibraryAction.add,
-                          child: _menuItem(Icons.add, l10n.add),
-                        ),
-                      PopupMenuItem(
-                        value: _FoodLibraryAction.edit,
-                        child: _menuItem(Icons.edit_outlined, l10n.edit),
-                      ),
-                      PopupMenuItem(
-                        value: _FoodLibraryAction.duplicate,
-                        child: _menuItem(Icons.copy_outlined, l10n.duplicate),
-                      ),
-                      PopupMenuItem(
-                        value: _FoodLibraryAction.delete,
-                        child: _menuItem(Icons.delete_outline, l10n.delete),
-                      ),
-                    ],
-                  ),
-              ],
+      tapLabel:
+          '$typeLabel, ${template.name}, ${addOnTap ? l10n.food_quantity_add_to_selection : l10n.details}',
+      onTap: (source) {
+        if (addOnTap) {
+          onAdd?.call(template, source);
+        } else if (onTap case final onTap?) {
+          onTap(template);
+        } else {
+          _edit(context);
+        }
+      },
+      actions: [
+        if (isSelected && onIncrement != null && onDecrement != null)
+          SelectionQuantityControl(
+            name: template.name,
+            quantity: selectedQuantity,
+            onIncrement: onIncrement!,
+            onDecrement: onDecrement!,
+          )
+        else if (!addOnTap && !isSelected && onAdd != null)
+          Builder(
+            builder: (buttonContext) => TextButton(
+              onPressed: () => onAdd!(
+                template,
+                globalCenter(buttonContext) ?? globalCenter(context),
+              ),
+              child: Text(l10n.add),
             ),
           ),
-        ),
-      ),
+        if (showManagementActions)
+          PopupMenuButton<_FoodLibraryAction>(
+            onSelected: (action) => _handleAction(context, action),
+            itemBuilder: (_) => [
+              if (!addOnTap && onAdd != null && !isSelected)
+                PopupMenuItem(
+                  value: _FoodLibraryAction.add,
+                  child: _menuItem(Icons.add, l10n.add),
+                ),
+              PopupMenuItem(
+                value: _FoodLibraryAction.edit,
+                child: _menuItem(Icons.edit_outlined, l10n.edit),
+              ),
+              PopupMenuItem(
+                value: _FoodLibraryAction.duplicate,
+                child: _menuItem(Icons.copy_outlined, l10n.duplicate),
+              ),
+              PopupMenuItem(
+                value: _FoodLibraryAction.delete,
+                child: _menuItem(Icons.delete_outline, l10n.delete),
+              ),
+            ],
+          ),
+      ],
     );
   }
 

@@ -48,32 +48,6 @@ class const _QuickSectionTabs({
   }
 }
 
-class const _SectionHeader({
-  required final IconData icon,
-  required final String title,
-  required final Color iconColor,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: iconColor),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class const _HistoryFoodCard({
   required final FoodSearchHistoryItem item,
   required final ValueChanged<Offset?> onTap,
@@ -99,292 +73,88 @@ class const _HistoryFoodCard({
       caloriesKnown: selected?.caloriesKnown ?? true,
       gramsKnown: selected?.gramsKnown ?? true,
     );
-    return SelectionFeedbackCard(
+    return FoodItemCard(
+      name: food.name,
+      metadata: metadata,
+      icon: _foodIcon(food),
+      imageUrl: imageUrl,
+      typeLabel: typeLabel,
+      titleStyle:
+          ListTileTheme.of(context).titleTextStyle ?? theme.textTheme.bodyLarge,
       selected: selected != null,
-      child: Semantics(
-        button: true,
-        label:
-            '$typeLabel, ${food.name}, ${selectionStore == null ? l10n.details : l10n.food_quantity_add_to_selection}',
-        child: InkWell(
-          onTap: () => onTap(globalCenter(context)),
-          borderRadius: BorderRadius.circular(12),
-          overlayColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.pressed)
-                ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 48),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: imageUrl == null
-                                ? fallbackFoodIcon(theme, _foodIcon(food))
-                                : ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      imageUrl,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) =>
-                                          fallbackFoodIcon(
-                                            theme,
-                                            _foodIcon(food),
-                                          ),
-                                    ),
-                                  ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  typeLabel,
-                                  style: theme.textTheme.labelSmall,
-                                ),
-                                Text(
-                                  food.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style:
-                                      ListTileTheme.of(context)
-                                          .titleTextStyle ??
-                                      theme.textTheme.bodyLarge,
-                                ),
-                                const SizedBox(height: 2),
-                                AnimatedSwitcher(
-                                  duration: selectionAnimationDuration(context),
-                                  child: Text(
-                                    metadata,
-                                    key: ValueKey(metadata),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                if (selected != null)
-                  SelectionQuantityControl(
-                    name: food.name,
-                    quantity: selected.quantity,
-                    quantityStyle: theme.textTheme.titleMedium,
-                    onIncrement: onIncrement,
-                    onDecrement: onDecrement,
-                  )
-                else if (onAdd case final add?)
-                  Builder(
-                    builder: (buttonContext) => TextButton(
-                      onPressed: () => add(globalCenter(buttonContext)),
-                      style: TextButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      child: Text(l10n.add),
-                    ),
-                  ),
-              ],
+      tapLabel:
+          '$typeLabel, ${food.name}, ${selectionStore == null ? l10n.details : l10n.food_quantity_add_to_selection}',
+      onTap: onTap,
+      actions: [
+        if (selected != null)
+          SelectionQuantityControl(
+            name: food.name,
+            quantity: selected.quantity,
+            quantityStyle: theme.textTheme.titleMedium,
+            onIncrement: onIncrement,
+            onDecrement: onDecrement,
+          )
+        else if (onAdd case final add?)
+          Builder(
+            builder: (buttonContext) => TextButton(
+              onPressed: () => add(globalCenter(buttonContext)),
+              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+              child: Text(l10n.add),
             ),
           ),
-        ),
-      ),
+      ],
     );
   }
 }
 
 class const _FoodResultCard({
   required final UnifiedFoodResult result,
-  required final ValueChanged<Offset?> onTap,
-  final ValueChanged<Offset?>? onAdd,
-  required final ThemeData theme,
+  required final void Function(Offset? source) onTap,
+  final void Function(Offset? source)? onAdd,
   final FoodSelectionStore? selectionStore,
   final String? selectionKey,
-  required final ValueChanged<Offset?> onIncrement,
+  required final void Function(Offset? source) onIncrement,
   required final VoidCallback onDecrement,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final selected = selectionKey == null
         ? null
         : selectionStore?.itemFor(selectionKey!);
-    final metadata = selected == null
-        ? formatFoodMetadata(
-            l10n,
-            grams: result.servingSizeGrams,
-            servingDescription: l10n.serving_amount(1),
-            calories: result.calories,
-          )
-        : foodTotalMetadata(
-            l10n,
-            selected.baseFood,
-            selected.quantity,
-            caloriesKnown: selected.caloriesKnown,
-            gramsKnown: selected.gramsKnown,
-          );
-
-    return SelectionFeedbackCard(
+    return FoodSearchResultCard(
+      result: result,
+      onTap: onTap,
+      tapLabel:
+          '${result.name}, ${selectionStore == null ? l10n.details : l10n.food_quantity_add_to_selection}',
       selected: selected != null,
-      child: Semantics(
-        button: true,
-        label:
-            '${result.name}, ${selectionStore == null ? l10n.details : l10n.food_quantity_add_to_selection}',
-        child: InkWell(
-          onTap: () => onTap(globalCenter(context)),
-          borderRadius: BorderRadius.circular(12),
-          overlayColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.pressed)
-                ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: result.imageUrl != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    result.imageUrl!,
-                                    width: 48,
-                                    height: 48,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => fallbackFoodIcon(
-                                      theme,
-                                      Icons.restaurant_outlined,
-                                      size: 24,
-                                    ),
-                                  ),
-                                )
-                              : fallbackFoodIcon(
-                                  theme,
-                                  Icons.restaurant_outlined,
-                                  size: 24,
-                                ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                result.name,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              AnimatedSwitcher(
-                                duration: selectionAnimationDuration(context),
-                                child: Text(
-                                  metadata,
-                                  key: ValueKey(metadata),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (selected != null)
-                  SelectionQuantityControl(
-                    name: result.name,
-                    quantity: selected.quantity,
-                    quantityStyle: theme.textTheme.titleMedium,
-                    onIncrement: onIncrement,
-                    onDecrement: onDecrement,
-                  )
-                else if (onAdd case final add?)
-                  Builder(
-                    builder: (buttonContext) => TextButton(
-                      onPressed: () => add(globalCenter(buttonContext)),
-                      style: TextButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      child: Text(l10n.add),
-                    ),
-                  ),
-              ],
+      metadata: selected == null
+          ? null
+          : foodTotalMetadata(
+              l10n,
+              selected.baseFood,
+              selected.quantity,
+              caloriesKnown: selected.caloriesKnown,
+              gramsKnown: selected.gramsKnown,
             ),
+      trailing: switch (selected) {
+        final item? => SelectionQuantityControl(
+          name: result.name,
+          quantity: item.quantity,
+          quantityStyle: theme.textTheme.titleMedium,
+          onIncrement: onIncrement,
+          onDecrement: onDecrement,
+        ),
+        _ when onAdd != null => Builder(
+          builder: (buttonContext) => TextButton(
+            onPressed: () => onAdd!(globalCenter(buttonContext)),
+            style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+            child: Text(l10n.add),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class const _ErrorMessage({
-  required final String message,
-  required final VoidCallback onRetry,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              message,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          TextButton(onPressed: onRetry, child: Text(l10n.try_again)),
-        ],
-      ),
-    );
-  }
-}
-
-class const _EmptySectionMessage({required final String message})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(
-        message,
-        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-        textAlign: TextAlign.center,
-      ),
+        _ => null,
+      },
     );
   }
 }
@@ -455,13 +225,8 @@ class const _FoodSearchListView({
   required final ThemeData theme,
   required final TemplateViewModel templateViewModel,
   required final String query,
-  required final bool isInitialLoading,
-  required final bool isLoadingMore,
-  required final bool hasSearched,
-  required final bool databaseComplete,
   required final bool showNoResults,
-  required final bool offHasMore,
-  required final bool usdaHasMore,
+  required final FoodSearchViewModel search,
   required final String? errorMessage,
   required final List<UnifiedFoodResult> combinedResults,
   required final List<FoodSearchHistoryItem> recentMatches,
@@ -498,6 +263,40 @@ class const _FoodSearchListView({
         onDecrementSelection(canonicalFoodSelectionKey(item.food)),
   );
 
+  String _templateKey(studyu.SavedFoodTemplate template) =>
+      canonicalFoodSelectionKey(templateViewModel.applyFoodTemplate(template));
+
+  Widget _templateCard(studyu.SavedFoodTemplate template) {
+    final key = _templateKey(template);
+    final selected = selectionStore?.itemFor(key);
+    return FoodLibraryItemCard(
+      template: template,
+      onTap: (template) => onAddFoodTemplate(template, null),
+      onAdd: onAddFoodTemplate,
+      addOnTap: selectionStore != null,
+      isSelected: selected != null,
+      selectedQuantity: selected?.quantity ?? 1,
+      onIncrement: (source) => onAddFoodTemplate(template, source),
+      onDecrement: () => onDecrementSelection(key),
+      showManagementActions: false,
+    );
+  }
+
+  Widget _resultCard(UnifiedFoodResult result) {
+    final selectionKey = selectionKeyForResult?.call(result);
+    return _FoodResultCard(
+      result: result,
+      onTap: (source) => onSelectResult(result, source),
+      onAdd: selectionStore == null
+          ? (source) => onAddResult(result, source)
+          : null,
+      selectionStore: selectionStore,
+      selectionKey: selectionKey,
+      onIncrement: (source) => onAddResult(result, source),
+      onDecrement: () => onDecrementSelection(selectionKey ?? result.id),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (query.isEmpty && selectedSection == _FoodSearchSection.myItems) {
@@ -520,23 +319,12 @@ class const _FoodSearchListView({
         onTap: (template) => onAddFoodTemplate(template, null),
         onAdd: onAddFoodTemplate,
         addOnTap: selectionStore != null,
-        isSelected: (template) {
-          final food = templateViewModel.applyFoodTemplate(template);
-          return selectionStore?.itemFor(canonicalFoodSelectionKey(food)) !=
-              null;
-        },
-        selectedQuantity: (template) {
-          final food = templateViewModel.applyFoodTemplate(template);
-          return selectionStore
-                  ?.itemFor(canonicalFoodSelectionKey(food))
-                  ?.quantity ??
-              1;
-        },
+        isSelected: (template) =>
+            selectionStore?.itemFor(_templateKey(template)) != null,
+        selectedQuantity: (template) =>
+            selectionStore?.itemFor(_templateKey(template))?.quantity ?? 1,
         onIncrement: onAddFoodTemplate,
-        onDecrement: (template) {
-          final food = templateViewModel.applyFoodTemplate(template);
-          onDecrementSelection(canonicalFoodSelectionKey(food));
-        },
+        onDecrement: (template) => onDecrementSelection(_templateKey(template)),
         showManagementActions: false,
         showLibraryHeading: false,
       );
@@ -596,26 +384,22 @@ class const _FoodSearchListView({
     } else {
       if (showRecent) {
         children.add(
-          _SectionHeader(
+          FoodSearchSectionHeader(
             icon: Icons.history,
             title: l10n.recent_foods,
-            iconColor: theme.colorScheme.onSurfaceVariant,
           ),
         );
-        children.add(const SizedBox(height: 8));
         children.addAll(recentMatches.map(_historyCard));
       }
 
       if (showPersonal) {
         if (showRecent) children.add(const SizedBox(height: 12));
         children.add(
-          _SectionHeader(
+          FoodSearchSectionHeader(
             icon: Icons.bookmark_outline,
             title: l10n.my_saved_items,
-            iconColor: theme.colorScheme.onSurfaceVariant,
           ),
         );
-        children.add(const SizedBox(height: 8));
         if (templateViewModel.isLoading && personalMatches.isEmpty) {
           children.add(
             const Padding(
@@ -625,42 +409,10 @@ class const _FoodSearchListView({
           );
         } else if (personalMatches.isEmpty) {
           children.add(
-            _EmptySectionMessage(message: l10n.no_matching_templates),
+            FoodSearchEmptyMessage(message: l10n.no_matching_templates),
           );
         } else {
-          children.addAll(
-            personalMatches.map(
-              (template) => FoodLibraryItemCard(
-                template: template,
-                onTap: (template) => onAddFoodTemplate(template, null),
-                onAdd: onAddFoodTemplate,
-                addOnTap: selectionStore != null,
-                isSelected:
-                    selectionStore?.itemFor(
-                      canonicalFoodSelectionKey(
-                        templateViewModel.applyFoodTemplate(template),
-                      ),
-                    ) !=
-                    null,
-                selectedQuantity:
-                    selectionStore
-                        ?.itemFor(
-                          canonicalFoodSelectionKey(
-                            templateViewModel.applyFoodTemplate(template),
-                          ),
-                        )
-                        ?.quantity ??
-                    1,
-                onIncrement: (source) => onAddFoodTemplate(template, source),
-                onDecrement: () => onDecrementSelection(
-                  canonicalFoodSelectionKey(
-                    templateViewModel.applyFoodTemplate(template),
-                  ),
-                ),
-                showManagementActions: false,
-              ),
-            ),
-          );
+          children.addAll(personalMatches.map(_templateCard));
         }
       }
 
@@ -669,82 +421,24 @@ class const _FoodSearchListView({
           children.add(const SizedBox(height: 12));
         }
         children.add(
-          _SectionHeader(
+          FoodSearchSectionHeader(
             icon: Icons.public,
             title: l10n.global_database,
-            iconColor: theme.colorScheme.onSurfaceVariant,
           ),
         );
-        children.add(const SizedBox(height: 8));
-        if (isInitialLoading && combinedResults.isEmpty) {
-          children.add(
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        } else {
-          if (combinedResults.isNotEmpty) {
-            children.addAll(
-              combinedResults.map(
-                (result) => _FoodResultCard(
-                  result: result,
-                  onTap: (source) => onSelectResult(result, source),
-                  onAdd: selectionStore == null
-                      ? (source) => onAddResult(result, source)
-                      : null,
-                  theme: theme,
-                  selectionStore: selectionStore,
-                  selectionKey: selectionKeyForResult?.call(result),
-                  onIncrement: (source) => onAddResult(result, source),
-                  onDecrement: () => onDecrementSelection(
-                    selectionKeyForResult?.call(result) ?? result.id,
-                  ),
-                ),
-              ),
-            );
-            if (combinedResults.any(
-              (result) => result.source == studyu.FoodSource.openfoodfacts,
-            )) {
-              children.add(const OpenFoodFactsAttribution());
-            }
-          }
-          if (errorMessage != null) {
-            children.add(
-              _ErrorMessage(message: errorMessage!, onRetry: onRetry),
-            );
-          } else if (databaseComplete && combinedResults.isEmpty) {
-            children.add(
-              _EmptySectionMessage(message: l10n.no_matching_templates),
-            );
-          }
-        }
-        if (isLoadingMore || (isInitialLoading && combinedResults.isNotEmpty)) {
-          children.add(
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        }
-        if (hasSearched &&
-            combinedResults.isNotEmpty &&
-            !offHasMore &&
-            !usdaHasMore &&
-            !isInitialLoading &&
-            !isLoadingMore) {
-          children.add(
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Center(
-                child: Text(
-                  l10n.end_of_results,
-                  style: TextStyle(color: Colors.grey.shade500),
-                ),
-              ),
-            ),
-          );
-        }
+        children.addAll(
+          buildFoodDatabaseResults(
+            search: search,
+            results: combinedResults,
+            buildResult: _resultCard,
+            errorMessage: errorMessage,
+            onRetry: onRetry,
+            emptyMessage: search.offSearched && search.usdaSearched
+                ? l10n.no_matching_templates
+                : null,
+            endMessage: l10n.end_of_results,
+          ),
+        );
       }
     }
 
