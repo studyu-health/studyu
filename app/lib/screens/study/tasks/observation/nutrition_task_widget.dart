@@ -1034,7 +1034,10 @@ class const _MealTimelineGroupHeader({
   }
 }
 
-enum _MealTimelineAction() { edit, delete }
+enum _MealTimelineAction() {
+  edit,
+  delete,
+}
 
 class const _MealTimelineCard({
   super.key,
