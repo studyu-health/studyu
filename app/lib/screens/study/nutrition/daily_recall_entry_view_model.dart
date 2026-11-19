@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
@@ -28,6 +29,7 @@ class DailyRecallEntryViewModel({
   final NutritionRecallAutoSaveManager _autoSaveManager =
       autoSaveManager ?? NutritionRecallAutoSaveManager();
   late DailyRecall recall;
+  late final Future<void> _initialization;
   bool isSaving = false;
   DateTime? lastSaveTime;
 
@@ -62,7 +64,7 @@ class DailyRecallEntryViewModel({
         meals: [],
       );
     }
-    _initialize();
+    _initialization = _initialize();
   }
 
   NutritionRecallPersistenceTarget? get persistenceTarget => _persistenceTarget;
@@ -314,22 +316,21 @@ class DailyRecallEntryViewModel({
     if (index >= 0) removeMeal(index);
   }
 
+  Future<void> adjustWaterIntake(int deltaMl) async {
+    await _initialization;
+    if (_isDisposed || readOnly || !revalidateHistoricalEligibility()) return;
+    final currentMl = recall.waterIntakeMl ?? 0;
+    final updatedMl = max(0, currentMl + deltaMl);
+    if (updatedMl == currentMl) return;
+    recall = _copyWithRecall(waterIntakeMl: updatedMl);
+    _recallRevision++;
+    notifyListeners();
+    _scheduleAutoSave('water intake changed');
+  }
+
   DailyRecall _copyRecall(DailyRecall source) {
     final copy = DailyRecall.fromJson(source.toJson());
-    if (copy.studyDaySnapshot == _studyDaySnapshot) return copy;
-    return DailyRecall(
-      id: copy.id,
-      date: copy.date,
-      isUsualIntakeDay: copy.isUsualIntakeDay,
-      specialOccasion: copy.specialOccasion,
-      recallMode: copy.recallMode,
-      entryStartedAt: copy.entryStartedAt,
-      entryCompletedAt: copy.entryCompletedAt,
-      meals: copy.meals,
-      studyDaySnapshot: _studyDaySnapshot,
-      lastAutoSavedAt: copy.lastAutoSavedAt,
-      availabilityVerified: copy.availabilityVerified,
-    );
+    return copy..studyDaySnapshot = _studyDaySnapshot;
   }
 
   DailyRecall _copyWithRecall({
@@ -339,6 +340,7 @@ class DailyRecallEntryViewModel({
     DateTime? entryCompletedAt,
     bool clearEntryCompletedAt = false,
     DateTime? lastAutoSavedAt,
+    int? waterIntakeMl,
   }) => DailyRecall(
     id: recall.id,
     date: recall.date,
@@ -352,6 +354,7 @@ class DailyRecallEntryViewModel({
         ? null
         : entryCompletedAt ?? recall.entryCompletedAt,
     meals: recall.meals,
+    waterIntakeMl: waterIntakeMl ?? recall.waterIntakeMl,
     studyDaySnapshot: _studyDaySnapshot ?? recall.studyDaySnapshot,
     lastAutoSavedAt: lastAutoSavedAt ?? recall.lastAutoSavedAt,
     availabilityVerified: recall.availabilityVerified,
@@ -414,6 +417,7 @@ class DailyRecallEntryViewModel({
 
   bool get _hasRecallContent =>
       recall.meals.isNotEmpty ||
+      recall.waterIntakeMl != null ||
       recall.specialOccasion != null ||
       recall.isUsualIntakeDay != null;
 

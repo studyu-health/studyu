@@ -28,6 +28,63 @@ void main() {
     );
   });
 
+  test('water adjustments preserve and autosave a water-only draft', () async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime.now();
+    final study = Study('study', 'owner')
+      ..schedule.numberOfCycles = 0
+      ..schedule.includeBaseline = true;
+    final subject = StudySubject('subject-water', study.id, 'user', const [])
+      ..study = study
+      ..startedAt = now.subtract(const Duration(days: 1));
+    final task = NutritionTask.withId();
+    final period = task.schedule.completionPeriods.single;
+    final manager = NutritionRecallAutoSaveManager();
+    final studyDay = nutritionStudyDayFor(subject, now);
+    final draft = DailyRecall.withId(
+      date: now,
+      recallMode: RecallMode.realtimeRecord,
+      meals: [],
+    );
+    expect(draft.toJsonForStorage(), isNot(contains('waterIntakeMl')));
+    expect(DailyRecall.fromJson(draft.toJson()).waterIntakeMl, isNull);
+    await manager.saveRecall(
+      recall: draft..waterIntakeMl = 500,
+      subjectId: subject.id,
+      taskId: task.id,
+      interventionId: 'baseline',
+      periodId: period.id,
+      studyDaySnapshot: studyDay,
+    );
+    final viewModel = DailyRecallEntryViewModel(
+      subject: subject,
+      task: task,
+      completionPeriod: period,
+      autoSaveManager: manager,
+    );
+    addTearDown(viewModel.dispose);
+
+    await viewModel.adjustWaterIntake(250);
+    expect(viewModel.recall.waterIntakeMl, 750);
+    await viewModel.flushPendingAutoSave();
+    expect(
+      (await manager.loadPendingRecall(
+        subjectId: subject.id,
+        taskId: task.id,
+        periodId: period.id,
+        studyDay: studyDay,
+      ))?.recall.waterIntakeMl,
+      750,
+    );
+
+    await viewModel.adjustWaterIntake(-1000);
+    expect(viewModel.recall.waterIntakeMl, 0);
+    expect(viewModel.recall.toJsonForStorage()['waterIntakeMl'], 0);
+    expect(viewModel.recall.entryCompletedAt, isNull);
+    expect(subject.progress, isEmpty);
+    await viewModel.flushPendingAutoSave();
+  });
+
   test(
     'autosave keeps an incomplete recall local without completing progress',
     () async {

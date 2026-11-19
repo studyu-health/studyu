@@ -188,6 +188,7 @@ extension StudySubjectExtension on StudySubject {
       entryStartedAt: recall.entryStartedAt,
       entryCompletedAt: recall.entryCompletedAt,
       meals: recall.meals,
+      waterIntakeMl: recall.waterIntakeMl,
       studyDaySnapshot: studyDaySnapshot,
       lastAutoSavedAt: recall.lastAutoSavedAt,
       availabilityVerified: recall.availabilityVerified,
