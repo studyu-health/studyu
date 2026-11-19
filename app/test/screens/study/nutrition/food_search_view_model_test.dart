@@ -179,6 +179,38 @@ void main() {
     ]);
   });
 
+  testWidgets('changing the query cancels a pending server retry', (
+    tester,
+  ) async {
+    final queries = <String>[];
+    final viewModel = FoodSearchViewModel(
+      usdaConfigured: false,
+      openFoodFactsSearch:
+          ({required query, required page, required pageSize}) async {
+            queries.add(query);
+            if (query == 'old') {
+              throw const HttpStatusException(statusCode: 503, message: '');
+            }
+            return offPage(page, 1);
+          },
+    );
+    addTearDown(viewModel.dispose);
+
+    viewModel.search('old');
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    expect(queries, ['old']);
+    expect(viewModel.isInitialLoading, isTrue);
+
+    viewModel.search('new');
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(seconds: 3));
+    expect(queries, ['old', 'new']);
+    expect(viewModel.activeQuery, 'new');
+    expect(viewModel.results, hasLength(1));
+    expect(viewModel.hasError, isFalse);
+  });
+
   testWidgets('stale pagination response and timeout cannot change new query', (
     tester,
   ) async {

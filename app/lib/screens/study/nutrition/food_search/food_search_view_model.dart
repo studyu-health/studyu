@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
@@ -27,6 +28,7 @@ final class FoodSearchViewModel({
 }) extends ChangeNotifier {
   static const _debounceDuration = Duration(milliseconds: 400);
   static const _pageSize = 20;
+  static final _retryRandom = Random();
 
   String _languageCode = languageCode;
   Timer? _debounceTimer;
@@ -73,7 +75,7 @@ final class FoodSearchViewModel({
     _debounceTimer?.cancel();
     final query = value.trim();
     final generation = ++_searchGeneration;
-    _reset();
+    _reset(query);
     if (query.isEmpty) return;
 
     _debounceTimer = Timer(_debounceDuration, () => _search(query, generation));
@@ -120,16 +122,16 @@ final class FoodSearchViewModel({
     _notifyListeners();
   }
 
-  void _reset() {
+  void _reset(String query) {
     _results.clear();
     _offPage = 1;
     _usdaPage = 1;
     _offHasMore = true;
     _usdaHasMore = true;
-    _isInitialLoading = false;
+    _isInitialLoading = query.isNotEmpty;
     _isLoadingMore = false;
     _hasSearched = false;
-    _activeQuery = '';
+    _activeQuery = query;
     _offSearched = false;
     _usdaSearched = false;
     _offFailed = false;
@@ -210,17 +212,42 @@ final class FoodSearchViewModel({
     );
   }
 
+  Future<SearchResult?> _fetchOpenFoodFactsWithRetry(
+    String query,
+    int page,
+    int generation,
+  ) async {
+    for (var attempt = 0; _isCurrent(generation); attempt++) {
+      try {
+        return await _fetchOpenFoodFacts(
+          query: query,
+          page: page,
+        ).timeout(foodProviderTimeout);
+      } on HttpStatusException catch (error) {
+        if (attempt == 2 || error.statusCode < 500 || error.statusCode >= 600) {
+          rethrow;
+        }
+        if (!_isCurrent(generation)) return null;
+        await Future<void>.delayed(
+          Duration(milliseconds: (2000 << attempt) + _retryRandom.nextInt(500)),
+        );
+      }
+    }
+    return null;
+  }
+
   Future<void> _searchOpenFoodFacts(
     String query, {
     required int page,
     required int generation,
   }) async {
     try {
-      final searchResult = await _fetchOpenFoodFacts(
-        query: query,
-        page: page,
-      ).timeout(foodProviderTimeout);
-      if (!_isCurrent(generation)) return;
+      final searchResult = await _fetchOpenFoodFactsWithRetry(
+        query,
+        page,
+        generation,
+      );
+      if (searchResult == null || !_isCurrent(generation)) return;
 
       final products = searchResult.products ?? const <Product>[];
       _results.addAll(

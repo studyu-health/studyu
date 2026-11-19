@@ -965,9 +965,11 @@ class _FoodSearchScreenContentState()
     final databaseComplete = search.offSearched && search.usdaSearched;
     final showNoResults =
         hasSearched &&
+        errorMessage == null &&
+        (!showPersonal || !templateViewModel.isLoading) &&
         visibleResultCount == 0 &&
         (!showDatabase || (!search.isInitialLoading && databaseComplete));
-    final showSearchFallback = showNoResults && errorMessage == null;
+    final showSearchFallback = showNoResults;
     String? searchStatus;
     if (showDatabase && (search.isInitialLoading || search.isLoadingMore)) {
       searchStatus = l10n.searching_databases;

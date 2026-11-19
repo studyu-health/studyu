@@ -211,6 +211,42 @@ void main() {
     },
   );
 
+  for (final failures in [1, 3]) {
+    testWidgets('search handles $failures HTTP 503 responses', (tester) async {
+      transport.unavailableResponses = failures;
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (_) => AppState(),
+          child: _app(home: FoodSearchScreen(repository: _EmptyRepository())),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'apple');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+
+      final l10n = lookupAppLocalizations(const Locale('en'));
+      expect(find.text(l10n.no_results_for_query('apple')), findsNothing);
+      expect(find.text(l10n.try_again), findsNothing);
+      expect(transport.requests, hasLength(1));
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+      if (failures == 3) {
+        expect(find.text(l10n.no_results_for_query('apple')), findsNothing);
+        await tester.pump(const Duration(seconds: 5));
+        await tester.pumpAndSettle();
+        expect(transport.requests, hasLength(3));
+        expect(find.text(l10n.no_results_for_query('apple')), findsNothing);
+        expect(find.text(l10n.food_search_error), findsOneWidget);
+        await tester.tap(find.text(l10n.try_again));
+      }
+      await tester.pumpAndSettle();
+      expect(find.text('Apple'), findsOneWidget);
+      expect(transport.requests, hasLength(failures + 1));
+    });
+  }
+
   testWidgets('barcode timeout uses neutral error and ignores late success', (
     tester,
   ) async {
@@ -367,6 +403,7 @@ class _EmptyRepository() extends NutritionFoodRepository {
 class _FoodFactsHttpHelper() extends HttpHelper {
   this : super.internal();
   final List<Map<String, String>> requests = [];
+  int unavailableResponses = 0;
   Future<http.Response>? pending;
   Map<String, dynamic> product = {
     'code': '0123456789012',
@@ -377,6 +414,10 @@ class _FoodFactsHttpHelper() extends HttpHelper {
 
   Future<http.Response> respond(Uri uri, Map<String, String> parameters) {
     requests.add(Map.of(parameters));
+    if (unavailableResponses > 0) {
+      unavailableResponses--;
+      return Future.value(http.Response('', 503));
+    }
     return pending ??
         Future.value(
           http.Response(

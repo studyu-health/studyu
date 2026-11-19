@@ -572,7 +572,10 @@ class const _FoodSearchListView({
     children.add(const SizedBox(height: 12));
 
     final showRecent = recentMatches.isNotEmpty;
-    final showPersonal = selectedFilter.includes(_FoodSearchFilter.myItems);
+    final showPersonal =
+        selectedFilter == _FoodSearchFilter.myItems ||
+        (selectedFilter == _FoodSearchFilter.all &&
+            (personalMatches.isNotEmpty || templateViewModel.isLoading));
     final showDatabase = selectedFilter.includes(_FoodSearchFilter.database);
 
     if (showNoResults) {
@@ -600,7 +603,14 @@ class const _FoodSearchListView({
           ),
         );
         children.add(const SizedBox(height: 8));
-        if (personalMatches.isEmpty) {
+        if (templateViewModel.isLoading && personalMatches.isEmpty) {
+          children.add(
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        } else if (personalMatches.isEmpty) {
           children.add(
             _EmptySectionMessage(message: l10n.no_matching_templates),
           );
