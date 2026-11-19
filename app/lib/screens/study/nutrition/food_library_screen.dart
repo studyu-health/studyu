@@ -6,14 +6,10 @@ import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_core/core.dart';
-
-enum _NewItemType() {
-  food,
-  meal,
-}
 
 class const FoodLibraryScreen({
   final bool embedded = false,
@@ -34,71 +30,39 @@ class const FoodLibraryScreen({
     ),
   );
 
-  static Widget newItemButton(BuildContext context) {
+  static Widget addButton(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return PopupMenuButton<_NewItemType>(
-      tooltip: l10n.new_item,
-      onSelected: (type) {
-        switch (type) {
-          case _NewItemType.food:
-            _createFood(context);
-          case _NewItemType.meal:
-            _createMeal(context);
+    return FloatingActionButton(
+      tooltip: l10n.add,
+      heroTag: null,
+      onPressed: () async {
+        final action = await showFoodCreationSheet(
+          context,
+          mealLabel: l10n.add_meal_action,
+        );
+        if (!context.mounted) return;
+        switch (action) {
+          case FoodCreationAction.food:
+            Navigator.push<FoodEntry>(
+              context,
+              FoodEntryScreen.route(
+                showSearchAction: false,
+                templateViewModel: context.read<TemplateViewModel>(),
+              ),
+            );
+          case FoodCreationAction.meal:
+            Navigator.push<FoodEntry>(
+              context,
+              MealCreatorScreen.route(
+                templateViewModel: context.read<TemplateViewModel>(),
+              ),
+            );
+          case null:
+            break;
         }
       },
-      itemBuilder: (_) => [
-        PopupMenuItem(
-          value: _NewItemType.food,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.restaurant_outlined),
-              const SizedBox(width: 12),
-              Text(l10n.add_food_action),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: _NewItemType.meal,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.restaurant_menu_outlined),
-              const SizedBox(width: 12),
-              Text(l10n.add_meal_action),
-            ],
-          ),
-        ),
-      ],
-      icon: const Icon(Icons.add),
+      child: const Icon(Icons.add),
     );
-  }
-
-  static Future<void> _createMeal(BuildContext context) async {
-    final meal = await Navigator.push<FoodEntry>(
-      context,
-      MealCreatorScreen.route(
-        templateViewModel: Provider.of<TemplateViewModel?>(
-          context,
-          listen: false,
-        ),
-      ),
-    );
-    if (meal == null || !context.mounted) return;
-  }
-
-  static Future<void> _createFood(BuildContext context) async {
-    final food = await Navigator.push<FoodEntry>(
-      context,
-      FoodEntryScreen.route(
-        showSearchAction: false,
-        templateViewModel: Provider.of<TemplateViewModel?>(
-          context,
-          listen: false,
-        ),
-      ),
-    );
-    if (food == null || !context.mounted) return;
   }
 
   @override
@@ -141,15 +105,14 @@ class const _FoodLibraryScreenContent({required final bool embedded})
     final library = FoodLibrary(
       includeExternalLibrary: true,
       externalSearchViewModel: context.read<FoodSearchViewModel>(),
+      bottomPadding: 88 + MediaQuery.paddingOf(context).bottom,
     );
 
     if (embedded) return library;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.food_library),
-        actions: [FoodLibraryScreen.newItemButton(context)],
-      ),
+      appBar: AppBar(title: Text(l10n.food_library)),
       body: library,
+      floatingActionButton: FoodLibraryScreen.addButton(context),
     );
   }
 }

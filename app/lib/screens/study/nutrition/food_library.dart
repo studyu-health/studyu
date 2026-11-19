@@ -43,6 +43,7 @@ class const FoodLibrary({
   final FoodLibrarySelectionAction? onIncrement,
   final ValueChanged<studyu.SavedFoodTemplate>? onDecrement,
   final bool showManagementActions = true,
+  final double bottomPadding = 24,
   final bool showLibraryHeading = true,
   final bool includeExternalLibrary = false,
   final FoodSearchViewModel? externalSearchViewModel,
@@ -406,7 +407,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
             },
             child: ListView(
               controller: widget.scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, widget.bottomPadding),
               children: children,
             ),
           ),

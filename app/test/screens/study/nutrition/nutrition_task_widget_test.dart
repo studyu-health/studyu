@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
@@ -390,6 +392,34 @@ void main() {
 
     expect(find.text('Corrected apple'), findsOneWidget);
     expect(find.text('Historical apple'), findsNothing);
+  });
+
+  testWidgets('library add opens the food and meal editors', (tester) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
+    await tester.pumpAndSettle();
+
+    final navigation = find.byType(NavigationBar);
+    final add = find.byTooltip(l10n.add);
+    expect(add, findsNothing);
+    await tester.tap(
+      find.descendant(of: navigation, matching: find.text(l10n.food_library)),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.add_food_action));
+    await tester.pumpAndSettle();
+    expect(find.byType(FoodEntryScreen), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.add_meal_action));
+    await tester.pumpAndSettle();
+    expect(find.byType(MealCreatorScreen), findsOneWidget);
   });
 
   testWidgets('returning from history refreshes the mounted food library', (

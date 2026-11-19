@@ -79,11 +79,6 @@ enum _FoodSearchFilter() {
   bool includes(_FoodSearchFilter source) => this == all || this == source;
 }
 
-enum _FoodSearchAction() {
-  food,
-  meal,
-}
-
 enum _FoodSearchLayoutSlot() {
   content,
   tray,
@@ -858,35 +853,16 @@ class _FoodSearchScreenContentState()
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final action = await showModalBottomSheet<_FoodSearchAction>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.restaurant_outlined),
-              title: Text(l10n.add_food_action),
-              onTap: () => Navigator.pop(sheetContext, _FoodSearchAction.food),
-            ),
-            ListTile(
-              leading: const Icon(Icons.restaurant_menu_outlined),
-              title: Text(l10n.create_meal),
-              onTap: () => Navigator.pop(sheetContext, _FoodSearchAction.meal),
-            ),
-          ],
-        ),
-      ),
+    final action = await showFoodCreationSheet(
+      context,
+      mealLabel: l10n.create_meal,
     );
     if (!mounted) return;
 
     switch (action) {
-      case _FoodSearchAction.food:
+      case FoodCreationAction.food:
         _addManually();
-      case _FoodSearchAction.meal:
+      case FoodCreationAction.meal:
         _createMeal();
       case null:
         return;

@@ -1,4 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:studyu_app/l10n/app_localizations.dart';
+
+enum FoodCreationAction() {
+  food,
+  meal,
+}
+
+Future<FoodCreationAction?> showFoodCreationSheet(
+  BuildContext context, {
+  required String mealLabel,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  return showModalBottomSheet<FoodCreationAction>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.restaurant_outlined),
+            title: Text(l10n.add_food_action),
+            onTap: () => Navigator.pop(sheetContext, FoodCreationAction.food),
+          ),
+          ListTile(
+            leading: const Icon(Icons.restaurant_menu_outlined),
+            title: Text(mealLabel),
+            onTap: () => Navigator.pop(sheetContext, FoodCreationAction.meal),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
 class const NutritionAddButton({
   required final String label,
