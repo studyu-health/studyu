@@ -1004,9 +1004,12 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: FilledButton(
+              child: FilledButton.icon(
                 onPressed: _isSkipped || _isMealValid ? _saveMeal : null,
-                child: Text(
+                icon: widget.existingMeal == null
+                    ? null
+                    : const Icon(Icons.save_outlined),
+                label: Text(
                   widget.existingMeal == null ? l10n.done_label : l10n.save,
                 ),
               ),
