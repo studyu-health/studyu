@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(97);
+SELECT plan(101);
 
 SELECT
     tests.create_supabase_user('nutrition_owner', 'nutrition_owner@studyu.health');
@@ -484,6 +484,22 @@ SELECT is(
     ),
     1,
     'historical composite mutation creates missing component definition atomically'
+);
+SELECT ok(
+    EXISTS (
+        SELECT 1
+        FROM public.list_nutrition_library('10000000-0000-0000-0000-000000000001')
+        WHERE id = '20000000-0000-0000-0000-000000000002'
+    ),
+    'a logged item is in the Library even without an explicit Library save'
+);
+SELECT ok(
+    EXISTS (
+        SELECT 1
+        FROM public.list_nutrition_library('10000000-0000-0000-0000-000000000001')
+        WHERE id = '20000000-0000-0000-0000-000000000020'
+    ),
+    'an explicitly saved meal is in the Library'
 );
 SELECT is(
     (
@@ -1084,10 +1100,18 @@ INSERT INTO nutrition_results VALUES (
 );
 SELECT ok(
     (
-        SELECT deleted_at IS NULL FROM public.nutrition_food_definition
+        SELECT deleted_at IS NOT NULL FROM public.nutrition_food_definition
         WHERE id = '20000000-0000-0000-0000-000000000001'
     ),
-    'historical edit restores the same stable definition identity'
+    'editing past meals preserves the deletion marker'
+);
+SELECT ok(
+    NOT EXISTS (
+        SELECT 1
+        FROM public.list_nutrition_library('10000000-0000-0000-0000-000000000001')
+        WHERE id = '20000000-0000-0000-0000-000000000001'
+    ),
+    'a deleted food with diary entries stays out of the Library'
 );
 SELECT is(
     (
@@ -1095,7 +1119,7 @@ SELECT is(
         WHERE id = '20000000-0000-0000-0000-000000000001'
     ),
     1,
-    'restore does not create a second definition'
+    'editing a deleted food in a past meal keeps one definition'
 );
 
 SELECT tests.authenticate_as('nutrition_other');
@@ -1103,6 +1127,14 @@ SELECT is(
     (SELECT count(*)::integer FROM public.nutrition_food_definition),
     0,
     'definition RLS hides another subject library'
+);
+SELECT is(
+    (
+        SELECT count(*)::integer
+        FROM public.list_nutrition_library('10000000-0000-0000-0000-000000000001')
+    ),
+    0,
+    'the Library function respects definition RLS'
 );
 SELECT throws_ok(
     $$SELECT public.apply_nutrition_food_mutation(
