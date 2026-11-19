@@ -2579,9 +2579,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get meal_nutrition => 'Meal Nutrition';
-
-  @override
   String get nutrition_summary => 'Nutrition Summary';
 
   @override

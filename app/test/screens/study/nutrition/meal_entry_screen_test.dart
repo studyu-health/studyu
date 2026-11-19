@@ -1190,27 +1190,19 @@ void main() {
     },
   );
 
-  testWidgets('meal nutrition appears below meal details in a card', (
-    tester,
-  ) async {
-    await openMealEntry(tester, editableMeal());
+  testWidgets(
+    'logged meal shows food and details without a nutrition summary',
+    (tester) async {
+      await openMealEntry(tester, editableMeal());
 
-    expect(
-      tester.getTopLeft(find.text('Foods and saved meals')).dy,
-      lessThan(tester.getTopLeft(find.text('Meal label')).dy),
-    );
-    expect(
-      tester.getTopLeft(find.text('Meal details')).dy,
-      lessThan(tester.getTopLeft(find.text('Meal Nutrition')).dy),
-    );
-    expect(
-      find.ancestor(
-        of: find.text('Meal Nutrition'),
-        matching: find.byType(Card),
-      ),
-      findsOneWidget,
-    );
-  });
+      expect(
+        tester.getTopLeft(find.text('Foods and saved meals')).dy,
+        lessThan(tester.getTopLeft(find.text('Meal label')).dy),
+      );
+      expect(find.text('Meal details'), findsOneWidget);
+      expect(find.text('Meal Nutrition'), findsNothing);
+    },
+  );
 
   testWidgets('meal fields cards and chips use native theme defaults', (
     tester,

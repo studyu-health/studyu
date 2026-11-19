@@ -536,16 +536,6 @@ class const DailyNutritionSummaryCard({
   );
 }
 
-class const MealNutritionSummaryCard({required final MealLog meal, super.key})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => NutritionSummaryCard(
-    nutrition: sumNutritionFoods(meal.foods),
-    title: AppLocalizations.of(context)!.meal_nutrition,
-    inCard: true,
-  );
-}
-
 /// App snapshots already contain nutrition for the logged amount.
 NutritionProfile sumNutritionFoods(List<FoodEntry> foods) =>
     sumNutritionProfiles(foods.map((food) => food.nutrition));

@@ -17,7 +17,6 @@ import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
-import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_app/widgets/photo_viewer_dialog.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
@@ -1124,10 +1123,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                     value: _mealDetailsSummary(l10n),
                     onTap: _editMealDetails,
                   ),
-                ],
-                if (_meal.foods.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  MealNutritionSummaryCard(meal: _meal),
                 ],
               ],
               if (widget.existingMeal != null) ...[

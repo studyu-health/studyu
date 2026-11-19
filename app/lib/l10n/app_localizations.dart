@@ -4777,12 +4777,6 @@ abstract class AppLocalizations {
   /// **'Some nutrient values are unavailable for {count} {count, plural, =1 {item} other {items}}.'**
   String some_values_unavailable(int count);
 
-  /// No description provided for @meal_nutrition.
-  ///
-  /// In en, this message translates to:
-  /// **'Meal Nutrition'**
-  String get meal_nutrition;
-
   /// No description provided for @nutrition_summary.
   ///
   /// In en, this message translates to:
