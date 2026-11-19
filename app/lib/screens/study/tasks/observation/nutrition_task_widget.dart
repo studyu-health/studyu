@@ -79,11 +79,13 @@ class _NutritionTaskWidgetState()
   int? _cupSizeMl;
   bool _isSavingCupSize = false;
 
+  bool get _trackWaterIntake => widget.task?.trackWaterIntake ?? true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (!widget.readOnly) unawaited(_loadCupSize());
+    if (_trackWaterIntake && !widget.readOnly) unawaited(_loadCupSize());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_showInstructionsIfNeeded());
     });
@@ -465,18 +467,21 @@ class _NutritionTaskWidgetState()
             const SizedBox(height: 16),
           ],
           _buildMealsSection(context, model, recall, theme, l10n),
-          const SizedBox(height: 24),
-          NutritionWaterCard(
-            waterIntakeMl: recall.waterIntakeMl,
-            cupSizeMl: _cupSizeMl ?? _defaultCupSizeMl,
-            readOnly: widget.readOnly,
-            onAdjust: _cupSizeMl == null || _isSavingCupSize
-                ? null
-                : (deltaMl) => unawaited(model.adjustWaterIntake(deltaMl)),
-            onEditCupSize: _cupSizeMl == null || _isSavingCupSize
-                ? null
-                : () => _editCupSize(context, _cupSizeMl!),
-          ),
+          if (_trackWaterIntake ||
+              (_isHistoricalMode && recall.waterIntakeMl != null)) ...[
+            const SizedBox(height: 24),
+            NutritionWaterCard(
+              waterIntakeMl: recall.waterIntakeMl,
+              cupSizeMl: _cupSizeMl ?? _defaultCupSizeMl,
+              readOnly: widget.readOnly || !_trackWaterIntake,
+              onAdjust: _cupSizeMl == null || _isSavingCupSize
+                  ? null
+                  : (deltaMl) => unawaited(model.adjustWaterIntake(deltaMl)),
+              onEditCupSize: _cupSizeMl == null || _isSavingCupSize
+                  ? null
+                  : () => _editCupSize(context, _cupSizeMl!),
+            ),
+          ],
           if (!_isHistoricalMode && !widget.readOnly && !kIsWeb) ...[
             const SizedBox(height: 24),
             Card(
@@ -575,7 +580,7 @@ class _NutritionTaskWidgetState()
       ),
     );
     if (!context.mounted) return;
-    await _loadCupSize();
+    if (_trackWaterIntake && !widget.readOnly) await _loadCupSize();
     await _templateViewModel?.loadAllTemplates();
     if (canEdit &&
         context.mounted &&

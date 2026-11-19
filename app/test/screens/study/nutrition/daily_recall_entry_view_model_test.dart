@@ -37,7 +37,7 @@ void main() {
     final subject = StudySubject('subject-water', study.id, 'user', const [])
       ..study = study
       ..startedAt = now.subtract(const Duration(days: 1));
-    final task = NutritionTask.withId();
+    final task = NutritionTask.withId()..trackWaterIntake = true;
     final period = task.schedule.completionPeriods.single;
     final manager = NutritionRecallAutoSaveManager();
     final studyDay = nutritionStudyDayFor(subject, now);
@@ -83,6 +83,10 @@ void main() {
     expect(viewModel.recall.entryCompletedAt, isNull);
     expect(subject.progress, isEmpty);
     await viewModel.flushPendingAutoSave();
+
+    task.trackWaterIntake = false;
+    await viewModel.adjustWaterIntake(250);
+    expect(viewModel.recall.waterIntakeMl, 0);
   });
 
   test(

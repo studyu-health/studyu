@@ -246,15 +246,27 @@ void main() {
         .setMockMethodCallHandler(_photoManagerChannel, null);
   });
 
+  testWidgets('water logging is hidden when the study has it disabled', (
+    tester,
+  ) async {
+    await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Log meal'), findsOneWidget);
+    expect(find.text('Water'), findsNothing);
+    expect(find.byTooltip('Add a cup of water'), findsNothing);
+  });
+
   testWidgets('water controls use the saved cup size for future adjustments', (
     tester,
   ) async {
+    final task = nutritionTask()..trackWaterIntake = true;
     final addCup = find.byTooltip('Add a cup of water');
     final removeCup = find.byWidgetPredicate(
       (widget) =>
           widget is IconButton && widget.tooltip == 'Remove a cup of water',
     );
-    await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
+    await tester.pumpWidget(nutritionTaskApp(task));
     await tester.pumpAndSettle();
 
     expect(
@@ -287,7 +299,7 @@ void main() {
     expect(tester.widget<IconButton>(removeCup).onPressed, isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
+    await tester.pumpWidget(nutritionTaskApp(task));
     await tester.pumpAndSettle();
     await tester.tap(addCup);
     await tester.pumpAndSettle();

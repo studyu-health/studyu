@@ -318,7 +318,12 @@ class DailyRecallEntryViewModel({
 
   Future<void> adjustWaterIntake(int deltaMl) async {
     await _initialization;
-    if (_isDisposed || readOnly || !revalidateHistoricalEligibility()) return;
+    if (_isDisposed ||
+        readOnly ||
+        task?.trackWaterIntake == false ||
+        !revalidateHistoricalEligibility()) {
+      return;
+    }
     final currentMl = recall.waterIntakeMl ?? 0;
     final updatedMl = max(0, currentMl + deltaMl);
     if (updatedMl == currentMl) return;
