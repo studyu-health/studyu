@@ -4279,16 +4279,16 @@ abstract class AppLocalizations {
   /// **'Add New Food'**
   String get add_new_food;
 
-  /// No description provided for @delete_template.
+  /// Title of the confirmation dialog for deleting a saved Library item.
   ///
   /// In en, this message translates to:
-  /// **'Delete item'**
-  String get delete_template;
+  /// **'Delete {name}?'**
+  String delete_template(String name);
 
   /// No description provided for @delete_template_confirmation.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this item?'**
+  /// **'This item will be removed from the Library.'**
   String get delete_template_confirmation;
 
   /// No description provided for @filter_all.

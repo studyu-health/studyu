@@ -483,6 +483,7 @@ void main() {
         find.descendant(of: sheet, matching: find.text(l10n.delete)),
       );
       await tester.pumpAndSettle();
+      expect(find.text(l10n.delete_template(template.name)), findsOneWidget);
       expect(find.text(l10n.delete_template_confirmation), findsOneWidget);
     }
 

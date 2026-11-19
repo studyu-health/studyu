@@ -2291,11 +2291,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get add_new_food => 'Add New Food';
 
   @override
-  String get delete_template => 'Delete item';
+  String delete_template(String name) {
+    return 'Delete $name?';
+  }
 
   @override
   String get delete_template_confirmation =>
-      'Are you sure you want to delete this item?';
+      'This item will be removed from the Library.';
 
   @override
   String get filter_all => 'All';
@@ -3283,7 +3285,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_exit => 'Exit';
-}
 
   @override
   String get nutrition_water => 'Water';
@@ -3306,3 +3307,4 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nutrition_water_cup_size_save_error =>
       'Could not save the cup size.';
+}

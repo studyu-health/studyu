@@ -2319,11 +2319,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get add_new_food => 'Neues Lebensmittel hinzufügen';
 
   @override
-  String get delete_template => 'Element löschen';
+  String delete_template(String name) {
+    return '$name löschen?';
+  }
 
   @override
   String get delete_template_confirmation =>
-      'Möchten Sie dieses Element wirklich löschen?';
+      'Dieser Eintrag wird aus der Bibliothek entfernt.';
 
   @override
   String get filter_all => 'Alle';
@@ -3328,7 +3330,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_exit => 'Verlassen';
-}
 
   @override
   String get nutrition_water => 'Wasser';
@@ -3351,3 +3352,4 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nutrition_water_cup_size_save_error =>
       'Die Glasgröße konnte nicht gespeichert werden.';
+}

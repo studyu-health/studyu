@@ -13,6 +13,7 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
+import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_core/core.dart' as studyu;
 import 'package:studyu_core/core.dart';
 
@@ -585,24 +586,17 @@ class const FoodLibraryItemCard({
     TemplateViewModel viewModel,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.delete_template),
-        content: Text(l10n.delete_template_confirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmationDialog(
+      context,
+      title: l10n.delete_template(template.name),
+      message: l10n.delete_template_confirmation,
+      cancelLabel: l10n.cancel,
+      confirmLabel: l10n.delete,
+      isDestructive: true,
     );
-    if (confirmed == true) await viewModel.deleteFoodTemplate(template.id);
+    if (confirmed && context.mounted) {
+      await viewModel.deleteFoodTemplate(template.id);
+    }
   }
 }
 

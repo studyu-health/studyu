@@ -2235,11 +2235,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get add_new_food => 'Add New Food';
 
   @override
-  String get delete_template => 'Delete item';
+  String delete_template(String name) {
+    return '$name을(를) 삭제할까요?';
+  }
 
   @override
-  String get delete_template_confirmation =>
-      'Are you sure you want to delete this item?';
+  String get delete_template_confirmation => '이 항목이 라이브러리에서 삭제됩니다.';
 
   @override
   String get filter_all => 'All';
@@ -3223,7 +3224,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_exit => '나가기';
-}
 
   @override
   String get nutrition_water => '물';
@@ -3245,3 +3245,4 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_water_cup_size_save_error => '컵 용량을 저장하지 못했습니다.';
+}

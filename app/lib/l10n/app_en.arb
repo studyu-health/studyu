@@ -875,8 +875,16 @@
   "save_templates_hint": "Save your favorite meals and foods for quick access",
   "from_template": "From My items",
   "add_new_food": "Add New Food",
-  "delete_template": "Delete item",
-  "delete_template_confirmation": "Are you sure you want to delete this item?",
+  "delete_template": "Delete {name}?",
+  "@delete_template": {
+    "description": "Title of the confirmation dialog for deleting a saved Library item.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_template_confirmation": "This item will be removed from the Library.",
   "filter_all": "All",
   "filter_meals": "Meals",
   "filter_foods": "Foods",
