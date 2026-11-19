@@ -243,33 +243,25 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     return showDialog<_LibraryEditChoice>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: Text(l10n.library_edit_title),
         content: Text(l10n.library_edit_message),
         actions: [
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () =>
-                      Navigator.of(dialogContext)
-                          .pop(_LibraryEditChoice.currentEntry),
-                  child: Text(l10n.library_edit_current_entry),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () =>
-                      Navigator.of(dialogContext)
-                          .pop(_LibraryEditChoice.currentEntryAndLibrary),
-                  child: Text(l10n.library_edit_current_entry_and_library),
-                ),
-              ),
-            ],
-          ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(l10n.cancel),
+          ),
+          OutlinedButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, _LibraryEditChoice.currentEntry),
+            child: Text(l10n.library_edit_current_entry),
+          ),
+          OutlinedButton(
+            onPressed: () => Navigator.pop(
+              dialogContext,
+              _LibraryEditChoice.currentEntryAndLibrary,
+            ),
+            child: Text(l10n.library_edit_current_entry_and_library),
           ),
         ],
       ),
