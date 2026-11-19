@@ -480,7 +480,7 @@ SELECT is(
         WHERE
             id = '20000000-0000-0000-0000-000000000002'
             AND subject_id = '10000000-0000-0000-0000-000000000001'
-            AND library_visible = FALSE
+          AND library_visible = FALSE
     ),
     1,
     'historical composite mutation creates missing component definition atomically'
