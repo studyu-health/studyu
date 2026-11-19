@@ -114,14 +114,20 @@ extension StudyExportX on Study {
       if (dailyRecall != null && recallCompletion == null) continue;
 
       final intervention = getIntervention(record.interventionId);
+      final startedAt = record.startedAt;
+      final completedAt = record.completedAt!;
+      final studyDay =
+          dailyRecall?.studyDaySnapshot ??
+          (startedAt == null
+              ? null
+              : dailyRecall == null
+              ? completedAt.difference(startedAt).inDays
+              : _utcStudyDay(completedAt, startedAt));
       final Map<String, dynamic> rowShared = {
         'participant_id': record.subjectId,
-        'participant_started_at': record.startedAt!.toString(),
+        'participant_started_at': startedAt?.toString() ?? '',
         'invite_code': inviteCodeByParticipant[record.subjectId] ?? '',
-        'current_day_of_study': record.completedAt!
-            .difference(record.startedAt!)
-            .inDays
-            .toString(),
+        'current_day_of_study': studyDay?.toString() ?? '',
         'current_intervention_id': record.interventionId,
         'current_intervention_name': intervention?.name ?? invalidKey,
       };
@@ -138,7 +144,7 @@ extension StudyExportX on Study {
           (o) => o.id == record.taskId,
         );
         final Map<String, dynamic> row = {
-          'measurement_time': record.completedAt!.toString(),
+          'measurement_time': completedAt.toString(),
           'measurement_id': record.taskId,
           'measurement_name': measurement?.title ?? invalidKey,
           ...rowShared,
@@ -151,13 +157,13 @@ extension StudyExportX on Study {
           // Populate question columns with submitted response data
           final submittedSurvey = record.result.result as QuestionnaireState;
           final submittedQuestionAnswerPairs = submittedSurvey.answers.values;
+          final surveyAnsweredColumn = surveyAnsweredColumnById[record.taskId];
 
           for (final questionAnswerPair in submittedQuestionAnswerPairs) {
             final questionId = questionAnswerPair.question;
             final questionResponseColumn = responseColumnById[questionId];
-            final surveyAnsweredColumn =
-                surveyAnsweredColumnById[record.taskId]!;
-            if (questionResponseColumn == null) {
+            if (surveyAnsweredColumn == null ||
+                questionResponseColumn == null) {
               continue; // skip unresolvable questions (e.g. because study design has changed)
             }
             final responseValue = StudyExportX._formatQuestionResponse(
@@ -193,10 +199,6 @@ extension StudyExportX on Study {
               .where((MealLog meal) => !meal.isSkipped)
               .length;
           row['entry_completed_at'] = recallCompletion!.toString();
-          row['current_day_of_study'] =
-              (dailyRecall.studyDaySnapshot ??
-                      _utcStudyDay(record.completedAt!, record.startedAt!))
-                  .toString();
           row['water_intake_ml'] = dailyRecall.waterIntakeMl;
         }
         measurementsData.add(row);
@@ -205,7 +207,7 @@ extension StudyExportX on Study {
           (e) => e.id == record.taskId,
         );
         final Map<String, dynamic> row = {
-          'intervention_task_time': record.completedAt!.toString(),
+          'intervention_task_time': completedAt.toString(),
           'intervention_task_id': record.taskId,
           'intervention_task_name': task?.title ?? invalidKey,
           'is_completed': true, // TODO add missed task from generated schedule

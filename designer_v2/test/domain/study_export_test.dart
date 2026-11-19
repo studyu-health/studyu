@@ -122,10 +122,59 @@ void main() {
     final row = study.exportData.measurementsData.single;
     expect(row['entry_completed_at'], completedAt.toString());
   });
+
+  test('exports nutrition alongside a removed questionnaire', () {
+    final study = Study('study', 'owner')..participants = [];
+    final startedAt = DateTime.utc(2026);
+    final completedAt = DateTime.utc(2026, 1, 2);
+    final survey = QuestionnaireState()
+      ..answers['removed-question'] = (Answer<String>(
+        'removed-question',
+        completedAt,
+      )..response = 'Previously answered');
+    final removedQuestionnaire =
+        SubjectProgress(
+            subjectId: 'subject',
+            interventionId: Study.baselineID,
+            taskId: 'removed-questionnaire',
+            resultType: 'QuestionnaireState',
+            result: Result<QuestionnaireState>.app(
+              type: 'QuestionnaireState',
+              periodId: 'period',
+              result: survey,
+            ),
+          )
+          ..startedAt = startedAt
+          ..completedAt = completedAt.add(const Duration(hours: 1));
+    study.participantsProgress = [
+      _recallProgress(startedAt, completedAt, waterIntakeMl: 250),
+      removedQuestionnaire,
+    ];
+
+    final rows = study.exportData.measurementsData;
+    expect(rows.map((row) => row['measurement_id']), [
+      'removed-questionnaire',
+      'nutrition',
+    ]);
+    expect(rows.last['water_intake_ml'], 250);
+  });
+
+  test('exports recalls with a missing participant start date', () {
+    final study = Study('study', 'owner')..participants = [];
+    final completedAt = DateTime.utc(2026, 1, 2);
+    study.participantsProgress = [
+      _recallProgress(null, completedAt, studyDay: 1),
+      _recallProgress(null, completedAt.add(const Duration(hours: 1))),
+    ];
+
+    final rows = study.exportData.measurementsData;
+    expect(rows.map((row) => row['participant_started_at']), ['', '']);
+    expect(rows.map((row) => row['current_day_of_study']), ['', '1']);
+  });
 }
 
 SubjectProgress _recallProgress(
-  DateTime startedAt,
+  DateTime? startedAt,
   DateTime completedAt, {
   int? studyDay,
   int? waterIntakeMl,
