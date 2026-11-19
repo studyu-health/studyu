@@ -68,6 +68,7 @@ class _SaveTemplateDialogState() extends State<SaveTemplateDialog> {
     final isMeal = widget.templateType == TemplateType.meal;
 
     return AlertDialog(
+      scrollable: true,
       title: Text(_getTitle(l10n)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -103,11 +104,7 @@ class _SaveTemplateDialogState() extends State<SaveTemplateDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(l10n.cancel),
         ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: Theme.of(context).primaryColor,
-          ),
+        FilledButton(
           onPressed: () {
             if (_nameController.text.trim().isEmpty) return;
 
