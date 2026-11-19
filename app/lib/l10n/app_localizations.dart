@@ -3601,12 +3601,6 @@ abstract class AppLocalizations {
   /// **'Apply'**
   String get apply;
 
-  /// No description provided for @custom_meal_label.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Meal Label'**
-  String get custom_meal_label;
-
   /// No description provided for @time.
   ///
   /// In en, this message translates to:

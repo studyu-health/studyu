@@ -72,7 +72,6 @@ class const MealEntryScreen({
   final MealLog? existingMeal,
   final NutritionTask? task,
   final MealType? initialMealType,
-  final String? initialCustomMealLabel,
   final List<FoodEntry> initialFoods = const [],
   final PhotoReference? recallPhoto,
   final DateTime? occurrenceDate,
@@ -84,7 +83,6 @@ class const MealEntryScreen({
     MealLog? existingMeal,
     NutritionTask? task,
     MealType? initialMealType,
-    String? initialCustomMealLabel,
     List<FoodEntry> initialFoods = const [],
     PhotoReference? recallPhoto,
     DateTime? occurrenceDate,
@@ -95,7 +93,6 @@ class const MealEntryScreen({
       existingMeal: existingMeal,
       task: task,
       initialMealType: initialMealType,
-      initialCustomMealLabel: initialCustomMealLabel,
       initialFoods: initialFoods,
       recallPhoto: recallPhoto,
       occurrenceDate: occurrenceDate,
@@ -155,14 +152,11 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       _timePrecision = MealOccurrenceTimePrecision.unknown;
       _hasSelectedTime = false;
       _mealType = widget.initialMealType ?? MealType.other;
-      _customMealLabel = widget.initialCustomMealLabel;
-      _isLabelExplicitlyUnset =
-          _mealType == MealType.other && _customMealLabel == null;
+      _isLabelExplicitlyUnset = _mealType == MealType.other;
       _mealContext = null;
       _isSkipped = false;
       _meal = MealLog.withId(
         mealType: _mealType,
-        customMealLabel: _customMealLabel,
         mealContext: _mealContext,
         timestamp: _timestamp,
         timePrecision: _timePrecision,
@@ -784,12 +778,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
 
     setState(() {
       _mealType = selection.type;
-      _customMealLabel = selection.type == MealType.other
-          ? selection.customLabel?.trim()
-          : null;
+      _customMealLabel = selection.customLabel;
       _isLabelExplicitlyUnset =
-          selection.type == MealType.other &&
-          (selection.customLabel?.trim().isEmpty ?? true);
+          _mealType == MealType.other && (_customMealLabel?.isEmpty ?? true);
     });
   }
 
@@ -1147,81 +1138,43 @@ class const _MealTypeSheet({
   required final MealType mealType,
   required final String? customMealLabel,
   final List<String>? customMealTypes,
-}) extends StatefulWidget {
-  @override
-  State<_MealTypeSheet> createState() => _MealTypeSheetState();
-}
-
-class _MealTypeSheetState() extends State<_MealTypeSheet> {
-  late final TextEditingController _customLabelController;
-  late String _selectedKey;
-  bool _editingOther = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _customLabelController = TextEditingController(
-      text: widget.customMealLabel ?? '',
+}) extends StatelessWidget {
+  Widget _choiceTile(
+    BuildContext context, {
+    required _MealTypeSelection choice,
+    required String label,
+    required IconData icon,
+  }) {
+    final selected =
+        mealType == choice.type &&
+        (mealType != MealType.other ||
+            (customMealLabel?.trim() ?? '') == (choice.customLabel ?? ''));
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(label),
+      selected: selected,
+      trailing: selected ? const Icon(Icons.check) : null,
+      onTap: () => Navigator.of(context).pop(choice),
     );
-    _selectedKey = _initialChoiceKey;
-  }
-
-  String get _initialChoiceKey {
-    if (widget.mealType != MealType.other) return widget.mealType.name;
-    final customLabel = widget.customMealLabel?.trim();
-    if (customLabel?.isNotEmpty == true) {
-      if (widget.customMealTypes?.contains(customLabel) == true) {
-        return 'custom:$customLabel';
-      }
-      return 'custom-editor';
-    }
-    return 'none';
-  }
-
-  void _onChoiceChanged(String? key) {
-    if (key == null) return;
-    if (key == 'custom-editor') {
-      setState(() {
-        _selectedKey = key;
-        _editingOther = true;
-      });
-      return;
-    }
-    if (key == 'none') {
-      Navigator.of(context).pop(const _MealTypeSelection(MealType.other, ''));
-      return;
-    }
-    if (key.startsWith('custom:')) {
-      Navigator.of(context)
-          .pop(_MealTypeSelection(MealType.other, key.substring(7)));
-      return;
-    }
-    final type = MealType.values.firstWhere((value) => value.name == key);
-    Navigator.of(context).pop(_MealTypeSelection(type));
-  }
-
-  @override
-  void dispose() {
-    _customLabelController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final customTypes = widget.customMealTypes;
     final visibleCustomTypes =
-        customTypes?.where((label) => label != l10n.meal_type_other).toList() ??
+        customMealTypes?.where((label) => label != l10n.meal_type_other) ??
         const <String>[];
+    const mealTypeIcons = {
+      MealType.breakfast: Icons.breakfast_dining_outlined,
+      MealType.lunch: Icons.lunch_dining_outlined,
+      MealType.dinner: Icons.dinner_dining_outlined,
+      MealType.snack: Icons.cookie_outlined,
+    };
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        16 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
+    return SafeArea(
+      top: false,
       child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1231,61 +1184,26 @@ class _MealTypeSheetState() extends State<_MealTypeSheet> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            RadioGroup<String>(
-              groupValue: _selectedKey == 'custom-editor' && !_editingOther
-                  ? null
-                  : _selectedKey,
-              onChanged: _onChoiceChanged,
-              child: Column(
-                children: [
-                  for (final type in [
-                    MealType.breakfast,
-                    MealType.lunch,
-                    MealType.dinner,
-                    MealType.snack,
-                  ])
-                    RadioListTile<String>(
-                      value: type.name,
-                      title: Text(_getMealTypeLabel(type, l10n)),
-                    ),
-                  ...visibleCustomTypes.map(
-                    (label) => RadioListTile<String>(
-                      value: 'custom:$label',
-                      title: Text(label),
-                    ),
-                  ),
-                  RadioListTile<String>(
-                    value: 'custom-editor',
-                    title: Text(l10n.custom_meal_label),
-                  ),
-                  RadioListTile<String>(
-                    value: 'none',
-                    title: Text(l10n.no_meal_label),
-                  ),
-                ],
+            for (final entry in mealTypeIcons.entries)
+              _choiceTile(
+                context,
+                choice: _MealTypeSelection(entry.key),
+                label: _getMealTypeLabel(entry.key, l10n),
+                icon: entry.value,
               ),
+            for (final label in visibleCustomTypes)
+              _choiceTile(
+                context,
+                choice: _MealTypeSelection(MealType.other, label.trim()),
+                label: label,
+                icon: Icons.restaurant_outlined,
+              ),
+            _choiceTile(
+              context,
+              choice: const _MealTypeSelection(MealType.other),
+              label: l10n.no_meal_label,
+              icon: Icons.label_off_outlined,
             ),
-            if (_editingOther) ...[
-              const SizedBox(height: 8),
-              TextField(
-                controller: _customLabelController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: l10n.custom_meal_label,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(
-                  _MealTypeSelection(
-                    MealType.other,
-                    _customLabelController.text.trim(),
-                  ),
-                ),
-                child: Text(l10n.apply),
-              ),
-            ],
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(l10n.cancel),

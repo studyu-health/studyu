@@ -1886,9 +1886,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get apply => 'Apply';
 
   @override
-  String get custom_meal_label => 'Custom Meal Label';
-
-  @override
   String get time => 'Time';
 
   @override

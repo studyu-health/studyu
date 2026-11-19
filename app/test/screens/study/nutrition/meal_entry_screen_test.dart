@@ -387,11 +387,7 @@ Finder foodEditorInput(String label) => find.byWidgetPredicate(
       ),
 );
 
-Future<void> selectMealType(
-  WidgetTester tester,
-  String label, {
-  String? customLabel,
-}) async {
+Future<void> selectMealType(WidgetTester tester, String label) async {
   final mealLabelTrigger = find.text('Meal label');
   await tester.tap(
     mealLabelTrigger.evaluate().isNotEmpty
@@ -401,11 +397,6 @@ Future<void> selectMealType(
   await tester.pumpAndSettle();
   await tester.tap(find.text(label).last);
   await tester.pumpAndSettle();
-  if (customLabel != null) {
-    await tester.enterText(find.byType(TextField).last, customLabel);
-    await tester.tap(find.text('Apply'));
-    await tester.pumpAndSettle();
-  }
 }
 
 Future<void> openFoodSearchFromMeal(WidgetTester tester) async {
@@ -799,28 +790,23 @@ void main() {
     expect(result!.timePrecision, MealOccurrenceTimePrecision.approximate);
   });
 
-  testWidgets('new meal uses the requested custom meal label', (tester) async {
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => AppState(),
-        child: const MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          locale: Locale('en'),
-          home: MealEntryScreen(
-            initialMealType: MealType.other,
-            initialCustomMealLabel: 'Late bite',
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
+  testWidgets('meal type picker offers no free-text label editor', (
+    tester,
+  ) async {
+    await openMealEntry(tester, null);
 
-    expect(find.text('Meal label'), findsOneWidget);
-    expect(find.text('Late bite'), findsWidgets);
+    await tester.tap(find.text('Meal label'));
+    await tester.pumpAndSettle();
+
+    final sheet = find.byType(BottomSheet);
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
+      find.descendant(of: sheet, matching: find.text('Breakfast')),
       findsOneWidget,
+    );
+    expect(find.text('Custom Meal Label'), findsNothing);
+    expect(
+      find.descendant(of: sheet, matching: find.byType(EditableText)),
+      findsNothing,
     );
   });
 
@@ -837,7 +823,6 @@ void main() {
           home: MealEntryScreen(
             existingMeal: editableMeal(),
             initialMealType: MealType.dinner,
-            initialCustomMealLabel: 'Ignored',
           ),
         ),
       ),
@@ -846,11 +831,11 @@ void main() {
 
     expect(find.text('Meal label'), findsOneWidget);
     expect(find.text('Supper'), findsWidgets);
+    expect(find.text('Dinner'), findsNothing);
     expect(
       find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
       findsOneWidget,
     );
-    expect(find.text('Ignored'), findsNothing);
   });
 
   testWidgets('built-in meal type clears an existing custom label', (
@@ -917,7 +902,7 @@ void main() {
     expect(meal.customMealLabel, 'Evening snack');
   });
 
-  testWidgets('custom meal choices represent an existing generic Other', (
+  testWidgets('picker marks an existing generic meal as No label', (
     tester,
   ) async {
     final task = NutritionTask.withId()
@@ -932,8 +917,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.widgetWithText(RadioListTile<String>, 'No label'),
-      findsOneWidget,
+      tester.getSemantics(find.text('No label')),
+      isSemantics(label: 'No label', isSelected: true, hasTapAction: true),
     );
     expect(find.text('Breakfast'), findsOneWidget);
   });
@@ -1904,11 +1889,7 @@ void main() {
   ) async {
     await openMealEntry(tester, editableMeal());
 
-    await selectMealType(
-      tester,
-      'Custom Meal Label',
-      customLabel: 'Edited supper',
-    );
+    await selectMealType(tester, 'Dinner');
 
     await tester.ensureVisible(find.byTooltip('More options'));
     await tester.pumpAndSettle();
@@ -1924,7 +1905,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(MealEntryScreen), findsOneWidget);
-    expect(find.text('Edited supper'), findsWidgets);
+    expect(find.text('Dinner'), findsWidgets);
   });
 
   testWidgets('recipe builder return preserves and saves the meal draft', (
@@ -1934,11 +1915,7 @@ void main() {
     MealLog? result;
     await openMealEntry(tester, original, onResult: (value) => result = value);
 
-    await selectMealType(
-      tester,
-      'Custom Meal Label',
-      customLabel: 'Edited supper',
-    );
+    await selectMealType(tester, 'Dinner');
 
     final recipeResult = Navigator.of(
       tester.element(find.byType(MealEntryScreen)),
@@ -1955,7 +1932,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
-    expect(result!.customMealLabel, 'Edited supper');
+    expect(result!.mealType, MealType.dinner);
     expect(result!.foods, hasLength(1));
     expect(result!.foods.single.id, 'food');
     expect(result!.foods.single.name, 'Apple');
@@ -1992,11 +1969,7 @@ void main() {
       onResult: (value) => result = value,
     );
 
-    await selectMealType(
-      tester,
-      'Custom Meal Label',
-      customLabel: 'Edited supper',
-    );
+    await selectMealType(tester, 'Dinner');
     await openFoodSearchFromMeal(tester);
     await tester.tap(find.text('Library'));
     await tester.pumpAndSettle();
@@ -2029,7 +2002,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
-    expect(result!.customMealLabel, 'Edited supper');
+    expect(result!.mealType, MealType.dinner);
     expect(result!.foods, hasLength(2));
     expect(result!.foods.first.id, 'food');
     expect(result!.foods.first.name, 'Apple');
@@ -2097,11 +2070,7 @@ void main() {
       foodRepository: repository,
       onResult: (value) => result = value,
     );
-    await selectMealType(
-      tester,
-      'Custom Meal Label',
-      customLabel: 'Edited supper',
-    );
+    await selectMealType(tester, 'Dinner');
     await openFoodSearchFromMeal(tester);
     await tester.tap(find.text('Library'));
     await tester.pumpAndSettle();
@@ -2121,8 +2090,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
-    expect(result!.mealType, MealType.other);
-    expect(result!.customMealLabel, 'Edited supper');
+    expect(result!.mealType, MealType.dinner);
     expect(result!.mealContext, original.mealContext);
     expect(result!.timestamp, original.timestamp);
     expect(result!.foods, hasLength(2));
@@ -2230,11 +2198,7 @@ void main() {
       foodRepository: repository,
       onResult: (value) => result = value,
     );
-    await selectMealType(
-      tester,
-      'Custom Meal Label',
-      customLabel: 'Edited supper',
-    );
+    await selectMealType(tester, 'Dinner');
     await openFoodSearchFromMeal(tester);
     await tester.tap(find.byType(CloseButton));
     await tester.pumpAndSettle();
@@ -2263,7 +2227,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
-    expect(result!.customMealLabel, 'Edited supper');
+    expect(result!.mealType, MealType.dinner);
     expect(result!.foods, hasLength(1));
     expect(result!.foods.single.id, 'food');
     expect(original.customMealLabel, 'Supper');

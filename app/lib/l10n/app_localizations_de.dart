@@ -1966,9 +1966,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get apply => 'Übernehmen';
 
   @override
-  String get custom_meal_label => 'Eigene Bezeichnung';
-
-  @override
   String get time => 'Uhrzeit';
 
   @override
