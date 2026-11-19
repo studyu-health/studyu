@@ -273,8 +273,8 @@ class _NutritionTaskWidgetState()
                           label: l10n.food_library,
                         ),
                         NavigationDestination(
-                          icon: const Icon(Icons.home_outlined),
-                          label: l10n.dashboard,
+                          icon: const Icon(Icons.exit_to_app),
+                          label: l10n.nutrition_exit,
                         ),
                       ],
                     ),

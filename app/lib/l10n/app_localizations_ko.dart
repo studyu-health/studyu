@@ -3226,4 +3226,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get food_selection_remove => '제거';
+
+  @override
+  String get nutrition_exit => '나가기';
 }

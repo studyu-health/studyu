@@ -568,7 +568,7 @@ void main() {
   );
 
   for (final tab in ['Today', 'Statistics', 'Library']) {
-    testWidgets('Dashboard exits $tab without returning a completion result', (
+    testWidgets('Exit closes $tab without returning a completion result', (
       tester,
     ) async {
       var didReturn = false;
@@ -601,7 +601,7 @@ void main() {
 
       expect(find.byType(BackButton), findsNothing);
       await tester.tap(
-        find.descendant(of: navigation, matching: find.text('Dashboard')),
+        find.descendant(of: navigation, matching: find.text('Exit')),
       );
       await tester.pumpAndSettle();
 
@@ -611,7 +611,7 @@ void main() {
     });
   }
 
-  testWidgets('Dashboard asks before leaving below the advisory meal target', (
+  testWidgets('Exit asks before leaving below the advisory meal target', (
     tester,
   ) async {
     var didReturn = false;
@@ -636,7 +636,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Dashboard'));
+    await tester.tap(find.text('Exit'));
     await tester.pumpAndSettle();
 
     expect(didReturn, isFalse);
@@ -644,7 +644,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(didReturn, isFalse);
-    await tester.tap(find.text('Dashboard'));
+    await tester.tap(find.text('Exit'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Leave anyway'));
     await tester.pumpAndSettle();

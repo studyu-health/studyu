@@ -3286,4 +3286,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get food_selection_remove => 'Remove';
+
+  @override
+  String get nutrition_exit => 'Exit';
 }

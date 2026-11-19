@@ -5868,6 +5868,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get food_selection_remove;
+
+  /// No description provided for @nutrition_exit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get nutrition_exit;
 }
 
 class _AppLocalizationsDelegate

@@ -1251,5 +1251,6 @@
       }
     }
   },
-  "food_selection_remove": "Entfernen"
+  "food_selection_remove": "Entfernen",
+  "nutrition_exit": "Verlassen"
 }
