@@ -550,22 +550,21 @@ class _FoodSearchScreenContentState()
     return widget.allowMeals || food.entryType != studyu.FoodEntryType.meal;
   }
 
-  void _selectHistoryItem(FoodSearchHistoryItem item) {
-    if (!_isAllowedFood(item.food)) return;
-    final food = item.createSelection();
-    if (_selectionStore == null) {
-      _showQuantity(food, action: FoodQuantityAction.addToMeal);
+  Future<void> _selectHistoryItem(
+    FoodSearchHistoryItem item,
+    Offset? source,
+  ) async {
+    if (_selectionStore != null) {
+      _addHistoryItem(item, source);
       return;
     }
-    final key = canonicalFoodSelectionKey(food);
-    final selected = _selectionStore.itemFor(key);
-    _showQuantity(
-      selected?.baseFood ?? food,
-      key: key,
-      action: selected == null
-          ? FoodQuantityAction.addToSelection
-          : FoodQuantityAction.updateSelection,
+    if (!_isAllowedFood(item.food)) return;
+    final result = await FoodQuantitySheet.show(
+      context,
+      food: item.createSelection(),
+      action: FoodQuantityAction.addToMeal,
     );
+    if (result != null && mounted) _completeSingleSelection(result);
   }
 
   void _addHistoryItem(FoodSearchHistoryItem item, Offset? source) {
@@ -580,24 +579,13 @@ class _FoodSearchScreenContentState()
   bool _caloriesKnownForResult(UnifiedFoodResult result) =>
       resultCaloriesKnown(result);
 
-  void _selectResult(UnifiedFoodResult result) {
-    final foodEntry = _foodEntryForResult(result);
-    if (!_isAllowedFood(foodEntry)) return;
-    if (widget.mealLabel == null) {
-      _navigateToEdit(foodEntry);
+  void _selectResult(UnifiedFoodResult result, Offset? source) {
+    if (_selectionStore != null) {
+      _addResult(result, source);
       return;
     }
-    final key = canonicalFoodSelectionKey(foodEntry);
-    final selected = _selectionStore!.itemFor(key);
-    _showQuantity(
-      selected?.baseFood ?? foodEntry,
-      key: key,
-      action: selected == null
-          ? FoodQuantityAction.addToSelection
-          : FoodQuantityAction.updateSelection,
-      caloriesKnown: _caloriesKnownForResult(result),
-      gramsKnown: result.servingSizeGrams != null,
-    );
+    final food = _foodEntryForResult(result);
+    if (_isAllowedFood(food)) _navigateToEdit(food);
   }
 
   void _addResult(UnifiedFoodResult result, Offset? source) {
@@ -620,87 +608,10 @@ class _FoodSearchScreenContentState()
     ).applyFoodTemplate(template);
   }
 
-  void _selectFoodTemplate(studyu.SavedFoodTemplate template) {
-    if (!_isAllowedFood(template.prototype)) return;
-    final foodEntry = _foodEntryForTemplate(template);
-    if (widget.mealLabel == null) {
-      _completeSingleSelection(foodEntry);
-      return;
-    }
-    final key = canonicalFoodSelectionKey(foodEntry);
-    final selected = _selectionStore!.itemFor(key);
-    _showQuantity(
-      selected?.baseFood ?? foodEntry,
-      key: key,
-      action: selected == null
-          ? FoodQuantityAction.addToSelection
-          : FoodQuantityAction.updateSelection,
-    );
-  }
-
   void _addFoodTemplate(studyu.SavedFoodTemplate template, Offset? source) {
     if (!_isAllowedFood(template.prototype)) return;
     final food = _foodEntryForTemplate(template);
     _addToSelection(food, key: canonicalFoodSelectionKey(food), source: source);
-  }
-
-  Future<void> _showQuantity(
-    studyu.FoodEntry foodEntry, {
-    String? key,
-    required FoodQuantityAction action,
-    bool caloriesKnown = true,
-    bool gramsKnown = true,
-  }) async {
-    _removeTransfer();
-    final store = _selectionStore;
-    final selected = key == null ? null : store?.itemFor(key);
-    if (store != null) _searchFocusNode.unfocus();
-    final result = await FoodQuantitySheet.show(
-      context,
-      food: foodEntry,
-      baselineFood: selected?.baselineFood,
-      mealLabel: widget.mealLabel,
-      action: action,
-      initialAmount: selected == null
-          ? null
-          : selected.baseFood.amount * selected.quantity,
-      caloriesKnown: selected?.caloriesKnown ?? caloriesKnown,
-      gramsKnown: selected?.gramsKnown ?? gramsKnown,
-      baselineGramsKnown: selected?.baselineGramsKnown,
-      fullScreen: store != null,
-    );
-    if (result == null || !mounted) return;
-    if (store == null) {
-      _completeSingleSelection(result);
-      return;
-    }
-    if (action == FoodQuantityAction.updateSelection && key != null) {
-      final weightChanged =
-          selected != null &&
-          (result.servingSizeGrams - selected.baseFood.servingSizeGrams).abs() >
-              0.000001;
-      store.replaceBase(
-        key,
-        result,
-        caloriesKnown: selected?.caloriesKnown ?? caloriesKnown,
-        gramsKnown:
-            selected?.gramsKnown == true ||
-            selected?.baselineGramsKnown == true ||
-            weightChanged,
-      );
-    } else {
-      final weightChanged =
-          (result.servingSizeGrams - foodEntry.servingSizeGrams).abs() >
-          0.000001;
-      _addToSelection(
-        result,
-        key: key ?? canonicalFoodSelectionKey(result),
-        sourceFood: foodEntry,
-        caloriesKnown: caloriesKnown,
-        gramsKnown: gramsKnown || weightChanged,
-        baselineGramsKnown: gramsKnown,
-      );
-    }
   }
 
   void _confirmSelection(FoodSelectionStore store) {
@@ -751,10 +662,8 @@ class _FoodSearchScreenContentState()
   void _addToSelection(
     studyu.FoodEntry food, {
     required String key,
-    studyu.FoodEntry? sourceFood,
     bool caloriesKnown = true,
     bool gramsKnown = true,
-    bool? baselineGramsKnown,
     Offset? source,
     String? imageUrl,
   }) {
@@ -768,10 +677,8 @@ class _FoodSearchScreenContentState()
     _selectionStore.addOrIncrement(
       key,
       food,
-      sourceFood: sourceFood,
       caloriesKnown: caloriesKnown,
       gramsKnown: gramsKnown,
-      baselineGramsKnown: baselineGramsKnown,
     );
 
     try {
@@ -789,13 +696,31 @@ class _FoodSearchScreenContentState()
     }
   }
 
-  void _selectTrayItem(FoodSelectionItem item) {
-    _showQuantity(
-      item.baseFood,
-      key: item.key,
+  Future<void> _editTrayItem(FoodSelectionItem item) async {
+    final store = _selectionStore!;
+    _removeTransfer();
+    _searchFocusNode.unfocus();
+    final result = await FoodQuantitySheet.show(
+      context,
+      food: item.baseFood,
+      baselineFood: item.baselineFood,
       action: FoodQuantityAction.updateSelection,
+      initialAmount: item.baseFood.amount * item.quantity,
       caloriesKnown: item.caloriesKnown,
       gramsKnown: item.gramsKnown,
+      baselineGramsKnown: item.baselineGramsKnown,
+      fullScreen: true,
+    );
+    if (result == null || !mounted) return;
+
+    final weightChanged =
+        (result.servingSizeGrams - item.baseFood.servingSizeGrams).abs() >
+        0.000001;
+    store.replaceBase(
+      item.key,
+      result,
+      caloriesKnown: item.caloriesKnown,
+      gramsKnown: item.gramsKnown || item.baselineGramsKnown || weightChanged,
     );
   }
 
@@ -931,15 +856,7 @@ class _FoodSearchScreenContentState()
     if (widget.mealLabel == null) {
       _navigateToEdit(result);
     } else {
-      final key = canonicalFoodSelectionKey(result);
-      final selected = _selectionStore!.itemFor(key);
-      await _showQuantity(
-        selected?.baseFood ?? result,
-        key: key,
-        action: selected == null
-            ? FoodQuantityAction.addToSelection
-            : FoodQuantityAction.updateSelection,
-      );
+      _addToSelection(result, key: canonicalFoodSelectionKey(result));
     }
   }
 
@@ -1103,7 +1020,7 @@ class _FoodSearchScreenContentState()
                   maxHeight: bodyConstraints.maxHeight,
                   isConfirming: _isConfirming,
                   onConfirm: () => _confirmSelection(store),
-                  onSelect: _selectTrayItem,
+                  onEdit: _editTrayItem,
                   onIncrement: _incrementTraySelection,
                   onDecrement: _decrementSelection,
                   onActivityChanged: _onSelectionSurfaceActivityChanged,
@@ -1149,7 +1066,7 @@ class _FoodSearchScreenContentState()
                         theme: theme,
                         templateViewModel: templateViewModel,
                         query: query,
-                        reserveCreateSpace: !showNoResults,
+                        reserveCreateSpace: !_selectionSurfaceActive,
                         isInitialLoading: search.isInitialLoading,
                         isLoadingMore: search.isLoadingMore,
                         hasSearched: hasSearched,
@@ -1190,10 +1107,10 @@ class _FoodSearchScreenContentState()
                         },
                         onSelectHistory: _selectHistoryItem,
                         onAddHistory: _addHistoryItem,
-                        onSelectFoodTemplate: _selectFoodTemplate,
                         onAddFoodTemplate: _addFoodTemplate,
                         onSelectResult: _selectResult,
                         onAddResult: _addResult,
+                        onAddManually: _addManually,
                         onRetry: () => _retrySearch(templateViewModel),
                         allowMeals: widget.allowMeals,
                         selectionStore: _selectionStore,
@@ -1204,16 +1121,6 @@ class _FoodSearchScreenContentState()
                         onDecrementSelection: _decrementSelection,
                       ),
                     ),
-                    if (showNoResults)
-                      Padding(
-                        padding: EdgeInsetsDirectional.only(
-                          end: _selectionSurfaceActive ? 0 : 80,
-                        ),
-                        child: _SearchFallback(
-                          query: query,
-                          onAddManually: _addManually,
-                        ),
-                      ),
                   ],
                 ),
               ),

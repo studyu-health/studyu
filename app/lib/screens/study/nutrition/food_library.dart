@@ -38,6 +38,7 @@ class const FoodLibrary({
   final Widget? header,
   final ValueChanged<studyu.SavedFoodTemplate>? onTap,
   final FoodLibrarySelectionAction? onAdd,
+  final bool addOnTap = false,
   final bool Function(studyu.SavedFoodTemplate)? isSelected,
   final int Function(studyu.SavedFoodTemplate)? selectedQuantity,
   final FoodLibrarySelectionAction? onIncrement,
@@ -315,6 +316,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
               template: template,
               onTap: widget.onTap,
               onAdd: widget.onAdd,
+              addOnTap: widget.addOnTap,
               isSelected: widget.isSelected?.call(template) ?? false,
               selectedQuantity: widget.selectedQuantity?.call(template) ?? 1,
               onIncrement: widget.onIncrement == null
@@ -342,6 +344,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
             template: template,
             onTap: widget.onTap,
             onAdd: widget.onAdd,
+            addOnTap: widget.addOnTap,
             isSelected: widget.isSelected?.call(template) ?? false,
             selectedQuantity: widget.selectedQuantity?.call(template) ?? 1,
             onIncrement: widget.onIncrement == null
@@ -640,6 +643,7 @@ class const FoodLibraryItemCard({
   required final studyu.SavedFoodTemplate template,
   final ValueChanged<studyu.SavedFoodTemplate>? onTap,
   final FoodLibrarySelectionAction? onAdd,
+  final bool addOnTap = false,
   final bool isSelected = false,
   final int selectedQuantity = 1,
   final ValueChanged<Offset?>? onIncrement,
@@ -671,28 +675,31 @@ class const FoodLibraryItemCard({
 
     return SelectionFeedbackCard(
       selected: isSelected,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                button: true,
-                label: '$typeLabel, ${template.name}, ${l10n.details}',
-                child: InkWell(
-                  onTap: () {
-                    if (onTap case final onTap?) {
-                      onTap(template);
-                    } else {
-                      _edit(context);
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  overlayColor: WidgetStateProperty.resolveWith(
-                    (states) => states.contains(WidgetState.pressed)
-                        ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                        : null,
-                  ),
+      child: Semantics(
+        button: true,
+        label:
+            '$typeLabel, ${template.name}, ${addOnTap ? l10n.food_quantity_add_to_selection : l10n.details}',
+        child: InkWell(
+          onTap: () {
+            if (addOnTap) {
+              onAdd?.call(template, globalCenter(context));
+            } else if (onTap case final onTap?) {
+              onTap(template);
+            } else {
+              _edit(context);
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          overlayColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.pressed)
+                ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                : null,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child: ConstrainedBox(
@@ -754,49 +761,49 @@ class const FoodLibraryItemCard({
                     ),
                   ),
                 ),
-              ),
-            ),
-            if (isSelected && onIncrement != null && onDecrement != null)
-              SelectionQuantityControl(
-                name: template.name,
-                quantity: selectedQuantity,
-                onIncrement: onIncrement!,
-                onDecrement: onDecrement!,
-              )
-            else if (!isSelected && onAdd != null)
-              Builder(
-                builder: (buttonContext) => TextButton(
-                  onPressed: () => onAdd!(
-                    template,
-                    globalCenter(buttonContext) ?? globalCenter(context),
-                  ),
-                  child: Text(l10n.add),
-                ),
-              ),
-            if (showManagementActions)
-              PopupMenuButton<_FoodLibraryAction>(
-                onSelected: (action) => _handleAction(context, action),
-                itemBuilder: (_) => [
-                  if (onAdd != null && !isSelected)
-                    PopupMenuItem(
-                      value: _FoodLibraryAction.add,
-                      child: _menuItem(Icons.add, l10n.add),
+                if (isSelected && onIncrement != null && onDecrement != null)
+                  SelectionQuantityControl(
+                    name: template.name,
+                    quantity: selectedQuantity,
+                    onIncrement: onIncrement!,
+                    onDecrement: onDecrement!,
+                  )
+                else if (!addOnTap && !isSelected && onAdd != null)
+                  Builder(
+                    builder: (buttonContext) => TextButton(
+                      onPressed: () => onAdd!(
+                        template,
+                        globalCenter(buttonContext) ?? globalCenter(context),
+                      ),
+                      child: Text(l10n.add),
                     ),
-                  PopupMenuItem(
-                    value: _FoodLibraryAction.edit,
-                    child: _menuItem(Icons.edit_outlined, l10n.edit),
                   ),
-                  PopupMenuItem(
-                    value: _FoodLibraryAction.duplicate,
-                    child: _menuItem(Icons.copy_outlined, l10n.duplicate),
+                if (showManagementActions)
+                  PopupMenuButton<_FoodLibraryAction>(
+                    onSelected: (action) => _handleAction(context, action),
+                    itemBuilder: (_) => [
+                      if (!addOnTap && onAdd != null && !isSelected)
+                        PopupMenuItem(
+                          value: _FoodLibraryAction.add,
+                          child: _menuItem(Icons.add, l10n.add),
+                        ),
+                      PopupMenuItem(
+                        value: _FoodLibraryAction.edit,
+                        child: _menuItem(Icons.edit_outlined, l10n.edit),
+                      ),
+                      PopupMenuItem(
+                        value: _FoodLibraryAction.duplicate,
+                        child: _menuItem(Icons.copy_outlined, l10n.duplicate),
+                      ),
+                      PopupMenuItem(
+                        value: _FoodLibraryAction.delete,
+                        child: _menuItem(Icons.delete_outline, l10n.delete),
+                      ),
+                    ],
                   ),
-                  PopupMenuItem(
-                    value: _FoodLibraryAction.delete,
-                    child: _menuItem(Icons.delete_outline, l10n.delete),
-                  ),
-                ],
-              ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );

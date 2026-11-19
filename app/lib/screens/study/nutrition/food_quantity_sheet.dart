@@ -7,7 +7,6 @@ import 'package:studyu_core/core.dart';
 enum FoodQuantityAction() {
   /// Legacy actions retained for source compatibility.
   existingMeal,
-  addToSelection,
   addMealToSelection,
   updateSelection,
   addToMeal,
@@ -654,8 +653,6 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                   ? null
                   : () => Navigator.pop(context, _scaledFood),
               child: Text(switch (widget.action) {
-                FoodQuantityAction.addToSelection =>
-                  l10n.food_quantity_add_to_selection,
                 FoodQuantityAction.addMealToSelection =>
                   widget.mealLabel == null
                       ? l10n.add_food

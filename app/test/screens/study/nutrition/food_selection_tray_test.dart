@@ -112,9 +112,13 @@ void main() {
       ]),
     );
 
-    final recent = find.text('Recent Apple');
-    final library = find.text('Library Apple');
-    final database = find.text('External Apple');
+    final list = find.byType(ListView).first;
+    Finder result(String name) =>
+        find.descendant(of: list, matching: find.text(name));
+
+    final recent = result('Recent Apple');
+    final library = result('Library Apple');
+    final database = result('External Apple');
     expect(recent, findsOneWidget);
     expect(library, findsOneWidget);
     expect(database, findsOneWidget);
@@ -125,12 +129,19 @@ void main() {
     expect(recent, findsOneWidget);
     expect(library, findsNothing);
     expect(database, findsNothing);
+    await tester.tap(recent);
+    await tester.pumpAndSettle();
+    expect(find.text('1 item · 80 kcal'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilterChip, 'My library'));
     await tester.pumpAndSettle();
     expect(recent, findsNothing);
     expect(library, findsOneWidget);
     expect(database, findsNothing);
+    await tester.tap(library);
+    await tester.pumpAndSettle();
+    expect(find.text('2 items · 160 kcal'), findsOneWidget);
+    expect(find.byType(FoodQuantitySheet), findsNothing);
 
     await tester.tap(find.widgetWithText(FilterChip, 'Database'));
     await tester.pump(const Duration(milliseconds: 500));
@@ -143,58 +154,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(recent, findsOneWidget);
     expect(library, findsOneWidget);
+    await tester.scrollUntilVisible(
+      database,
+      80,
+      scrollable: find.descendant(of: list, matching: find.byType(Scrollable)),
+    );
     expect(database, findsOneWidget);
   });
 
-  testWidgets('new result opens details, then add reveals compact tray', (
+  testWidgets('the whole result adds a serving and keeps the query', (
     tester,
   ) async {
     await _pumpSearch(tester);
 
-    await tester.tap(find.text('External Apple'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Edit amount'), findsOneWidget);
-    expect(find.byKey(const ValueKey('food-quantity-back')), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Add to basket'), findsOneWidget);
-    expect(
-      tester
-          .widget<FoodQuantitySheet>(find.byType(FoodQuantitySheet))
-          .food
-          .portionReference,
-      '1 medium apple',
-    );
-    expect(find.textContaining('1 medium apple'), findsOneWidget);
-
-    await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
+    final result = find.text('External Apple');
+    final card = find.ancestor(of: result, matching: find.byType(Card)).first;
+    expect(find.widgetWithText(TextButton, 'Add'), findsNothing);
+    await tester.tapAt(tester.getRect(card).centerRight.translate(-6, 0));
     await tester.pumpAndSettle();
 
     expect(find.byType(FoodQuantitySheet), findsNothing);
-    expect(find.text('Selected items'), findsOneWidget);
-    expect(
-      find.widgetWithText(FilledButton, 'Add 1 item to Lunch'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('back from empty details hides tray but keeps it ready', (
-    tester,
-  ) async {
-    await _pumpSearch(tester);
-
-    await tester.tap(find.text('External Apple'));
+    expect(find.text('1 item · 78 kcal'), findsOneWidget);
+    await tester.tap(find.text('External Apple').first);
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(FilledButton, 'Add to basket'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
+    expect(find.text('1 item · 156 kcal'), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: card,
+        matching: find.byTooltip('Decrease External Apple'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('1 item · 78 kcal'), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: card,
+        matching: find.byTooltip('Increase External Apple'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(FoodQuantitySheet), findsNothing);
-    expect(find.text('Selected items'), findsNothing);
-
-    await tester.tap(find.text('External Apple'));
-    await tester.pumpAndSettle();
-    expect(find.widgetWithText(FilledButton, 'Add to basket'), findsOneWidget);
+    expect(find.text('1 item · 156 kcal'), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      'apple',
+    );
   });
 
   testWidgets('selector preserves underlying list state through navigation', (
@@ -261,26 +267,26 @@ void main() {
     final overlayRect = tester.getRect(
       find.byKey(const ValueKey('selection-tray')),
     );
-    final libraryAddActions = find.descendant(
+    final libraryCards = find.descendant(
       of: library,
-      matching: find.widgetWithText(TextButton, 'Add'),
+      matching: find.byType(FoodLibraryItemCard),
     );
-    Finder? coveredAddAction;
-    for (final element in libraryAddActions.evaluate()) {
+    Finder? coveredCard;
+    for (final element in libraryCards.evaluate()) {
       final renderObject = element.renderObject;
       if (renderObject is! RenderBox || !renderObject.hasSize) continue;
       final rect = renderObject.localToGlobal(Offset.zero) & renderObject.size;
       if (overlayRect.contains(rect.center)) {
-        coveredAddAction = find.byElementPredicate(
+        coveredCard = find.byElementPredicate(
           (candidate) => identical(candidate, element),
         );
         break;
       }
     }
-    expect(coveredAddAction, isNotNull);
-    expect(coveredAddAction!.hitTestable(), findsNothing);
+    expect(coveredCard, isNotNull);
+    expect(coveredCard!.hitTestable(), findsNothing);
 
-    await tester.tap(selectedRow);
+    await tester.tap(_basketEdit(expandedList));
     await tester.pumpAndSettle();
     expect(find.byType(FoodQuantitySheet), findsOneWidget);
     expect(libraryList, findsNothing);
@@ -296,60 +302,53 @@ void main() {
     expectUnderlyingListPreserved();
   });
 
-  testWidgets('selected item details open above the basket', (tester) async {
+  testWidgets('basket tune action opens editor and back discards edits', (
+    tester,
+  ) async {
     _setSurfaceSize(tester);
     await _pumpSearch(tester);
     await _addExternalApple(tester);
 
-    final searchRouteCount = find.byType(FoodSearchScreen).evaluate().length;
     await tester.tap(find.text('Selected items'));
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey('selection-expanded-list')),
-      findsOneWidget,
+    final expandedList = find.byKey(const ValueKey('selection-expanded-list'));
+    final tuneAction = find.descendant(
+      of: expandedList,
+      matching: find.byTooltip('Edit amount'),
     );
-    expect(find.byKey(const ValueKey('selection-drag-handle')), findsOneWidget);
-    expect(find.byType(FoodSearchScreen), findsNWidgets(searchRouteCount));
 
-    await tester.tap(find.text('External Apple').last);
+    await tester.tap(
+      find.descendant(of: expandedList, matching: find.text('External Apple')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(FoodQuantitySheet), findsNothing);
+
+    await tester.tap(tuneAction);
     await tester.pumpAndSettle();
     expect(find.text('Edit amount'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Save changes'), findsOneWidget);
-    expect(find.byKey(const ValueKey('selection-drag-handle')), findsNothing);
-    expect(
-      find.descendant(
-        of: find.byType(FoodQuantitySheet),
-        matching: find.byIcon(Icons.close),
-      ),
-      findsNothing,
-    );
+    expect(expandedList, findsNothing);
     expect(find.textContaining('1 medium apple'), findsOneWidget);
-    expect(find.textContaining('150 g per serving'), findsNothing);
+    await tester.enterText(_amountField(), '3');
 
     await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey('selection-expanded-list')),
-      findsOneWidget,
-    );
-    expect(find.byType(FoodSearchScreen), findsNWidgets(searchRouteCount));
-
-    await tester.tap(find.byTooltip('Collapse selected items'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('selection-expanded-list')), findsNothing);
+    expect(expandedList, findsOneWidget);
+    expect(find.text('1 item · 78 kcal'), findsOneWidget);
   });
 
-  testWidgets('detail servings normalize into quantity before increment', (
+  testWidgets('saved servings normalize into quantity before increment', (
     tester,
   ) async {
     FoodSearchSelection? selection;
     await _pumpSearch(tester, onResult: (value) => selection = value);
 
-    await tester.tap(find.text('External Apple'));
+    await _addExternalApple(tester);
+    await tester.tap(_basketEdit());
     await tester.pumpAndSettle();
     await tester.enterText(_amountField(), '2');
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Save changes'));
     await tester.pumpAndSettle();
 
     expect(
@@ -389,7 +388,8 @@ void main() {
     _setSurfaceSize(tester);
     await _pumpSearch(tester);
 
-    await tester.tap(find.text('External Apple'));
+    await _addExternalApple(tester);
+    await tester.tap(_basketEdit());
     await tester.pumpAndSettle();
     tester.view.viewInsets = const FakeViewPadding(bottom: 300);
     addTearDown(tester.view.resetViewInsets);
@@ -398,7 +398,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(
-      find.widgetWithText(FilledButton, 'Add to basket').hitTestable(),
+      find.widgetWithText(FilledButton, 'Save changes').hitTestable(),
       findsOneWidget,
     );
   });
@@ -410,7 +410,7 @@ void main() {
     await _pumpSearch(tester, textScaler: const TextScaler.linear(1.5));
 
     await _addExternalApple(tester);
-    await tester.tap(find.text('External Apple').last);
+    await tester.tap(_basketEdit());
     await tester.pumpAndSettle();
     await tester.enterText(_weightField(), '120');
     await tester.pump();
@@ -424,7 +424,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('External Apple').last);
+    await tester.tap(_basketEdit());
     await tester.pumpAndSettle();
     final reset = find.text('Use default weight (150 g)');
     await tester.ensureVisible(reset);
@@ -488,7 +488,7 @@ void main() {
     tester.semantics.tap(header);
     await tester.pumpAndSettle();
     expect(tray.evaluate().single, same(trayElement));
-    await tester.tap(find.text('External Apple').last);
+    await tester.tap(_basketEdit());
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
     await tester.pumpAndSettle();
@@ -528,10 +528,6 @@ void main() {
   testWidgets('German header uses Lebensmittel count', (tester) async {
     await _pumpSearch(tester, locale: const Locale('de'));
     await tester.tap(find.text('External Apple'));
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Zur Auswahl hinzufügen'),
-    );
     await tester.pumpAndSettle();
 
     expect(find.text('Ausgewählte Lebensmittel'), findsOneWidget);
@@ -599,7 +595,7 @@ void main() {
     );
   });
 
-  testWidgets('expanded list keeps scroll position across details', (
+  testWidgets('saving an edit preserves the expanded basket scroll position', (
     tester,
   ) async {
     _setSurfaceSize(tester);
@@ -612,22 +608,17 @@ void main() {
     await tester.pumpAndSettle();
     final before = tester.widget<ListView>(listFinder).controller!.offset;
     expect(before, greaterThan(0));
-    final visibleItem = find
-        .descendant(
-          of: listFinder,
-          matching: find.textContaining('Library item'),
-        )
-        .hitTestable()
-        .first;
-
-    await tester.tap(visibleItem);
+    await tester.tap(_basketEdit(listFinder).hitTestable().first);
     await tester.pumpAndSettle();
     expect(find.text('Edit amount'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
+    await tester.enterText(_amountField(), '2');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Save changes'));
     await tester.pumpAndSettle();
 
     final after = tester.widget<ListView>(listFinder).controller!.offset;
     expect(after, closeTo(before, 0.1));
+    expect(find.text('8 items · 720 kcal'), findsOneWidget);
   });
 
   testWidgets('compact tray offers View all with total count', (tester) async {
@@ -650,8 +641,7 @@ void main() {
     tester,
   ) async {
     await _pumpSearch(tester);
-    await tester.tap(find.widgetWithText(TextButton, 'Add'));
-    await tester.pumpAndSettle();
+    await _addExternalApple(tester);
     expect(find.widgetWithText(TextButton, 'Add'), findsNothing);
 
     await tester.tap(find.byTooltip('Increase External Apple').first);
@@ -682,7 +672,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Selected items'), findsNothing);
-    expect(find.widgetWithText(TextButton, 'Add'), findsOneWidget);
+    expect(find.text('External Apple').hitTestable(), findsOneWidget);
     expect(
       find.widgetWithText(FilledButton, 'Add 0 items to Lunch'),
       findsNothing,
@@ -698,7 +688,7 @@ void main() {
 
     await tester.tap(find.text('Selected items'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('External Apple').last);
+    await tester.tap(_basketEdit());
     await tester.pumpAndSettle();
     expect(find.byType(FoodQuantitySheet), findsOneWidget);
 
@@ -722,8 +712,7 @@ void main() {
     FoodSearchSelection? selection;
     await _pumpSearch(tester, onResult: (value) => selection = value);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Add'));
-    await tester.pumpAndSettle();
+    await _addExternalApple(tester);
     await tester.tap(find.widgetWithText(FilledButton, 'Add 1 item to Lunch'));
     await tester.pumpAndSettle();
 
@@ -732,9 +721,7 @@ void main() {
     expect(selection?.foods.single.amount, 1);
   });
 
-  testWidgets('My library item uses unified details and selection surface', (
-    tester,
-  ) async {
+  testWidgets('My library row adds directly to the basket', (tester) async {
     final repository = FakeNutritionFoodRepository([_libraryTemplate()]);
     await _pumpSearch(tester, repository: repository, query: null);
 
@@ -743,15 +730,16 @@ void main() {
     await tester.tap(find.text('Library Pear'));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(FilledButton, 'Add to basket'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
-    await tester.pumpAndSettle();
-
     expect(find.byType(FoodQuantitySheet), findsNothing);
     expect(find.text('Selected items'), findsOneWidget);
     expect(repository.loadCalls, 1);
   });
 }
+
+Finder _basketEdit([Finder? basket]) => find.descendant(
+  of: basket ?? find.byKey(const ValueKey('selection-tray')),
+  matching: find.byTooltip('Edit amount'),
+);
 
 Finder _amountField() => find
     .descendant(
@@ -774,8 +762,6 @@ void _setSurfaceSize(WidgetTester tester) {
 
 Future<void> _addExternalApple(WidgetTester tester) async {
   await tester.tap(find.text('External Apple'));
-  await tester.pumpAndSettle();
-  await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
   await tester.pumpAndSettle();
 }
 
@@ -809,17 +795,16 @@ Future<void> _pumpLibrarySelection(
     matching: find.byType(Scrollable),
   );
   for (var index = 0; index < (selectedCount ?? count); index++) {
-    final card = find.ancestor(
-      of: find.text('Library item ${index + 1}'),
-      matching: find.byType(FoodLibraryItemCard),
+    final item = find.descendant(
+      of: library,
+      matching: find.text('Library item ${index + 1}'),
     );
-    final add = find.descendant(of: card, matching: find.text('Add'));
     await tester.scrollUntilVisible(
-      add.hitTestable(),
+      item.hitTestable(),
       40,
       scrollable: scrollable,
     );
-    await tester.tap(add);
+    await tester.tap(item);
     await tester.pumpAndSettle();
   }
 }

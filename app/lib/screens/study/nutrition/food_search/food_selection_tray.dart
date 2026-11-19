@@ -10,7 +10,7 @@ class const _SelectionPeekTray({
   required final double maxHeight,
   required final bool isConfirming,
   required final VoidCallback onConfirm,
-  required final ValueChanged<FoodSelectionItem> onSelect,
+  required final ValueChanged<FoodSelectionItem> onEdit,
   required final void Function(String key, Offset? source) onIncrement,
   required final ValueChanged<String> onDecrement,
   required final ValueChanged<bool> onActivityChanged,
@@ -156,7 +156,7 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
                     final item = widget.store.items.elementAt(index);
                     return _SelectionPreviewRow(
                       item: item,
-                      onSelect: widget.onSelect,
+                      onEdit: widget.onEdit,
                       onIncrement: widget.onIncrement,
                       onDecrement: widget.onDecrement,
                     );
@@ -234,7 +234,7 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
         items: widget.store.recentItems.take(previewLimit).toList(),
         rowAnchorFor: widget.rowAnchorFor,
         quantityAnchorFor: widget.quantityAnchorFor,
-        onSelect: widget.onSelect,
+        onEdit: widget.onEdit,
         onIncrement: widget.onIncrement,
         onDecrement: widget.onDecrement,
       ),
@@ -246,7 +246,7 @@ class const _SelectionPreviewRows({
   required final List<FoodSelectionItem> items,
   required final GlobalKey Function(String key) rowAnchorFor,
   required final GlobalKey Function(String key) quantityAnchorFor,
-  required final ValueChanged<FoodSelectionItem> onSelect,
+  required final ValueChanged<FoodSelectionItem> onEdit,
   required final void Function(String key, Offset? source) onIncrement,
   required final ValueChanged<String> onDecrement,
 }) extends StatefulWidget {
@@ -315,7 +315,7 @@ class _SelectionPreviewRowsState() extends State<_SelectionPreviewRows> {
       anchorKey: outgoing ? null : widget.rowAnchorFor(item.key),
       quantityAnchorKey: outgoing ? null : widget.quantityAnchorFor(item.key),
       item: item,
-      onSelect: widget.onSelect,
+      onEdit: widget.onEdit,
       onIncrement: widget.onIncrement,
       onDecrement: widget.onDecrement,
     );
@@ -354,7 +354,7 @@ class const _SelectionPreviewRow({
   final GlobalKey? anchorKey,
   final GlobalKey? quantityAnchorKey,
   required final FoodSelectionItem item,
-  required final ValueChanged<FoodSelectionItem> onSelect,
+  required final ValueChanged<FoodSelectionItem> onEdit,
   required final void Function(String key, Offset? source) onIncrement,
   required final ValueChanged<String> onDecrement,
   super.key,
@@ -385,65 +385,61 @@ class const _SelectionPreviewRow({
           return Row(
             children: [
               Expanded(
-                child: InkWell(
-                  onTap: () => onSelect(item),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 48),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                metadata,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: weightStyle,
-                              ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              metadata,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: weightStyle,
                             ),
-                            if (showCustomLabel) ...[
-                              const SizedBox(width: 6),
-                              Flexible(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(
-                                    l10n.food_quantity_custom_weight,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color:
-                                          theme.colorScheme.onPrimaryContainer,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                          ),
+                          if (showCustomLabel) ...[
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  l10n.food_quantity_custom_weight,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                            ],
+                            ),
                           ],
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               SelectionQuantityButton(
                 tooltip: l10n.food_quantity_edit_amount,
-                onPressed: () => onSelect(item),
+                onPressed: () => onEdit(item),
                 icon: Icons.tune,
                 visualDensity: VisualDensity.compact,
               ),

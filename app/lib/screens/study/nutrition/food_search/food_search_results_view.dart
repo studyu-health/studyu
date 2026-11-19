@@ -76,12 +76,12 @@ class const _SectionHeader({
 
 class const _HistoryFoodCard({
   required final FoodSearchHistoryItem item,
-  required final VoidCallback onTap,
-  required final ValueChanged<Offset?> onAdd,
+  required final ValueChanged<Offset?> onTap,
+  final ValueChanged<Offset?>? onAdd,
   required final ThemeData theme,
   final FoodSelectionStore? selectionStore,
-  final ValueChanged<Offset?>? onIncrement,
-  final VoidCallback? onDecrement,
+  required final ValueChanged<Offset?> onIncrement,
+  required final VoidCallback onDecrement,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -101,22 +101,23 @@ class const _HistoryFoodCard({
     );
     return SelectionFeedbackCard(
       selected: selected != null,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                button: true,
-                label: '$typeLabel, ${food.name}, ${l10n.details}',
-                child: InkWell(
-                  onTap: onTap,
-                  borderRadius: BorderRadius.circular(12),
-                  overlayColor: WidgetStateProperty.resolveWith(
-                    (states) => states.contains(WidgetState.pressed)
-                        ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                        : null,
-                  ),
+      child: Semantics(
+        button: true,
+        label:
+            '$typeLabel, ${food.name}, ${selectionStore == null ? l10n.details : l10n.food_quantity_add_to_selection}',
+        child: InkWell(
+          onTap: () => onTap(globalCenter(context)),
+          borderRadius: BorderRadius.circular(12),
+          overlayColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.pressed)
+                ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                : null,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child: ConstrainedBox(
@@ -181,27 +182,27 @@ class const _HistoryFoodCard({
                     ),
                   ),
                 ),
-              ),
-            ),
-            if (selected == null)
-              Builder(
-                builder: (buttonContext) => TextButton(
-                  onPressed: () => onAdd(globalCenter(buttonContext)),
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
+                if (selected != null)
+                  SelectionQuantityControl(
+                    name: food.name,
+                    quantity: selected.quantity,
+                    quantityStyle: theme.textTheme.titleMedium,
+                    onIncrement: onIncrement,
+                    onDecrement: onDecrement,
+                  )
+                else if (onAdd case final add?)
+                  Builder(
+                    builder: (buttonContext) => TextButton(
+                      onPressed: () => add(globalCenter(buttonContext)),
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: Text(l10n.add),
+                    ),
                   ),
-                  child: Text(l10n.add),
-                ),
-              )
-            else
-              SelectionQuantityControl(
-                name: food.name,
-                quantity: selected.quantity,
-                quantityStyle: theme.textTheme.titleMedium,
-                onIncrement: onIncrement!,
-                onDecrement: onDecrement!,
-              ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -210,13 +211,13 @@ class const _HistoryFoodCard({
 
 class const _FoodResultCard({
   required final UnifiedFoodResult result,
-  required final VoidCallback onTap,
-  required final ValueChanged<Offset?> onAdd,
+  required final ValueChanged<Offset?> onTap,
+  final ValueChanged<Offset?>? onAdd,
   required final ThemeData theme,
   final FoodSelectionStore? selectionStore,
   final String? selectionKey,
-  final ValueChanged<Offset?>? onIncrement,
-  final VoidCallback? onDecrement,
+  required final ValueChanged<Offset?> onIncrement,
+  required final VoidCallback onDecrement,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -241,22 +242,23 @@ class const _FoodResultCard({
 
     return SelectionFeedbackCard(
       selected: selected != null,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                button: true,
-                label: '${result.name}, ${l10n.details}',
-                child: InkWell(
-                  onTap: onTap,
-                  borderRadius: BorderRadius.circular(12),
-                  overlayColor: WidgetStateProperty.resolveWith(
-                    (states) => states.contains(WidgetState.pressed)
-                        ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                        : null,
-                  ),
+      child: Semantics(
+        button: true,
+        label:
+            '${result.name}, ${selectionStore == null ? l10n.details : l10n.food_quantity_add_to_selection}',
+        child: InkWell(
+          onTap: () => onTap(globalCenter(context)),
+          borderRadius: BorderRadius.circular(12),
+          overlayColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.pressed)
+                ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                : null,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child: Row(
@@ -318,27 +320,27 @@ class const _FoodResultCard({
                     ),
                   ),
                 ),
-              ),
-            ),
-            if (selected == null)
-              Builder(
-                builder: (buttonContext) => TextButton(
-                  onPressed: () => onAdd(globalCenter(buttonContext)),
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
+                if (selected != null)
+                  SelectionQuantityControl(
+                    name: result.name,
+                    quantity: selected.quantity,
+                    quantityStyle: theme.textTheme.titleMedium,
+                    onIncrement: onIncrement,
+                    onDecrement: onDecrement,
+                  )
+                else if (onAdd case final add?)
+                  Builder(
+                    builder: (buttonContext) => TextButton(
+                      onPressed: () => add(globalCenter(buttonContext)),
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: Text(l10n.add),
+                    ),
                   ),
-                  child: Text(l10n.add),
-                ),
-              )
-            else
-              SelectionQuantityControl(
-                name: result.name,
-                quantity: selected.quantity,
-                quantityStyle: theme.textTheme.titleMedium,
-                onIncrement: onIncrement!,
-                onDecrement: onDecrement!,
-              ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -469,13 +471,15 @@ class const _FoodSearchListView({
   required final ValueChanged<_FoodSearchSection> onSectionChanged,
   required final _FoodSearchFilter selectedFilter,
   required final ValueChanged<_FoodSearchFilter> onFilterChanged,
-  required final void Function(FoodSearchHistoryItem) onSelectHistory,
+  required final void Function(FoodSearchHistoryItem, Offset? source)
+  onSelectHistory,
   required final void Function(FoodSearchHistoryItem, Offset? source)
   onAddHistory,
-  required final void Function(studyu.SavedFoodTemplate) onSelectFoodTemplate,
   required final FoodLibrarySelectionAction onAddFoodTemplate,
-  required final void Function(UnifiedFoodResult) onSelectResult,
+  required final void Function(UnifiedFoodResult, Offset? source)
+  onSelectResult,
   required final void Function(UnifiedFoodResult, Offset? source) onAddResult,
+  required final VoidCallback onAddManually,
   required final VoidCallback onRetry,
   final bool allowMeals = true,
   final FoodSelectionStore? selectionStore,
@@ -484,8 +488,10 @@ class const _FoodSearchListView({
 }) extends StatelessWidget {
   Widget _historyCard(FoodSearchHistoryItem item) => _HistoryFoodCard(
     item: item,
-    onTap: () => onSelectHistory(item),
-    onAdd: (source) => onAddHistory(item, source),
+    onTap: (source) => onSelectHistory(item, source),
+    onAdd: selectionStore == null
+        ? (source) => onAddHistory(item, source)
+        : null,
     theme: theme,
     selectionStore: selectionStore,
     onIncrement: (source) => onAddHistory(item, source),
@@ -514,8 +520,9 @@ class const _FoodSearchListView({
             l10n: l10n,
           ),
         ),
-        onTap: onSelectFoodTemplate,
+        onTap: (template) => onAddFoodTemplate(template, null),
         onAdd: onAddFoodTemplate,
+        addOnTap: selectionStore != null,
         isSelected: (template) {
           final food = templateViewModel.applyFoodTemplate(template);
           return selectionStore?.itemFor(canonicalFoodSelectionKey(food)) !=
@@ -562,10 +569,9 @@ class const _FoodSearchListView({
       } else {
         children.addAll(recentMatches.map(_historyCard));
       }
-      children.add(SizedBox(height: bottomPadding));
       return ListView(
         controller: scrollController,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
         children: children,
       );
     }
@@ -587,7 +593,9 @@ class const _FoodSearchListView({
     final showDatabase = selectedFilter.includes(_FoodSearchFilter.database);
 
     if (showNoResults) {
-      children.add(_NoResultsState(query: query));
+      children
+        ..add(_NoResultsState(query: query))
+        ..add(_SearchFallback(query: query, onAddManually: onAddManually));
     } else {
       if (showRecent) {
         children.add(
@@ -627,8 +635,9 @@ class const _FoodSearchListView({
             personalMatches.map(
               (template) => FoodLibraryItemCard(
                 template: template,
-                onTap: onSelectFoodTemplate,
+                onTap: (template) => onAddFoodTemplate(template, null),
                 onAdd: onAddFoodTemplate,
+                addOnTap: selectionStore != null,
                 isSelected:
                     selectionStore?.itemFor(
                       canonicalFoodSelectionKey(
@@ -683,8 +692,10 @@ class const _FoodSearchListView({
               combinedResults.map(
                 (result) => _FoodResultCard(
                   result: result,
-                  onTap: () => onSelectResult(result),
-                  onAdd: (source) => onAddResult(result, source),
+                  onTap: (source) => onSelectResult(result, source),
+                  onAdd: selectionStore == null
+                      ? (source) => onAddResult(result, source)
+                      : null,
                   theme: theme,
                   selectionStore: selectionStore,
                   selectionKey: selectionKeyForResult?.call(result),
@@ -740,10 +751,9 @@ class const _FoodSearchListView({
       }
     }
 
-    children.add(SizedBox(height: bottomPadding));
     return ListView(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
       children: children,
     );
   }

@@ -2002,14 +2002,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.loadCalls, 1);
+    await tester.tap(find.byTooltip('Edit amount'));
+    await tester.pumpAndSettle();
     await tester.enterText(
-      find.descendant(
-        of: find.byType(FoodQuantitySheet),
-        matching: find.byType(TextField),
-      ),
+      find
+          .descendant(
+            of: find.byType(FoodQuantitySheet),
+            matching: find.byType(TextField),
+          )
+          .first,
       '2',
     );
-    await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Save changes'));
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
@@ -2104,13 +2108,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.loadCalls, 1);
-    await tester.tap(
-      find.descendant(
-        of: find.byType(FoodQuantitySheet),
-        matching: find.byType(FilledButton),
-      ),
-    );
-    await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
         of: find.byKey(const ValueKey('selection-tray')),
@@ -2217,9 +2214,13 @@ void main() {
     await tester.tap(find.text('Saved Pear Template'));
     await tester.pumpAndSettle();
     expect(repository.loadCalls, 2);
+    await tester.tap(find.byTooltip('Edit amount'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(CloseButton));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discard changes'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
