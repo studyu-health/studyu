@@ -138,12 +138,12 @@ void main() {
               required recall,
               required persistenceTarget,
               interventionIdOverride,
-            }) async {
-              throw const PostgrestException(
+            }) => Future<void>.error(
+              const PostgrestException(
                 message: 'stale nutrition recall revision',
                 code: '40001',
-              );
-            },
+              ),
+            ),
       );
       addTearDown(model.dispose);
 
