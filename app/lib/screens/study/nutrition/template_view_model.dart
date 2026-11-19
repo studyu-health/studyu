@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
@@ -180,7 +181,7 @@ class TemplateViewModel({
   }
 
   FoodEntry _createFoodFromPrototype(FoodEntry prototype, String templateId) {
-    final food = _cloneFoodEntry(prototype)
+    final food = rescaleFoodAmount(prototype, 1)
       ..id = const Uuid().v4()
       ..originalValues = jsonDecode(
         jsonEncode(prototype.originalValues),

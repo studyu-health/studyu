@@ -96,21 +96,28 @@ void main() {
   });
 
   test(
-    'creates an independent selection with fresh identity and timestamp',
+    'creates a one-serving selection without changing the logged portion',
     () {
-      final original = food(id: 'original', name: 'Apple');
+      final original = food(id: 'original', name: 'Apple')
+        ..amount = 1.8
+        ..nutrition.energyKcal = 180;
       final history = buildFoodSearchHistory([
         recallProgress('participant', DateTime.utc(2025), [original]),
       ], subjectId: 'participant');
 
       final selected = history.recent.single.createSelection();
+      expect(selected.amount, 1);
+      expect(selected.nutrition.energyKcal, 100);
+      expect(selected.servingSizeGrams, 100);
       selected.nutrition.energyKcal = 999;
 
       expect(selected.id, isNot(original.id));
       expect(selected.foodId, original.foodId);
       expect(selected.foodVersionId, original.foodVersionId);
       expect(selected.createdAt, isNot(original.createdAt));
-      expect(original.nutrition.energyKcal, 100);
+      expect(original.amount, 1.8);
+      expect(original.nutrition.energyKcal, 180);
+      expect(history.recent.single.food.amount, 1);
       expect(history.recent.single.food.nutrition.energyKcal, 100);
     },
   );

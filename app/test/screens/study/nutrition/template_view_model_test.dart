@@ -267,15 +267,18 @@ void main() {
     },
   );
 
-  test('applyFoodTemplate isolates mutable food data', () async {
-    final prototype = _foodEntry(
-      id: 'food-prototype',
-      originalValues: {
-        'source': 'saved',
-        'details': {'verified': true, 'note': null},
-        'tags': ['fresh', null],
-      },
-    );
+  test('applying a template starts at one serving and isolates data', () async {
+    final prototype =
+        _foodEntry(
+            id: 'food-prototype',
+            originalValues: {
+              'source': 'saved',
+              'details': {'verified': true, 'note': null},
+              'tags': ['fresh', null],
+            },
+          )
+          ..amount = 1.8
+          ..nutrition.energyKcal = 180;
     final viewModel = await _viewModel();
 
     final applied = viewModel.applyFoodTemplate(
@@ -284,6 +287,9 @@ void main() {
 
     expect(applied.id, isNot(prototype.id));
     expect(applied.templateId, 'food-template');
+    expect(applied.amount, 1);
+    expect(applied.nutrition.energyKcal, 100);
+    expect(prototype.amount, 1.8);
     expect(applied.nutrition, isNot(same(prototype.nutrition)));
     expect(applied.nutrition.micros, isNot(same(prototype.nutrition.micros)));
     expect(applied.originalValues, isNot(same(prototype.originalValues)));
@@ -306,7 +312,7 @@ void main() {
 
     expect(prototype.id, 'food-prototype');
     expect(prototype.templateId, isNull);
-    expect(prototype.nutrition.energyKcal, 100);
+    expect(prototype.nutrition.energyKcal, 180);
     expect(prototype.nutrition.micros['iron'], 2);
     expect(prototype.originalValues['source'], 'saved');
     expect(prototypeDetails, {'verified': true, 'note': null});

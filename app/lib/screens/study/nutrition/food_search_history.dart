@@ -39,6 +39,7 @@ FoodSearchHistory buildFoodSearchHistory(
           : meal.timestamp;
       final historyDate = occurrenceTimestamp ?? result.date;
       for (final food in meal.foods) {
+        if (!food.amount.isFinite || food.amount <= 0) continue;
         final identity = foodHistoryIdentity(food);
         final existing = entries[identity];
         if (existing == null) {
@@ -66,7 +67,7 @@ FoodSearchHistory buildFoodSearchHistory(
       .map(
         (entry) => FoodSearchHistoryItem(
           identity: entry.key,
-          food: entry.value.food,
+          food: rescaleFoodAmount(entry.value.food, 1),
           useCount: entry.value.useCount,
           lastUsedAt: entry.value.lastUsedAt,
         ),

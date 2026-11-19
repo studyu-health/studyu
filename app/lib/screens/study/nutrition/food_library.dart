@@ -448,8 +448,8 @@ class const FoodLibraryItemCard({
         ? Icons.restaurant_menu_outlined
         : Icons.restaurant_outlined;
     final baseAmount = template.prototype.amount;
-    final amount = selectedQuantity ?? baseAmount;
-    final quantity = isSelected && baseAmount > 0 ? amount / baseAmount : 1;
+    final amount = isSelected ? selectedQuantity ?? 1 : 1;
+    final quantity = baseAmount > 0 ? amount / baseAmount : 1;
     final metadata = foodTotalMetadata(
       l10n,
       template.prototype,

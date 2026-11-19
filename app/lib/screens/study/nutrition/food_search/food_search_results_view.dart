@@ -264,7 +264,7 @@ class const _FoodSearchListView({
   );
 
   String _templateKey(studyu.SavedFoodTemplate template) =>
-      canonicalFoodSelectionKey(templateViewModel.applyFoodTemplate(template));
+      'template:${template.id}';
 
   Widget _templateCard(studyu.SavedFoodTemplate template) {
     final key = _templateKey(template);
