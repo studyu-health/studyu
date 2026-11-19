@@ -256,7 +256,7 @@ final class FoodSearchViewModel({
             product,
             _languageCode,
           );
-          return _unifiedOpenFoodFactsResult(product);
+          return openFoodFactsSearchResult(product);
         }),
       );
       _offSearched = true;
@@ -285,7 +285,7 @@ final class FoodSearchViewModel({
       ).timeout(foodProviderTimeout);
       if (!_isCurrent(generation)) return;
 
-      _results.addAll(searchResult.foods.map(_unifiedUsdaResult));
+      _results.addAll(searchResult.foods.map(usdaFoodSearchResult));
       _usdaSearched = true;
       _usdaFailed = false;
       _usdaPage = searchResult.currentPage + 1;
@@ -315,7 +315,7 @@ final class FoodSearchViewModel({
   }
 }
 
-UnifiedFoodResult _unifiedOpenFoodFactsResult(Product product) {
+UnifiedFoodResult openFoodFactsSearchResult(Product product) {
   final nutriments = product.nutriments;
   final caloriesPer100g = nutriments?.getValue(
     Nutrient.energyKCal,
@@ -339,16 +339,10 @@ UnifiedFoodResult _unifiedOpenFoodFactsResult(Product product) {
   );
 }
 
-UnifiedFoodResult _unifiedUsdaResult(UsdaFoodItem food) {
+UnifiedFoodResult usdaFoodSearchResult(UsdaFoodItem food) {
   final caloriesPer100g = food.getNutrientValue(1008);
-  final servingSize = food.servingSize;
-  final hasGramServing =
-      _isGramServingUnit(food.servingSizeUnit) &&
-      servingSize != null &&
-      servingSize.isFinite &&
-      servingSize > 0;
-  final servingSizeGrams = hasGramServing ? servingSize : null;
-  final calorieBasisGrams = hasGramServing ? servingSize : 100.0;
+  final servingSizeGrams = _usdaServingGrams(food);
+  final calorieBasisGrams = servingSizeGrams ?? 100.0;
 
   return UnifiedFoodResult(
     id: food.fdcId.toString(),
@@ -364,11 +358,13 @@ UnifiedFoodResult _unifiedUsdaResult(UsdaFoodItem food) {
   );
 }
 
-bool _isGramServingUnit(String? unit) {
-  return switch (unit?.trim().toLowerCase()) {
+double? _usdaServingGrams(UsdaFoodItem food) {
+  final size = food.servingSize;
+  final isGramUnit = switch (food.servingSizeUnit?.trim().toLowerCase()) {
     'g' || 'gram' || 'grams' => true,
     _ => false,
   };
+  return isGramUnit && size != null && size.isFinite && size > 0 ? size : null;
 }
 
 List<UnifiedFoodResult> rankFoodSearchResults(
@@ -436,13 +432,7 @@ studyu.FoodEntry convertFoodResultToFoodEntry(UnifiedFoodResult result) {
 }
 
 studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
-  final servingSize = food.servingSize;
-  final hasGramServing =
-      _isGramServingUnit(food.servingSizeUnit) &&
-      servingSize != null &&
-      servingSize.isFinite &&
-      servingSize > 0;
-  final servingSizeGrams = hasGramServing ? servingSize : 100.0;
+  final servingSizeGrams = _usdaServingGrams(food) ?? 100.0;
   final scale = servingSizeGrams / 100.0;
 
   return studyu.FoodEntry.withId(

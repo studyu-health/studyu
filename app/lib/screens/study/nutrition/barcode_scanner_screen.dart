@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/models/unified_food_result.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search/food_search_requests.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
@@ -9,7 +10,7 @@ import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
 class const BarcodeScannerScreen({super.key}) extends StatefulWidget {
-  static MaterialPageRoute<studyu.FoodEntry> route() =>
+  static MaterialPageRoute<UnifiedFoodResult> route() =>
       MaterialPageRoute(builder: (_) => const BarcodeScannerScreen());
 
   @override
@@ -119,10 +120,7 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
 
       if (result.status == ProductResultV3.statusSuccess &&
           result.product != null) {
-        Navigator.pop(
-          context,
-          convertOpenFoodFactsToFoodEntry(result.product!),
-        );
+        Navigator.pop(context, openFoodFactsSearchResult(result.product!));
         return;
       }
 
@@ -137,7 +135,7 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
           if (usdaResult.foods.isNotEmpty) {
             final usdaFood = usdaResult.foods.first;
 
-            Navigator.pop(context, convertUsdaToFoodEntry(usdaFood));
+            Navigator.pop(context, usdaFoodSearchResult(usdaFood));
             return;
           }
         } catch (usdaError) {

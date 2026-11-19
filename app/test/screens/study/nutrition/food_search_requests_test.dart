@@ -272,6 +272,56 @@ void main() {
     expect(transport.requests, isEmpty);
   });
 
+  for (final hasGramServing in [false, true]) {
+    testWidgets(
+      'barcode tray uses source serving weight when known ($hasGramServing)',
+      (tester) async {
+        final original = MobileScannerPlatform.instance;
+        MobileScannerPlatform.instance = _ScannerPlatform();
+        addTearDown(() => MobileScannerPlatform.instance = original);
+        transport.product = {
+          'code': '0123456789012',
+          'product_name_en': 'Test drink',
+          'serving_size': hasGramServing ? '50 g' : '1 cup (200 mL)',
+          'nutriments': {'energy-kcal_100g': 125},
+        };
+        final l10n = lookupAppLocalizations(const Locale('en'));
+        await tester.pumpWidget(
+          ChangeNotifierProvider(
+            create: (_) => AppState(),
+            child: _app(
+              home: FoodSearchScreen(
+                mealLabel: 'Meal',
+                repository: _EmptyRepository(),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip(l10n.scan_barcode));
+        await tester.pumpAndSettle();
+
+        tester.widget<MobileScanner>(find.byType(MobileScanner)).onDetect!(
+          const BarcodeCapture(
+            barcodes: [
+              Barcode(format: BarcodeFormat.ean13, rawValue: '0123456789012'),
+            ],
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Test drink'), findsOneWidget);
+        expect(
+          find.text(
+            hasGramServing ? '50 g · 63 kcal' : '1 cup (200 mL) · 125 kcal',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('100 g · 125 kcal'), findsNothing);
+      },
+    );
+  }
+
   testWidgets('barcode timeout uses neutral error and ignores late success', (
     tester,
   ) async {

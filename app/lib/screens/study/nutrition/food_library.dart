@@ -156,12 +156,9 @@ class _FoodLibraryState() extends State<FoodLibrary> {
 
   Future<void> _scanBarcode() async {
     if (_copyInProgress || !mounted) return;
-    final result = await Navigator.push<studyu.FoodEntry>(
-      context,
-      BarcodeScannerScreen.route(),
-    );
+    final result = await Navigator.push(context, BarcodeScannerScreen.route());
     if (result == null || !mounted) return;
-    await _copyFood(result);
+    await _copyExternalResult(result);
   }
 
   Future<void> _copyExternalResult(UnifiedFoodResult result) async {

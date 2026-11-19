@@ -829,16 +829,9 @@ class _FoodSearchScreenContentState()
 
   Future<void> _scanBarcode() async {
     _removeTransfer();
-    final result = await Navigator.push<studyu.FoodEntry>(
-      context,
-      BarcodeScannerScreen.route(),
-    );
+    final result = await Navigator.push(context, BarcodeScannerScreen.route());
     if (result == null || !mounted) return;
-    if (widget.mealLabel == null) {
-      _navigateToEdit(result);
-    } else {
-      _addToSelection(result, key: canonicalFoodSelectionKey(result));
-    }
+    _selectResult(result, null);
   }
 
   List<FoodSearchHistoryItem> _recentMatches(String query) {
