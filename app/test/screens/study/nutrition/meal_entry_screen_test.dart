@@ -409,7 +409,9 @@ Future<void> selectMealType(
 }
 
 Future<void> openFoodSearchFromMeal(WidgetTester tester) async {
-  await tester.tap(find.byTooltip('Add food or saved meal'));
+  final addFood = find.widgetWithText(TextButton, 'Add Food');
+  await tester.ensureVisible(addFood);
+  await tester.tap(addFood);
   await tester.pumpAndSettle();
 }
 
@@ -1218,10 +1220,10 @@ void main() {
     }
   });
 
-  testWidgets('floating add food action opens search directly', (tester) async {
+  testWidgets('the Add Food button opens search directly', (tester) async {
     await openMealEntry(tester, editableMeal());
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.widgetWithText(TextButton, 'Add Food'));
     await tester.pumpAndSettle();
 
     expect(find.byType(FoodSearchScreen), findsOneWidget);

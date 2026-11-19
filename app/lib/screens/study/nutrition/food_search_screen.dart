@@ -18,6 +18,7 @@ import 'package:studyu_app/screens/study/nutrition/food_search_bar.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_history.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
@@ -984,14 +985,12 @@ class _FoodSearchScreenContentState()
         actions: [
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 8),
-            child: FilledButton.icon(
+            child: NutritionAddButton(
               onPressed: _createFromSearch,
-              icon: const Icon(Icons.add),
-              label: Text(
-                widget.historicalMode || !widget.allowMeals
-                    ? l10n.add_food_action
-                    : l10n.create,
-              ),
+              filled: true,
+              label: widget.historicalMode || !widget.allowMeals
+                  ? l10n.add_food_action
+                  : l10n.create,
             ),
           ),
         ],

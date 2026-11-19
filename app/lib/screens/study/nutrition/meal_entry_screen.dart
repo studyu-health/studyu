@@ -11,6 +11,7 @@ import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
@@ -1016,18 +1017,13 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
             ),
           ],
         ),
-        floatingActionButton: _isSkipped
-            ? null
-            : FloatingActionButton(
-                heroTag: null,
-                tooltip: _allowMeals
-                    ? l10n.nutrition_add_food_or_saved_meal
-                    : l10n.add_food,
-                onPressed: _openFoodSearch,
-                child: const Icon(Icons.add),
-              ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, _isSkipped ? 16 : 88),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            16 + MediaQuery.paddingOf(context).bottom,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1059,6 +1055,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                   meal: _meal,
                   showValidationError: _hasAttemptedSave && _meal.foods.isEmpty,
                   allowMeals: _allowMeals,
+                  onAddFood: _openFoodSearch,
                   onFoodTap: _adjustFoodQuantity,
                   onFoodActions: _showFoodActions,
                   onSaveToLibrary:
@@ -1420,6 +1417,7 @@ class const _TimeSelector({
 
 class const _FoodListSection({
   required final MealLog meal,
+  required final VoidCallback onAddFood,
   required final Future<void> Function(FoodEntry) onFoodTap,
   required final Future<void> Function(FoodEntry) onFoodActions,
   required final VoidCallback? onSaveToLibrary,
@@ -1431,43 +1429,44 @@ class const _FoodListSection({
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final saveToLibrary = onSaveToLibrary;
-    final compactActions = MediaQuery.sizeOf(context).width < 480;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          spacing: 8,
-          children: [
-            Flexible(
-              child: Text(
-                allowMeals
-                    ? l10n.nutrition_logged_foods_and_meals
-                    : l10n.food_items,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+        LayoutBuilder(
+          builder: (context, constraints) => Row(
+            spacing: 4,
+            children: [
+              Expanded(
+                child: Text(
+                  allowMeals
+                      ? l10n.nutrition_logged_foods_and_meals
+                      : l10n.food_items,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
-            if (meal.foods.isNotEmpty && saveToLibrary != null)
-              if (compactActions)
+              if (meal.foods.isNotEmpty && saveToLibrary != null)
                 IconButton(
                   tooltip: l10n.nutrition_create_saved_meal_from_log,
                   onPressed: saveToLibrary,
                   icon: const Icon(Icons.bookmark_add_outlined),
-                )
-              else
-                Flexible(
-                  child: TextButton.icon(
-                    onPressed: saveToLibrary,
-                    icon: const Icon(Icons.bookmark_add_outlined),
-                    label: Text(l10n.nutrition_create_saved_meal_from_log),
-                  ),
                 ),
-          ],
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth / 2),
+                child: NutritionAddButton(
+                  label: l10n.add_food,
+                  tooltip: allowMeals
+                      ? l10n.nutrition_add_food_or_saved_meal
+                      : null,
+                  onPressed: onAddFood,
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         if (meal.foods.isEmpty)
           SizedBox(
             width: double.infinity,

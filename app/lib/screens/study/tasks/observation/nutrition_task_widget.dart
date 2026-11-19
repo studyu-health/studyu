@@ -11,6 +11,7 @@ import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model
 import 'package:studyu_app/screens/study/nutrition/food_library_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_help_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
@@ -214,17 +215,6 @@ class _NutritionTaskWidgetState()
                 l10n,
                 appState.activeSubject,
               ),
-              floatingActionButton:
-                  (_isHistoricalMode || _selectedDestination == 0) &&
-                      !widget.readOnly
-                  ? FloatingActionButton.extended(
-                      onPressed: () => _addMeal(context, model),
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n.log_meal),
-                    )
-                  : null,
               body: _isHistoricalMode
                   ? _buildToday(context, model, l10n)
                   : IndexedStack(
@@ -375,8 +365,11 @@ class _NutritionTaskWidgetState()
   ) {
     final theme = Theme.of(context);
     final recall = model.recall;
+    final bottomInset = _isHistoricalMode
+        ? MediaQuery.paddingOf(context).bottom
+        : 0.0;
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottomInset),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -462,7 +455,6 @@ class _NutritionTaskWidgetState()
             const SizedBox(height: 16),
             HtmlText(widget.task!.footer, centered: true),
           ],
-          const SizedBox(height: 96),
         ],
       ),
     );
@@ -572,28 +564,55 @@ class _NutritionTaskWidgetState()
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          spacing: 8,
           children: [
-            Expanded(
-              child: Text(
-                l10n.meals,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 2,
+                children: [
+                  Text(
+                    l10n.meals,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        MaterialLocalizations.of(context)
+                            .formatMediumDate(recall.date),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (widget.task?.minimumMealsRequired case final minimum?)
+                        _MinMealsProgressChip(
+                          current: recall.meals
+                              .where((meal) => !meal.isSkipped)
+                              .length,
+                          minimum: minimum,
+                          theme: theme,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (!widget.readOnly)
+              Flexible(
+                child: NutritionAddButton(
+                  onPressed: () => _addMeal(context, model),
+                  label: l10n.log_meal,
                 ),
               ),
-            ),
-            if (widget.task?.minimumMealsRequired != null)
-              _MinMealsProgressChip(
-                current: recall.meals.where((meal) => !meal.isSkipped).length,
-                minimum: widget.task!.minimumMealsRequired!,
-                theme: theme,
-              ),
-            Text(
-              MaterialLocalizations.of(context).formatMediumDate(recall.date),
-              style: theme.textTheme.bodyMedium,
-            ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         if (entries.isEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
