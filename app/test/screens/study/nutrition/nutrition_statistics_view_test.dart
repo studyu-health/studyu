@@ -70,7 +70,7 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('Average across completed days'), findsNothing);
-        expect(find.byTooltip('Next period'), findsNothing);
+        expect(find.byTooltip('Next period'), findsOneWidget);
       }
     },
   );
@@ -117,15 +117,26 @@ void main() {
     await _tapPeriodControl(tester, 'Previous period');
     expect(find.text(DateFormat.yMMMd('en').format(oldest)), findsOneWidget);
     expect(find.text('400 kcal'), findsOneWidget);
-    expect(find.byTooltip('Previous period'), findsNothing);
+    expect(
+      tester.getSemantics(find.byTooltip('Previous period')),
+      isSemantics(hasEnabledState: true, isEnabled: false, hasTapAction: false),
+    );
 
     await _tapPeriodControl(tester, 'Next period');
     expect(find.text('No nutrition entries for this day.'), findsOneWidget);
     await _tapPeriodControl(tester, 'Jump to today');
     expect(find.text('Today'), findsOneWidget);
     expect(find.text('800 kcal'), findsOneWidget);
-    expect(find.byTooltip('Next period'), findsNothing);
-    expect(find.byTooltip('Jump to today'), findsNothing);
+    for (final tooltip in ['Next period', 'Jump to today']) {
+      expect(
+        tester.getSemantics(find.byTooltip(tooltip)),
+        isSemantics(
+          hasEnabledState: true,
+          isEnabled: false,
+          hasTapAction: false,
+        ),
+      );
+    }
     semantics.dispose();
     expect(tester.takeException(), isNull);
   });
@@ -208,7 +219,7 @@ void main() {
     await _selectPeriod(tester, 'Week');
     expect(find.text('+200 kcal/day'), findsOneWidget);
     expect(find.text('Compared with the previous 7 days'), findsWidgets);
-    expect(find.byTooltip('Next period'), findsNothing);
+    expect(find.byTooltip('Next period'), findsOneWidget);
 
     await _tapPeriodControl(tester, 'Previous period');
     expect(find.text('+100 kcal/day'), findsOneWidget);
@@ -217,14 +228,14 @@ void main() {
     expect(oldWeekChart.data.barGroups[5].barRods.single.toY, 200);
 
     await _selectPeriod(tester, 'Month');
-    expect(find.byTooltip('Next period'), findsNothing);
+    expect(find.byTooltip('Next period'), findsOneWidget);
     expect(find.text('+183 kcal/day'), findsOneWidget);
     expect(find.text('Compared with the previous 30 days'), findsWidgets);
     await _tapPeriodControl(tester, 'Previous period');
     final oldMonthChart = tester.widget<BarChart>(energyChart);
     expect(oldMonthChart.data.barGroups, hasLength(30));
     expect(oldMonthChart.data.barGroups[21].barRods.single.toY, 50);
-    expect(find.byTooltip('Previous period'), findsNothing);
+    expect(find.byTooltip('Previous period'), findsOneWidget);
 
     await _tapPeriodControl(tester, 'Jump to today');
     expect(find.text('+183 kcal/day'), findsOneWidget);

@@ -222,28 +222,25 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
             ),
           ),
         ),
-        if (canGoBack || !isLatest) const SizedBox(width: 8),
+        const SizedBox(width: 8),
         Wrap(
           spacing: 4,
           children: [
-            if (canGoBack)
-              IconButton.filledTonal(
-                icon: const Icon(Icons.chevron_left),
-                tooltip: l10n.nutrition_statistics_previous_period,
-                onPressed: () => _selectDate(periodsBack + 1),
-              ),
-            if (!isLatest) ...[
-              IconButton.filledTonal(
-                icon: const Icon(Icons.chevron_right),
-                tooltip: l10n.nutrition_statistics_next_period,
-                onPressed: () => _selectDate(periodsBack - 1),
-              ),
-              IconButton.filledTonal(
-                icon: const Icon(Icons.settings_backup_restore),
-                tooltip: l10n.nutrition_statistics_go_to_today,
-                onPressed: () => _selectDate(0),
-              ),
-            ],
+            IconButton.filledTonal(
+              icon: const Icon(Icons.chevron_left),
+              tooltip: l10n.nutrition_statistics_previous_period,
+              onPressed: canGoBack ? () => _selectDate(periodsBack + 1) : null,
+            ),
+            IconButton.filledTonal(
+              icon: const Icon(Icons.chevron_right),
+              tooltip: l10n.nutrition_statistics_next_period,
+              onPressed: isLatest ? null : () => _selectDate(periodsBack - 1),
+            ),
+            IconButton.filledTonal(
+              icon: const Icon(Icons.settings_backup_restore),
+              tooltip: l10n.nutrition_statistics_go_to_today,
+              onPressed: isLatest ? null : () => _selectDate(0),
+            ),
           ],
         ),
       ],
