@@ -22,6 +22,7 @@ final class const FoodSearchHistoryItem({
 FoodSearchHistory buildFoodSearchHistory(
   Iterable<SubjectProgress> progress, {
   required String subjectId,
+  Set<String>? libraryFoodIds,
 }) {
   final entries = <String, _HistoryAccumulator>{};
 
@@ -41,6 +42,9 @@ FoodSearchHistory buildFoodSearchHistory(
       for (final food in meal.foods) {
         if (!food.amount.isFinite || food.amount <= 0) continue;
         final identity = foodHistoryIdentity(food);
+        if (libraryFoodIds != null && !libraryFoodIds.contains(identity)) {
+          continue;
+        }
         final existing = entries[identity];
         if (existing == null) {
           entries[identity] = _HistoryAccumulator(

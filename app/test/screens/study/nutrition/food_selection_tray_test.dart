@@ -79,6 +79,10 @@ void main() {
     tester,
   ) async {
     final subject = studyu.StudySubject('subject', 'study', 'user', []);
+    final recentApple = _libraryTemplate(
+      id: 'recent-apple',
+      name: 'Saved fruit',
+    );
     final date = DateTime.utc(2025);
     subject.progress.add(
       studyu.SubjectProgress(
@@ -100,7 +104,9 @@ void main() {
                 timezone: 'UTC',
                 isSkipped: false,
                 foods: [
-                  _libraryTemplate(name: 'Recent Apple').prototype,
+                  recentApple.prototype
+                    ..foodId = recentApple.id
+                    ..name = 'Recent Apple',
                   _libraryTemplate(name: 'Recent Pear').prototype,
                 ],
               ),
@@ -114,6 +120,7 @@ void main() {
       subject: subject,
       query: 'APPLE',
       repository: FakeNutritionFoodRepository([
+        recentApple,
         _libraryTemplate(name: 'Library Apple'),
       ]),
     );

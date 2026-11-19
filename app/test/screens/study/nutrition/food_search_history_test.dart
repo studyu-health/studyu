@@ -73,6 +73,22 @@ void main() {
     expect(history.recent, isEmpty);
   });
 
+  test('recent foods require a Library entry and retain their logged data', () {
+    final active = food(id: 'active', name: 'Apple');
+    final deleted = food(id: 'deleted', name: 'Nussmischung');
+    final history = buildFoodSearchHistory(
+      [
+        recallProgress('participant', DateTime.utc(2025), [active, deleted]),
+      ],
+      subjectId: 'participant',
+      libraryFoodIds: {active.foodId},
+    );
+
+    expect(history.recent.single.food.foodId, active.foodId);
+    expect(history.recent.single.createSelection().foodId, active.foodId);
+    expect(deleted.templateId, isNull);
+  });
+
   test('includes foods from meals with unknown time', () {
     final recentFood = food(id: 'unknown-recent', name: 'Tea');
     final frequentFood = food(id: 'unknown-frequent', name: 'Toast');

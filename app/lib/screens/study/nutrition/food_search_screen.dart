@@ -170,23 +170,26 @@ class const FoodSearchScreen({
     final appState = Provider.of<AppState>(context, listen: false);
     final activeSubject = appState.activeSubject;
     final userId = activeSubject?.id ?? 'anonymous';
-    final history = activeSubject == null
-        ? FoodSearchHistory.empty
-        : buildFoodSearchHistory(
-            activeSubject.progress,
-            subjectId: activeSubject.id,
-          );
-
     final inheritedViewModel =
         templateViewModel ?? Provider.of<TemplateViewModel?>(context);
-    final content = _FoodSearchScreenContent(
-      allowMeals: allowMeals,
-      mealLabel: mealLabel,
-      initialFoods: initialFoods,
-      openFoodFactsSearch: openFoodFactsSearch,
-      usdaFoodSearch: usdaFoodSearch,
-      historicalMode: historicalMode,
-      history: history,
+    final content = Consumer<TemplateViewModel>(
+      builder: (_, templates, _) => _FoodSearchScreenContent(
+        allowMeals: allowMeals,
+        mealLabel: mealLabel,
+        initialFoods: initialFoods,
+        openFoodFactsSearch: openFoodFactsSearch,
+        usdaFoodSearch: usdaFoodSearch,
+        historicalMode: historicalMode,
+        history: activeSubject == null
+            ? FoodSearchHistory.empty
+            : buildFoodSearchHistory(
+                activeSubject.progress,
+                subjectId: activeSubject.id,
+                libraryFoodIds: {
+                  for (final template in templates.foodTemplates) template.id,
+                },
+              ),
+      ),
     );
     if (inheritedViewModel != null) {
       return ChangeNotifierProvider.value(

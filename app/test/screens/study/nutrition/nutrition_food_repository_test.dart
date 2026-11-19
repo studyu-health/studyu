@@ -16,11 +16,9 @@ void main() {
         ..nutrition.partialNutrients = {'energyKcal'};
       final repository = NutritionFoodRepository(
         client: _client((request) async {
-          if (request.method == 'GET') {
+          if (request.url.path.endsWith('/list_nutrition_library')) {
             final row = _definitionRow()
-              ..['nutrition_food_version'] = {
-                'snapshot': food.toJsonForStorage(),
-              };
+              ..['snapshot'] = food.toJsonForStorage();
             return _jsonResponse([row], request);
           }
           final params = jsonDecode(request.body) as Map<String, dynamic>;
@@ -76,11 +74,11 @@ void main() {
     },
   );
 
-  test('loads only active library-visible subject definitions', () async {
-    late Uri requestedUri;
+  test('loads the Library for the requested subject', () async {
+    late http.Request libraryRequest;
     final repository = NutritionFoodRepository(
       client: _client((request) async {
-        requestedUri = request.url;
+        libraryRequest = request;
         return _jsonResponse([_definitionRow()], request);
       }),
     );
@@ -90,9 +88,8 @@ void main() {
     expect(templates.single.id, 'food-definition');
     expect(templates.single.prototype.foodVersionId, 'version-1');
     expect(templates.single.tags, ['fruit']);
-    expect(requestedUri.query, contains('subject_id=eq.subject'));
-    expect(requestedUri.query, contains('library_visible=eq.true'));
-    expect(requestedUri.query, contains('deleted_at=is.null'));
+    expect(libraryRequest.url.path, endsWith('/rpc/list_nutrition_library'));
+    expect(jsonDecode(libraryRequest.body), {'p_subject_id': 'subject'});
   });
 
   test('historical mutation returns explicit update counts', () async {
@@ -272,7 +269,7 @@ Map<String, dynamic> _definitionRow() => {
   'deleted_at': null,
   'created_at': '2026-07-15T08:00:00.000Z',
   'updated_at': '2026-07-15T08:00:00.000Z',
-  'nutrition_food_version': {'snapshot': _food().toJsonForStorage()},
+  'snapshot': _food().toJsonForStorage(),
 };
 
 Map<String, dynamic> _mutationResponse({

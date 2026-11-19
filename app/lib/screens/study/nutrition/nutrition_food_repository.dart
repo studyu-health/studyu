@@ -8,15 +8,10 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
   SupabaseClient get _supabase => _client ?? Supabase.instance.client;
 
   Future<List<SavedFoodTemplate>> loadTemplates(String subjectId) async {
-    final rows = await _supabase
-        .from('nutrition_food_definition')
-        .select(
-          'id, subject_id, deleted_at, created_at, updated_at, '
-          'nutrition_food_version!nutrition_food_definition_current_version_id_fkey(snapshot)',
-        )
-        .eq('subject_id', subjectId)
-        .eq('library_visible', true)
-        .isFilter('deleted_at', null);
+    final rows = await _supabase.rpc(
+      'list_nutrition_library',
+      params: {'p_subject_id': subjectId},
+    );
     return (rows as List<dynamic>)
         .map((row) => _templateFromRow(Map<String, dynamic>.from(row as Map)))
         .toList();
@@ -248,11 +243,8 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
   }
 
   SavedFoodTemplate _templateFromRow(Map<String, dynamic> row) {
-    final version = Map<String, dynamic>.from(
-      row['nutrition_food_version'] as Map,
-    );
     final food = FoodEntry.fromJson(
-      Map<String, dynamic>.from(version['snapshot'] as Map),
+      Map<String, dynamic>.from(row['snapshot'] as Map),
     );
     food.setAvailabilityVerified(true);
     final tags = food.originalValues['_libraryTags'];

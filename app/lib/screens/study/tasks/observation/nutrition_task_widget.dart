@@ -300,6 +300,9 @@ class _NutritionTaskWidgetState()
                           return;
                         }
                         setState(() => _selectedDestination = index);
+                        if (index == 2) {
+                          await _templateViewModel?.loadAllTemplates();
+                        }
                       },
                       destinations: [
                         NavigationDestination(

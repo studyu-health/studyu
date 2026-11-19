@@ -159,6 +159,9 @@ class TemplateViewModel({
     );
     if (template == null) return;
     await _repository.deleteTemplate(subjectId: userId, template: template);
+    _foodTemplates = _foodTemplates
+        .where((item) => item.id != templateId)
+        .toList();
     await loadAllTemplates();
   }
 
