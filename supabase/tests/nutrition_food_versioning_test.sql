@@ -7,19 +7,33 @@ SELECT
 SELECT
     tests.create_supabase_user('nutrition_other', 'nutrition_other@studyu.health');
 
+-- The clock can advance only in a draft that the participant can edit.
+INSERT INTO public.study (
+    id, user_id, title, status, contact, description, icon_name, questionnaire,
+    eligibility_criteria, observations, interventions, consent, schedule, report_specification,
+    results
+)
+SELECT
+    '10000000-0000-0000-0000-000000000010',
+    tests.get_supabase_uid('nutrition_owner'), 'Nutrition preview', 'draft',
+    contact, description, icon_name, questionnaire, eligibility_criteria,
+    observations, interventions, consent, schedule, report_specification, results
+FROM public.study
+WHERE id = '22222222-2222-4222-8222-222222222222';
+
 INSERT INTO public.study_subject (
     id, study_id, user_id, started_at, selected_intervention_ids
 ) VALUES
 (
     '10000000-0000-0000-0000-000000000001',
-    (SELECT id FROM public.study LIMIT 1),
+    '10000000-0000-0000-0000-000000000010',
     tests.get_supabase_uid('nutrition_owner'),
     now() - interval '5 days',
     ARRAY[]::text []
 ),
 (
     '10000000-0000-0000-0000-000000000002',
-    (SELECT id FROM public.study LIMIT 1),
+    '22222222-2222-4222-8222-222222222222',
     tests.get_supabase_uid('nutrition_other'),
     now() - interval '5 days',
     ARRAY[]::text []
