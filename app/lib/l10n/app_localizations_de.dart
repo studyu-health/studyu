@@ -3369,4 +3369,27 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nutrition_invalid_calories =>
       'Geben Sie null oder eine positive Kalorienzahl ein.';
+
+  @override
+  String get nutrition_recall_conflict_title =>
+      'Nicht synchronisierter Ernährungsentwurf';
+
+  @override
+  String get nutrition_recall_conflict_message =>
+      'Dieser Entwurf stimmt nicht mit der gespeicherten Version überein. Er bleibt auf diesem Gerät. Um den Tag weiter zu bearbeiten, verwerfen Sie den Entwurf.';
+
+  @override
+  String get nutrition_recall_discard_draft => 'Entwurf verwerfen';
+
+  @override
+  String get nutrition_recall_discard_confirmation =>
+      'Dadurch werden die nicht synchronisierten Änderungen auf diesem Gerät gelöscht. Der gespeicherte Eintrag bleibt erhalten.';
+
+  @override
+  String get nutrition_recall_discard_failed =>
+      'Der Entwurf konnte nicht verworfen werden. Versuchen Sie es erneut.';
+
+  @override
+  String get nutrition_recall_conflict_reopen =>
+      'Öffnen Sie die Ernährungsaufgabe erneut. Wenn weiterhin eine alte Version angezeigt wird, laden Sie die Studie neu.';
 }

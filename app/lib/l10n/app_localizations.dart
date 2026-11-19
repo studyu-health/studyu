@@ -5928,6 +5928,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter zero or a positive number of calories.'**
   String get nutrition_invalid_calories;
+
+  /// No description provided for @nutrition_recall_conflict_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsynced nutrition draft'**
+  String get nutrition_recall_conflict_title;
+
+  /// No description provided for @nutrition_recall_conflict_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This draft conflicts with the saved version. It stays on this device. To edit this day again, discard the draft.'**
+  String get nutrition_recall_conflict_message;
+
+  /// No description provided for @nutrition_recall_discard_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard draft'**
+  String get nutrition_recall_discard_draft;
+
+  /// No description provided for @nutrition_recall_discard_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes the unsynced changes on this device. The saved entry remains available.'**
+  String get nutrition_recall_discard_confirmation;
+
+  /// No description provided for @nutrition_recall_discard_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not discard the draft. Try again.'**
+  String get nutrition_recall_discard_failed;
+
+  /// No description provided for @nutrition_recall_conflict_reopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the nutrition task again. If you still see an older version, reload the study.'**
+  String get nutrition_recall_conflict_reopen;
 }
 
 class _AppLocalizationsDelegate

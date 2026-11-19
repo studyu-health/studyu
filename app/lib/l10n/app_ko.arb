@@ -558,5 +558,11 @@
   "nutrition_water_per_cup": "컵당 {volume}",
   "nutrition_current_day_ended": "이 영양 기록일이 끝났습니다. 계속하려면 영양 기록 과제를 다시 여세요.",
   "nutrition_food_definition_conflict": "이 항목의 새 버전이 있습니다. 현재 버전을 수정하려면 편집기를 다시 여세요.",
-  "nutrition_invalid_calories": "칼로리는 0 또는 양수로 입력하세요."
+  "nutrition_invalid_calories": "칼로리는 0 또는 양수로 입력하세요.",
+  "nutrition_recall_conflict_title": "동기화되지 않은 영양 기록 초안",
+  "nutrition_recall_conflict_message": "이 초안이 저장된 버전과 충돌합니다. 초안은 이 기기에 남습니다. 이 날의 기록을 다시 수정하려면 초안을 삭제하세요.",
+  "nutrition_recall_discard_draft": "초안 삭제",
+  "nutrition_recall_discard_confirmation": "이 기기에서 동기화되지 않은 변경 사항을 삭제합니다. 저장된 기록은 그대로 유지됩니다.",
+  "nutrition_recall_discard_failed": "초안을 삭제할 수 없습니다. 다시 시도하세요.",
+  "nutrition_recall_conflict_reopen": "영양 기록 과제를 다시 여세요. 이전 버전이 계속 표시되면 연구를 다시 불러오세요."
 }

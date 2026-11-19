@@ -1261,5 +1261,11 @@
   "nutrition_water_per_cup": "{volume} pro Glas",
   "nutrition_current_day_ended": "Dieser Ernährungstag ist beendet. Öffnen Sie die Ernährungsaufgabe erneut, um fortzufahren.",
   "nutrition_food_definition_conflict": "Eine neuere Version dieses Lebensmittels ist verfügbar. Öffnen Sie den Eintrag erneut, um die aktuelle Version zu bearbeiten.",
-  "nutrition_invalid_calories": "Geben Sie null oder eine positive Kalorienzahl ein."
+  "nutrition_invalid_calories": "Geben Sie null oder eine positive Kalorienzahl ein.",
+  "nutrition_recall_conflict_title": "Nicht synchronisierter Ernährungsentwurf",
+  "nutrition_recall_conflict_message": "Dieser Entwurf stimmt nicht mit der gespeicherten Version überein. Er bleibt auf diesem Gerät. Um den Tag weiter zu bearbeiten, verwerfen Sie den Entwurf.",
+  "nutrition_recall_discard_draft": "Entwurf verwerfen",
+  "nutrition_recall_discard_confirmation": "Dadurch werden die nicht synchronisierten Änderungen auf diesem Gerät gelöscht. Der gespeicherte Eintrag bleibt erhalten.",
+  "nutrition_recall_discard_failed": "Der Entwurf konnte nicht verworfen werden. Versuchen Sie es erneut.",
+  "nutrition_recall_conflict_reopen": "Öffnen Sie die Ernährungsaufgabe erneut. Wenn weiterhin eine alte Version angezeigt wird, laden Sie die Studie neu."
 }

@@ -1476,5 +1476,11 @@
   "nutrition_water_per_cup": "{volume} per cup",
   "nutrition_current_day_ended": "This nutrition day has ended. Open the nutrition task again to continue.",
   "nutrition_food_definition_conflict": "A newer version of this item is available. Open the editor again to edit the current version.",
-  "nutrition_invalid_calories": "Enter zero or a positive number of calories."
+  "nutrition_invalid_calories": "Enter zero or a positive number of calories.",
+  "nutrition_recall_conflict_title": "Unsynced nutrition draft",
+  "nutrition_recall_conflict_message": "This draft conflicts with the saved version. It stays on this device. To edit this day again, discard the draft.",
+  "nutrition_recall_discard_draft": "Discard draft",
+  "nutrition_recall_discard_confirmation": "This deletes the unsynced changes on this device. The saved entry remains available.",
+  "nutrition_recall_discard_failed": "Could not discard the draft. Try again.",
+  "nutrition_recall_conflict_reopen": "Open the nutrition task again. If you still see an older version, reload the study."
 }

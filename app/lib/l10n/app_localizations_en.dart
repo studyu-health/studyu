@@ -3324,4 +3324,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nutrition_invalid_calories =>
       'Enter zero or a positive number of calories.';
+
+  @override
+  String get nutrition_recall_conflict_title => 'Unsynced nutrition draft';
+
+  @override
+  String get nutrition_recall_conflict_message =>
+      'This draft conflicts with the saved version. It stays on this device. To edit this day again, discard the draft.';
+
+  @override
+  String get nutrition_recall_discard_draft => 'Discard draft';
+
+  @override
+  String get nutrition_recall_discard_confirmation =>
+      'This deletes the unsynced changes on this device. The saved entry remains available.';
+
+  @override
+  String get nutrition_recall_discard_failed =>
+      'Could not discard the draft. Try again.';
+
+  @override
+  String get nutrition_recall_conflict_reopen =>
+      'Open the nutrition task again. If you still see an older version, reload the study.';
 }
