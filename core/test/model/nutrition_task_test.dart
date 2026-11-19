@@ -2,6 +2,18 @@ import 'package:studyu_core/core.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('water tracking defaults to off for older nutrition tasks', () {
+    final json = NutritionTask.withId().toJson()..remove('trackWaterIntake');
+
+    expect(NutritionTask.fromJson(json).trackWaterIntake, isFalse);
+  });
+
+  test('serializes enabled water tracking', () {
+    final task = NutritionTask.withId()..trackWaterIntake = true;
+
+    expect(NutritionTask.fromJson(task.toJson()).trackWaterIntake, isTrue);
+  });
+
   test('missing completion confirmation defaults to required', () {
     final task = NutritionTask.withId();
     final json = task.toJson()..remove('requireDailyCompletionConfirmation');

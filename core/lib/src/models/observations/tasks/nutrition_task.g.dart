@@ -22,6 +22,7 @@ NutritionTask _$NutritionTaskFromJson(Map<String, dynamic> json) =>
       ..instructions = json['instructions'] as String?
       ..collectMealContext = json['collectMealContext'] as bool? ?? true
       ..allowMeals = json['allowMeals'] as bool? ?? true
+      ..trackWaterIntake = json['trackWaterIntake'] as bool? ?? false
       ..requireDailyCompletionConfirmation =
           json['requireDailyCompletionConfirmation'] as bool? ?? true
       ..minimumMealsRequired = (json['minimumMealsRequired'] as num?)?.toInt()
@@ -41,6 +42,7 @@ Map<String, dynamic> _$NutritionTaskToJson(NutritionTask instance) =>
       'instructions': ?instance.instructions,
       'collectMealContext': instance.collectMealContext,
       'allowMeals': instance.allowMeals,
+      'trackWaterIntake': instance.trackWaterIntake,
       'requireDailyCompletionConfirmation':
           instance.requireDailyCompletionConfirmation,
       'minimumMealsRequired': ?instance.minimumMealsRequired,

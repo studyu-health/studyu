@@ -18,6 +18,9 @@ class NutritionTask extends Observation {
   @JsonKey(defaultValue: true)
   bool allowMeals = true;
 
+  @JsonKey(defaultValue: false)
+  bool trackWaterIntake = false;
+
   /// Whether participants must explicitly confirm their daily nutrition log.
   ///
   /// Existing serialized tasks default to true for backwards compatibility;
