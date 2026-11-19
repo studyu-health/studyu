@@ -66,6 +66,8 @@ class const NutritionTaskWidget({
 class _NutritionTaskWidgetState()
     extends State<NutritionTaskWidget>
     with WidgetsBindingObserver {
+  static const _exitDestination = 3;
+
   DailyRecallEntryViewModel? _viewModel;
   TemplateViewModel? _templateViewModel;
   int _selectedDestination = 0;
@@ -247,8 +249,13 @@ class _NutritionTaskWidgetState()
                   ? null
                   : NavigationBar(
                       selectedIndex: _selectedDestination,
-                      onDestinationSelected: (index) =>
-                          setState(() => _selectedDestination = index),
+                      onDestinationSelected: (index) async {
+                        if (index == _exitDestination) {
+                          await Navigator.of(context).maybePop();
+                          return;
+                        }
+                        setState(() => _selectedDestination = index);
+                      },
                       destinations: [
                         NavigationDestination(
                           icon: const Icon(Icons.today_outlined),
@@ -310,6 +317,7 @@ class _NutritionTaskWidgetState()
     AppLocalizations l10n,
     StudySubject? subject,
   ) => AppBar(
+    automaticallyImplyLeading: _isHistoricalMode,
     title: Text(
       _isHistoricalMode
           ? _historicalDateTitle(context, l10n)

@@ -567,38 +567,53 @@ void main() {
     },
   );
 
-  testWidgets('task-mode exit returns no completion result', (tester) async {
-    var didReturn = false;
-    DailyRecall? result;
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => AppState(),
-        child: MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          locale: const Locale('en'),
-          home: _NutritionLauncher(
-            task: nutritionTask(),
-            existingRecall: recall([meal('meal', MealType.breakfast)]),
-            onResult: (value) {
-              didReturn = true;
-              result = value;
-            },
+  for (final tab in ['Today', 'Statistics', 'Library']) {
+    testWidgets('Dashboard exits $tab without returning a completion result', (
+      tester,
+    ) async {
+      var didReturn = false;
+      DailyRecall? result;
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (_) => AppState(),
+          child: MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            locale: const Locale('en'),
+            home: _NutritionLauncher(
+              task: nutritionTask(),
+              existingRecall: recall([meal('meal', MealType.breakfast)]),
+              onResult: (value) {
+                didReturn = true;
+                result = value;
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump();
+      );
+      await tester.pumpAndSettle();
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+      final navigation = find.byType(NavigationBar);
+      await tester.tap(
+        find.descendant(of: navigation, matching: find.text(tab)),
+      );
+      await tester.pumpAndSettle();
 
-    expect(didReturn, isTrue);
-    expect(result, isNull);
-  });
+      expect(find.byType(BackButton), findsNothing);
+      await tester.tap(
+        find.descendant(of: navigation, matching: find.text('Dashboard')),
+      );
+      await tester.pumpAndSettle();
 
-  testWidgets('allows leaving below the advisory meal target', (tester) async {
+      expect(didReturn, isTrue);
+      expect(result, isNull);
+      expect(find.byType(NutritionTaskWidget), findsNothing);
+    });
+  }
+
+  testWidgets('Dashboard asks before leaving below the advisory meal target', (
+    tester,
+  ) async {
     var didReturn = false;
     DailyRecall? result;
     await tester.pumpWidget(
@@ -619,13 +634,18 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    await tester.pageBack();
+    await tester.tap(find.text('Dashboard'));
     await tester.pumpAndSettle();
 
     expect(didReturn, isFalse);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(didReturn, isFalse);
+    await tester.tap(find.text('Dashboard'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Leave anyway'));
     await tester.pumpAndSettle();
 
