@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
+import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_core/core.dart';
 
 import 'fake_nutrition_food_repository.dart';
@@ -79,6 +83,7 @@ class _NutritionLauncherState() extends State<_NutritionLauncher> {
 
 const nutritionInstructionsShownKey =
     'nutrition_instructions_shown_nutrition-task';
+const _photoManagerChannel = MethodChannel('com.fluttercandies/photo_manager');
 
 NutritionTask nutritionTask({
   String? instructions,
@@ -155,6 +160,34 @@ DailyRecall recall(List<MealLog> meals) => DailyRecall(
   meals: meals,
 );
 
+FakeNutritionFoodRepository _savedSoupRepository() =>
+    FakeNutritionFoodRepository([
+      SavedFoodTemplate(
+        id: 'saved-soup',
+        userId: 'anonymous',
+        name: 'Saved soup',
+        isPublic: false,
+        createdAt: DateTime(2026, 7, 15),
+        prototype: food('soup', 'Soup', 100),
+      ),
+    ]);
+
+Future<void> _selectSavedSoup(WidgetTester tester) async {
+  await tester.tap(find.text('My library'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Saved soup'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(FilledButton, 'Add item'));
+  await tester.pumpAndSettle();
+  await tester.tap(
+    find.descendant(
+      of: find.byKey(const ValueKey('selection-tray')),
+      matching: find.byType(FilledButton),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 ({NutritionTask task, StudySubject subject}) historicalNavigationSetup(
   String foodName, {
   required bool hasPersistenceTarget,
@@ -196,12 +229,22 @@ DailyRecall recall(List<MealLog> meals) => DailyRecall(
 }
 
 void main() {
-  setUp(
-    () => SharedPreferences.setMockInitialValues({
+  setUp(() {
+    SharedPreferences.setMockInitialValues({
       nutritionInstructionsShownKey: true,
       'nutrition_instructions_shown_task': true,
-    }),
-  );
+    });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          _photoManagerChannel,
+          (_) async => PermissionState.denied.index,
+        );
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_photoManagerChannel, null);
+  });
 
   testWidgets('historical mode shows context and hides workspace navigation', (
     tester,
@@ -237,6 +280,7 @@ void main() {
     expect(find.text('My items'), findsNothing);
     expect(find.byIcon(Icons.history_outlined), findsNothing);
     expect(find.byIcon(Icons.help_outline), findsNothing);
+    expect(find.byType(PhotoRecallSection), findsNothing);
   });
 
   testWidgets(
@@ -619,8 +663,12 @@ void main() {
     );
   });
 
-  testWidgets('empty overview uses one log-meal action', (tester) async {
-    await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
+  testWidgets('Log meal opens search before the new meal editor', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      nutritionTaskApp(nutritionTask(), foodRepository: _savedSoupRepository()),
+    );
     await tester.pump();
 
     expect(find.text('No meals recorded yet'), findsOneWidget);
@@ -629,11 +677,114 @@ void main() {
 
     await tester.tap(find.text('Log meal'));
     await tester.pumpAndSettle();
+    expect(find.byType(FoodSearchScreen), findsOneWidget);
+    expect(find.byType(MealEntryScreen, skipOffstage: false), findsNothing);
+
+    await tester.tap(find.byType(CloseButton));
+    await tester.pumpAndSettle();
+    expect(find.text('No meals recorded yet'), findsOneWidget);
+
+    await tester.tap(find.text('Log meal'));
+    await tester.pumpAndSettle();
+    await _selectSavedSoup(tester);
 
     expect(
       find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
       findsOneWidget,
     );
+    expect(find.text('Soup'), findsOneWidget);
+    expect(find.byType(FoodSearchScreen), findsNothing);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discard changes'));
+    await tester.pumpAndSettle();
+    expect(find.text('No meals recorded yet'), findsOneWidget);
+  });
+
+  testWidgets('logs a new meal from a photo below the Today meals', (
+    tester,
+  ) async {
+    const photoId = 'lunch-photo';
+    final photoTime = DateTime(2026, 7, 15, 12, 30);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_photoManagerChannel, (call) async {
+          return switch (call.method) {
+            'getPermissionState' => PermissionState.authorized.index,
+            'getAssetPathList' => {
+              'data': [
+                {'id': 'all', 'name': 'All photos', 'isAll': true},
+              ],
+            },
+            'getAssetCountFromPath' => 1,
+            'getAssetListPaged' => {
+              'data': [
+                {
+                  'id': photoId,
+                  'type': 1,
+                  'width': 300,
+                  'height': 300,
+                  'createDt': photoTime.millisecondsSinceEpoch ~/ 1000,
+                },
+              ],
+            },
+            _ => null,
+          };
+        });
+
+    final today = recall([
+      meal(
+        'breakfast',
+        MealType.breakfast,
+        foods: [food('toast', 'Toast', 80)],
+      ),
+    ]);
+    await tester.pumpWidget(
+      nutritionTaskApp(
+        nutritionTask(),
+        existingRecall: today,
+        foodRepository: _savedSoupRepository(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gallery = find.byType(PhotoRecallSection);
+    expect(tester.widget<PhotoRecallSection>(gallery).date, today.date);
+    expect(
+      tester.getTopLeft(gallery).dy,
+      greaterThan(
+        tester.getBottomLeft(find.byKey(const ValueKey('meal-breakfast'))).dy,
+      ),
+    );
+    final thumbnail = find.byKey(const ValueKey(photoId));
+    await tester.ensureVisible(thumbnail);
+    await tester.tap(thumbnail);
+    await tester.pumpAndSettle();
+
+    final editor = find.byType(MealEntryScreen);
+    expect(tester.widget<MealEntryScreen>(editor).existingMeal, isNull);
+    expect(tester.widget<MealEntryScreen>(editor).occurrenceDate, today.date);
+    final preview = find.descendant(
+      of: editor,
+      matching: find.byType(PhotoRecallThumbnail),
+    );
+    expect(tester.widget<PhotoRecallThumbnail>(preview).photo.id, photoId);
+    expect(find.text('Select a time'), findsOneWidget);
+
+    await tester.tap(find.text('Select a time'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text("I don't remember"));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add food or saved meal'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FoodSearchScreen), findsOneWidget);
+    await _selectSavedSoup(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MealEntryScreen), findsNothing);
+    expect(find.text('Toast'), findsOneWidget);
+    expect(find.text('Soup'), findsOneWidget);
   });
 
   testWidgets('German nutrition timeline uses participant translations', (
@@ -651,13 +802,13 @@ void main() {
     await tester.tap(find.text('Mahlzeit erfassen'));
     await tester.pumpAndSettle();
 
-    expect(
-      find.descendant(
-        of: find.byType(AppBar),
-        matching: find.text('Mahlzeit erfassen'),
-      ),
-      findsOneWidget,
+    final search = tester.widget<FoodSearchScreen>(
+      find.byType(FoodSearchScreen),
     );
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(FoodSearchScreen)),
+    )!;
+    expect(search.mealLabel, l10n.meal_neutral_label);
     expect(find.text('Lunch'), findsNothing);
   });
 
@@ -667,11 +818,13 @@ void main() {
     await tester.pumpWidget(
       nutritionTaskApp(
         nutritionTask(customMealTypes: ['Morning meal', 'Late meal']),
+        foodRepository: _savedSoupRepository(),
       ),
     );
     await tester.pump();
     await tester.tap(find.text('Log meal'));
     await tester.pumpAndSettle();
+    await _selectSavedSoup(tester);
     await tester.tap(find.text('Meal label'));
     await tester.pumpAndSettle();
 

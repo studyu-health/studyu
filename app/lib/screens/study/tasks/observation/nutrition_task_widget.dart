@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/models/photo_reference.dart';
 import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_help_screen.dart';
@@ -17,6 +20,7 @@ import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
+import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_core/core.dart';
 
@@ -228,9 +232,9 @@ class _NutritionTaskWidgetState()
                       children: [
                         _buildToday(context, model, l10n),
                         NutritionStatisticsView(
+                          isVisible: _selectedDestination == 1,
                           subject: appState.activeSubject,
                           taskId: widget.task?.id,
-                          isVisible: _selectedDestination == 1,
                           activeRecall: model.recall,
                           activeStudyDay: model.studyDaySnapshot,
                           activePeriodId:
@@ -418,6 +422,23 @@ class _NutritionTaskWidgetState()
           ],
           const SizedBox(height: 24),
           _buildMealsSection(context, model, recall, theme, l10n),
+          if (!_isHistoricalMode && !widget.readOnly && !kIsWeb) ...[
+            const SizedBox(height: 24),
+            Text(
+              l10n.photoRecallTitle,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(l10n.photoRecallSubtitle, style: theme.textTheme.bodyMedium),
+            const SizedBox(height: 12),
+            PhotoRecallSection(
+              date: recall.date,
+              onPhotoTap: (photo) =>
+                  _addMeal(context, model, recallPhoto: photo),
+            ),
+          ],
           if (_isHistoricalMode) ...[
             const SizedBox(height: 24),
             Text(
@@ -691,21 +712,38 @@ class _NutritionTaskWidgetState()
   Future<void> _addMeal(
     BuildContext context,
     DailyRecallEntryViewModel model, {
-    MealType? initialMealType,
-    String? initialCustomMealLabel,
+    PhotoReference? recallPhoto,
   }) async {
-    final result = await _pushMealEditor(
-      context,
-      model,
-      MealEntryScreen.route(
-        task: widget.task,
-        initialMealType: initialMealType,
-        initialCustomMealLabel: initialCustomMealLabel,
-        occurrenceDate: model.recall.date,
-        historicalTarget: widget.persistenceTarget,
-        foodRepository: widget.foodRepository,
-      ),
-    );
+    final result = await _openMealEditor(context, model, (navigator) async {
+      var foods = const <FoodEntry>[];
+      if (recallPhoto == null) {
+        final selection = await FoodSearchScreen.show(
+          context,
+          mealLabel: AppLocalizations.of(context)!.meal_neutral_label,
+          allowMeals: widget.task?.allowMeals ?? true,
+          historicalMode: widget.persistenceTarget != null,
+          repository: widget.foodRepository,
+          templateViewModel: _templateViewModel,
+        );
+        if (!context.mounted ||
+            !model.revalidateHistoricalEligibility() ||
+            selection == null ||
+            selection.foods.isEmpty) {
+          return null;
+        }
+        foods = selection.foods;
+      }
+      return await navigator.push(
+        MealEntryScreen.route(
+          task: widget.task,
+          initialFoods: foods,
+          recallPhoto: recallPhoto,
+          occurrenceDate: model.recall.date,
+          historicalTarget: widget.persistenceTarget,
+          foodRepository: widget.foodRepository,
+        ),
+      );
+    });
     if (result case SavedMealEntryResult(:final meal)) model.addMeal(meal);
   }
 
@@ -714,15 +752,17 @@ class _NutritionTaskWidgetState()
     DailyRecallEntryViewModel model,
     MealLog meal,
   ) async {
-    final result = await _pushMealEditor(
+    final result = await _openMealEditor(
       context,
       model,
-      MealEntryScreen.route(
-        existingMeal: meal,
-        task: widget.task,
-        occurrenceDate: model.recall.date,
-        historicalTarget: widget.persistenceTarget,
-        foodRepository: widget.foodRepository,
+      (navigator) => navigator.push(
+        MealEntryScreen.route(
+          existingMeal: meal,
+          task: widget.task,
+          occurrenceDate: model.recall.date,
+          historicalTarget: widget.persistenceTarget,
+          foodRepository: widget.foodRepository,
+        ),
       ),
     );
     switch (result) {
@@ -735,10 +775,10 @@ class _NutritionTaskWidgetState()
     }
   }
 
-  Future<MealEntryResult?> _pushMealEditor(
+  Future<MealEntryResult?> _openMealEditor(
     BuildContext context,
     DailyRecallEntryViewModel model,
-    Route<MealEntryResult> route,
+    Future<MealEntryResult?> Function(NavigatorState) open,
   ) async {
     if (!await _flushHistoricalRecallBeforeNestedMutation(context, model) ||
         !context.mounted) {
@@ -748,8 +788,10 @@ class _NutritionTaskWidgetState()
     final suspendPersistence = _isHistoricalMode && !widget.readOnly;
     if (suspendPersistence) model.suspendPersistence();
     try {
-      final result = await Navigator.of(context).push(route);
-      if (!model.revalidateHistoricalEligibility()) return null;
+      final result = await open(Navigator.of(context));
+      if (!context.mounted || !model.revalidateHistoricalEligibility()) {
+        return null;
+      }
       final definitionMutated = switch (result) {
         SavedMealEntryResult(:final definitionMutated) => definitionMutated,
         DiscardedMealEntryResult() => true,

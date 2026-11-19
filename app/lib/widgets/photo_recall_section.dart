@@ -24,6 +24,7 @@ class const PhotoRecallSection({
 
 class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
   final PhotoGalleryService _photoService = PhotoGalleryService();
+  late final AppLifecycleListener _lifecycleListener;
   List<PhotoReference>? _photos;
   bool _isLoading = false;
   bool _hasPermission = false;
@@ -31,15 +32,24 @@ class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
   @override
   void initState() {
     super.initState();
+    _lifecycleListener = AppLifecycleListener(
+      onResume: _checkPermissionAndLoad,
+    );
     _checkPermissionAndLoad();
   }
 
   @override
   void didUpdateWidget(covariant PhotoRecallSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.date != widget.date && _hasPermission) {
+    if (!DateUtils.isSameDay(oldWidget.date, widget.date) && _hasPermission) {
       _loadPhotos();
     }
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    super.dispose();
   }
 
   Future<void> _checkPermissionAndLoad() async {
@@ -54,18 +64,22 @@ class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
 
   Future<void> _loadPhotos() async {
     if (!mounted) return;
-    setState(() => _isLoading = true);
+    final date = widget.date;
+    setState(() {
+      _isLoading = true;
+      _photos = null;
+    });
 
     try {
-      final photos = await _photoService.getPhotosForDate(widget.date);
-      if (mounted) {
+      final photos = await _photoService.getPhotosForDate(date);
+      if (mounted && DateUtils.isSameDay(date, widget.date)) {
         setState(() {
           _photos = photos;
           _isLoading = false;
         });
       }
-    } catch (e) {
-      if (mounted) {
+    } catch (_) {
+      if (mounted && DateUtils.isSameDay(date, widget.date)) {
         setState(() => _isLoading = false);
       }
     }
@@ -235,7 +249,8 @@ class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
           itemCount: _photos!.length,
           itemBuilder: (context, index) {
             final photo = _photos![index];
-            return _PhotoThumbnail(
+            return PhotoRecallThumbnail(
+              key: ValueKey(photo.id),
               photo: photo,
               onTap: () => widget.onPhotoTap?.call(photo),
             );
@@ -246,10 +261,31 @@ class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
   }
 }
 
-class const _PhotoThumbnail({
+class const PhotoRecallThumbnail({
   required final PhotoReference photo,
   final VoidCallback? onTap,
-}) extends StatelessWidget {
+  super.key,
+}) extends StatefulWidget {
+  @override
+  State<PhotoRecallThumbnail> createState() => _PhotoRecallThumbnailState();
+}
+
+class _PhotoRecallThumbnailState() extends State<PhotoRecallThumbnail> {
+  late Future<Uint8List?> _thumbnail = _loadThumbnail();
+
+  @override
+  void didUpdateWidget(covariant PhotoRecallThumbnail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.photo.id != widget.photo.id) _thumbnail = _loadThumbnail();
+  }
+
+  Future<Uint8List?> _loadThumbnail() => AssetEntity(
+    id: widget.photo.id,
+    typeInt: 1,
+    width: 0,
+    height: 0,
+  ).thumbnailDataWithSize(const ThumbnailSize(300, 300), quality: 80);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -257,17 +293,13 @@ class const _PhotoThumbnail({
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Stack(
           fit: StackFit.expand,
           children: [
             // Photo thumbnail
             FutureBuilder<Uint8List?>(
-              future: AssetEntity(id: photo.id, typeInt: 1, width: 0, height: 0)
-                  .thumbnailDataWithSize(
-                    const ThumbnailSize(300, 300),
-                    quality: 80,
-                  ),
+              future: _thumbnail,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return ColoredBox(

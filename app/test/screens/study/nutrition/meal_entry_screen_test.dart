@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
@@ -15,7 +14,6 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dar
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
-import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_core/core.dart';
 
 import 'fake_nutrition_food_repository.dart';
@@ -100,7 +98,6 @@ Future<void> openMealEntry(
   NutritionRecallPersistenceTarget? historicalTarget,
   NutritionFoodRepository? foodRepository,
   AppState? appState,
-  bool openFoodSearch = false,
   ValueChanged<MealLog?>? onResult,
   ValueChanged<MealEntryResult?>? onEntryResult,
 }) async {
@@ -127,7 +124,6 @@ Future<void> openMealEntry(
                             historicalTarget: historicalTarget,
                             foodRepository:
                                 foodRepository ?? FakeNutritionFoodRepository(),
-                            openFoodSearch: openFoodSearch,
                           ),
                         ),
                       );
@@ -254,10 +250,10 @@ Future<_TrackingNutritionFoodRepository> _openValidNewHistoricalMeal(
     historicalTarget: setup.target,
     foodRepository: repository,
     appState: setup.appState,
-    openFoodSearch: true,
     onResult: onResult,
   );
 
+  await openFoodSearchFromMeal(tester);
   await tester.tap(find.byTooltip('Create food'));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Save to My items for future use'));
@@ -278,6 +274,9 @@ Future<_TrackingNutritionFoodRepository> _openValidNewHistoricalMeal(
   await tester.pumpAndSettle();
   await tester.tap(find.text("I don't remember"));
   await tester.pumpAndSettle();
+  await tester.ensureVisible(
+    find.widgetWithText(CheckboxListTile, 'Save to My items for future use'),
+  );
   return repository;
 }
 
@@ -421,8 +420,6 @@ Future<void> openFoodSearchFromMeal(WidgetTester tester) async {
         ? addFood
         : find.text('Add food or saved meal').first,
   );
-  await tester.pumpAndSettle();
-  await tester.tap(find.byKey(const ValueKey('add-food-search-option')));
   await tester.pumpAndSettle();
 }
 
@@ -1253,53 +1250,16 @@ void main() {
     }
   });
 
-  testWidgets('routes Photo Recall from Add Food using the occurrence date', (
-    tester,
-  ) async {
-    const channel = MethodChannel('com.fluttercandies/photo_manager');
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async {
-          switch (call.method) {
-            case 'getPermissionState':
-              return PermissionState.authorized.index;
-            case 'getAssetPathList':
-              return {'data': <dynamic>[]};
-          }
-          return null;
-        });
-    addTearDown(
-      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, null),
-    );
+  testWidgets('Add food opens search directly', (tester) async {
+    await openMealEntry(tester, editableMeal());
 
-    final meal = editableMeal()
-      ..timestamp = null
-      ..timePrecision = MealOccurrenceTimePrecision.unknown;
-    await openMealEntry(tester, meal, occurrenceDate: DateTime(2024, 2, 3));
-
-    expect(find.text('Photo Recall'), findsNothing);
     await tester.tap(find.byTooltip('Add food or saved meal'));
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey('add-food-search-option')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('add-food-photo-recall-option')),
-      findsOneWidget,
-    );
-    await tester.tap(
-      find.byKey(const ValueKey('add-food-photo-recall-option')),
-    );
+    expect(find.byType(FoodSearchScreen), findsOneWidget);
+    await tester.tap(find.byType(CloseButton));
     await tester.pumpAndSettle();
-
-    final section = tester.widget<PhotoRecallSection>(
-      find.byType(PhotoRecallSection),
-    );
-    expect(section.date, DateTime(2024, 2, 3));
-    expect(find.byType(AlertDialog), findsNothing);
-    expect(find.text('No photos found'), findsOneWidget);
+    expect(find.byType(MealEntryScreen), findsOneWidget);
   });
 
   testWidgets('back offers discard and continue actions', (tester) async {

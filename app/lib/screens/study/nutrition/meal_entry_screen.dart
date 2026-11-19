@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/models/photo_reference.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
@@ -48,11 +49,6 @@ enum _LibraryEditChoice() {
   currentEntryAndLibrary,
 }
 
-enum _AddFoodSource() {
-  search,
-  photoRecall,
-}
-
 class const _MealTypeSelection(
   final MealType type, [
   final String? customLabel,
@@ -75,10 +71,11 @@ class const MealEntryScreen({
   final NutritionTask? task,
   final MealType? initialMealType,
   final String? initialCustomMealLabel,
+  final List<FoodEntry> initialFoods = const [],
+  final PhotoReference? recallPhoto,
   final DateTime? occurrenceDate,
   final NutritionRecallPersistenceTarget? historicalTarget,
   final NutritionFoodRepository? foodRepository,
-  final bool openFoodSearch = false,
   super.key,
 }) extends StatefulWidget {
   static MaterialPageRoute<MealEntryResult> route({
@@ -86,20 +83,22 @@ class const MealEntryScreen({
     NutritionTask? task,
     MealType? initialMealType,
     String? initialCustomMealLabel,
+    List<FoodEntry> initialFoods = const [],
+    PhotoReference? recallPhoto,
     DateTime? occurrenceDate,
     NutritionRecallPersistenceTarget? historicalTarget,
     NutritionFoodRepository? foodRepository,
-    bool openFoodSearch = false,
   }) => MaterialPageRoute(
     builder: (_) => MealEntryScreen(
       existingMeal: existingMeal,
       task: task,
       initialMealType: initialMealType,
       initialCustomMealLabel: initialCustomMealLabel,
+      initialFoods: initialFoods,
+      recallPhoto: recallPhoto,
       occurrenceDate: occurrenceDate,
       historicalTarget: historicalTarget,
       foodRepository: foodRepository,
-      openFoodSearch: openFoodSearch,
     ),
   );
 
@@ -129,9 +128,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
   bool _propagateToCurrentStudyDay = false;
 
   bool get _allowMeals => widget.task?.allowMeals ?? true;
-
-  DateTime get _occurrenceDate =>
-      widget.occurrenceDate ?? _meal.timestamp ?? DateTime.now();
 
   late TextEditingController _skipReasonController;
 
@@ -177,52 +173,13 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
 
     _skipReasonController = TextEditingController(text: _skipReason ?? '');
     _initialMealSnapshot = _mealSnapshot;
-    if (widget.openFoodSearch) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _openFoodSearch();
-      });
-    }
+    if (widget.existingMeal == null) _addSelectedFoods(widget.initialFoods);
   }
 
   @override
   void dispose() {
     _skipReasonController.dispose();
     super.dispose();
-  }
-
-  Future<void> _addFood() async {
-    final l10n = AppLocalizations.of(context)!;
-    final source = await showModalBottomSheet<_AddFoodSource>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (sheetContext) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            key: const ValueKey('add-food-search-option'),
-            leading: const Icon(Icons.search_outlined),
-            title: Text(l10n.nutrition_add_food_or_saved_meal),
-            onTap: () => Navigator.pop(sheetContext, _AddFoodSource.search),
-          ),
-          ListTile(
-            key: const ValueKey('add-food-photo-recall-option'),
-            leading: const Icon(Icons.photo_library_outlined),
-            title: Text(l10n.photoRecallTitle),
-            subtitle: Text(l10n.photoRecallSubtitle),
-            onTap: () =>
-                Navigator.pop(sheetContext, _AddFoodSource.photoRecall),
-          ),
-        ],
-      ),
-    );
-    if (!mounted || source == null) return;
-    switch (source) {
-      case _AddFoodSource.search:
-        await _openFoodSearch();
-      case _AddFoodSource.photoRecall:
-        await _showPhotoRecall();
-    }
   }
 
   Future<void> _openFoodSearch() async {
@@ -239,13 +196,16 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     );
     if (!mounted || !_revalidateHistoricalEligibility()) return;
     if (result != null) {
-      final foods = _allowMeals
-          ? result.foods
-          : result.foods
-                .where((food) => food.entryType != FoodEntryType.meal)
-                .toList();
-      setState(() => _meal.foods.addAll(foods));
+      setState(() => _addSelectedFoods(result.foods));
     }
+  }
+
+  void _addSelectedFoods(List<FoodEntry> foods) {
+    _meal.foods.addAll(
+      _allowMeals
+          ? foods
+          : foods.where((food) => food.entryType != FoodEntryType.meal),
+    );
   }
 
   int _foodIndex(String foodId) =>
@@ -1022,68 +982,11 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     }
   }
 
-  Future<void> _showPhotoRecall() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (sheetContext) {
-        final l10n = AppLocalizations.of(sheetContext)!;
-        return FractionallySizedBox(
-          heightFactor: 0.9,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 8, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.photoRecallTitle,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            l10n.photoRecallSubtitle,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: MaterialLocalizations.of(context)
-                          .closeButtonTooltip,
-                      onPressed: () => Navigator.of(sheetContext).pop(),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: PhotoRecallSection(
-                    date: _occurrenceDate,
-                    onPhotoTap: (photo) {
-                      PhotoViewerDialog.show(
-                        context,
-                        photoId: photo.id,
-                        photoDate: photo.createDateTime,
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+  void _showRecallPhoto(PhotoReference photo) {
+    PhotoViewerDialog.show(
+      context,
+      photoId: photo.id,
+      photoDate: photo.createDateTime,
     );
   }
 
@@ -1116,6 +1019,19 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (widget.recallPhoto case final photo?) ...[
+                Tooltip(
+                  message: l10n.photoRecallTapToEnlarge,
+                  child: SizedBox.square(
+                    dimension: 128,
+                    child: PhotoRecallThumbnail(
+                      photo: photo,
+                      onTap: () => _showRecallPhoto(photo),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               if (widget.existingMeal == null &&
                   widget.historicalTarget != null)
                 CheckboxListTile(
@@ -1132,7 +1048,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                   isSkipped: false,
                   showValidationError: _hasAttemptedSave && _meal.foods.isEmpty,
                   allowMeals: _allowMeals,
-                  onAddFood: _addFood,
+                  onAddFood: _openFoodSearch,
                   onFoodTap: _adjustFoodQuantity,
                   onFoodActions: _showFoodActions,
                   onSaveToLibrary:
