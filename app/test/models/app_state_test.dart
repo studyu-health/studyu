@@ -18,13 +18,15 @@ void main() {
     expect(state.showParticipantRecovery, isFalse);
   });
 
-  test('preview progress is tracked only for a known non-running study', () {
+  test('preview progress is tracked only for a draft study', () {
     final state = AppState()..isPreview = true;
 
     expect(state.trackParticipantProgress, isFalse);
     state.selectedStudy = Study('study', 'user');
     expect(state.trackParticipantProgress, isTrue);
     state.selectedStudy!.status = StudyStatus.running;
+    expect(state.trackParticipantProgress, isFalse);
+    state.selectedStudy!.status = StudyStatus.closed;
     expect(state.trackParticipantProgress, isFalse);
     state.clearAccountState();
     expect(state.trackParticipantProgress, isFalse);

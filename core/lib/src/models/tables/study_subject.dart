@@ -340,12 +340,17 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
     return taskSchedule;
   }
 
-  Future<void> setStartDateBackBy({required int days}) async {
+  Future<void> setStartDateBackBy({
+    required int days,
+    bool persist = true,
+  }) async {
     try {
-      await env.client.rpc(
-        'advance_owned_study_subject_day',
-        params: {'p_subject_id': id, 'p_days': days},
-      );
+      if (persist) {
+        await env.client.rpc(
+          'advance_owned_study_subject_day',
+          params: {'p_subject_id': id, 'p_days': days},
+        );
+      }
       for (final item in progress) {
         item.setStartDateBackBy(days: days);
       }

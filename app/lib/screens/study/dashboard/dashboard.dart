@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +15,6 @@ import 'package:studyu_app/screens/app_onboarding/study_unavailable_screen.dart'
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
 import 'package:studyu_app/theme.dart' as app_theme;
 import 'package:studyu_app/util/dashboard_showcase.dart';
-import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/debug_screen.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
@@ -79,8 +77,7 @@ class _DashboardScreenState()
   bool get _studyIsAvailable => isStudyAvailableForTesting(subject!.study);
 
   bool get showNextDay =>
-      (isDebugMode || context.read<AppState>().isPreview) &&
-      !subject!.completedStudy;
+      context.read<AppState>().isPreview && !subject!.completedStudy;
 
   Future<void> _submitPendingNutritionRecalls() async {
     final currentSubject = subject;
@@ -470,15 +467,34 @@ class _DashboardScreenState()
                 icon: const Icon(Icons.fast_forward_rounded),
                 onPressed: () async {
                   try {
-                    await subject!.setStartDateBackBy(days: 1);
+                    final appState = context.read<AppState>();
+                    await subject!.setStartDateBackBy(
+                      days: 1,
+                      persist: appState.isPreview && subject!.study.isDraft,
+                    );
 
+                    if (!mounted) return;
                     setState(() {
                       scheduleToday = subject!.scheduleFor(DateTime.now());
                     });
                     await _submitPendingNutritionRecalls();
                     _scheduleMidnightSubmitTimer();
                     unawaited(_startDashboardShowcaseIfNeeded());
-                  } on SocketException catch (_) {}
+                  } catch (error) {
+                    StudyULogger.warning(
+                      'Could not advance the study day: $error',
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!
+                                .could_not_save_results,
+                          ),
+                        ),
+                      );
+                    }
+                  }
                 },
                 label: Text(AppLocalizations.of(context)!.next_day),
                 style: ElevatedButton.styleFrom(

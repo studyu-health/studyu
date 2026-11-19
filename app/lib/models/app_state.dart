@@ -114,11 +114,9 @@ class AppState() with ChangeNotifier {
 
   /// Flag indicating whether the participant's progress should be tracked
   ///
-  /// We always track the participant's progress except when the study is
-  /// being viewed in test/preview mode while already launched (to avoid
-  /// mixing results from test users with actual participants)
+  /// Persist preview progress only for draft studies.
   bool get trackParticipantProgress =>
-      !isPreview || selectedStudy?.isRunning == false;
+      !isPreview || selectedStudy?.isDraft == true;
 
   void init(BuildContext context) {
     scheduleNotifications(context);
