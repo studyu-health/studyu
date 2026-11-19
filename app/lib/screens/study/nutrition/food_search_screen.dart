@@ -986,7 +986,7 @@ class _FoodSearchScreenContentState()
             padding: const EdgeInsetsDirectional.only(end: 8),
             child: NutritionAddButton(
               onPressed: _createFromSearch,
-              filled: true,
+              filled: _selectionStore == null,
               label: widget.historicalMode || !widget.allowMeals
                   ? l10n.add_food_action
                   : l10n.create,

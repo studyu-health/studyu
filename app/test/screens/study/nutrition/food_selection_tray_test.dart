@@ -31,7 +31,7 @@ void main() {
     await tester.pumpAndSettle();
     final create = find.descendant(
       of: find.byType(AppBar),
-      matching: find.widgetWithText(FilledButton, 'Create'),
+      matching: find.text('Create'),
     );
 
     await tester.tap(create);
