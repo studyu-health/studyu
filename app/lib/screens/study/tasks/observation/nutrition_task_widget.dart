@@ -245,10 +245,6 @@ class _NutritionTaskWidgetState()
                         const FoodLibraryScreen(embedded: true),
                       ],
                     ),
-              floatingActionButton:
-                  !_isHistoricalMode && _selectedDestination == 2
-                  ? FoodLibraryScreen.addButton(context)
-                  : null,
               bottomNavigationBar: _isHistoricalMode
                   ? null
                   : NavigationBar(
@@ -371,6 +367,8 @@ class _NutritionTaskWidgetState()
                     : () => Navigator.of(context)
                           .push(NutritionHelpScreen.route(task: widget.task!)),
               ),
+            if (_selectedDestination == 2)
+              FoodLibraryScreen.createButton(context),
           ],
   );
 

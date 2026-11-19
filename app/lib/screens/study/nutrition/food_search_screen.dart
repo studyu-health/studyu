@@ -846,29 +846,6 @@ class _FoodSearchScreenContentState()
     }
   }
 
-  Future<void> _createFromSearch() async {
-    if (widget.historicalMode || !widget.allowMeals) {
-      _addManually();
-      return;
-    }
-
-    final l10n = AppLocalizations.of(context)!;
-    final action = await showFoodCreationSheet(
-      context,
-      mealLabel: l10n.create_meal,
-    );
-    if (!mounted) return;
-
-    switch (action) {
-      case FoodCreationAction.food:
-        _addManually();
-      case FoodCreationAction.meal:
-        _createMeal();
-      case null:
-        return;
-    }
-  }
-
   List<FoodSearchHistoryItem> _recentMatches(String query) {
     final history = widget.history;
     final items = [...history.frequentlyUsed, ...history.recent]
@@ -958,15 +935,12 @@ class _FoodSearchScreenContentState()
               : null,
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 8),
-            child: NutritionAddButton(
-              onPressed: _createFromSearch,
-              filled: _selectionStore == null,
-              label: widget.historicalMode || !widget.allowMeals
-                  ? l10n.add_food_action
-                  : l10n.create,
-            ),
+          FoodCreationButton(
+            onCreateFood: _addManually,
+            onCreateMeal: widget.historicalMode || !widget.allowMeals
+                ? null
+                : _createMeal,
+            filled: _selectionStore == null,
           ),
         ],
       ),

@@ -394,20 +394,23 @@ void main() {
     expect(find.text('Historical apple'), findsNothing);
   });
 
-  testWidgets('library add opens the food and meal editors', (tester) async {
+  testWidgets('Library Create opens the food and meal editors', (tester) async {
     final l10n = lookupAppLocalizations(const Locale('en'));
     await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
     await tester.pumpAndSettle();
 
     final navigation = find.byType(NavigationBar);
-    final add = find.byTooltip(l10n.add);
-    expect(add, findsNothing);
+    final create = find.descendant(
+      of: find.byType(AppBar),
+      matching: find.text(l10n.create),
+    );
+    expect(create, findsNothing);
     await tester.tap(
       find.descendant(of: navigation, matching: find.text(l10n.food_library)),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(add);
+    await tester.tap(create);
     await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.add_food_action));
     await tester.pumpAndSettle();
@@ -415,9 +418,9 @@ void main() {
 
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.tap(add);
+    await tester.tap(create);
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l10n.add_meal_action));
+    await tester.tap(find.text(l10n.create_meal));
     await tester.pumpAndSettle();
     expect(find.byType(MealCreatorScreen), findsOneWidget);
   });

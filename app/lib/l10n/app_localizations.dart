@@ -4801,12 +4801,6 @@ abstract class AppLocalizations {
   /// **'Create food'**
   String get add_food_action;
 
-  /// No description provided for @add_meal_action.
-  ///
-  /// In en, this message translates to:
-  /// **'Create meal'**
-  String get add_meal_action;
-
   /// No description provided for @recent_foods.
   ///
   /// In en, this message translates to:

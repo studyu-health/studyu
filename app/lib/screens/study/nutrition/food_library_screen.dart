@@ -30,40 +30,21 @@ class const FoodLibraryScreen({
     ),
   );
 
-  static Widget addButton(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return FloatingActionButton(
-      tooltip: l10n.add,
-      heroTag: null,
-      onPressed: () async {
-        final action = await showFoodCreationSheet(
-          context,
-          mealLabel: l10n.add_meal_action,
-        );
-        if (!context.mounted) return;
-        switch (action) {
-          case FoodCreationAction.food:
-            Navigator.push<FoodEntry>(
-              context,
-              FoodEntryScreen.route(
-                showSearchAction: false,
-                templateViewModel: context.read<TemplateViewModel>(),
-              ),
-            );
-          case FoodCreationAction.meal:
-            Navigator.push<FoodEntry>(
-              context,
-              MealCreatorScreen.route(
-                templateViewModel: context.read<TemplateViewModel>(),
-              ),
-            );
-          case null:
-            break;
-        }
-      },
-      child: const Icon(Icons.add),
-    );
-  }
+  static Widget createButton(BuildContext context) => FoodCreationButton(
+    onCreateFood: () => Navigator.push<FoodEntry>(
+      context,
+      FoodEntryScreen.route(
+        showSearchAction: false,
+        templateViewModel: context.read<TemplateViewModel>(),
+      ),
+    ),
+    onCreateMeal: () => Navigator.push<FoodEntry>(
+      context,
+      MealCreatorScreen.route(
+        templateViewModel: context.read<TemplateViewModel>(),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -105,14 +86,16 @@ class const _FoodLibraryScreenContent({required final bool embedded})
     final library = FoodLibrary(
       includeExternalLibrary: true,
       externalSearchViewModel: context.read<FoodSearchViewModel>(),
-      bottomPadding: 88 + MediaQuery.paddingOf(context).bottom,
+      bottomPadding: 24 + MediaQuery.paddingOf(context).bottom,
     );
 
     if (embedded) return library;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.food_library)),
+      appBar: AppBar(
+        title: Text(l10n.food_library),
+        actions: [FoodLibraryScreen.createButton(context)],
+      ),
       body: library,
-      floatingActionButton: FoodLibraryScreen.addButton(context),
     );
   }
 }
