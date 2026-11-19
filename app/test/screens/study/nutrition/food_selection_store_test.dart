@@ -137,6 +137,25 @@ void main() {
       'usda:id:123',
     );
   });
+
+  test('copies of a recent manual food share one selection item', () {
+    final store = FoodSelectionStore();
+    final recent = food(id: 'apple', calories: 95);
+    final first = duplicateFoodEntry(recent);
+    final second = duplicateFoodEntry(recent);
+
+    store
+      ..addOrIncrement(canonicalFoodSelectionKey(first), first)
+      ..addOrIncrement(canonicalFoodSelectionKey(second), second);
+
+    expect(store.itemFor(canonicalFoodSelectionKey(recent))?.quantity, 2);
+    expect(store.materialize().single.amount, 2);
+    expect(store.knownCalories(), 190);
+    expect(
+      canonicalFoodSelectionKey(food(id: 'another-apple')),
+      isNot(canonicalFoodSelectionKey(recent)),
+    );
+  });
 }
 
 studyu.FoodEntry food({

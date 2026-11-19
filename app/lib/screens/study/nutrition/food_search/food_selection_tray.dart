@@ -86,13 +86,15 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
         : _SelectionSurfaceMode.compact,
   );
 
+  void collapse() => _setMode(_SelectionSurfaceMode.compact);
+
   bool handleSystemBack() {
     if (_mode == _SelectionSurfaceMode.details) {
       _closeDetails();
       return true;
     }
     if (_mode == _SelectionSurfaceMode.expanded) {
-      _setMode(_SelectionSurfaceMode.compact);
+      collapse();
       return true;
     }
     return false;
@@ -145,19 +147,6 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
       _restoreExpandedScrollOffset(_previousMode);
       widget.onActivityChanged(_previousMode != _SelectionSurfaceMode.compact);
     }
-  }
-
-  void _deleteItem(String key) {
-    widget.store.delete(key);
-    if (!widget.store.isEmpty) return;
-    setState(() {
-      _mode = _SelectionSurfaceMode.compact;
-      _previousMode = _SelectionSurfaceMode.compact;
-      _detailFood = null;
-      _detailKey = null;
-      _detailAction = null;
-    });
-    widget.onActivityChanged(false);
   }
 
   @override
@@ -285,8 +274,7 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
                           if (_mode == _SelectionSurfaceMode.expanded)
                             IconButton(
                               tooltip: l10n.food_selection_collapse,
-                              onPressed: () =>
-                                  _setMode(_SelectionSurfaceMode.compact),
+                              onPressed: collapse,
                               icon: const Icon(Icons.keyboard_arrow_down),
                             ),
                         ],
@@ -310,7 +298,6 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
                         onSelect: widget.onSelect,
                         onIncrement: widget.onIncrement,
                         onDecrement: widget.onDecrement,
-                        onDelete: () => _deleteItem(item.key),
                       );
                     },
                   ),
@@ -518,7 +505,6 @@ class const _SelectionPreviewRow({
   required final ValueChanged<FoodSelectionItem> onSelect,
   required final void Function(String key, Offset? source) onIncrement,
   required final ValueChanged<String> onDecrement,
-  final VoidCallback? onDelete,
   super.key,
 }) extends StatelessWidget {
   @override
@@ -543,9 +529,7 @@ class const _SelectionPreviewRow({
       key: anchorKey,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final showCustomLabel =
-              overridden &&
-              constraints.maxWidth >= (onDelete == null ? 320 : 400);
+          final showCustomLabel = overridden && constraints.maxWidth >= 320;
           return Row(
             children: [
               Expanded(
@@ -611,7 +595,14 @@ class const _SelectionPreviewRow({
                             ],
                           ),
                         ),
-                        const FoodDetailsAffordance(),
+                        Tooltip(
+                          message: l10n.food_quantity_edit_amount,
+                          child: const SizedBox(
+                            width: 40,
+                            height: 48,
+                            child: Icon(Icons.edit_outlined, size: 22),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -626,12 +617,6 @@ class const _SelectionPreviewRow({
                 onDecrement: () => onDecrement(item.key),
                 onIncrement: (source) => onIncrement(item.key, source),
               ),
-              if (onDelete != null)
-                IconButton(
-                  tooltip: l10n.food_selection_delete(item.name),
-                  onPressed: onDelete,
-                  icon: const Icon(Icons.delete_outline),
-                ),
             ],
           );
         },

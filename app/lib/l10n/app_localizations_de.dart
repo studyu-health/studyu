@@ -2377,11 +2377,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String food_selection_delete(String name) {
-    return '$name löschen';
-  }
-
-  @override
   String get food_selection_item_removed => 'Element entfernt';
 
   @override
@@ -3343,4 +3338,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String nutrition_energy_change_from_previous_day(Object value) {
     return '$value zum Vortag';
   }
+
+  @override
+  String food_selection_remove_title(String name) {
+    return '$name entfernen?';
+  }
+
+  @override
+  String get food_selection_remove => 'Entfernen';
 }

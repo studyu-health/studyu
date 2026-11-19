@@ -2294,11 +2294,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String food_selection_delete(String name) {
-    return 'Delete $name';
-  }
-
-  @override
   String get food_selection_item_removed => 'Item removed';
 
   @override
@@ -3079,7 +3074,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get food_selection_collapse => 'Collapse selected items';
 
   @override
-  String get food_quantity_edit_amount => 'Edit amount';
+  String get food_quantity_edit_amount => '수량 수정';
 
   @override
   String food_quantity_nutrition_for_amount(Object amount, Object unit) {
@@ -3242,4 +3237,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String nutrition_energy_change_from_previous_day(Object value) {
     return '전날 대비 $value';
   }
+
+  @override
+  String food_selection_remove_title(String name) {
+    return '$name 항목을 제거하시겠습니까?';
+  }
+
+  @override
+  String get food_selection_remove => '제거';
 }

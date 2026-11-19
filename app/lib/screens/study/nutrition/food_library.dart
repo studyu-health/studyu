@@ -747,7 +747,6 @@ class const FoodLibraryItemCard({
                               ],
                             ),
                           ),
-                          const FoodDetailsAffordance(),
                         ],
                       ),
                     ),
@@ -762,7 +761,7 @@ class const FoodLibraryItemCard({
                 onIncrement: onIncrement!,
                 onDecrement: onDecrement!,
               )
-            else if (onAdd != null)
+            else if (!isSelected && onAdd != null)
               Builder(
                 builder: (buttonContext) => TextButton(
                   onPressed: () => onAdd!(

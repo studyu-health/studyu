@@ -16,6 +16,8 @@ import 'fake_nutrition_food_repository.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+
+
   testWidgets('new result opens details, then add reveals compact tray', (
     tester,
   ) async {
@@ -176,7 +178,10 @@ void main() {
     final searchRouteCount = find.byType(FoodSearchScreen).evaluate().length;
     await tester.tap(find.text('Selected items'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Delete External Apple'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('selection-expanded-list')),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('selection-drag-handle')), findsOneWidget);
     expect(find.byType(FoodSearchScreen), findsNWidgets(searchRouteCount));
 
@@ -197,12 +202,15 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Delete External Apple'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('selection-expanded-list')),
+      findsOneWidget,
+    );
     expect(find.byType(FoodSearchScreen), findsNWidgets(searchRouteCount));
 
     await tester.tap(find.byTooltip('Collapse selected items'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Delete External Apple'), findsNothing);
+    expect(find.byKey(const ValueKey('selection-expanded-list')), findsNothing);
   });
 
   testWidgets('detail servings normalize into quantity before increment', (
@@ -288,7 +296,6 @@ void main() {
 
     await tester.tap(find.text('Selected items'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Delete External Apple'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.text('External Apple').last);
@@ -333,6 +340,7 @@ void main() {
     expect(header, isSemantics(hasExpandedState: true, isExpanded: false));
     semantics.dispose();
   });
+
 
   testWidgets('header semantics describe unavailable calories', (tester) async {
     final semantics = tester.ensureSemantics();
@@ -455,7 +463,6 @@ void main() {
 
     final after = tester.widget<ListView>(listFinder).controller!.offset;
     expect(after, closeTo(before, 0.1));
-    expect(find.byIcon(Icons.delete_outline), findsWidgets);
   });
 
   testWidgets('compact tray offers View all with total count', (tester) async {
@@ -465,22 +472,52 @@ void main() {
     expect(find.text('View all 4 items'), findsOneWidget);
     await tester.tap(find.text('View all 4 items'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Delete Library item 4'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('selection-expanded-list')),
+        matching: find.text('Library item 4'),
+      ),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('deleting final expanded item hides selection surface', (
+  testWidgets('removing final expanded item requires confirmation', (
     tester,
   ) async {
     await _pumpSearch(tester);
-    await _addExternalApple(tester);
+    await tester.tap(find.widgetWithText(TextButton, 'Add'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextButton, 'Add'), findsNothing);
+
+    await tester.tap(find.byTooltip('Increase External Apple').first);
+    await tester.pumpAndSettle();
+    expect(find.text('1 item · 156 kcal'), findsOneWidget);
 
     await tester.tap(find.text('Selected items'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Delete External Apple'));
+    final decrease = find.descendant(
+      of: find.byKey(const ValueKey('selection-expanded-list')),
+      matching: find.byTooltip('Decrease External Apple'),
+    );
+    await tester.tap(decrease);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('1 item · 78 kcal'), findsOneWidget);
+
+    await tester.tap(decrease);
+    await tester.pumpAndSettle();
+    expect(find.text('Remove External Apple?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 item · 78 kcal'), findsOneWidget);
+
+    await tester.tap(decrease);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Remove'));
     await tester.pumpAndSettle();
 
     expect(find.text('Selected items'), findsNothing);
-    expect(find.byTooltip('Delete External Apple'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Add'), findsOneWidget);
     expect(
       find.widgetWithText(FilledButton, 'Add 0 items to Lunch'),
       findsNothing,
@@ -503,11 +540,14 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.byType(FoodQuantitySheet), findsNothing);
-    expect(find.byTooltip('Delete External Apple'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('selection-expanded-list')),
+      findsOneWidget,
+    );
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Delete External Apple'), findsNothing);
+    expect(find.byKey(const ValueKey('selection-expanded-list')), findsNothing);
     expect(find.text('Selected items'), findsOneWidget);
   });
 

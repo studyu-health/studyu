@@ -917,16 +917,8 @@
       }
     }
   },
-  "food_selection_delete": "Delete {name}",
   "food_selection_item_removed": "Item removed",
   "food_selection_undo": "Undo",
-  "@food_selection_delete": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "food_selection_selected": "{name}, selected, quantity {quantity}",
   "@food_selection_selected": {
     "placeholders": {
@@ -1461,5 +1453,14 @@
   "nutrition_statistics_next_period": "Next period",
   "nutrition_statistics_go_to_today": "Jump to today",
   "nutrition_statistics_day_empty": "No nutrition entries for this day.",
-  "nutrition_energy_change_from_previous_day": "{value} vs. previous day"
+  "nutrition_energy_change_from_previous_day": "{value} vs. previous day",
+  "food_selection_remove_title": "Remove {name}?",
+  "@food_selection_remove_title": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "food_selection_remove": "Remove"
 }

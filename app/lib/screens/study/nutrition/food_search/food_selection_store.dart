@@ -192,7 +192,7 @@ String canonicalFoodSelectionKey(studyu.FoodEntry food) {
   if (barcode != null && barcode.isNotEmpty) {
     return '$source:barcode:$barcode';
   }
-  if (food.source == studyu.FoodSource.manual) return 'manual:${food.id}';
+  if (food.source == studyu.FoodSource.manual) return 'manual:${food.foodId}';
   return [
     source,
     normalizeFoodSearchText(food.name),

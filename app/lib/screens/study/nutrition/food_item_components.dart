@@ -297,18 +297,6 @@ String? foodImageUrl(studyu.FoodEntry food) {
   return null;
 }
 
-class const FoodDetailsAffordance({super.key}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => Tooltip(
-    message: AppLocalizations.of(context)!.details,
-    child: const SizedBox(
-      width: 40,
-      height: 48,
-      child: Icon(Icons.chevron_right, size: 22),
-    ),
-  );
-}
-
 Widget fallbackFoodIcon(ThemeData theme, IconData icon, {double size = 22}) =>
     Container(
       alignment: Alignment.center,

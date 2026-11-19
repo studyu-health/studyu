@@ -203,6 +203,7 @@ class _FoodSearchScreenContentState()
   late final FoodSearchViewModel _searchViewModel;
   bool _showServingHint = true;
   bool _isConfirming = false;
+  bool _isConfirmingRemoval = false;
   bool _allowPop = false;
   bool _selectionSurfaceActive = false;
 
@@ -768,9 +769,44 @@ class _FoodSearchScreenContentState()
     );
   }
 
-  void _decrementSelection(String key) {
+  Future<void> _decrementSelection(String key) async {
+    final store = _selectionStore;
+    final item = store?.itemFor(key);
+    if (store == null || item == null || _isConfirmingRemoval) return;
+
     _removeTransfer();
-    _selectionStore?.decrement(key);
+    if (item.quantity > 1) {
+      store.decrement(key);
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+    _isConfirmingRemoval = true;
+    final shouldRemove = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.food_selection_remove_title(item.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.food_selection_remove),
+          ),
+        ],
+      ),
+    );
+    _isConfirmingRemoval = false;
+    if (!mounted ||
+        shouldRemove != true ||
+        store.itemFor(key) != item ||
+        item.quantity != 1) {
+      return;
+    }
+    store.delete(key);
+    if (store.isEmpty) _selectionTrayKey.currentState?.collapse();
   }
 
   void _incrementTraySelection(String key, Offset? _) {

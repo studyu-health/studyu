@@ -526,5 +526,8 @@
   "nutrition_statistics_next_period": "다음 기간",
   "nutrition_statistics_go_to_today": "오늘로 이동",
   "nutrition_statistics_day_empty": "이 날짜에는 식사 기록이 없습니다.",
-  "nutrition_energy_change_from_previous_day": "전날 대비 {value}"
+  "nutrition_energy_change_from_previous_day": "전날 대비 {value}",
+  "food_selection_remove_title": "{name} 항목을 제거하시겠습니까?",
+  "food_selection_remove": "제거",
+  "food_quantity_edit_amount": "수량 수정"
 }

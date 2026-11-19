@@ -4363,12 +4363,6 @@ abstract class AppLocalizations {
   /// **'Decrease {name}'**
   String food_selection_decrement(String name);
 
-  /// No description provided for @food_selection_delete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete {name}'**
-  String food_selection_delete(String name);
-
   /// No description provided for @food_selection_item_removed.
   ///
   /// In en, this message translates to:
@@ -5886,6 +5880,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value} vs. previous day'**
   String nutrition_energy_change_from_previous_day(Object value);
+
+  /// No description provided for @food_selection_remove_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String food_selection_remove_title(String name);
+
+  /// No description provided for @food_selection_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get food_selection_remove;
 }
 
 class _AppLocalizationsDelegate
