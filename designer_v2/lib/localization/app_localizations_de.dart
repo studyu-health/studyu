@@ -3278,4 +3278,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get form_field_report_data_source_empty =>
       'Keine Skalenfrage definiert';
+
+  @override
+  String get form_field_nutrition_track_water => 'Wasseraufnahme erfassen';
+
+  @override
+  String get form_field_nutrition_track_water_help =>
+      'Teilnehmende können erfassen, wie viel Wasser sie täglich trinken.';
 }

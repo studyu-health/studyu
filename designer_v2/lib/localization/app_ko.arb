@@ -851,5 +851,7 @@
   "system": "기기 설정 따름",
   "time_format": "시간 형식",
   "time_format_12_hour": "12시간제 (오후 2:30)",
-  "time_format_24_hour": "24시간제 (14:30)"
+  "time_format_24_hour": "24시간제 (14:30)",
+  "form_field_nutrition_track_water": "물 섭취량 기록",
+  "form_field_nutrition_track_water_help": "참여자가 매일 마신 물의 양을 기록할 수 있습니다."
 }

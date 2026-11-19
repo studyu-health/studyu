@@ -5528,6 +5528,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No scale survey question defined'**
   String get form_field_report_data_source_empty;
+
+  /// No description provided for @form_field_nutrition_track_water.
+  ///
+  /// In en, this message translates to:
+  /// **'Track water intake'**
+  String get form_field_nutrition_track_water;
+
+  /// No description provided for @form_field_nutrition_track_water_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow participants to log how much water they drink each day.'**
+  String get form_field_nutrition_track_water_help;
 }
 
 class _AppLocalizationsDelegate

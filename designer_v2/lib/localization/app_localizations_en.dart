@@ -3248,4 +3248,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get form_field_report_data_source_empty =>
       'No scale survey question defined';
+
+  @override
+  String get form_field_nutrition_track_water => 'Track water intake';
+
+  @override
+  String get form_field_nutrition_track_water_help =>
+      'Allow participants to log how much water they drink each day.';
 }

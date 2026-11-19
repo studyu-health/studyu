@@ -32,6 +32,7 @@ class NutritionFormViewModel({
   final FormControl<String> instructionsControl = FormControl(value: '');
   final FormControl<bool> collectMealContextControl = FormControl(value: true);
   final FormControl<bool> allowMealsControl = FormControl(value: true);
+  final FormControl<bool> trackWaterIntakeControl = FormControl(value: false);
   final FormControl<bool> requireDailyCompletionConfirmationControl =
       FormControl(value: false);
   final FormControl<int> minimumMealsRequiredControl = FormControl();
@@ -76,6 +77,7 @@ class NutritionFormViewModel({
     'instructions': instructionsControl,
     'collectMealContext': collectMealContextControl,
     'allowMeals': allowMealsControl,
+    'trackWaterIntake': trackWaterIntakeControl,
     'requireDailyCompletionConfirmation':
         requireDailyCompletionConfirmationControl,
     'minimumMealsRequired': minimumMealsRequiredControl,
@@ -91,6 +93,7 @@ class NutritionFormViewModel({
     instructionsControl.value = data.instructions ?? '';
     collectMealContextControl.value = data.collectMealContext;
     allowMealsControl.value = data.allowMeals;
+    trackWaterIntakeControl.value = data.trackWaterIntake;
     requireDailyCompletionConfirmationControl.value =
         data.requireDailyCompletionConfirmation;
     minimumMealsRequiredControl.value = data.minimumMealsRequired;
@@ -112,6 +115,7 @@ class NutritionFormViewModel({
       instructions: instructionsControl.value,
       collectMealContext: collectMealContextControl.value ?? true,
       allowMeals: allowMealsControl.value ?? true,
+      trackWaterIntake: trackWaterIntakeControl.value ?? false,
       requireDailyCompletionConfirmation:
           requireDailyCompletionConfirmationControl.value ?? false,
       minimumMealsRequired: minimumMealsRequiredControl.value,

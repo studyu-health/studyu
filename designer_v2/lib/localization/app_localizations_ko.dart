@@ -3141,4 +3141,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get form_field_report_data_source_empty => '설정된 척도형 설문 문항이 없습니다';
+
+  @override
+  String get form_field_nutrition_track_water => '물 섭취량 기록';
+
+  @override
+  String get form_field_nutrition_track_water_help =>
+      '참여자가 매일 마신 물의 양을 기록할 수 있습니다.';
 }

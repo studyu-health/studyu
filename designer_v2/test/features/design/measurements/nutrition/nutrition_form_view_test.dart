@@ -70,4 +70,45 @@ void main() {
     expect(find.text('Meal type 1'), findsOneWidget);
     expect(find.byTooltip('Remove'), findsOneWidget);
   });
+
+  testWidgets('the water tracking switch updates the saved nutrition task', (
+    tester,
+  ) async {
+    final viewModel = NutritionFormViewModel(study: Study.withId('study-1'));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ReactiveForm(
+              formGroup: viewModel.form,
+              child: NutritionFormView(formViewModel: viewModel),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      viewModel.buildFormData().toNutritionTask().trackWaterIntake,
+      isFalse,
+    );
+    final waterSwitch = find.byWidgetPredicate(
+      (widget) =>
+          widget is ReactiveSwitch &&
+          identical(widget.formControl, viewModel.trackWaterIntakeControl),
+    );
+    await tester.tap(waterSwitch);
+    await tester.pump();
+    expect(
+      viewModel.buildFormData().toNutritionTask().trackWaterIntake,
+      isTrue,
+    );
+
+    await tester.tap(waterSwitch);
+    await tester.pump();
+    expect(
+      viewModel.buildFormData().toNutritionTask().trackWaterIntake,
+      isFalse,
+    );
+  });
 }

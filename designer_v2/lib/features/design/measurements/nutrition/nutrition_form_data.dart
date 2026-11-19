@@ -19,6 +19,7 @@ class NutritionFormData({
   super.reminderTime,
   final bool collectMealContext = true,
   final bool allowMeals = true,
+  final bool trackWaterIntake = false,
   final bool requireDailyCompletionConfirmation = false,
   final int? minimumMealsRequired,
   final List<String>? customMealTypes,
@@ -42,6 +43,7 @@ class NutritionFormData({
       instanceId: nutritionTask.schedule.instanceId,
       collectMealContext: nutritionTask.collectMealContext,
       allowMeals: nutritionTask.allowMeals,
+      trackWaterIntake: nutritionTask.trackWaterIntake,
       requireDailyCompletionConfirmation:
           nutritionTask.requireDailyCompletionConfirmation,
       minimumMealsRequired: nutritionTask.minimumMealsRequired,
@@ -58,6 +60,7 @@ class NutritionFormData({
     nutritionTask.schedule = toSchedule();
     nutritionTask.collectMealContext = collectMealContext;
     nutritionTask.allowMeals = allowMeals;
+    nutritionTask.trackWaterIntake = trackWaterIntake;
     nutritionTask.requireDailyCompletionConfirmation =
         requireDailyCompletionConfirmation;
     nutritionTask.minimumMealsRequired = minimumMealsRequired;
@@ -80,6 +83,7 @@ class NutritionFormData({
       reminderTime: reminderTime,
       collectMealContext: collectMealContext,
       allowMeals: allowMeals,
+      trackWaterIntake: trackWaterIntake,
       requireDailyCompletionConfirmation: requireDailyCompletionConfirmation,
       minimumMealsRequired: minimumMealsRequired,
       customMealTypes: customMealTypes != null

@@ -52,4 +52,29 @@ void main() {
 
     expect(newTask.scheduleRule, isNull);
   });
+
+  test(
+    'editing and duplicating a nutrition task preserve water tracking',
+    () async {
+      final task = NutritionTask.withId()
+        ..title = 'Nutrition'
+        ..trackWaterIntake = true;
+      final viewModel = NutritionFormViewModel(
+        study: Study('study', 'owner'),
+        formData: NutritionFormData.fromDomainModel(task),
+      );
+      viewModel.titleControl.value = 'Daily nutrition';
+      await viewModel.save();
+
+      expect(viewModel.formData!.toNutritionTask().trackWaterIntake, isTrue);
+      expect(
+        viewModel
+            .createDuplicate()
+            .buildFormData()
+            .toNutritionTask()
+            .trackWaterIntake,
+        isTrue,
+      );
+    },
+  );
 }

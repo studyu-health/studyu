@@ -66,6 +66,14 @@ class _NutritionFormViewState() extends ConsumerState<NutritionFormView> {
               ),
             ),
             FormTableRow(
+              control: widget.formViewModel.trackWaterIntakeControl,
+              label: tr.form_field_nutrition_track_water,
+              labelHelpText: tr.form_field_nutrition_track_water_help,
+              input: ReactiveSwitch(
+                formControl: widget.formViewModel.trackWaterIntakeControl,
+              ),
+            ),
+            FormTableRow(
               control: widget.formViewModel.minimumMealsRequiredControl,
               label: tr.form_field_nutrition_minimum_meals_required,
               labelHelpText: tr.form_field_nutrition_minimum_meals_help,

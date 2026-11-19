@@ -1285,5 +1285,7 @@
   "invitation_message_alternative": "Alternatively, open the StudyU Health app and enter this invitation code:",
   "form_field_report_improvementDirection_hint": "Select an improvement direction",
   "form_field_report_data_source_hint": "Select a data source",
-  "form_field_report_data_source_empty": "No scale survey question defined"
+  "form_field_report_data_source_empty": "No scale survey question defined",
+  "form_field_nutrition_track_water": "Track water intake",
+  "form_field_nutrition_track_water_help": "Allow participants to log how much water they drink each day."
 }

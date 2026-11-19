@@ -1285,5 +1285,7 @@
   "invitation_message_alternative": "Alternativ kannst du die StudyU Health-App öffnen und diesen Teilnahmecode eingeben:",
   "form_field_report_improvementDirection_hint": "Wähle eine Verbesserungsrichtung aus",
   "form_field_report_data_source_hint": "Wähle eine Datenquelle aus",
-  "form_field_report_data_source_empty": "Keine Skalenfrage definiert"
+  "form_field_report_data_source_empty": "Keine Skalenfrage definiert",
+  "form_field_nutrition_track_water": "Wasseraufnahme erfassen",
+  "form_field_nutrition_track_water_help": "Teilnehmende können erfassen, wie viel Wasser sie täglich trinken."
 }
