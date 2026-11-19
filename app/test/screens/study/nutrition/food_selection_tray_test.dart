@@ -296,9 +296,10 @@ void main() {
     await tester.tap(_basketEdit(expandedList));
     await tester.pumpAndSettle();
     expect(find.byType(FoodQuantitySheet), findsOneWidget);
-    expect(libraryList, findsNothing);
+    expect(libraryList, findsOneWidget);
+    expect(libraryList.hitTestable(), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
+    await tester.tap(_closeAmountEditor());
     await tester.pumpAndSettle();
     expect(expandedList, findsOneWidget);
     expectUnderlyingListPreserved();
@@ -309,7 +310,7 @@ void main() {
     expectUnderlyingListPreserved();
   });
 
-  testWidgets('basket tune action opens editor and back discards edits', (
+  testWidgets('basket tune action opens an amount sheet that can be canceled', (
     tester,
   ) async {
     _setSurfaceSize(tester);
@@ -334,11 +335,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Edit amount'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Save changes'), findsOneWidget);
-    expect(expandedList, findsNothing);
+    expect(expandedList, findsOneWidget);
+    expect(expandedList.hitTestable(), findsNothing);
     expect(find.textContaining('1 medium apple'), findsOneWidget);
     await tester.enterText(_amountField(), '3');
 
-    await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
+    await tester.tap(_closeAmountEditor());
     await tester.pumpAndSettle();
     expect(expandedList, findsOneWidget);
     expect(find.text('1 item · 78 kcal'), findsOneWidget);
@@ -497,7 +499,7 @@ void main() {
     expect(tray.evaluate().single, same(trayElement));
     await tester.tap(_basketEdit());
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
+    await tester.tap(_closeAmountEditor());
     await tester.pumpAndSettle();
     tester.semantics.tap(header);
     await tester.pumpAndSettle();
@@ -754,6 +756,11 @@ Finder _amountField() => find
       matching: find.byType(TextField),
     )
     .first;
+
+Finder _closeAmountEditor() => find.descendant(
+  of: find.byType(FoodQuantitySheet),
+  matching: find.byTooltip('Close'),
+);
 
 Finder _weightField() =>
     find.byKey(const ValueKey('food-quantity-weight-field'));

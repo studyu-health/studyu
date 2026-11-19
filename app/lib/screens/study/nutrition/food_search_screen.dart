@@ -701,7 +701,6 @@ class _FoodSearchScreenContentState()
       caloriesKnown: item.caloriesKnown,
       gramsKnown: item.gramsKnown,
       baselineGramsKnown: item.baselineGramsKnown,
-      fullScreen: true,
     );
     if (result == null || !mounted) return;
 

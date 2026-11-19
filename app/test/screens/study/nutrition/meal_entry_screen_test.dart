@@ -2150,18 +2150,47 @@ void main() {
   testWidgets(
     'food actions show contextual sheet and close before quantity edit',
     (tester) async {
-      await openMealEntry(tester, editableMeal());
+      final original = editableMeal();
+      MealLog? result;
+      await openMealEntry(
+        tester,
+        original,
+        onResult: (value) => result = value,
+      );
 
-      expect(find.byType(PopupMenuButton<String>), findsNothing);
       await tester.tap(find.byTooltip('More options'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Edit amount'), findsOneWidget);
       await tester.tap(find.text('Edit amount'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(FoodQuantitySheet), findsOneWidget);
+      final amountSheet = find.byType(FoodQuantitySheet);
+      final amountField = find.descendant(
+        of: amountSheet,
+        matching: find.byType(TextField),
+      );
+      expect(amountSheet, findsOneWidget);
       expect(find.text('Remove from meal'), findsNothing);
+      await tester.enterText(amountField, '3');
+      await tester.tap(
+        find.descendant(of: amountSheet, matching: find.byTooltip('Close')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Apple'));
+      await tester.pumpAndSettle();
+      expect(amountSheet, findsOneWidget);
+      expect(tester.widget<TextField>(amountField).controller!.text, '1');
+      await tester.enterText(amountField, '2');
+      await tester.pump();
+      await tester.tap(find.widgetWithText(FilledButton, 'Save changes'));
+      await tester.pumpAndSettle();
+
+      expect(result, isNull);
+      expect(original.foods.single.amount, 1);
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+      expect(result!.foods.single.amount, 2);
     },
   );
 
@@ -2218,7 +2247,12 @@ void main() {
     expect(repository.loadCalls, 2);
     await tester.tap(find.byTooltip('Edit amount'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(FoodQuantitySheet),
+        matching: find.byTooltip('Close'),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byType(CloseButton));
     await tester.pumpAndSettle();

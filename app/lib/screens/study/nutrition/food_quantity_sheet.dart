@@ -22,7 +22,6 @@ class const FoodQuantitySheet({
   final bool caloriesKnown = true,
   final bool gramsKnown = true,
   final bool? baselineGramsKnown,
-  final bool fullScreen = false,
   super.key,
 }) extends StatefulWidget {
   static Future<FoodEntry?> show(
@@ -35,51 +34,25 @@ class const FoodQuantitySheet({
     bool caloriesKnown = true,
     bool gramsKnown = true,
     bool? baselineGramsKnown,
-    bool fullScreen = false,
-  }) {
-    final editor = FoodQuantitySheet(
-      food: food,
-      baselineFood: baselineFood,
-      mealLabel: mealLabel,
-      action: action,
-      initialAmount: initialAmount,
-      caloriesKnown: caloriesKnown,
-      gramsKnown: gramsKnown,
-      baselineGramsKnown: baselineGramsKnown,
-      fullScreen: fullScreen,
-    );
-    if (fullScreen) {
-      return Navigator.of(context).push(
-        MaterialPageRoute<FoodEntry>(
-          builder: (context) => Scaffold(
-            appBar: AppBar(
-              leading: const BackButton(key: ValueKey('food-quantity-back')),
-              title: Text(
-                AppLocalizations.of(context)!.food_quantity_edit_amount,
-              ),
-            ),
-            body: SafeArea(
-              top: false,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: editor,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return showModalBottomSheet<FoodEntry>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (_) => editor,
-    );
-  }
+  }) => showModalBottomSheet<FoodEntry>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    showDragHandle: true,
+    builder: (_) => SafeArea(
+      top: false,
+      child: FoodQuantitySheet(
+        food: food,
+        baselineFood: baselineFood,
+        mealLabel: mealLabel,
+        action: action,
+        initialAmount: initialAmount,
+        caloriesKnown: caloriesKnown,
+        gramsKnown: gramsKnown,
+        baselineGramsKnown: baselineGramsKnown,
+      ),
+    ),
+  );
 
   @override
   State<FoodQuantitySheet> createState() => _FoodQuantitySheetState();
@@ -92,6 +65,10 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
 
   bool get _canEditServingWeight =>
       widget.action == FoodQuantityAction.updateSelection;
+
+  bool get _isEditingAmount =>
+      widget.action == FoodQuantityAction.update || _canEditServingWeight;
+
   FoodEntry get _baselineFood => widget.baselineFood ?? widget.food;
   bool get _baselineGramsKnown =>
       widget.baselineGramsKnown ?? widget.gramsKnown;
@@ -311,24 +288,45 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
       currentGramsKnown ? _formatNumber(totalGrams) : _formatNumber(amount),
       currentGramsKnown ? 'g' : _amountUnit(l10n, amount),
     );
+    final closeButton = IconButton(
+      onPressed: () => Navigator.pop(context),
+      tooltip: l10n.close,
+      icon: const Icon(Icons.close),
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
         24,
         12,
         24,
-        widget.fullScreen ? 24 : 24 + MediaQuery.viewInsetsOf(context).bottom,
+        24 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: Column(
-        mainAxisSize: widget.fullScreen ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Flexible(
-            fit: widget.fullScreen ? FlexFit.tight : FlexFit.loose,
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (_isEditingAmount) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Semantics(
+                            header: true,
+                            child: Text(
+                              l10n.food_quantity_edit_amount,
+                              style: theme.textTheme.titleLarge,
+                            ),
+                          ),
+                        ),
+                        closeButton,
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -374,12 +372,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                           ],
                         ),
                       ),
-                      if (!widget.fullScreen)
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          tooltip: l10n.close,
-                          icon: const Icon(Icons.close),
-                        ),
+                      if (!_isEditingAmount) closeButton,
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -661,7 +654,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                   widget.mealLabel == null
                       ? l10n.add_food
                       : l10n.food_quantity_add_to_meal(widget.mealLabel!),
-                FoodQuantityAction.update => l10n.update,
+                FoodQuantityAction.update ||
                 FoodQuantityAction.updateSelection =>
                   l10n.food_quantity_update_selection,
                 FoodQuantityAction.existingMeal => l10n.update,
