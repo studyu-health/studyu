@@ -84,8 +84,8 @@ void main() {
       preferences: prefs,
       submitter: (_, recall) async => submitted = recall,
     );
-    final subject = _subject(daysAgo: 0);
-    final studyDay = nutritionStudyDayFor(subject, DateTime.now());
+    final subject = _subject(daysAgo: 1);
+    final studyDay = nutritionStudyDayFor(subject, DateTime.now()) - 1;
     await _save(manager, _foodRecall('legacy', studyDay: studyDay));
 
     final storageKey =
@@ -288,7 +288,7 @@ void main() {
     viewModel.dispose();
   });
 
-  test('UTC-current upload is not skipped by local schedule day', () async {
+  test('completed UTC-current recall uploads despite the local day', () async {
     final prefs = await SharedPreferences.getInstance();
     DailyRecall? submitted;
     final manager = NutritionRecallAutoSaveManager(
@@ -298,7 +298,10 @@ void main() {
     final subject = _DivergentStudyDaySubject(localStudyDay: 0)
       ..startedAt = DateTime.utc(2026, 7, 15, 23, 30);
     final now = DateTime.utc(2026, 7, 16, 0, 15);
-    await _save(manager, _recall('utc-current', studyDay: 1));
+    await _save(
+      manager,
+      _recall('utc-current', studyDay: 1)..entryCompletedAt = now,
+    );
 
     await manager.submitPendingRecalls(
       subject: subject,
@@ -307,12 +310,12 @@ void main() {
     );
 
     expect(submitted?.id, 'utc-current');
-    expect(submitted?.entryCompletedAt, isNull);
-    expect(await manager.scanPendingRecalls(subject.id), hasLength(1));
+    expect(submitted?.entryCompletedAt, now);
+    expect(await manager.scanPendingRecalls(subject.id), isEmpty);
     expect(await manager.getLastKnownStudyDay(subject.id), 1);
   });
 
-  test('UTC-current upload is not finalized by local schedule day', () async {
+  test('UTC-current draft stays cached despite the local day', () async {
     final prefs = await SharedPreferences.getInstance();
     DailyRecall? submitted;
     final manager = NutritionRecallAutoSaveManager(
@@ -329,25 +332,41 @@ void main() {
       now: DateTime.utc(2026, 7, 16, 0, 15),
     );
 
-    expect(submitted?.entryCompletedAt, isNull);
-    expect(await manager.scanPendingRecalls(subject.id), hasLength(1));
+    expect(submitted, isNull);
+    final pending = (await manager.scanPendingRecalls(subject.id)).single;
+    expect(pending.recall.entryCompletedAt, isNull);
   });
 
-  test('same-day upload remains incomplete and cached', () async {
+  test('same-day draft uploads only after rollover', () async {
     final prefs = await SharedPreferences.getInstance();
     DailyRecall? submitted;
     final manager = NutritionRecallAutoSaveManager(
       preferences: prefs,
       submitter: (_, recall) async => submitted = recall,
     );
-    final subject = _subject(daysAgo: 2);
-    final today = subject.getDayOfStudyFor(DateTime.now());
+    final now = DateTime.utc(2026, 7, 17, 12);
+    final subject = _subject(daysAgo: 2)..startedAt = DateTime.utc(2026, 7, 15);
+    final today = nutritionStudyDayFor(subject, now);
     await _save(manager, _recall('today', studyDay: today));
 
-    await manager.submitPendingRecalls(subject: subject, trackProgress: true);
+    await manager.submitPendingRecalls(
+      subject: subject,
+      trackProgress: true,
+      now: now,
+    );
 
-    expect(submitted!.entryCompletedAt, isNull);
+    expect(submitted, isNull);
     expect(await manager.scanPendingRecalls(subject.id), hasLength(1));
+
+    await manager.submitPendingRecalls(
+      subject: subject,
+      trackProgress: true,
+      now: now.add(const Duration(days: 1)),
+    );
+
+    expect(submitted?.id, 'today');
+    expect(submitted?.entryCompletedAt, isNotNull);
+    expect(await manager.scanPendingRecalls(subject.id), isEmpty);
   });
 
   test('previous-day upload finalizes and deletes after success', () async {
@@ -434,12 +453,20 @@ void main() {
     () async {
       final prefs = await SharedPreferences.getInstance();
       DailyRecall? submitted;
+      DateTime? submittedTarget;
       final manager = NutritionRecallAutoSaveManager(
         preferences: prefs,
-        submitter: (_, recall) async => submitted = recall,
+        submitter: (pending, recall) async {
+          submitted = recall;
+          submittedTarget = pending.progressCompletedAt;
+        },
       );
       final subject = _subject(daysAgo: 2);
       final today = subject.getDayOfStudyFor(DateTime.now());
+      final completedAt = DateTime.utc(2026, 7, 15, 12);
+      final entryCompletedAt = DateTime.utc(2026, 7, 15, 11);
+      final canonical = _recall('canonical', studyDay: today - 1)
+        ..entryCompletedAt = entryCompletedAt;
       await manager.saveRecall(
         recall: _recall('correction', studyDay: today - 1),
         subjectId: subject.id,
@@ -447,12 +474,34 @@ void main() {
         interventionId: 'intervention',
         periodId: 'period',
         studyDaySnapshot: today - 1,
-        progressCompletedAt: DateTime.utc(2026, 7, 15, 12),
+        progressCompletedAt: completedAt,
       );
 
       await manager.submitPendingRecalls(subject: subject, trackProgress: true);
 
-      expect(submitted!.entryCompletedAt, isNull);
+      expect(submitted, isNull);
+      expect(await manager.scanPendingRecalls(subject.id), hasLength(1));
+
+      subject.progress.add(
+        SubjectProgress(
+          subjectId: subject.id,
+          taskId: 'task',
+          interventionId: 'intervention',
+          resultType: 'DailyRecall',
+          result: Result<DailyRecall>.app(
+            type: 'DailyRecall',
+            periodId: 'period',
+            result: canonical,
+          ),
+        )..completedAt = completedAt,
+      );
+
+      await manager.submitPendingRecalls(subject: subject, trackProgress: true);
+
+      expect(submitted?.id, 'correction');
+      expect(submitted?.entryCompletedAt, entryCompletedAt);
+      expect(submittedTarget, completedAt);
+      expect(await manager.scanPendingRecalls(subject.id), isEmpty);
     },
   );
 
@@ -644,7 +693,8 @@ void main() {
         subject: subject,
         task: task,
         completionPeriod: period,
-        existingRecall: _foodRecall('old', studyDay: currentDay - 1),
+        existingRecall: _foodRecall('old', studyDay: currentDay - 1)
+          ..entryCompletedAt = target.completedAt,
         persistenceTarget: target,
         historicalMode: true,
         autoSaveManager: manager,
@@ -695,7 +745,8 @@ void main() {
         viewModel.suspendPersistence();
         try {
           events.add('definition-rpc');
-          final canonicalRecall = _foodRecall('new', studyDay: currentDay - 1);
+          final canonicalRecall = _foodRecall('new', studyDay: currentDay - 1)
+            ..entryCompletedAt = target.completedAt;
           canonicalRecall.meals.single.foods.single
             ..id = 'logged-entry'
             ..foodVersionId = 'version-2';
@@ -795,7 +846,8 @@ void main() {
       subject: subject,
       task: task,
       completionPeriod: period,
-      existingRecall: _foodRecall('old', studyDay: currentDay - 1),
+      existingRecall: _foodRecall('old', studyDay: currentDay - 1)
+        ..entryCompletedAt = target.completedAt,
       persistenceTarget: target,
       historicalMode: true,
       autoSaveManager: manager,
@@ -944,17 +996,19 @@ void main() {
     expect(await manager.scanPendingRecalls(subject.id), hasLength(1));
   });
 
-  test('old failed recalls are never pruned by age', () async {
+  test('expired drafts stay cached without an upload attempt', () async {
     final prefs = await SharedPreferences.getInstance();
+    final submitted = <DailyRecall>[];
     final manager = NutritionRecallAutoSaveManager(
       preferences: prefs,
-      submitter: (_, _) => throw const SocketException('offline'),
+      submitter: (_, recall) async => submitted.add(recall),
     );
     final subject = _subject(daysAgo: 10);
     await _save(manager, _recall('old-retry', studyDay: 0));
 
     await manager.submitPendingRecalls(subject: subject, trackProgress: true);
 
+    expect(submitted, isEmpty);
     expect(await manager.scanPendingRecalls(subject.id), hasLength(1));
   });
 }

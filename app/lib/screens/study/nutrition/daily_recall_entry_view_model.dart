@@ -492,6 +492,14 @@ class DailyRecallEntryViewModel({
       return Future.value();
     }
     final recallToSave = DailyRecall.fromJson(recall.toJson());
+    if (recallToSave.entryCompletedAt == null) {
+      if (propagateErrors && shouldSaveToDb) {
+        return Future.error(
+          StateError('Complete the nutrition recall before saving it.'),
+        );
+      }
+      return _remoteSaveQueue;
+    }
     final now = recallToSave.lastAutoSavedAt ?? DateTime.now();
     final remoteSave = _remoteSaveQueue.then((_) async {
       isSaving = true;

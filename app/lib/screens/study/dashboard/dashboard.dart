@@ -105,8 +105,8 @@ class _DashboardScreenState()
     final trackProgress = context.read<AppState>().trackParticipantProgress;
     if (subject == null || !trackProgress) return;
 
-    final now = DateTime.now();
-    final tomorrow = DateTime(
+    final now = DateTime.now().toUtc();
+    final tomorrow = DateTime.utc(
       now.year,
       now.month,
       now.day + 1,

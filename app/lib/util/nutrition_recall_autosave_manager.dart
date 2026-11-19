@@ -337,12 +337,27 @@ class NutritionRecallAutoSaveManager({
     });
   }
 
+  Future<bool> _updateRecallIfUnchanged(
+    PendingRecall pending,
+    DailyRecall recall,
+  ) => _mutateForSubject(pending.subjectId, () async {
+    final prefs = await _getPrefs();
+    final stored = prefs.getString(pending.storageKey);
+    if (stored == null) return false;
+    final data = jsonDecode(stored) as Map<String, dynamic>;
+    final metadata = data['metadata'] as Map<String, dynamic>;
+    if (metadata['lastModifiedAt'] != pending.lastModifiedAt) return false;
+    data['recall'] = recall.toJson();
+    await _writeString(prefs, pending.storageKey, jsonEncode(data));
+    return true;
+  });
+
   Future<void> submitPendingRecalls({
     required StudySubject subject,
     required bool trackProgress,
     DateTime? now,
   }) async {
-    if (_isSubmitting || !trackProgress) return;
+    if (_isSubmitting || !trackProgress || subject.startedAt == null) return;
     _isSubmitting = true;
 
     try {
@@ -352,14 +367,30 @@ class NutritionRecallAutoSaveManager({
       );
       final pendingRecalls = await scanPendingRecalls(subject.id);
       for (final pending in pendingRecalls) {
-        if (pending.studyDaySnapshot > todayStudyDay ||
-            pending.studyDaySnapshot < 0) {
+        if (pending.subjectId != subject.id ||
+            pending.taskId == standaloneTaskId ||
+            !isWritableNutritionStudyDay(
+              pending.studyDaySnapshot,
+              todayStudyDay,
+            )) {
           continue;
         }
 
         final isPreviousDay = pending.studyDaySnapshot < todayStudyDay;
+        final target = pending.progressCompletedAt == null
+            ? null
+            : _findPersistenceTarget(subject, pending);
+        if (pending.progressCompletedAt != null && target == null) continue;
+
+        final existingCompletion =
+            (target?.result.result as DailyRecall?)?.entryCompletedAt;
+        if (!isPreviousDay &&
+            pending.recall.entryCompletedAt == null &&
+            existingCompletion == null) {
+          continue;
+        }
         if (isPreviousDay &&
-            pending.progressCompletedAt == null &&
+            target == null &&
             pending.recall.entryCompletedAt == null &&
             _hasCompletedProgressFor(
               subject,
@@ -373,11 +404,12 @@ class NutritionRecallAutoSaveManager({
           }
           continue;
         }
-        final recall = isPreviousDay && pending.progressCompletedAt == null
-            ? _finalizeRecall(pending.recall, pending.studyDaySnapshot)
-            : pending.recall;
+        final recall = pending.recall
+          ..studyDaySnapshot = pending.studyDaySnapshot;
+        recall.entryCompletedAt ??=
+            existingCompletion ?? _rolloverCompletionTime(recall);
+        recall.lastAutoSavedAt ??= recall.entryCompletedAt;
         try {
-          var pendingForDelete = pending;
           if (_submitter != null) {
             await _submitter(pending, recall);
           } else {
@@ -392,24 +424,9 @@ class NutritionRecallAutoSaveManager({
             final linkageChanged = recall.meals
                 .expand((meal) => meal.foods)
                 .any((food) => versionsBefore[food.id] != food.foodVersionId);
-            if (linkageChanged) {
-              await saveRecall(
-                recall: recall,
-                subjectId: pending.subjectId,
-                taskId: pending.taskId,
-                interventionId: pending.interventionId,
-                periodId: pending.periodId,
-                studyDaySnapshot: pending.studyDaySnapshot,
-                progressCompletedAt: pending.progressCompletedAt,
-              );
-              pendingForDelete =
-                  await loadPendingRecall(
-                    subjectId: pending.subjectId,
-                    taskId: pending.taskId,
-                    periodId: pending.periodId,
-                    studyDay: pending.studyDaySnapshot,
-                  ) ??
-                  pending;
+            if (linkageChanged &&
+                !await _updateRecallIfUnchanged(pending, recall)) {
+              continue;
             }
             await subject.upsertNutritionResult(
               taskId: pending.taskId,
@@ -422,20 +439,18 @@ class NutritionRecallAutoSaveManager({
                   pending.interventionId == unknownInterventionId
                   ? null
                   : pending.interventionId,
-              persistenceTarget: pending.progressCompletedAt == null
+              persistenceTarget: target == null
                   ? null
                   : NutritionRecallPersistenceTarget(
-                      taskId: pending.taskId,
+                      taskId: target.taskId,
                       periodId: pending.periodId,
-                      interventionId: pending.interventionId,
-                      completedAt: pending.progressCompletedAt!,
+                      interventionId: target.interventionId,
+                      completedAt: target.completedAt!,
                       studyDaySnapshot: pending.studyDaySnapshot,
                     ),
             );
           }
-          if (isPreviousDay) {
-            await _deleteRecallIfUnchanged(pendingForDelete);
-          }
+          await _deleteRecallIfUnchanged(pending);
         } on SocketException {
           StudyULogger.warning(
             'Network error while submitting nutrition recall for study day '
@@ -452,6 +467,26 @@ class NutritionRecallAutoSaveManager({
     } finally {
       _isSubmitting = false;
     }
+  }
+
+  SubjectProgress? _findPersistenceTarget(
+    StudySubject subject,
+    PendingRecall pending,
+  ) {
+    for (final progress in subject.resultsFor(pending.taskId)) {
+      if (progress.resultType != 'DailyRecall' ||
+          progress.completedAt != pending.progressCompletedAt ||
+          progress.result.periodId != pending.periodId ||
+          progress.interventionId != pending.interventionId) {
+        continue;
+      }
+      final recall = progress.result.result;
+      if (recall is DailyRecall &&
+          recall.studyDaySnapshot == pending.studyDaySnapshot) {
+        return progress;
+      }
+    }
+    return null;
   }
 
   bool _hasCompletedProgressFor(
@@ -473,12 +508,11 @@ class NutritionRecallAutoSaveManager({
       if (result.studyDaySnapshot == studyDay) return true;
       return result.studyDaySnapshot == null &&
           progress.completedAt != null &&
-          subject.getDayOfStudyFor(progress.completedAt!.toLocal()) == studyDay;
+          nutritionStudyDayFor(subject, progress.completedAt!) == studyDay;
     });
   }
 
-  DailyRecall _finalizeRecall(DailyRecall recall, int studyDaySnapshot) {
-    final now = DateTime.now();
+  DateTime _rolloverCompletionTime(DailyRecall recall) {
     final dayStart = DateTime(
       recall.date.year,
       recall.date.month,
@@ -490,28 +524,12 @@ class NutritionRecallAutoSaveManager({
       recall.date.day + 1,
     ).subtract(const Duration(microseconds: 1));
     final completionCandidate =
-        recall.entryCompletedAt ??
-        recall.lastAutoSavedAt ??
-        recall.entryStartedAt ??
-        now;
-    final completedAt = completionCandidate.isBefore(dayStart)
+        recall.lastAutoSavedAt ?? recall.entryStartedAt ?? DateTime.now();
+    return completionCandidate.isBefore(dayStart)
         ? dayStart
         : completionCandidate.isAfter(dayEnd)
         ? dayEnd
         : completionCandidate;
-    return DailyRecall(
-      id: recall.id,
-      date: recall.date,
-      isUsualIntakeDay: recall.isUsualIntakeDay,
-      specialOccasion: recall.specialOccasion,
-      recallMode: recall.recallMode,
-      entryStartedAt: recall.entryStartedAt,
-      entryCompletedAt: completedAt,
-      meals: recall.meals,
-      studyDaySnapshot: recall.studyDaySnapshot ?? studyDaySnapshot,
-      lastAutoSavedAt: recall.lastAutoSavedAt ?? recall.entryCompletedAt ?? now,
-      availabilityVerified: recall.availabilityVerified,
-    );
   }
 
   Future<int?> getLastKnownStudyDay(String subjectId) async {

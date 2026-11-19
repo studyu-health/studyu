@@ -5,10 +5,6 @@ import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 
-/// The immutable identity of an already persisted nutrition recall.
-///
-/// Keeping this with the upsert API prevents a correction from being treated
-/// as a new completion in a different period or intervention.
 int nutritionStudyDayFor(StudySubject subject, DateTime date) {
   final current = date.toUtc();
   final started = subject.startedAt!.toUtc();
@@ -19,6 +15,15 @@ int nutritionStudyDayFor(StudySubject subject, DateTime date) {
   ).difference(DateTime.utc(started.year, started.month, started.day)).inDays;
 }
 
+bool isWritableNutritionStudyDay(int? studyDay, int todayStudyDay) =>
+    studyDay != null &&
+    studyDay >= 0 &&
+    (studyDay == todayStudyDay || studyDay == todayStudyDay - 1);
+
+/// The immutable identity of an already persisted nutrition recall.
+///
+/// Keeping this with the upsert API prevents a correction from being treated
+/// as a new completion in a different period or intervention.
 class const NutritionRecallPersistenceTarget({
   required final String taskId,
   required final String periodId,

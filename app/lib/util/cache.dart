@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:studyu_app/util/debug_mode.dart';
+import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
@@ -14,8 +14,10 @@ class Cache() {
   static Future<void> storeSubject(StudySubject? subject) async {
     // debugPrint("Store subject in cache");
     if (subject == null) return;
-    SecureStorage.write(cacheSubjectKey, jsonEncode(subject.toFullJson()));
-    assert(subject == (await loadSubject()));
+    await SecureStorage.write(
+      cacheSubjectKey,
+      jsonEncode(subject.toFullJson()),
+    );
   }
 
   static Future<StudySubject> loadSubject({StudySubject? backupSubject}) async {
@@ -98,83 +100,67 @@ class Cache() {
 
   static Future<StudySubject> synchronize(StudySubject remoteSubject) async {
     if (isSynchronizing) return remoteSubject;
-    // No local subject found
-    if (!(await SecureStorage.containsKey(cacheSubjectKey))) {
-      return remoteSubject;
-    }
-    final localSubject = await loadSubject(backupSubject: remoteSubject);
-    // local and remote subject are equal, nothing to synchronize
-    if (localSubject == remoteSubject) return remoteSubject;
-    // remote subject belongs to a different study
-    if (!isDebugMode &&
-        remoteSubject.startedAt!.isAfter(localSubject.startedAt!)) {
-      return remoteSubject;
-    }
-
-    debugPrint("Synchronize subject with cache");
     isSynchronizing = true;
 
     try {
-      await uploadBlobFiles();
+      if (!await SecureStorage.containsKey(cacheSubjectKey)) {
+        return remoteSubject;
+      }
+      final localSubject = await loadSubject(backupSubject: remoteSubject);
+      if (localSubject.id != remoteSubject.id ||
+          localSubject.startedAt?.toUtc() != remoteSubject.startedAt?.toUtc()) {
+        return remoteSubject;
+      }
 
-      // only minimal update
-      // Check if progress has changed
-      if (localSubject.progress.length != remoteSubject.progress.length) {
-        StudyULogger.info("Cache synchronization: Merging progress");
-        /*if (remoteSubject.progress.isNotEmpty) {
-        // sort remote progress list from oldest to newest
-        remoteSubject.progress.sort((a, b) =>
-            a.completedAt.compareTo(b.completedAt));
-        // merge all local progress older than the latest remote progress to remote subject and upload
-        newProgress = localSubject.progress.where((element) =>
-            element.completedAt.isAfter(remoteSubject.progress.last.completedAt)
-        ).toList();
-      } else {
-        newProgress = localSubject.progress;
-      }*/
-        // save new progress
-        final List<SubjectProgress> newProgress = [
-          ...localSubject.progress,
-          ...remoteSubject.progress,
-        ];
-        newProgress.removeWhere(
-          (element) =>
-              localSubject.progress.contains(element) &&
-              remoteSubject.progress.contains(element),
-        );
-        for (final p in newProgress) {
-          await p.save();
+      final savedTimes = remoteSubject.progress
+          .map((progress) => progress.completedAt?.toUtc())
+          .toSet();
+      final pending = localSubject.progress
+          .where(
+            (progress) =>
+                progress.subjectId == remoteSubject.id &&
+                progress.completedAt != null &&
+                !savedTimes.contains(progress.completedAt!.toUtc()),
+          )
+          .toList();
+      if (pending.isEmpty) {
+        if (localSubject != remoteSubject) await storeSubject(remoteSubject);
+        return remoteSubject;
+      }
+
+      if (!kIsWeb) await uploadBlobFiles();
+      final todayStudyDay = remoteSubject.startedAt == null
+          ? null
+          : nutritionStudyDayFor(remoteSubject, DateTime.now());
+      var allSaved = true;
+      for (final progress in pending) {
+        final completedAt = progress.completedAt!.toUtc();
+        if (savedTimes.contains(completedAt)) continue;
+        final recall = progress.result.result;
+        if (recall is DailyRecall &&
+            (recall.entryCompletedAt == null ||
+                todayStudyDay == null ||
+                !isWritableNutritionStudyDay(
+                  recall.studyDaySnapshot,
+                  todayStudyDay,
+                ))) {
+          allSaved = false;
+          continue;
         }
-
-        // merge local and remote progress and remove duplicates
-        final List<SubjectProgress> finalProgress = [
-          ...localSubject.progress,
-          ...remoteSubject.progress,
-        ];
-        final duplicates = <DateTime?>{};
-        finalProgress.retainWhere(
-          (element) => duplicates.add(element.completedAt),
-        );
-        // replace remote progress with our merge
-        remoteSubject.progress = finalProgress;
-        await remoteSubject.save(onlyUpdate: true);
-      } else {
-        // Unable to determine what has changed
-        // We can either drop local or overwrite remote
-        // ... for now do nothing
-        if (!isDebugMode && localSubject.startedAt == remoteSubject.startedAt) {
-          StudyULogger.fatal(
-            "Cache synchronization found local changes that cannot be merged",
-          );
-          StudyULogger.error(
-            "localSubject: ${localSubject.toFullJson()} \nremoteSubject: ${remoteSubject.toFullJson()}",
-          );
+        try {
+          remoteSubject.progress.add(await progress.save());
+          savedTimes.add(completedAt);
+        } catch (error) {
+          allSaved = false;
+          StudyULogger.warning(error);
         }
       }
+      if (allSaved) await storeSubject(remoteSubject);
     } catch (exception) {
       StudyULogger.warning(exception);
+    } finally {
+      isSynchronizing = false;
     }
-    isSynchronizing = false;
     return remoteSubject;
   }
 

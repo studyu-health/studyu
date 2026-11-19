@@ -42,10 +42,21 @@ void main() {
             ..startedAt = DateTime.now().subtract(const Duration(hours: 1));
       final task = NutritionTask.withId();
       final period = task.schedule.completionPeriods.single;
+      var remoteSaves = 0;
       final viewModel = DailyRecallEntryViewModel(
         subject: subject,
         task: task,
         completionPeriod: period,
+        remoteSaver:
+            ({
+              required taskId,
+              required periodId,
+              required recall,
+              required persistenceTarget,
+              interventionIdOverride,
+            }) async {
+              remoteSaves++;
+            },
       );
       addTearDown(viewModel.dispose);
 
@@ -66,6 +77,7 @@ void main() {
       );
 
       expect(viewModel.lastSaveTime, isNotNull);
+      expect(remoteSaves, 0);
       expect(viewModel.recall.entryCompletedAt, isNull);
       expect(subject.progress, isEmpty);
       expect(
@@ -245,23 +257,25 @@ void main() {
       final study = Study('study', 'owner')
         ..schedule.numberOfCycles = 0
         ..schedule.includeBaseline = true;
+      final now = DateTime.utc(2026, 7, 16, 12);
+      final yesterday = now.subtract(const Duration(days: 1));
       final subject =
           StudySubject('subject-rollover', study.id, 'user', const [])
             ..study = study
-            ..startedAt = DateTime.now().subtract(const Duration(days: 2));
+            ..startedAt = yesterday;
       final task = NutritionTask.withId();
       final manager = NutritionRecallAutoSaveManager();
       final draft = DailyRecall.withId(
-        date: DateTime.now().subtract(const Duration(days: 2)),
+        date: yesterday,
         recallMode: RecallMode.realtimeRecord,
         meals: [],
         studyDaySnapshot: 0,
-        lastAutoSavedAt: DateTime.now().subtract(const Duration(days: 2)),
+        lastAutoSavedAt: yesterday,
       );
       final completed = DailyRecall.withId(
         date: draft.date,
         recallMode: RecallMode.realtimeRecord,
-        entryCompletedAt: DateTime.now().subtract(const Duration(days: 2)),
+        entryCompletedAt: yesterday,
         meals: [],
         studyDaySnapshot: 0,
       );
@@ -287,7 +301,11 @@ void main() {
         studyDaySnapshot: 0,
       );
 
-      await manager.submitPendingRecalls(subject: subject, trackProgress: true);
+      await manager.submitPendingRecalls(
+        subject: subject,
+        trackProgress: true,
+        now: now,
+      );
 
       expect(
         await manager.loadRecall(
