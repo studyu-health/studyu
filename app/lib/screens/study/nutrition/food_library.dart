@@ -9,6 +9,7 @@ import 'package:studyu_app/screens/study/nutrition/food_search/food_search_resul
 import 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_bar.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
@@ -481,7 +482,7 @@ class const FoodLibraryItemCard({
             onIncrement: onIncrement!,
             onDecrement: onDecrement!,
           )
-        else if (!addOnTap && !isSelected && onAdd != null)
+        else if (_canAdd)
           Builder(
             builder: (buttonContext) => TextButton(
               onPressed: () => onAdd!(
@@ -492,30 +493,49 @@ class const FoodLibraryItemCard({
             ),
           ),
         if (showManagementActions)
-          PopupMenuButton<_FoodLibraryAction>(
-            onSelected: (action) => _handleAction(context, action),
-            itemBuilder: (_) => [
-              if (!addOnTap && onAdd != null && !isSelected)
-                PopupMenuItem(
-                  value: _FoodLibraryAction.add,
-                  child: _menuItem(Icons.add, l10n.add),
-                ),
-              PopupMenuItem(
-                value: _FoodLibraryAction.edit,
-                child: _menuItem(Icons.edit_outlined, l10n.edit),
-              ),
-              PopupMenuItem(
-                value: _FoodLibraryAction.duplicate,
-                child: _menuItem(Icons.copy_outlined, l10n.duplicate),
-              ),
-              PopupMenuItem(
-                value: _FoodLibraryAction.delete,
-                child: _menuItem(Icons.delete_outline, l10n.delete),
-              ),
-            ],
+          IconButton(
+            icon: const Icon(Icons.more_vert, size: 20),
+            tooltip: l10n.more_options,
+            onPressed: () => _showActions(context),
           ),
       ],
     );
+  }
+
+  bool get _canAdd => !addOnTap && !isSelected && onAdd != null;
+
+  Future<void> _showActions(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final action = await showNutritionActionSheet<_FoodLibraryAction>(
+      context,
+      title: template.name,
+      actions: [
+        if (_canAdd)
+          NutritionSheetAction(
+            value: _FoodLibraryAction.add,
+            label: l10n.add,
+            icon: Icons.add,
+          ),
+        NutritionSheetAction(
+          value: _FoodLibraryAction.edit,
+          label: l10n.edit,
+          icon: Icons.edit_outlined,
+        ),
+        NutritionSheetAction(
+          value: _FoodLibraryAction.duplicate,
+          label: l10n.duplicate,
+          icon: Icons.copy_outlined,
+        ),
+        NutritionSheetAction(
+          value: _FoodLibraryAction.delete,
+          label: l10n.delete,
+          icon: Icons.delete_outline,
+          isDestructive: true,
+        ),
+      ],
+    );
+    if (action == null || !context.mounted) return;
+    await _handleAction(context, action);
   }
 
   Future<void> _handleAction(
@@ -525,7 +545,7 @@ class const FoodLibraryItemCard({
     final viewModel = context.read<TemplateViewModel>();
     switch (action) {
       case _FoodLibraryAction.add:
-        onAdd?.call(template, null);
+        if (_canAdd) onAdd?.call(template, null);
       case _FoodLibraryAction.edit:
         await _edit(context);
       case _FoodLibraryAction.duplicate:
@@ -579,9 +599,6 @@ class const FoodLibraryItemCard({
     );
     if (confirmed == true) await viewModel.deleteFoodTemplate(template.id);
   }
-
-  Widget _menuItem(IconData icon, String label) =>
-      Row(children: [Icon(icon), const SizedBox(width: 8), Text(label)]);
 }
 
 class const _FoodLibraryToolbar({

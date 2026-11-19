@@ -15,6 +15,8 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dar
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_core/core.dart';
 
+import 'fake_nutrition_food_repository.dart';
+
 void main() {
   final l10n = lookupAppLocalizations(const Locale('en'));
 
@@ -155,7 +157,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Import'), findsOneWidget);
-    expect(find.byType(PopupMenuButton), findsNothing);
+    expect(find.byTooltip(l10n.more_options), findsNothing);
   });
 
   testWidgets('Meals filter invalidates pending external results', (
@@ -436,6 +438,66 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
   });
 
+  testWidgets('library menu duplicates and confirms deletion of a food', (
+    tester,
+  ) async {
+    final template = _template(_food('apple', 'Apple'));
+    final repository = FakeNutritionFoodRepository([template]);
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: viewModel,
+        child: const MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          locale: Locale('en'),
+          home: Scaffold(body: FoodLibrary()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final menu = find.byTooltip(l10n.more_options);
+    final sheet = find.byType(BottomSheet);
+    await tester.tap(menu);
+    await tester.pumpAndSettle();
+    expect(sheet, findsOneWidget);
+    await tester.tap(
+      find.descendant(of: sheet, matching: find.text(l10n.duplicate)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Apple'), findsNWidgets(2));
+    final duplicateId = viewModel.foodTemplates.last.id;
+    expect(duplicateId, isNot(template.id));
+
+    Future<void> requestDelete() async {
+      await tester.tap(menu.first);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(of: sheet, matching: find.text(l10n.delete)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.delete_template_confirmation), findsOneWidget);
+    }
+
+    await requestDelete();
+    await tester.tap(find.text(l10n.cancel));
+    await tester.pumpAndSettle();
+    expect(viewModel.foodTemplates, hasLength(2));
+
+    await requestDelete();
+    await tester.tap(find.text(l10n.delete));
+    await tester.pumpAndSettle();
+    expect(viewModel.foodTemplates.single.id, duplicateId);
+    expect(find.text('Apple'), findsOneWidget);
+  });
+
   testWidgets('saved meal edit updates name and ordered composition', (
     tester,
   ) async {
@@ -479,7 +541,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Fruit bowl'));
+    await tester.tap(find.byTooltip(l10n.more_options));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.text(l10n.edit),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(MealCreatorScreen), findsOneWidget);
