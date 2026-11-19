@@ -86,6 +86,7 @@ enum _FoodSearchAction() {
 enum _FoodSearchLayoutSlot() {
   content,
   tray,
+  create,
 }
 
 class _FoodSearchLayoutDelegate({required final bool trayOverlapsContent})
@@ -107,10 +108,18 @@ class _FoodSearchLayoutDelegate({required final bool trayOverlapsContent})
       _FoodSearchLayoutSlot.content,
       BoxConstraints.tightFor(width: size.width, height: contentHeight),
     );
-    positionChild(
-      _FoodSearchLayoutSlot.tray,
-      Offset(0, size.height - traySize.height),
-    );
+    final trayTop = size.height - traySize.height;
+    positionChild(_FoodSearchLayoutSlot.tray, Offset(0, trayTop));
+    if (hasChild(_FoodSearchLayoutSlot.create)) {
+      final buttonSize = layoutChild(
+        _FoodSearchLayoutSlot.create,
+        BoxConstraints(maxHeight: trayTop).tighten(width: size.width),
+      );
+      positionChild(
+        _FoodSearchLayoutSlot.create,
+        Offset(0, trayTop - buttonSize.height),
+      );
+    }
   }
 
   @override
@@ -947,6 +956,48 @@ class _FoodSearchScreenContentState()
     }
   }
 
+  Future<void> _createFromSearch() async {
+    if (widget.historicalMode || !widget.allowMeals) {
+      _addManually();
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+    final action = await showModalBottomSheet<_FoodSearchAction>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.restaurant_outlined),
+              title: Text(l10n.add_food_action),
+              onTap: () => Navigator.pop(sheetContext, _FoodSearchAction.food),
+            ),
+            ListTile(
+              leading: const Icon(Icons.restaurant_menu_outlined),
+              title: Text(l10n.nutrition_create_saved_meal),
+              onTap: () => Navigator.pop(sheetContext, _FoodSearchAction.meal),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+
+    switch (action) {
+      case _FoodSearchAction.food:
+        _addManually();
+      case _FoodSearchAction.meal:
+        _createMeal();
+      case null:
+        return;
+    }
+  }
+
   List<FoodSearchHistoryItem> _recentMatches(String query) {
     final history = widget.history;
     final items = [...history.frequentlyUsed, ...history.recent]
@@ -1030,52 +1081,6 @@ class _FoodSearchScreenContentState()
                   widget.mealLabel!.toLowerCase(),
                 ),
         ),
-        actions: [
-          if (widget.historicalMode)
-            IconButton(
-              tooltip: l10n.add_food_action,
-              onPressed: _addManually,
-              icon: const Icon(Icons.add),
-            )
-          else
-            PopupMenuButton<_FoodSearchAction>(
-              tooltip: l10n.create,
-              onSelected: (action) {
-                switch (action) {
-                  case _FoodSearchAction.food:
-                    _addManually();
-                  case _FoodSearchAction.meal:
-                    _createMeal();
-                }
-              },
-              itemBuilder: (_) => [
-                PopupMenuItem(
-                  value: _FoodSearchAction.food,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.restaurant_outlined),
-                      const SizedBox(width: 12),
-                      Flexible(child: Text(l10n.add_food_action)),
-                    ],
-                  ),
-                ),
-                if (widget.allowMeals)
-                  PopupMenuItem(
-                    value: _FoodSearchAction.meal,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.restaurant_menu_outlined),
-                        const SizedBox(width: 12),
-                        Flexible(child: Text(l10n.nutrition_create_saved_meal)),
-                      ],
-                    ),
-                  ),
-              ],
-              icon: const Icon(Icons.add),
-            ),
-        ],
       ),
       body: LayoutBuilder(
         builder: (context, bodyConstraints) {
@@ -1158,6 +1163,7 @@ class _FoodSearchScreenContentState()
                         theme: theme,
                         templateViewModel: templateViewModel,
                         query: query,
+                        reserveCreateSpace: !showNoResults,
                         isInitialLoading: search.isInitialLoading,
                         isLoadingMore: search.isLoadingMore,
                         hasSearched: hasSearched,
@@ -1213,14 +1219,42 @@ class _FoodSearchScreenContentState()
                       ),
                     ),
                     if (showNoResults)
-                      _SearchFallback(
-                        query: query,
-                        onAddManually: _addManually,
+                      Padding(
+                        padding: EdgeInsetsDirectional.only(
+                          end: _selectionSurfaceActive ? 0 : 80,
+                        ),
+                        child: _SearchFallback(
+                          query: query,
+                          onAddManually: _addManually,
+                        ),
                       ),
                   ],
                 ),
               ),
               LayoutId(id: _FoodSearchLayoutSlot.tray, child: selectionSurface),
+              if (!_selectionSurfaceActive)
+                LayoutId(
+                  id: _FoodSearchLayoutSlot.create,
+                  child: SafeArea(
+                    top: false,
+                    bottom: _selectionStore?.isEmpty ?? true,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Align(
+                        alignment: AlignmentDirectional.bottomEnd,
+                        heightFactor: 1,
+                        child: FloatingActionButton(
+                          heroTag: null,
+                          tooltip: widget.historicalMode || !widget.allowMeals
+                              ? l10n.add_food_action
+                              : l10n.create,
+                          onPressed: _createFromSearch,
+                          child: const Icon(Icons.add),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         },

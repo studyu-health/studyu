@@ -4513,12 +4513,6 @@ abstract class AppLocalizations {
   /// **'Tap the button above to add your first meal'**
   String get tap_to_add_first_meal;
 
-  /// No description provided for @tap_to_add_food.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap to add food'**
-  String get tap_to_add_food;
-
   /// No description provided for @add_food_title.
   ///
   /// In en, this message translates to:
@@ -5628,12 +5622,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add food or saved meal'**
   String get nutrition_add_food_or_saved_meal;
-
-  /// No description provided for @nutrition_add_food_or_choose_saved_meal.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a food or choose a saved meal'**
-  String get nutrition_add_food_or_choose_saved_meal;
 
   /// No description provided for @nutrition_food_badge.
   ///

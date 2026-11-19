@@ -983,8 +983,11 @@ class const _FoodsSectionHeader({
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
       children: [
         Text(
           l10n.nutrition_ingredients_section(foodCount),
@@ -992,7 +995,9 @@ class const _FoodsSectionHeader({
             fontWeight: FontWeight.w600,
           ),
         ),
-        Row(
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
           children: [
             IconButton.outlined(
               onPressed: onToggleQuickAdd,
@@ -1003,7 +1008,6 @@ class const _FoodsSectionHeader({
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
-            const SizedBox(width: 8),
             FilledButton(
               onPressed: onAddFood,
               style: FilledButton.styleFrom(
@@ -1017,7 +1021,7 @@ class const _FoodsSectionHeader({
                 children: [
                   const Icon(Icons.search, size: 18),
                   const SizedBox(width: 6),
-                  Text(l10n.nutrition_add_food_ingredient),
+                  Flexible(child: Text(l10n.nutrition_add_food_ingredient)),
                 ],
               ),
             ),

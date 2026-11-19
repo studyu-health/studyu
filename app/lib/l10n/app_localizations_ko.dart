@@ -2408,9 +2408,6 @@ class AppLocalizationsKo extends AppLocalizations {
       'Tap the button above to add your first meal';
 
   @override
-  String get tap_to_add_food => 'Tap to add food';
-
-  @override
   String get add_food_title => 'Add Food';
 
   @override
@@ -3093,10 +3090,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_add_food_or_saved_meal => 'Add food or saved meal';
-
-  @override
-  String get nutrition_add_food_or_choose_saved_meal =>
-      'Add a food or choose a saved meal';
 
   @override
   String get nutrition_food_badge => 'Food';

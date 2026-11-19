@@ -117,8 +117,9 @@ void main() {
     );
     await tester.tap(find.text('Open search'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Create'));
+    await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
+    expect(find.text('Create saved meal'), findsOneWidget);
     await tester.tap(find.text('Create food'));
     await tester.pumpAndSettle();
 

@@ -1021,7 +1021,6 @@
   "meals": "Meals",
   "food_items": "Food items",
   "tap_to_add_first_meal": "Tap the button above to add your first meal",
-  "tap_to_add_food": "Tap to add food",
   "add_food_title": "Add Food",
   "add_food_to_meal": "Add food to {meal}",
   "@add_food_to_meal": {
@@ -1412,7 +1411,6 @@
   "food_selection_items_count": "{count, plural, =1 {1 item} other {{count} items}}",
   "nutrition_logged_foods_and_meals": "Foods and saved meals",
   "nutrition_add_food_or_saved_meal": "Add food or saved meal",
-  "nutrition_add_food_or_choose_saved_meal": "Add a food or choose a saved meal",
   "nutrition_food_badge": "Food",
   "nutrition_saved_meal_badge": "Saved meal",
   "nutrition_add_foods_or_saved_meals_to_meal": "Add foods or saved meals to {meal}",

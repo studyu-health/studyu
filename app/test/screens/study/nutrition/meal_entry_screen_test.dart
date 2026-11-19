@@ -409,17 +409,7 @@ Future<void> selectMealType(
 }
 
 Future<void> openFoodSearchFromMeal(WidgetTester tester) async {
-  final addFood = find.byTooltip('Add food or saved meal');
-  await tester.ensureVisible(
-    addFood.evaluate().isNotEmpty
-        ? addFood
-        : find.text('Add food or saved meal').first,
-  );
-  await tester.tap(
-    addFood.evaluate().isNotEmpty
-        ? addFood
-        : find.text('Add food or saved meal').first,
-  );
+  await tester.tap(find.byTooltip('Add food or saved meal'));
   await tester.pumpAndSettle();
 }
 
@@ -1144,26 +1134,15 @@ void main() {
         onResult: (value) => result = value,
       );
 
-      final emptyFoodState = find.ancestor(
-        of: find.text('Add food or saved meal'),
-        matching: find.byType(InkWell),
+      expect(find.text('No foods added'), findsOneWidget);
+      expect(
+        find.byTooltip('Add food or saved meal').hitTestable(),
+        findsOneWidget,
       );
-      expect(emptyFoodState, findsOneWidget);
-      expect(tester.widget<InkWell>(emptyFoodState).onTap, isNotNull);
       expect(find.text('Foods and saved meals'), findsOneWidget);
       expect(find.text('Meal Nutrition'), findsNothing);
       expect(
-        find.ancestor(
-          of: find.text('Add food or saved meal'),
-          matching: find.byType(Card),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: emptyFoodState,
-          matching: find.text('Add at least one food item before saving.'),
-        ),
+        find.text('Add at least one food item before saving.'),
         findsNothing,
       );
       final saveButton = tester.widget<FilledButton>(
@@ -1177,10 +1156,7 @@ void main() {
       expect(result, isNull);
       expect(find.byType(MealEntryScreen), findsOneWidget);
       expect(
-        find.descendant(
-          of: emptyFoodState,
-          matching: find.text('Add at least one food item before saving.'),
-        ),
+        find.text('Add at least one food item before saving.'),
         findsNothing,
       );
 
@@ -1242,10 +1218,10 @@ void main() {
     }
   });
 
-  testWidgets('Add food opens search directly', (tester) async {
+  testWidgets('floating add food action opens search directly', (tester) async {
     await openMealEntry(tester, editableMeal());
 
-    await tester.tap(find.byTooltip('Add food or saved meal'));
+    await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
     expect(find.byType(FoodSearchScreen), findsOneWidget);

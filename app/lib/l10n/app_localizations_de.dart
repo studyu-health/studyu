@@ -2491,9 +2491,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tap the button above to add your first meal';
 
   @override
-  String get tap_to_add_food => 'Tippen, um Elemente hinzuzufügen';
-
-  @override
   String get add_food_title => 'Add Food';
 
   @override
@@ -3191,10 +3188,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nutrition_add_food_or_saved_meal =>
       'Lebensmittel oder gespeicherte Mahlzeit hinzufügen';
-
-  @override
-  String get nutrition_add_food_or_choose_saved_meal =>
-      'Lebensmittel hinzufügen oder gespeicherte Mahlzeit auswählen';
 
   @override
   String get nutrition_food_badge => 'Lebensmittel';

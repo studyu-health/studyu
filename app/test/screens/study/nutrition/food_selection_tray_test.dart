@@ -12,12 +12,36 @@ import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library.dart';
 import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
 import 'fake_nutrition_food_repository.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  testWidgets('floating create action opens meal creation above the basket', (
+    tester,
+  ) async {
+    _setSurfaceSize(tester);
+    await _pumpSearch(tester);
+    await _addExternalApple(tester);
+
+    final create = find.byType(FloatingActionButton).hitTestable();
+    final basket = find.byKey(const ValueKey('selection-tray'));
+    expect(tester.getRect(create).bottom, lessThan(tester.getRect(basket).top));
+
+    await tester.tap(create);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Create saved meal'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MealCreatorScreen), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Selected items'), findsOneWidget);
+    expect(create, findsOneWidget);
+  });
 
   testWidgets('manual entry prompt appears only after an empty search', (
     tester,

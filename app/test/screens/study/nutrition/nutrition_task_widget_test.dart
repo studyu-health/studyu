@@ -775,7 +775,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text("I don't remember"));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Add food or saved meal'));
+    await tester.tap(find.byTooltip('Add food or saved meal'));
     await tester.pumpAndSettle();
     expect(find.byType(FoodSearchScreen), findsOneWidget);
     await _selectSavedSoup(tester);
