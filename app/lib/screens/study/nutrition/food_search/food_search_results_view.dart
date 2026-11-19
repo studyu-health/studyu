@@ -442,37 +442,23 @@ class const _SearchFallback({
   }
 }
 
-class const _ServingHint({required final AppLocalizations l10n})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        l10n.tap_item_to_choose_serving,
-        style: Theme.of(context).textTheme.bodySmall
-            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-      ),
-    );
-  }
-}
-
 class const _FoodSearchListView({
   required final ScrollController scrollController,
   required final AppLocalizations l10n,
   required final ThemeData theme,
   required final TemplateViewModel templateViewModel,
-  required final TextEditingController searchController,
+  required final String query,
   required final bool isInitialLoading,
   required final bool isLoadingMore,
   required final bool hasSearched,
-  required final bool offSearched,
-  required final bool usdaSearched,
+  required final bool databaseComplete,
+  required final bool showNoResults,
   required final bool offHasMore,
   required final bool usdaHasMore,
   required final String? errorMessage,
   required final List<UnifiedFoodResult> combinedResults,
-  required final FoodSearchHistory history,
+  required final List<FoodSearchHistoryItem> recentMatches,
+  required final List<studyu.SavedFoodTemplate> personalMatches,
   required final _FoodSearchSection selectedSection,
   required final ValueChanged<_FoodSearchSection> onSectionChanged,
   required final _FoodSearchFilter selectedFilter,
@@ -486,47 +472,23 @@ class const _FoodSearchListView({
   required final void Function(UnifiedFoodResult, Offset? source) onAddResult,
   required final VoidCallback onRetry,
   final bool allowMeals = true,
-  required final bool showServingHint,
   final FoodSelectionStore? selectionStore,
   final String Function(UnifiedFoodResult)? selectionKeyForResult,
   required final ValueChanged<String> onDecrementSelection,
 }) extends StatelessWidget {
-  bool isAllowedTemplate(studyu.SavedFoodTemplate template) {
-    return allowMeals ||
-        template.prototype.entryType != studyu.FoodEntryType.meal;
-  }
-
-  List<studyu.SavedFoodTemplate> personalMatches0() {
-    final query = searchController.text.trim().toLowerCase();
-    return templateViewModel.foodTemplates
-        .where(
-          (template) =>
-              isAllowedTemplate(template) &&
-              template.name.toLowerCase().contains(query),
-        )
-        .toList();
-  }
-
-  List<FoodSearchHistoryItem> recentItems0() {
-    final items = [...history.frequentlyUsed, ...history.recent]
-        .where(
-          (item) =>
-              allowMeals || item.food.entryType != studyu.FoodEntryType.meal,
-        )
-        .toList();
-    return items..sort((left, right) {
-      final dateComparison = right.lastUsedAt.compareTo(left.lastUsedAt);
-      if (dateComparison != 0) return dateComparison;
-      final countComparison = right.useCount.compareTo(left.useCount);
-      return countComparison != 0
-          ? countComparison
-          : left.identity.compareTo(right.identity);
-    });
-  }
+  Widget _historyCard(FoodSearchHistoryItem item) => _HistoryFoodCard(
+    item: item,
+    onTap: () => onSelectHistory(item),
+    onAdd: (source) => onAddHistory(item, source),
+    theme: theme,
+    selectionStore: selectionStore,
+    onIncrement: (source) => onAddHistory(item, source),
+    onDecrement: () =>
+        onDecrementSelection(canonicalFoodSelectionKey(item.food)),
+  );
 
   @override
   Widget build(BuildContext context) {
-    final query = searchController.text.trim();
     if (query.isEmpty && selectedSection == _FoodSearchSection.myItems) {
       return FoodLibrary(
         allowMeals: allowMeals,
@@ -544,7 +506,6 @@ class const _FoodSearchListView({
             l10n: l10n,
           ),
         ),
-        listHeader: showServingHint ? _ServingHint(l10n: l10n) : null,
         onTap: onSelectFoodTemplate,
         onAdd: onAddFoodTemplate,
         isSelected: (template) {
@@ -583,8 +544,7 @@ class const _FoodSearchListView({
         ),
       );
       children.add(const SizedBox(height: 4));
-      final recentItems = recentItems0();
-      if (recentItems.isEmpty) {
+      if (recentMatches.isEmpty) {
         children.add(
           FoodLibraryEmptyState(
             icon: Icons.history_outlined,
@@ -592,21 +552,7 @@ class const _FoodSearchListView({
           ),
         );
       } else {
-        if (showServingHint) children.add(_ServingHint(l10n: l10n));
-        children.addAll(
-          recentItems.map(
-            (item) => _HistoryFoodCard(
-              item: item,
-              onTap: () => onSelectHistory(item),
-              onAdd: (source) => onAddHistory(item, source),
-              theme: theme,
-              selectionStore: selectionStore,
-              onIncrement: (source) => onAddHistory(item, source),
-              onDecrement: () =>
-                  onDecrementSelection(canonicalFoodSelectionKey(item.food)),
-            ),
-          ),
-        );
+        children.addAll(recentMatches.map(_historyCard));
       }
       children.add(const SizedBox(height: 24));
       return ListView(
@@ -625,28 +571,27 @@ class const _FoodSearchListView({
     );
     children.add(const SizedBox(height: 12));
 
-    final personalMatches = personalMatches0();
-    final showPersonal = selectedFilter != _FoodSearchFilter.database;
-    final showDatabase = selectedFilter != _FoodSearchFilter.myItems;
-    final databaseComplete = offSearched && usdaSearched;
-    final selectedSearchComplete =
-        hasSearched &&
-        !isInitialLoading &&
-        (selectedFilter == _FoodSearchFilter.myItems || databaseComplete);
-    final noVisibleResults =
-        !(showPersonal && personalMatches.isNotEmpty) &&
-        !(showDatabase && combinedResults.isNotEmpty);
-    final showGlobalNoResults = selectedSearchComplete && noVisibleResults;
-    if (showServingHint &&
-        ((showDatabase && combinedResults.isNotEmpty) ||
-            (showPersonal && personalMatches.isNotEmpty))) {
-      children.add(_ServingHint(l10n: l10n));
-    }
+    final showRecent = recentMatches.isNotEmpty;
+    final showPersonal = selectedFilter.includes(_FoodSearchFilter.myItems);
+    final showDatabase = selectedFilter.includes(_FoodSearchFilter.database);
 
-    if (showGlobalNoResults) {
+    if (showNoResults) {
       children.add(_NoResultsState(query: query));
     } else {
+      if (showRecent) {
+        children.add(
+          _SectionHeader(
+            icon: Icons.history,
+            title: l10n.recent_foods,
+            iconColor: theme.colorScheme.onSurfaceVariant,
+          ),
+        );
+        children.add(const SizedBox(height: 8));
+        children.addAll(recentMatches.map(_historyCard));
+      }
+
       if (showPersonal) {
+        if (showRecent) children.add(const SizedBox(height: 12));
         children.add(
           _SectionHeader(
             icon: Icons.bookmark_outline,
@@ -696,7 +641,9 @@ class const _FoodSearchListView({
       }
 
       if (showDatabase) {
-        if (showPersonal) children.add(const SizedBox(height: 12));
+        if (showPersonal || showRecent) {
+          children.add(const SizedBox(height: 12));
+        }
         children.add(
           _SectionHeader(
             icon: Icons.public,
@@ -791,27 +738,24 @@ class const _SearchFilterChips({
 }) extends StatelessWidget {
   String label(_FoodSearchFilter filter) => switch (filter) {
     _FoodSearchFilter.all => l10n.filter_all,
+    _FoodSearchFilter.recent => l10n.recent_foods,
     _FoodSearchFilter.myItems => l10n.my_saved_items,
     _FoodSearchFilter.database => l10n.database,
   };
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (final filter in _FoodSearchFilter.values) ...[
-            FilterChip(
-              selected: selectedFilter == filter,
-              label: Text(label(filter)),
-              onSelected: (_) => onChanged(filter),
-              visualDensity: VisualDensity.compact,
-            ),
-            const SizedBox(width: 6),
-          ],
-        ],
-      ),
+    return Wrap(
+      spacing: 6,
+      children: [
+        for (final filter in _FoodSearchFilter.values)
+          FilterChip(
+            selected: selectedFilter == filter,
+            label: Text(label(filter)),
+            onSelected: (_) => onChanged(filter),
+            visualDensity: VisualDensity.compact,
+          ),
+      ],
     );
   }
 }

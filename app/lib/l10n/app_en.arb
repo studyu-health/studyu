@@ -1168,7 +1168,6 @@
   "create_meal_subtitle": "Combine multiple foods",
   "add_manually": "Create food manually",
   "add_manually_subtitle": "Enter nutrition facts yourself",
-  "tap_item_to_choose_serving": "Tap a food to change the serving or amount.",
   "scan_barcode": "Scan Barcode",
   "scan_barcode_subtitle": "Find packaged products quickly",
   "barcode_scanner_guidance_initial": "Point camera at barcode",

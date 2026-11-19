@@ -71,8 +71,11 @@ enum _FoodSearchSection() {
 
 enum _FoodSearchFilter() {
   all,
+  recent,
   myItems,
-  database,
+  database;
+
+  bool includes(_FoodSearchFilter source) => this == all || this == source;
 }
 
 enum _FoodSearchAction() {
@@ -201,7 +204,6 @@ class _FoodSearchScreenContentState()
   ImageInfo? _activeTransferImage;
 
   late final FoodSearchViewModel _searchViewModel;
-  bool _showServingHint = true;
   bool _isConfirming = false;
   bool _isConfirmingRemoval = false;
   bool _allowPop = false;
@@ -486,7 +488,7 @@ class _FoodSearchScreenContentState()
     _removeTransfer();
     templateViewModel.setSearchQuery(value);
     _searchViewModel.search(
-      _selectedFilter == _FoodSearchFilter.myItems ? '' : value,
+      _selectedFilter.includes(_FoodSearchFilter.database) ? value : '',
     );
   }
 
@@ -496,7 +498,7 @@ class _FoodSearchScreenContentState()
   }
 
   void _loadMore() {
-    if (_selectedFilter == _FoodSearchFilter.myItems) return;
+    if (!_selectedFilter.includes(_FoodSearchFilter.database)) return;
     _searchViewModel.loadMore(_searchController.text);
   }
 
@@ -606,9 +608,6 @@ class _FoodSearchScreenContentState()
     bool gramsKnown = true,
   }) async {
     _removeTransfer();
-    if (_showServingHint) {
-      setState(() => _showServingHint = false);
-    }
     final store = _selectionStore;
     if (store != null) {
       _selectionTrayKey.currentState?.showDetails(
@@ -913,21 +912,23 @@ class _FoodSearchScreenContentState()
     }
   }
 
-  bool _isAllowedTemplate(studyu.SavedFoodTemplate template) {
-    return widget.allowMeals ||
-        template.prototype.entryType != studyu.FoodEntryType.meal;
-  }
-
-  int _personalResultCount(TemplateViewModel templateViewModel) {
-    final query = _searchController.text.trim().toLowerCase();
-    if (query.isEmpty) return 0;
-    return templateViewModel.foodTemplates
+  List<FoodSearchHistoryItem> _recentMatches(String query) {
+    final history = widget.history;
+    final items = [...history.frequentlyUsed, ...history.recent]
         .where(
-          (template) =>
-              _isAllowedTemplate(template) &&
-              template.name.toLowerCase().contains(query),
+          (item) =>
+              _isAllowedFood(item.food) &&
+              item.food.name.toLowerCase().contains(query),
         )
-        .length;
+        .toList();
+    return items..sort((left, right) {
+      final dateComparison = right.lastUsedAt.compareTo(left.lastUsedAt);
+      if (dateComparison != 0) return dateComparison;
+      final countComparison = right.useCount.compareTo(left.useCount);
+      return countComparison != 0
+          ? countComparison
+          : left.identity.compareTo(right.identity);
+    });
   }
 
   @override
@@ -936,36 +937,43 @@ class _FoodSearchScreenContentState()
     final l10n = AppLocalizations.of(context)!;
     final templateViewModel = Provider.of<TemplateViewModel>(context);
     final query = _searchController.text.trim();
+    final normalizedQuery = query.toLowerCase();
+    final showRecent = _selectedFilter.includes(_FoodSearchFilter.recent);
+    final showPersonal = _selectedFilter.includes(_FoodSearchFilter.myItems);
+    final showDatabase = _selectedFilter.includes(_FoodSearchFilter.database);
+    final recentMatches = showRecent || query.isEmpty
+        ? _recentMatches(normalizedQuery)
+        : const <FoodSearchHistoryItem>[];
+    final personalMatches = [
+      if (showPersonal && query.isNotEmpty)
+        for (final template in templateViewModel.foodTemplates)
+          if (_isAllowedFood(template.prototype) &&
+              template.name.toLowerCase().contains(normalizedQuery))
+            template,
+    ];
     final search = _searchViewModel;
     final results = search.results;
-    final errorMessage = search.hasError ? l10n.food_search_error : null;
-    final personalResultCount = _personalResultCount(templateViewModel);
-    final visibleResultCount = switch (_selectedFilter) {
-      _FoodSearchFilter.all => personalResultCount + results.length,
-      _FoodSearchFilter.myItems => personalResultCount,
-      _FoodSearchFilter.database => results.length,
-    };
+    final errorMessage = showDatabase && search.hasError
+        ? l10n.food_search_error
+        : null;
+    final visibleResultCount =
+        recentMatches.length +
+        personalMatches.length +
+        (showDatabase ? results.length : 0);
     final hasSearched =
-        search.hasSearched ||
-        (query.isNotEmpty && _selectedFilter == _FoodSearchFilter.myItems);
+        query.isNotEmpty && (!showDatabase || search.hasSearched);
     final databaseComplete = search.offSearched && search.usdaSearched;
-    final searchComplete =
+    final showNoResults =
         hasSearched &&
-        !search.isInitialLoading &&
-        (_selectedFilter == _FoodSearchFilter.myItems || databaseComplete);
-    final showSearchFallback =
-        query.isNotEmpty &&
-        searchComplete &&
         visibleResultCount == 0 &&
-        (_selectedFilter == _FoodSearchFilter.myItems || errorMessage == null);
+        (!showDatabase || (!search.isInitialLoading && databaseComplete));
+    final showSearchFallback = showNoResults && errorMessage == null;
     String? searchStatus;
-    if ((search.isInitialLoading || search.isLoadingMore) &&
-        _selectedFilter != _FoodSearchFilter.myItems) {
+    if (showDatabase && (search.isInitialLoading || search.isLoadingMore)) {
       searchStatus = l10n.searching_databases;
-    } else if (errorMessage != null &&
-        _selectedFilter != _FoodSearchFilter.myItems) {
+    } else if (errorMessage != null) {
       searchStatus = errorMessage;
-    } else if (searchComplete && visibleResultCount == 0) {
+    } else if (showNoResults) {
       searchStatus = l10n.no_results_for_query(query);
     } else if (hasSearched && visibleResultCount > 0) {
       searchStatus = l10n.food_search_results_count(visibleResultCount);
@@ -1106,17 +1114,18 @@ class _FoodSearchScreenContentState()
                       l10n: l10n,
                       theme: theme,
                       templateViewModel: templateViewModel,
-                      searchController: _searchController,
+                      query: query,
                       isInitialLoading: search.isInitialLoading,
                       isLoadingMore: search.isLoadingMore,
                       hasSearched: hasSearched,
-                      offSearched: search.offSearched,
-                      usdaSearched: search.usdaSearched,
+                      databaseComplete: databaseComplete,
+                      showNoResults: showNoResults,
                       offHasMore: search.offHasMore,
                       usdaHasMore: search.usdaHasMore,
                       errorMessage: errorMessage,
                       combinedResults: results,
-                      history: widget.history,
+                      recentMatches: recentMatches,
+                      personalMatches: personalMatches,
                       selectedSection: _selectedSection,
                       selectedFilter: _selectedFilter,
                       onSectionChanged: (section) {
@@ -1127,15 +1136,22 @@ class _FoodSearchScreenContentState()
                       },
                       onFilterChanged: (filter) {
                         if (_selectedFilter == filter) return;
-                        _searchViewModel.search(
-                          filter == _FoodSearchFilter.myItems
-                              ? ''
-                              : _searchController.text,
-                        );
+                        final previousFilter = _selectedFilter;
                         _removeTransfer();
                         setState(() {
                           _selectedFilter = filter;
                         });
+                        final includeDatabase = filter.includes(
+                          _FoodSearchFilter.database,
+                        );
+                        if (includeDatabase !=
+                            previousFilter.includes(
+                              _FoodSearchFilter.database,
+                            )) {
+                          _searchViewModel.search(
+                            includeDatabase ? _searchController.text : '',
+                          );
+                        }
                       },
                       onSelectHistory: _selectHistoryItem,
                       onAddHistory: _addHistoryItem,
@@ -1145,8 +1161,6 @@ class _FoodSearchScreenContentState()
                       onAddResult: _addResult,
                       onRetry: () => _retrySearch(templateViewModel),
                       allowMeals: widget.allowMeals,
-                      showServingHint:
-                          _showServingHint && widget.mealLabel != null,
                       selectionStore: _selectionStore,
                       selectionKeyForResult: (result) =>
                           canonicalFoodSelectionKey(

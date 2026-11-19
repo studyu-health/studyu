@@ -35,7 +35,6 @@ class const FoodLibrary({
   final bool showSearch = true,
   final ScrollController? scrollController,
   final Widget? header,
-  final Widget? listHeader,
   final ValueChanged<studyu.SavedFoodTemplate>? onTap,
   final FoodLibrarySelectionAction? onAdd,
   final bool Function(studyu.SavedFoodTemplate)? isSelected,
@@ -288,7 +287,6 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         viewModel.currentFilter != TemplateFilter.meals;
     final children = <Widget>[];
 
-    if (widget.listHeader != null) children.add(widget.listHeader!);
     if (viewModel.isLoading && templates.isEmpty) {
       children.add(const Center(child: CircularProgressIndicator()));
     } else if (viewModel.currentFilter != TemplateFilter.meals) {

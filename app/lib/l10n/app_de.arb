@@ -919,7 +919,6 @@
   "external_library_copy_notice": "Prüfen Sie die Details, bevor Sie dieses Lebensmittel zu „Meine Bibliothek“ hinzufügen. Änderungen wirken sich nicht auf die externe Bibliothek aus.",
   "external_library_save_copy": "In „Meine Bibliothek“ speichern",
   "add_manually": "Lebensmittel manuell erstellen",
-  "tap_item_to_choose_serving": "Tippen Sie auf ein Lebensmittel, um Portion oder Menge zu ändern.",
   "scan_barcode": "Barcode scannen",
   "barcode_scanner_guidance_initial": "Kamera auf den Barcode richten",
   "barcode_scanner_no_barcode": "Kein Barcode erkannt – Position ändern",

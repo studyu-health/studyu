@@ -2740,10 +2740,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get add_manually_subtitle => 'Enter nutrition facts yourself';
 
   @override
-  String get tap_item_to_choose_serving =>
-      'Tippen Sie auf ein Lebensmittel, um Portion oder Menge zu ändern.';
-
-  @override
   String get scan_barcode => 'Barcode scannen';
 
   @override

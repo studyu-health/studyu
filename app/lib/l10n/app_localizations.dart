@@ -4915,12 +4915,6 @@ abstract class AppLocalizations {
   /// **'Enter nutrition facts yourself'**
   String get add_manually_subtitle;
 
-  /// No description provided for @tap_item_to_choose_serving.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap a food to change the serving or amount.'**
-  String get tap_item_to_choose_serving;
-
   /// No description provided for @scan_barcode.
   ///
   /// In en, this message translates to:

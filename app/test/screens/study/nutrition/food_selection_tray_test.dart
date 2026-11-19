@@ -18,6 +18,84 @@ void main() {
 
 
 
+  testWidgets('search filters show results from the selected sources', (
+    tester,
+  ) async {
+    final subject = studyu.StudySubject('subject', 'study', 'user', []);
+    final date = DateTime.utc(2025);
+    subject.progress.add(
+      studyu.SubjectProgress(
+        subjectId: subject.id,
+        interventionId: 'intervention',
+        taskId: 'task',
+        resultType: 'DailyRecall',
+        result: studyu.Result<studyu.DailyRecall>.app(
+          type: 'DailyRecall',
+          periodId: 'period',
+          result: studyu.DailyRecall.withId(
+            date: date,
+            recallMode: studyu.RecallMode.realtimeRecord,
+            meals: [
+              studyu.MealLog.withId(
+                mealType: studyu.MealType.lunch,
+                mealContext: studyu.MealContext.home,
+                timestamp: date,
+                timezone: 'UTC',
+                isSkipped: false,
+                foods: [
+                  _libraryTemplate(name: 'Recent Apple').prototype,
+                  _libraryTemplate(name: 'Recent Pear').prototype,
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await _pumpSearch(
+      tester,
+      subject: subject,
+      query: 'APPLE',
+      repository: FakeNutritionFoodRepository([
+        _libraryTemplate(name: 'Library Apple'),
+      ]),
+    );
+
+    final recent = find.text('Recent Apple');
+    final library = find.text('Library Apple');
+    final database = find.text('External Apple');
+    expect(recent, findsOneWidget);
+    expect(library, findsOneWidget);
+    expect(database, findsOneWidget);
+    expect(find.text('Recent Pear'), findsNothing);
+
+    await tester.tap(find.widgetWithText(FilterChip, 'Recently added'));
+    await tester.pumpAndSettle();
+    expect(recent, findsOneWidget);
+    expect(library, findsNothing);
+    expect(database, findsNothing);
+
+    await tester.tap(find.widgetWithText(FilterChip, 'My library'));
+    await tester.pumpAndSettle();
+    expect(recent, findsNothing);
+    expect(library, findsOneWidget);
+    expect(database, findsNothing);
+
+    await tester.tap(find.widgetWithText(FilterChip, 'Database'));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(recent, findsNothing);
+    expect(library, findsNothing);
+    expect(database, findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilterChip, 'All'));
+    await tester.pumpAndSettle();
+    expect(recent, findsOneWidget);
+    expect(library, findsOneWidget);
+    expect(database, findsOneWidget);
+  });
+
+
   testWidgets('new result opens details, then add reveals compact tray', (
     tester,
   ) async {
@@ -645,6 +723,7 @@ Future<void> _pumpLibrarySelection(
 Future<void> _pumpSearch(
   WidgetTester tester, {
   String? query = 'apple',
+  studyu.StudySubject? subject,
   TextScaler? textScaler,
   FakeNutritionFoodRepository? repository,
   ValueChanged<FoodSearchSelection?>? onResult,
@@ -669,7 +748,7 @@ Future<void> _pumpSearch(
 
   await tester.pumpWidget(
     ChangeNotifierProvider(
-      create: (_) => AppState(),
+      create: (_) => AppState()..activeSubject = subject,
       child: MaterialApp(
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
