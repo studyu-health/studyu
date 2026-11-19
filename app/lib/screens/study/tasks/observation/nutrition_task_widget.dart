@@ -1096,10 +1096,13 @@ class const _MealTimelineCard({
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final foodNames = meal.foods.map((food) => food.name).join(', ');
-    final totalEnergy = meal.foods.fold<double>(
-      0,
-      (sum, food) => sum + food.nutrition.energyKcal,
-    );
+    final nutrition = sumNutritionFoods(meal.foods);
+    final energy = l10n.kcal_value(nutrition.energyKcal.toStringAsFixed(0));
+    final energyLabel = !nutrition.isKnown('energyKcal')
+        ? l10n.food_quantity_nutrition_unavailable
+        : nutrition.isPartial('energyKcal')
+        ? '$energy (${l10n.nutrition_partial})'
+        : energy;
     final time =
         meal.timestamp == null ||
             meal.timePrecision == MealOccurrenceTimePrecision.unknown
@@ -1117,7 +1120,7 @@ class const _MealTimelineCard({
       if (meal.isSkipped && meal.skipReason?.trim().isNotEmpty == true)
         meal.skipReason!.trim()
       else if (!meal.isSkipped)
-        l10n.kcal_value(totalEnergy.toStringAsFixed(0)),
+        energyLabel,
     ].join(' • ');
 
     return Semantics(
@@ -1133,7 +1136,7 @@ class const _MealTimelineCard({
         time,
         if (meal.isSkipped && meal.skipReason?.trim().isNotEmpty == true)
           meal.skipReason!.trim(),
-        if (!meal.isSkipped) l10n.kcal_value(totalEnergy.toStringAsFixed(0)),
+        if (!meal.isSkipped) energyLabel,
       ].join('. '),
       child: Card(
         margin: const EdgeInsets.only(bottom: 8),
