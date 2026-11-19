@@ -223,28 +223,16 @@ class _NutritionTaskWidgetState()
             onPopInvokedWithResult: (didPop, _) async {
               if (didPop || widget.readOnly) return;
               if (!model.meetsMinimumMeals) {
-                final shouldLeave = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: Text(l10n.min_meals_not_met_title),
-                    content: Text(
-                      l10n.min_meals_not_met_message(
-                        widget.task!.minimumMealsRequired!,
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(false),
-                        child: Text(l10n.cancel),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                        child: Text(l10n.leave_anyway),
-                      ),
-                    ],
+                final shouldLeave = await showConfirmationDialog(
+                  context,
+                  title: l10n.min_meals_not_met_title,
+                  message: l10n.min_meals_not_met_message(
+                    widget.task!.minimumMealsRequired!,
                   ),
+                  cancelLabel: l10n.cancel,
+                  confirmLabel: l10n.leave_anyway,
                 );
-                if (shouldLeave != true || !context.mounted) return;
+                if (!shouldLeave || !context.mounted) return;
               }
               try {
                 await model.flushPendingAutoSave(persistToDatabase: true);
