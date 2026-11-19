@@ -247,8 +247,8 @@ class _FoodLibraryState() extends State<FoodLibrary> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: Text(l10n.external_library_copy_save_error),
-        content: Text(l10n.external_library_copy_save_error),
         actions: [
           TextButton(
             onPressed: () =>

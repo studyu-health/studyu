@@ -343,6 +343,9 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Save to Library'));
     await tester.pumpAndSettle();
 
+    expect(find.text(l10n.external_library_copy_save_error), findsOneWidget);
+    expect(find.text(l10n.discard_changes), findsOneWidget);
+    expect(find.text(l10n.continue_editing), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Try again'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, 'Try again'));
     await tester.pumpAndSettle();
