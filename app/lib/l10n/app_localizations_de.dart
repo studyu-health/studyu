@@ -3352,4 +3352,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nutrition_water_cup_size_save_error =>
       'Die Glasgröße konnte nicht gespeichert werden.';
+
+  @override
+  String nutrition_water_per_cup(Object volume) {
+    return '$volume pro Glas';
+  }
 }

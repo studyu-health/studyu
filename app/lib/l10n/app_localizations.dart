@@ -5904,6 +5904,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save the cup size.'**
   String get nutrition_water_cup_size_save_error;
+
+  /// No description provided for @nutrition_water_per_cup.
+  ///
+  /// In en, this message translates to:
+  /// **'{volume} per cup'**
+  String nutrition_water_per_cup(Object volume);
 }
 
 class _AppLocalizationsDelegate

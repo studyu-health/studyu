@@ -266,7 +266,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('250 mL'), findsOneWidget);
 
-    await tester.tap(find.text('Cup size · 250 mL'));
+    await tester.tap(find.byTooltip('Cup size · 250 mL'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), '0');
     await tester.tap(find.text('Save'));

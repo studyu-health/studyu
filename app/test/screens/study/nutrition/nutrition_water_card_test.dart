@@ -25,12 +25,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Cup size · 250 mL'));
+    await tester.tap(find.text('250 mL per cup'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), '400');
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Cup size · 400 mL'), findsOneWidget);
+    expect(find.text('400 mL per cup'), findsOneWidget);
   });
 }

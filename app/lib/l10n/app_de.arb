@@ -1257,5 +1257,6 @@
   "nutrition_water_remove_cup": "Ein Glas Wasser abziehen",
   "nutrition_water_cup_size": "Glasgröße",
   "nutrition_water_cup_size_invalid": "Gib 1 bis 9999 mL ein.",
-  "nutrition_water_cup_size_save_error": "Die Glasgröße konnte nicht gespeichert werden."
+  "nutrition_water_cup_size_save_error": "Die Glasgröße konnte nicht gespeichert werden.",
+  "nutrition_water_per_cup": "{volume} pro Glas"
 }

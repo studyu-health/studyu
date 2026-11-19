@@ -3307,4 +3307,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nutrition_water_cup_size_save_error =>
       'Could not save the cup size.';
+
+  @override
+  String nutrition_water_per_cup(Object volume) {
+    return '$volume per cup';
+  }
 }

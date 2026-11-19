@@ -554,5 +554,6 @@
   "nutrition_water_cup_size_invalid": "1~9999mL를 입력하세요.",
   "nutrition_water_cup_size_save_error": "컵 용량을 저장하지 못했습니다.",
   "delete_template": "{name}을(를) 삭제할까요?",
-  "delete_template_confirmation": "이 항목이 라이브러리에서 삭제됩니다."
+  "delete_template_confirmation": "이 항목이 라이브러리에서 삭제됩니다.",
+  "nutrition_water_per_cup": "컵당 {volume}"
 }

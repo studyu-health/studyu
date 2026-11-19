@@ -26,18 +26,17 @@ class const NutritionWaterCard({
       elevation: 0,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          spacing: 12,
           children: [
-            Row(
-              spacing: 12,
-              children: [
-                Icon(
-                  Icons.local_drink_outlined,
-                  color: theme.colorScheme.primary,
-                ),
-                Expanded(
-                  child: Column(
+            Icon(Icons.local_drink_outlined, color: theme.colorScheme.primary),
+            Expanded(
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 4,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -50,43 +49,52 @@ class const NutritionWaterCard({
                           readOnly && waterIntakeMl == null
                               ? l10n.nutrition_water_unlogged
                               : volume(amountMl),
-                          style: theme.textTheme.bodyLarge,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                if (!readOnly)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton.outlined(
-                        tooltip: l10n.nutrition_water_remove_cup,
-                        onPressed: adjust == null || amountMl == 0
-                            ? null
-                            : () => adjust(-cupSizeMl),
-                        icon: const Icon(Icons.remove),
+                  if (!readOnly)
+                    Tooltip(
+                      message:
+                          '${l10n.nutrition_water_cup_size} · ${volume(cupSizeMl)}',
+                      child: TextButton.icon(
+                        onPressed: onEditCupSize,
+                        style: TextButton.styleFrom(
+                          foregroundColor: theme.colorScheme.onSurfaceVariant,
+                          iconSize: 16,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          textStyle: theme.textTheme.labelMedium,
+                        ),
+                        icon: const Icon(Icons.edit_outlined),
+                        label: Text(
+                          l10n.nutrition_water_per_cup(volume(cupSizeMl)),
+                        ),
                       ),
-                      IconButton.filledTonal(
-                        tooltip: l10n.nutrition_water_add_cup,
-                        onPressed: adjust == null
-                            ? null
-                            : () => adjust(cupSizeMl),
-                        icon: const Icon(Icons.add),
-                      ),
-                    ],
-                  ),
-              ],
+                    ),
+                ],
+              ),
             ),
             if (!readOnly)
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: TextButton(
-                  onPressed: onEditCupSize,
-                  child: Text(
-                    '${l10n.nutrition_water_cup_size} · ${volume(cupSizeMl)}',
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: [
+                  IconButton.outlined(
+                    tooltip: l10n.nutrition_water_remove_cup,
+                    onPressed: adjust == null || amountMl == 0
+                        ? null
+                        : () => adjust(-cupSizeMl),
+                    icon: const Icon(Icons.remove),
                   ),
-                ),
+                  IconButton.filledTonal(
+                    tooltip: l10n.nutrition_water_add_cup,
+                    onPressed: adjust == null ? null : () => adjust(cupSizeMl),
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
               ),
           ],
         ),
