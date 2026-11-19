@@ -529,5 +529,6 @@
   "nutrition_energy_change_from_previous_day": "전날 대비 {value}",
   "food_selection_remove_title": "{name} 항목을 제거하시겠습니까?",
   "food_selection_remove": "제거",
-  "food_quantity_edit_amount": "수량 수정"
+  "food_quantity_edit_amount": "수량 수정",
+  "food_quantity_add_to_selection": "선택 목록에 추가"
 }

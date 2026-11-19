@@ -4642,7 +4642,7 @@ abstract class AppLocalizations {
   /// No description provided for @food_quantity_add_to_selection.
   ///
   /// In en, this message translates to:
-  /// **'Add item'**
+  /// **'Add to basket'**
   String get food_quantity_add_to_selection;
 
   /// No description provided for @food_quantity_add_meal_to_selection.

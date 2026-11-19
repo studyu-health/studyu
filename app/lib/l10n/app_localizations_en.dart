@@ -2552,7 +2552,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get food_quantity_add_to_selection => 'Add item';
+  String get food_quantity_add_to_selection => 'Add to basket';
 
   @override
   String get food_quantity_add_meal_to_selection => 'Add meal to selection';

@@ -1094,7 +1094,7 @@
   "food_quantity_carbs": "Carbs",
   "food_quantity_fat": "Fat",
   "food_quantity_add_to_meal": "Add to {meal}",
-  "food_quantity_add_to_selection": "Add item",
+  "food_quantity_add_to_selection": "Add to basket",
   "food_quantity_add_meal_to_selection": "Add meal to selection",
   "food_quantity_update_selection": "Save changes",
   "food_quantity_nutrition_unavailable": "Nutrition information unavailable",

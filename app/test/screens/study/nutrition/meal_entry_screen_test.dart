@@ -2009,7 +2009,7 @@ void main() {
       ),
       '2',
     );
-    await tester.tap(find.widgetWithText(FilledButton, 'Add item'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(

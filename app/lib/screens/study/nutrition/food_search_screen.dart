@@ -653,40 +653,27 @@ class _FoodSearchScreenContentState()
   }) async {
     _removeTransfer();
     final store = _selectionStore;
-    if (store != null) {
-      _selectionTrayKey.currentState?.showDetails(
-        food: foodEntry,
-        key: key,
-        action: action,
-        caloriesKnown: caloriesKnown,
-        gramsKnown: gramsKnown,
-      );
-      if (mounted) setState(() {});
-      return;
-    }
+    final selected = key == null ? null : store?.itemFor(key);
+    if (store != null) _searchFocusNode.unfocus();
     final result = await FoodQuantitySheet.show(
       context,
       food: foodEntry,
+      baselineFood: selected?.baselineFood,
       mealLabel: widget.mealLabel,
       action: action,
-      caloriesKnown: caloriesKnown,
-      gramsKnown: gramsKnown,
+      initialAmount: selected == null
+          ? null
+          : selected.baseFood.amount * selected.quantity,
+      caloriesKnown: selected?.caloriesKnown ?? caloriesKnown,
+      gramsKnown: selected?.gramsKnown ?? gramsKnown,
+      baselineGramsKnown: selected?.baselineGramsKnown,
+      fullScreen: store != null,
     );
     if (result == null || !mounted) return;
-    _completeSingleSelection(result);
-  }
-
-  void _onEmbeddedDetailsConfirmed(
-    studyu.FoodEntry result,
-    String? key,
-    FoodQuantityAction action,
-    studyu.FoodEntry sourceFood,
-    bool caloriesKnown,
-    bool gramsKnown,
-  ) {
-    final store = _selectionStore;
-    if (store == null) return;
-    final selected = key == null ? null : store.itemFor(key);
+    if (store == null) {
+      _completeSingleSelection(result);
+      return;
+    }
     if (action == FoodQuantityAction.updateSelection && key != null) {
       final weightChanged =
           selected != null &&
@@ -703,12 +690,12 @@ class _FoodSearchScreenContentState()
       );
     } else {
       final weightChanged =
-          (result.servingSizeGrams - sourceFood.servingSizeGrams).abs() >
+          (result.servingSizeGrams - foodEntry.servingSizeGrams).abs() >
           0.000001;
       _addToSelection(
         result,
         key: key ?? canonicalFoodSelectionKey(result),
-        sourceFood: sourceFood,
+        sourceFood: foodEntry,
         caloriesKnown: caloriesKnown,
         gramsKnown: gramsKnown || weightChanged,
         baselineGramsKnown: gramsKnown,
@@ -1103,7 +1090,7 @@ class _FoodSearchScreenContentState()
             child: switch (_selectionStore) {
               final store? => Visibility(
                 key: const ValueKey('selection-tray'),
-                visible: !store.isEmpty || _selectionSurfaceActive,
+                visible: !store.isEmpty,
                 maintainState: true,
                 child: _SelectionPeekTray(
                   key: _selectionTrayKey,
@@ -1119,7 +1106,6 @@ class _FoodSearchScreenContentState()
                   onSelect: _selectTrayItem,
                   onIncrement: _incrementTraySelection,
                   onDecrement: _decrementSelection,
-                  onDetailsConfirmed: _onEmbeddedDetailsConfirmed,
                   onActivityChanged: _onSelectionSurfaceActivityChanged,
                 ),
               ),

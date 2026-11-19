@@ -23,8 +23,7 @@ class const FoodQuantitySheet({
   final bool caloriesKnown = true,
   final bool gramsKnown = true,
   final bool? baselineGramsKnown,
-  final ValueChanged<FoodEntry>? onConfirmed,
-  final VoidCallback? onClose,
+  final bool fullScreen = false,
   super.key,
 }) extends StatefulWidget {
   static Future<FoodEntry?> show(
@@ -37,12 +36,9 @@ class const FoodQuantitySheet({
     bool caloriesKnown = true,
     bool gramsKnown = true,
     bool? baselineGramsKnown,
-  }) => showModalBottomSheet<FoodEntry>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    showDragHandle: true,
-    builder: (_) => FoodQuantitySheet(
+    bool fullScreen = false,
+  }) {
+    final editor = FoodQuantitySheet(
       food: food,
       baselineFood: baselineFood,
       mealLabel: mealLabel,
@@ -51,8 +47,40 @@ class const FoodQuantitySheet({
       caloriesKnown: caloriesKnown,
       gramsKnown: gramsKnown,
       baselineGramsKnown: baselineGramsKnown,
-    ),
-  );
+      fullScreen: fullScreen,
+    );
+    if (fullScreen) {
+      return Navigator.of(context).push(
+        MaterialPageRoute<FoodEntry>(
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              leading: const BackButton(key: ValueKey('food-quantity-back')),
+              title: Text(
+                AppLocalizations.of(context)!.food_quantity_edit_amount,
+              ),
+            ),
+            body: SafeArea(
+              top: false,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: editor,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return showModalBottomSheet<FoodEntry>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => editor,
+    );
+  }
 
   @override
   State<FoodQuantitySheet> createState() => _FoodQuantitySheetState();
@@ -253,7 +281,6 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final embedded = widget.onConfirmed != null;
     final food = _scaledFood ?? widget.food;
     final amount = food.amount;
     final servingWeight = _parseNumber(_servingWeightController.text);
@@ -291,40 +318,18 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
         24,
         12,
         24,
-        24 +
-            (widget.onConfirmed == null
-                ? MediaQuery.viewInsetsOf(context).bottom
-                : 0),
+        widget.fullScreen ? 24 : 24 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: widget.fullScreen ? MainAxisSize.max : MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Flexible(
+            fit: widget.fullScreen ? FlexFit.tight : FlexFit.loose,
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (embedded) ...[
-                    Row(
-                      children: [
-                        IconButton(
-                          key: const ValueKey('food-quantity-back'),
-                          onPressed: widget.onClose,
-                          tooltip: l10n.back,
-                          icon: const Icon(Icons.arrow_back),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            l10n.food_quantity_edit_amount,
-                            style: theme.textTheme.titleLarge,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                  ],
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -370,10 +375,9 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                           ],
                         ),
                       ),
-                      if (!embedded)
+                      if (!widget.fullScreen)
                         IconButton(
-                          onPressed:
-                              widget.onClose ?? () => Navigator.pop(context),
+                          onPressed: () => Navigator.pop(context),
                           tooltip: l10n.close,
                           icon: const Icon(Icons.close),
                         ),
@@ -648,14 +652,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
             child: FilledButton(
               onPressed: _scaledFood == null
                   ? null
-                  : () {
-                      final result = _scaledFood!;
-                      if (widget.onConfirmed case final callback?) {
-                        callback(result);
-                      } else {
-                        Navigator.pop(context, result);
-                      }
-                    },
+                  : () => Navigator.pop(context, _scaledFood),
               child: Text(switch (widget.action) {
                 FoodQuantityAction.addToSelection =>
                   l10n.food_quantity_add_to_selection,

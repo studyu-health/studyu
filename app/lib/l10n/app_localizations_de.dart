@@ -2580,7 +2580,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get food_quantity_add_to_selection => 'Lebensmittel hinzufügen';
+  String get food_quantity_add_to_selection => 'Zur Auswahl hinzufügen';
 
   @override
   String get food_quantity_add_meal_to_selection =>

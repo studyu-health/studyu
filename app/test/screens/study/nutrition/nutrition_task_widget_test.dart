@@ -177,7 +177,7 @@ Future<void> _selectSavedSoup(WidgetTester tester) async {
   await tester.pumpAndSettle();
   await tester.tap(find.text('Saved soup'));
   await tester.pumpAndSettle();
-  await tester.tap(find.widgetWithText(FilledButton, 'Add item'));
+  await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
   await tester.pumpAndSettle();
   await tester.tap(
     find.descendant(

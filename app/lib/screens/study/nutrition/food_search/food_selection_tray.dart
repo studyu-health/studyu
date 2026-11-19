@@ -1,11 +1,5 @@
 part of '../food_search_screen.dart';
 
-enum _SelectionSurfaceMode() {
-  compact,
-  expanded,
-  details,
-}
-
 class const _SelectionPeekTray({
   required final GlobalKey anchorKey,
   required final GlobalKey headerAnchorKey,
@@ -19,15 +13,6 @@ class const _SelectionPeekTray({
   required final ValueChanged<FoodSelectionItem> onSelect,
   required final void Function(String key, Offset? source) onIncrement,
   required final ValueChanged<String> onDecrement,
-  required final void Function(
-    studyu.FoodEntry result,
-    String? key,
-    FoodQuantityAction action,
-    studyu.FoodEntry sourceFood,
-    bool caloriesKnown,
-    bool gramsKnown,
-  )
-  onDetailsConfirmed,
   required final ValueChanged<bool> onActivityChanged,
   super.key,
 }) extends StatefulWidget {
@@ -36,117 +21,23 @@ class const _SelectionPeekTray({
 }
 
 class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
-  _SelectionSurfaceMode _mode = _SelectionSurfaceMode.compact;
-  _SelectionSurfaceMode _previousMode = _SelectionSurfaceMode.compact;
-  studyu.FoodEntry? _detailFood;
-  String? _detailKey;
-  FoodQuantityAction? _detailAction;
-  bool _detailCaloriesKnown = true;
-  bool _detailGramsKnown = true;
+  bool _isExpanded = false;
   final ScrollController _expandedScrollController = ScrollController();
-  double _expandedScrollOffset = 0;
 
-  void showDetails({
-    required studyu.FoodEntry food,
-    String? key,
-    required FoodQuantityAction action,
-    bool caloriesKnown = true,
-    bool gramsKnown = true,
-  }) {
-    if (!mounted) return;
-    if (_mode == _SelectionSurfaceMode.expanded &&
-        _expandedScrollController.hasClients) {
-      _expandedScrollOffset = _expandedScrollController.offset;
-    }
-    setState(() {
-      _previousMode = _mode == _SelectionSurfaceMode.details
-          ? _previousMode
-          : _mode;
-      _mode = _SelectionSurfaceMode.details;
-      _detailFood = food;
-      _detailKey = key;
-      _detailAction = action;
-      _detailCaloriesKnown = caloriesKnown;
-      _detailGramsKnown = gramsKnown;
-    });
-    widget.onActivityChanged(true);
+  void _setExpanded(bool expanded) {
+    if (_isExpanded == expanded) return;
+    setState(() => _isExpanded = expanded);
+    widget.onActivityChanged(expanded);
   }
 
-  bool get isActive => _mode != _SelectionSurfaceMode.compact;
+  void _toggleSelector() => _setExpanded(!_isExpanded);
 
-  void _setMode(_SelectionSurfaceMode mode) {
-    if (_mode == mode) return;
-    setState(() => _mode = mode);
-    widget.onActivityChanged(isActive);
-  }
-
-  void _toggleSelector() => _setMode(
-    _mode == _SelectionSurfaceMode.compact
-        ? _SelectionSurfaceMode.expanded
-        : _SelectionSurfaceMode.compact,
-  );
-
-  void collapse() => _setMode(_SelectionSurfaceMode.compact);
+  void collapse() => _setExpanded(false);
 
   bool handleSystemBack() {
-    if (_mode == _SelectionSurfaceMode.details) {
-      _closeDetails();
-      return true;
-    }
-    if (_mode == _SelectionSurfaceMode.expanded) {
-      collapse();
-      return true;
-    }
-    return false;
-  }
-
-  void _closeDetails() {
-    final previousMode = _previousMode;
-    setState(() {
-      _mode = previousMode;
-      _detailFood = null;
-      _detailKey = null;
-      _detailAction = null;
-    });
-    _restoreExpandedScrollOffset(previousMode);
-    widget.onActivityChanged(previousMode != _SelectionSurfaceMode.compact);
-  }
-
-  void _restoreExpandedScrollOffset(_SelectionSurfaceMode mode) {
-    if (mode != _SelectionSurfaceMode.expanded) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_expandedScrollController.hasClients) return;
-      final position = _expandedScrollController.position;
-      _expandedScrollController.jumpTo(
-        _expandedScrollOffset.clamp(
-          position.minScrollExtent,
-          position.maxScrollExtent,
-        ),
-      );
-    });
-  }
-
-  void _confirmDetails(studyu.FoodEntry result) {
-    final action = _detailAction;
-    if (action == null) return;
-    widget.onDetailsConfirmed(
-      result,
-      _detailKey,
-      action,
-      _detailFood!,
-      _detailCaloriesKnown,
-      _detailGramsKnown,
-    );
-    if (mounted) {
-      setState(() {
-        _mode = _previousMode;
-        _detailFood = null;
-        _detailKey = null;
-        _detailAction = null;
-      });
-      _restoreExpandedScrollOffset(_previousMode);
-      widget.onActivityChanged(_previousMode != _SelectionSurfaceMode.compact);
-    }
+    if (!_isExpanded) return false;
+    collapse();
+    return true;
   }
 
   @override
@@ -170,17 +61,10 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
     final headerSemantics =
         '${l10n.food_selection_selected_items}, $itemCountText, '
         '$calorieText$unavailable';
-    final detailsHeight = (widget.maxHeight * 0.65).clamp(
-      0.0,
-      widget.maxHeight,
-    );
     final expandedMaxHeight = (widget.maxHeight * 0.75).clamp(
       0.0,
       widget.maxHeight,
     );
-    final selected = _detailKey == null
-        ? null
-        : widget.store.itemFor(_detailKey!);
 
     final surface = Material(
       key: widget.anchorKey,
@@ -194,161 +78,132 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
       child: SafeArea(
         top: false,
         child: Column(
-          mainAxisSize: _mode == _SelectionSurfaceMode.details
-              ? MainAxisSize.max
-              : MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_mode != _SelectionSurfaceMode.details)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Center(
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Center(
+                child: Container(
+                  key: const ValueKey('selection-drag-handle'),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ),
+            Semantics(
+              key: const ValueKey('selection-header-semantics'),
+              button: true,
+              expanded: _isExpanded,
+              label: headerSemantics,
+              onTap: _toggleSelector,
+              child: ExcludeSemantics(
+                child: InkWell(
+                  onTap: _toggleSelector,
                   child: Container(
-                    key: const ValueKey('selection-drag-handle'),
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.outlineVariant,
-                      borderRadius: BorderRadius.circular(2),
+                    key: widget.headerAnchorKey,
+                    constraints: const BoxConstraints(minHeight: 56),
+                    padding: const EdgeInsets.fromLTRB(16, 6, 12, 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                l10n.food_selection_selected_items,
+                                style: _isExpanded
+                                    ? theme.textTheme.titleLarge
+                                    : theme.textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                headerSummary,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_isExpanded)
+                          IconButton(
+                            tooltip: l10n.food_selection_collapse,
+                            onPressed: collapse,
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                          ),
+                      ],
                     ),
                   ),
                 ),
               ),
-            if (_mode == _SelectionSurfaceMode.details && _detailFood != null)
-              Expanded(
-                child: FoodQuantitySheet(
-                  key: ValueKey(_detailKey ?? _detailFood!.id),
-                  food: _detailFood!,
-                  baselineFood: selected?.baselineFood,
-                  mealLabel: widget.mealLabel,
-                  action: _detailAction!,
-                  initialAmount: selected == null
-                      ? null
-                      : selected.baseFood.amount * selected.quantity,
-                  caloriesKnown:
-                      selected?.caloriesKnown ?? _detailCaloriesKnown,
-                  gramsKnown: selected?.gramsKnown ?? _detailGramsKnown,
-                  baselineGramsKnown: selected?.baselineGramsKnown,
-                  onConfirmed: _confirmDetails,
-                  onClose: _closeDetails,
+            ),
+            if (_isExpanded)
+              Flexible(
+                child: ListView.builder(
+                  key: const ValueKey('selection-expanded-list'),
+                  controller: _expandedScrollController,
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: widget.store.items.length,
+                  itemBuilder: (context, index) {
+                    final item = widget.store.items.elementAt(index);
+                    return _SelectionPreviewRow(
+                      item: item,
+                      onSelect: widget.onSelect,
+                      onIncrement: widget.onIncrement,
+                      onDecrement: widget.onDecrement,
+                    );
+                  },
                 ),
               )
-            else ...[
-              Semantics(
-                key: const ValueKey('selection-header-semantics'),
-                button: true,
-                expanded: _mode == _SelectionSurfaceMode.expanded,
-                label: headerSemantics,
-                onTap: _toggleSelector,
-                child: ExcludeSemantics(
-                  child: InkWell(
-                    onTap: _toggleSelector,
-                    child: Container(
-                      key: widget.headerAnchorKey,
-                      constraints: const BoxConstraints(minHeight: 56),
-                      padding: const EdgeInsets.fromLTRB(16, 6, 12, 6),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  l10n.food_selection_selected_items,
-                                  style: _mode == _SelectionSurfaceMode.expanded
-                                      ? theme.textTheme.titleLarge
-                                      : theme.textTheme.titleSmall,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  headerSummary,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (_mode == _SelectionSurfaceMode.expanded)
-                            IconButton(
-                              tooltip: l10n.food_selection_collapse,
-                              onPressed: collapse,
-                              icon: const Icon(Icons.keyboard_arrow_down),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              if (_mode == _SelectionSurfaceMode.expanded)
-                Flexible(
-                  child: ListView.builder(
-                    key: const ValueKey('selection-expanded-list'),
-                    controller: _expandedScrollController,
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: widget.store.items.length,
-                    itemBuilder: (context, index) {
-                      final item = widget.store.items.elementAt(index);
-                      return _SelectionPreviewRow(
-                        item: item,
-                        onSelect: widget.onSelect,
-                        onIncrement: widget.onIncrement,
-                        onDecrement: widget.onDecrement,
-                      );
-                    },
-                  ),
-                )
-              else
-                _compactRows(context),
-              if (_mode == _SelectionSurfaceMode.compact &&
-                  MediaQuery.viewInsetsOf(context).bottom == 0 &&
-                  widget.store.itemCount >
-                      widget.store.recentItems
-                          .take(
-                            MediaQuery.textScalerOf(context).scale(1) > 1.3
-                                ? 1
-                                : 2,
-                          )
-                          .length)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () => _setMode(_SelectionSurfaceMode.expanded),
-                    child: Text(
-                      l10n.food_selection_view_more(widget.store.itemCount),
-                    ),
-                  ),
-                ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  8,
-                  16,
-                  _mode == _SelectionSurfaceMode.expanded ? 8 : 12,
-                ),
-                child: FilledButton(
-                  onPressed: widget.isConfirming || widget.store.isEmpty
-                      ? null
-                      : widget.onConfirm,
+            else
+              _compactRows(context),
+            if (!_isExpanded &&
+                MediaQuery.viewInsetsOf(context).bottom == 0 &&
+                widget.store.itemCount >
+                    widget.store.recentItems
+                        .take(
+                          MediaQuery.textScalerOf(context).scale(1) > 1.3
+                              ? 1
+                              : 2,
+                        )
+                        .length)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () => _setExpanded(true),
                   child: Text(
-                    l10n.food_selection_confirm(
-                      widget.store.itemCount,
-                      widget.mealLabel,
-                    ),
+                    l10n.food_selection_view_more(widget.store.itemCount),
                   ),
                 ),
               ),
-            ],
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, 8, 16, _isExpanded ? 8 : 12),
+              child: FilledButton(
+                onPressed: widget.isConfirming || widget.store.isEmpty
+                    ? null
+                    : widget.onConfirm,
+                child: Text(
+                  l10n.food_selection_confirm(
+                    widget.store.itemCount,
+                    widget.mealLabel,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
 
-    final constrainedSurface = _mode == _SelectionSurfaceMode.expanded
+    final constrainedSurface = _isExpanded
         ? ConstrainedBox(
             constraints: BoxConstraints(maxHeight: expandedMaxHeight),
             child: surface,
@@ -357,17 +212,14 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onVerticalDragEnd: _mode == _SelectionSurfaceMode.compact
+      onVerticalDragEnd: !_isExpanded
           ? (details) {
               if ((details.primaryVelocity ?? 0) < -200) {
-                _setMode(_SelectionSurfaceMode.expanded);
+                _setExpanded(true);
               }
             }
           : null,
-      child: SizedBox(
-        height: _mode == _SelectionSurfaceMode.details ? detailsHeight : null,
-        child: constrainedSurface,
-      ),
+      child: constrainedSurface,
     );
   }
 
@@ -537,71 +389,51 @@ class const _SelectionPreviewRow({
                   onTap: () => onSelect(item),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 48),
-                    child: Row(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.name,
+                        Text(
+                          item.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                metadata,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
+                                style: weightStyle,
                               ),
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      metadata,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: weightStyle,
+                            ),
+                            if (showCustomLabel) ...[
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    l10n.food_quantity_custom_weight,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color:
+                                          theme.colorScheme.onPrimaryContainer,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  if (showCustomLabel) ...[
-                                    const SizedBox(width: 6),
-                                    Flexible(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: theme
-                                              .colorScheme
-                                              .primaryContainer,
-                                          borderRadius: BorderRadius.circular(
-                                            999,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          l10n.food_quantity_custom_weight,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                                color: theme
-                                                    .colorScheme
-                                                    .onPrimaryContainer,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ],
+                                ),
                               ),
                             ],
-                          ),
-                        ),
-                        Semantics(
-                          label: l10n.food_quantity_edit_amount,
-                          child: const SizedBox(
-                            width: 40,
-                            height: 48,
-                            child: Icon(Icons.edit_outlined, size: 22),
-                          ),
+                          ],
                         ),
                       ],
                     ),
@@ -609,6 +441,12 @@ class const _SelectionPreviewRow({
                 ),
               ),
               const SizedBox(width: 8),
+              SelectionQuantityButton(
+                tooltip: l10n.food_quantity_edit_amount,
+                onPressed: () => onSelect(item),
+                icon: Icons.tune,
+                visualDensity: VisualDensity.compact,
+              ),
               SelectionQuantityControl(
                 name: item.name,
                 quantity: item.quantity,

@@ -156,7 +156,7 @@ void main() {
 
     expect(find.text('Edit amount'), findsOneWidget);
     expect(find.byKey(const ValueKey('food-quantity-back')), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Add item'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Add to basket'), findsOneWidget);
     expect(
       tester
           .widget<FoodQuantitySheet>(find.byType(FoodQuantitySheet))
@@ -166,7 +166,7 @@ void main() {
     );
     expect(find.textContaining('1 medium apple'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Add item'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
     await tester.pumpAndSettle();
 
     expect(find.byType(FoodQuantitySheet), findsNothing);
@@ -184,7 +184,7 @@ void main() {
 
     await tester.tap(find.text('External Apple'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(FilledButton, 'Add item'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Add to basket'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
     await tester.pumpAndSettle();
@@ -194,7 +194,7 @@ void main() {
 
     await tester.tap(find.text('External Apple'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(FilledButton, 'Add item'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Add to basket'), findsOneWidget);
   });
 
   testWidgets('selector preserves underlying list state through navigation', (
@@ -283,7 +283,7 @@ void main() {
     await tester.tap(selectedRow);
     await tester.pumpAndSettle();
     expect(find.byType(FoodQuantitySheet), findsOneWidget);
-    expectUnderlyingListPreserved();
+    expect(libraryList, findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
     await tester.pumpAndSettle();
@@ -296,9 +296,7 @@ void main() {
     expectUnderlyingListPreserved();
   });
 
-  testWidgets('selected item details navigate inside one surface', (
-    tester,
-  ) async {
+  testWidgets('selected item details open above the basket', (tester) async {
     _setSurfaceSize(tester);
     await _pumpSearch(tester);
     await _addExternalApple(tester);
@@ -351,7 +349,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(_amountField(), '2');
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Add item'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
     await tester.pumpAndSettle();
 
     expect(
@@ -400,7 +398,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(
-      find.widgetWithText(FilledButton, 'Add item').hitTestable(),
+      find.widgetWithText(FilledButton, 'Add to basket').hitTestable(),
       findsOneWidget,
     );
   });
@@ -532,7 +530,7 @@ void main() {
     await tester.tap(find.text('External Apple'));
     await tester.pumpAndSettle();
     await tester.tap(
-      find.widgetWithText(FilledButton, 'Lebensmittel hinzufügen'),
+      find.widgetWithText(FilledButton, 'Zur Auswahl hinzufügen'),
     );
     await tester.pumpAndSettle();
 
@@ -745,8 +743,8 @@ void main() {
     await tester.tap(find.text('Library Pear'));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(FilledButton, 'Add item'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Add item'));
+    expect(find.widgetWithText(FilledButton, 'Add to basket'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
     await tester.pumpAndSettle();
 
     expect(find.byType(FoodQuantitySheet), findsNothing);
@@ -777,7 +775,7 @@ void _setSurfaceSize(WidgetTester tester) {
 Future<void> _addExternalApple(WidgetTester tester) async {
   await tester.tap(find.text('External Apple'));
   await tester.pumpAndSettle();
-  await tester.tap(find.widgetWithText(FilledButton, 'Add item'));
+  await tester.tap(find.widgetWithText(FilledButton, 'Add to basket'));
   await tester.pumpAndSettle();
 }
 

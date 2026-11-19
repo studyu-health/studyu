@@ -2497,7 +2497,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get food_quantity_add_to_selection => 'Add item';
+  String get food_quantity_add_to_selection => '선택 목록에 추가';
 
   @override
   String get food_quantity_add_meal_to_selection => 'Add meal to selection';
