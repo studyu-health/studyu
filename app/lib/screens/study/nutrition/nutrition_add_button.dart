@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
 
 enum _FoodCreationAction() {
   food,
@@ -20,30 +21,21 @@ class const FoodCreationButton({
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final action = await showModalBottomSheet<_FoodCreationAction>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.restaurant_outlined),
-              title: Text(l10n.add_food_action),
-              onTap: () =>
-                  Navigator.pop(sheetContext, _FoodCreationAction.food),
-            ),
-            ListTile(
-              leading: const Icon(Icons.restaurant_menu_outlined),
-              title: Text(l10n.create_meal),
-              onTap: () =>
-                  Navigator.pop(sheetContext, _FoodCreationAction.meal),
-            ),
-          ],
+    final action = await showNutritionActionSheet<_FoodCreationAction>(
+      context,
+      title: l10n.create,
+      actions: [
+        NutritionSheetAction(
+          value: _FoodCreationAction.food,
+          label: l10n.add_food_action,
+          icon: Icons.restaurant_outlined,
         ),
-      ),
+        NutritionSheetAction(
+          value: _FoodCreationAction.meal,
+          label: l10n.create_meal,
+          icon: Icons.restaurant_menu_outlined,
+        ),
+      ],
     );
     if (!context.mounted) return;
 
