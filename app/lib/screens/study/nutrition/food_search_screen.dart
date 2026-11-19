@@ -86,7 +86,6 @@ enum _FoodSearchAction() {
 enum _FoodSearchLayoutSlot() {
   content,
   tray,
-  create,
 }
 
 class _FoodSearchLayoutDelegate({required final bool trayOverlapsContent})
@@ -108,18 +107,10 @@ class _FoodSearchLayoutDelegate({required final bool trayOverlapsContent})
       _FoodSearchLayoutSlot.content,
       BoxConstraints.tightFor(width: size.width, height: contentHeight),
     );
-    final trayTop = size.height - traySize.height;
-    positionChild(_FoodSearchLayoutSlot.tray, Offset(0, trayTop));
-    if (hasChild(_FoodSearchLayoutSlot.create)) {
-      final buttonSize = layoutChild(
-        _FoodSearchLayoutSlot.create,
-        BoxConstraints(maxHeight: trayTop).tighten(width: size.width),
-      );
-      positionChild(
-        _FoodSearchLayoutSlot.create,
-        Offset(0, trayTop - buttonSize.height),
-      );
-    }
+    positionChild(
+      _FoodSearchLayoutSlot.tray,
+      Offset(0, size.height - traySize.height),
+    );
   }
 
   @override
@@ -984,7 +975,26 @@ class _FoodSearchScreenContentState()
               : l10n.nutrition_add_food_to_meal(
                   widget.mealLabel!.toLowerCase(),
                 ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: MediaQuery.sizeOf(context).width < 480
+              ? theme.textTheme.titleMedium
+              : null,
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 8),
+            child: FilledButton.icon(
+              onPressed: _createFromSearch,
+              icon: const Icon(Icons.add),
+              label: Text(
+                widget.historicalMode || !widget.allowMeals
+                    ? l10n.add_food_action
+                    : l10n.create,
+              ),
+            ),
+          ),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, bodyConstraints) {
@@ -1066,7 +1076,6 @@ class _FoodSearchScreenContentState()
                         theme: theme,
                         templateViewModel: templateViewModel,
                         query: query,
-                        reserveCreateSpace: !_selectionSurfaceActive,
                         isInitialLoading: search.isInitialLoading,
                         isLoadingMore: search.isLoadingMore,
                         hasSearched: hasSearched,
@@ -1125,29 +1134,6 @@ class _FoodSearchScreenContentState()
                 ),
               ),
               LayoutId(id: _FoodSearchLayoutSlot.tray, child: selectionSurface),
-              if (!_selectionSurfaceActive)
-                LayoutId(
-                  id: _FoodSearchLayoutSlot.create,
-                  child: SafeArea(
-                    top: false,
-                    bottom: _selectionStore?.isEmpty ?? true,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Align(
-                        alignment: AlignmentDirectional.bottomEnd,
-                        heightFactor: 1,
-                        child: FloatingActionButton(
-                          heroTag: null,
-                          tooltip: widget.historicalMode || !widget.allowMeals
-                              ? l10n.add_food_action
-                              : l10n.create,
-                          onPressed: _createFromSearch,
-                          child: const Icon(Icons.add),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
             ],
           );
         },

@@ -20,16 +20,19 @@ import 'fake_nutrition_food_repository.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('floating create action opens meal creation above the basket', (
+  testWidgets('search header Create opens meal creation from the basket', (
     tester,
   ) async {
     _setSurfaceSize(tester);
     await _pumpSearch(tester);
     await _addExternalApple(tester);
 
-    final create = find.byType(FloatingActionButton).hitTestable();
-    final basket = find.byKey(const ValueKey('selection-tray'));
-    expect(tester.getRect(create).bottom, lessThan(tester.getRect(basket).top));
+    await tester.tap(find.text('Selected items'));
+    await tester.pumpAndSettle();
+    final create = find.descendant(
+      of: find.byType(AppBar),
+      matching: find.widgetWithText(FilledButton, 'Create'),
+    );
 
     await tester.tap(create);
     await tester.pumpAndSettle();
@@ -40,6 +43,10 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.text('Selected items'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('selection-expanded-list')),
+      findsOneWidget,
+    );
     expect(create, findsOneWidget);
   });
 

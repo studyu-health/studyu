@@ -34,7 +34,6 @@ class const FoodLibrary({
   final bool allowMeals = true,
   final bool showSearch = true,
   final ScrollController? scrollController,
-  final double listBottomPadding = 24,
   final Widget? header,
   final ValueChanged<studyu.SavedFoodTemplate>? onTap,
   final FoodLibrarySelectionAction? onAdd,
@@ -463,10 +462,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
             child: ListView(
               controller: widget.scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                ...children,
-                SizedBox(height: widget.listBottomPadding),
-              ],
+              children: [...children, const SizedBox(height: 24)],
             ),
           ),
         ),

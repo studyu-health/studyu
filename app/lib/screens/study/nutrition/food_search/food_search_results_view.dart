@@ -455,7 +455,6 @@ class const _FoodSearchListView({
   required final ThemeData theme,
   required final TemplateViewModel templateViewModel,
   required final String query,
-  required final bool reserveCreateSpace,
   required final bool isInitialLoading,
   required final bool isLoadingMore,
   required final bool hasSearched,
@@ -501,13 +500,11 @@ class const _FoodSearchListView({
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = reserveCreateSpace ? 88.0 : 24.0;
     if (query.isEmpty && selectedSection == _FoodSearchSection.myItems) {
       return FoodLibrary(
         allowMeals: allowMeals,
         showSearch: false,
         scrollController: scrollController,
-        listBottomPadding: bottomPadding,
         header: Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: _QuickSectionTabs(
@@ -571,7 +568,7 @@ class const _FoodSearchListView({
       }
       return ListView(
         controller: scrollController,
-        padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         children: children,
       );
     }
@@ -753,7 +750,7 @@ class const _FoodSearchListView({
 
     return ListView(
       controller: scrollController,
-      padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       children: children,
     );
   }

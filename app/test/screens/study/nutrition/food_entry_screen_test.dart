@@ -282,10 +282,10 @@ void main() {
 
       await tester.tap(find.text('Open search'));
       await tester.pumpAndSettle();
-      expect(find.byTooltip('Create food'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Create food'), findsOneWidget);
       expect(find.text('Create meal'), findsNothing);
 
-      await tester.tap(find.byTooltip('Create food'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Create food'));
       await tester.pumpAndSettle();
       final saveToMyItems = find.widgetWithText(
         CheckboxListTile,
