@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +15,133 @@ import 'fake_nutrition_food_repository.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  testWidgets('zero quantity cannot add a meal ingredient', (tester) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: FakeNutritionFoodRepository(),
+    );
+    addTearDown(viewModel.dispose);
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(initialName: 'Meal'),
+      (_) {},
+      viewModel,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip(l10n.nutrition_add_food_manually));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, l10n.food_name),
+      'Ingredient',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, l10n.nutrition_quantity_short),
+      '0',
+    );
+    final add = find.widgetWithText(FilledButton, l10n.add);
+    await tester.ensureVisible(add);
+    await tester.pumpAndSettle();
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.food_quantity_invalid_amount), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('repeat taps submit one meal template while saving', (
+    tester,
+  ) async {
+    final repository = _PendingSaveRepository();
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(
+        initialName: 'Meal',
+        initialFoods: [_food()],
+        templateViewModel: viewModel,
+      ),
+      (_) {},
+      viewModel,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    final save = find.byType(FloatingActionButton);
+    await tester.tap(save);
+    await tester.tap(save);
+    await tester.pump();
+
+    expect(repository.saveCalls, 1);
+    repository.pending.complete();
+    await tester.pumpAndSettle();
+    expect(await repository.loadTemplates('subject'), hasLength(1));
+  });
+
+  testWidgets('save as creates a recipe separate from the logged recipe', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final ingredient = _food();
+    final recipe = _food()
+      ..entryType = FoodEntryType.meal
+      ..name = 'Original'
+      ..componentFoods = [
+        FoodComposition.withId(
+          parentEntryId: 'recipe',
+          foodId: ingredient.foodId,
+          amount: 1,
+          unit: ingredient.unit,
+        ),
+      ]
+      ..componentSnapshots = [ingredient];
+    final repository = FakeNutritionFoodRepository();
+    await repository.saveTemplate(
+      subjectId: 'subject',
+      name: recipe.name,
+      food: recipe,
+    );
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(
+        existingMeal: recipe,
+        editLoggedAmount: true,
+        templateViewModel: viewModel,
+      ),
+      (_) {},
+      viewModel,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip(l10n.create_meal));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find
+          .descendant(
+            of: find.byType(AlertDialog),
+            matching: find.byType(TextField),
+          )
+          .first,
+      'Copy',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, l10n.save_meal));
+    await tester.pumpAndSettle();
+
+    final templates = await repository.loadTemplates('subject');
+    expect(templates.map((item) => item.name), ['Original', 'Copy']);
+    expect(templates.last.id, isNot(recipe.foodId));
+  });
 
   testWidgets(
     'meal creator retains known partial zero across save and reload',
@@ -214,3 +343,27 @@ FoodEntry _food() => FoodEntry.withId(
     micros: {},
   ),
 );
+
+class _PendingSaveRepository() extends FakeNutritionFoodRepository {
+  final pending = Completer<void>();
+  int saveCalls = 0;
+
+  @override
+  Future<SavedFoodTemplate> saveTemplate({
+    required String subjectId,
+    required String name,
+    required FoodEntry food,
+    List<String>? tags,
+    String? expectedVersionId,
+  }) async {
+    saveCalls++;
+    await pending.future;
+    return await super.saveTemplate(
+      subjectId: subjectId,
+      name: name,
+      food: food,
+      tags: tags,
+      expectedVersionId: expectedVersionId,
+    );
+  }
+}

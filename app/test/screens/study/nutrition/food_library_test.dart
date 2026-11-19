@@ -20,6 +20,84 @@ import 'fake_nutrition_food_repository.dart';
 void main() {
   final l10n = lookupAppLocalizations(const Locale('en'));
 
+  testWidgets('library reports failed loads and allows retry', (tester) async {
+    final repository = _RetryLibraryRepository([
+      _template(_food('local', 'Local Apple')),
+    ]);
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: viewModel,
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: FoodLibrary()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.loading_error_title), findsOneWidget);
+    expect(find.text(l10n.no_templates_saved), findsNothing);
+
+    repository.failLoad = false;
+    await tester.tap(find.text(l10n.try_again));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.loading_error_title), findsNothing);
+    expect(find.text('Local Apple'), findsOneWidget);
+  });
+
+  testWidgets('library query stays local to its search field', (tester) async {
+    final repository = FakeNutritionFoodRepository([
+      _template(_food('apple', 'Local Apple')),
+      _template(_food('pear', 'Local Pear')),
+    ]);
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: viewModel,
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Row(
+              children: [
+                Expanded(child: FoodLibrary(key: ValueKey('first-library'))),
+                Expanded(child: FoodLibrary(key: ValueKey('second-library'))),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final first = find.byKey(const ValueKey('first-library'));
+    final second = find.byKey(const ValueKey('second-library'));
+    await tester.enterText(
+      find.descendant(of: first, matching: find.byType(TextField)),
+      'Apple',
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(of: first, matching: find.text('Local Pear')),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: second, matching: find.text('Local Pear')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('local and external matches appear together', (tester) async {
     final local = _food('local', 'Local Apple');
     final repository = _ExternalLibraryRepository([_template(local)]);
@@ -728,3 +806,14 @@ FoodEntry _food(String id, String name) => FoodEntry(
   createdAt: DateTime.utc(2026, 7, 15),
   originalValues: const {},
 );
+
+class _RetryLibraryRepository(super.templates)
+    extends FakeNutritionFoodRepository {
+  bool failLoad = true;
+
+  @override
+  Future<List<SavedFoodTemplate>> loadTemplates(String subjectId) {
+    if (failLoad) return Future.error(StateError('List unavailable'));
+    return super.loadTemplates(subjectId);
+  }
+}

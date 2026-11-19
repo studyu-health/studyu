@@ -93,6 +93,52 @@ void main() {
   });
 
   test(
+    'creating a template expands saved meals into leaf ingredients',
+    () async {
+      final ingredient = _foodEntry(id: 'ingredient', originalValues: {});
+      final recipe =
+          _foodEntry(
+              id: 'recipe',
+              entryType: FoodEntryType.meal,
+              originalValues: {},
+            )
+            ..amount = 2
+            ..nutrition.energyKcal = 200
+            ..componentFoods = [
+              FoodComposition.withId(
+                parentEntryId: 'recipe',
+                foodId: ingredient.foodId,
+                amount: 1,
+                unit: ingredient.unit,
+              ),
+            ]
+            ..componentSnapshots = [ingredient];
+      final viewModel = await _viewModel();
+      addTearDown(viewModel.dispose);
+
+      await viewModel.saveMealAsTemplate(
+        name: 'Meal',
+        meal: MealLog.withId(
+          mealType: MealType.lunch,
+          timestamp: DateTime(2026),
+          timezone: 'UTC',
+          isSkipped: false,
+          foods: [recipe],
+        ),
+      );
+
+      final prototype = viewModel.foodTemplates.single.prototype;
+      expect(
+        prototype.componentSnapshots!.single.entryType,
+        FoodEntryType.singleIngredient,
+      );
+      expect(prototype.componentSnapshots!.single.amount, 2);
+      expect(prototype.componentFoods!.single.foodId, ingredient.foodId);
+      expect(prototype.nutrition.energyKcal, 200);
+    },
+  );
+
+  test(
     'custom food and saved meal templates round-trip across managers',
     () async {
       final manager = TemplateStorageManager();
@@ -242,7 +288,7 @@ void main() {
   });
 
   test(
-    'saving reports refresh failures after preserving saved template',
+    'saving returns the committed template when the list refresh fails',
     () async {
       final repository = _RefreshFailureRepository();
       final viewModel = TemplateViewModel(
@@ -254,14 +300,12 @@ void main() {
       }
       repository.failLoads = true;
 
-      await expectLater(
-        viewModel.saveFoodAsTemplate(
-          name: 'New food',
-          food: _foodEntry(id: 'new-food', originalValues: {}),
-        ),
-        throwsA(isA<StateError>()),
+      final id = await viewModel.saveFoodAsTemplate(
+        name: 'New food',
+        food: _foodEntry(id: 'new-food', originalValues: {}),
       );
 
+      expect(viewModel.foodTemplates.single.id, id);
       expect(viewModel.foodTemplates.single.name, 'New food');
       expect(viewModel.error, contains('refresh failed'));
     },

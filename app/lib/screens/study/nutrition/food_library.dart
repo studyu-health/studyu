@@ -62,6 +62,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
   final TextEditingController _searchController = TextEditingController();
   FoodSearchViewModel? _ownedExternalViewModel;
   FoodSearchViewModel? _externalViewModel;
+  TemplateFilter _filter = TemplateFilter.all;
   bool _copyInProgress = false;
   FoodEntry? _pendingCopyDraft;
 
@@ -140,26 +141,17 @@ class _FoodLibraryState() extends State<FoodLibrary> {
     if (mounted) setState(() {});
   }
 
-  void _onSearchChanged(String value, TemplateViewModel viewModel) {
-    viewModel.setSearchQuery(value);
-    final external = _externalViewModel;
-    if (external == null) return;
-    if (viewModel.currentFilter == TemplateFilter.meals) {
-      external.search('');
-    } else {
-      external.search(value);
-    }
+  void _onSearchChanged(String value) {
+    setState(() {});
+    _externalViewModel?.search(_filter == TemplateFilter.meals ? '' : value);
   }
 
-  void _onFilterChanged(TemplateFilter filter, TemplateViewModel viewModel) {
-    viewModel.setFilter(filter);
-    final external = _externalViewModel;
-    if (external == null) return;
-    if (filter == TemplateFilter.meals) {
-      external.search('');
-    } else {
-      external.search(_searchController.text);
-    }
+  void _onFilterChanged(TemplateFilter filter) {
+    if (filter == _filter) return;
+    setState(() => _filter = filter);
+    _externalViewModel?.search(
+      filter == TemplateFilter.meals ? '' : _searchController.text,
+    );
   }
 
   Future<void> _scanBarcode() async {
@@ -276,7 +268,9 @@ class _FoodLibraryState() extends State<FoodLibrary> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final viewModel = context.watch<TemplateViewModel>();
-    final templates = viewModel.filteredTemplates
+    final query = _searchController.text.trim();
+    final templates = viewModel
+        .filterTemplates(_filter, query)
         .where(
           (template) =>
               widget.allowMeals ||
@@ -284,14 +278,22 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         )
         .toList();
     final external = _externalViewModel;
-    final query = _searchController.text.trim();
     final showExternal =
-        external != null &&
-        query.isNotEmpty &&
-        viewModel.currentFilter != TemplateFilter.meals;
+        external != null && query.isNotEmpty && _filter != TemplateFilter.meals;
     final children = <Widget>[];
 
-    final showingMeals = viewModel.currentFilter == TemplateFilter.meals;
+    final showingMeals = _filter == TemplateFilter.meals;
+    if (viewModel.error != null) {
+      children.add(
+        ListTile(
+          title: Text(l10n.loading_error_title),
+          trailing: TextButton(
+            onPressed: viewModel.loadAllTemplates,
+            child: Text(l10n.try_again),
+          ),
+        ),
+      );
+    }
     if (viewModel.isLoading && templates.isEmpty) {
       children.add(const Center(child: CircularProgressIndicator()));
     } else {
@@ -323,10 +325,10 @@ class _FoodLibraryState() extends State<FoodLibrary> {
             ),
           ),
         );
-      } else if (!showExternal) {
+      } else if (!showExternal && viewModel.error == null) {
         children.add(
           FoodLibraryEmptyState(
-            icon: _templateFilterIcon(viewModel.currentFilter),
+            icon: _templateFilterIcon(_filter),
             message: showingMeals || query.isNotEmpty
                 ? l10n.no_matching_templates
                 : l10n.no_templates_saved,
@@ -381,7 +383,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
             hintText: _externalEnabled
                 ? l10n.food_library_search_hint
                 : l10n.search_templates,
-            onChanged: (value) => _onSearchChanged(value, viewModel),
+            onChanged: _onSearchChanged,
             onScanBarcode: _externalEnabled ? _scanBarcode : null,
             barcodeTooltip: _externalEnabled ? l10n.scan_barcode : null,
           ),
@@ -393,9 +395,9 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _FoodLibraryToolbar(
-            viewModel: viewModel,
+            selectedFilter: _filter,
             l10n: l10n,
-            onChanged: (filter) => _onFilterChanged(filter, viewModel),
+            onChanged: _onFilterChanged,
           ),
         ),
         const SizedBox(height: 8),
@@ -552,7 +554,10 @@ class const FoodLibraryItemCard({
       case _FoodLibraryAction.edit:
         await _edit(context);
       case _FoodLibraryAction.duplicate:
-        await viewModel.duplicateFoodTemplate(template.id);
+        await _manage(
+          context,
+          () => viewModel.duplicateFoodTemplate(template.id),
+        );
       case _FoodLibraryAction.delete:
         await _delete(context, viewModel);
     }
@@ -573,12 +578,16 @@ class const FoodLibraryItemCard({
             ),
     );
     if (edited == null || !context.mounted) return;
-    await context.read<TemplateViewModel>().updateFoodTemplatePrototype(
-      template.id,
-      edited.entryType == FoodEntryType.meal
-          ? normalizeNutritionFoodDefinition(edited)
-          : edited,
-    );
+    final viewModel = context.read<TemplateViewModel>();
+    await _manage(context, () async {
+      await viewModel.updateFoodTemplatePrototype(
+        template.id,
+        edited.entryType == FoodEntryType.meal
+            ? normalizeNutritionFoodDefinition(edited)
+            : edited,
+        expectedVersionId: template.prototype.foodVersionId,
+      );
+    });
   }
 
   Future<void> _delete(
@@ -595,13 +604,37 @@ class const FoodLibraryItemCard({
       isDestructive: true,
     );
     if (confirmed && context.mounted) {
-      await viewModel.deleteFoodTemplate(template.id);
+      await _manage(context, () => viewModel.deleteFoodTemplate(template.id));
+    }
+  }
+
+  Future<void> _manage(
+    BuildContext context,
+    Future<void> Function() action,
+  ) async {
+    final viewModel = context.read<TemplateViewModel>();
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await action();
+    } catch (error, stackTrace) {
+      StudyULogger.error(
+        'Failed to change nutrition library: $error\n$stackTrace',
+      );
+      final conflict = NutritionFoodRepository.isVersionConflict(error);
+      if (conflict) await viewModel.loadAllTemplates();
+      if (messenger.mounted) {
+        final message = conflict
+            ? l10n.nutrition_food_definition_conflict
+            : l10n.could_not_save_results;
+        messenger.showSnackBar(SnackBar(content: Text(message)));
+      }
     }
   }
 }
 
 class const _FoodLibraryToolbar({
-  required final TemplateViewModel viewModel,
+  required final TemplateFilter selectedFilter,
   required final AppLocalizations l10n,
   required final ValueChanged<TemplateFilter> onChanged,
 }) extends StatelessWidget {
@@ -619,7 +652,7 @@ class const _FoodLibraryToolbar({
         children: [
           for (final filter in TemplateFilter.values) ...[
             FilterChip(
-              selected: viewModel.currentFilter == filter,
+              selected: selectedFilter == filter,
               label: Text(_label(filter)),
               onSelected: (_) => onChanged(filter),
               visualDensity: VisualDensity.compact,

@@ -14,6 +14,19 @@ class FakeNutritionFoodRepository([
   }
 
   @override
+  Future<FoodEntry?> loadCurrentFoodDefinition({
+    required String subjectId,
+    required String foodId,
+  }) async {
+    for (final template in _templates) {
+      if (template.id == foodId && template.userId == subjectId) {
+        return FoodEntry.fromJson(template.prototype.toJson());
+      }
+    }
+    return null;
+  }
+
+  @override
   Future<void> ensureDefinitions({
     required String subjectId,
     required Iterable<FoodEntry> foods,

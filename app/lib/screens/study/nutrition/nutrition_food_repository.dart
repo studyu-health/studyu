@@ -5,16 +5,56 @@ import 'package:uuid/uuid.dart';
 
 /// The server is the authoritative library; snapshots in recalls stay immutable.
 class NutritionFoodRepository({final SupabaseClient? _client}) {
+  static bool isVersionConflict(Object error) =>
+      error is PostgrestException &&
+      error.code == '40001' &&
+      error.message == 'stale nutrition definition version';
+
   SupabaseClient get _supabase => _client ?? Supabase.instance.client;
 
   Future<List<SavedFoodTemplate>> loadTemplates(String subjectId) async {
-    final rows = await _supabase.rpc(
-      'list_nutrition_library',
-      params: {'p_subject_id': subjectId},
-    );
-    return (rows as List<dynamic>)
-        .map((row) => _templateFromRow(Map<String, dynamic>.from(row as Map)))
-        .toList();
+    const pageSize = 250;
+    final templates = <SavedFoodTemplate>[];
+    String? lastId;
+    while (true) {
+      final query = _supabase.rpc(
+        'list_nutrition_library',
+        params: {'p_subject_id': subjectId},
+      );
+      final page = lastId == null ? query : query.gt('id', lastId);
+      final rows =
+          await page.order('id', ascending: true).limit(pageSize)
+              as List<dynamic>;
+      templates.addAll(
+        rows.map(
+          (row) => _templateFromRow(Map<String, dynamic>.from(row as Map)),
+        ),
+      );
+      if (rows.isEmpty) return templates;
+      lastId = templates.last.id;
+    }
+  }
+
+  Future<FoodEntry?> loadCurrentFoodDefinition({
+    required String subjectId,
+    required String foodId,
+  }) async {
+    final definition = await _supabase
+        .from('nutrition_food_definition')
+        .select('current_version_id,deleted_at')
+        .eq('subject_id', subjectId)
+        .eq('id', foodId)
+        .maybeSingle();
+    if (definition == null || definition['deleted_at'] != null) return null;
+    final version = await _supabase
+        .from('nutrition_food_version')
+        .select('snapshot')
+        .eq('food_id', foodId)
+        .eq('id', definition['current_version_id'] as String)
+        .single();
+    return FoodEntry.fromJson(
+      Map<String, dynamic>.from(version['snapshot'] as Map),
+    )..setAvailabilityVerified(true);
   }
 
   Future<SavedFoodTemplate> saveTemplate({

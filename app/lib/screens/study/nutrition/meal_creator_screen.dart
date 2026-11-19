@@ -15,6 +15,7 @@ import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
 import 'package:studyu_core/core.dart';
+import 'package:uuid/uuid.dart';
 
 class const MealCreatorScreen({
   final FoodEntry? existingMeal,
@@ -87,6 +88,9 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   NutritionProfile? _cachedNutrition;
   late final String _initialSnapshot;
   bool _allowPop = false;
+  bool _isSaving = false;
+  String? _newFoodId;
+  String? _copyFoodId;
   final GlobalKey _saveButtonKey = GlobalKey();
 
   @override
@@ -199,7 +203,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             Provider.of<TemplateViewModel?>(context, listen: false),
       ),
     );
-    if (result != null) {
+    if (result != null && mounted) {
       setState(() {
         _invalidComponents = false;
         _componentFoods.add(result);
@@ -219,13 +223,28 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
 
   void _quickAddFood() {
     final name = _quickNameController.text.trim();
-    final amount = double.tryParse(_quickAmountController.text) ?? 1;
-    final calories = double.tryParse(_quickCaloriesController.text) ?? 0;
+    final amount = _parseMealNumber(_quickAmountController.text);
+    final caloriesText = _quickCaloriesController.text.trim();
+    final calories = _parseMealNumber(caloriesText);
+    final l10n = AppLocalizations.of(context)!;
 
     if (name.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.enter_food_name)));
+      return;
+    }
+
+    if (amount == null || !amount.isFinite || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.enter_food_name)),
+        SnackBar(content: Text(l10n.food_quantity_invalid_amount)),
       );
+      return;
+    }
+    if (caloriesText.isNotEmpty &&
+        (calories == null || !calories.isFinite || calories < 0)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.nutrition_invalid_calories)));
       return;
     }
 
@@ -238,7 +257,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       portionEstimationMethod: PortionEstimationMethod.householdMeasure,
       portionState: PortionState.asServed,
       nutrition: NutritionProfile(
-        energyKcal: calories,
+        energyKcal: calories ?? 0,
         protein: 0,
         carbs: 0,
         fat: 0,
@@ -252,8 +271,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         micros: {},
         unavailableNutrients: {
           ...NutritionProfile.nutrientKeys.where((key) => key != 'energyKcal'),
-          if (double.tryParse(_quickCaloriesController.text) == null)
-            'energyKcal',
+          if (calories == null) 'energyKcal',
         },
       ),
       source: FoodSource.manual,
@@ -346,8 +364,23 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     if (_rawWeightController.text.isNotEmpty &&
         _cookedWeightController.text.isNotEmpty &&
         _preparationMethodController.text.isNotEmpty) {
-      final rawWeight = double.parse(_rawWeightController.text);
-      final cookedWeight = double.parse(_cookedWeightController.text);
+      final rawWeight = _parseMealNumber(_rawWeightController.text);
+      final cookedWeight = _parseMealNumber(_cookedWeightController.text);
+      if (rawWeight == null ||
+          !rawWeight.isFinite ||
+          rawWeight <= 0 ||
+          cookedWeight == null ||
+          !cookedWeight.isFinite ||
+          cookedWeight <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.food_quantity_invalid_amount,
+            ),
+          ),
+        );
+        return null;
+      }
       preparationDetails = PreparationDetails(
         rawWeight: rawWeight,
         cookedWeight: cookedWeight,
@@ -379,6 +412,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     ];
     final meal = existing == null
         ? FoodEntry.withId(
+            foodId: _newFoodId ??= const Uuid().v4(),
             entryType: FoodEntryType.meal,
             name: _nameController.text,
             description: _descriptionController.text.isEmpty
@@ -437,6 +471,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   }
 
   Future<void> _saveMeal() async {
+    if (_isSaving) return;
     Offset? saveSource;
     final saveContext = _saveButtonKey.currentContext;
     if (widget.existingMeal == null && saveContext != null) {
@@ -444,6 +479,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     }
     final meal = _buildMeal();
     if (meal != null) {
+      setState(() => _isSaving = true);
       if (widget.existingMeal == null) {
         final appState = Provider.of<AppState>(context, listen: false);
         try {
@@ -460,6 +496,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             food: normalized,
           );
           meal
+            ..foodVersionId = normalized.foodVersionId
             ..componentFoods = normalized.componentFoods
             ..componentSnapshots = normalized.componentSnapshots
             ..amount = servings;
@@ -468,6 +505,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             'Failed to save meal to My items: $error\n$stackTrace',
           );
           if (mounted) {
+            setState(() => _isSaving = false);
             final l10n = AppLocalizations.of(context)!;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(l10n.could_not_save_results)),
@@ -501,6 +539,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     final route = ModalRoute.of(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (route?.isCurrent != true) return;
       Navigator.of(context).pop(result);
       if (afterPop == null) return;
       final completed = route?.completed;
@@ -557,6 +596,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   bool get _hasUnsavedChanges => _snapshot != _initialSnapshot;
 
   Future<void> _saveAsTemplate() async {
+    if (_isSaving) return;
     final meal = _buildMeal();
     if (meal == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -581,17 +621,24 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       templateType: TemplateType.meal,
     );
 
-    if (result != null && mounted) {
+    if (result != null && mounted && !_isSaving) {
+      setState(() => _isSaving = true);
       try {
         final viewModel =
             widget.templateViewModel ??
             Provider.of<TemplateViewModel?>(context, listen: false) ??
             TemplateViewModel(userId: userId);
+        final copy =
+            duplicateFoodEntry(snapshots.normalizeNutritionFoodDefinition(meal))
+              ..foodId = _copyFoodId ??= const Uuid().v4()
+              ..foodVersionId = const Uuid().v4()
+              ..templateId = null;
         await viewModel.saveFoodAsTemplate(
           name: result.name,
-          food: snapshots.normalizeNutritionFoodDefinition(meal),
+          food: copy,
           tags: result.tags,
         );
+        _copyFoodId = null;
         if (mounted) {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
@@ -603,6 +650,8 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             context,
           ).showSnackBar(SnackBar(content: Text(l10n.could_not_save_results)));
         }
+      } finally {
+        if (mounted) setState(() => _isSaving = false);
       }
     }
   }
@@ -634,12 +683,15 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
             IconButton(
               icon: const Icon(Icons.bookmark_add_outlined),
               tooltip: l10n.create_meal,
-              onPressed: _saveAsTemplate,
+              onPressed: _isSaving ? null : _saveAsTemplate,
             ),
         ],
       ),
       floatingActionButton: canSave
-          ? NutritionSaveButton(key: _saveButtonKey, onPressed: _saveMeal)
+          ? NutritionSaveButton(
+              key: _saveButtonKey,
+              onPressed: _isSaving ? null : _saveMeal,
+            )
           : null,
       body: Form(
         key: _formKey,
@@ -792,14 +844,14 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     return PopScope(
       canPop: _allowPop,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
+        if (didPop || _isSaving) return;
         if (_hasUnsavedChanges) {
           _confirmDiscard();
         } else {
           _pop();
         }
       },
-      child: scaffold,
+      child: AbsorbPointer(absorbing: _isSaving, child: scaffold),
     );
   }
 }
@@ -1305,8 +1357,13 @@ class const _FoodCard({
           ),
           FilledButton(
             onPressed: () {
-              final amount =
-                  double.tryParse(amountController.text) ?? composition.amount;
+              final amount = _parseMealNumber(amountController.text);
+              if (amount == null || !amount.isFinite || amount <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.food_quantity_invalid_amount)),
+                );
+                return;
+              }
               onUpdateAmount(amount, unitController.text);
               Navigator.pop(context);
             },
@@ -1317,3 +1374,6 @@ class const _FoodCard({
     );
   }
 }
+
+double? _parseMealNumber(String text) =>
+    double.tryParse(text.trim().replaceFirst(',', '.'));

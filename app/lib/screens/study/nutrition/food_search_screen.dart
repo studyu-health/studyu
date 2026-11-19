@@ -526,16 +526,14 @@ class _FoodSearchScreenContentState()
     }
   }
 
-  void _onSearchChanged(String value, TemplateViewModel templateViewModel) {
+  void _onSearchChanged(String value) {
     _removeTransfer();
-    templateViewModel.setSearchQuery(value);
     _searchViewModel.search(
       _selectedFilter.includes(_FoodSearchFilter.database) ? value : '',
     );
   }
 
-  void _retrySearch(TemplateViewModel templateViewModel) {
-    templateViewModel.setSearchQuery(_searchController.text.trim());
+  void _retrySearch() {
     _searchViewModel.retry(_searchController.text);
   }
 
@@ -1004,8 +1002,7 @@ class _FoodSearchScreenContentState()
                       hintText: widget.allowMeals
                           ? l10n.nutrition_search_foods_saved_meals_or_brands
                           : l10n.nutrition_search_foods_or_brands,
-                      onChanged: (val) =>
-                          _onSearchChanged(val, templateViewModel),
+                      onChanged: _onSearchChanged,
                       onScanBarcode: _scanBarcode,
                       barcodeTooltip: l10n.scan_barcode,
                     ),
@@ -1063,7 +1060,7 @@ class _FoodSearchScreenContentState()
                         onSelectResult: _selectResult,
                         onAddResult: _addResult,
                         onAddManually: _addManually,
-                        onRetry: () => _retrySearch(templateViewModel),
+                        onRetry: _retrySearch,
                         allowMeals: widget.allowMeals,
                         selectionStore: _selectionStore,
                         selectionKeyForResult: (result) =>

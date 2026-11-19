@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
 
@@ -23,8 +24,9 @@ class TemplateViewModel({
 
   bool _isLoading = false;
   String? _error;
-  TemplateFilter _currentFilter = TemplateFilter.all;
   String _searchQuery = '';
+  bool _disposed = false;
+  int _loadGeneration = 0;
 
   this {
     loadAllTemplates();
@@ -32,7 +34,6 @@ class TemplateViewModel({
 
   bool get isLoading => _isLoading;
   String? get error => _error;
-  TemplateFilter get currentFilter => _currentFilter;
   String get searchQuery => _searchQuery;
 
   List<SavedFoodTemplate> get foodTemplates => _foodTemplates;
@@ -43,45 +44,62 @@ class TemplateViewModel({
       .where((template) => template.prototype.entryType != FoodEntryType.meal)
       .toList();
 
-  List<SavedFoodTemplate> get filteredTemplates {
-    final templates = switch (_currentFilter) {
+  List<SavedFoodTemplate> filterTemplates(TemplateFilter filter, String query) {
+    final templates = switch (filter) {
       TemplateFilter.all => _foodTemplates,
       TemplateFilter.foods => foodOnlyTemplates,
       TemplateFilter.meals => mealTemplates,
     };
-
-    if (_searchQuery.isEmpty) return templates;
-    final lowerQuery = _searchQuery.toLowerCase();
+    final lowerQuery = query.trim().toLowerCase();
+    if (lowerQuery.isEmpty) return templates;
     return templates
         .where((template) => template.name.toLowerCase().contains(lowerQuery))
         .toList();
   }
 
-  Future<void> loadAllTemplates({bool rethrowOnError = false}) async {
+  Future<void> loadAllTemplates() async {
+    final generation = ++_loadGeneration;
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _notifyListeners();
 
     try {
-      _foodTemplates = await _repository.loadTemplates(userId);
-    } catch (error, stackTrace) {
-      _error = error.toString();
+      final templates = await _repository.loadTemplates(userId);
+      if (generation == _loadGeneration) _foodTemplates = templates;
+    } catch (error) {
+      if (generation == _loadGeneration) _error = error.toString();
       StudyULogger.error('Failed to load templates: $error');
-      if (rethrowOnError) Error.throwWithStackTrace(error, stackTrace);
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (generation == _loadGeneration) {
+        _isLoading = false;
+        _notifyListeners();
+      }
     }
+  }
+
+  void _notifyListeners() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   Future<void> saveMealAsTemplate({
     required String name,
     required MealLog meal,
     List<String>? tags,
+    String? foodId,
   }) async {
     await saveFoodAsTemplate(
       name: name,
-      food: _buildMealEntry(name: name, foods: meal.foods),
+      food: _buildMealEntry(
+        name: name,
+        foodId: foodId,
+        foods: flattenNutritionFoodEntries(meal.foods),
+      ),
       tags: tags,
     );
   }
@@ -101,19 +119,16 @@ class TemplateViewModel({
       ..foodId = template.prototype.foodId
       ..foodVersionId = template.prototype.foodVersionId
       ..templateId = template.id;
-    _foodTemplates = [
-      ..._foodTemplates.where((item) => item.id != template.id),
-      template,
-    ];
-    notifyListeners();
-    await loadAllTemplates(rethrowOnError: true);
+    _replaceTemplate(template);
+    await loadAllTemplates();
     return template.id;
   }
 
   Future<SavedFoodTemplate?> updateFoodTemplatePrototype(
     String templateId,
-    FoodEntry prototype,
-  ) async {
+    FoodEntry prototype, {
+    String? expectedVersionId,
+  }) async {
     var template = _foodTemplates.firstWhereOrNull(
       (item) => item.id == templateId,
     );
@@ -130,10 +145,19 @@ class TemplateViewModel({
       name: updated.name,
       food: updated,
       tags: template.tags,
-      expectedVersionId: template.prototype.foodVersionId,
+      expectedVersionId: expectedVersionId ?? template.prototype.foodVersionId,
     );
+    _replaceTemplate(result);
     await loadAllTemplates();
     return result;
+  }
+
+  void _replaceTemplate(SavedFoodTemplate template) {
+    _foodTemplates = [
+      ..._foodTemplates.where((item) => item.id != template.id),
+      template,
+    ];
+    _notifyListeners();
   }
 
   Future<void> duplicateFoodTemplate(String templateId) async {
@@ -169,14 +193,9 @@ class TemplateViewModel({
     return _createFoodFromPrototype(template.prototype, template.id);
   }
 
-  void setFilter(TemplateFilter filter) {
-    _currentFilter = filter;
-    notifyListeners();
-  }
-
   void setSearchQuery(String query) {
     _searchQuery = query;
-    notifyListeners();
+    _notifyListeners();
   }
 
   FoodEntry _cloneFoodEntry(FoodEntry original) {
@@ -209,10 +228,12 @@ class TemplateViewModel({
 
   FoodEntry _buildMealEntry({
     required String name,
+    required String? foodId,
     required List<FoodEntry> foods,
   }) {
     final nutrition = _sumNutrition(foods);
     final meal = FoodEntry.withId(
+      foodId: foodId,
       entryType: FoodEntryType.meal,
       name: name,
       amount: 1,

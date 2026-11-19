@@ -17,6 +17,9 @@ void main() {
       final repository = NutritionFoodRepository(
         client: _client((request) async {
           if (request.url.path.endsWith('/list_nutrition_library')) {
+            if (request.url.queryParameters.containsKey('id')) {
+              return _jsonResponse([], request);
+            }
             final row = _definitionRow()
               ..['snapshot'] = food.toJsonForStorage();
             return _jsonResponse([row], request);
@@ -78,6 +81,9 @@ void main() {
     late http.Request libraryRequest;
     final repository = NutritionFoodRepository(
       client: _client((request) async {
+        if (request.url.queryParameters.containsKey('id')) {
+          return _jsonResponse([], request);
+        }
         libraryRequest = request;
         return _jsonResponse([_definitionRow()], request);
       }),
@@ -90,6 +96,66 @@ void main() {
     expect(templates.single.tags, ['fruit']);
     expect(libraryRequest.url.path, endsWith('/rpc/list_nutrition_library'));
     expect(jsonDecode(libraryRequest.body), {'p_subject_id': 'subject'});
+  });
+
+  test('library continues when the service caps the page size', () async {
+    final requests = <Uri>[];
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        requests.add(request.url);
+        final cursor = request.url.queryParameters['id'];
+        final rows = [
+          if (cursor == null) _definitionRow()..['id'] = 'food-000',
+          if (cursor == null || cursor == 'gt.food-000')
+            _definitionRow()..['id'] = 'food-001',
+          if (cursor == 'gt.food-001') _definitionRow()..['id'] = 'food-002',
+        ];
+        return _jsonResponse(rows, request);
+      }),
+    );
+
+    final templates = await repository.loadTemplates('subject');
+
+    expect(templates.map((template) => template.id), [
+      'food-000',
+      'food-001',
+      'food-002',
+    ]);
+    expect(requests.map((uri) => uri.queryParameters['order']), [
+      'id.asc.nullslast',
+      'id.asc.nullslast',
+      'id.asc.nullslast',
+    ]);
+    expect(requests.map((uri) => uri.queryParameters['id']), [
+      null,
+      'gt.food-001',
+      'gt.food-002',
+    ]);
+  });
+
+  test('current food definition loads the owner-scoped snapshot', () async {
+    final food = _food()..foodVersionId = 'current';
+    final requests = <Uri>[];
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        requests.add(request.url);
+        final data = request.url.path.endsWith('/nutrition_food_definition')
+            ? {'current_version_id': 'current', 'deleted_at': null}
+            : {'snapshot': food.toJsonForStorage()};
+        return _jsonResponse(data, request);
+      }),
+    );
+
+    final current = await repository.loadCurrentFoodDefinition(
+      subjectId: 'subject',
+      foodId: food.foodId,
+    );
+
+    expect(current!.foodVersionId, 'current');
+    expect(current.canWriteAvailability, isTrue);
+    expect(requests.first.queryParameters['subject_id'], 'eq.subject');
+    expect(requests.last.queryParameters['food_id'], 'eq.${food.foodId}');
+    expect(requests.last.queryParameters['id'], 'eq.current');
   });
 
   test('historical mutation returns explicit update counts', () async {

@@ -149,6 +149,8 @@ class _TrackingNutritionFoodRepository({
   final bool failTemplateSave = false,
 }) extends FakeNutritionFoodRepository {
   int mutationCalls = 0;
+  FoodEntry? currentDefinition;
+  final expectedVersions = <String>[];
   final List<String?> mutationIds = [];
   final List<int?> propagatedStudyDays = [];
   List<Map<String, dynamic>> Function(FoodEntry definition)? progressBuilder;
@@ -177,6 +179,12 @@ class _TrackingNutritionFoodRepository({
   }
 
   @override
+  Future<FoodEntry?> loadCurrentFoodDefinition({
+    required String subjectId,
+    required String foodId,
+  }) async => currentDefinition;
+
+  @override
   Future<NutritionFoodMutationResult> mutateHistoricalDefinition({
     required String subjectId,
     required FoodEntry snapshot,
@@ -187,6 +195,7 @@ class _TrackingNutritionFoodRepository({
     String? mutationId,
   }) async {
     mutationCalls++;
+    expectedVersions.add(expectedVersionId);
     mutationIds.add(mutationId);
     propagatedStudyDays.add(currentStudyDay);
     submittedSnapshot = FoodEntry.fromJson(snapshot.toJson());
@@ -1571,6 +1580,42 @@ void main() {
       );
     },
   );
+
+  testWidgets('historical reusable edit uses the current definition version', (
+    tester,
+  ) async {
+    final setup = _historicalEditingSetup();
+    final repository = _TrackingNutritionFoodRepository(todayUpdateCount: 0)
+      ..currentDefinition = (testFood()
+        ..name = 'Current apple'
+        ..foodVersionId = 'current-version'
+        ..amount = 1);
+    MealLog? result;
+    await openMealEntry(
+      tester,
+      _mealWithMatchingDefinitions(),
+      historicalTarget: setup.target,
+      foodRepository: repository,
+      appState: setup.appState,
+      onResult: (meal) => result = meal,
+    );
+
+    await tester.tap(find.byTooltip('More options').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit reusable food'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Current apple'), findsOneWidget);
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(repository.expectedVersions, ['current-version']);
+    expect(repository.submittedSnapshot!.id, 'food');
+
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(result!.foods.first.amount, 2);
+    expect(result!.foods.first.foodVersionId, 'updated-food-version');
+  });
 
   testWidgets(
     'historical reusable edit normalizes definition and reports opt-out',

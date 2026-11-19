@@ -36,6 +36,7 @@ class const FoodEntryScreen({
   final bool isExternalLibraryCopy = false,
   final NutritionFoodRepository? repository,
   final TemplateViewModel? templateViewModel,
+  final bool Function()? canEditRecall,
   final void Function(FoodEntry food, Offset? source)? onSavedToSelection,
   super.key,
 }) extends StatefulWidget {
@@ -57,6 +58,7 @@ class const FoodEntryScreen({
     bool isExternalLibraryCopy = false,
     NutritionFoodRepository? repository,
     TemplateViewModel? templateViewModel,
+    bool Function()? canEditRecall,
     void Function(FoodEntry food, Offset? source)? onSavedToSelection,
   }) => MaterialPageRoute(
     builder: (_) => FoodEntryScreen(
@@ -73,6 +75,7 @@ class const FoodEntryScreen({
       isExternalLibraryCopy: isExternalLibraryCopy,
       repository: repository,
       templateViewModel: templateViewModel,
+      canEditRecall: canEditRecall,
       onSavedToSelection: onSavedToSelection,
     ),
   );
@@ -113,6 +116,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   late final String _initialSnapshot;
   bool _allowPop = false;
   bool _isSaving = false;
+  String? _newFoodId;
   final GlobalKey _saveButtonKey = GlobalKey();
 
   /// Whether the food entry data comes from AI analysis.
@@ -235,7 +239,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   }
 
   Future<void> _saveFood() async {
-    if (_isSaving) return;
+    if (_isSaving || widget.canEditRecall?.call() == false) return;
     Offset? saveSource;
     final saveContext = _saveButtonKey.currentContext;
     if (widget.existingFood == null && saveContext != null) {
@@ -317,9 +321,12 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
           '$error\n$stackTrace',
         );
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.could_not_save_results)));
+          final conflict = NutritionFoodRepository.isVersionConflict(error);
+          final message = conflict
+              ? l10n.nutrition_food_definition_conflict
+              : l10n.could_not_save_results;
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(message)));
           setState(() => _isSaving = false);
         }
         return;
@@ -393,7 +400,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     setState(() => _allowPop = true);
     final route = ModalRoute.of(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted || route?.isCurrent != true) return;
       Navigator.of(context).pop(result);
       if (afterPop == null) return;
       final completed = route?.completed;
@@ -489,6 +496,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     final existingFood = widget.existingFood;
     if (existingFood == null) {
       return FoodEntry.withId(
+        foodId: _newFoodId ??= const Uuid().v4(),
         entryType: _entryType,
         name: _nameController.text,
         brandName: _brandController.text.isEmpty ? null : _brandController.text,
@@ -788,14 +796,14 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     return PopScope(
       canPop: _allowPop,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
+        if (didPop || _isSaving) return;
         if (_hasUnsavedChanges) {
           _confirmDiscard();
         } else {
           _pop();
         }
       },
-      child: scaffold,
+      child: AbsorbPointer(absorbing: _isSaving, child: scaffold),
     );
   }
 }
@@ -1010,10 +1018,10 @@ class const _EssentialFieldsCard({
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return l10n.required_error;
-                }
-                return null;
+                final grams = double.tryParse(value ?? '');
+                return grams == null || !grams.isFinite || grams <= 0
+                    ? l10n.food_quantity_invalid_amount
+                    : null;
               },
             ),
             const SizedBox(height: 12),
