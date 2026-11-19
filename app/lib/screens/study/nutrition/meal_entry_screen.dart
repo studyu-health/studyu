@@ -1433,27 +1433,37 @@ class const _FoodListSection({
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          allowMeals ? l10n.nutrition_logged_foods_and_meals : l10n.food_items,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        if (meal.foods.isNotEmpty && saveToLibrary != null)
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: compactActions
-                ? IconButton(
-                    tooltip: l10n.nutrition_create_saved_meal_from_log,
-                    onPressed: saveToLibrary,
-                    icon: const Icon(Icons.bookmark_add_outlined),
-                  )
-                : TextButton.icon(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          spacing: 8,
+          children: [
+            Flexible(
+              child: Text(
+                allowMeals
+                    ? l10n.nutrition_logged_foods_and_meals
+                    : l10n.food_items,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (meal.foods.isNotEmpty && saveToLibrary != null)
+              if (compactActions)
+                IconButton(
+                  tooltip: l10n.nutrition_create_saved_meal_from_log,
+                  onPressed: saveToLibrary,
+                  icon: const Icon(Icons.bookmark_add_outlined),
+                )
+              else
+                Flexible(
+                  child: TextButton.icon(
                     onPressed: saveToLibrary,
                     icon: const Icon(Icons.bookmark_add_outlined),
                     label: Text(l10n.nutrition_create_saved_meal_from_log),
                   ),
-          ),
+                ),
+          ],
+        ),
         const SizedBox(height: 12),
         if (meal.foods.isEmpty)
           SizedBox(
