@@ -700,13 +700,15 @@ void main() {
     expect(find.text('No meals recorded yet'), findsOneWidget);
   });
 
-  testWidgets('logs a new meal from a photo below the Today meals', (
+  testWidgets('expands Photo Recall and logs a new meal from a photo', (
     tester,
   ) async {
     const photoId = 'lunch-photo';
     final photoTime = DateTime(2026, 7, 15, 12, 30);
+    var galleryQueries = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_photoManagerChannel, (call) async {
+          if (call.method == 'getAssetPathList') galleryQueries++;
           return switch (call.method) {
             'getPermissionState' => PermissionState.authorized.index,
             'getAssetPathList' => {
@@ -746,14 +748,27 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final photoRecall = find.text('Photo Recall');
     final gallery = find.byType(PhotoRecallSection);
-    expect(tester.widget<PhotoRecallSection>(gallery).date, today.date);
+    expect(gallery, findsNothing);
+    expect(galleryQueries, 0);
     expect(
-      tester.getTopLeft(gallery).dy,
+      tester.getTopLeft(photoRecall).dy,
       greaterThan(
         tester.getBottomLeft(find.byKey(const ValueKey('meal-breakfast'))).dy,
       ),
     );
+    await tester.ensureVisible(photoRecall);
+    await tester.tap(photoRecall);
+    await tester.pumpAndSettle();
+    expect(tester.widget<PhotoRecallSection>(gallery).date, today.date);
+
+    await tester.tap(photoRecall);
+    await tester.pumpAndSettle();
+    expect(gallery, findsNothing);
+
+    await tester.tap(photoRecall);
+    await tester.pumpAndSettle();
     final thumbnail = find.byKey(const ValueKey(photoId));
     await tester.ensureVisible(thumbnail);
     await tester.tap(thumbnail);

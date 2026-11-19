@@ -423,19 +423,28 @@ class _NutritionTaskWidgetState()
           _buildMealsSection(context, model, recall, theme, l10n),
           if (!_isHistoricalMode && !widget.readOnly && !kIsWeb) ...[
             const SizedBox(height: 24),
-            Text(
-              l10n.photoRecallTitle,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+            Card(
+              margin: EdgeInsets.zero,
+              elevation: 0,
+              clipBehavior: Clip.antiAlias,
+              child: ExpansionTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(l10n.photoRecallTitle),
+                expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                children: [
+                  Text(
+                    l10n.photoRecallSubtitle,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  PhotoRecallSection(
+                    date: recall.date,
+                    onPhotoTap: (photo) =>
+                        _addMeal(context, model, recallPhoto: photo),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(l10n.photoRecallSubtitle, style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 12),
-            PhotoRecallSection(
-              date: recall.date,
-              onPhotoTap: (photo) =>
-                  _addMeal(context, model, recallPhoto: photo),
             ),
           ],
           if (_isHistoricalMode) ...[
