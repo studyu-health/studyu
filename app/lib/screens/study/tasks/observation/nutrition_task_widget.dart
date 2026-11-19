@@ -380,8 +380,8 @@ class _NutritionTaskWidgetState()
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
           if (_isHistoricalMode) ...[
+            const SizedBox(height: 16),
             MaterialBanner(
               padding: const EdgeInsets.all(8),
               leading: Icon(
@@ -414,13 +414,12 @@ class _NutritionTaskWidgetState()
               backgroundColor: theme.colorScheme.secondaryContainer,
               dividerColor: Colors.transparent,
             ),
-            const SizedBox(height: 8),
-          ],
-          if (!_isHistoricalMode && widget.task?.header != null) ...[
-            HtmlText(widget.task!.header, centered: true),
+            const SizedBox(height: 32),
+          ] else if (widget.task?.header case final header?
+              when header.trim().isNotEmpty) ...[
+            HtmlText(header, centered: true),
             const SizedBox(height: 16),
           ],
-          const SizedBox(height: 24),
           _buildMealsSection(context, model, recall, theme, l10n),
           if (!_isHistoricalMode && !widget.readOnly && !kIsWeb) ...[
             const SizedBox(height: 24),
