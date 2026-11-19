@@ -835,7 +835,7 @@
   "library_edit_current_entry_and_library": "This item and reusable library item",
   "save_to_my_items_action": "Save to My items",
   "external_library_copy": "Import",
-  "external_library_copy_label": "Review and add {name} to My library",
+  "external_library_copy_label": "Review and add {name} to the Library",
   "@external_library_copy_label": {
     "placeholders": {
       "name": {
@@ -843,8 +843,8 @@
       }
     }
   },
-  "external_library_copy_saved": "Added to My library",
-  "external_library_copy_save_error": "Could not add food to My library",
+  "external_library_copy_saved": "Added to the Library",
+  "external_library_copy_save_error": "Could not add food to the Library",
   "remove_from_meal": "Remove from meal",
   "duplicate": "Duplicate",
   "save_as_template": "Add to My items",
@@ -870,7 +870,7 @@
   "template_saved": "Added to My items",
   "select_meal": "My meals",
   "select_food": "My foods",
-  "food_library_search_hint": "Search My library and external library…",
+  "food_library_search_hint": "Search library",
   "search_templates": "Search saved foods and meals…",
   "no_templates_saved": "No items yet",
   "save_templates_hint": "Save your favorite meals and foods for quick access",
@@ -1051,7 +1051,7 @@
   },
   "food_quantity_library_serving_unknown": "Library serving: weight unavailable",
   "food_quantity_default_serving_unknown": "Default serving: weight unavailable",
-  "food_quantity_override_helper": "Changes only this meal selection. My Library and the source item remain unchanged.",
+  "food_quantity_override_helper": "Changes apply only to the selected item in this meal.",
   "food_quantity_use_library_weight": "Use library weight ({weight} g)",
   "@food_quantity_use_library_weight": {
     "placeholders": {
@@ -1140,8 +1140,8 @@
   "calorie_distribution": "Calorie Distribution",
   "more_options": "More options",
   "search_food_hint": "Search foods, meals or brands",
-  "my_saved_items": "My library",
-  "food_library": "Food library",
+  "my_saved_items": "Library",
+  "food_library": "Library",
   "add_food_action": "Create food",
   "add_meal_action": "Create meal",
   "recent_foods": "Recently added",
@@ -1159,8 +1159,8 @@
     }
   },
   "review_copied_food": "Review food",
-  "external_library_copy_notice": "Review the details before adding this food to My library. Changes won’t affect the external library.",
-  "external_library_save_copy": "Save to My library",
+  "external_library_copy_notice": "Review the food details before saving to the Library. Your edits apply to the saved copy.",
+  "external_library_save_copy": "Save to Library",
   "quick_actions": "Quick Actions",
   "create": "Create",
   "create_meal": "Create meal",
@@ -1388,7 +1388,7 @@
   "historical_edit_mode_description": "On this History screen, you can update the meal log from your previous study day. Foods and meals you create here remain available for future meal logs.",
   "update_current_day_entries": "Also update matching entries in current study day",
   "update": "Update",
-  "current_meal_only_banner": "Changes apply only to this meal. For permanent changes, use Food Library.",
+  "current_meal_only_banner": "Changes apply only to this meal. For permanent changes, use the Library.",
   "grams_per_serving": "{grams} g per serving",
   "open_food_facts_attribution": "(c) Open Food Facts contributors",
   "open_food_facts_attribution_launch_error": "Could not open the Open Food Facts terms of use.",
@@ -1413,8 +1413,8 @@
   "nutrition_add_food_or_saved_meal": "Add food or saved meal",
   "nutrition_food_badge": "Food",
   "nutrition_saved_meal_badge": "Saved meal",
-  "nutrition_add_foods_or_saved_meals_to_meal": "Add foods or saved meals to {meal}",
-  "nutrition_search_foods_saved_meals_or_brands": "Search foods, saved meals, or brands",
+  "nutrition_add_foods_or_saved_meals_to_meal": "Add to {meal}",
+  "nutrition_search_foods_saved_meals_or_brands": "Search foods or meals",
   "nutrition_create_saved_meal": "Create saved meal",
   "nutrition_create_saved_meal_from_log": "Create saved meal from this log",
   "nutrition_edit_saved_meal": "Edit saved meal",

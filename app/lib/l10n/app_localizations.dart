@@ -4126,19 +4126,19 @@ abstract class AppLocalizations {
   /// No description provided for @external_library_copy_label.
   ///
   /// In en, this message translates to:
-  /// **'Review and add {name} to My library'**
+  /// **'Review and add {name} to the Library'**
   String external_library_copy_label(String name);
 
   /// No description provided for @external_library_copy_saved.
   ///
   /// In en, this message translates to:
-  /// **'Added to My library'**
+  /// **'Added to the Library'**
   String get external_library_copy_saved;
 
   /// No description provided for @external_library_copy_save_error.
   ///
   /// In en, this message translates to:
-  /// **'Could not add food to My library'**
+  /// **'Could not add food to the Library'**
   String get external_library_copy_save_error;
 
   /// No description provided for @remove_from_meal.
@@ -4252,7 +4252,7 @@ abstract class AppLocalizations {
   /// No description provided for @food_library_search_hint.
   ///
   /// In en, this message translates to:
-  /// **'Search My library and external library…'**
+  /// **'Search library'**
   String get food_library_search_hint;
 
   /// No description provided for @search_templates.
@@ -4570,7 +4570,7 @@ abstract class AppLocalizations {
   /// No description provided for @food_quantity_override_helper.
   ///
   /// In en, this message translates to:
-  /// **'Changes only this meal selection. My Library and the source item remain unchanged.'**
+  /// **'Changes apply only to the selected item in this meal.'**
   String get food_quantity_override_helper;
 
   /// No description provided for @food_quantity_use_library_weight.
@@ -4792,13 +4792,13 @@ abstract class AppLocalizations {
   /// No description provided for @my_saved_items.
   ///
   /// In en, this message translates to:
-  /// **'My library'**
+  /// **'Library'**
   String get my_saved_items;
 
   /// No description provided for @food_library.
   ///
   /// In en, this message translates to:
-  /// **'Food library'**
+  /// **'Library'**
   String get food_library;
 
   /// No description provided for @add_food_action.
@@ -4864,13 +4864,13 @@ abstract class AppLocalizations {
   /// No description provided for @external_library_copy_notice.
   ///
   /// In en, this message translates to:
-  /// **'Review the details before adding this food to My library. Changes won’t affect the external library.'**
+  /// **'Review the food details before saving to the Library. Your edits apply to the saved copy.'**
   String get external_library_copy_notice;
 
   /// No description provided for @external_library_save_copy.
   ///
   /// In en, this message translates to:
-  /// **'Save to My library'**
+  /// **'Save to Library'**
   String get external_library_save_copy;
 
   /// No description provided for @quick_actions.
@@ -5530,7 +5530,7 @@ abstract class AppLocalizations {
   /// No description provided for @current_meal_only_banner.
   ///
   /// In en, this message translates to:
-  /// **'Changes apply only to this meal. For permanent changes, use Food Library.'**
+  /// **'Changes apply only to this meal. For permanent changes, use the Library.'**
   String get current_meal_only_banner;
 
   /// No description provided for @grams_per_serving.
@@ -5638,13 +5638,13 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_add_foods_or_saved_meals_to_meal.
   ///
   /// In en, this message translates to:
-  /// **'Add foods or saved meals to {meal}'**
+  /// **'Add to {meal}'**
   String nutrition_add_foods_or_saved_meals_to_meal(Object meal);
 
   /// No description provided for @nutrition_search_foods_saved_meals_or_brands.
   ///
   /// In en, this message translates to:
-  /// **'Search foods, saved meals, or brands'**
+  /// **'Search foods or meals'**
   String get nutrition_search_foods_saved_meals_or_brands;
 
   /// No description provided for @nutrition_create_saved_meal.

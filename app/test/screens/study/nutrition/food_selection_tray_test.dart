@@ -140,7 +140,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('1 item · 80 kcal'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilterChip, 'My library'));
+    await tester.tap(find.widgetWithText(FilterChip, 'Library'));
     await tester.pumpAndSettle();
     expect(recent, findsNothing);
     expect(library, findsOneWidget);
@@ -728,11 +728,11 @@ void main() {
     expect(selection?.foods.single.amount, 1);
   });
 
-  testWidgets('My library row adds directly to the basket', (tester) async {
+  testWidgets('Library row adds directly to the basket', (tester) async {
     final repository = FakeNutritionFoodRepository([_libraryTemplate()]);
     await _pumpSearch(tester, repository: repository, query: null);
 
-    await tester.tap(find.text('My library'));
+    await tester.tap(find.text('Library'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Library Pear'));
     await tester.pumpAndSettle();
@@ -788,7 +788,7 @@ Future<void> _pumpLibrarySelection(
     query: null,
     textScaler: textScaler,
   );
-  final myLibrary = find.text('My library');
+  final myLibrary = find.text('Library');
   await tester.ensureVisible(myLibrary);
   await tester.tap(myLibrary);
   await tester.pumpAndSettle();

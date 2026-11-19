@@ -1998,7 +1998,7 @@ void main() {
       customLabel: 'Edited supper',
     );
     await openFoodSearchFromMeal(tester);
-    await tester.tap(find.text('My library'));
+    await tester.tap(find.text('Library'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Saved Pear Template'));
     await tester.pumpAndSettle();
@@ -2103,7 +2103,7 @@ void main() {
       customLabel: 'Edited supper',
     );
     await openFoodSearchFromMeal(tester);
-    await tester.tap(find.text('My library'));
+    await tester.tap(find.text('Library'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Afternoon Snack'));
@@ -2211,7 +2211,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await openFoodSearchFromMeal(tester);
-    await tester.tap(find.text('My library'));
+    await tester.tap(find.text('Library'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Saved Pear Template'));
     await tester.pumpAndSettle();

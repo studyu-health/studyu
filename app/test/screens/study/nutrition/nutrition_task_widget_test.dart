@@ -173,7 +173,7 @@ FakeNutritionFoodRepository _savedSoupRepository() =>
     ]);
 
 Future<void> _selectSavedSoup(WidgetTester tester) async {
-  await tester.tap(find.text('My library'));
+  await tester.tap(find.text('Library'));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Saved soup'));
   await tester.pumpAndSettle();

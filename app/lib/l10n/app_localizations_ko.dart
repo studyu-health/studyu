@@ -2152,15 +2152,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String external_library_copy_label(String name) {
-    return 'Review and add $name to My library';
+    return '$name 확인 후 라이브러리에 추가';
   }
 
   @override
-  String get external_library_copy_saved => 'Added to My library';
+  String get external_library_copy_saved => '라이브러리에 추가했습니다';
 
   @override
-  String get external_library_copy_save_error =>
-      'Could not add food to My library';
+  String get external_library_copy_save_error => '식품을 라이브러리에 추가하지 못했습니다';
 
   @override
   String get remove_from_meal => 'Remove from meal';
@@ -2220,8 +2219,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get select_food => 'My foods';
 
   @override
-  String get food_library_search_hint =>
-      'Search My library and external library…';
+  String get food_library_search_hint => '라이브러리 검색';
 
   @override
   String get search_templates => 'Search saved foods and meals…';
@@ -2443,8 +2441,7 @@ class AppLocalizationsKo extends AppLocalizations {
       'Default serving: weight unavailable';
 
   @override
-  String get food_quantity_override_helper =>
-      'Changes only this meal selection. My Library and the source item remain unchanged.';
+  String get food_quantity_override_helper => '변경 사항은 이 식사에서 선택한 항목에만 적용됩니다.';
 
   @override
   String food_quantity_use_library_weight(String weight) {
@@ -2583,10 +2580,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get search_food_hint => 'Search foods, meals or brands';
 
   @override
-  String get my_saved_items => 'My library';
+  String get my_saved_items => '라이브러리';
 
   @override
-  String get food_library => 'Food library';
+  String get food_library => '라이브러리';
 
   @override
   String get add_food_action => 'Create food';
@@ -2629,10 +2626,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get external_library_copy_notice =>
-      'Review the details before adding this food to My library. Changes won’t affect the external library.';
+      '라이브러리에 저장하기 전에 식품 정보를 확인하세요. 수정 사항은 저장한 사본에 적용됩니다.';
 
   @override
-  String get external_library_save_copy => 'Save to My library';
+  String get external_library_save_copy => '라이브러리에 저장';
 
   @override
   String get quick_actions => 'Quick Actions';
@@ -3027,7 +3024,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get current_meal_only_banner =>
-      'Changes apply only to this meal. For permanent changes, use Food Library.';
+      '변경 사항은 이 식사에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요.';
 
   @override
   String grams_per_serving(Object grams) {
@@ -3099,12 +3096,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String nutrition_add_foods_or_saved_meals_to_meal(Object meal) {
-    return 'Add foods or saved meals to $meal';
+    return '$meal에 추가';
   }
 
   @override
-  String get nutrition_search_foods_saved_meals_or_brands =>
-      'Search foods, saved meals, or brands';
+  String get nutrition_search_foods_saved_meals_or_brands => '식품 또는 식사 검색';
 
   @override
   String get nutrition_create_saved_meal => 'Create saved meal';

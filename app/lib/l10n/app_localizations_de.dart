@@ -2233,15 +2233,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String external_library_copy_label(String name) {
-    return '$name prüfen und zu meiner Bibliothek hinzufügen';
+    return '$name prüfen und zur Bibliothek hinzufügen';
   }
 
   @override
-  String get external_library_copy_saved => 'Zu „Meine Bibliothek“ hinzugefügt';
+  String get external_library_copy_saved => 'Zur Bibliothek hinzugefügt';
 
   @override
   String get external_library_copy_save_error =>
-      'Lebensmittel konnte nicht zu „Meine Bibliothek“ hinzugefügt werden';
+      'Das Lebensmittel konnte nicht zur Bibliothek hinzugefügt werden';
 
   @override
   String get remove_from_meal => 'Aus Mahlzeit entfernen';
@@ -2302,8 +2302,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get select_food => 'Meine Lebensmittel';
 
   @override
-  String get food_library_search_hint =>
-      'Meine Bibliothek und externe Bibliothek durchsuchen…';
+  String get food_library_search_hint => 'Bibliothek durchsuchen';
 
   @override
   String get search_templates =>
@@ -2527,7 +2526,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get food_quantity_override_helper =>
-      'Ändert nur die aktuelle Mahlzeitenauswahl. „Meine Elemente“ und das Quellelement bleiben unverändert.';
+      'Änderungen gelten nur für das ausgewählte Element in dieser Mahlzeit.';
 
   @override
   String food_quantity_use_library_weight(String weight) {
@@ -2667,10 +2666,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get search_food_hint => 'Lebensmittel und Mahlzeiten suchen…';
 
   @override
-  String get my_saved_items => 'Meine Bibliothek';
+  String get my_saved_items => 'Bibliothek';
 
   @override
-  String get food_library => 'Lebensmittelbibliothek';
+  String get food_library => 'Bibliothek';
 
   @override
   String get add_food_action => 'Lebensmittel erstellen';
@@ -2713,10 +2712,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get external_library_copy_notice =>
-      'Prüfen Sie die Details, bevor Sie dieses Lebensmittel zu „Meine Bibliothek“ hinzufügen. Änderungen wirken sich nicht auf die externe Bibliothek aus.';
+      'Prüfen Sie die Angaben vor dem Speichern in der Bibliothek. Änderungen gelten für die gespeicherte Kopie.';
 
   @override
-  String get external_library_save_copy => 'In „Meine Bibliothek“ speichern';
+  String get external_library_save_copy => 'In der Bibliothek speichern';
 
   @override
   String get quick_actions => 'Quick Actions';
@@ -3122,7 +3121,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get current_meal_only_banner =>
-      'Änderungen gelten nur für diese Mahlzeit. Für dauerhafte Änderungen verwenden Sie die Lebensmittelbibliothek.';
+      'Änderungen gelten nur für diese Mahlzeit. Für dauerhafte Änderungen verwenden Sie die Bibliothek.';
 
   @override
   String grams_per_serving(Object grams) {
@@ -3197,12 +3196,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String nutrition_add_foods_or_saved_meals_to_meal(Object meal) {
-    return 'Lebensmittel oder gespeicherte Mahlzeiten zu $meal hinzufügen';
+    return 'Zu $meal hinzufügen';
   }
 
   @override
   String get nutrition_search_foods_saved_meals_or_brands =>
-      'Lebensmittel, gespeicherte Mahlzeiten oder Marken suchen';
+      'Lebensmittel oder Mahlzeiten suchen';
 
   @override
   String get nutrition_create_saved_meal => 'Gespeicherte Mahlzeit erstellen';

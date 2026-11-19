@@ -530,5 +530,17 @@
   "food_selection_remove_title": "{name} 항목을 제거하시겠습니까?",
   "food_selection_remove": "제거",
   "food_quantity_edit_amount": "수량 수정",
-  "food_quantity_add_to_selection": "선택 목록에 추가"
+  "food_quantity_add_to_selection": "선택 목록에 추가",
+  "food_library": "라이브러리",
+  "my_saved_items": "라이브러리",
+  "nutrition_add_foods_or_saved_meals_to_meal": "{meal}에 추가",
+  "nutrition_search_foods_saved_meals_or_brands": "식품 또는 식사 검색",
+  "food_library_search_hint": "라이브러리 검색",
+  "external_library_copy_label": "{name} 확인 후 라이브러리에 추가",
+  "external_library_copy_saved": "라이브러리에 추가했습니다",
+  "external_library_copy_save_error": "식품을 라이브러리에 추가하지 못했습니다",
+  "external_library_copy_notice": "라이브러리에 저장하기 전에 식품 정보를 확인하세요. 수정 사항은 저장한 사본에 적용됩니다.",
+  "external_library_save_copy": "라이브러리에 저장",
+  "food_quantity_override_helper": "변경 사항은 이 식사에서 선택한 항목에만 적용됩니다.",
+  "current_meal_only_banner": "변경 사항은 이 식사에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요."
 }

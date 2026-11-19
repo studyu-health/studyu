@@ -369,14 +369,14 @@ void main() {
     );
 
     expect(find.text('Review food'), findsOneWidget);
-    expect(find.text('Save to My library'), findsOneWidget);
+    expect(find.text('Save to Library'), findsOneWidget);
     expect(
-      find.textContaining('Changes won’t affect the external library.'),
+      find.textContaining('Your edits apply to the saved copy.'),
       findsOneWidget,
     );
 
     await tester.enterText(find.byType(TextFormField).first, 'Copied product');
-    await tester.tap(find.widgetWithText(FilledButton, 'Save to My library'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Save to Library'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -400,7 +400,7 @@ void main() {
     );
 
     expect(find.text('Review food'), findsNothing);
-    expect(find.text('Save to My library'), findsNothing);
+    expect(find.text('Save to Library'), findsNothing);
     expect(find.text('Edit food'), findsOneWidget);
   });
 

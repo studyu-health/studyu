@@ -2207,15 +2207,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String external_library_copy_label(String name) {
-    return 'Review and add $name to My library';
+    return 'Review and add $name to the Library';
   }
 
   @override
-  String get external_library_copy_saved => 'Added to My library';
+  String get external_library_copy_saved => 'Added to the Library';
 
   @override
   String get external_library_copy_save_error =>
-      'Could not add food to My library';
+      'Could not add food to the Library';
 
   @override
   String get remove_from_meal => 'Remove from meal';
@@ -2275,8 +2275,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get select_food => 'My foods';
 
   @override
-  String get food_library_search_hint =>
-      'Search My library and external library…';
+  String get food_library_search_hint => 'Search library';
 
   @override
   String get search_templates => 'Search saved foods and meals…';
@@ -2499,7 +2498,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get food_quantity_override_helper =>
-      'Changes only this meal selection. My Library and the source item remain unchanged.';
+      'Changes apply only to the selected item in this meal.';
 
   @override
   String food_quantity_use_library_weight(String weight) {
@@ -2638,10 +2637,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search_food_hint => 'Search foods, meals or brands';
 
   @override
-  String get my_saved_items => 'My library';
+  String get my_saved_items => 'Library';
 
   @override
-  String get food_library => 'Food library';
+  String get food_library => 'Library';
 
   @override
   String get add_food_action => 'Create food';
@@ -2684,10 +2683,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get external_library_copy_notice =>
-      'Review the details before adding this food to My library. Changes won’t affect the external library.';
+      'Review the food details before saving to the Library. Your edits apply to the saved copy.';
 
   @override
-  String get external_library_save_copy => 'Save to My library';
+  String get external_library_save_copy => 'Save to Library';
 
   @override
   String get quick_actions => 'Quick Actions';
@@ -3082,7 +3081,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get current_meal_only_banner =>
-      'Changes apply only to this meal. For permanent changes, use Food Library.';
+      'Changes apply only to this meal. For permanent changes, use the Library.';
 
   @override
   String grams_per_serving(Object grams) {
@@ -3154,12 +3153,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String nutrition_add_foods_or_saved_meals_to_meal(Object meal) {
-    return 'Add foods or saved meals to $meal';
+    return 'Add to $meal';
   }
 
   @override
   String get nutrition_search_foods_saved_meals_or_brands =>
-      'Search foods, saved meals, or brands';
+      'Search foods or meals';
 
   @override
   String get nutrition_create_saved_meal => 'Create saved meal';

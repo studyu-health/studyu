@@ -290,7 +290,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Import'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save to My library'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Save to Library'));
     await tester.pumpAndSettle();
 
     expect(repository.saveCount, 1);
@@ -338,7 +338,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Import'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save to My library'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Save to Library'));
     await tester.pumpAndSettle();
 
     expect(find.widgetWithText(FilledButton, 'Try again'), findsOneWidget);
