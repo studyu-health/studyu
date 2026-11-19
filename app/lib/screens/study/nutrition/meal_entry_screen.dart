@@ -1527,6 +1527,14 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
               itemLabel: (value) => value == null
                   ? l10n.not_added
                   : _getMealContextLabel(value, l10n),
+              itemIcon: (value) => switch (value) {
+                null => Icons.remove,
+                MealContext.home => Icons.home_outlined,
+                MealContext.restaurant => Icons.restaurant_outlined,
+                MealContext.takeout => Icons.takeout_dining_outlined,
+                MealContext.vending => Icons.local_drink_outlined,
+                MealContext.other => Icons.more_horiz,
+              },
               onChanged: (value) => setState(() => _mealContext = value),
             ),
             if (_mealContext == MealContext.other) ...[
@@ -1549,6 +1557,14 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
               itemLabel: (value) => value == null
                   ? l10n.not_specified
                   : _getCompanyContextLabel(value, l10n),
+              itemIcon: (value) => switch (value) {
+                null => Icons.remove,
+                CompanyContext.alone => Icons.person_outline,
+                CompanyContext.family => Icons.family_restroom_outlined,
+                CompanyContext.friends => Icons.group_outlined,
+                CompanyContext.colleagues => Icons.badge_outlined,
+                CompanyContext.other => Icons.more_horiz,
+              },
               onChanged: (value) => setState(() => _companyContext = value),
             ),
             const SizedBox(height: 12),
@@ -1560,6 +1576,14 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
               itemLabel: (value) => value == null
                   ? l10n.not_specified
                   : _getDistractionContextLabel(value, l10n),
+              itemIcon: (value) => switch (value) {
+                null => Icons.remove,
+                DistractionContext.none => Icons.notifications_off_outlined,
+                DistractionContext.tv => Icons.tv_outlined,
+                DistractionContext.phone => Icons.smartphone_outlined,
+                DistractionContext.work => Icons.work_outlined,
+                DistractionContext.other => Icons.more_horiz,
+              },
               onChanged: (value) => setState(() => _distractionContext = value),
             ),
             const SizedBox(height: 16),
@@ -1669,6 +1693,7 @@ class const _DropdownField<T>({
   required final T? value,
   required final List<T?> items,
   required final String Function(T?) itemLabel,
+  required final IconData Function(T?) itemIcon,
   required final ValueChanged<T?> onChanged,
 }) extends StatelessWidget {
   @override
@@ -1682,12 +1707,26 @@ class const _DropdownField<T>({
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
-      items: items
-          .map(
-            (item) =>
-                DropdownMenuItem<T?>(value: item, child: Text(itemLabel(item))),
-          )
-          .toList(),
+      items: [
+        for (final item in items)
+          DropdownMenuItem<T?>(
+            value: item,
+            child: Row(
+              children: [
+                Icon(itemIcon(item), size: 20),
+                const SizedBox(width: 12),
+                Flexible(child: Text(itemLabel(item))),
+              ],
+            ),
+          ),
+      ],
+      selectedItemBuilder: (context) => [
+        for (final item in items)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(itemLabel(item)),
+          ),
+      ],
       onChanged: onChanged,
     );
   }
