@@ -7,6 +7,42 @@ import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
 
 void main() {
+  test('legacy recall and a period-qualified draft count only once', () async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime.utc(2026, 7, 17);
+    final yesterday = now.subtract(const Duration(days: 1));
+    final subject = _subject(yesterday);
+    final canonical = _recall('legacy', yesterday, 0);
+    final progress = _progress(recall: canonical, completedAt: yesterday);
+    progress.result = Result<DailyRecall>.app(
+      type: 'DailyRecall',
+      periodId: null,
+      result: canonical,
+    );
+    subject.progress.add(progress);
+    final manager = NutritionRecallAutoSaveManager();
+    await manager.saveRecall(
+      recall: _recall('pending', yesterday, 0),
+      subjectId: subject.id,
+      taskId: 'task',
+      interventionId: 'intervention',
+      periodId: 'period',
+      studyDaySnapshot: 0,
+    );
+
+    final records = await loadNutritionRecallRecords(
+      subject: subject,
+      taskId: 'task',
+      autoSaveManager: manager,
+      now: now,
+    );
+
+    expect(records.single.recall.id, 'legacy');
+    expect(
+      (await manager.scanPendingRecalls(subject.id)).single.recall.id,
+      'pending',
+    );
+  });
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test('nutrition study day uses the UTC calendar across offset midnights', () {

@@ -11,6 +11,7 @@ import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_core/core.dart';
@@ -229,6 +230,93 @@ Future<void> _selectSavedSoup(WidgetTester tester) async {
 }
 
 void main() {
+  for (final legacyPeriod in [false, true]) {
+    testWidgets(
+      'conflicting draft is kept until confirmed discard (legacy period: $legacyPeriod)',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({
+          nutritionInstructionsShownKey: true,
+        });
+        final l10n = lookupAppLocalizations(const Locale('en'));
+        final today = DateTime.now();
+        final task = nutritionTask();
+        final subject = StudySubject('subject-draft', 'study', 'user', [])
+          ..startedAt = today
+          ..study = (Study('study', 'user')..schedule.numberOfCycles = 0);
+        final saved = DailyRecall.withId(
+          date: today,
+          recallMode: RecallMode.realtimeRecord,
+          meals: [],
+          studyDaySnapshot: 0,
+          entryCompletedAt: today,
+          lastAutoSavedAt: today,
+          waterIntakeMl: 100,
+        );
+        subject.progress.add(
+          SubjectProgress(
+              subjectId: subject.id,
+              interventionId: 'baseline',
+              taskId: task.id,
+              resultType: 'DailyRecall',
+              result: Result<DailyRecall>.app(
+                type: 'DailyRecall',
+                periodId: legacyPeriod ? null : 'period',
+                result: saved,
+              ),
+            )
+            ..completedAt = today
+            ..nutritionRevision = 1,
+        );
+        final manager = NutritionRecallAutoSaveManager();
+        final local = DailyRecall.fromJson(saved.toJson())
+          ..lastAutoSavedAt = today.add(const Duration(seconds: 1))
+          ..waterIntakeMl = 350;
+        await manager.saveRecall(
+          recall: local,
+          subjectId: subject.id,
+          taskId: task.id,
+          interventionId: 'baseline',
+          periodId: 'period',
+          studyDaySnapshot: 0,
+          progressCompletedAt: today,
+          nutritionRevision: 0,
+        );
+
+        await tester.pumpWidget(
+          nutritionTaskApp(task, appState: AppState()..activeSubject = subject),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.nutrition_recall_conflict_title), findsOneWidget);
+        expect(find.text(l10n.log_meal), findsNothing);
+        await tester.tap(find.text(l10n.nutrition_recall_discard_draft));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(l10n.cancel));
+        await tester.pumpAndSettle();
+        expect(
+          (await manager.scanPendingRecalls(subject.id))
+              .single
+              .recall
+              .waterIntakeMl,
+          350,
+        );
+
+        await tester.tap(find.text(l10n.nutrition_recall_discard_draft));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.widgetWithText(
+            FilledButton,
+            l10n.nutrition_recall_discard_draft,
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+        expect(find.text(l10n.nutrition_recall_conflict_title), findsNothing);
+        expect(find.text(l10n.log_meal), findsOneWidget);
+      },
+    );
+  }
+
   testWidgets('timeline identifies missing and partial meal energy', (
     tester,
   ) async {

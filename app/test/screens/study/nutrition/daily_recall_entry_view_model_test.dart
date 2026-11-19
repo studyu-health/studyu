@@ -6,8 +6,167 @@ import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
+  test('rollover preserves the prior draft and rejects new entries', () async {
+    SharedPreferences.setMockInitialValues({});
+    var now = DateTime.utc(2025, 7, 16, 23, 59);
+    final subject = StudySubject('rollover-subject', 'study', 'user', [])
+      ..study = (Study('study', 'user')..schedule.numberOfCycles = 0)
+      ..startedAt = DateTime.utc(2025, 7, 15);
+    final task = NutritionTask.withId()..trackWaterIntake = true;
+    final period = task.schedule.completionPeriods.single;
+    final manager = NutritionRecallAutoSaveManager();
+    final model = DailyRecallEntryViewModel(
+      subject: subject,
+      task: task,
+      completionPeriod: period,
+      autoSaveManager: manager,
+      clock: () => now,
+    );
+    addTearDown(model.dispose);
+    await model.adjustWaterIntake(250);
+    await model.flushPendingAutoSave();
+
+    now = now.add(const Duration(minutes: 2));
+    await model.adjustWaterIntake(250);
+    expect(model.currentDayExpired, isTrue);
+    expect(model.recall.waterIntakeMl, 250);
+    expect(
+      (await manager.scanPendingRecalls(subject.id))
+          .single
+          .recall
+          .waterIntakeMl,
+      250,
+    );
+  });
+
+  test('reloading a newer canonical recall preserves the old draft', () async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime.utc(2026, 7, 16, 12);
+    final task = NutritionTask.withId()..trackWaterIntake = true;
+    final period = task.schedule.completionPeriods.single;
+    final subject = StudySubject('subject-reload', 'study', 'user', [])
+      ..study = (Study('study', 'user')..schedule.numberOfCycles = 0)
+      ..startedAt = now;
+    final completed = DailyRecall.withId(
+      date: now,
+      recallMode: RecallMode.realtimeRecord,
+      meals: [],
+      entryCompletedAt: now,
+      studyDaySnapshot: 0,
+      lastAutoSavedAt: now,
+      waterIntakeMl: 100,
+    );
+    final progress = SubjectProgress(
+      subjectId: subject.id,
+      interventionId: 'baseline',
+      taskId: task.id,
+      resultType: 'DailyRecall',
+      result: Result<DailyRecall>.app(
+        type: 'DailyRecall',
+        periodId: period.id,
+        result: completed,
+      ),
+    )..completedAt = now;
+    subject.progress.add(progress);
+    final manager = NutritionRecallAutoSaveManager();
+    final model = DailyRecallEntryViewModel(
+      subject: subject,
+      task: task,
+      completionPeriod: period,
+      autoSaveManager: manager,
+      clock: () => now.add(const Duration(minutes: 1)),
+    )..shouldSaveToDb = false;
+    addTearDown(model.dispose);
+    await model.adjustWaterIntake(250);
+    await model.flushPendingAutoSave();
+    expect(model.recall.waterIntakeMl, 350);
+
+    completed
+      ..waterIntakeMl = 125
+      ..lastAutoSavedAt = now.add(const Duration(minutes: 2));
+    progress.nutritionRevision = 1;
+    await model.reloadCanonicalRecall();
+
+    expect(model.hasDraftConflict, isTrue);
+    expect(model.recall.waterIntakeMl, 125);
+    await model.adjustWaterIntake(250);
+    expect(model.recall.waterIntakeMl, 125);
+    expect(
+      (await manager.scanPendingRecalls(subject.id))
+          .single
+          .recall
+          .waterIntakeMl,
+      350,
+    );
+    expect(await model.discardConflictingDraft(), isTrue);
+    expect(model.canEdit, isTrue);
+    expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+  });
+
+  test(
+    'a server revision conflict keeps the local draft and locks edits',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final now = DateTime.utc(2026, 7, 16, 12);
+      final task = NutritionTask.withId()..trackWaterIntake = true;
+      final period = task.schedule.completionPeriods.single;
+      final subject = StudySubject('subject-conflict', 'study', 'user', [])
+        ..study = (Study('study', 'user')..schedule.numberOfCycles = 0)
+        ..startedAt = now;
+      final completed = DailyRecall.withId(
+        date: now,
+        recallMode: RecallMode.realtimeRecord,
+        meals: [],
+        entryCompletedAt: now,
+        studyDaySnapshot: 0,
+      );
+      final manager = NutritionRecallAutoSaveManager();
+      final model = DailyRecallEntryViewModel(
+        subject: subject,
+        task: task,
+        completionPeriod: period,
+        existingRecall: completed,
+        autoSaveManager: manager,
+        clock: () => now.add(const Duration(minutes: 1)),
+        remoteSaver:
+            ({
+              required taskId,
+              required periodId,
+              required recall,
+              required persistenceTarget,
+              interventionIdOverride,
+            }) async {
+              throw const PostgrestException(
+                message: 'stale nutrition recall revision',
+                code: '40001',
+              );
+            },
+      );
+      addTearDown(model.dispose);
+
+      await model.adjustWaterIntake(250);
+      await model.flushPendingAutoSave(persistToDatabase: true);
+      expect(model.hasDraftConflict, isTrue);
+      expect(model.canDiscardConflictingDraft, isTrue);
+      await model.adjustWaterIntake(250);
+      expect(model.recall.waterIntakeMl, 250);
+      expect(
+        (await manager.scanPendingRecalls(subject.id))
+            .single
+            .recall
+            .waterIntakeMl,
+        250,
+      );
+      expect(await model.discardConflictingDraft(), isTrue);
+      expect(model.canEdit, isFalse);
+      expect(model.requiresReopen, isTrue);
+      expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+    },
+  );
+
   test('new recall uses the authoritative UTC study day', () {
     SharedPreferences.setMockInitialValues({});
     final subject = _LocalDaySubject()
@@ -120,6 +279,7 @@ void main() {
             },
       );
       addTearDown(viewModel.dispose);
+      await viewModel.initialized;
 
       viewModel.addMeal(
         MealLog.withId(
@@ -171,6 +331,7 @@ void main() {
         completionPeriod: period,
       );
       addTearDown(viewModel.dispose);
+      await viewModel.initialized;
 
       viewModel.addMeal(
         MealLog.withId(
@@ -232,6 +393,7 @@ void main() {
       autoSaveManager: autoSaveManager,
     );
     addTearDown(viewModel.dispose);
+    await viewModel.initialized;
 
     viewModel.addMeal(
       MealLog.withId(
@@ -311,7 +473,7 @@ void main() {
   );
 
   test(
-    'rollover discards a draft when its study day is already complete',
+    'rollover retains a conflicting draft when its study day is complete',
     () async {
       SharedPreferences.setMockInitialValues({});
 
@@ -374,7 +536,7 @@ void main() {
           taskId: task.id,
           studyDay: 0,
         ),
-        isNull,
+        isNotNull,
       );
       expect(subject.progress, hasLength(1));
       expect(
@@ -410,6 +572,7 @@ class _BlockingAutoSaveManager() extends NutritionRecallAutoSaveManager {
     required String periodId,
     required int studyDaySnapshot,
     DateTime? progressCompletedAt,
+    int? nutritionRevision,
   }) async {
     savedRecalls.add(recall);
     final saveNumber = savedRecalls.length;
@@ -425,6 +588,7 @@ class _BlockingAutoSaveManager() extends NutritionRecallAutoSaveManager {
       periodId: periodId,
       studyDaySnapshot: studyDaySnapshot,
       progressCompletedAt: progressCompletedAt,
+      nutritionRevision: nutritionRevision,
     );
   }
 }

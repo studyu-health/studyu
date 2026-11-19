@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
@@ -148,7 +149,20 @@ class Cache() {
           continue;
         }
         try {
-          remoteSubject.progress.add(await progress.save());
+          if (recall is DailyRecall) {
+            await remoteSubject.upsertNutritionResult(
+              taskId: progress.taskId,
+              periodId:
+                  progress.result.periodId ??
+                  NutritionRecallAutoSaveManager.defaultPeriodId,
+              recall: recall,
+              completionDateOverride: completedAt,
+              interventionIdOverride: progress.interventionId,
+              createOnly: true,
+            );
+          } else {
+            remoteSubject.progress.add(await progress.save());
+          }
           savedTimes.add(completedAt);
         } catch (error) {
           allSaved = false;

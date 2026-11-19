@@ -293,21 +293,29 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
           existingFood,
           result.definition.snapshot,
         );
-        _reconcileProgress(subject, result.progress);
+        final progress = _reconcileProgress(subject, result.progress);
         final autoSaveManager = NutritionRecallAutoSaveManager();
-        if (_propagateToCurrentStudyDay) {
-          await autoSaveManager.rewriteFoodDefinition(
+        await Future.wait([
+          if (_propagateToCurrentStudyDay)
+            autoSaveManager.rewriteFoodDefinition(
+              subjectId: subject.id,
+              studyDaySnapshot: currentStudyDay!,
+              definition: result.definition.snapshot,
+              canonicalProgress: progress,
+            ),
+          autoSaveManager.rewriteFoodDefinition(
             subjectId: subject.id,
-            studyDaySnapshot: currentStudyDay!,
+            studyDaySnapshot: historicalTarget.studyDaySnapshot,
             definition: result.definition.snapshot,
+            canonicalProgress: progress,
+            entryId: existingFood.id,
+          ),
+        ]).then<void>((_) {}).onError((error, stackTrace) {
+          StudyULogger.warning(
+            'Could not synchronize the local draft after saving the food definition: '
+            '$error\n$stackTrace',
           );
-        }
-        await autoSaveManager.rewriteFoodDefinition(
-          subjectId: subject.id,
-          studyDaySnapshot: historicalTarget.studyDaySnapshot,
-          definition: result.definition.snapshot,
-          entryId: existingFood.id,
-        );
+        });
         if (mounted) {
           final message = _propagateToCurrentStudyDay
               ? l10n.food_definition_updated_current_day_opt_in
@@ -375,25 +383,18 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     }
   }
 
-  void _reconcileProgress(
+  List<SubjectProgress> _reconcileProgress(
     StudySubject subject,
     List<Map<String, dynamic>> canonicalRows,
   ) {
-    for (final row in canonicalRows) {
-      final canonical = SupabaseQuery.extractSupabaseSingleRow<SubjectProgress>(
-        row,
-      );
-      final index = subject.progress.indexWhere(
-        (progress) =>
-            progress.subjectId == canonical.subjectId &&
-            progress.completedAt == canonical.completedAt,
-      );
-      if (index < 0) {
-        subject.progress.add(canonical);
-      } else {
-        subject.progress[index] = canonical;
-      }
+    final reconciled = [
+      for (final row in canonicalRows)
+        SupabaseQuery.extractSupabaseSingleRow<SubjectProgress>(row),
+    ];
+    for (final canonical in reconciled) {
+      subject.applySavedProgress(canonical);
     }
+    return reconciled;
   }
 
   void _pop([FoodEntry? result, VoidCallback? afterPop]) {

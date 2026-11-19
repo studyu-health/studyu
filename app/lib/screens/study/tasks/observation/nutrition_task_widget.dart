@@ -75,7 +75,8 @@ class _NutritionTaskWidgetState()
   DailyRecallEntryViewModel? _viewModel;
   TemplateViewModel? _templateViewModel;
   int _selectedDestination = 0;
-  bool _didHandleExpiredHistoricalEdit = false;
+  bool _didHandleExpiredEdit = false;
+  Timer? _studyDayTimer;
   int? _cupSizeMl;
   bool _isSavingCupSize = false;
 
@@ -85,6 +86,7 @@ class _NutritionTaskWidgetState()
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scheduleDayCheck();
     if (_trackWaterIntake && !widget.readOnly) unawaited(_loadCupSize());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_showInstructionsIfNeeded());
@@ -184,10 +186,22 @@ class _NutritionTaskWidgetState()
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _viewModel?.onAppLifecycleStateChanged(state);
+    if (state == AppLifecycleState.resumed) _scheduleDayCheck();
+  }
+
+  void _scheduleDayCheck() {
+    _studyDayTimer?.cancel();
+    if (widget.readOnly || widget.task == null) return;
+    final now = DateTime.now().toUtc();
+    final nextDay = DateTime.utc(now.year, now.month, now.day + 1);
+    _studyDayTimer = Timer(nextDay.difference(now), () {
+      if (_viewModel?.revalidateEligibility() ?? false) _scheduleDayCheck();
+    });
   }
 
   @override
   void dispose() {
+    _studyDayTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _viewModel?.dispose();
     _templateViewModel?.dispose();
@@ -226,13 +240,21 @@ class _NutritionTaskWidgetState()
         builder: (context, model, child) {
           final l10n = AppLocalizations.of(context)!;
           final appState = context.read<AppState>();
-          if (model.historicalEligibilityExpired) {
-            _returnToHistoryAfterExpiration(context, l10n);
+          if (model.historicalEligibilityExpired || model.currentDayExpired) {
+            _closeExpiredDiary(
+              context,
+              model.currentDayExpired
+                  ? l10n.nutrition_current_day_ended
+                  : l10n.historical_edit_expired,
+            );
           }
           return PopScope(
             canPop:
                 widget.readOnly ||
+                model.hasDraftConflict ||
+                model.requiresReopen ||
                 model.historicalEligibilityExpired ||
+                model.currentDayExpired ||
                 !model.isInTaskMode,
             onPopInvokedWithResult: (didPop, _) async {
               if (didPop || widget.readOnly) return;
@@ -250,7 +272,9 @@ class _NutritionTaskWidgetState()
               }
               try {
                 await model.flushPendingAutoSave(persistToDatabase: true);
-                if (context.mounted) Navigator.of(context).pop();
+                if (context.mounted && !model.hasDraftConflict) {
+                  Navigator.of(context).pop();
+                }
               } catch (error) {
                 if (!context.mounted) return;
                 StudyULogger.error('Failed to save nutrition results: $error');
@@ -338,20 +362,17 @@ class _NutritionTaskWidgetState()
 
   bool get _isHistoricalMode => widget.historicalDate != null;
 
-  void _returnToHistoryAfterExpiration(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
-    if (_didHandleExpiredHistoricalEdit) return;
-    _didHandleExpiredHistoricalEdit = true;
+  void _closeExpiredDiary(BuildContext context, String message) {
+    if (_didHandleExpiredEdit) return;
+    _didHandleExpiredEdit = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
-      final historicalRoute = ModalRoute.of(context);
-      if (historicalRoute == null) return;
+      final diaryRoute = ModalRoute.of(context);
+      if (diaryRoute == null) return;
       final navigator = Navigator.of(context);
-      navigator.popUntil((route) => route == historicalRoute);
+      navigator.popUntil((route) => route == diaryRoute);
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.historical_edit_expired)));
+          .showSnackBar(SnackBar(content: Text(message)));
       navigator.maybePop();
     });
   }
@@ -438,6 +459,11 @@ class _NutritionTaskWidgetState()
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (model.isCheckingDraft) const LinearProgressIndicator(),
+          if (model.hasDraftConflict || model.requiresReopen) ...[
+            _draftConflictBanner(context, model, l10n),
+            const SizedBox(height: 16),
+          ],
           if (_isHistoricalMode) ...[
             const SizedBox(height: 16),
             MaterialBanner(
@@ -485,7 +511,7 @@ class _NutritionTaskWidgetState()
             NutritionWaterCard(
               waterIntakeMl: recall.waterIntakeMl,
               cupSizeMl: _cupSizeMl ?? _defaultCupSizeMl,
-              readOnly: widget.readOnly || !_trackWaterIntake,
+              readOnly: !model.canEdit || !_trackWaterIntake,
               onAdjust: _cupSizeMl == null || _isSavingCupSize
                   ? null
                   : (deltaMl) => unawaited(model.adjustWaterIntake(deltaMl)),
@@ -494,7 +520,7 @@ class _NutritionTaskWidgetState()
                   : () => _editCupSize(context, _cupSizeMl!),
             ),
           ],
-          if (!_isHistoricalMode && !widget.readOnly && !kIsWeb) ...[
+          if (!_isHistoricalMode && model.canEdit && !kIsWeb) ...[
             const SizedBox(height: 24),
             Card(
               margin: EdgeInsets.zero,
@@ -537,6 +563,71 @@ class _NutritionTaskWidgetState()
           ],
         ],
       ),
+    );
+  }
+
+  Widget _draftConflictBanner(
+    BuildContext context,
+    DailyRecallEntryViewModel model,
+    AppLocalizations l10n,
+  ) {
+    final message = model.hasDraftConflict
+        ? l10n.nutrition_recall_conflict_message
+        : l10n.nutrition_recall_conflict_reopen;
+    return MaterialBanner(
+      leading: const Icon(Icons.sync_problem_outlined),
+      content: Semantics(
+        liveRegion: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (model.hasDraftConflict)
+              Text(
+                l10n.nutrition_recall_conflict_title,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            Text(message),
+          ],
+        ),
+      ),
+      actions: [
+        if (model.hasDraftConflict)
+          TextButton(
+            onPressed: model.canDiscardConflictingDraft
+                ? () => _confirmDiscardDraft(context, model, l10n)
+                : null,
+            child: Text(l10n.nutrition_recall_discard_draft),
+          )
+        else
+          const SizedBox.shrink(),
+      ],
+    );
+  }
+
+  Future<void> _confirmDiscardDraft(
+    BuildContext context,
+    DailyRecallEntryViewModel model,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await showConfirmationDialog(
+      context,
+      title: l10n.nutrition_recall_discard_draft,
+      message: l10n.nutrition_recall_discard_confirmation,
+      cancelLabel: l10n.cancel,
+      confirmLabel: l10n.nutrition_recall_discard_draft,
+      isDestructive: true,
+    );
+    if (!confirmed || !context.mounted) return;
+    try {
+      if (await model.discardConflictingDraft()) return;
+    } catch (error, stackTrace) {
+      StudyULogger.warning(
+        'Failed to discard the nutrition draft: $error\n$stackTrace',
+      );
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.nutrition_recall_discard_failed)),
     );
   }
 
@@ -684,7 +775,7 @@ class _NutritionTaskWidgetState()
                 ],
               ),
             ),
-            if (!widget.readOnly)
+            if (model.canEdit)
               Flexible(
                 child: NutritionAddButton(
                   onPressed: () => _addMeal(context, model),
@@ -717,13 +808,13 @@ class _NutritionTaskWidgetState()
               key: ValueKey('meal-${entry.meal.id}'),
               meal: entry.meal,
               categoryLabel: groups[groupIndex].category.label,
-              onTap: widget.readOnly
+              onTap: !model.canEdit
                   ? null
                   : () => _editMeal(context, model, entry.meal),
-              onSaveTemplate: widget.readOnly || _isHistoricalMode
+              onSaveTemplate: !model.canEdit || _isHistoricalMode
                   ? null
                   : () => _saveMealAsTemplate(context, entry.meal),
-              onDelete: widget.readOnly
+              onDelete: !model.canEdit
                   ? null
                   : () => _confirmDeleteMeal(context, model, entry.meal.id),
             ),
@@ -834,7 +925,7 @@ class _NutritionTaskWidgetState()
           templateViewModel: _templateViewModel,
         );
         if (!context.mounted ||
-            !model.revalidateHistoricalEligibility() ||
+            !model.revalidateEditingEligibility() ||
             selection == null ||
             selection.foods.isEmpty) {
           return null;
@@ -848,6 +939,7 @@ class _NutritionTaskWidgetState()
           recallPhoto: recallPhoto,
           occurrenceDate: model.recall.date,
           historicalTarget: widget.persistenceTarget,
+          canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,
         ),
       );
@@ -869,6 +961,7 @@ class _NutritionTaskWidgetState()
           task: widget.task,
           occurrenceDate: model.recall.date,
           historicalTarget: widget.persistenceTarget,
+          canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,
         ),
       ),
@@ -888,7 +981,8 @@ class _NutritionTaskWidgetState()
     DailyRecallEntryViewModel model,
     Future<MealEntryResult?> Function(NavigatorState) open,
   ) async {
-    if (!await _flushHistoricalRecallBeforeNestedMutation(context, model) ||
+    if (!model.revalidateEditingEligibility() ||
+        !await _flushHistoricalRecallBeforeNestedMutation(context, model) ||
         !context.mounted) {
       return null;
     }
@@ -897,7 +991,7 @@ class _NutritionTaskWidgetState()
     if (suspendPersistence) model.suspendPersistence();
     try {
       final result = await open(Navigator.of(context));
-      if (!context.mounted || !model.revalidateHistoricalEligibility()) {
+      if (!context.mounted || !model.revalidateEditingEligibility()) {
         return null;
       }
       final definitionMutated = switch (result) {

@@ -386,11 +386,24 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   Map<String, dynamic> toFullJson({Map<String, dynamic>? partialJson}) {
     final json = partialJson ?? toJson();
     json['study'] = study.toJson();
-    json['subject_progress'] = progress.map((p) => p.toJson()).toList();
+    json['subject_progress'] = progress.map((p) => p.toCacheJson()).toList();
     return json;
   }
 
   Stream<StudySubject> get onSave => _controller.stream;
+
+  void applySavedProgress(SubjectProgress saved) {
+    final index = progress.indexWhere(
+      (item) => item.completedAt == saved.completedAt,
+    );
+    if (index < 0) {
+      progress.add(saved);
+    } else {
+      if (progress[index].nutritionRevision > saved.nutritionRevision) return;
+      progress[index] = saved;
+    }
+    _controller.add(this);
+  }
 
   Future<void> deleteProgress() async {
     try {

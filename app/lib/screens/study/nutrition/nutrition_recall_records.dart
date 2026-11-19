@@ -22,6 +22,7 @@ class const NutritionRecallRecord({
       interventionId: interventionId,
       completedAt: completedAt,
       studyDaySnapshot: studyDaySnapshot,
+      nutritionRevision: progress!.nutritionRevision,
     );
   }
 
@@ -88,6 +89,9 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
     );
     final remote = records[identity];
     if (remote == null) {
+      final legacy =
+          records[_recordIdentity(taskId, null, local.studyDaySnapshot)];
+      if (legacy != null) continue;
       records[identity] = NutritionRecallRecord(
         recall: local.recall,
         taskId: local.taskId,
@@ -97,14 +101,10 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
       );
       continue;
     }
-    final remoteSavedAt =
-        remote.recall.lastAutoSavedAt ??
-        remote.progress?.completedAt ??
-        DateTime.fromMillisecondsSinceEpoch(0);
     final canReplace =
         local.studyDaySnapshot == todayStudyDay ||
         local.studyDaySnapshot == todayStudyDay - 1;
-    if (canReplace && local.lastModifiedAtDate.isAfter(remoteSavedAt)) {
+    if (canReplace && local.canReplace(remote.progress!)) {
       records[identity] = remote.withLocalRecall(local);
     }
   }

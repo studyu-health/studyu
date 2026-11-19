@@ -19,7 +19,7 @@ void main() {
     );
   });
 
-  test('upsert retains the target recall identity while offline', () async {
+  test('upsert retains canonical progress while offline', () async {
     final completedAt = DateTime.utc(2026, 7, 15, 12);
     final target = NutritionRecallPersistenceTarget(
       taskId: 'stored-task',
@@ -61,6 +61,7 @@ void main() {
     expect(saved.interventionId, target.interventionId);
     expect(saved.completedAt, target.completedAt);
     expect(savedRecall.studyDaySnapshot, target.studyDaySnapshot);
+    expect(savedRecall.id, 'stored');
   });
 }
 

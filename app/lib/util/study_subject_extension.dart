@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
@@ -30,6 +28,7 @@ class const NutritionRecallPersistenceTarget({
   required final String interventionId,
   required final DateTime completedAt,
   required final int studyDaySnapshot,
+  final int? nutritionRevision,
 }) {
   Map<String, dynamic> toJson() => {
     'taskId': taskId,
@@ -43,13 +42,14 @@ class const NutritionRecallPersistenceTarget({
 extension StudySubjectExtension on StudySubject {
   /// Upserts a DailyRecall result without changing an existing recall's
   /// persistence identity.
-  Future<void> upsertNutritionResult({
+  Future<SubjectProgress> upsertNutritionResult({
     required String taskId,
     required String periodId,
     required DailyRecall recall,
     DateTime? completionDateOverride,
     NutritionRecallPersistenceTarget? persistenceTarget,
     String? interventionIdOverride,
+    bool createOnly = false,
   }) async {
     if (recall.entryCompletedAt == null) {
       throw StateError(
@@ -70,13 +70,18 @@ extension StudySubjectExtension on StudySubject {
       result: effectiveRecall,
     );
 
-    final matching = progress.where((progress) {
+    final matching = (createOnly ? const <SubjectProgress>[] : progress).where((
+      progress,
+    ) {
       if (progress.taskId != effectiveTaskId ||
           progress.resultType != 'DailyRecall') {
         return false;
       }
       if (target != null) {
-        return progress.completedAt == target.completedAt;
+        return progress.completedAt == target.completedAt &&
+            progress.interventionId == target.interventionId &&
+            (progress.result.periodId == null ||
+                progress.result.periodId == effectivePeriodId);
       }
       return _isSameStudyDay(progress, effectiveRecall) &&
           progress.result.periodId == effectivePeriodId;
@@ -92,7 +97,7 @@ extension StudySubjectExtension on StudySubject {
         'Multiple nutrition recalls match task $effectiveTaskId, period '
         '$effectivePeriodId and study day ${effectiveRecall.studyDaySnapshot}.',
       );
-    } else {
+    } else if (!createOnly) {
       final legacyMatches = progress.where((progress) {
         return progress.taskId == effectiveTaskId &&
             progress.resultType == 'DailyRecall' &&
@@ -128,36 +133,25 @@ extension StudySubjectExtension on StudySubject {
       'completionDate=$completionDate meals=${effectiveRecall.meals.length}',
     );
 
-    final progressToSave = SubjectProgress(
-      subjectId: id,
-      interventionId: interventionId,
-      taskId: effectiveTaskId,
-      result: resultObject,
-      resultType: resultObject.type,
-    )..completedAt = target?.completedAt ?? completionDate.toUtc();
-
-    var updatedLocalProgress = false;
-    try {
-      final saved = await progressToSave.save();
-      if (existing != null) {
-        final index = progress.indexOf(existing);
-        if (index >= 0) progress[index] = saved;
-      } else {
-        progress.add(saved);
-      }
-      updatedLocalProgress = true;
-      await save(onlyUpdate: true);
-    } on SocketException {
-      if (!updatedLocalProgress) {
-        if (existing != null) {
-          final index = progress.indexOf(existing);
-          if (index >= 0) progress[index] = progressToSave;
-        } else {
-          progress.add(progressToSave);
-        }
-      }
-      rethrow;
-    }
+    final response = await client.rpc<dynamic>(
+      'save_nutrition_recall',
+      params: {
+        'p_subject_id': id,
+        'p_completed_at': completionDate.toUtc().toIso8601String(),
+        'p_intervention_id': interventionId,
+        'p_task_id': effectiveTaskId,
+        'p_result': resultObject.toJsonForStorage(),
+        'p_expected_revision': createOnly
+            ? null
+            : target?.nutritionRevision ?? existing?.nutritionRevision,
+      },
+    );
+    final row = response is List ? response.single : response;
+    final saved = SupabaseQuery.extractSupabaseSingleRow<SubjectProgress>(
+      Map<String, dynamic>.from(row as Map),
+    );
+    applySavedProgress(saved);
+    return saved;
   }
 
   String _interventionIdForRecall(DailyRecall recall) {

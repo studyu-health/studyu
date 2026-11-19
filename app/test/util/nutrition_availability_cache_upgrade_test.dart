@@ -78,15 +78,26 @@ void main() {
         );
       }
       final body = jsonDecode(request.body) as Map<String, dynamic>;
-      if (request.url.path.endsWith('/subject_progress')) {
-        progressRequests.add(body);
-        final result = body['result'] as Map<String, dynamic>;
+      final isRecallRpc = request.url.path.endsWith('/save_nutrition_recall');
+      if (isRecallRpc || request.url.path.endsWith('/subject_progress')) {
+        final row = isRecallRpc
+            ? <String, dynamic>{
+                'subject_id': body['p_subject_id'],
+                'task_id': body['p_task_id'],
+                'intervention_id': body['p_intervention_id'],
+                'completed_at': body['p_completed_at'],
+                'result_type': 'DailyRecall',
+                'result': body['p_result'],
+                'nutrition_revision': body['p_expected_revision'] ?? 0,
+              }
+            : body;
+        progressRequests.add(row);
+        final result = row['result'] as Map<String, dynamic>;
         if (metadataBearing && !_hasIntent(result)) return _rejection(request);
         stored = Map<String, dynamic>.from(result)
           ..remove(NutritionProfile.availabilityWriteIntentKey);
-        return _response([
-          {...body, 'result': stored},
-        ], request);
+        final saved = {...row, 'result': stored};
+        return _response(isRecallRpc ? saved : [saved], request);
       }
       if (request.url.path.contains('/rpc/')) {
         definitionRequests.add(body);

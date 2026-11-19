@@ -28,11 +28,25 @@ void main() {
       'test-key',
       httpClient: MockClient((request) async {
         expect(request.method, 'POST');
-        expect(request.url.path, endsWith('/subject_progress'));
         final body = jsonDecode(request.body) as Map<String, dynamic>;
         uploads.add(body);
+        final isNutrition = request.url.path.endsWith('/save_nutrition_recall');
+        if (!isNutrition) {
+          expect(request.url.path, endsWith('/subject_progress'));
+        }
+        final response = isNutrition
+            ? {
+                'subject_id': body['p_subject_id'],
+                'task_id': body['p_task_id'],
+                'intervention_id': body['p_intervention_id'],
+                'completed_at': body['p_completed_at'],
+                'result_type': 'DailyRecall',
+                'result': body['p_result'],
+                'nutrition_revision': 0,
+              }
+            : [body];
         return http.Response(
-          jsonEncode([body]),
+          jsonEncode(response),
           201,
           headers: const {'content-type': 'application/json'},
           request: request,
@@ -110,6 +124,20 @@ void main() {
     expect(uploads, [queued.toJson()]);
     expect(synchronized.progress, [remoteRecall, queued]);
     expect((await Cache.loadSubject()).progress, contains(expired));
+  });
+
+  test('sync replays a completed nutrition recall as create-only', () async {
+    final now = DateTime.now().toUtc();
+    final start = DateTime.utc(now.year, now.month, now.day);
+    final remote = _subject(start);
+    final local = _subject(start)..progress = [_nutrition(now)];
+    await Cache.storeSubject(local);
+
+    await Cache.synchronize(remote);
+
+    expect(uploads.single['p_expected_revision'], isNull);
+    expect(uploads.single['p_completed_at'], now.toIso8601String());
+    expect(remote.progress.single.result.result, isA<DailyRecall>());
   });
 }
 
