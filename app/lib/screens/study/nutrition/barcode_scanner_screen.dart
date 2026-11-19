@@ -155,12 +155,12 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
 
       // Not found in either database
       if (mounted) {
-        _showProductNotFoundDialog(code);
+        await _showProductNotFoundDialog(code);
       }
     } catch (e) {
       studyu.StudyULogger.error('Error fetching barcode product: $e');
       if (mounted) {
-        _showErrorDialog();
+        await _showErrorDialog();
       }
     }
   }
@@ -316,90 +316,66 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
     );
   }
 
-  void _showProductNotFoundDialog(String barcode) {
+  Future<void> _showProductNotFoundDialog(String barcode) {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.search_off, color: Colors.orange),
-            const SizedBox(width: 8),
-            Text(l10n.barcode_scanner_not_found_title),
-          ],
-        ),
-        content: Text(l10n.barcode_scanner_not_found_message(barcode)),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _isProcessing = false;
-                _lastScannedCode = null;
-                _lastScanTime = null;
-              });
-              try {
-                _controller.start();
-              } catch (e) {
-                // Ignore restart errors
-              }
-            },
-            child: Text(l10n.barcode_scanner_scan_again),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context); // Go back to previous screen
-            },
-            child: Text(l10n.add_manually),
-          ),
-        ],
-      ),
+    return _showLookupDialog(
+      title: l10n.barcode_scanner_not_found_title,
+      message: l10n.barcode_scanner_not_found_message(barcode),
+      retryLabel: l10n.barcode_scanner_scan_again,
+      exitLabel: l10n.add_manually,
     );
   }
 
-  void _showErrorDialog() {
+  Future<void> _showErrorDialog() {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
+    return _showLookupDialog(
+      title: l10n.barcode_scanner_error_title,
+      message: l10n.external_library_error,
+      retryLabel: l10n.try_again,
+      exitLabel: l10n.cancel,
+    );
+  }
+
+  Future<void> _showLookupDialog({
+    required String title,
+    required String message,
+    required String retryLabel,
+    required String exitLabel,
+  }) async {
+    final shouldExit = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red),
-            const SizedBox(width: 8),
-            Text(l10n.barcode_scanner_error_title),
-          ],
-        ),
-        content: Text(l10n.external_library_error),
+      builder: (dialogContext) => AlertDialog(
+        scrollable: true,
+        title: Text(title),
+        content: Text(message),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _isProcessing = false;
-                _lastScannedCode = null;
-                _lastScanTime = null;
-              });
-              try {
-                _controller.start();
-              } catch (e) {
-                // Ignore restart errors
-              }
-            },
-            child: Text(l10n.try_again),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(retryLabel),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: Text(l10n.cancel),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(exitLabel),
           ),
         ],
       ),
     );
+    if (!mounted || shouldExit == null) return;
+    if (shouldExit) {
+      Navigator.pop(context);
+      return;
+    }
+    setState(() {
+      _isProcessing = false;
+      _lastScannedCode = null;
+      _lastScanTime = null;
+    });
+    try {
+      await _controller.start();
+    } catch (_) {
+      // The controller can fail to restart.
+    }
   }
 
   @override

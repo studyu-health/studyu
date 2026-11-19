@@ -259,12 +259,26 @@ void main() {
     addTearDown(() => MobileScannerPlatform.instance = original);
     final pending = Completer<http.Response>();
     transport.pending = pending.future;
-    await tester.pumpWidget(_app(home: const BarcodeScannerScreen()));
+    await tester.pumpWidget(
+      _app(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () =>
+                  Navigator.push(context, BarcodeScannerScreen.route()),
+              child: const Text('Open scanner'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open scanner'));
     await tester.pumpAndSettle();
     final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-    scanner.onDetect!(
-      const BarcodeCapture(barcodes: [Barcode(rawValue: '0123456789012')]),
+    const capture = BarcodeCapture(
+      barcodes: [Barcode(rawValue: '0123456789012')],
     );
+    scanner.onDetect!(capture);
     await tester.pump();
     expect(transport.requests, hasLength(1));
     await tester.pump(const Duration(seconds: 9));
@@ -282,6 +296,27 @@ void main() {
     await tester.pump();
     expect(find.byType(BarcodeScannerScreen), findsOneWidget);
     expect(find.text(l10n.external_library_error), findsOneWidget);
+
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pump();
+    expect(find.text(l10n.external_library_error), findsOneWidget);
+
+    await tester.tap(find.text(l10n.try_again));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(AlertDialog), findsNothing);
+
+    transport.pending = Completer<http.Response>().future;
+    scanner.onDetect!(capture);
+    await tester.pump();
+    expect(transport.requests, hasLength(2));
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.text(l10n.cancel));
+    await tester.pumpAndSettle();
+    expect(find.byType(BarcodeScannerScreen), findsNothing);
+    expect(find.text('Open scanner'), findsOneWidget);
   });
 
   testWidgets(
