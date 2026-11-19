@@ -47,6 +47,45 @@ void main() {
     },
   );
 
+  test('USDA mapping uses a 100 g basis for a non-gram serving', () {
+    final food = convertUsdaToFoodEntry(
+      UsdaFoodItem(
+        fdcId: 1,
+        servingSize: 240,
+        servingSizeUnit: 'ML',
+        foodNutrients: [UsdaFoodNutrient(nutrientId: 1008, value: 125.5)],
+      ),
+    );
+    expect(food.unit, 'serving');
+    expect(food.servingSizeGrams, 100);
+    expect(food.nutrition.energyKcal, 125.5);
+  });
+
+  test('OFF preview and conversion agree on comma-decimal servings', () async {
+    final product = Product.fromJson({
+      'code': '123',
+      'product_name': 'Food',
+      'serving_size': '1 portion (12,5 g)',
+      'nutriments': {'energy-kcal_100g': 200},
+    });
+    final model = FoodSearchViewModel(
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => SearchResult(products: [product]),
+      usdaConfigured: false,
+    );
+    addTearDown(model.dispose);
+    await model.retry('Food');
+    final result = model.results.single;
+    final food = convertFoodResultToFoodEntry(result);
+
+    expect(result.servingSizeGrams, 12.5);
+    expect(food.servingSizeGrams, result.servingSizeGrams);
+    expect(food.nutrition.energyKcal, result.calories);
+  });
+
   test('OFF mapping preserves null versus zero and sodium units', () {
     final product = Product.fromJson({
       'code': '123',

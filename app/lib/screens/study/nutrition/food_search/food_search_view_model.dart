@@ -417,12 +417,12 @@ String normalizeFoodSearchText(String value) =>
 double? _gramsFromMetadata(String? value) {
   if (value == null) return null;
   final match = RegExp(
-    r'(\d+(?:[.,]\d+)?)\s*g(?:rams?)?\b',
+    r'(?:^|[^0-9.,+-])(\d+(?:[.,]\d+)?)\s*g(?:rams?)?\b',
     caseSensitive: false,
   ).firstMatch(value);
-  return match == null
-      ? null
-      : double.tryParse(match.group(1)!.replaceAll(',', '.'));
+  if (match == null) return null;
+  final grams = double.tryParse(match.group(1)!.replaceAll(',', '.'));
+  return grams != null && grams.isFinite && grams > 0 ? grams : null;
 }
 
 studyu.FoodEntry convertFoodResultToFoodEntry(UnifiedFoodResult result) {
@@ -458,7 +458,7 @@ studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
     portionState: studyu.PortionState.asServed,
     yieldFactor: 1.0,
     nutrition: studyu.NutritionProfile(
-      energyKcal: (food.energyKcal100g * scale).roundToDouble(),
+      energyKcal: food.energyKcal100g * scale,
       protein: food.protein100g * scale,
       carbs: food.carbohydrates100g * scale,
       fat: food.fat100g * scale,
@@ -526,14 +526,7 @@ studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
     if (isUnavailable(Nutrient.cholesterol)) 'cholesterol',
     'waterContent',
   };
-  double servingSizeGrams = 100.0;
-  if (product.servingSize != null) {
-    final match = RegExp(r'(\d+(?:\.\d+)?)\s*g')
-        .firstMatch(product.servingSize!);
-    if (match != null) {
-      servingSizeGrams = double.tryParse(match.group(1)!) ?? 100.0;
-    }
-  }
+  final servingSizeGrams = _gramsFromMetadata(product.servingSize) ?? 100.0;
 
   return studyu.FoodEntry.withId(
     entryType: studyu.FoodEntryType.brandedProduct,

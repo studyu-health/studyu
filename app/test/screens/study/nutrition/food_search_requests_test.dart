@@ -250,6 +250,28 @@ void main() {
     });
   }
 
+  testWidgets('scanner ignores QR codes and nonnumeric product codes', (
+    tester,
+  ) async {
+    final original = MobileScannerPlatform.instance;
+    MobileScannerPlatform.instance = _ScannerPlatform();
+    addTearDown(() => MobileScannerPlatform.instance = original);
+    await tester.pumpWidget(_app(home: const BarcodeScannerScreen()));
+    await tester.pumpAndSettle();
+
+    tester.widget<MobileScanner>(find.byType(MobileScanner)).onDetect!(
+      const BarcodeCapture(
+        barcodes: [
+          Barcode(format: BarcodeFormat.qrCode, rawValue: '0123456789012'),
+          Barcode(format: BarcodeFormat.ean13, rawValue: 'A123456789012'),
+        ],
+      ),
+    );
+    await tester.pump();
+
+    expect(transport.requests, isEmpty);
+  });
+
   testWidgets('barcode timeout uses neutral error and ignores late success', (
     tester,
   ) async {
@@ -276,7 +298,9 @@ void main() {
     await tester.pumpAndSettle();
     final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
     const capture = BarcodeCapture(
-      barcodes: [Barcode(rawValue: '0123456789012')],
+      barcodes: [
+        Barcode(format: BarcodeFormat.ean13, rawValue: '0123456789012'),
+      ],
     );
     scanner.onDetect!(capture);
     await tester.pump();
@@ -335,7 +359,9 @@ void main() {
           await tester.pumpAndSettle();
           tester.widget<MobileScanner>(find.byType(MobileScanner)).onDetect!(
             const BarcodeCapture(
-              barcodes: [Barcode(rawValue: '0123456789012')],
+              barcodes: [
+                Barcode(format: BarcodeFormat.ean13, rawValue: '0123456789012'),
+              ],
             ),
           );
           await tester.pump();
@@ -402,7 +428,9 @@ void main() {
       await tester.pumpAndSettle();
       final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
       const capture = BarcodeCapture(
-        barcodes: [Barcode(rawValue: '0123456789012')],
+        barcodes: [
+          Barcode(format: BarcodeFormat.ean13, rawValue: '0123456789012'),
+        ],
       );
       scanner.onDetect!(capture);
       await tester.pump();

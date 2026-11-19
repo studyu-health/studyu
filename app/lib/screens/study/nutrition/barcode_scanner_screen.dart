@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
-import 'package:studyu_app/models/usda_models.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search/food_search_requests.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.dart';
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
@@ -17,9 +17,17 @@ class const BarcodeScannerScreen({super.key}) extends StatefulWidget {
 }
 
 class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
+  static const _foodBarcodeFormats = [
+    BarcodeFormat.ean8,
+    BarcodeFormat.ean13,
+    BarcodeFormat.upcA,
+    BarcodeFormat.upcE,
+    BarcodeFormat.itf14,
+  ];
+
   final MobileScannerController _controller = MobileScannerController(
-    detectionSpeed: DetectionSpeed.unrestricted, // Fastest detection!
-    // No format restrictions - detects ALL barcode types!
+    detectionSpeed: DetectionSpeed.unrestricted,
+    formats: _foodBarcodeFormats,
   );
 
   bool _isProcessing = false;
@@ -28,21 +36,23 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
   String? _detectedCode;
   String? _guidanceMessage;
 
-  bool _isValidBarcode(String code) {
-    // Remove any non-digit characters
-    final cleanCode = code.replaceAll(RegExp('[^0-9]'), '');
-
-    // Valid barcodes are usually 8, 12, or 13 digits
-    if (cleanCode.length < 8 || cleanCode.length > 13) {
-      return false;
+  String? _productCode(Barcode barcode) {
+    final code = barcode.rawValue;
+    final length = switch (barcode.format) {
+      BarcodeFormat.ean8 || BarcodeFormat.upcE => 8,
+      BarcodeFormat.upcA => 12,
+      BarcodeFormat.ean13 => 13,
+      BarcodeFormat.itf14 => 14,
+      _ => 0,
+    };
+    if (code == null ||
+        length == 0 ||
+        code.length != length ||
+        code.contains(RegExp('[^0-9]')) ||
+        RegExp(r'^(.)\1+$').hasMatch(code)) {
+      return null;
     }
-
-    // Check if it's all zeros or all the same digit (usually invalid)
-    if (RegExp(r'^(.)\1+$').hasMatch(cleanCode)) {
-      return false;
-    }
-
-    return true;
+    return code;
   }
 
   @override
@@ -64,33 +74,15 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
       return;
     }
 
-    // Update guidance based on detection
-    setState(() {
-      _guidanceMessage = l10n.barcode_scanner_processing;
-    });
+    if (_isProcessing) return;
 
-    if (_isProcessing) {
-      return;
-    }
-
-    final barcode = barcodes.first;
-    final code = barcode.rawValue;
-
-    if (code == null || code.isEmpty) {
-      return;
-    }
-
-    // Validate barcode before processing
-    if (!_isValidBarcode(code)) {
+    final code = barcodes.map(_productCode).nonNulls.firstOrNull;
+    if (code == null) {
       setState(() {
         _guidanceMessage = l10n.barcode_scanner_invalid;
       });
       return;
     }
-
-    setState(() {
-      _guidanceMessage = l10n.barcode_scanner_lookup;
-    });
 
     // Prevent duplicate scans within 2 seconds (reduced from 3 for faster scanning)
     final now = DateTime.now();
@@ -100,12 +92,9 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
       return;
     }
 
-    // Show detected barcode prominently
     setState(() {
+      _guidanceMessage = l10n.barcode_scanner_lookup;
       _detectedCode = code;
-    });
-
-    setState(() {
       _isProcessing = true;
       _lastScannedCode = code;
       _lastScanTime = now;
@@ -130,7 +119,10 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
 
       if (result.status == ProductResultV3.statusSuccess &&
           result.product != null) {
-        Navigator.pop(context, _convertToFoodEntry(result.product!));
+        Navigator.pop(
+          context,
+          convertOpenFoodFactsToFoodEntry(result.product!),
+        );
         return;
       }
 
@@ -145,7 +137,7 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
           if (usdaResult.foods.isNotEmpty) {
             final usdaFood = usdaResult.foods.first;
 
-            Navigator.pop(context, _convertUsdaToFoodEntry(usdaFood));
+            Navigator.pop(context, convertUsdaToFoodEntry(usdaFood));
             return;
           }
         } catch (usdaError) {
@@ -163,157 +155,6 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
         await _showErrorDialog();
       }
     }
-  }
-
-  studyu.FoodEntry _convertToFoodEntry(Product product) {
-    final nutriments = product.nutriments;
-
-    // Extract nutrition info with fallbacks
-    final energyKcal =
-        nutriments?.getValue(Nutrient.energyKCal, PerSize.oneHundredGrams) ?? 0;
-    final protein =
-        nutriments?.getValue(Nutrient.proteins, PerSize.oneHundredGrams) ?? 0;
-    final carbs =
-        nutriments?.getValue(Nutrient.carbohydrates, PerSize.oneHundredGrams) ??
-        0;
-    final fat =
-        nutriments?.getValue(Nutrient.fat, PerSize.oneHundredGrams) ?? 0;
-    final sugars =
-        nutriments?.getValue(Nutrient.sugars, PerSize.oneHundredGrams) ?? 0;
-    final fiber =
-        nutriments?.getValue(Nutrient.fiber, PerSize.oneHundredGrams) ?? 0;
-    final saturatedFat =
-        nutriments?.getValue(Nutrient.saturatedFat, PerSize.oneHundredGrams) ??
-        0;
-    final sodium =
-        (nutriments?.getValue(Nutrient.sodium, PerSize.oneHundredGrams) ?? 0) *
-        1000;
-    bool isUnavailable(Nutrient nutrient) =>
-        nutriments?.getValue(nutrient, PerSize.oneHundredGrams) == null;
-    final unavailableNutrients = {
-      if (isUnavailable(Nutrient.energyKCal)) 'energyKcal',
-      if (isUnavailable(Nutrient.proteins)) 'protein',
-      if (isUnavailable(Nutrient.carbohydrates)) 'carbs',
-      if (isUnavailable(Nutrient.fat)) 'fat',
-      if (isUnavailable(Nutrient.sugars)) 'sugars',
-      if (isUnavailable(Nutrient.fiber)) 'fiber',
-      if (isUnavailable(Nutrient.saturatedFat)) 'saturatedFat',
-      if (isUnavailable(Nutrient.sodium)) 'sodium',
-      if (isUnavailable(Nutrient.transFat)) 'transFat',
-      if (isUnavailable(Nutrient.cholesterol)) 'cholesterol',
-      'waterContent',
-    };
-
-    // Parse serving size
-    double servingSizeGrams = 100.0;
-    if (product.servingSize != null) {
-      final match = RegExp(r'(\d+(?:\.\d+)?)\s*g')
-          .firstMatch(product.servingSize!);
-      if (match != null) {
-        servingSizeGrams = double.tryParse(match.group(1)!) ?? 100.0;
-      }
-    }
-
-    return studyu.FoodEntry.withId(
-      entryType: studyu.FoodEntryType.brandedProduct,
-      name: product.productName ?? 'Unknown Product',
-      brandName: product.brands,
-      description: product.genericName,
-      amount: 1,
-      unit: 'serving',
-      servingSizeGrams: servingSizeGrams,
-      portionReference: product.servingSize,
-      portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
-      portionState: studyu.PortionState.asServed,
-      yieldFactor: 1.0,
-      nutrition: studyu.NutritionProfile(
-        energyKcal: energyKcal * servingSizeGrams / 100,
-        protein: protein * servingSizeGrams / 100,
-        carbs: carbs * servingSizeGrams / 100,
-        fat: fat * servingSizeGrams / 100,
-        sugars: sugars * servingSizeGrams / 100,
-        fiber: fiber * servingSizeGrams / 100,
-        saturatedFat: saturatedFat * servingSizeGrams / 100,
-        transFat:
-            (nutriments?.getValue(Nutrient.transFat, PerSize.oneHundredGrams) ??
-                0) *
-            servingSizeGrams /
-            100,
-        cholesterol:
-            (nutriments?.getValue(
-                  Nutrient.cholesterol,
-                  PerSize.oneHundredGrams,
-                ) ??
-                0) *
-            1000 *
-            servingSizeGrams /
-            100,
-        sodium: sodium * servingSizeGrams / 100,
-        waterContent: 0,
-        micros: {},
-        unavailableNutrients: unavailableNutrients,
-      ),
-      foodCode: product.barcode,
-      externalId: product.barcode,
-      source: studyu.FoodSource.openfoodfacts,
-      confidenceScore: 1.0,
-      originalValues: product.toJson(),
-    );
-  }
-
-  studyu.FoodEntry _convertUsdaToFoodEntry(UsdaFoodItem food) {
-    // USDA provides nutrients per 100g by default
-    final servingSizeGrams = food.servingSize ?? 100.0;
-    final servingSizeUnit = food.servingSizeUnit ?? 'g';
-
-    // Scale nutrients to serving size
-    final scale = servingSizeGrams / 100.0;
-
-    return studyu.FoodEntry.withId(
-      entryType: studyu.FoodEntryType.brandedProduct,
-      name: food.description ?? 'Unknown Food',
-      brandName: food.brandOwner ?? food.brandName,
-      description: food.ingredients,
-      amount: 1,
-      unit: servingSizeUnit,
-      servingSizeGrams: servingSizeGrams,
-      portionReference: food.householdServingFullText,
-      portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
-      portionState: studyu.PortionState.asServed,
-      yieldFactor: 1.0,
-      nutrition: studyu.NutritionProfile(
-        energyKcal: (food.energyKcal100g * scale).roundToDouble(),
-        protein: food.protein100g * scale,
-        carbs: food.carbohydrates100g * scale,
-        fat: food.fat100g * scale,
-        sugars: food.sugars100g * scale,
-        fiber: food.fiber100g * scale,
-        saturatedFat: food.saturatedFat100g * scale,
-        transFat: (food.getNutrientValue(1257) ?? 0) * scale,
-        cholesterol: (food.getNutrientValue(1253) ?? 0) * scale,
-        sodium: food.sodium100g * scale, // Already in mg
-        waterContent: (food.getNutrientValue(1051) ?? 0) * scale,
-        micros: {},
-        unavailableNutrients: {
-          if (food.getNutrientValue(1008) == null) 'energyKcal',
-          if (food.getNutrientValue(1003) == null) 'protein',
-          if (food.getNutrientValue(1005) == null) 'carbs',
-          if (food.getNutrientValue(1004) == null) 'fat',
-          if (food.getNutrientValue(2000) == null) 'sugars',
-          if (food.getNutrientValue(1079) == null) 'fiber',
-          if (food.getNutrientValue(1258) == null) 'saturatedFat',
-          if (food.getNutrientValue(1093) == null) 'sodium',
-          if (food.getNutrientValue(1257) == null) 'transFat',
-          if (food.getNutrientValue(1253) == null) 'cholesterol',
-          if (food.getNutrientValue(1051) == null) 'waterContent',
-        },
-      ),
-      foodCode: food.gtinUpc, // Barcode from USDA
-      externalId: food.fdcId.toString(),
-      source: studyu.FoodSource.usda,
-      confidenceScore: 1.0,
-      originalValues: food.toJson(),
-    );
   }
 
   Future<void> _showProductNotFoundDialog(String barcode) {
@@ -361,8 +202,8 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
         ],
       ),
     );
-    if (!mounted || shouldExit == null) return;
-    if (shouldExit) {
+    if (!mounted) return;
+    if (shouldExit == true) {
       Navigator.pop(context);
       return;
     }
