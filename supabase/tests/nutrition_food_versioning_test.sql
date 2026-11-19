@@ -739,7 +739,7 @@ SELECT throws_ok(
     'nutrition recall study day is not writable',
     'direct writes cannot change a recall study-day identity'
 );
-SELECT lives_ok(
+SELECT throws_ok(
     $$UPDATE public.subject_progress
       SET result = jsonb_set(
         jsonb_set(result, '{result,specialOccasion}', '"holiday"'),
@@ -747,7 +747,8 @@ SELECT lives_ok(
       )
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'historical-task'$$,
-    'direct entry-local writes remain allowed for the latest historical day'
+    '40001', 'nutrition recall update requires a revision',
+    'a historical food mutation protects the affected recall from direct writes'
 );
 
 CREATE TEMP VIEW mutation_guard_state AS

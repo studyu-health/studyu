@@ -106,9 +106,23 @@ RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   );
 $$;
 CREATE FUNCTION tests.availability_write_recall(
-    p_result jsonb, p_time timestamptz DEFAULT '2026-10-04 12:00:00+00'
+    p_result jsonb, p_time timestamptz DEFAULT '2026-10-04 12:00:00+00',
+    p_via_rpc boolean DEFAULT false
 )
-RETURNS void LANGUAGE sql AS $$
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  IF p_via_rpc THEN
+    PERFORM public.save_nutrition_recall(
+      'a1000000-0000-0000-0000-000000000001', p_time, 'availability-intervention',
+      'availability-task',
+      jsonb_set(p_result, '{result,entryCompletedAt}', to_jsonb(p_time)),
+      (
+        SELECT nutrition_revision FROM public.subject_progress
+        WHERE subject_id = 'a1000000-0000-0000-0000-000000000001' AND completed_at = p_time
+      )
+    );
+    RETURN;
+  END IF;
   INSERT INTO public.subject_progress (subject_id, completed_at, task_id, intervention_id, result_type, result)
   VALUES (
     'a1000000-0000-0000-0000-000000000001', p_time, 'availability-task',
@@ -122,6 +136,7 @@ RETURNS void LANGUAGE sql AS $$
     ))
   )
   ON CONFLICT (subject_id, completed_at) DO UPDATE SET result = EXCLUDED.result;
+END;
 $$;
 CREATE FUNCTION tests.availability_mutate(
     p_food jsonb, p_expected uuid DEFAULT null
@@ -331,7 +346,7 @@ SELECT throws_ok(
     'nutrition availability write intent is required',
     'older whole-recall serializer cannot clear metadata by removing foods'
 );
-SELECT lives_ok($sql$ SELECT tests.availability_write_recall(tests.availability_intent(tests.availability_recall(tests.availability_meal(tests.availability_current())))) $sql$, 'supported recall stores nested availability');
+SELECT lives_ok($sql$ SELECT tests.availability_write_recall(tests.availability_intent(tests.availability_recall(tests.availability_meal(tests.availability_current()))), p_via_rpc => true) $sql$, 'supported recall stores nested availability');
 SELECT throws_ok(
     $sql$ SELECT tests.availability_write_recall(tests.availability_recall(tests.availability_meal(tests.availability_old_food(tests.availability_current())))) $sql$,
     '22023',
@@ -346,7 +361,7 @@ SELECT throws_ok(
     'older mutation cannot strip nested saved-meal metadata'
 );
 
-SELECT lives_ok($sql$ SELECT tests.availability_write_recall(tests.availability_intent(tests.availability_recall(tests.availability_old_food(tests.availability_current())))) $sql$, 'supported recall can intentionally clear both states');
+SELECT lives_ok($sql$ SELECT tests.availability_write_recall(tests.availability_intent(tests.availability_recall(tests.availability_old_food(tests.availability_current()))), p_via_rpc => true) $sql$, 'supported recall can intentionally clear both states');
 SELECT is((SELECT result #>> '{result,meals,0,foods,0,nutrition,protein}' FROM public.subject_progress WHERE result_type = 'DailyRecall'), '0', 'intentional recall clearing preserves known zero');
 SELECT lives_ok($sql$ SELECT tests.availability_mutate(tests.availability_intent(tests.availability_old_food(tests.availability_current()))) $sql$, 'supported mutation can intentionally clear both states');
 SELECT is(tests.availability_current() -> 'nutrition', tests.availability_food() -> 'nutrition', 'intentional definition clearing restores complete zero');

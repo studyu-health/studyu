@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(15);
+SELECT plan(18);
 
 SELECT tests.create_supabase_user('nutrition_revision_owner', 'nutrition_revision_owner@studyu.health');
 SELECT tests.create_supabase_user('nutrition_revision_other', 'nutrition_revision_other@studyu.health');
@@ -75,24 +75,51 @@ SELECT throws_ok(
     $$UPDATE public.subject_progress
       SET result = tests.revision_test_result(450)
       WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()$$,
-    '40001', 'stale nutrition recall revision',
-    'a changed legacy write with the same timestamp cannot overwrite a recall'
+    '40001', 'nutrition recall update requires a revision',
+    'a changed legacy write cannot overwrite a revision-protected recall'
 );
 SELECT is(
     (SELECT result #>> '{result,waterIntakeMl}' FROM public.subject_progress
      WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()),
     '350', 'failed writes preserve the current recall'
 );
-SELECT lives_ok(
+SELECT throws_ok(
     $$UPDATE public.subject_progress
       SET result = tests.revision_test_result(500, now() + interval '1 second')
       WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()$$,
-    'a later legacy timestamp preserves existing client compatibility'
+    '40001', 'nutrition recall update requires a revision',
+    'a later legacy timestamp does not bypass revision protection'
 );
 SELECT is(
     (SELECT nutrition_revision FROM public.subject_progress
      WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()),
-    2::bigint, 'a changed legacy write also increments the revision'
+    1::bigint, 'a rejected legacy write preserves the revision'
+);
+SELECT lives_ok(
+    $$INSERT INTO public.subject_progress (
+        subject_id, completed_at, intervention_id, task_id, result_type, result
+    ) VALUES (
+        'a7100000-0000-4000-8000-000000000001', now() + interval '1 hour',
+        'intervention-a', 'legacy-task', 'DailyRecall', tests.revision_test_result()
+    )$$,
+    'older clients can still create recalls'
+);
+SELECT is(
+    (
+        public.save_nutrition_recall(
+            'a7100000-0000-4000-8000-000000000001', now() + interval '1 hour',
+            'intervention-a', 'legacy-task', tests.revision_test_result()
+        )
+    ).nutrition_revision,
+    0::bigint, 'a no-op RPC adopts a legacy recall without changing its revision'
+);
+SELECT throws_ok(
+    $$UPDATE public.subject_progress
+      SET result = tests.revision_test_result(500, now() + interval '2 hours')
+      WHERE subject_id = 'a7100000-0000-4000-8000-000000000001'
+        AND task_id = 'legacy-task'$$,
+    '40001', 'nutrition recall update requires a revision',
+    'an exact retry protects the legacy row from future direct changes'
 );
 SELECT lives_ok(
     $$SELECT tests.revision_test_save(
