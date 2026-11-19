@@ -22,7 +22,6 @@ import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_app/widgets/photo_viewer_dialog.dart';
-import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
@@ -42,7 +41,6 @@ enum _FoodAction() {
   editAmount,
   edit,
   editDefinition,
-  saveTemplate,
   remove,
 }
 
@@ -536,14 +534,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
             label: l10n.edit_food_definition,
             icon: Icons.sync_outlined,
           ),
-        if (food.templateId == null &&
-            widget.historicalTarget == null &&
-            (_allowMeals || food.entryType != FoodEntryType.meal))
-          NutritionSheetAction(
-            value: _FoodAction.saveTemplate,
-            label: l10n.save_to_my_items_action,
-            icon: Icons.bookmark_add_outlined,
-          ),
         NutritionSheetAction(
           value: _FoodAction.remove,
           label: l10n.remove_from_meal,
@@ -560,8 +550,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         await _editFood(food);
       case _FoodAction.editDefinition:
         await _editFood(food, editReusableDefinition: true);
-      case _FoodAction.saveTemplate:
-        await _saveFoodAsTemplate(food);
       case _FoodAction.remove:
         _removeFood(food);
       case null:
@@ -904,39 +892,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           ),
         ),
       );
-    }
-  }
-
-  Future<void> _saveFoodAsTemplate(FoodEntry food) async {
-    if (!_allowMeals && food.entryType == FoodEntryType.meal) return;
-    final l10n = AppLocalizations.of(context)!;
-    final appState = Provider.of<AppState>(context, listen: false);
-    final userId = appState.activeSubject?.id ?? 'anonymous';
-
-    final templateType = food.entryType == FoodEntryType.meal
-        ? TemplateType.meal
-        : TemplateType.food;
-
-    final result = await SaveTemplateDialog.show(
-      context,
-      initialName: food.name,
-      templateType: templateType,
-    );
-
-    if (result != null && mounted) {
-      final viewModel = TemplateViewModel(
-        userId: userId,
-        repository: widget.foodRepository,
-      );
-      food.templateId = await viewModel.saveFoodAsTemplate(
-        name: result.name,
-        food: food,
-        tags: result.tags,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
-      }
     }
   }
 

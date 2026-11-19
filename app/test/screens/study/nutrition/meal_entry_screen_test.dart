@@ -2177,10 +2177,8 @@ void main() {
     },
   );
 
-  testWidgets('saved food omits the save action', (tester) async {
-    final meal = editableMeal();
-    meal.foods.single.templateId = 'saved-food-template';
-    await openMealEntry(tester, meal);
+  testWidgets('food menu omits the Library save action', (tester) async {
+    await openMealEntry(tester, editableMeal());
 
     await tester.tap(find.byTooltip('More options'));
     await tester.pumpAndSettle();
