@@ -66,11 +66,11 @@ class _TaskOverviewState() extends State<TaskOverview> {
           TaskBox(
             taskInstance: taskInstance,
             onCompleted: () => _navigateToReportIfStudyCompleted(context),
-            icon: Icon(
-              taskInstance.task is Observation
-                  ? MdiIcons.orderBoolAscendingVariant
-                  : MdiIconsHelper.fromString(widget.interventionIcon!),
-            ),
+            icon: Icon(switch (taskInstance.task) {
+              NutritionTask() => Icons.restaurant_outlined,
+              Observation() => MdiIcons.orderBoolAscendingVariant,
+              _ => MdiIconsHelper.fromString(widget.interventionIcon!),
+            }),
           ),
         );
     }
