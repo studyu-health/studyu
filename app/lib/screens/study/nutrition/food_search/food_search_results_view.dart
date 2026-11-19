@@ -407,32 +407,39 @@ class const _SearchFallback({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return SafeArea(
       top: false,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           border: Border(
             top: BorderSide(color: theme.colorScheme.outlineVariant),
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
           children: [
-            Text(
-              AppLocalizations.of(context)!.cant_find_it,
-              style: theme.textTheme.bodySmall,
+            Flexible(
+              child: Text(l10n.cant_find_it, style: theme.textTheme.bodySmall),
             ),
-            const SizedBox(height: 4),
-            FilledButton.tonalIcon(
-              onPressed: onAddManually,
-              icon: const Icon(Icons.note_add_outlined),
-              label: Text(
-                AppLocalizations.of(context)!.create_food_from_search(query),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 2,
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: FilledButton.tonal(
+                  onPressed: onAddManually,
+                  child: Text(
+                    query.isEmpty
+                        ? l10n.add_manually
+                        : l10n.create_food_from_search(query),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ),
             ),
           ],

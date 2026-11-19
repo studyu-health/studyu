@@ -922,10 +922,12 @@ class const _EssentialFieldsCard({
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  l10n.basic_information,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    l10n.basic_information,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],

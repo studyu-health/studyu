@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/models/usda_models.dart';
+import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library.dart';
 import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
@@ -18,7 +19,27 @@ import 'fake_nutrition_food_repository.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  testWidgets('manual entry is available before and after finding food', (
+    tester,
+  ) async {
+    _setSurfaceSize(tester);
+    await _pumpSearch(tester, query: null);
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final prompt = find.text(l10n.cant_find_it);
 
+    expect(prompt.hitTestable(), findsOneWidget);
+    expect(find.text(l10n.add_manually).hitTestable(), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'apple');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(find.text('External Apple'), findsOneWidget);
+    expect(prompt.hitTestable(), findsOneWidget);
+
+    await tester.tap(find.text(l10n.create_food_from_search('apple')));
+    await tester.pumpAndSettle();
+    expect(find.byType(FoodEntryScreen), findsOneWidget);
+  });
 
   testWidgets('search filters show results from the selected sources', (
     tester,
@@ -96,7 +117,6 @@ void main() {
     expect(library, findsOneWidget);
     expect(database, findsOneWidget);
   });
-
 
   testWidgets('new result opens details, then add reveals compact tray', (
     tester,
@@ -421,7 +441,6 @@ void main() {
     semantics.dispose();
   });
 
-
   testWidgets('accessibility stays active while search and basket change', (
     tester,
   ) async {
@@ -461,7 +480,6 @@ void main() {
     await mouse.removePointer();
     semantics.dispose();
   });
-
 
   testWidgets('header semantics describe unavailable calories', (tester) async {
     final semantics = tester.ensureSemantics();
@@ -755,9 +773,26 @@ Future<void> _pumpLibrarySelection(
   await tester.ensureVisible(myLibrary);
   await tester.tap(myLibrary);
   await tester.pumpAndSettle();
+  final library = find.byType(FoodLibrary);
+  final libraryList = find.descendant(
+    of: library,
+    matching: find.byType(ListView),
+  );
+  final scrollable = find.descendant(
+    of: libraryList,
+    matching: find.byType(Scrollable),
+  );
   for (var index = 0; index < (selectedCount ?? count); index++) {
-    final add = find.text('Add').first;
-    await tester.ensureVisible(add);
+    final card = find.ancestor(
+      of: find.text('Library item ${index + 1}'),
+      matching: find.byType(FoodLibraryItemCard),
+    );
+    final add = find.descendant(of: card, matching: find.text('Add'));
+    await tester.scrollUntilVisible(
+      add.hitTestable(),
+      40,
+      scrollable: scrollable,
+    );
     await tester.tap(add);
     await tester.pumpAndSettle();
   }
