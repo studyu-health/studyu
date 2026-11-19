@@ -318,6 +318,7 @@ class _NutritionTaskWidgetState()
     StudySubject? subject,
   ) => AppBar(
     automaticallyImplyLeading: _isHistoricalMode,
+    centerTitle: _isHistoricalMode ? null : false,
     title: Text(
       _isHistoricalMode
           ? _historicalDateTitle(context, l10n)
