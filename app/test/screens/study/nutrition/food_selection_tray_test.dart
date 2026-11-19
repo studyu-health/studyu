@@ -1,3 +1,5 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
@@ -416,6 +418,47 @@ void main() {
     tester.semantics.tap(header);
     await tester.pumpAndSettle();
     expect(header, isSemantics(hasExpandedState: true, isExpanded: false));
+    semantics.dispose();
+  });
+
+
+  testWidgets('accessibility stays active while search and basket change', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await _pumpSearch(tester);
+    await _addExternalApple(tester);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(
+      location: tester.getCenter(
+        find.byTooltip('Increase External Apple').last,
+      ),
+    );
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final header = find.semantics.byLabel(RegExp('Selected items'));
+    final tray = find.byKey(const ValueKey('selection-tray'));
+    final trayElement = tray.evaluate().single;
+    tester.semantics.tap(header);
+    await tester.pumpAndSettle();
+    expect(tray.evaluate().single, same(trayElement));
+    await tester.tap(find.text('External Apple').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('food-quantity-back')));
+    await tester.pumpAndSettle();
+    tester.semantics.tap(header);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Clear text'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'apple');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(header, findsOneWidget);
+    expect(tray.evaluate().single, same(trayElement));
+    expect(tester.takeException(), isNull);
+    await mouse.removePointer();
     semantics.dispose();
   });
 

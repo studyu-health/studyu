@@ -595,8 +595,8 @@ class const _SelectionPreviewRow({
                             ],
                           ),
                         ),
-                        Tooltip(
-                          message: l10n.food_quantity_edit_amount,
+                        Semantics(
+                          label: l10n.food_quantity_edit_amount,
                           child: const SizedBox(
                             width: 40,
                             height: 48,

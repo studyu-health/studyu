@@ -21,20 +21,27 @@ class const FoodSearchBar({
           hintText: hintText,
           prefixIcon: const Icon(Icons.search),
           suffixIcon: controller.text.isNotEmpty
-              ? IconButton(
-                  tooltip: MaterialLocalizations.of(context).clearButtonTooltip,
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    controller.clear();
-                    onChanged('');
-                  },
+              ? Semantics(
+                  container: true,
+                  child: IconButton(
+                    tooltip: MaterialLocalizations.of(context)
+                        .clearButtonTooltip,
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      controller.clear();
+                      onChanged('');
+                    },
+                  ),
                 )
               : onScanBarcode == null
               ? null
-              : IconButton(
-                  tooltip: barcodeTooltip,
-                  icon: const Icon(Icons.qr_code_scanner_outlined),
-                  onPressed: onScanBarcode,
+              : Semantics(
+                  container: true,
+                  child: IconButton(
+                    tooltip: barcodeTooltip,
+                    icon: const Icon(Icons.qr_code_scanner_outlined),
+                    onPressed: onScanBarcode,
+                  ),
                 ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
           filled: true,

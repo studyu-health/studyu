@@ -172,11 +172,14 @@ class _SelectionQuantityButtonState() extends State<SelectionQuantityButton> {
         curve: Curves.easeOutCubic,
         child: SizedBox.square(
           dimension: 48,
-          child: IconButton(
-            tooltip: widget.tooltip,
-            onPressed: widget.onPressed == null ? null : _onPressed,
-            icon: Icon(widget.icon),
-            visualDensity: widget.visualDensity,
+          child: Semantics(
+            container: true,
+            child: IconButton(
+              tooltip: widget.tooltip,
+              onPressed: widget.onPressed == null ? null : _onPressed,
+              icon: Icon(widget.icon),
+              visualDensity: widget.visualDensity,
+            ),
           ),
         ),
       ),

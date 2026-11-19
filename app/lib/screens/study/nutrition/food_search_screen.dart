@@ -83,6 +83,41 @@ enum _FoodSearchAction() {
   meal,
 }
 
+enum _FoodSearchLayoutSlot() {
+  content,
+  tray,
+}
+
+class _FoodSearchLayoutDelegate({required final bool trayOverlapsContent})
+    extends MultiChildLayoutDelegate {
+  @override
+  void performLayout(Size size) {
+    final traySize = layoutChild(
+      _FoodSearchLayoutSlot.tray,
+      BoxConstraints(
+        minWidth: size.width,
+        maxWidth: size.width,
+        maxHeight: size.height,
+      ),
+    );
+    final contentHeight = trayOverlapsContent
+        ? size.height
+        : size.height - traySize.height;
+    layoutChild(
+      _FoodSearchLayoutSlot.content,
+      BoxConstraints.tightFor(width: size.width, height: contentHeight),
+    );
+    positionChild(
+      _FoodSearchLayoutSlot.tray,
+      Offset(0, size.height - traySize.height),
+    );
+  }
+
+  @override
+  bool shouldRelayout(covariant _FoodSearchLayoutDelegate oldDelegate) =>
+      trayOverlapsContent != oldDelegate.trayOverlapsContent;
+}
+
 class const FoodSearchScreen({
   final bool allowMeals = true,
   final String? mealLabel,
@@ -969,7 +1004,6 @@ class _FoodSearchScreenContentState()
         (!showPersonal || !templateViewModel.isLoading) &&
         visibleResultCount == 0 &&
         (!showDatabase || (!search.isInitialLoading && databaseComplete));
-    final showSearchFallback = showNoResults;
     String? searchStatus;
     if (showDatabase && (search.isInitialLoading || search.isLoadingMore)) {
       searchStatus = l10n.searching_databases;
@@ -1087,102 +1121,103 @@ class _FoodSearchScreenContentState()
               _ => const SizedBox.shrink(key: ValueKey('empty-selection-tray')),
             },
           );
-          return Stack(
+          // Keep the tray mounted in the same layout slot as its mode changes.
+          return CustomMultiChildLayout(
+            delegate: _FoodSearchLayoutDelegate(
+              trayOverlapsContent: _selectionSurfaceActive,
+            ),
             children: [
-              Column(
-                children: [
-                  // Search Bar
-                  FoodSearchBar(
-                    controller: _searchController,
-                    focusNode: _searchFocusNode,
-                    hintText: widget.allowMeals
-                        ? l10n.nutrition_search_foods_saved_meals_or_brands
-                        : l10n.nutrition_search_foods_or_brands,
-                    onChanged: (val) =>
-                        _onSearchChanged(val, templateViewModel),
-                    onScanBarcode: _scanBarcode,
-                    barcodeTooltip: l10n.scan_barcode,
-                  ),
-                  Semantics(
-                    liveRegion: true,
-                    label: searchStatus,
-                    child: const SizedBox.shrink(),
-                  ),
-
-                  // Content
-                  Expanded(
-                    child: _FoodSearchListView(
-                      scrollController: _scrollController,
-                      l10n: l10n,
-                      theme: theme,
-                      templateViewModel: templateViewModel,
-                      query: query,
-                      isInitialLoading: search.isInitialLoading,
-                      isLoadingMore: search.isLoadingMore,
-                      hasSearched: hasSearched,
-                      databaseComplete: databaseComplete,
-                      showNoResults: showNoResults,
-                      offHasMore: search.offHasMore,
-                      usdaHasMore: search.usdaHasMore,
-                      errorMessage: errorMessage,
-                      combinedResults: results,
-                      recentMatches: recentMatches,
-                      personalMatches: personalMatches,
-                      selectedSection: _selectedSection,
-                      selectedFilter: _selectedFilter,
-                      onSectionChanged: (section) {
-                        _removeTransfer();
-                        setState(() {
-                          _selectedSection = section;
-                        });
-                      },
-                      onFilterChanged: (filter) {
-                        if (_selectedFilter == filter) return;
-                        final previousFilter = _selectedFilter;
-                        _removeTransfer();
-                        setState(() {
-                          _selectedFilter = filter;
-                        });
-                        final includeDatabase = filter.includes(
-                          _FoodSearchFilter.database,
-                        );
-                        if (includeDatabase !=
-                            previousFilter.includes(
-                              _FoodSearchFilter.database,
-                            )) {
-                          _searchViewModel.search(
-                            includeDatabase ? _searchController.text : '',
-                          );
-                        }
-                      },
-                      onSelectHistory: _selectHistoryItem,
-                      onAddHistory: _addHistoryItem,
-                      onSelectFoodTemplate: _selectFoodTemplate,
-                      onAddFoodTemplate: _addFoodTemplate,
-                      onSelectResult: _selectResult,
-                      onAddResult: _addResult,
-                      onRetry: () => _retrySearch(templateViewModel),
-                      allowMeals: widget.allowMeals,
-                      selectionStore: _selectionStore,
-                      selectionKeyForResult: (result) =>
-                          canonicalFoodSelectionKey(
-                            _foodEntryForResult(result),
-                          ),
-                      onDecrementSelection: _decrementSelection,
+              LayoutId(
+                id: _FoodSearchLayoutSlot.content,
+                child: Column(
+                  children: [
+                    // Search Bar
+                    FoodSearchBar(
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      hintText: widget.allowMeals
+                          ? l10n.nutrition_search_foods_saved_meals_or_brands
+                          : l10n.nutrition_search_foods_or_brands,
+                      onChanged: (val) =>
+                          _onSearchChanged(val, templateViewModel),
+                      onScanBarcode: _scanBarcode,
+                      barcodeTooltip: l10n.scan_barcode,
                     ),
-                  ),
-                  if (showSearchFallback)
-                    _SearchFallback(query: query, onAddManually: _addManually),
-                  if (!_selectionSurfaceActive) selectionSurface,
-                ],
-              ),
-              if (_selectionSurfaceActive)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: selectionSurface,
+                    Semantics(
+                      container: true,
+                      liveRegion: true,
+                      label: searchStatus,
+                      child: const SizedBox.shrink(),
+                    ),
+
+                    // Content
+                    Expanded(
+                      child: _FoodSearchListView(
+                        scrollController: _scrollController,
+                        l10n: l10n,
+                        theme: theme,
+                        templateViewModel: templateViewModel,
+                        query: query,
+                        isInitialLoading: search.isInitialLoading,
+                        isLoadingMore: search.isLoadingMore,
+                        hasSearched: hasSearched,
+                        databaseComplete: databaseComplete,
+                        showNoResults: showNoResults,
+                        offHasMore: search.offHasMore,
+                        usdaHasMore: search.usdaHasMore,
+                        errorMessage: errorMessage,
+                        combinedResults: results,
+                        recentMatches: recentMatches,
+                        personalMatches: personalMatches,
+                        selectedSection: _selectedSection,
+                        selectedFilter: _selectedFilter,
+                        onSectionChanged: (section) {
+                          _removeTransfer();
+                          setState(() {
+                            _selectedSection = section;
+                          });
+                        },
+                        onFilterChanged: (filter) {
+                          if (_selectedFilter == filter) return;
+                          final previousFilter = _selectedFilter;
+                          _removeTransfer();
+                          setState(() {
+                            _selectedFilter = filter;
+                          });
+                          final includeDatabase = filter.includes(
+                            _FoodSearchFilter.database,
+                          );
+                          if (includeDatabase !=
+                              previousFilter.includes(
+                                _FoodSearchFilter.database,
+                              )) {
+                            _searchViewModel.search(
+                              includeDatabase ? _searchController.text : '',
+                            );
+                          }
+                        },
+                        onSelectHistory: _selectHistoryItem,
+                        onAddHistory: _addHistoryItem,
+                        onSelectFoodTemplate: _selectFoodTemplate,
+                        onAddFoodTemplate: _addFoodTemplate,
+                        onSelectResult: _selectResult,
+                        onAddResult: _addResult,
+                        onRetry: () => _retrySearch(templateViewModel),
+                        allowMeals: widget.allowMeals,
+                        selectionStore: _selectionStore,
+                        selectionKeyForResult: (result) =>
+                            canonicalFoodSelectionKey(
+                              _foodEntryForResult(result),
+                            ),
+                        onDecrementSelection: _decrementSelection,
+                      ),
+                    ),
+                    if (showNoResults)
+                      _SearchFallback(query: query, onAddManually: _addManually),
+                  ],
                 ),
+              ),
+              LayoutId(id: _FoodSearchLayoutSlot.tray, child: selectionSurface),
             ],
           );
         },
