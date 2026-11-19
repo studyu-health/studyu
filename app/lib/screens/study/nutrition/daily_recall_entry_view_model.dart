@@ -16,7 +16,7 @@ typedef NutritionRecallRemoteSaver = Future<void> Function({
 
 class DailyRecallEntryViewModel({
   final StudySubject? subject,
-  final NutritionTask? task,
+  var NutritionTask? task,
   final CompletionPeriod? completionPeriod,
   var NutritionRecallPersistenceTarget? _persistenceTarget,
   final String? interventionId,

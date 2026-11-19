@@ -91,6 +91,18 @@ class _NutritionTaskWidgetState()
     });
   }
 
+  @override
+  void didUpdateWidget(covariant NutritionTaskWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _viewModel?.task = widget.task;
+    if (oldWidget.task?.trackWaterIntake == false &&
+        _trackWaterIntake &&
+        !widget.readOnly &&
+        _cupSizeMl == null) {
+      unawaited(_loadCupSize());
+    }
+  }
+
   Future<void> _loadCupSize() async {
     int? savedSize;
     try {

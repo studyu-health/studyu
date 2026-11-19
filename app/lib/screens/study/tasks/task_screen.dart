@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
@@ -29,10 +30,12 @@ class _TaskScreenState() extends State<TaskScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     subject = context.watch<AppState>().activeSubject;
-    taskInstance = TaskInstance.fromInstanceId(
-      widget.taskInstance.id,
-      study: subject!.study,
-    );
+    if (!_hasNavigated) {
+      taskInstance = TaskInstance.fromInstanceId(
+        widget.taskInstance.id,
+        study: subject!.study,
+      );
+    }
 
     if (taskInstance.task is NutritionTask && !_hasNavigated) {
       _hasNavigated = true;
@@ -43,11 +46,24 @@ class _TaskScreenState() extends State<TaskScreen> {
   }
 
   Future<void> _navigateToNutritionTask() async {
+    if (!mounted) return;
     final nutritionTask = taskInstance.task as NutritionTask;
+    final completionPeriod = taskInstance.completionPeriod;
     final result = await Navigator.of(context).push(
-      NutritionTaskWidget.route(
-        task: nutritionTask,
-        completionPeriod: taskInstance.completionPeriod,
+      MaterialPageRoute<DailyRecall>(
+        builder: (context) => Consumer<AppState>(
+          builder: (context, state, child) {
+            final updatedTask = state.isPreview
+                ? state.activeSubject?.study.observations
+                      .whereType<NutritionTask>()
+                      .firstWhereOrNull((task) => task.id == nutritionTask.id)
+                : null;
+            return NutritionTaskWidget(
+              task: updatedTask ?? nutritionTask,
+              completionPeriod: completionPeriod,
+            );
+          },
+        ),
       ),
     );
 
