@@ -12,6 +12,7 @@ class const NutritionSaveButton({
     final colors = Theme.of(context).colorScheme;
     return FloatingActionButton.extended(
       onPressed: onPressed,
+      disabledElevation: 0,
       backgroundColor: onPressed == null
           ? colors.onSurface.withValues(alpha: 0.12)
           : colors.primary,
