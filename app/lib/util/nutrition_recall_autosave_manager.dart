@@ -217,10 +217,6 @@ class NutritionRecallAutoSaveManager({
       }
     }
 
-    StudyULogger.debug(
-      '[AutoSave] scanPendingRecalls | subject=$subjectId '
-      'found=${pendingByIdentity.length}',
-    );
     return pendingByIdentity.values.toList();
   }
 
