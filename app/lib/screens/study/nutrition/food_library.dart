@@ -42,6 +42,7 @@ class const FoodLibrary({
   final bool addOnTap = false,
   final bool Function(studyu.SavedFoodTemplate)? isSelected,
   final num? Function(studyu.SavedFoodTemplate)? selectedQuantity,
+  final studyu.FoodEntry? Function(studyu.SavedFoodTemplate)? selectedFood,
   final FoodLibrarySelectionAction? onIncrement,
   final ValueChanged<studyu.SavedFoodTemplate>? onDecrement,
   final bool showManagementActions = true,
@@ -325,6 +326,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
               addOnTap: widget.addOnTap,
               isSelected: widget.isSelected?.call(template) ?? false,
               selectedQuantity: widget.selectedQuantity?.call(template),
+              selectedFood: widget.selectedFood?.call(template),
               onIncrement: widget.onIncrement == null
                   ? null
                   : (source) => widget.onIncrement!(template, source),
@@ -444,6 +446,7 @@ class const FoodLibraryItemCard({
   final bool addOnTap = false,
   final bool isSelected = false,
   final num? selectedQuantity,
+  final studyu.FoodEntry? selectedFood,
   final ValueChanged<Offset?>? onIncrement,
   final VoidCallback? onDecrement,
   final bool showManagementActions = true,
@@ -460,15 +463,17 @@ class const FoodLibraryItemCard({
     final icon = _isMeal
         ? Icons.restaurant_menu_outlined
         : Icons.restaurant_outlined;
-    final baseAmount = template.prototype.amount;
-    final amount = isSelected ? selectedQuantity ?? 1 : 1;
+    final food = selectedFood ?? template.prototype;
+    final baseAmount = food.amount;
+    final amount = isSelected
+        ? selectedQuantity ?? selectedFood?.amount ?? 1
+        : 1;
     final quantity = baseAmount > 0 ? amount / baseAmount : 1;
     final metadata = foodTotalMetadata(
       l10n,
-      template.prototype,
+      food,
       quantity,
-      caloriesKnown: !template.prototype.nutrition.unavailableNutrients
-          .contains('energyKcal'),
+      caloriesKnown: food.nutrition.isKnown('energyKcal'),
     );
 
     return FoodItemCard(

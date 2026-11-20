@@ -175,6 +175,33 @@ void main() {
     expect(database, findsOneWidget);
   });
 
+  testWidgets('saved food cards reflect edits to the selected serving', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    await _pumpLibrarySelection(tester, 1);
+    Finder cardEnergy() => find.descendant(
+      of: find.byType(FoodLibraryItemCard),
+      matching: find.text('120 g · 153 kcal'),
+    );
+    expect(cardEnergy(), findsNothing);
+
+    await tester.tap(_basketEdit());
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, l10n.energy_kcal),
+      '153',
+    );
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    expect(cardEnergy(), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Library item 1');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(cardEnergy(), findsOneWidget);
+  });
+
   testWidgets('the whole result adds a serving and keeps the query', (
     tester,
   ) async {

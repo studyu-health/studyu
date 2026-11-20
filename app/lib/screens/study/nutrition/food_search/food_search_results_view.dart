@@ -276,6 +276,7 @@ class const _FoodSearchListView({
       addOnTap: selectionStore != null,
       isSelected: selected != null,
       selectedQuantity: selected?.amount,
+      selectedFood: selected?.baseFood,
       onIncrement: (source) => onAddFoodTemplate(template, source),
       onDecrement: () => onDecrementSelection(key),
       showManagementActions: false,
@@ -323,6 +324,8 @@ class const _FoodSearchListView({
             selectionStore?.itemFor(_templateKey(template)) != null,
         selectedQuantity: (template) =>
             selectionStore?.itemFor(_templateKey(template))?.amount,
+        selectedFood: (template) =>
+            selectionStore?.itemFor(_templateKey(template))?.baseFood,
         onIncrement: onAddFoodTemplate,
         onDecrement: (template) => onDecrementSelection(_templateKey(template)),
         showManagementActions: false,
