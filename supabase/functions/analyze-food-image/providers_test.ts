@@ -4,21 +4,18 @@ const providers = [
   {
     provider: 'openai',
     apiKeyName: 'OPENAI_API_KEY',
-    modelName: 'OPENAI_MODEL',
     defaultModel: 'gpt-4o-mini',
     response: (content: string) => ({ choices: [{ message: { content } }] }),
   },
   {
     provider: 'anthropic',
     apiKeyName: 'ANTHROPIC_API_KEY',
-    modelName: 'ANTHROPIC_MODEL',
     defaultModel: 'claude-sonnet-4-6',
     response: (text: string) => ({ content: [{ text }] }),
   },
   {
     provider: 'gemini',
     apiKeyName: 'GOOGLE_API_KEY',
-    modelName: 'GEMINI_MODEL',
     defaultModel: 'gemini-3.6-flash',
     response: (text: string) => ({ candidates: [{ content: { parts: [{ text }] } }] }),
   },
@@ -30,15 +27,10 @@ function assertEqual(actual: unknown, expected: unknown) {
   }
 }
 
-for (const { provider, apiKeyName, modelName, defaultModel, response } of providers) {
+for (const { provider, apiKeyName, defaultModel, response } of providers) {
   Deno.test(`${provider} preserves known zeros and omits unavailable estimates`, async () => {
-    const originalProvider = Deno.env.get('LLM_PROVIDER');
-    const originalApiKey = Deno.env.get(apiKeyName);
-    const originalModel = Deno.env.get(modelName);
+    const env = new Map([['LLM_PROVIDER', provider], [apiKeyName, 'test-key']]);
     const originalFetch = globalThis.fetch;
-    Deno.env.set('LLM_PROVIDER', provider);
-    Deno.env.set(apiKeyName, 'test-key');
-    Deno.env.delete(modelName);
     const content = JSON.stringify({
       items: [
         { name: 'Apple', nutrition: { energyKcal: 50, carbs: 0, protein: null, fat: -1, sugars: '' } },
@@ -53,17 +45,12 @@ for (const { provider, apiKeyName, modelName, defaultModel, response } of provid
       return Promise.resolve(Response.json(response(content)));
     };
     try {
-      const { items } = await createProvider().analyzeImage('fixture', 'image/jpeg', {});
+      const testProvider = createProvider((name) => env.get(name));
+      const { items } = await testProvider.analyzeImage('fixture', 'image/jpeg', {});
       assertEqual(items[0].nutrition, { energyKcal: 50, carbs: 0 });
       assertEqual(items[1].nutrition, {});
     } finally {
       globalThis.fetch = originalFetch;
-      if (originalProvider === undefined) Deno.env.delete('LLM_PROVIDER');
-      else Deno.env.set('LLM_PROVIDER', originalProvider);
-      if (originalApiKey === undefined) Deno.env.delete(apiKeyName);
-      else Deno.env.set(apiKeyName, originalApiKey);
-      if (originalModel === undefined) Deno.env.delete(modelName);
-      else Deno.env.set(modelName, originalModel);
     }
   });
 }

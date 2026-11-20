@@ -459,32 +459,34 @@ class GeminiProvider implements LLMProvider {
 }
 
 // Provider factory
-export function createProvider(): LLMProvider {
-  const provider = Deno.env.get('LLM_PROVIDER')?.toLowerCase() || 'openai';
+export function createProvider(
+  getEnv: (name: string) => string | undefined = (name) => Deno.env.get(name),
+): LLMProvider {
+  const provider = getEnv('LLM_PROVIDER')?.toLowerCase() || 'openai';
 
   switch (provider) {
     case 'openai': {
-      const apiKey = Deno.env.get('OPENAI_API_KEY');
+      const apiKey = getEnv('OPENAI_API_KEY');
       if (!apiKey) {
         throw new Error('OPENAI_API_KEY not configured');
       }
-      const model = Deno.env.get('OPENAI_MODEL') || 'gpt-4o-mini';
+      const model = getEnv('OPENAI_MODEL') || 'gpt-4o-mini';
       return new OpenAIProvider(apiKey, model);
     }
     case 'anthropic': {
-      const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
+      const apiKey = getEnv('ANTHROPIC_API_KEY');
       if (!apiKey) {
         throw new Error('ANTHROPIC_API_KEY not configured');
       }
-      const model = Deno.env.get('ANTHROPIC_MODEL') || 'claude-sonnet-4-6';
+      const model = getEnv('ANTHROPIC_MODEL') || 'claude-sonnet-4-6';
       return new AnthropicProvider(apiKey, model);
     }
     case 'gemini': {
-      const apiKey = Deno.env.get('GOOGLE_API_KEY');
+      const apiKey = getEnv('GOOGLE_API_KEY');
       if (!apiKey) {
         throw new Error('GOOGLE_API_KEY not configured');
       }
-      const model = Deno.env.get('GEMINI_MODEL') || 'gemini-3.6-flash';
+      const model = getEnv('GEMINI_MODEL') || 'gemini-3.6-flash';
       return new GeminiProvider(apiKey, model);
     }
     default:
