@@ -91,4 +91,62 @@ void main() {
       DateTime(2026),
     ]);
   });
+
+  test(
+    'keeps an unfinished UTC nutrition period after the local phase ends',
+    () {
+      final now = DateTime.utc(2026, 1, 2, 22);
+      final task = NutritionTask.withId();
+      final firstPeriod = task.schedule.completionPeriods.single;
+      task.schedule.completionPeriods.add(
+        CompletionPeriod(
+          id: 'period-two',
+          unlockTime: StudyUTimeOfDay(hour: 12),
+          lockTime: StudyUTimeOfDay(hour: 23),
+        ),
+      );
+      final subject = _FinishedLocalStudy()
+        ..startedAt = DateTime.utc(2026)
+        ..study = (Study('study', 'user')
+          ..schedule = (StudySchedule()
+            ..includeBaseline = false
+            ..phaseDuration = 1
+            ..numberOfCycles = 1)
+          ..interventions = [Intervention('a', 'A'), Intervention('b', 'B')]
+          ..observations = [task]);
+      final recall = DailyRecall.withId(
+        date: now,
+        recallMode: RecallMode.realtimeRecord,
+        entryCompletedAt: now,
+        studyDaySnapshot: 1,
+        meals: [],
+      );
+      subject.progress.add(
+        SubjectProgress(
+          subjectId: subject.id,
+          taskId: task.id,
+          resultType: 'DailyRecall',
+          interventionId: 'b',
+          result: Result<DailyRecall>.app(
+            type: 'DailyRecall',
+            periodId: firstPeriod.id,
+            result: recall,
+          ),
+        )..completedAt = now,
+      );
+
+      expect(subject.getInterventionForDate(now), isNull);
+      expect(subject.getNutritionInterventionForStudyDay(1)!.id, 'b');
+      expect(subject.getNutritionInterventionForStudyDay(2), isNull);
+      expect(subject.scheduleFor(now), hasLength(2));
+      expect(subject.allTasksCompletedFor(now), isFalse);
+    },
+  );
+}
+
+class _FinishedLocalStudy() extends StudySubject {
+  this : super('subject', 'study', 'user', ['a', 'b']);
+
+  @override
+  int getDayOfStudyFor(DateTime date) => 2;
 }

@@ -148,9 +148,10 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   }
 
   Intervention? getNutritionInterventionForStudyDay(int studyDay) {
-    if (studyDay < 0 || studyDay >= study.schedule.length) return null;
+    final duration = study.schedule.phaseDuration;
+    if (studyDay < 0 || duration <= 0) return null;
     final order = interventionOrder;
-    final index = studyDay ~/ study.schedule.phaseDuration;
+    final index = studyDay ~/ duration;
     if (index >= order.length) return null;
     return selectedInterventions.firstWhereOrNull(
       (intervention) => intervention.id == order[index],
@@ -285,7 +286,13 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   /// returns true if all of of the tasks (interventions & observations)
   /// have been completed on a given day
   bool allTasksCompletedFor(DateTime dateTime) => scheduleFor(dateTime).every(
-    (taskInstance) => completedTaskForDay(taskInstance.task.id, dateTime),
+    (instance) => instance.task is NutritionTask
+        ? completedTaskInstanceForDay(
+            instance.task.id,
+            instance.completionPeriod,
+            dateTime,
+          )
+        : completedTaskForDay(instance.task.id, dateTime),
   );
 
   // Currently the end of the study, as there is no real minimum, just a set study length
@@ -327,9 +334,9 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
     final studyDayIndex = getDayOfStudyFor(dateTime);
     final nutritionDay = getNutritionStudyDayFor(dateTime);
     final inNutritionSchedule =
+        study.observations.any((task) => task is NutritionTask) &&
         !dateTime.isBefore(startedAt!) &&
-        nutritionDay >= 0 &&
-        nutritionDay < study.schedule.length;
+        getNutritionInterventionForStudyDay(nutritionDay) != null;
 
     for (final observation in study.observations) {
       final isNutrition = observation is NutritionTask;
