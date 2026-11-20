@@ -40,8 +40,11 @@ bool shouldMarkDashboardShowcaseCompleted({required bool wasStarted}) {
   return wasStarted;
 }
 
-class const DashboardScreen({super.key, final String? error})
-    extends StatefulWidget {
+class const DashboardScreen({
+  super.key,
+  final String? error,
+  final NutritionRecallAutoSaveManager? nutritionAutoSaveManager,
+}) extends StatefulWidget {
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
@@ -67,7 +70,8 @@ class _DashboardScreenState()
   late final TextStyle showcaseActionTextStyle;
   StudySubject? subject;
   List<TaskInstance>? scheduleToday;
-  final _nutritionAutoSaveManager = NutritionRecallAutoSaveManager();
+  late final _nutritionAutoSaveManager =
+      widget.nutritionAutoSaveManager ?? NutritionRecallAutoSaveManager();
   static const _nutritionRetryDelay = Duration(minutes: 5);
 
   Timer? _midnightSubmitTimer;
@@ -105,15 +109,17 @@ class _DashboardScreenState()
         trackProgress: true,
       );
       if (!mounted || subject?.id != currentSubject.id) return;
-      final needsAnotherAttempt =
-          needsRetry || _nutritionUploadGeneration != uploadGeneration;
-      setState(() => _nutritionRetryNeeded = needsAnotherAttempt);
-      if (needsAnotherAttempt) _scheduleNutritionRetry();
+      setState(() => _nutritionRetryNeeded = needsRetry);
+      if (needsRetry) _scheduleNutritionRetry();
     } catch (e) {
       StudyULogger.error('Failed to auto-submit pending nutrition recalls: $e');
     } finally {
       _submittingNutritionRecalls = false;
-      if (mounted && subject != null && subject?.id != currentSubject.id) {
+      if (mounted &&
+          subject != null &&
+          (subject?.id != currentSubject.id ||
+              !_nutritionRetryNeeded &&
+                  _nutritionUploadGeneration != uploadGeneration)) {
         unawaited(_submitPendingNutritionRecalls());
       }
     }
@@ -134,8 +140,9 @@ class _DashboardScreenState()
       return;
     }
     _nutritionUploadGeneration++;
-    setState(() => _nutritionRetryNeeded = true);
-    _scheduleNutritionRetry();
+    if (_nutritionRetryTimer?.isActive != true) {
+      unawaited(_submitPendingNutritionRecalls());
+    }
   }
 
   void _scheduleMidnightSubmitTimer() {

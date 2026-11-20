@@ -562,16 +562,24 @@ class DailyRecallEntryViewModel({
     _autoSaveTimer?.cancel();
     _autoSaveTimer = null;
     await _localSaveFuture;
-    if (persistToDatabase && historicalMode && persistenceTarget == null) {
-      if (shouldSaveToDb && subject != null) {
-        NutritionRecallAutoSaveManager.requestUpload(subject!.id);
-      }
-    } else if (persistToDatabase &&
-        (hadScheduledSave || requireRemoteSuccess)) {
+    if (persistToDatabase && _requestInitialHistoricalUpload()) {
+      return;
+    }
+    if (persistToDatabase && (hadScheduledSave || requireRemoteSuccess)) {
       await _performAutoSave(propagateErrors: requireRemoteSuccess);
     } else {
       await _remoteSaveQueue;
     }
+  }
+
+  bool _requestInitialHistoricalUpload() {
+    if (!historicalMode || persistenceTarget != null || subject == null) {
+      return false;
+    }
+    if (shouldSaveToDb) {
+      NutritionRecallAutoSaveManager.requestUpload(subject!.id);
+    }
+    return true;
   }
 
   void _scheduleAutoSave([String reason = 'unspecified']) {
@@ -633,7 +641,7 @@ class DailyRecallEntryViewModel({
   Future<void> _performAutoSaveAfterLocalSave() async {
     try {
       await _localSaveFuture;
-      await _performAutoSave();
+      if (!_requestInitialHistoricalUpload()) await _performAutoSave();
     } catch (error, stackTrace) {
       StudyULogger.warning(
         'Could not finish nutrition autosave: $error\n$stackTrace',

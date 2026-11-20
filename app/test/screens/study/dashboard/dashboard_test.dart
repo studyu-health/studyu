@@ -8,6 +8,7 @@ import 'package:studyu_app/screens/study/dashboard/dashboard.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
 
 import '../../../util/mock_nutrition_draft_storage.dart';
@@ -19,6 +20,7 @@ Widget _dashboardWith(
   DateTime? startedAt,
   NutritionTask? nutritionTask,
   DailyRecall? historicalRecall,
+  NutritionRecallAutoSaveManager? autoSaveManager,
 }) {
   final study = Study('study', 'user')
     ..status = StudyStatus.running
@@ -58,17 +60,43 @@ Widget _dashboardWith(
 
   return ChangeNotifierProvider.value(
     value: appState,
-    child: const MaterialApp(
+    child: MaterialApp(
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      locale: Locale('en'),
-      home: DashboardScreen(),
+      locale: const Locale('en'),
+      home: DashboardScreen(nutritionAutoSaveManager: autoSaveManager),
     ),
   );
 }
 
 void main() {
   setUp(mockNutritionDraftStorage);
+
+  testWidgets('uploads on request and backs off after failure', (tester) async {
+    final manager = _TestNutritionAutoSaveManager();
+    await tester.pumpWidget(
+      _dashboardWith(
+        2,
+        preview: false,
+        startedAt: DateTime.now().subtract(const Duration(days: 1)),
+        autoSaveManager: manager,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(manager.attempts, 1);
+
+    NutritionRecallAutoSaveManager.requestUpload(manager.subjectId!);
+    await tester.pump();
+    expect(manager.attempts, 2);
+
+    await tester.pump(const Duration(minutes: 4));
+    NutritionRecallAutoSaveManager.requestUpload(manager.subjectId!);
+    await tester.pump();
+    expect(manager.attempts, 2);
+
+    await tester.pump(const Duration(minutes: 1));
+    expect(manager.attempts, 3);
+  });
 
   testWidgets('study with one intervention stays unavailable despite tasks', (
     tester,
@@ -135,4 +163,19 @@ void main() {
       isFalse,
     );
   });
+}
+
+class _TestNutritionAutoSaveManager() extends NutritionRecallAutoSaveManager {
+  int attempts = 0;
+  String? subjectId;
+
+  @override
+  Future<bool> submitPendingRecalls({
+    required StudySubject subject,
+    required bool trackProgress,
+    DateTime? now,
+  }) async {
+    subjectId = subject.id;
+    return ++attempts == 2;
+  }
 }
