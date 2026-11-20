@@ -3632,7 +3632,7 @@ abstract class AppLocalizations {
   /// No description provided for @participant_details_study_days_description.
   ///
   /// In en, this message translates to:
-  /// **'This section provides an overview of the participant\'s progress in the study. The color coding indicates the status of the participant\'s tasks on each day. Hover over each day to see more details about the participant\'s activity.'**
+  /// **'The colors show task status for each study day. A nutrition diary is complete for its UTC study day when all scheduled periods are complete. Hover over a day to see its tasks.'**
   String get participant_details_study_days_description;
 
   /// No description provided for @participant_details_color_legend_title.
@@ -3692,19 +3692,19 @@ abstract class AppLocalizations {
   /// No description provided for @participant_details_completed_legend_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'All intervention and survey tasks have been completed for this day'**
+  /// **'All scheduled tasks for this study day are complete.'**
   String get participant_details_completed_legend_tooltip;
 
   /// No description provided for @participant_details_partially_completed_legend_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Not all intervention or survey tasks have been completed for this day'**
+  /// **'Some scheduled tasks for this study day are complete.'**
   String get participant_details_partially_completed_legend_tooltip;
 
   /// No description provided for @participant_details_incomplete_legend_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'No intervention or survey tasks have been completed for this day'**
+  /// **'No scheduled tasks for this study day are complete.'**
   String get participant_details_incomplete_legend_tooltip;
 
   /// No description provided for @participant_details_progress_empty_title.
@@ -3830,7 +3830,7 @@ abstract class AppLocalizations {
   /// No description provided for @monitoring_table_column_completed_surveys.
   ///
   /// In en, this message translates to:
-  /// **'Completed surveys'**
+  /// **'Completed measurements'**
   String get monitoring_table_column_completed_surveys;
 
   /// No description provided for @monitoring_table_row_tooltip_dropout.
@@ -3854,7 +3854,7 @@ abstract class AppLocalizations {
   /// No description provided for @monitoring_table_completed_surveys_header_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'A survey is completed, if all of its tasks have been completed for that day'**
+  /// **'Each completed questionnaire counts once per study day. Each completed nutrition diary period counts once on its assigned UTC study day.'**
   String get monitoring_table_completed_surveys_header_tooltip;
 
   /// No description provided for @banner_text_study_recruit_draft.

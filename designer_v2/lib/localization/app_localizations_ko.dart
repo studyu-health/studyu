@@ -2015,7 +2015,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get participant_details_study_days_description =>
-      '참여자의 연구 진행 현황을 한눈에 확인할 수 있습니다. 색상은 날짜별 과제 수행 상태를 나타냅니다. 각 날짜에 마우스 포인터를 올리면 자세한 활동 정보를 볼 수 있습니다.';
+      '색상은 연구일별 과제 상태를 나타냅니다. 예정된 모든 시간대의 기록을 마치면 해당 UTC 기준 연구일의 영양 일지가 완료됩니다. 각 날짜에 마우스 포인터를 올리면 해당 날짜의 과제를 볼 수 있습니다.';
 
   @override
   String get participant_details_color_legend_title => '범례';
@@ -2049,15 +2049,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get participant_details_completed_legend_tooltip =>
-      '해당 날짜의 모든 중재 과제와 설문 과제가 완료되었습니다.';
+      '해당 연구일에 예정된 모든 과제를 완료했습니다.';
 
   @override
   String get participant_details_partially_completed_legend_tooltip =>
-      '해당 날짜의 중재 과제 또는 설문 과제 중 완료하지 않은 과제가 있습니다.';
+      '해당 연구일에 예정된 과제 중 일부를 완료했습니다.';
 
   @override
   String get participant_details_incomplete_legend_tooltip =>
-      '해당 날짜의 중재 과제와 설문 과제가 하나도 완료되지 않았습니다.';
+      '해당 연구일에 예정된 과제를 하나도 완료하지 않았습니다.';
 
   @override
   String get participant_details_progress_empty_title => '아직 연구 진행 데이터가 없습니다';
@@ -2124,7 +2124,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '완료한 중재 과제';
 
   @override
-  String get monitoring_table_column_completed_surveys => '완료한 설문';
+  String get monitoring_table_column_completed_surveys => '완료한 측정';
 
   @override
   String get monitoring_table_row_tooltip_dropout =>
@@ -2139,7 +2139,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get monitoring_table_completed_surveys_header_tooltip =>
-      '해당 날짜의 설문 과제를 모두 완료하면 그날의 설문을 완료한 것으로 처리합니다.';
+      '완료한 설문은 연구일마다 한 번 집계됩니다. 영양 일지에서 기록을 완료한 각 시간대는 배정된 UTC 기준 연구일에 한 번씩 집계됩니다.';
 
   @override
   String get banner_text_study_recruit_draft =>

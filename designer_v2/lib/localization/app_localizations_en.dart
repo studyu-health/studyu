@@ -2094,7 +2094,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get participant_details_study_days_description =>
-      'This section provides an overview of the participant\'s progress in the study. The color coding indicates the status of the participant\'s tasks on each day. Hover over each day to see more details about the participant\'s activity.';
+      'The colors show task status for each study day. A nutrition diary is complete for its UTC study day when all scheduled periods are complete. Hover over a day to see its tasks.';
 
   @override
   String get participant_details_color_legend_title => 'Legend';
@@ -2131,15 +2131,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get participant_details_completed_legend_tooltip =>
-      'All intervention and survey tasks have been completed for this day';
+      'All scheduled tasks for this study day are complete.';
 
   @override
   String get participant_details_partially_completed_legend_tooltip =>
-      'Not all intervention or survey tasks have been completed for this day';
+      'Some scheduled tasks for this study day are complete.';
 
   @override
   String get participant_details_incomplete_legend_tooltip =>
-      'No intervention or survey tasks have been completed for this day';
+      'No scheduled tasks for this study day are complete.';
 
   @override
   String get participant_details_progress_empty_title =>
@@ -2211,7 +2211,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Completed intervention tasks';
 
   @override
-  String get monitoring_table_column_completed_surveys => 'Completed surveys';
+  String get monitoring_table_column_completed_surveys =>
+      'Completed measurements';
 
   @override
   String get monitoring_table_row_tooltip_dropout =>
@@ -2227,7 +2228,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get monitoring_table_completed_surveys_header_tooltip =>
-      'A survey is completed, if all of its tasks have been completed for that day';
+      'Each completed questionnaire counts once per study day. Each completed nutrition diary period counts once on its assigned UTC study day.';
 
   @override
   String get banner_text_study_recruit_draft =>

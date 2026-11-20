@@ -2116,7 +2116,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get participant_details_study_days_description =>
-      'Dieser Abschnitt bietet einen Überblick über die täglichen Aktivitäten des Teilnehmers in der Studie. Die Farblegende zeigt den Status der täglichen Aufgaben an. Bewege den Mauszeiger über die Studientage, um mehr Details über die tägliche Aktivität des Teilnehmers zu erfahren.';
+      'Die Farben zeigen den Aufgabenstatus für jeden Studientag. Ein Ernährungstagebuch ist für seinen Studientag nach UTC vollständig, wenn alle geplanten Erfassungszeiträume abgeschlossen sind. Bewege den Mauszeiger über einen Tag, um die Aufgaben zu sehen.';
 
   @override
   String get participant_details_color_legend_title => 'Legende';
@@ -2155,15 +2155,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get participant_details_completed_legend_tooltip =>
-      'Alle Interventions- und Umfrageaufgaben wurden abgeschlossen';
+      'Alle geplanten Aufgaben für diesen Studientag sind abgeschlossen.';
 
   @override
   String get participant_details_partially_completed_legend_tooltip =>
-      'Nicht alle Interventions- oder Umfrageaufgaben wurden abgeschlossen';
+      'Einige geplante Aufgaben für diesen Studientag sind abgeschlossen.';
 
   @override
   String get participant_details_incomplete_legend_tooltip =>
-      'Keine Interventions- oder Umfrageaufgaben wurden abgeschlossen';
+      'Für diesen Studientag wurde keine geplante Aufgabe abgeschlossen.';
 
   @override
   String get participant_details_progress_empty_title =>
@@ -2236,7 +2236,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get monitoring_table_column_completed_surveys =>
-      'Abgeschlossene Fragebögen';
+      'Abgeschlossene Messungen';
 
   @override
   String get monitoring_table_row_tooltip_dropout =>
@@ -2252,7 +2252,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get monitoring_table_completed_surveys_header_tooltip =>
-      'Die Umfrage zählt als abgeschlossen, wenn alle Aufgaben für den Tag erledigt wurden';
+      'Jeder abgeschlossene Fragebogen zählt einmal pro Studientag. Jeder abgeschlossene Erfassungszeitraum eines Ernährungstagebuchs zählt einmal am zugewiesenen Studientag nach UTC.';
 
   @override
   String get banner_text_study_recruit_draft =>
