@@ -65,10 +65,7 @@ class NutritionFormViewModel({
         final end =
             restrictedTimeEndControl.value?.toStudyUTimeOfDay() ??
             ScheduleX.unrestrictedTime.last;
-        final availableMinutes =
-            (end.hour - start.hour) * 60 + end.minute - start.minute - 1;
-        // The participant app excludes the start and end minutes.
-        return availableMinutes > 0
+        return start.earlierThan(end)
             ? null
             : {'unavailableCompletionWindow': true};
       }),

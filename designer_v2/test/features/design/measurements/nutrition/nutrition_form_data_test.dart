@@ -70,17 +70,19 @@ void main() {
         minute: 0,
       );
 
+      viewModel.restrictedTimeEndControl.value = const Time(
+        hour: 7,
+        minute: 59,
+      );
+      expect(viewModel.form.valid, isFalse);
+
       for (final end in [
-        const Time(hour: 7, minute: 59),
         const Time(hour: 8, minute: 0),
         const Time(hour: 8, minute: 1),
       ]) {
         viewModel.restrictedTimeEndControl.value = end;
-        expect(viewModel.form.valid, isFalse);
+        expect(viewModel.form.valid, isTrue);
       }
-
-      viewModel.restrictedTimeEndControl.value = const Time(hour: 8, minute: 2);
-      expect(viewModel.form.valid, isTrue);
 
       viewModel.restrictedTimeEndControl.value = const Time(hour: 7, minute: 0);
       viewModel.isTimeRestrictedControl.value = false;
