@@ -197,6 +197,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     final result = await Navigator.of(context).push(
       FoodSearchScreen.route(
         allowMeals: false,
+        isRecipeIngredient: true,
         templateViewModel:
             widget.templateViewModel ??
             Provider.of<TemplateViewModel?>(context, listen: false),

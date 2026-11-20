@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
@@ -84,6 +85,57 @@ void main() {
     expect(added!.servingSizeGrams, 0);
     expect(added!.nutrition.energyKcal, 200);
     expect(flattenNutritionFoodEntries([added!]), hasLength(2));
+  });
+
+  testWidgets('offline recipe can add a detailed manual ingredient', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final repository = _OfflineMealRepository();
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    FoodEntry? added;
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(
+        initialName: 'Soup',
+        templateViewModel: viewModel,
+        onSavedToSelection: (food, _) => added = food,
+      ),
+      (_) {},
+      viewModel,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.nutrition_add_food_ingredient));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.add_food_action));
+    await tester.pumpAndSettle();
+    final editor = find.byType(FoodEntryScreen);
+    await tester.enterText(
+      find.descendant(
+        of: editor,
+        matching: find.widgetWithText(TextFormField, l10n.food_name),
+      ),
+      'Carrot',
+    );
+    await tester.enterText(
+      find.descendant(
+        of: editor,
+        matching: find.widgetWithText(TextFormField, l10n.energy_kcal),
+      ),
+      '41',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, l10n.save));
+    await tester.pumpAndSettle();
+    expect(repository.writeAttempts, 0);
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    expect(added!.componentSnapshots!.single.name, 'Carrot');
+    expect(added!.nutrition.energyKcal, 41);
   });
 
   testWidgets('ingredient quantity keeps its unit and scales nutrition', (

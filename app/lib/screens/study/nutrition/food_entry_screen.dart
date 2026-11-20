@@ -27,6 +27,7 @@ class const FoodEntryScreen({
   final bool showSearchAction = true,
   final String? mealLabel,
   final bool editLoggedAmount = false,
+  final bool isRecipeIngredient = false,
   final bool historicalMode = false,
   final NutritionRecallPersistenceTarget? historicalTarget,
   final bool editReusableDefinition = false,
@@ -49,6 +50,7 @@ class const FoodEntryScreen({
     bool showSearchAction = true,
     String? mealLabel,
     bool editLoggedAmount = false,
+    bool isRecipeIngredient = false,
     bool historicalMode = false,
     NutritionRecallPersistenceTarget? historicalTarget,
     bool editReusableDefinition = false,
@@ -66,6 +68,7 @@ class const FoodEntryScreen({
       showSearchAction: showSearchAction,
       mealLabel: mealLabel,
       editLoggedAmount: editLoggedAmount,
+      isRecipeIngredient: isRecipeIngredient,
       historicalMode: historicalMode,
       historicalTarget: historicalTarget,
       editReusableDefinition: editReusableDefinition,
@@ -344,9 +347,9 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     }
 
     // A current recall saves new food definitions when it syncs.
-    final saveToLibrary = widget.historicalMode
-        ? _saveToMyItems
-        : widget.mealLabel == null;
+    final saveToLibrary =
+        !widget.isRecipeIngredient &&
+        (widget.historicalMode ? _saveToMyItems : widget.mealLabel == null);
     if (widget.existingFood == null && saveToLibrary) {
       if (!mounted) return;
       final userId = appState.activeSubject?.id ?? 'anonymous';

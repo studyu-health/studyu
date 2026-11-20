@@ -122,17 +122,20 @@ class const FoodSearchScreen({
   final NutritionFoodRepository? repository,
   final TemplateViewModel? templateViewModel,
   final bool historicalMode = false,
+  final bool isRecipeIngredient = false,
   super.key,
 }) extends StatelessWidget {
   static MaterialPageRoute<studyu.FoodEntry> route({
     bool allowMeals = true,
     bool historicalMode = false,
+    bool isRecipeIngredient = false,
     NutritionFoodRepository? repository,
     TemplateViewModel? templateViewModel,
   }) => MaterialPageRoute(
     builder: (_) => FoodSearchScreen(
       allowMeals: allowMeals,
       historicalMode: historicalMode,
+      isRecipeIngredient: isRecipeIngredient,
       repository: repository,
       templateViewModel: templateViewModel,
     ),
@@ -179,6 +182,7 @@ class const FoodSearchScreen({
         openFoodFactsSearch: openFoodFactsSearch,
         usdaFoodSearch: usdaFoodSearch,
         historicalMode: historicalMode,
+        isRecipeIngredient: isRecipeIngredient,
         history: activeSubject == null
             ? FoodSearchHistory.empty
             : buildFoodSearchHistory(
@@ -210,6 +214,7 @@ class const _FoodSearchScreenContent({
   final OpenFoodFactsSearch? openFoodFactsSearch,
   final UsdaFoodSearch? usdaFoodSearch,
   required final bool historicalMode,
+  required final bool isRecipeIngredient,
   required final FoodSearchHistory history,
 }) extends StatefulWidget {
   @override
@@ -790,6 +795,7 @@ class _FoodSearchScreenContentState()
         showSearchAction: false,
         mealLabel: widget.mealLabel,
         historicalMode: widget.historicalMode,
+        isRecipeIngredient: widget.isRecipeIngredient,
         templateViewModel: context.read<TemplateViewModel>(),
         onSavedToSelection: onSavedToSelection,
       ),
