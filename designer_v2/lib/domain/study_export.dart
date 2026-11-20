@@ -28,7 +28,7 @@ class StudyExportData({
 extension StudyExportX on Study {
   // TODO: add missing records from generated schedule
 
-  static dynamic _formatQuestionResponse(dynamic response, Question? question) {
+  static dynamic _formatQuestionResponse(dynamic response, Question question) {
     if (question is ChoiceQuestion && response is List<String>) {
       return _formatChoiceResponse(response, question);
     }
@@ -74,10 +74,9 @@ extension StudyExportX on Study {
 
     // Build columns dynamically for each question in each survey
     final Map<String, dynamic> surveyColumns = {};
-    final Map<String, String> responseColumnById = {};
     final Map<String, String> surveyAnsweredColumnById = {};
-    final Map<String, Question> questionById = {};
-    final mediaIndices = [];
+    final questionColumns =
+        <(String, String), ({String column, Question question})>{};
 
     // Filter observations to only include QuestionnaireTask instances
     final questionnaireTasks = observations
@@ -97,12 +96,11 @@ extension StudyExportX on Study {
         surveyColumns['survey${i}_question${j}_id'] = question.id;
         surveyColumns['survey${i}_question${j}_text'] = question.prompt;
         surveyColumns['survey${i}_question${j}_response'] = '';
-        responseColumnById[question.id] = 'survey${i}_question${j}_response';
-        questionById[question.id] = question;
-        if (question.type == AudioRecordingQuestion.questionType ||
-            question.type == ImageCapturingQuestion.questionType) {
-          mediaIndices.add(question.id);
-        }
+        final key = (surveyMeasurement.id, question.id);
+        questionColumns[key] = (
+          column: 'survey${i}_question${j}_response',
+          question: question,
+        );
       }
     }
 
@@ -160,22 +158,21 @@ extension StudyExportX on Study {
           final surveyAnsweredColumn = surveyAnsweredColumnById[record.taskId];
 
           for (final questionAnswerPair in submittedQuestionAnswerPairs) {
-            final questionId = questionAnswerPair.question;
-            final questionResponseColumn = responseColumnById[questionId];
-            if (surveyAnsweredColumn == null ||
-                questionResponseColumn == null) {
+            final key = (record.taskId, questionAnswerPair.question);
+            final questionColumn = questionColumns[key];
+            if (surveyAnsweredColumn == null || questionColumn == null) {
               continue; // skip unresolvable questions (e.g. because study design has changed)
             }
+            final (:column, :question) = questionColumn;
             final responseValue = StudyExportX._formatQuestionResponse(
               questionAnswerPair.response,
-              questionById[questionId],
+              question,
             );
-            row[questionResponseColumn] = responseValue;
+            row[column] = responseValue;
             row[surveyAnsweredColumn] = true;
-            for (final mediaIndex in mediaIndices) {
-              if (mediaIndex == questionId) {
-                mediaData.add(responseValue.toString());
-              }
+            if (question is AudioRecordingQuestion ||
+                question is ImageCapturingQuestion) {
+              mediaData.add(responseValue.toString());
             }
           }
         } else if (dailyRecall != null) {

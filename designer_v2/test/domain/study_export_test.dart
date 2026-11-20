@@ -171,6 +171,49 @@ void main() {
     expect(rows.map((row) => row['participant_started_at']), ['', '']);
     expect(rows.map((row) => row['current_day_of_study']), ['', '1']);
   });
+
+  test('exports shared preset question IDs in their own survey columns', () {
+    final study = Study('study', 'owner');
+    final startedAt = DateTime.utc(2026);
+    final surveys = [
+      FFQQuestions.createFFQTask()..title = 'Baseline FFQ',
+      FFQQuestions.createFFQTask()..title = 'Follow-up FFQ',
+    ];
+    study.observations = surveys;
+    study.participantsProgress = [
+      for (final (index, survey) in surveys.indexed)
+        SubjectProgress(
+            subjectId: 'subject',
+            interventionId: Study.baselineID,
+            taskId: survey.id,
+            resultType: 'QuestionnaireState',
+            result: Result<QuestionnaireState>.app(
+              type: 'QuestionnaireState',
+              periodId: 'period',
+              result: QuestionnaireState()
+                ..answers[survey.questions.questions.first.id] =
+                    Answer<List<String>>.forQuestion(
+                      survey.questions.questions.first,
+                      ['less_than_once_per_month'],
+                    ),
+            ),
+          )
+          ..startedAt = startedAt
+          ..completedAt = startedAt.add(Duration(days: index)),
+    ];
+    final byTask = {
+      for (final row in study.exportData.measurementsData)
+        row['measurement_id']: row,
+    };
+
+    for (final (index, survey) in surveys.indexed) {
+      final row = byTask[survey.id]!;
+      expect(row['survey${index + 1}_question1_response'], [
+        {'id': 'less_than_once_per_month', 'text': 'Less than once per month'},
+      ]);
+      expect(row['survey${2 - index}_question1_response'], '');
+    }
+  });
 }
 
 SubjectProgress _recallProgress(
