@@ -1059,8 +1059,9 @@ class _NutritionTaskWidgetState()
         if (context.mounted) _showNutritionSaveError(context);
         return null;
       }
-      if (!context.mounted || !model.revalidateEditingEligibility())
+      if (!context.mounted || !model.revalidateEditingEligibility()) {
         return null;
+      }
     }
 
     final suspendPersistence = _isHistoricalMode && !widget.readOnly;
@@ -1104,8 +1105,9 @@ class _NutritionTaskWidgetState()
     try {
       model.resumePersistence();
       await model.reloadCanonicalRecall();
-      if (!context.mounted || !model.revalidateEditingEligibility())
+      if (!context.mounted || !model.revalidateEditingEligibility()) {
         return null;
+      }
       if (model.persistenceTarget?.nutritionRevision != expectedRevision) {
         _showNutritionSaveError(context, conflict: true);
         return null;
@@ -1114,8 +1116,9 @@ class _NutritionTaskWidgetState()
         persistToDatabase: true,
         requireRemoteSuccess: true,
       );
-      if (!context.mounted || !model.revalidateEditingEligibility())
+      if (!context.mounted || !model.revalidateEditingEligibility()) {
         return null;
+      }
       return model.persistenceTarget;
     } catch (error, stackTrace) {
       StudyULogger.warning(

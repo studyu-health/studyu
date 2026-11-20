@@ -164,7 +164,7 @@ void main() {
 
   test('counts scheduled nutrition periods in a custom phase sequence', () {
     final study = Study('study', 'user')
-      ..schedule = (StudySchedule(sequenceCustom: 'ABAB')
+      ..schedule = (StudySchedule()
         ..sequence = PhaseSequence.customized
         ..phaseDuration = 2
         ..numberOfCycles = 2);
