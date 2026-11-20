@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -115,6 +116,41 @@ void main() {
       expect(uploads, [queued.toJson()]);
       expect(synchronized.progress, [remoteRecall, queued]);
       expect((await Cache.loadSubject()).progress, synchronized.progress);
+    },
+  );
+
+  test(
+    'withdrawal invalidation blocks delayed writes to a deleted cache',
+    () async {
+      final subject = _subject(DateTime.utc(2026, 7, 15))..id = 'withdrawn';
+      final writing = Completer<void>();
+      final finishWrite = Completer<void>();
+      final operations = <String>[];
+      messenger.setMockMethodCallHandler(secureStorage, (call) async {
+        operations.add(call.method);
+        if (call.method == 'write') {
+          if (!writing.isCompleted) {
+            writing.complete();
+            await finishWrite.future;
+          }
+          cachedSubject = (call.arguments as Map)['value'] as String;
+        }
+        if (call.method == 'delete') {
+          cachedSubject = null;
+        }
+        return null;
+      });
+
+      final beforeWithdrawal = Cache.storeSubject(subject);
+      await writing.future;
+      Cache.invalidateSubject(subject.id);
+      final deletion = Cache.delete();
+      final delayedWrite = Cache.storeSubject(subject);
+      finishWrite.complete();
+      await Future.wait([beforeWithdrawal, deletion, delayedWrite]);
+      await Cache.storeSubject(subject);
+      expect(operations, ['write', 'delete']);
+      expect(cachedSubject, isNull);
     },
   );
 

@@ -345,12 +345,17 @@ void main() {
     addTearDown(() => messenger.setMockMethodCallHandler(secureStorage, null));
     final study = Study('study', 'researcher')..title = 'Nutrition study';
     final subject = _DeletedSubject()..study = study;
+    final state = AppState()..activeSubject = subject;
+    addTearDown(state.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        locale: const Locale('en'),
-        home: Scaffold(body: DeleteAlertDialog(subject: subject)),
+      ChangeNotifierProvider.value(
+        value: state,
+        child: MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          locale: const Locale('en'),
+          home: Scaffold(body: DeleteAlertDialog(subject: subject)),
+        ),
       ),
     );
 
@@ -389,8 +394,8 @@ class _TestAppLanguage() extends ChangeNotifier implements AppLanguage {
   Future<void> synchronizeWithServer() async {}
 }
 
-class _DeletedSubject extends StudySubject {
-  _DeletedSubject() : super('subject', 'study', 'user', []);
+class _DeletedSubject() extends StudySubject {
+  this : super('subject', 'study', 'user', []);
 
   int deleteCalls = 0;
 

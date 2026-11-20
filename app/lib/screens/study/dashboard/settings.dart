@@ -7,12 +7,11 @@ import 'package:provider/provider.dart';
 import 'package:studyu_app/app_router.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
-import 'package:studyu_app/services/restore_account_service.dart';
+import 'package:studyu_app/services/study_withdrawal_cleanup.dart';
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/date_time_preferences.dart';
 import 'package:studyu_app/util/fitbit_handler.dart';
 import 'package:studyu_app/util/localization.dart';
-import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_app/widgets/recovery_phrase_content.dart';
 import 'package:studyu_app/widgets/study_onboarding_description.dart';
@@ -572,23 +571,26 @@ class _DeleteAlertDialogState() extends State<DeleteAlertDialog> {
     setState(() => _isDeleting = true);
     final subject = widget.subject!;
     final l10n = AppLocalizations.of(context)!;
+    final state = context.read<AppState>();
     try {
+      var pending = StudyWithdrawalCleanup(
+        subjectId: subject.id,
+        studyId: subject.studyId,
+        userId: subject.userId,
+      );
       if (!_remoteDeleted) {
+        await pending.record();
         try {
           await subject.delete();
         } on PostgrestException catch (error) {
-          if (error.code != 'PGRST116') rethrow;
+          if (error.code != 'PGRST116' && error.code != '42501') rethrow;
+          if (await pending.remoteSubjectExists() != false) rethrow;
         }
         _remoteDeleted = true;
       }
-      await NutritionRecallAutoSaveManager().deleteSubjectDrafts(subject.id);
-      RestoreAccountService.clearCache();
-      await deleteLocalData();
-      await FitbitHandler.deleteFitbitCredentials(subject.studyId);
+      pending = await pending.confirm();
+      await pending.clearStudyData(state);
       if (!mounted) return;
-      await cancelNotifications(context);
-      if (!mounted) return;
-      context.read<AppState>().clearAccountState();
       context.pop(true);
     } on SocketException {
       if (!mounted) return;

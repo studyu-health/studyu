@@ -9,10 +9,16 @@ import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 
 class Cache() {
   static bool isSynchronizing = false;
+  static final _invalidatedSubjectIds = <String>{};
+
+  /// Secure storage queues writes that already started before deletion.
+  static void invalidateSubject(String subjectId) {
+    _invalidatedSubjectIds.add(subjectId);
+  }
 
   static Future<void> storeSubject(StudySubject? subject) async {
     // debugPrint("Store subject in cache");
-    if (subject == null) return;
+    if (subject == null || _invalidatedSubjectIds.contains(subject.id)) return;
     await SecureStorage.write(
       cacheSubjectKey,
       jsonEncode(subject.toFullJson()),
