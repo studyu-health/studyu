@@ -551,7 +551,8 @@ class NutritionRecallAutoSaveManager({
     for (final progress in subject.resultsFor(pending.taskId)) {
       if (progress.resultType != 'DailyRecall' ||
           progress.completedAt != pending.progressCompletedAt ||
-          progress.result.periodId != pending.periodId ||
+          (progress.result.periodId != null &&
+              progress.result.periodId != pending.periodId) ||
           progress.interventionId != pending.interventionId) {
         continue;
       }

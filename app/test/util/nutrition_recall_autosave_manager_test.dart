@@ -574,6 +574,52 @@ void main() {
     expect(await manager.scanPendingRecalls(subject.id), isEmpty);
   });
 
+  test('rollover completes a draft pinned to legacy progress', () async {
+    final now = DateTime.utc(2026, 7, 17, 12);
+    final completedAt = now.subtract(const Duration(days: 1, hours: 1));
+    final subject = _subject(daysAgo: 2)
+      ..startedAt = now.subtract(const Duration(days: 2));
+    final canonical = _recall('legacy', studyDay: 1);
+    subject.progress.add(
+      SubjectProgress(
+        subjectId: subject.id,
+        taskId: 'task',
+        interventionId: 'intervention',
+        resultType: 'DailyRecall',
+        result: Result<DailyRecall>.app(
+          type: 'DailyRecall',
+          periodId: null,
+          result: canonical,
+        ),
+      )..completedAt = completedAt,
+    );
+
+    final submitted = <PendingRecall>[];
+    final manager = NutritionRecallAutoSaveManager(
+      submitter: (pending, _) async => submitted.add(pending),
+    );
+    await manager.saveRecall(
+      recall: _recall(canonical.id, studyDay: 1)
+        ..lastAutoSavedAt = completedAt.add(const Duration(hours: 1)),
+      subjectId: subject.id,
+      taskId: 'task',
+      periodId: 'period',
+      interventionId: 'intervention',
+      studyDaySnapshot: 1,
+      progressCompletedAt: completedAt,
+      nutritionRevision: 0,
+    );
+
+    await manager.submitPendingRecalls(
+      subject: subject,
+      trackProgress: true,
+      now: now,
+    );
+    expect(submitted.single.progressCompletedAt, completedAt);
+    expect(submitted.single.periodId, 'period');
+    expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+  });
+
   test(
     'historical correction keeps its existing completion metadata',
     () async {
