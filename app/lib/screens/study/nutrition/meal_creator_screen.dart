@@ -333,6 +333,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   }
 
   double _calculateServingSizeGrams() {
+    if (_componentFoods.any((food) => food.servingSizeGrams <= 0)) return 0;
     final totalGrams = [
       for (var index = 0; index < _componentFoods.length; index++)
         _componentFoods[index].servingSizeGrams * _foods[index].amount,

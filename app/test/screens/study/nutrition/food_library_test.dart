@@ -433,6 +433,58 @@ void main() {
     expect(repository.saved, isNotNull);
   });
 
+  testWidgets('can import a drink with no known gram weight', (tester) async {
+    final repository = _ExternalLibraryRepository(const []);
+    final search = FoodSearchViewModel(
+      openFoodFactsSearch:
+          ({required query, required page, required pageSize}) async =>
+              SearchResult(
+                products: [
+                  Product.fromJson({
+                    'product_name': 'Orange drink',
+                    'serving_size': '200 mL',
+                    'nutrition': {
+                      'aggregated_set': {
+                        'preparation': 'as_sold',
+                        'per': '100ml',
+                        'nutrients': {
+                          'energy-kcal': {'unit': 'kcal', 'value': 50},
+                        },
+                      },
+                    },
+                  }),
+                ],
+              ),
+      usdaConfigured: false,
+    );
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    addTearDown(search.dispose);
+    await _pumpExternalLibrary(
+      tester,
+      viewModel: viewModel,
+      search: search,
+      appState: AppState(),
+    );
+    await tester.enterText(find.byType(TextField), 'drink');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(find.text('200 mL · 100 kcal'), findsOneWidget);
+    await tester.tap(find.text(l10n.external_library_copy));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, l10n.external_library_save_copy),
+    );
+    await tester.pumpAndSettle();
+
+    expect(repository.saved!.servingSizeGrams, 0);
+    expect(repository.saved!.portionReference, '200 mL');
+    expect(repository.saved!.nutrition.energyKcal, 100);
+  });
+
   testWidgets('saved meal add exposes quantity controls', (tester) async {
     final meal = _food('meal', 'Fruit bowl')..entryType = FoodEntryType.meal;
     final template = _template(meal);

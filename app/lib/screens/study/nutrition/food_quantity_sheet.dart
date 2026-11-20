@@ -70,8 +70,10 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
       widget.action == FoodQuantityAction.update || _canEditServingWeight;
 
   FoodEntry get _baselineFood => widget.baselineFood ?? widget.food;
+  bool get _gramsKnown => widget.gramsKnown && widget.food.servingSizeGrams > 0;
   bool get _baselineGramsKnown =>
-      widget.baselineGramsKnown ?? widget.gramsKnown;
+      (widget.baselineGramsKnown ?? widget.gramsKnown) &&
+      _baselineFood.servingSizeGrams > 0;
 
   @override
   void initState() {
@@ -81,7 +83,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
     );
     _servingWeightController = TextEditingController(
       text:
-          widget.gramsKnown &&
+          _gramsKnown &&
               widget.food.servingSizeGrams.isFinite &&
               widget.food.servingSizeGrams > 0
           ? _formatNumber(widget.food.servingSizeGrams)
@@ -112,12 +114,12 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
         : widget.food.servingSizeGrams;
     final weightRequired =
         _canEditServingWeight &&
-        (_baselineGramsKnown || widget.gramsKnown || weightText.isNotEmpty);
+        (_baselineGramsKnown || _gramsKnown || weightText.isNotEmpty);
     final weightSource = _baselineGramsKnown ? _baselineFood : widget.food;
     final sourceAmount = weightSource.amount;
     final sourceWeight = weightSource.servingSizeGrams;
     final hasKnownSourceWeight =
-        (_baselineGramsKnown || widget.gramsKnown) &&
+        (_baselineGramsKnown || _gramsKnown) &&
         sourceWeight.isFinite &&
         sourceWeight > 0;
     setState(() {
@@ -155,8 +157,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
       return false;
     }
     if (!_baselineGramsKnown) {
-      return widget.gramsKnown ||
-          _servingWeightController.text.trim().isNotEmpty;
+      return _gramsKnown || _servingWeightController.text.trim().isNotEmpty;
     }
     return (weight - _baselineFood.servingSizeGrams).abs() > 0.000001;
   }
@@ -196,7 +197,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
 
   String _servingDescription(AppLocalizations l10n, FoodEntry food) {
     final portionReference = widget.food.portionReference?.trim();
-    if (!widget.gramsKnown && !_servingWeightOverridden) {
+    if (!_gramsKnown && !_servingWeightOverridden) {
       return portionReference == null || portionReference.isEmpty
           ? l10n.serving_amount(1)
           : portionReference;
@@ -281,7 +282,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
     ].join(' · ');
     final totalGrams = food.servingSizeGrams * amount;
     final currentGramsKnown =
-        (widget.gramsKnown || (_canEditServingWeight && servingWeightKnown)) &&
+        (_gramsKnown || (_canEditServingWeight && servingWeightKnown)) &&
         totalGrams.isFinite &&
         totalGrams > 0;
     final nutritionHeading = l10n.food_quantity_nutrition_for_amount(

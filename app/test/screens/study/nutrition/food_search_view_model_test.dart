@@ -214,7 +214,7 @@ void main() {
     expect(food.nutrition.isKnown('sodium'), isTrue);
   });
 
-  test('OFF volume-only data does not produce values for 100 g', () {
+  test('OFF volume-only data retains the source volume and calories', () {
     final product = Product.fromJson({
       'product_name': 'Drink',
       'serving_size': '200 mL',
@@ -232,9 +232,36 @@ void main() {
     final result = openFoodFactsSearchResult(product);
     final food = convertFoodResultToFoodEntry(result);
 
-    expect(result.calories, isNull);
-    expect(food.nutrition.isKnown('energyKcal'), isFalse);
+    expect(result.calories, 100);
+    expect(result.servingVolumeLabel, '200 mL');
+    expect(result.calorieBasisGrams, isNull);
+    expect(food.servingSizeGrams, 0);
+    expect(food.portionReference, '200 mL');
+    expect(food.nutrition.energyKcal, 100);
+    expect(food.nutrition.isKnown('energyKcal'), isTrue);
     expect(food.originalValues['nutrition'], isNotNull);
+  });
+
+  test('OFF source serving basis works without a free-text label', () {
+    final product = Product.fromJson({
+      'product_name': 'Drink',
+      'nutrition': {
+        'aggregated_set': {
+          'preparation': 'as_sold',
+          'per': 'serving',
+          'per_unit': 'ml',
+          'per_quantity': 330,
+          'nutrients': {
+            'energy-kcal': {'unit': 'kcal', 'value': 80},
+          },
+        },
+      },
+    });
+
+    final food = convertOpenFoodFactsToFoodEntry(product);
+    expect(food.portionReference, '330 mL');
+    expect(food.servingSizeGrams, 0);
+    expect(food.nutrition.energyKcal, 80);
   });
 
   test('OFF preserves nutrient limits without treating them as exact', () {

@@ -349,9 +349,13 @@ void main() {
     );
   }
 
-  for (final hasGramServing in [false, true]) {
+  for (final (per, serving, grams, calories, portion) in [
+    ('100g', '50 g', 50.0, 62.5, '50 g'),
+    ('100g', '1 cup (200 mL)', 100.0, 125.0, null),
+    ('100ml', '1 cup (200 mL)', 0.0, 250.0, '1 cup (200 mL)'),
+  ]) {
     testWidgets(
-      'barcode retains its nutrition basis across selection ($hasGramServing)',
+      'barcode retains its nutrition basis across selection ($per, $serving)',
       (tester) async {
         final original = MobileScannerPlatform.instance;
         MobileScannerPlatform.instance = _ScannerPlatform();
@@ -359,11 +363,11 @@ void main() {
         transport.product = {
           'code': '0123456789012',
           'product_name_en': 'Test drink',
-          'serving_size': hasGramServing ? '50 g' : '1 cup (200 mL)',
+          'serving_size': serving,
           'nutrition': {
             'aggregated_set': {
               'preparation': 'as_sold',
-              'per': '100g',
+              'per': per,
               'nutrients': {
                 'energy-kcal': {'unit': 'kcal', 'value': 125},
               },
@@ -417,18 +421,19 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final metadata = hasGramServing ? '50 g · 63 kcal' : '100 g · 125 kcal';
+        final metadata = grams > 0
+            ? '${grams.toInt()} g · ${calories.round()} kcal'
+            : '$portion · ${calories.round()} kcal';
         expect(find.text('Test drink'), findsOneWidget);
         expect(find.text(metadata), findsOneWidget);
-        expect(find.textContaining('1 cup (200 mL)'), findsNothing);
 
         await tester.tap(
           find.widgetWithText(FilledButton, 'Add 1 item to Meal'),
         );
         await tester.pumpAndSettle();
-        expect(foods.single.servingSizeGrams, hasGramServing ? 50 : 100);
-        expect(foods.single.portionReference, hasGramServing ? '50 g' : isNull);
-        expect(foods.single.nutrition.energyKcal, hasGramServing ? 62.5 : 125);
+        expect(foods.single.servingSizeGrams, grams);
+        expect(foods.single.portionReference, portion);
+        expect(foods.single.nutrition.energyKcal, calories);
 
         await tester.tap(find.text('Open search'));
         await tester.pumpAndSettle();

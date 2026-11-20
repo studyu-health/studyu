@@ -238,10 +238,12 @@ class TemplateViewModel({
       name: name,
       amount: 1,
       unit: 'serving',
-      servingSizeGrams: foods.fold(
-        0,
-        (total, food) => total + food.servingSizeGrams * food.amount,
-      ),
+      servingSizeGrams: foods.any((food) => food.servingSizeGrams <= 0)
+          ? 0
+          : foods.fold(
+              0,
+              (total, food) => total + food.servingSizeGrams * food.amount,
+            ),
       portionEstimationMethod: PortionEstimationMethod.householdMeasure,
       portionState: PortionState.asServed,
       nutrition: nutrition,

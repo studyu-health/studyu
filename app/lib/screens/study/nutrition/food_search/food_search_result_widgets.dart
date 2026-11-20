@@ -55,11 +55,9 @@ class const FoodSearchResultCard({
       metadata ??
           formatFoodMetadata(
             l10n,
-            grams:
-                result.servingSizeGrams ??
-                result.calorieBasisGrams ??
-                defaultFoodReferenceGrams,
-            servingDescription: l10n.serving_amount(1),
+            grams: result.servingSizeGrams ?? result.calorieBasisGrams,
+            servingDescription:
+                result.servingVolumeLabel ?? l10n.serving_amount(1),
             calories: result.calories,
           ),
     ].join(' · ');

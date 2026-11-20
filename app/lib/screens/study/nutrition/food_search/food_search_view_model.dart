@@ -318,21 +318,20 @@ final class FoodSearchViewModel({
 }
 
 UnifiedFoodResult openFoodFactsSearchResult(Product product) {
-  final servingSizeGrams = _gramsFromMetadata(product.servingSize);
-  final calorieBasisGrams = servingSizeGrams ?? defaultFoodReferenceGrams;
-  final calories = _openFoodFactsServingNutrients(
-    product,
-    calorieBasisGrams,
-  )['energyKcal'];
+  final (basis, nutrients) = _openFoodFactsNutrition(product);
+  final referenceGrams = basis?.unit == Unit.G ? basis!.quantity : null;
 
   return UnifiedFoodResult(
     id: product.barcode ?? '',
     name: product.productName ?? 'Unknown',
     brand: product.brands,
     imageUrl: product.imageFrontSmallUrl,
-    calories: calories,
-    calorieBasisGrams: calories == null ? null : calorieBasisGrams,
-    servingSizeGrams: servingSizeGrams,
+    calories: nutrients['energyKcal'],
+    calorieBasisGrams: referenceGrams,
+    servingSizeGrams: basis?.portionReference != null ? referenceGrams : null,
+    servingVolumeLabel: basis?.unit == Unit.MILLI_L
+        ? basis!.portionReference
+        : null,
     source: studyu.FoodSource.openfoodfacts,
     originalData: product,
   );
@@ -409,16 +408,22 @@ int _foodSearchScore(UnifiedFoodResult result, String normalizedQuery) {
 String normalizeFoodSearchText(String value) =>
     value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 
-double? _gramsFromMetadata(String? value) {
+double? _quantityFromMetadata(String? value, String units) {
   if (value == null) return null;
   final match = RegExp(
-    r'(?:^|[^0-9.,+-])(\d+(?:[.,]\d+)?)\s*g(?:rams?)?\b',
+    r'(?:^|[^0-9.,+-])(\d+(?:[.,]\d+)?)\s*'
+    '(?:$units)'
+    r'\b',
     caseSensitive: false,
   ).firstMatch(value);
   if (match == null) return null;
-  final grams = double.tryParse(match.group(1)!.replaceAll(',', '.'));
-  return grams != null && grams.isFinite && grams > 0 ? grams : null;
+  return _positiveQuantity(
+    double.tryParse(match.group(1)!.replaceAll(',', '.')),
+  );
 }
+
+double? _positiveQuantity(Object? value) =>
+    value is num && value.isFinite && value > 0 ? value.toDouble() : null;
 
 studyu.FoodEntry convertFoodResultToFoodEntry(UnifiedFoodResult result) {
   return switch (result.originalData) {
@@ -485,10 +490,9 @@ studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
   );
 }
 
-Map<String, double?> _openFoodFactsServingNutrients(
-  Product product,
-  double referenceGrams,
-) {
+typedef _FoodBasis = ({Unit unit, double quantity, String? portionReference});
+
+(_FoodBasis?, Map<String, double?>) _openFoodFactsNutrition(Product product) {
   final nutrition = product.nutrition;
   final inputSets = nutrition?['input_sets'];
   final sets = [
@@ -496,28 +500,89 @@ Map<String, double?> _openFoodFactsServingNutrients(
     if (inputSets is List) ...inputSets,
   ];
 
-  // Match nutrition for the product as sold on a mass basis.
-  final massSets = <(Map<String, dynamic>, double)>[];
+  final sourceSets =
+      <
+        ({
+          Map<String, dynamic> nutrients,
+          Unit unit,
+          double quantity,
+          bool serving,
+        })
+      >[];
   for (final set in sets) {
     if (set case {
       'preparation': NutritionSetKey.preparationAsSold,
       'nutrients': final Map<String, dynamic> nutrients,
       'per': final String per,
     }) {
-      final grams = switch (per) {
-        '100g' => 100.0,
-        'serving' when set['per_unit'] == 'g' => set['per_quantity'],
-        _ => null,
+      final (unit, quantity) = switch (per) {
+        '100g' => (Unit.G, defaultFoodReferenceGrams),
+        '100ml' => (Unit.MILLI_L, 100.0),
+        'serving' => _servingSetBasis(set),
+        _ => (null, null),
       };
-      if (grams is num && grams.isFinite && grams > 0) {
-        massSets.add((nutrients, referenceGrams / grams));
+      if (unit != null && quantity != null) {
+        sourceSets.add((
+          nutrients: nutrients,
+          unit: unit,
+          quantity: quantity,
+          serving: per == 'serving',
+        ));
       }
     }
   }
 
+  final metadataGrams = _quantityFromMetadata(
+    product.servingSize,
+    'g(?:rams?)?',
+  );
+  final metadataMl =
+      _quantityFromMetadata(product.servingSize, 'ml|millilit(?:er|re)s?') ??
+      (_quantityFromMetadata(product.servingSize, 'cl') ?? 0) * 10 +
+          (_quantityFromMetadata(product.servingSize, 'dl') ?? 0) * 100 +
+          (_quantityFromMetadata(product.servingSize, 'l|lit(?:er|re)s?') ??
+                  0) *
+              1000;
+  final sourceGramServing = sourceSets
+      .where((set) => set.unit == Unit.G && set.serving)
+      .firstOrNull
+      ?.quantity;
+  final sourceMlServing = sourceSets
+      .where((set) => set.unit == Unit.MILLI_L && set.serving)
+      .firstOrNull
+      ?.quantity;
+  final grams = metadataGrams ?? sourceGramServing;
+  final milliliters = _positiveQuantity(metadataMl) ?? sourceMlServing;
+  final hasGramData = sourceSets.any((set) => set.unit == Unit.G);
+  final hasVolumeData = sourceSets.any((set) => set.unit == Unit.MILLI_L);
+  final useVolume =
+      (hasVolumeData && !hasGramData) ||
+      (hasVolumeData && grams == null && milliliters != null) ||
+      (!hasGramData && grams == null && milliliters != null);
+  final volume = milliliters ?? 100.0;
+  final _FoodBasis? basis = useVolume
+      ? (
+          unit: Unit.MILLI_L,
+          quantity: volume,
+          portionReference: metadataMl <= 0
+              ? '${volume.truncateToDouble() == volume ? volume.toStringAsFixed(0) : volume} mL'
+              : product.servingSize,
+        )
+      : grams != null || hasGramData
+      ? (
+          unit: Unit.G,
+          quantity: grams ?? defaultFoodReferenceGrams,
+          portionReference: metadataGrams == null
+              ? (sourceGramServing == null ? null : '$sourceGramServing g')
+              : product.servingSize,
+        )
+      : null;
+
   double? amount(Nutrient nutrient, Unit targetUnit) {
-    for (final (nutrients, scale) in massSets) {
-      final raw = nutrients[nutrient.offTag];
+    if (basis == null) return null;
+    for (final set in sourceSets) {
+      if (set.unit != basis.unit) continue;
+      final raw = set.nutrients[nutrient.offTag];
       if (raw is! Map<String, dynamic>) continue;
       final value = NutritionValue.fromJson(raw);
       if (value?.modifier
@@ -541,33 +606,46 @@ Map<String, double?> _openFoodFactsServingNutrients(
         _ => null,
       };
       if (unitFactor == null) continue;
-      final scaled = measured * unitFactor * scale;
+      final scaled = measured * unitFactor * basis.quantity / set.quantity;
       if (scaled.isFinite) return scaled;
     }
     return null;
   }
 
-  return {
-    'energyKcal':
-        amount(Nutrient.energyKCal, Unit.KCAL) ??
-        amount(Nutrient.energyKJ, Unit.KCAL),
-    'protein': amount(Nutrient.proteins, Unit.G),
-    'carbs': amount(Nutrient.carbohydrates, Unit.G),
-    'fat': amount(Nutrient.fat, Unit.G),
-    'sugars': amount(Nutrient.sugars, Unit.G),
-    'fiber': amount(Nutrient.fiber, Unit.G),
-    'saturatedFat': amount(Nutrient.saturatedFat, Unit.G),
-    'transFat': amount(Nutrient.transFat, Unit.G),
-    'cholesterol': amount(Nutrient.cholesterol, Unit.MILLI_G),
-    'sodium': amount(Nutrient.sodium, Unit.MILLI_G),
-    'waterContent': amount(Nutrient.water, Unit.G),
+  return (
+    basis,
+    {
+      'energyKcal':
+          amount(Nutrient.energyKCal, Unit.KCAL) ??
+          amount(Nutrient.energyKJ, Unit.KCAL),
+      'protein': amount(Nutrient.proteins, Unit.G),
+      'carbs': amount(Nutrient.carbohydrates, Unit.G),
+      'fat': amount(Nutrient.fat, Unit.G),
+      'sugars': amount(Nutrient.sugars, Unit.G),
+      'fiber': amount(Nutrient.fiber, Unit.G),
+      'saturatedFat': amount(Nutrient.saturatedFat, Unit.G),
+      'transFat': amount(Nutrient.transFat, Unit.G),
+      'cholesterol': amount(Nutrient.cholesterol, Unit.MILLI_G),
+      'sodium': amount(Nutrient.sodium, Unit.MILLI_G),
+      'waterContent': amount(Nutrient.water, Unit.G),
+    },
+  );
+}
+
+(Unit?, double?) _servingSetBasis(Map<Object?, Object?> set) {
+  final quantity = _positiveQuantity(set['per_quantity']);
+  final unitTag = set['per_unit'];
+  final unit = unitTag is String ? UnitHelper.stringToUnit(unitTag) : null;
+  return switch (unit) {
+    Unit.G => (Unit.G, quantity),
+    Unit.MILLI_L => (Unit.MILLI_L, quantity),
+    Unit.L when quantity != null => (Unit.MILLI_L, quantity * 1000),
+    _ => (null, null),
   };
 }
 
 studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
-  final sourceServingGrams = _gramsFromMetadata(product.servingSize);
-  final servingSizeGrams = sourceServingGrams ?? defaultFoodReferenceGrams;
-  final nutrients = _openFoodFactsServingNutrients(product, servingSizeGrams);
+  final (basis, nutrients) = _openFoodFactsNutrition(product);
 
   return studyu.FoodEntry.withId(
     entryType: studyu.FoodEntryType.brandedProduct,
@@ -576,8 +654,8 @@ studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
     description: product.genericName,
     amount: 1,
     unit: 'serving',
-    servingSizeGrams: servingSizeGrams,
-    portionReference: sourceServingGrams == null ? null : product.servingSize,
+    servingSizeGrams: basis?.unit == Unit.G ? basis!.quantity : 0,
+    portionReference: basis?.portionReference,
     portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
     portionState: studyu.PortionState.asServed,
     yieldFactor: 1.0,

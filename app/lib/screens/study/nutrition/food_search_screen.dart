@@ -586,6 +586,7 @@ class _FoodSearchScreenContentState()
       food,
       key: canonicalFoodSelectionKey(food),
       caloriesKnown: result.calories != null,
+      gramsKnown: food.servingSizeGrams > 0,
       source: source,
       imageUrl: result.imageUrl,
     );

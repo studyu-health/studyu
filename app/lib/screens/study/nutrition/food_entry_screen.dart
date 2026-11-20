@@ -149,7 +149,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       _amountController = TextEditingController(text: food.amount.toString());
       _unitController = TextEditingController(text: food.unit);
       _servingSizeController = TextEditingController(
-        text: food.servingSizeGrams.toString(),
+        text: food.servingSizeGrams > 0 ? food.servingSizeGrams.toString() : '',
       );
       _portionReferenceController = TextEditingController(
         text: food.portionReference ?? '',
@@ -514,6 +514,8 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     final amount = widget.editReusableDefinition
         ? 1.0
         : parseNutritionAmount(_amountController.text)!;
+    final servingSizeGrams =
+        parseNutritionAmount(_servingSizeController.text) ?? 0;
     final savedNutrition = _showServings
         ? scaleNutritionProfile(nutrition, amount)
         : nutrition;
@@ -529,7 +531,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
             : _descriptionController.text,
         amount: amount,
         unit: _unitController.text,
-        servingSizeGrams: parseNutritionAmount(_servingSizeController.text)!,
+        servingSizeGrams: servingSizeGrams,
         portionReference: _portionReferenceController.text.isEmpty
             ? null
             : _portionReferenceController.text,
@@ -561,7 +563,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
           : _descriptionController.text
       ..amount = amount
       ..unit = _unitController.text
-      ..servingSizeGrams = parseNutritionAmount(_servingSizeController.text)!
+      ..servingSizeGrams = servingSizeGrams
       ..portionReference = _portionReferenceController.text.isEmpty
           ? null
           : _portionReferenceController.text
@@ -767,6 +769,8 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
               nameController: _nameController,
               amountController: _showServings ? _amountController : null,
               servingSizeController: _servingSizeController,
+              unknownServingMass: widget.existingFood?.servingSizeGrams == 0,
+              portionReference: _portionReferenceController.text,
               energyController: _energyController,
               proteinController: _proteinController,
               carbsController: _carbsController,
@@ -944,6 +948,8 @@ class const _EssentialFieldsCard({
   required final TextEditingController nameController,
   final TextEditingController? amountController,
   required final TextEditingController servingSizeController,
+  required final bool unknownServingMass,
+  required final String portionReference,
   required final TextEditingController energyController,
   required final TextEditingController proteinController,
   required final TextEditingController carbsController,
@@ -1036,11 +1042,17 @@ class const _EssentialFieldsCard({
                 labelText: l10n.nutrition_values_are_for,
                 border: const OutlineInputBorder(),
                 suffixText: 'g',
+                helperText: unknownServingMass && portionReference.isNotEmpty
+                    ? portionReference
+                    : null,
               ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               validator: (value) {
+                if (unknownServingMass && (value ?? '').trim().isEmpty) {
+                  return null;
+                }
                 final grams = parseNutritionAmount(value ?? '');
                 return grams == null || grams <= 0
                     ? l10n.food_quantity_invalid_amount
