@@ -97,6 +97,109 @@ void main() {
     expect(recipe.componentSnapshots!.single.nutrition.energyKcal, 200);
   });
 
+  testWidgets('partial preparation input stays in the editor until complete', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final repository = FakeNutritionFoodRepository();
+    final templates = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(templates.dispose);
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(
+        initialName: 'Meal',
+        initialFoods: [_food()],
+        templateViewModel: templates,
+      ),
+      (_) {},
+      templates,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.nutrition_preparation_details));
+    await tester.pumpAndSettle();
+    final rawWeight = find.widgetWithText(
+      TextFormField,
+      l10n.nutrition_raw_weight_grams,
+    );
+    final cookedWeight = find.widgetWithText(
+      TextFormField,
+      l10n.nutrition_cooked_weight_grams,
+    );
+    final method = find.widgetWithText(
+      TextFormField,
+      l10n.nutrition_preparation_method,
+    );
+    await tester.enterText(rawWeight, '100');
+    await tester.enterText(cookedWeight, '80');
+    final save = find.byType(FloatingActionButton);
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MealCreatorScreen), findsOneWidget);
+    expect(await repository.loadTemplates('subject'), isEmpty);
+    await tester.ensureVisible(method);
+    await tester.enterText(method, 'Bake');
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+
+    final recipe = (await repository.loadTemplates('subject')).single.prototype;
+    expect(recipe.preparationDetails?.rawWeight, 100);
+    expect(recipe.preparationDetails?.cookedWeight, 80);
+    expect(recipe.preparationDetails?.preparationMethod, 'Bake');
+  });
+
+  testWidgets('recipe name edits keep preparation retention factors', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final ingredient = _food();
+    final recipe = _food()
+      ..entryType = FoodEntryType.meal
+      ..componentFoods = [
+        FoodComposition.withId(
+          parentEntryId: 'meal',
+          foodId: ingredient.foodId,
+          amount: 1,
+          unit: ingredient.unit,
+        ),
+      ]
+      ..componentSnapshots = [ingredient]
+      ..preparationDetails = PreparationDetails(
+        rawWeight: 100,
+        cookedWeight: 80,
+        yieldFactor: 0.8,
+        preparationMethod: 'Bake',
+        retentionFactors: {'protein': 0.75},
+      );
+    final templates = TemplateViewModel(
+      userId: 'subject',
+      repository: FakeNutritionFoodRepository(),
+    );
+    addTearDown(templates.dispose);
+    FoodEntry? edited;
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(existingMeal: recipe),
+      (value) => edited = value,
+      templates,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, l10n.template_name_required),
+      'Renamed recipe',
+    );
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(edited?.name, 'Renamed recipe');
+    expect(edited?.preparationDetails?.retentionFactors, {'protein': 0.75});
+  });
+
   testWidgets('repeat taps submit one meal template while saving', (
     tester,
   ) async {

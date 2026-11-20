@@ -354,11 +354,29 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     final servingSizeGrams = _calculateServingSizeGrams();
 
     PreparationDetails? preparationDetails;
-    if (_rawWeightController.text.isNotEmpty &&
-        _cookedWeightController.text.isNotEmpty &&
-        _preparationMethodController.text.isNotEmpty) {
-      final rawWeight = _parseMealNumber(_rawWeightController.text);
-      final cookedWeight = _parseMealNumber(_cookedWeightController.text);
+    final rawWeightInput = _rawWeightController.text.trim();
+    final cookedWeightInput = _cookedWeightController.text.trim();
+    final preparationMethod = _preparationMethodController.text.trim();
+    final preparationInputs = [
+      rawWeightInput,
+      cookedWeightInput,
+      preparationMethod,
+    ];
+    if (preparationInputs.any((input) => input.isNotEmpty)) {
+      final l10n = AppLocalizations.of(context)!;
+      if (preparationInputs.any((input) => input.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${l10n.nutrition_preparation_details_subtitle} (${l10n.required_error})',
+            ),
+          ),
+        );
+        return null;
+      }
+
+      final rawWeight = _parseMealNumber(rawWeightInput);
+      final cookedWeight = _parseMealNumber(cookedWeightInput);
       if (rawWeight == null ||
           !rawWeight.isFinite ||
           rawWeight <= 0 ||
@@ -366,11 +384,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
           !cookedWeight.isFinite ||
           cookedWeight <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.food_quantity_invalid_amount,
-            ),
-          ),
+          SnackBar(content: Text(l10n.food_quantity_invalid_amount)),
         );
         return null;
       }
@@ -378,8 +392,8 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         rawWeight: rawWeight,
         cookedWeight: cookedWeight,
         yieldFactor: cookedWeight / rawWeight,
-        preparationMethod: _preparationMethodController.text,
-        retentionFactors: {},
+        preparationMethod: preparationMethod,
+        retentionFactors: {...?_preparationDetails?.retentionFactors},
       );
     }
 
