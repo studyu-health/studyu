@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(23);
+SELECT plan(29);
 
 SELECT tests.create_supabase_user('nutrition_revision_owner', 'nutrition_revision_owner@studyu.health');
 SELECT tests.create_supabase_user('nutrition_revision_other', 'nutrition_revision_other@studyu.health');
@@ -49,6 +49,43 @@ CREATE FUNCTION tests.revision_test_save(
 $$;
 
 SELECT tests.authenticate_as('nutrition_revision_owner');
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(tests.revision_test_result() #- '{result,id}')$$,
+    '22023', 'invalid nutrition recall', 'save rejects a missing recall ID'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(), '{result,date}', '"tomorrow"')
+    )$$,
+    '22023', 'invalid nutrition recall', 'save rejects non-ISO recall dates'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(), '{result,recallMode}', '"other"')
+    )$$,
+    '22023', 'invalid nutrition recall', 'save rejects unknown recall modes'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(), '{result,meals}', '{}')
+    )$$,
+    '22023', 'invalid nutrition recall', 'save rejects a non-array meal list'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(), '{result,meals}', '[{}]')
+    )$$,
+    '22023', 'invalid nutrition recall', 'save rejects a meal missing required fields'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(
+            tests.revision_test_result(), '{result,meals}',
+            '[{"id":"meal","mealType":"breakfast","timezone":"UTC","isSkipped":false,"foods":[{}]}]'
+        )
+    )$$,
+    '22023', 'invalid nutrition recall', 'save rejects an invalid nested food snapshot'
+);
 SELECT is(
     (tests.revision_test_save(tests.revision_test_result())).nutrition_revision,
     0::bigint, 'new recall returns its initial revision'
