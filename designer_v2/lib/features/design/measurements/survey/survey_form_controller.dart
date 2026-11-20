@@ -104,9 +104,39 @@ class MeasurementSurveyFormViewModel({
   @override
   FormValidationConfigSet get sharedValidationConfig => {
     StudyFormValidationSet.draft: [titleRequired, atLeastOneQuestion],
-    StudyFormValidationSet.publish: [titleRequired, atLeastOneQuestion],
-    StudyFormValidationSet.test: [titleRequired, atLeastOneQuestion],
+    StudyFormValidationSet.publish: [
+      titleRequired,
+      atLeastOneQuestion,
+      validOccurrenceSchedule,
+    ],
+    StudyFormValidationSet.test: [
+      titleRequired,
+      atLeastOneQuestion,
+      validOccurrenceSchedule,
+    ],
   };
+
+  FormControlValidation get validOccurrenceSchedule => FormControlValidation(
+    control: form,
+    validators: [
+      Validators.delegate((_) {
+        final rule = buildScheduleRule();
+        if (rule == null) return null;
+
+        final days = rule.resolveScheduledDays(study.schedule);
+        if (days.isEmpty) return {'emptySchedule': true};
+        if (rule.type == TaskScheduleType.specificDays &&
+            days.length != rule.specificDays.length) {
+          return {'scheduleOutsideStudy': true};
+        }
+        return null;
+      }),
+    ],
+    validationMessages: {
+      'emptySchedule': (_) => tr.form_survey_schedule_summary_empty,
+      'scheduleOutsideStudy': (_) => tr.form_survey_template_day_outside_study,
+    },
+  );
 
   FormControlValidation get titleRequired => FormControlValidation(
     control: surveyTitleControl,

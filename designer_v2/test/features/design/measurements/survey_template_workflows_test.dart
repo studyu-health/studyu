@@ -10,6 +10,8 @@ import 'package:studyu_designer_v2/features/design/measurements/measurements_for
 import 'package:studyu_designer_v2/features/design/measurements/measurements_form_data.dart';
 import 'package:studyu_designer_v2/features/design/measurements/nutrition/nutrition_form_controller.dart';
 import 'package:studyu_designer_v2/features/design/measurements/survey/survey_form_controller.dart';
+import 'package:studyu_designer_v2/features/design/measurements/survey/survey_form_data.dart';
+import 'package:studyu_designer_v2/features/design/study_form_validation.dart';
 import 'package:studyu_designer_v2/localization/app_localizations_en.dart';
 import 'package:studyu_designer_v2/localization/app_translation.dart';
 
@@ -205,6 +207,30 @@ void main() {
       isFalse,
     );
     expect(measurements.measurementViewModels, isEmpty);
+  });
+
+  test('blocks publishing when an existing DHQ3 day leaves the study', () {
+    final study = Study.withId('study-1');
+    final entry = SurveyTemplateRegistry.findById('dhq3_14day')!
+        .dayEntries!
+        .last;
+    final task = entry.buildTask()
+      ..scheduleRule = TaskScheduleRule.forSpecificDays([20]);
+    final formData = MeasurementSurveyFormData.fromDomainModel(task);
+    final validSurvey = MeasurementSurveyFormViewModel(
+      study: study,
+      formData: formData,
+      validationSet: StudyFormValidationSet.publish,
+    );
+    expect(validSurvey.form.errors, isNot(contains('emptySchedule')));
+
+    study.schedule.phaseDuration = 3;
+    final shortenedSurvey = MeasurementSurveyFormViewModel(
+      study: study,
+      formData: formData,
+      validationSet: StudyFormValidationSet.publish,
+    );
+    expect(shortenedSurvey.form.errors, contains('emptySchedule'));
   });
 
   test('disabled occurrence schedule delegates to the default schedule', () {
