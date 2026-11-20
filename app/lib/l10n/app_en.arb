@@ -1482,5 +1482,7 @@
   "nutrition_recall_discard_draft": "Discard draft",
   "nutrition_recall_discard_confirmation": "This deletes the unsynced changes on this device. The saved entry remains available.",
   "nutrition_recall_discard_failed": "Could not discard the draft. Try again.",
-  "nutrition_recall_conflict_reopen": "Open the nutrition task again. If you still see an older version, reload the study."
+  "nutrition_recall_conflict_reopen": "Open the nutrition task again. If you still see an older version, reload the study.",
+  "nutrition_recall_view_draft": "View draft",
+  "nutrition_recall_view_saved": "View saved version"
 }

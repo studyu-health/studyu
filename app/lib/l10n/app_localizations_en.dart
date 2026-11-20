@@ -3346,4 +3346,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nutrition_recall_conflict_reopen =>
       'Open the nutrition task again. If you still see an older version, reload the study.';
+
+  @override
+  String get nutrition_recall_view_draft => 'View draft';
+
+  @override
+  String get nutrition_recall_view_saved => 'View saved version';
 }

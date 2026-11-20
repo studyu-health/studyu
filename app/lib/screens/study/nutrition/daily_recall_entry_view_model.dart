@@ -16,6 +16,10 @@ typedef NutritionRecallRemoteSaver = Future<void> Function({
   String? interventionIdOverride,
 });
 
+typedef NutritionRecallRemoteLoader = Future<SubjectProgress?> Function(
+  NutritionRecallPersistenceTarget? target,
+);
+
 class DailyRecallEntryViewModel({
   final StudySubject? subject,
   var NutritionTask? task,
@@ -28,6 +32,7 @@ class DailyRecallEntryViewModel({
   DailyRecall? existingRecall,
   NutritionRecallAutoSaveManager? autoSaveManager,
   final NutritionRecallRemoteSaver? _remoteSaver,
+  final NutritionRecallRemoteLoader? _remoteLoader,
 }) extends ChangeNotifier {
   final NutritionRecallAutoSaveManager _autoSaveManager =
       autoSaveManager ?? NutritionRecallAutoSaveManager();
@@ -53,6 +58,7 @@ class DailyRecallEntryViewModel({
   bool _remoteConflict = false;
   bool _isReloadingDraft = false;
   bool _requiresReopen = false;
+  bool _showConflictingDraft = false;
 
   this {
     _hasExistingRecall = existingRecall != null;
@@ -91,6 +97,22 @@ class DailyRecallEntryViewModel({
 
   bool get canDiscardConflictingDraft =>
       _conflictingDraft != null && !isCheckingDraft;
+
+  bool get canRefreshConflictingRecall => _remoteConflict && !isCheckingDraft;
+
+  bool get canCompareConflictingDraft =>
+      _conflictingDraft != null && _canonicalProgress != null;
+
+  bool get showsConflictingDraft => _showConflictingDraft;
+
+  DailyRecall get displayedRecall =>
+      _showConflictingDraft ? _conflictingDraft?.recall ?? recall : recall;
+
+  void toggleConflictPreview() {
+    if (!canCompareConflictingDraft) return;
+    _showConflictingDraft = !_showConflictingDraft;
+    notifyListeners();
+  }
 
   bool get requiresReopen => _requiresReopen;
 
@@ -199,6 +221,7 @@ class DailyRecallEntryViewModel({
         return false;
       }
       _conflictingDraft = null;
+      _showConflictingDraft = false;
       _requiresReopen = _requiresReopen || _remoteConflict;
       _remoteConflict = false;
       return true;
@@ -260,22 +283,73 @@ class DailyRecallEntryViewModel({
       return false;
     }
 
-    _canonicalProgress = latestProgress;
-    recall = _copyRecall(latestRecall);
+    _adoptCanonicalRecall(latestProgress, latestRecall, periodId, studyDay);
+    return true;
+  }
+
+  void _adoptCanonicalRecall(
+    SubjectProgress progress,
+    DailyRecall canonical,
+    String periodId,
+    int studyDay,
+  ) {
+    _canonicalProgress = progress;
+    recall = _copyRecall(canonical);
     _hasExistingRecall = true;
-    _interventionId = latestProgress.interventionId;
-    if (latestProgress.completedAt != null) {
+    _interventionId = progress.interventionId;
+    if (progress.completedAt case final completedAt?) {
       _persistenceTarget = NutritionRecallPersistenceTarget(
-        taskId: taskId,
+        taskId: progress.taskId,
         periodId: periodId,
-        interventionId: latestProgress.interventionId,
-        completedAt: latestProgress.completedAt!,
+        interventionId: progress.interventionId,
+        completedAt: completedAt,
         studyDaySnapshot: studyDay,
-        nutritionRevision: latestProgress.nutritionRevision,
+        nutritionRevision: progress.nutritionRevision,
       );
     }
     lastSaveTime = recall.lastAutoSavedAt;
-    return true;
+  }
+
+  Future<void> refreshConflictingRecall() async {
+    final activeSubject = subject;
+    final taskId = task?.id;
+    final periodId = _periodId;
+    final studyDay = _studyDaySnapshot;
+    if (!canRefreshConflictingRecall ||
+        activeSubject == null ||
+        taskId == null ||
+        periodId == null ||
+        studyDay == null) {
+      return;
+    }
+
+    _isReloadingDraft = true;
+    notifyListeners();
+    try {
+      final load = _remoteLoader;
+      final progress = load == null
+          ? await activeSubject.fetchNutritionRecall(
+              taskId: taskId,
+              periodId: periodId,
+              studyDaySnapshot: studyDay,
+              target: persistenceTarget,
+            )
+          : await load(persistenceTarget);
+      final canonical = progress?.result.result;
+      if (_isDisposed || canonical is! DailyRecall || progress == null) return;
+
+      activeSubject.applySavedProgress(progress);
+      _adoptCanonicalRecall(progress, canonical, periodId, studyDay);
+      _remoteConflict = false;
+      _showConflictingDraft = false;
+    } catch (error, stackTrace) {
+      StudyULogger.warning(
+        'Failed to refresh the conflicting nutrition recall: $error\n$stackTrace',
+      );
+    } finally {
+      _isReloadingDraft = false;
+      if (!_isDisposed) notifyListeners();
+    }
   }
 
   Future<void> reloadCanonicalRecall() async {
@@ -630,6 +704,7 @@ class DailyRecallEntryViewModel({
               'Failed to load the conflicting nutrition draft: $error\n$stackTrace',
             );
           }
+          if (!_isDisposed) await refreshConflictingRecall();
         }
         StudyULogger.warning(
           '[DailyRecallVM] Remote auto-save failed; local recall is retained: '

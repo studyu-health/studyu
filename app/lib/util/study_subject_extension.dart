@@ -40,6 +40,33 @@ class const NutritionRecallPersistenceTarget({
 }
 
 extension StudySubjectExtension on StudySubject {
+  Future<SubjectProgress?> fetchNutritionRecall({
+    required String taskId,
+    required String periodId,
+    required int studyDaySnapshot,
+    NutritionRecallPersistenceTarget? target,
+  }) async {
+    final query = client
+        .from(SubjectProgress.tableName)
+        .select()
+        .eq('subject_id', id)
+        .eq('task_id', taskId)
+        .eq('result_type', 'DailyRecall');
+    final match = target == null
+        ? query
+              .eq('result->>periodId', periodId)
+              .eq(
+                'result->result->>studyDaySnapshot',
+                studyDaySnapshot.toString(),
+              )
+        : query
+              .eq('completed_at', target.completedAt.toUtc().toIso8601String())
+              .eq('intervention_id', target.interventionId);
+    final row = await match.limit(2).maybeSingle();
+    if (row == null) return null;
+    return SupabaseQuery.extractSupabaseSingleRow<SubjectProgress>(row);
+  }
+
   /// Upserts a DailyRecall result without changing an existing recall's
   /// persistence identity.
   Future<SubjectProgress> upsertNutritionResult({

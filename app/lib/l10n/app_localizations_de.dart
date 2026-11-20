@@ -3392,4 +3392,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nutrition_recall_conflict_reopen =>
       'Öffnen Sie die Ernährungsaufgabe erneut. Wenn weiterhin eine alte Version angezeigt wird, laden Sie die Studie neu.';
+
+  @override
+  String get nutrition_recall_view_draft => 'Entwurf anzeigen';
+
+  @override
+  String get nutrition_recall_view_saved => 'Gespeicherte Version anzeigen';
 }

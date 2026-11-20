@@ -456,7 +456,7 @@ class _NutritionTaskWidgetState()
     AppLocalizations l10n,
   ) {
     final theme = Theme.of(context);
-    final recall = model.recall;
+    final recall = model.displayedRecall;
     final bottomInset = _isHistoricalMode
         ? MediaQuery.paddingOf(context).bottom
         : 0.0;
@@ -597,6 +597,20 @@ class _NutritionTaskWidgetState()
         ),
       ),
       actions: [
+        if (model.canRefreshConflictingRecall)
+          TextButton(
+            onPressed: model.refreshConflictingRecall,
+            child: Text(l10n.try_again),
+          ),
+        if (model.canCompareConflictingDraft)
+          TextButton(
+            onPressed: model.toggleConflictPreview,
+            child: Text(
+              model.showsConflictingDraft
+                  ? l10n.nutrition_recall_view_saved
+                  : l10n.nutrition_recall_view_draft,
+            ),
+          ),
         if (model.hasDraftConflict)
           TextButton(
             onPressed: model.canDiscardConflictingDraft

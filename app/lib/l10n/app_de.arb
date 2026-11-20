@@ -1267,5 +1267,7 @@
   "nutrition_recall_discard_draft": "Entwurf verwerfen",
   "nutrition_recall_discard_confirmation": "Dadurch werden die nicht synchronisierten Änderungen auf diesem Gerät gelöscht. Der gespeicherte Eintrag bleibt erhalten.",
   "nutrition_recall_discard_failed": "Der Entwurf konnte nicht verworfen werden. Versuchen Sie es erneut.",
-  "nutrition_recall_conflict_reopen": "Öffnen Sie die Ernährungsaufgabe erneut. Wenn weiterhin eine alte Version angezeigt wird, laden Sie die Studie neu."
+  "nutrition_recall_conflict_reopen": "Öffnen Sie die Ernährungsaufgabe erneut. Wenn weiterhin eine alte Version angezeigt wird, laden Sie die Studie neu.",
+  "nutrition_recall_view_draft": "Entwurf anzeigen",
+  "nutrition_recall_view_saved": "Gespeicherte Version anzeigen"
 }

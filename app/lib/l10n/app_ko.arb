@@ -564,5 +564,7 @@
   "nutrition_recall_discard_draft": "초안 삭제",
   "nutrition_recall_discard_confirmation": "이 기기에서 동기화되지 않은 변경 사항을 삭제합니다. 저장된 기록은 그대로 유지됩니다.",
   "nutrition_recall_discard_failed": "초안을 삭제할 수 없습니다. 다시 시도하세요.",
-  "nutrition_recall_conflict_reopen": "영양 기록 과제를 다시 여세요. 이전 버전이 계속 표시되면 연구를 다시 불러오세요."
+  "nutrition_recall_conflict_reopen": "영양 기록 과제를 다시 여세요. 이전 버전이 계속 표시되면 연구를 다시 불러오세요.",
+  "nutrition_recall_view_draft": "초안 보기",
+  "nutrition_recall_view_saved": "저장된 버전 보기"
 }

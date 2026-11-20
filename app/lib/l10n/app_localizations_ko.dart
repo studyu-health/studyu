@@ -3282,4 +3282,10 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get nutrition_recall_conflict_reopen =>
       '영양 기록 과제를 다시 여세요. 이전 버전이 계속 표시되면 연구를 다시 불러오세요.';
+
+  @override
+  String get nutrition_recall_view_draft => '초안 보기';
+
+  @override
+  String get nutrition_recall_view_saved => '저장된 버전 보기';
 }

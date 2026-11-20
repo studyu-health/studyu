@@ -107,7 +107,7 @@ void main() {
   });
 
   test(
-    'a server revision conflict keeps the local draft and locks edits',
+    'a server conflict refreshes saved progress without losing the local draft',
     () async {
       SharedPreferences.setMockInitialValues({});
       final now = DateTime.utc(2026, 7, 16, 12);
@@ -123,6 +123,22 @@ void main() {
         entryCompletedAt: now,
         studyDaySnapshot: 0,
       );
+      var fetchAttempts = 0;
+      final remoteProgress =
+          SubjectProgress(
+              subjectId: subject.id,
+              taskId: task.id,
+              resultType: 'DailyRecall',
+              interventionId: 'intervention',
+              result: Result<DailyRecall>.app(
+                type: 'DailyRecall',
+                periodId: period.id,
+                result: DailyRecall.fromJson(completed.toJson())
+                  ..waterIntakeMl = 500,
+              ),
+            )
+            ..completedAt = now
+            ..nutritionRevision = 2;
       final manager = NutritionRecallAutoSaveManager();
       final model = DailyRecallEntryViewModel(
         subject: subject,
@@ -131,6 +147,10 @@ void main() {
         existingRecall: completed,
         autoSaveManager: manager,
         clock: () => now.add(const Duration(minutes: 1)),
+        remoteLoader: (_) async {
+          if (++fetchAttempts == 1) return null;
+          return remoteProgress;
+        },
         remoteSaver:
             ({
               required taskId,
@@ -160,9 +180,16 @@ void main() {
             .waterIntakeMl,
         250,
       );
+      expect(model.canRefreshConflictingRecall, isTrue);
+      await model.refreshConflictingRecall();
+      expect(subject.progress.single.nutritionRevision, 2);
+      expect(model.displayedRecall.waterIntakeMl, 500);
+      model.toggleConflictPreview();
+      expect(model.displayedRecall.waterIntakeMl, 250);
       expect(await model.discardConflictingDraft(), isTrue);
-      expect(model.canEdit, isFalse);
-      expect(model.requiresReopen, isTrue);
+      expect(model.canEdit, isTrue);
+      expect(model.persistenceTarget!.nutritionRevision, 2);
+      expect(model.displayedRecall.waterIntakeMl, 500);
       expect(await manager.scanPendingRecalls(subject.id), isEmpty);
     },
   );

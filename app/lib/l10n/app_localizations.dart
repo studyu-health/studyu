@@ -5964,6 +5964,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open the nutrition task again. If you still see an older version, reload the study.'**
   String get nutrition_recall_conflict_reopen;
+
+  /// No description provided for @nutrition_recall_view_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'View draft'**
+  String get nutrition_recall_view_draft;
+
+  /// No description provided for @nutrition_recall_view_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'View saved version'**
+  String get nutrition_recall_view_saved;
 }
 
 class _AppLocalizationsDelegate
