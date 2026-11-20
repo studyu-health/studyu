@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/dashboard/dashboard.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
+import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_core/core.dart';
 
 Widget _dashboardWith(
@@ -12,6 +15,8 @@ Widget _dashboardWith(
   bool withTask = false,
   bool preview = true,
   DateTime? startedAt,
+  NutritionTask? nutritionTask,
+  DailyRecall? historicalRecall,
 }) {
   final study = Study('study', 'user')
     ..status = StudyStatus.running
@@ -25,12 +30,27 @@ Widget _dashboardWith(
     ];
   }
 
+  if (nutritionTask != null) study.observations = [nutritionTask];
   final subject = StudySubject.fromStudy(
     study,
     'user',
     study.interventions.map((intervention) => intervention.id).toList(),
     null,
   )..startedAt = startedAt ?? DateTime.now().add(const Duration(days: 1));
+  if (nutritionTask != null && historicalRecall != null) {
+    final progress = SubjectProgress(
+      subjectId: subject.id,
+      taskId: nutritionTask.id,
+      resultType: 'DailyRecall',
+      interventionId: Study.baselineID,
+      result: Result<DailyRecall>.app(
+        type: 'DailyRecall',
+        periodId: nutritionTask.schedule.completionPeriods.single.id,
+        result: historicalRecall,
+      ),
+    )..completedAt = historicalRecall.entryCompletedAt;
+    subject.progress.add(progress);
+  }
   final appState = AppState()..activeSubject = subject;
   appState.updatePreviewMode(preview);
 
@@ -69,5 +89,46 @@ void main() {
     );
     expect(find.byType(AppBar), findsOneWidget);
     expect(find.text('Dashboard'), findsOneWidget);
+  });
+
+  testWidgets('opens yesterday from the dashboard without a task today', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime.now().toUtc();
+    final yesterday = DateTime.utc(now.year, now.month, now.day - 1, 12);
+    final task = NutritionTask.withId()
+      ..title = 'One-day diary'
+      ..scheduleRule = TaskScheduleRule.forSpecificDays([0]);
+    final recall = DailyRecall.withId(
+      date: yesterday,
+      recallMode: RecallMode.realtimeRecord,
+      entryCompletedAt: yesterday,
+      studyDaySnapshot: 0,
+      meals: [],
+    );
+    await tester.pumpWidget(
+      _dashboardWith(
+        2,
+        startedAt: yesterday,
+        nutritionTask: task,
+        historicalRecall: recall,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('One-day diary'), findsNothing);
+    await tester.tap(find.byType(PopupMenuButton<OverflowMenuItem>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('History'));
+    await tester.pumpAndSettle();
+    expect(find.byType(NutritionHistoryScreen), findsOneWidget);
+    await tester.tap(find.text('No foods logged'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<NutritionTaskWidget>(find.byType(NutritionTaskWidget))
+          .readOnly,
+      isFalse,
+    );
   });
 }

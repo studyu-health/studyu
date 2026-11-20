@@ -61,6 +61,41 @@ class const NutritionTaskWidget({
     ),
   );
 
+  static Future<bool> openHistoricalRecall(
+    BuildContext context, {
+    required StudySubject subject,
+    required NutritionTask task,
+    required NutritionRecallRecord record,
+    NutritionFoodRepository? foodRepository,
+  }) async {
+    final period = task.schedule.completionPeriods
+        .where((period) => period.id == record.periodId)
+        .firstOrNull;
+    final target = record.persistenceTarget;
+    final canEdit =
+        target != null &&
+        isEditableNutritionRecallDay(
+          studyDaySnapshot: record.studyDaySnapshot,
+          currentStudyDay: nutritionStudyDayFor(subject, DateTime.now()),
+          hasUnambiguousPeriod: period != null,
+        );
+    await Navigator.of(context).push(
+      route(
+        existingRecall: record.recall,
+        task: task,
+        completionPeriod: period,
+        persistenceTarget: target,
+        historicalDate: subject.nutritionDateForStudyDay(
+          record.studyDaySnapshot,
+        ),
+        interventionId: record.interventionId,
+        readOnly: !canEdit,
+        foodRepository: foodRepository,
+      ),
+    );
+    return canEdit;
+  }
+
   @override
   State<NutritionTaskWidget> createState() => _NutritionTaskWidgetState();
 }
@@ -663,8 +698,7 @@ class _NutritionTaskWidgetState()
       NutritionHistoryScreen.route(
         subject: subject,
         task: task,
-        onOpenRecall: (record, editable) =>
-            _openRecall(context, subject, task, record, editable: editable),
+        onOpenRecall: (record) => _openRecall(context, subject, task, record),
       ),
     );
     await _viewModel?.reloadCanonicalRecall();
@@ -674,36 +708,17 @@ class _NutritionTaskWidgetState()
     BuildContext context,
     StudySubject? subject,
     NutritionTask task,
-    NutritionRecallRecord record, {
-    bool? editable,
-  }) async {
+    NutritionRecallRecord record,
+  ) async {
     if (subject == null) return;
     await _viewModel?.flushPendingAutoSave(persistToDatabase: true);
     if (!context.mounted) return;
-    final period = _completionPeriodFor(task, record.periodId);
-    final target = record.persistenceTarget;
-    final canEdit =
-        (editable ??
-            isEditableNutritionRecallDay(
-              studyDaySnapshot: record.studyDaySnapshot,
-              currentStudyDay: nutritionStudyDayFor(subject, DateTime.now()),
-              hasUnambiguousPeriod:
-                  record.hasUnambiguousPeriod && period != null,
-            )) &&
-        target != null;
-    await Navigator.of(context).push(
-      NutritionTaskWidget.route(
-        existingRecall: record.recall,
-        task: task,
-        completionPeriod: period,
-        persistenceTarget: target,
-        historicalDate: subject.nutritionDateForStudyDay(
-          record.studyDaySnapshot,
-        ),
-        interventionId: record.interventionId,
-        readOnly: !canEdit,
-        foodRepository: widget.foodRepository,
-      ),
+    final canEdit = await NutritionTaskWidget.openHistoricalRecall(
+      context,
+      subject: subject,
+      task: task,
+      record: record,
+      foodRepository: widget.foodRepository,
     );
     if (!context.mounted) return;
     if (_trackWaterIntake && !widget.readOnly) await _loadCupSize();
@@ -714,20 +729,12 @@ class _NutritionTaskWidgetState()
         !isEditableNutritionRecallDay(
           studyDaySnapshot: record.studyDaySnapshot,
           currentStudyDay: nutritionStudyDayFor(subject, DateTime.now()),
-          hasUnambiguousPeriod: period != null,
+          hasUnambiguousPeriod: true,
         )) {
       await _openHistory(context, subject, task);
       return;
     }
     await _viewModel?.reloadCanonicalRecall();
-  }
-
-  CompletionPeriod? _completionPeriodFor(NutritionTask task, String? id) {
-    if (id == null) return null;
-    for (final period in task.schedule.completionPeriods) {
-      if (period.id == id) return period;
-    }
-    return null;
   }
 
   Widget _buildMealsSection(

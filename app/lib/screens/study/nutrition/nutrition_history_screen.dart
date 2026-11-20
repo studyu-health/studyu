@@ -5,7 +5,6 @@ import 'package:studyu_core/core.dart';
 
 typedef NutritionRecallOpener = Future<void> Function(
   NutritionRecallRecord record,
-  bool editable,
 );
 
 class const NutritionHistoryScreen({
@@ -150,7 +149,7 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
         minVerticalPadding: 2,
         visualDensity: const VisualDensity(vertical: -1),
         onTap: () async {
-          await widget.onOpenRecall(record, editable);
+          await widget.onOpenRecall(record);
           if (!mounted) return;
           setState(() {
             _records = _loadRecords();

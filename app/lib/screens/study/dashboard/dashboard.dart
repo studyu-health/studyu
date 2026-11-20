@@ -13,6 +13,8 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/app_onboarding/study_unavailable_screen.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
+import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/theme.dart' as app_theme;
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/debug_screen.dart';
@@ -326,6 +328,15 @@ class _DashboardScreenState()
               },
               itemBuilder: (context) {
                 return [
+                  if (subject!.startedAt?.isAfter(DateTime.now()) == false &&
+                      subject!.study.observations.any(
+                        (task) => task is NutritionTask,
+                      ))
+                    OverflowMenuItem(
+                      l10n.nutrition_history,
+                      Icons.history,
+                      onTap: _openNutritionHistory,
+                    ),
                   OverflowMenuItem(
                     AppLocalizations.of(context)!.report_history,
                     MdiIcons.history,
@@ -536,6 +547,47 @@ class _DashboardScreenState()
               ),
             )
           : null,
+    );
+  }
+
+  Future<void> _openNutritionHistory() async {
+    final activeSubject = subject;
+    if (activeSubject?.startedAt == null) return;
+    final tasks = activeSubject!.study.observations
+        .whereType<NutritionTask>()
+        .toList();
+    if (tasks.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
+    final task = tasks.length == 1
+        ? tasks.single
+        : await showDialog<NutritionTask>(
+            context: context,
+            builder: (dialogContext) => SimpleDialog(
+              title: Text(l10n.nutrition_history),
+              children: [
+                for (final task in tasks)
+                  SimpleDialogOption(
+                    onPressed: () => Navigator.of(dialogContext).pop(task),
+                    child: Text(task.title ?? l10n.nutrition_tracking),
+                  ),
+              ],
+            ),
+          );
+    if (task == null || !mounted || subject?.id != activeSubject.id) return;
+
+    await Navigator.of(context).push(
+      NutritionHistoryScreen.route(
+        subject: activeSubject,
+        task: task,
+        onOpenRecall: (record) async {
+          await NutritionTaskWidget.openHistoricalRecall(
+            context,
+            subject: activeSubject,
+            task: task,
+            record: record,
+          );
+        },
+      ),
     );
   }
 
