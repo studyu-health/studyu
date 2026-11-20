@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/models/unified_food_result.dart';
-import 'package:studyu_app/models/usda_models.dart';
 import 'package:studyu_app/screens/study/nutrition/barcode_scanner_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
@@ -572,9 +570,6 @@ class _FoodSearchScreenContentState()
   studyu.FoodEntry _foodEntryForResult(UnifiedFoodResult result) =>
       convertFoodResultToFoodEntry(result);
 
-  bool _caloriesKnownForResult(UnifiedFoodResult result) =>
-      resultCaloriesKnown(result);
-
   void _selectResult(UnifiedFoodResult result, Offset? source) {
     if (_selectionStore != null) {
       _addResult(result, source);
@@ -590,7 +585,7 @@ class _FoodSearchScreenContentState()
     _addToSelection(
       food,
       key: canonicalFoodSelectionKey(food),
-      caloriesKnown: _caloriesKnownForResult(result),
+      caloriesKnown: result.calories != null,
       source: source,
       imageUrl: result.imageUrl,
     );

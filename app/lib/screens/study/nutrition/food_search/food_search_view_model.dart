@@ -193,7 +193,7 @@ final class FoodSearchViewModel({
         ],
         languages: openFoodFactsLanguages(_languageCode),
         fields: openFoodFactsSearchFields,
-        version: ProductQueryVersion.v3,
+        version: ProductQueryVersion.v3_5,
       ),
     );
   }
@@ -318,23 +318,20 @@ final class FoodSearchViewModel({
 }
 
 UnifiedFoodResult openFoodFactsSearchResult(Product product) {
-  final nutriments = product.nutriments;
-  final caloriesPer100g = nutriments?.getValue(
-    Nutrient.energyKCal,
-    PerSize.oneHundredGrams,
-  );
   final servingSizeGrams = _gramsFromMetadata(product.servingSize);
   final calorieBasisGrams = servingSizeGrams ?? defaultFoodReferenceGrams;
+  final calories = _openFoodFactsServingNutrients(
+    product,
+    calorieBasisGrams,
+  )['energyKcal'];
 
   return UnifiedFoodResult(
     id: product.barcode ?? '',
     name: product.productName ?? 'Unknown',
     brand: product.brands,
     imageUrl: product.imageFrontSmallUrl,
-    calories: caloriesPer100g == null
-        ? null
-        : caloriesPer100g * calorieBasisGrams / 100,
-    calorieBasisGrams: caloriesPer100g == null ? null : calorieBasisGrams,
+    calories: calories,
+    calorieBasisGrams: calories == null ? null : calorieBasisGrams,
     servingSizeGrams: servingSizeGrams,
     source: studyu.FoodSource.openfoodfacts,
     originalData: product,
@@ -487,42 +484,81 @@ studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
   );
 }
 
-studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
-  final nutriments = product.nutriments;
-  final energyKcal =
-      nutriments?.getValue(Nutrient.energyKCal, PerSize.oneHundredGrams) ?? 0;
-  final protein =
-      nutriments?.getValue(Nutrient.proteins, PerSize.oneHundredGrams) ?? 0;
-  final carbs =
-      nutriments?.getValue(Nutrient.carbohydrates, PerSize.oneHundredGrams) ??
-      0;
-  final fat = nutriments?.getValue(Nutrient.fat, PerSize.oneHundredGrams) ?? 0;
-  final sugars =
-      nutriments?.getValue(Nutrient.sugars, PerSize.oneHundredGrams) ?? 0;
-  final fiber =
-      nutriments?.getValue(Nutrient.fiber, PerSize.oneHundredGrams) ?? 0;
-  final saturatedFat =
-      nutriments?.getValue(Nutrient.saturatedFat, PerSize.oneHundredGrams) ?? 0;
-  final sodium =
-      (nutriments?.getValue(Nutrient.sodium, PerSize.oneHundredGrams) ?? 0) *
-      1000;
-  bool isUnavailable(Nutrient nutrient) =>
-      nutriments?.getValue(nutrient, PerSize.oneHundredGrams) == null;
-  final unavailableNutrients = {
-    if (isUnavailable(Nutrient.energyKCal)) 'energyKcal',
-    if (isUnavailable(Nutrient.proteins)) 'protein',
-    if (isUnavailable(Nutrient.carbohydrates)) 'carbs',
-    if (isUnavailable(Nutrient.fat)) 'fat',
-    if (isUnavailable(Nutrient.sugars)) 'sugars',
-    if (isUnavailable(Nutrient.fiber)) 'fiber',
-    if (isUnavailable(Nutrient.saturatedFat)) 'saturatedFat',
-    if (isUnavailable(Nutrient.sodium)) 'sodium',
-    if (isUnavailable(Nutrient.transFat)) 'transFat',
-    if (isUnavailable(Nutrient.cholesterol)) 'cholesterol',
-    'waterContent',
+Map<String, double?> _openFoodFactsServingNutrients(
+  Product product,
+  double referenceGrams,
+) {
+  final nutrition = product.nutrition;
+  final inputSets = nutrition?['input_sets'];
+  final sets = [
+    nutrition?['aggregated_set'],
+    if (inputSets is List) ...inputSets,
+  ];
+
+  // Match nutrition for the product as sold on a mass basis.
+  final massSets = <(Map<String, dynamic>, double)>[];
+  for (final set in sets) {
+    if (set case {
+      'preparation': NutritionSetKey.preparationAsSold,
+      'nutrients': final Map<String, dynamic> nutrients,
+      'per': final String per,
+    }) {
+      final grams = switch (per) {
+        '100g' => 100.0,
+        'serving' when set['per_unit'] == 'g' => set['per_quantity'],
+        _ => null,
+      };
+      if (grams is num && grams.isFinite && grams > 0) {
+        massSets.add((nutrients, referenceGrams / grams));
+      }
+    }
+  }
+
+  double? amount(Nutrient nutrient, Unit targetUnit) {
+    for (final (nutrients, scale) in massSets) {
+      final raw = nutrients[nutrient.offTag];
+      if (raw is! Map<String, dynamic>) continue;
+      final value = NutritionValue.fromJson(raw);
+      final measured = value?.value ?? value?.valueComputed;
+      if (measured == null || !measured.isFinite || measured < 0) continue;
+      final unit = value?.unit;
+      final unitFactor = switch ((unit, targetUnit)) {
+        (Unit.KJ, Unit.KCAL) => 1 / 4.184,
+        (Unit.G, Unit.MILLI_G) => 1000.0,
+        (Unit.MILLI_G, Unit.G) => 0.001,
+        (Unit.MICRO_G, Unit.MILLI_G) => 0.001,
+        (Unit.MICRO_G, Unit.G) => 0.000001,
+        _ when unit == targetUnit => 1.0,
+        _ => null,
+      };
+      if (unitFactor == null) continue;
+      final scaled = measured * unitFactor * scale;
+      if (scaled.isFinite) return scaled;
+    }
+    return null;
+  }
+
+  return {
+    'energyKcal':
+        amount(Nutrient.energyKCal, Unit.KCAL) ??
+        amount(Nutrient.energyKJ, Unit.KCAL),
+    'protein': amount(Nutrient.proteins, Unit.G),
+    'carbs': amount(Nutrient.carbohydrates, Unit.G),
+    'fat': amount(Nutrient.fat, Unit.G),
+    'sugars': amount(Nutrient.sugars, Unit.G),
+    'fiber': amount(Nutrient.fiber, Unit.G),
+    'saturatedFat': amount(Nutrient.saturatedFat, Unit.G),
+    'transFat': amount(Nutrient.transFat, Unit.G),
+    'cholesterol': amount(Nutrient.cholesterol, Unit.MILLI_G),
+    'sodium': amount(Nutrient.sodium, Unit.MILLI_G),
+    'waterContent': amount(Nutrient.water, Unit.G),
   };
+}
+
+studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
   final sourceServingGrams = _gramsFromMetadata(product.servingSize);
   final servingSizeGrams = sourceServingGrams ?? defaultFoodReferenceGrams;
+  final nutrients = _openFoodFactsServingNutrients(product, servingSizeGrams);
 
   return studyu.FoodEntry.withId(
     entryType: studyu.FoodEntryType.brandedProduct,
@@ -537,31 +573,22 @@ studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
     portionState: studyu.PortionState.asServed,
     yieldFactor: 1.0,
     nutrition: studyu.NutritionProfile(
-      energyKcal: energyKcal * servingSizeGrams / 100,
-      protein: protein * servingSizeGrams / 100,
-      carbs: carbs * servingSizeGrams / 100,
-      fat: fat * servingSizeGrams / 100,
-      sugars: sugars * servingSizeGrams / 100,
-      fiber: fiber * servingSizeGrams / 100,
-      saturatedFat: saturatedFat * servingSizeGrams / 100,
-      transFat:
-          (nutriments?.getValue(Nutrient.transFat, PerSize.oneHundredGrams) ??
-              0) *
-          servingSizeGrams /
-          100,
-      cholesterol:
-          (nutriments?.getValue(
-                Nutrient.cholesterol,
-                PerSize.oneHundredGrams,
-              ) ??
-              0) *
-          1000 *
-          servingSizeGrams /
-          100,
-      sodium: sodium * servingSizeGrams / 100,
-      waterContent: 0,
+      energyKcal: nutrients['energyKcal'] ?? 0,
+      protein: nutrients['protein'] ?? 0,
+      carbs: nutrients['carbs'] ?? 0,
+      fat: nutrients['fat'] ?? 0,
+      sugars: nutrients['sugars'] ?? 0,
+      fiber: nutrients['fiber'] ?? 0,
+      saturatedFat: nutrients['saturatedFat'] ?? 0,
+      transFat: nutrients['transFat'] ?? 0,
+      cholesterol: nutrients['cholesterol'] ?? 0,
+      sodium: nutrients['sodium'] ?? 0,
+      waterContent: nutrients['waterContent'] ?? 0,
       micros: {},
-      unavailableNutrients: unavailableNutrients,
+      unavailableNutrients: {
+        for (final entry in nutrients.entries)
+          if (entry.value == null) entry.key,
+      },
     ),
     foodCode: product.barcode,
     externalId: product.barcode,

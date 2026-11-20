@@ -478,16 +478,3 @@ class const _SearchFilterChips({
     );
   }
 }
-
-bool resultCaloriesKnown(UnifiedFoodResult result) {
-  return switch (result.originalData) {
-    final UsdaFoodItem food => food.getNutrientValue(1008) != null,
-    final Product product =>
-      product.nutriments?.getValue(
-            Nutrient.energyKCal,
-            PerSize.oneHundredGrams,
-          ) !=
-          null,
-    _ => result.calories != null,
-  };
-}

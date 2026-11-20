@@ -17,7 +17,7 @@ const openFoodFactsSearchFields = [
   ProductField.NAME_IN_LANGUAGES,
   ProductField.BRANDS,
   ProductField.BARCODE,
-  ProductField.NUTRIMENTS,
+  ProductField.NUTRITION,
   ProductField.SERVING_SIZE,
   ProductField.QUANTITY,
   ProductField.IMAGE_FRONT_SMALL_URL,
@@ -41,7 +41,7 @@ Future<ProductResultV3> fetchOpenFoodFactsBarcode(
       barcode,
       languages: openFoodFactsLanguages(languageCode),
       fields: openFoodFactsSearchFields,
-      version: ProductQueryVersion.v3,
+      version: ProductQueryVersion.v3_5,
     ),
   ).timeout(foodProviderTimeout);
   final product = result.product;

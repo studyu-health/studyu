@@ -69,7 +69,15 @@ void main() {
       'code': '123',
       'product_name': 'Food',
       'serving_size': '1 portion (12,5 g)',
-      'nutriments': {'energy-kcal_100g': 200},
+      'nutrition': {
+        'aggregated_set': {
+          'preparation': 'as_sold',
+          'per': '100g',
+          'nutrients': {
+            'energy-kcal': {'unit': 'kcal', 'value': 200},
+          },
+        },
+      },
     });
     final model = FoodSearchViewModel(
       openFoodFactsSearch: ({
@@ -94,13 +102,19 @@ void main() {
       'code': '123',
       'product_name': 'Zero product',
       'serving_size': '50 g',
-      'nutriments': {
-        'energy-kcal_100g': 0,
-        'proteins_100g': 0,
-        'sugars_100g': 0,
-        'trans-fat_100g': 0,
-        'cholesterol_100g': 0,
-        'sodium_100g': 0.1,
+      'nutrition': {
+        'aggregated_set': {
+          'preparation': 'as_sold',
+          'per': '100g',
+          'nutrients': {
+            'energy-kcal': {'unit': 'kcal', 'value': 0},
+            'proteins': {'unit': 'g', 'value': 0},
+            'sugars': {'unit': 'g', 'value': 0},
+            'trans-fat': {'unit': 'g', 'value': 0},
+            'cholesterol': {'unit': 'g', 'value': 0},
+            'sodium': {'unit': 'g', 'value': 0.1},
+          },
+        },
       },
     });
     final food = convertOpenFoodFactsToFoodEntry(product);
@@ -129,6 +143,72 @@ void main() {
       studyu.FoodEntry.fromJson(food.toJson()).nutrition.unavailableNutrients,
       food.nutrition.unavailableNutrients,
     );
+  });
+
+  test('OFF prefers as-sold mass data over a prepared or volume basis', () {
+    final product = Product.fromJson({
+      'product_name': 'Food',
+      'serving_size': '25 g',
+      'nutrition': {
+        'aggregated_set': {
+          'preparation': 'prepared',
+          'per': '100g',
+          'nutrients': {
+            'energy-kcal': {'unit': 'kcal', 'value': 20},
+          },
+        },
+        'input_sets': [
+          {
+            'preparation': 'as_sold',
+            'per': '100ml',
+            'nutrients': {
+              'energy-kcal': {'unit': 'kcal', 'value': 14},
+            },
+          },
+          {
+            'preparation': 'as_sold',
+            'per': 'serving',
+            'per_quantity': 25,
+            'per_unit': 'g',
+            'nutrients': {
+              'energy-kj': {'unit': 'kJ', 'value': 418.4},
+              'sodium': {'unit': 'mg', 'value_computed': 80},
+            },
+          },
+        ],
+      },
+    });
+
+    final result = openFoodFactsSearchResult(product);
+    final food = convertFoodResultToFoodEntry(result);
+
+    expect(result.calories, closeTo(100, 0.0001));
+    expect(food.nutrition.energyKcal, result.calories);
+    expect(food.nutrition.sodium, 80);
+    expect(food.nutrition.isKnown('sodium'), isTrue);
+  });
+
+  test('OFF volume-only data does not produce values for 100 g', () {
+    final product = Product.fromJson({
+      'product_name': 'Drink',
+      'serving_size': '200 mL',
+      'nutrition': {
+        'aggregated_set': {
+          'preparation': 'as_sold',
+          'per': '100ml',
+          'nutrients': {
+            'energy-kcal': {'unit': 'kcal', 'value': 50},
+          },
+        },
+      },
+    });
+
+    final result = openFoodFactsSearchResult(product);
+    final food = convertFoodResultToFoodEntry(result);
+
+    expect(result.calories, isNull);
+    expect(food.nutrition.isKnown('energyKcal'), isFalse);
+    expect(food.originalValues['nutrition'], isNotNull);
   });
 
   for (final slowOff in [true, false]) {

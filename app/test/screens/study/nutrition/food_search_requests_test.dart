@@ -47,11 +47,17 @@ void main() {
         languageCode: code,
       );
       expect(transport.requests, hasLength(2));
+      expect(transport.requests.first['api_version'], '3.5');
+      expect(transport.paths.last, '/api/v3.5/product/0123456789012');
       for (final request in transport.requests) {
         expect(request['lc'], code == 'de' ? 'de,en' : 'en');
         expect(request['tags_lc'], code == 'de' ? 'de' : 'en');
         final fields = request['fields']!.split(',');
-        expect(fields, containsAll(['product_name', 'product_name_en']));
+        expect(
+          fields,
+          containsAll(['product_name', 'product_name_en', 'nutrition']),
+        );
+        expect(fields, isNot(contains('nutriments')));
         if (code == 'de') expect(fields, contains('product_name_de'));
       }
       final name = code == 'de' ? 'Apfel' : 'Apple';
@@ -354,7 +360,15 @@ void main() {
           'code': '0123456789012',
           'product_name_en': 'Test drink',
           'serving_size': hasGramServing ? '50 g' : '1 cup (200 mL)',
-          'nutriments': {'energy-kcal_100g': 125},
+          'nutrition': {
+            'aggregated_set': {
+              'preparation': 'as_sold',
+              'per': '100g',
+              'nutrients': {
+                'energy-kcal': {'unit': 'kcal', 'value': 125},
+              },
+            },
+          },
         };
         final l10n = lookupAppLocalizations(const Locale('en'));
         var foods = <studyu.FoodEntry>[];
@@ -620,6 +634,7 @@ class _EmptyRepository() extends NutritionFoodRepository {
 class _FoodFactsHttpHelper() extends HttpHelper {
   this : super.internal();
   final List<Map<String, String>> requests = [];
+  final List<String> paths = [];
   int unavailableResponses = 0;
   Future<http.Response>? pending;
   Map<String, dynamic> product = {
@@ -631,6 +646,7 @@ class _FoodFactsHttpHelper() extends HttpHelper {
 
   Future<http.Response> respond(Uri uri, Map<String, String> parameters) {
     requests.add(Map.of(parameters));
+    paths.add(uri.path);
     if (unavailableResponses > 0) {
       unavailableResponses--;
       return Future.value(http.Response('', 503));
