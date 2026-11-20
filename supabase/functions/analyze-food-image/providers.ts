@@ -234,7 +234,7 @@ class AnthropicProvider implements LLMProvider {
   private apiKey: string;
   private model: string;
 
-  constructor(apiKey: string, model = 'claude-3-5-sonnet-20241022') {
+  constructor(apiKey: string, model = 'claude-sonnet-4-6') {
     this.apiKey = apiKey;
     this.model = model;
   }
@@ -352,7 +352,7 @@ class GeminiProvider implements LLMProvider {
   private apiKey: string;
   private model: string;
 
-  constructor(apiKey: string, model = 'gemini-2.0-flash') {
+  constructor(apiKey: string, model = 'gemini-3.6-flash') {
     this.apiKey = apiKey;
     this.model = model;
   }
@@ -476,7 +476,7 @@ export function createProvider(): LLMProvider {
       if (!apiKey) {
         throw new Error('ANTHROPIC_API_KEY not configured');
       }
-      const model = Deno.env.get('ANTHROPIC_MODEL') || 'claude-3-5-sonnet-20241022';
+      const model = Deno.env.get('ANTHROPIC_MODEL') || 'claude-sonnet-4-6';
       return new AnthropicProvider(apiKey, model);
     }
     case 'gemini': {
@@ -484,7 +484,7 @@ export function createProvider(): LLMProvider {
       if (!apiKey) {
         throw new Error('GOOGLE_API_KEY not configured');
       }
-      const model = Deno.env.get('GEMINI_MODEL') || 'gemini-2.0-flash';
+      const model = Deno.env.get('GEMINI_MODEL') || 'gemini-3.6-flash';
       return new GeminiProvider(apiKey, model);
     }
     default:
