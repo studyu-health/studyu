@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
@@ -681,11 +682,28 @@ class DailyRecallEntryViewModel({
               interventionIdOverride: _interventionId,
             );
           } else {
+            final prepared = await NutritionFoodRepository(client: client)
+                .prepareRecallForUpload(
+                  subjectId: subject!.id,
+                  recall: recallToSave,
+                );
             final previousRevision = persistenceTarget?.nutritionRevision;
+            final stored = await _loadPendingDraft();
+            if (stored != null &&
+                stored.nutritionRevision == previousRevision &&
+                stored.matchesUploadedRecall(recallToSave)) {
+              await _autoSaveManager.stageRecallUpload(stored, prepared);
+            }
+            if (_isDisposed ||
+                !_canPersist ||
+                _persistenceSuspended ||
+                !revalidateEligibility()) {
+              return;
+            }
             final saved = await subject!.upsertNutritionResult(
               taskId: taskId,
               periodId: periodId,
-              recall: recallToSave,
+              recall: prepared,
               persistenceTarget: persistenceTarget,
               interventionIdOverride: _interventionId,
             );
@@ -701,7 +719,7 @@ class DailyRecallEntryViewModel({
             await _localSaveFuture;
             await _autoSaveManager.acknowledgeRecallSave(
               saved: saved,
-              uploaded: recallToSave,
+              uploaded: prepared,
               previousRevision: previousRevision,
             );
           }

@@ -95,6 +95,31 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
     required String subjectId,
     required Iterable<FoodEntry> foods,
   }) async {
+    final entries = foods.toList();
+    final ingredients = entries.expand(_validatedComponents).toList();
+    if (ingredients.isNotEmpty) {
+      await ensureDefinitions(subjectId: subjectId, foods: ingredients);
+    }
+    await _ensureDefinitions(subjectId, entries);
+  }
+
+  /// Resolves version links without changing the open diary or its local draft.
+  Future<DailyRecall> prepareRecallForUpload({
+    required String subjectId,
+    required DailyRecall recall,
+  }) async {
+    final prepared = DailyRecall.fromJson(recall.toJson());
+    await ensureDefinitions(
+      subjectId: subjectId,
+      foods: prepared.meals.expand((meal) => meal.foods),
+    );
+    return prepared;
+  }
+
+  Future<void> _ensureDefinitions(
+    String subjectId,
+    Iterable<FoodEntry> foods,
+  ) async {
     final sourceById = <String, List<FoodEntry>>{};
     for (final food in foods) {
       (sourceById[food.foodId] ??= []).add(food);

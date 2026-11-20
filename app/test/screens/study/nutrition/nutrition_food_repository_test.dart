@@ -3,9 +3,13 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../util/mock_nutrition_draft_storage.dart';
 
 void main() {
   test(
@@ -309,6 +313,108 @@ void main() {
       expect(food.foodVersionId, 'version-1');
       expect(food.amount, 2);
       expect(food.nutrition.energyKcal, 200);
+    },
+  );
+
+  test(
+    'foreground upload links a new ingredient in an existing meal',
+    () async {
+      mockNutritionDraftStorage();
+      final now = DateTime.utc(2026, 7, 15, 12);
+      final subject = StudySubject('subject', 'study', 'user', [])
+        ..study = (Study('study', 'user')..schedule.numberOfCycles = 0)
+        ..startedAt = now;
+      final task = NutritionTask.withId();
+      final meal = _meal([_food(versionId: 'local-version')]);
+      final requests = <String>[];
+      final supabase = _client((request) async {
+        final operation = request.url.pathSegments.last;
+        requests.add(operation);
+        if (operation == 'nutrition_food_definition') {
+          final mealLookup = request.url.queryParameters['id']!.contains(
+            'meal-definition',
+          );
+          return _jsonResponse([
+            if (mealLookup)
+              {'id': 'meal-definition', 'current_version_id': 'meal-version'},
+          ], request);
+        }
+        if (operation == 'nutrition_food_version') {
+          return _jsonResponse([
+            {'id': 'meal-version', 'food_id': 'meal-definition'},
+          ], request);
+        }
+        final params = jsonDecode(request.body) as Map<String, dynamic>;
+        if (operation == 'apply_nutrition_food_mutation') {
+          expect(params['p_food_id'], 'food-definition');
+          return _jsonResponse(_mutationResponse(), request);
+        }
+        expect(operation, 'save_nutrition_recall');
+        final result = params['p_result'] as Map<String, dynamic>;
+        final saved = DailyRecall.fromJson(
+          result['result'] as Map<String, dynamic>,
+        );
+        expect(
+          saved
+              .meals
+              .single
+              .foods
+              .single
+              .componentSnapshots!
+              .single
+              .foodVersionId,
+          'version-1',
+        );
+        return _jsonResponse({
+          'subject_id': subject.id,
+          'intervention_id': Study.baselineID,
+          'task_id': task.id,
+          'completed_at': params['p_completed_at'],
+          'result_type': 'DailyRecall',
+          'result': result,
+        }, request);
+      });
+      setEnv(
+        'https://example.supabase.co',
+        'test-key',
+        supabaseClient: supabase,
+      );
+      final manager = NutritionRecallAutoSaveManager();
+      final model = DailyRecallEntryViewModel(
+        subject: subject,
+        task: task,
+        completionPeriod: task.schedule.completionPeriods.single,
+        autoSaveManager: manager,
+        clock: () => now,
+      );
+      addTearDown(model.dispose);
+      await model.initialized;
+      model.recall.entryCompletedAt = now;
+      model.addMeal(
+        MealLog.withId(
+          mealType: MealType.lunch,
+          timestamp: now,
+          timezone: 'UTC',
+          isSkipped: false,
+          foods: [meal],
+        ),
+      );
+
+      await model.flushPendingAutoSave(
+        persistToDatabase: true,
+        requireRemoteSuccess: true,
+      );
+
+      expect(requests, [
+        'nutrition_food_definition',
+        'apply_nutrition_food_mutation',
+        'nutrition_food_definition',
+        'nutrition_food_version',
+        'save_nutrition_recall',
+      ]);
+      expect(subject.progress, hasLength(1));
+      expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+      expect(meal.componentSnapshots!.single.foodVersionId, 'local-version');
     },
   );
 }

@@ -275,20 +275,28 @@ class NutritionRecallAutoSaveManager {
   bool _isUnchanged(PendingRecall pending, Object? stored) {
     final current = _pendingFromJson(stored, pending.storageKey);
     return current?.lastModifiedAt == pending.lastModifiedAt &&
-        current?.nutritionRevision == pending.nutritionRevision;
+        current?.nutritionRevision == pending.nutritionRevision &&
+        const DeepCollectionEquality().equals(
+          current?.recall.toJson(),
+          pending.recall.toJson(),
+        );
   }
 
-  Future<bool> _updateRecallIfUnchanged(
-    PendingRecall pending,
-    DailyRecall recall,
-  ) => _mutateForSubject(pending.subjectId, () async {
-    final drafts = await _readDrafts(pending.subjectId);
-    final stored = drafts[pending.storageKey];
-    if (!_isUnchanged(pending, stored)) return false;
-    (stored as Map<String, dynamic>)['recall'] = recall.toJson();
-    await _writeDrafts(pending.subjectId, drafts);
-    return true;
-  });
+  Future<bool> stageRecallUpload(PendingRecall pending, DailyRecall recall) =>
+      _mutateForSubject(pending.subjectId, () async {
+        final drafts = await _readDrafts(pending.subjectId);
+        final stored = drafts[pending.storageKey];
+        if (!_isUnchanged(pending, stored)) return false;
+        if (const DeepCollectionEquality().equals(
+          pending.recall.toJson(),
+          recall.toJson(),
+        )) {
+          return true;
+        }
+        (stored as Map<String, dynamic>)['recall'] = recall.toJson();
+        await _writeDrafts(pending.subjectId, drafts);
+        return true;
+      });
 
   Future<void> acknowledgeRecallSave({
     required SubjectProgress saved,
@@ -403,35 +411,16 @@ class NutritionRecallAutoSaveManager {
           if (_submitter != null) {
             await _submitter(pending, recall);
           } else {
-            final versionsBefore = {
-              for (final food in recall.meals.expand((meal) => meal.foods))
-                food.id: food.foodVersionId,
-            };
-            await NutritionFoodRepository().ensureDefinitions(
-              subjectId: subject.id,
-              foods: recall.meals.expand((meal) => meal.foods),
-            );
-            final linkageChanged = recall.meals
-                .expand((meal) => meal.foods)
-                .any((food) => versionsBefore[food.id] != food.foodVersionId);
-            if (linkageChanged) {
-              if (!await _updateRecallIfUnchanged(pending, recall)) continue;
-            } else {
-              final current = await loadPendingRecall(
-                subjectId: pending.subjectId,
-                taskId: pending.taskId,
-                periodId: pending.periodId,
-                studyDay: pending.studyDaySnapshot,
-              );
-              if (current?.lastModifiedAt != pending.lastModifiedAt ||
-                  current?.nutritionRevision != pending.nutritionRevision) {
-                continue;
-              }
+            final prepared = await NutritionFoodRepository(client: client)
+                .prepareRecallForUpload(subjectId: subject.id, recall: recall);
+            if (!await stageRecallUpload(pending, prepared)) {
+              needsRetry = true;
+              continue;
             }
             final saved = await subject.upsertNutritionResult(
               taskId: pending.taskId,
               periodId: pending.periodId,
-              recall: recall,
+              recall: prepared,
               completionDateOverride: isPreviousDay
                   ? recall.entryCompletedAt
                   : null,
@@ -449,7 +438,7 @@ class NutritionRecallAutoSaveManager {
             );
             await acknowledgeRecallSave(
               saved: saved,
-              uploaded: recall,
+              uploaded: prepared,
               previousRevision: pending.nutritionRevision,
             );
             continue;

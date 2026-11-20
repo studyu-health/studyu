@@ -52,7 +52,8 @@ AS $$
 $$;
 
 CREATE FUNCTION studyu_private.nutrition_assert_snapshot_owner(
-    p_subject_id uuid, p_food jsonb, p_mutating_food_id uuid DEFAULT null
+    p_subject_id uuid, p_food jsonb, p_mutating_food_id uuid DEFAULT null,
+    p_require_version boolean DEFAULT false
 ) RETURNS void LANGUAGE plpgsql SET search_path = ''
 AS $$
 DECLARE
@@ -83,6 +84,8 @@ BEGIN
       WHERE id = v_food_id AND subject_id IS DISTINCT FROM p_subject_id
     ) THEN
       RAISE EXCEPTION 'nutrition definition subject is not owned by caller' USING ERRCODE = '42501';
+    ELSIF p_require_version THEN
+      RAISE EXCEPTION 'nutrition food version does not exist' USING ERRCODE = '22023';
     END IF;
   END LOOP;
 END;
@@ -305,7 +308,7 @@ FOR EACH ROW EXECUTE FUNCTION studyu_private.guard_nutrition_food_version();
 REVOKE ALL ON FUNCTION studyu_private.nutrition_availability_is_valid(jsonb),
 studyu_private.nutrition_snapshot_foods(jsonb),
 studyu_private.nutrition_recall_foods(jsonb),
-studyu_private.nutrition_assert_snapshot_owner(uuid, jsonb, uuid),
+studyu_private.nutrition_assert_snapshot_owner(uuid, jsonb, uuid, boolean),
 studyu_private.guard_nutrition_food_version()
 FROM PUBLIC, anon, authenticated, service_role;
 

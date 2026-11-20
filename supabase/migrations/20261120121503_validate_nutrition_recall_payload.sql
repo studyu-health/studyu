@@ -123,7 +123,9 @@ BEGIN
     FROM public.study_subject AS subject WHERE id = p_subject_id;
 
     FOR v_food IN SELECT * FROM studyu_private.nutrition_recall_foods(p_result) LOOP
-        PERFORM studyu_private.nutrition_assert_snapshot_owner(p_subject_id, v_food);
+        PERFORM studyu_private.nutrition_assert_snapshot_owner(
+            p_subject_id, v_food, p_require_version => true
+        );
     END LOOP;
 
     IF p_expected_revision IS NULL THEN
