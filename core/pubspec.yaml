@@ -12,6 +12,7 @@ resolution: workspace
 
 dependencies:
   collection: ^1.19.1
+  crypto: ^3.0.8
   csv: ^8.0.0
   json_annotation: ^4.12.0
   logger: ^2.8.0

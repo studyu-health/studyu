@@ -39,7 +39,10 @@ extension StudyMonitoringX on Study {
   }) {
     // Generate the ordered list of intervention IDs and exclude baseline
     final interventionOrder = schedule
-        .generateInterventionIdsInOrder(participant.selectedInterventionIds)
+        .generateInterventionIdsInOrder(
+          participant.selectedInterventionIds,
+          participantId: participant.id,
+        )
         .where((id) => id != Study.baselineID)
         .toList();
 
@@ -104,9 +107,10 @@ extension StudyMonitoringX on Study {
       final missedTasksPerDay = <Set<String>>[];
       final completedTasksPerDay = <Set<String>>[];
 
-      final interventionOrder = schedule
-          .generateInterventionIdsInOrder(participant.selectedInterventionIds)
-          .toList();
+      final interventionOrder = schedule.generateInterventionIdsInOrder(
+        participant.selectedInterventionIds,
+        participantId: participant.id,
+      );
 
       for (int day = 0; day < currentDayOfStudy; day++) {
         final dayStart = start.add(Duration(days: day));
