@@ -1643,6 +1643,14 @@ void main() {
       );
       await tester.enterText(foodEditorInput('Food Name'), 'Reusable apple');
       await tester.enterText(foodEditorInput('Nutrition values are for'), '80');
+      expect(
+        tester
+            .widget<TextField>(foodEditorInput('Energy (kcal) *'))
+            .controller!
+            .text,
+        '52.0',
+      );
+      await tester.enterText(foodEditorInput('Energy (kcal) *'), '120');
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
@@ -1651,7 +1659,7 @@ void main() {
       expect(repository.submittedSnapshot!.id, 'food');
       expect(repository.submittedSnapshot!.foodId, 'food-definition');
       expect(repository.submittedSnapshot!.amount, 1);
-      expect(repository.submittedSnapshot!.nutrition.energyKcal, 52);
+      expect(repository.submittedSnapshot!.nutrition.energyKcal, 120);
       expect(repository.submittedSnapshot!.servingSizeGrams, 80);
       expect(
         find.text(
@@ -1670,7 +1678,7 @@ void main() {
       expect(meal.foods[0].foodVersionId, 'updated-food-version');
       expect(meal.foods[0].name, 'Reusable apple');
       expect(meal.foods[0].amount, 2);
-      expect(meal.foods[0].nutrition.energyKcal, 104);
+      expect(meal.foods[0].nutrition.energyKcal, 240);
       expect(meal.foods[0].servingSizeGrams, 80);
       expect(meal.foods[1].id, 'sibling-entry');
       expect(meal.foods[1].foodVersionId, 'food-version');

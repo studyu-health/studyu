@@ -292,27 +292,39 @@ void main() {
     );
   }
 
-  test('creates missing entry definitions through the mutation RPC', () async {
-    final requests = <http.BaseRequest>[];
-    final repository = NutritionFoodRepository(
-      client: _client((request) async {
-        requests.add(request);
-        if (request.method == 'GET') return _jsonResponse([], request);
-        final params = jsonDecode(request.body) as Map<String, dynamic>;
-        expect(params['p_food_id'], 'food-definition');
-        expect(params['p_expected_version_id'], isNull);
-        expect(params['p_library_visible'], isFalse);
-        expect(params['p_mutation_id'], isA<String>());
-        return _jsonResponse(_mutationResponse(), request);
-      }),
-    );
-    final food = _food(versionId: 'provisional-version');
+  test(
+    'creates one-serving definitions without changing logged amounts',
+    () async {
+      final requests = <http.BaseRequest>[];
+      final repository = NutritionFoodRepository(
+        client: _client((request) async {
+          requests.add(request);
+          if (request.method == 'GET') return _jsonResponse([], request);
+          final params = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(params['p_food_id'], 'food-definition');
+          expect(params['p_expected_version_id'], isNull);
+          expect(params['p_library_visible'], isFalse);
+          expect(params['p_mutation_id'], isA<String>());
+          final prototype = FoodEntry.fromJson(
+            params['p_snapshot'] as Map<String, dynamic>,
+          );
+          expect(prototype.amount, 1);
+          expect(prototype.nutrition.energyKcal, 100);
+          return _jsonResponse(_mutationResponse(food: prototype), request);
+        }),
+      );
+      final food = _food()
+        ..amount = 2
+        ..nutrition.energyKcal = 200;
 
-    await repository.ensureDefinitions(subjectId: 'subject', foods: [food]);
+      await repository.ensureDefinitions(subjectId: 'subject', foods: [food]);
 
-    expect(requests, hasLength(2));
-    expect(food.foodVersionId, 'version-1');
-  });
+      expect(requests, hasLength(2));
+      expect(food.foodVersionId, 'version-1');
+      expect(food.amount, 2);
+      expect(food.nutrition.energyKcal, 200);
+    },
+  );
 }
 
 http.Response _jsonResponse(Object? body, http.BaseRequest request) =>

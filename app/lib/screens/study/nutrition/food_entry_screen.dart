@@ -128,7 +128,10 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   bool get _showServings => widget.editLoggedAmount || widget.mealLabel != null;
 
   late final FoodEntry? _nutritionBasis = switch (widget.existingFood) {
-    final food? when _showServings && food.amount.isFinite && food.amount > 0 =>
+    final food?
+        when (_showServings || widget.editReusableDefinition) &&
+            food.amount.isFinite &&
+            food.amount > 0 =>
       rescaleFoodAmount(food, 1),
     final food => food,
   };
@@ -508,7 +511,9 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       }
     }
 
-    final amount = parseNutritionAmount(_amountController.text)!;
+    final amount = widget.editReusableDefinition
+        ? 1.0
+        : parseNutritionAmount(_amountController.text)!;
     final savedNutrition = _showServings
         ? scaleNutritionProfile(nutrition, amount)
         : nutrition;

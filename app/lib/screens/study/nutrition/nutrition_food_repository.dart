@@ -66,7 +66,7 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
   }) async {
     final persisted = food.entryType == FoodEntryType.meal
         ? normalizeCompositeNutritionFoodDefinition(food)
-        : FoodEntry.fromJson(food.toJson());
+        : normalizeNutritionFoodDefinition(food);
     await ensureDefinitions(
       subjectId: subjectId,
       foods: _validatedComponents(persisted),
@@ -104,7 +104,7 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
       for (final food in sourceById.values.map((entries) => entries.last))
         food.foodId: food.entryType == FoodEntryType.meal
             ? normalizeCompositeNutritionFoodDefinition(food)
-            : food,
+            : normalizeNutritionFoodDefinition(food),
     };
     final existing = await _supabase
         .from('nutrition_food_definition')

@@ -574,7 +574,9 @@ class const FoodLibraryItemCard({
   }
 
   Future<void> _edit(BuildContext context) async {
-    final prototype = studyu.FoodEntry.fromJson(template.prototype.toJson());
+    final prototype = _isMeal
+        ? studyu.FoodEntry.fromJson(template.prototype.toJson())
+        : normalizeNutritionFoodDefinition(template.prototype);
     final edited = await Navigator.push<studyu.FoodEntry>(
       context,
       _isMeal
