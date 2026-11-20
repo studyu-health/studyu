@@ -23,6 +23,7 @@ class NutritionFormData({
   final int? minimumMealsRequired,
   final List<String>? customMealTypes,
   final TaskScheduleRule? scheduleRule,
+  final List<CompletionPeriod> additionalCompletionPeriods = const [],
 }) extends IFormDataWithSchedule {
   static String get kDefaultTitle => tr.form_field_nutrition_default_title;
 
@@ -46,8 +47,15 @@ class NutritionFormData({
       minimumMealsRequired: nutritionTask.minimumMealsRequired,
       customMealTypes: nutritionTask.customMealTypes,
       scheduleRule: nutritionTask.scheduleRule,
+      additionalCompletionPeriods: nutritionTask.schedule.completionPeriods
+          .skip(1)
+          .toList(),
     );
   }
+
+  @override
+  Schedule toSchedule() =>
+      super.toSchedule()..completionPeriods.addAll(additionalCompletionPeriods);
 
   NutritionTask toNutritionTask() {
     final nutritionTask = NutritionTask();
@@ -84,6 +92,13 @@ class NutritionFormData({
           ? List.from(customMealTypes!)
           : null,
       scheduleRule: scheduleRule,
+      additionalCompletionPeriods: [
+        for (final period in additionalCompletionPeriods)
+          CompletionPeriod.noId(
+            unlockTime: period.unlockTime,
+            lockTime: period.lockTime,
+          ),
+      ],
     );
   }
 }

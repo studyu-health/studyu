@@ -154,6 +154,7 @@ class NutritionFormViewModel({
       hasReminder: hasReminderControl.value!, // required
       reminderTime: reminderTimeControl.value?.toStudyUTimeOfDay(),
       scheduleRule: formData?.scheduleRule,
+      additionalCompletionPeriods: formData?.additionalCompletionPeriods ?? [],
     );
     return data;
   }

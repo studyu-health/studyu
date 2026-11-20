@@ -47,6 +47,73 @@ void main() {
     expect(duplicateTask.scheduleRule?.toJson(), task.scheduleRule?.toJson());
   });
 
+  test(
+    'editing and duplicating preserve imported completion periods',
+    () async {
+      final task = NutritionTask.withId()..title = 'Nutrition';
+      final originalPeriods = [
+        CompletionPeriod(
+          id: 'morning',
+          unlockTime: StudyUTimeOfDay(hour: 6),
+          lockTime: StudyUTimeOfDay(hour: 11),
+        ),
+        CompletionPeriod(
+          id: 'afternoon',
+          unlockTime: StudyUTimeOfDay(hour: 12),
+          lockTime: StudyUTimeOfDay(hour: 16),
+        ),
+        CompletionPeriod(
+          id: 'evening',
+          unlockTime: StudyUTimeOfDay(hour: 18),
+          lockTime: StudyUTimeOfDay(hour: 23),
+        ),
+      ];
+      task.schedule.completionPeriods = originalPeriods;
+      final viewModel = NutritionFormViewModel(
+        study: Study('study', 'owner'),
+        formData: NutritionFormData.fromDomainModel(task),
+      );
+
+      viewModel.titleControl.value = 'Updated nutrition';
+      viewModel.restrictedTimeEndControl.value = const Time(
+        hour: 10,
+        minute: 30,
+      );
+      await viewModel.save();
+
+      final saved = viewModel.formData!
+          .toNutritionTask()
+          .schedule
+          .completionPeriods;
+      expect(
+        saved.map((period) => period.id),
+        originalPeriods.map((period) => period.id),
+      );
+      expect(saved.first.lockTime.toJson(), '10:30');
+      expect(
+        saved.skip(1).map((period) => period.toJson()),
+        originalPeriods.skip(1).map((period) => period.toJson()),
+      );
+
+      final duplicate = viewModel
+          .createDuplicate()
+          .buildFormData()
+          .toNutritionTask();
+      final duplicatePeriods = duplicate.schedule.completionPeriods;
+      final duplicateIds = duplicatePeriods.map((period) => period.id).toSet();
+      expect(duplicateIds, hasLength(saved.length));
+      expect(
+        saved.map((period) => period.id).toSet().intersection(duplicateIds),
+        isEmpty,
+      );
+      Iterable<(String, String)> windows(List<CompletionPeriod> periods) =>
+          periods.map(
+            (period) => (period.unlockTime.toJson(), period.lockTime.toJson()),
+          );
+      expect(windows(duplicatePeriods), windows(saved));
+    },
+  );
+
   test('new nutrition tasks have no schedule rule', () {
     final viewModel = NutritionFormViewModel(study: Study('study', 'owner'));
 
