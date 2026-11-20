@@ -291,3 +291,70 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
     );
   }
 }
+
+/// Keeps a food library for the lifetime of a non-persisted study preview.
+final class PreviewNutritionFoodRepository() extends NutritionFoodRepository {
+  final _templates = <String, SavedFoodTemplate>{};
+
+  @override
+  Future<List<SavedFoodTemplate>> loadTemplates(String subjectId) async =>
+      _templates.values
+          .where((template) => template.userId == subjectId)
+          .toList();
+
+  @override
+  Future<FoodEntry?> loadCurrentFoodDefinition({
+    required String subjectId,
+    required String foodId,
+  }) async {
+    final template = _templates[foodId];
+    return template?.userId == subjectId
+        ? FoodEntry.fromJson(template!.prototype.toJson())
+        : null;
+  }
+
+  @override
+  Future<SavedFoodTemplate> saveTemplate({
+    required String subjectId,
+    required String name,
+    required FoodEntry food,
+    List<String>? tags,
+    String? expectedVersionId,
+  }) async {
+    final existing = _templates[food.foodId];
+    if (expectedVersionId != null &&
+        existing?.prototype.foodVersionId != expectedVersionId) {
+      throw const PostgrestException(
+        code: '40001',
+        message: 'stale nutrition definition version',
+      );
+    }
+    final snapshot = food.entryType == FoodEntryType.meal
+        ? normalizeCompositeNutritionFoodDefinition(food)
+        : normalizeNutritionFoodDefinition(food);
+    snapshot
+      ..name = name
+      ..foodVersionId = const Uuid().v4();
+    final now = DateTime.now();
+    return _templates[food.foodId] = SavedFoodTemplate(
+      id: food.foodId,
+      userId: subjectId,
+      name: name,
+      tags: tags,
+      isPublic: false,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+      prototype: snapshot,
+    );
+  }
+
+  @override
+  Future<void> deleteTemplate({
+    required String subjectId,
+    required SavedFoodTemplate template,
+  }) async {
+    if (_templates[template.id]?.userId == subjectId) {
+      _templates.remove(template.id);
+    }
+  }
+}

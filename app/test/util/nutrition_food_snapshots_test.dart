@@ -221,12 +221,14 @@ void main() {
               versionId: 'meal-v1',
               name: 'Meal',
               amount: 2,
-              energy: 150,
+              energy: 300,
             )
             ..entryType = FoodEntryType.meal
             ..componentFoods = [
-              _composition('first-composition', 'meal-snapshot', first, 0),
-              _composition('second-composition', 'meal-snapshot', second, 1),
+              _composition('first-composition', 'meal-snapshot', first, 0)
+                ..amount = 1,
+              _composition('second-composition', 'meal-snapshot', second, 1)
+                ..amount = 2,
             ]
             ..componentSnapshots = [first, second];
 
@@ -281,7 +283,7 @@ void main() {
       expect(current.amount, 3);
       expect(current.nutrition.energyKcal, 450);
       expect(creatorResult.amount, 2);
-      expect(creatorResult.componentFoods!.first.amount, 2);
+      expect(creatorResult.componentFoods!.first.amount, 1);
     },
   );
 

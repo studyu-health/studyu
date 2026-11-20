@@ -74,6 +74,7 @@ class const MealEntryScreen({
   final DateTime? occurrenceDate,
   final NutritionRecallPersistenceTarget? historicalTarget,
   final NutritionFoodRepository? foodRepository,
+  final TemplateViewModel? templateViewModel,
   final bool Function()? canEditRecall,
   super.key,
 }) extends StatefulWidget {
@@ -86,6 +87,7 @@ class const MealEntryScreen({
     DateTime? occurrenceDate,
     NutritionRecallPersistenceTarget? historicalTarget,
     NutritionFoodRepository? foodRepository,
+    TemplateViewModel? templateViewModel,
     bool Function()? canEditRecall,
   }) => MaterialPageRoute(
     builder: (_) => MealEntryScreen(
@@ -97,6 +99,7 @@ class const MealEntryScreen({
       occurrenceDate: occurrenceDate,
       historicalTarget: historicalTarget,
       foodRepository: foodRepository,
+      templateViewModel: templateViewModel,
       canEditRecall: canEditRecall,
     ),
   );
@@ -129,6 +132,10 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
   bool _propagateToCurrentStudyDay = false;
 
   bool get _allowMeals => widget.task?.allowMeals ?? true;
+  NutritionFoodRepository get _foodRepository =>
+      widget.foodRepository ??
+      widget.templateViewModel?.repository ??
+      NutritionFoodRepository();
 
   late TextEditingController _skipReasonController;
 
@@ -186,10 +193,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       allowMeals: widget.task?.allowMeals ?? true,
       historicalMode: widget.historicalTarget != null,
       repository: widget.foodRepository,
-      templateViewModel: Provider.of<TemplateViewModel?>(
-        context,
-        listen: false,
-      ),
+      templateViewModel:
+          widget.templateViewModel ??
+          Provider.of<TemplateViewModel?>(context, listen: false),
     );
     if (!mounted || !_revalidateHistoricalEligibility()) return;
     if (result != null) {
@@ -314,6 +320,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           existingMeal: editableFood,
           editLoggedAmount: true,
           showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
+          templateViewModel: widget.templateViewModel,
         ),
       );
     } else {
@@ -341,10 +348,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         context,
         listen: false,
       ).activeSubject;
-      final inheritedViewModel = Provider.of<TemplateViewModel?>(
-        context,
-        listen: false,
-      );
+      final inheritedViewModel =
+          widget.templateViewModel ??
+          Provider.of<TemplateViewModel?>(context, listen: false);
       final viewModel =
           inheritedViewModel ??
           TemplateViewModel(
@@ -405,12 +411,10 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     if (subject == null) return null;
     final l10n = AppLocalizations.of(context)!;
     try {
-      final definition =
-          await (widget.foodRepository ?? NutritionFoodRepository())
-              .loadCurrentFoodDefinition(
-                subjectId: subject.id,
-                foodId: occurrence.foodId,
-              );
+      final definition = await _foodRepository.loadCurrentFoodDefinition(
+        subjectId: subject.id,
+        foodId: occurrence.foodId,
+      );
       if (definition == null ||
           definition.foodVersionId == occurrence.foodVersionId) {
         return occurrence;
@@ -471,7 +475,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     final currentStudyDay = _propagateToCurrentStudyDay
         ? nutritionStudyDayFor(subject, DateTime.now())
         : null;
-    final repository = widget.foodRepository ?? NutritionFoodRepository();
+    final repository = _foodRepository;
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isSaving = true);
     try {
@@ -691,9 +695,11 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       final meal = _buildMeal(normalizeSkipped: true);
       meal.foods = meal.foods.map(cloneFoodEntry).toList();
       try {
-        if (subject != null) {
-          await (widget.foodRepository ?? NutritionFoodRepository())
-              .ensureDefinitions(subjectId: subject.id, foods: meal.foods);
+        if (subject != null && appState.trackParticipantProgress) {
+          await _foodRepository.ensureDefinitions(
+            subjectId: subject.id,
+            foods: meal.foods,
+          );
         }
       } catch (error, stackTrace) {
         StudyULogger.warning(
@@ -972,6 +978,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         MealCreatorScreen.route(
           initialFoods: foods,
           initialName: _mealLabel,
+          templateViewModel: widget.templateViewModel,
           showExpansionNotice: _meal.foods.any(
             (food) => food.entryType == FoodEntryType.meal,
           ),

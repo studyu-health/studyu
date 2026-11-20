@@ -689,7 +689,11 @@ class _FoodSearchScreenContentState()
     final food = rescaleFoodAmount(item.baseFood, item.amount);
     final result = await Navigator.of(context).push(
       food.entryType == studyu.FoodEntryType.meal
-          ? MealCreatorScreen.route(existingMeal: food, editLoggedAmount: true)
+          ? MealCreatorScreen.route(
+              existingMeal: food,
+              editLoggedAmount: true,
+              templateViewModel: context.read<TemplateViewModel>(),
+            )
           : FoodEntryScreen.route(
               existingFood: food,
               showSearchAction: false,

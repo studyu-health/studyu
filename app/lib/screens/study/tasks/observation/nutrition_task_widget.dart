@@ -261,7 +261,11 @@ class _NutritionTaskWidgetState()
       if (!_isHistoricalMode) {
         _templateViewModel = TemplateViewModel(
           userId: appState.activeSubject?.id ?? 'anonymous',
-          repository: widget.foodRepository,
+          repository:
+              widget.foodRepository ??
+              (appState.trackParticipantProgress
+                  ? null
+                  : PreviewNutritionFoodRepository()),
         );
       }
     }
@@ -975,6 +979,7 @@ class _NutritionTaskWidgetState()
           historicalTarget: _isHistoricalMode ? model.persistenceTarget : null,
           canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,
+          templateViewModel: _templateViewModel,
         ),
       );
     });
@@ -997,6 +1002,7 @@ class _NutritionTaskWidgetState()
           historicalTarget: _isHistoricalMode ? model.persistenceTarget : null,
           canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,
+          templateViewModel: _templateViewModel,
         ),
       ),
     );

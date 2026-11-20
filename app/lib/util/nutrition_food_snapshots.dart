@@ -62,30 +62,7 @@ FoodEntry normalizeCompositeNutritionFoodDefinition(FoodEntry meal) {
       servings <= 0) {
     throw ArgumentError.value(servings, 'amount');
   }
-  final definition = FoodEntry.fromJson(meal.toJson());
-  final compositions = definition.componentFoods;
-  final snapshots = definition.componentSnapshots;
-  if (compositions == null ||
-      snapshots == null ||
-      compositions.length != snapshots.length) {
-    throw StateError('Saved meal requires complete food ingredients');
-  }
-  final reusableOccurrence = meal.templateId?.isNotEmpty == true;
-  for (var index = 0; index < compositions.length; index++) {
-    final composition = compositions[index];
-    final snapshot = snapshots[index];
-    if (composition.foodId != snapshot.foodId) {
-      throw StateError('Saved meal ingredients do not match their snapshots');
-    }
-    if (!reusableOccurrence) {
-      composition.amount /= servings;
-      snapshots[index] = _rescaleFoodAmount(
-        snapshot,
-        snapshot.amount / servings,
-      );
-    }
-  }
-  definition.amount = 1;
+  final definition = normalizeNutritionFoodDefinition(meal);
   final flattened = flattenNutritionFoodEntries([definition]);
   if (flattened.isEmpty) {
     throw StateError('Saved meals require at least one food ingredient');

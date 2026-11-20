@@ -583,6 +583,7 @@ class const FoodLibraryItemCard({
           ? MealCreatorScreen.route(
               existingMeal: prototype,
               showServings: false,
+              templateViewModel: context.read<TemplateViewModel>(),
             )
           : FoodEntryScreen.route(
               existingFood: prototype,

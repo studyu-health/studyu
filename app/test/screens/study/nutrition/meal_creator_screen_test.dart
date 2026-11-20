@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_core/core.dart';
@@ -50,6 +51,39 @@ void main() {
     expect(find.text(l10n.food_quantity_invalid_amount), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('new meal can join a recall without writing to the library', (
+    tester,
+  ) async {
+    final repository = _OfflineMealRepository();
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    FoodEntry? added;
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(
+        initialName: 'Soup',
+        initialFoods: [_food(), _food()..servingSizeGrams = 0],
+        templateViewModel: viewModel,
+        onSavedToSelection: (food, _) => added = food,
+      ),
+      (_) {},
+      viewModel,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(repository.writeAttempts, 0);
+    expect(added!.name, 'Soup');
+    expect(added!.servingSizeGrams, 0);
+    expect(added!.nutrition.energyKcal, 200);
+    expect(flattenNutritionFoodEntries([added!]), hasLength(2));
   });
 
   testWidgets('ingredient quantity keeps its unit and scales nutrition', (
@@ -464,6 +498,25 @@ Future<void> _pump(
     ),
   ),
 );
+
+final class _OfflineMealRepository() extends NutritionFoodRepository {
+  int writeAttempts = 0;
+
+  @override
+  Future<List<SavedFoodTemplate>> loadTemplates(String subjectId) async => [];
+
+  @override
+  Future<SavedFoodTemplate> saveTemplate({
+    required String subjectId,
+    required String name,
+    required FoodEntry food,
+    List<String>? tags,
+    String? expectedVersionId,
+  }) async {
+    writeAttempts++;
+    throw StateError('offline');
+  }
+}
 
 FoodEntry _food() => FoodEntry.withId(
   entryType: FoodEntryType.singleIngredient,

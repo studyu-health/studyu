@@ -483,7 +483,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     final meal = _buildMeal();
     if (meal != null) {
       setState(() => _isSaving = true);
-      if (widget.existingMeal == null) {
+      if (widget.existingMeal == null && widget.onSavedToSelection == null) {
         final appState = Provider.of<AppState>(context, listen: false);
         try {
           final viewModel =

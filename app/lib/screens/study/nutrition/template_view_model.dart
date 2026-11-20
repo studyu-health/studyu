@@ -33,6 +33,7 @@ class TemplateViewModel({
   }
 
   bool get isLoading => _isLoading;
+  NutritionFoodRepository get repository => _repository;
   String? get error => _error;
   String get searchQuery => _searchQuery;
 
