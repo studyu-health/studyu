@@ -52,7 +52,7 @@ abstract class SupabaseObjectFunctions<T extends SupabaseObject>()
   /// If [onlyUpdate] is set to true, the object has to exist in the database, otherwise the result will be empty.
   Future<T> save({bool onlyUpdate = false}) async {
     final tableQuery = env.client.from(tableName(T));
-    final json = SupabaseQuery._jsonForStorage<T>(this.toJson());
+    final json = this.toJson();
     PostgrestFilterBuilder query;
     if (onlyUpdate) {
       query = tableQuery.upsert(json);
@@ -109,10 +109,7 @@ class SupabaseQuery() {
   ) async {
     try {
       return SupabaseQuery.extractSupabaseList<T>(
-        await env.client
-            .from(tableName(T))
-            .upsert(batchJson.map(_jsonForStorage<T>).toList())
-            .select(),
+        await env.client.from(tableName(T)).upsert(batchJson).select(),
       );
     } catch (error, stacktrace) {
       catchSupabaseException(error, stacktrace);
@@ -131,7 +128,7 @@ class SupabaseQuery() {
     final notExtracted = <JsonWithError>[];
     for (final json in response) {
       try {
-        extracted.add(_fromServerJson<T>(json));
+        extracted.add(SupabaseObjectFunctions.fromJson<T>(json));
         // ignore: avoid_catching_errors
       } on ArgumentError catch (error) {
         // We are catching ArgumentError because unknown enums throw an ArgumentError
@@ -164,34 +161,7 @@ class SupabaseQuery() {
   static T extractSupabaseSingleRow<T extends SupabaseObject>(
     Map<String, dynamic> response,
   ) {
-    return _fromServerJson<T>(response);
-  }
-
-  static Map<String, dynamic> _jsonForStorage<T extends SupabaseObject>(
-    Map<String, dynamic> json,
-  ) {
-    if (T != SubjectProgress) return json;
-    final resultJson = json['result'] as Map<String, dynamic>;
-    if (resultJson['type'] != 'DailyRecall') return json;
-    final result = Result<DailyRecall>.fromJson(resultJson);
-    return {...json, 'result': result.toJsonForStorage()};
-  }
-
-  static T _fromServerJson<T extends SupabaseObject>(
-    Map<String, dynamic> json,
-  ) {
-    final object = SupabaseObjectFunctions.fromJson<T>(json);
-    final List<SubjectProgress> progress = switch (object) {
-      SubjectProgress() => [object],
-      StudySubject() => object.progress,
-      _ => <SubjectProgress>[],
-    };
-    // These extraction methods receive actual Supabase responses, not caches.
-    for (final entry in progress) {
-      final result = entry.result.result;
-      if (result is DailyRecall) result.setAvailabilityVerified(true);
-    }
-    return object;
+    return SupabaseObjectFunctions.fromJson<T>(response);
   }
 
   static void catchSupabaseException(Object error, StackTrace stacktrace) {

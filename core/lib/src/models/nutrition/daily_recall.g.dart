@@ -26,7 +26,6 @@ DailyRecall _$DailyRecallFromJson(Map<String, dynamic> json) => DailyRecall(
   lastAutoSavedAt: json['lastAutoSavedAt'] == null
       ? null
       : DateTime.parse(json['lastAutoSavedAt'] as String),
-  availabilityVerified: json['availabilityVerified'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$DailyRecallToJson(DailyRecall instance) =>
@@ -42,7 +41,6 @@ Map<String, dynamic> _$DailyRecallToJson(DailyRecall instance) =>
       'waterIntakeMl': ?instance.waterIntakeMl,
       'studyDaySnapshot': ?instance.studyDaySnapshot,
       'lastAutoSavedAt': ?instance.lastAutoSavedAt?.toIso8601String(),
-      'availabilityVerified': instance.availabilityVerified,
     };
 
 const _$RecallModeEnumMap = {

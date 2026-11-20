@@ -32,15 +32,10 @@ class NutritionProfile({
 
   Map<String, dynamic> toJson() {
     final json = _$NutritionProfileToJson(this);
-    // Empty metadata must not change legacy definition/version comparisons.
     if (unavailableNutrients.isEmpty) json.remove('unavailableNutrients');
     if (partialNutrients.isEmpty) json.remove('partialNutrients');
     return json;
   }
-
-  /// Write-only protocol fields belong outside the scaled nutrition map.
-  static const availabilityWriteIntentKey = 'nutritionAvailabilityWriteIntent';
-  static const availabilityWriteIntent = 'explicit-v1';
 
   static const nutrientKeys = {
     'energyKcal',

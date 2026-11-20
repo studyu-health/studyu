@@ -18,10 +18,6 @@ class FoodEntry {
   /// Immutable definition revision used for this logged snapshot.
   String foodVersionId;
 
-  /// Local serializer provenance. Absence in cached JSON is not verification.
-  @JsonKey(defaultValue: false)
-  bool availabilityVerified;
-
   FoodEntryType entryType;
   String name;
   String? brandName;
@@ -81,7 +77,6 @@ class FoodEntry {
     this.preparationDetails,
     this.componentFoods,
     this.componentSnapshots,
-    this.availabilityVerified = true,
   });
 
   new withId({
@@ -111,69 +106,14 @@ class FoodEntry {
     this.preparationDetails,
     this.componentFoods,
     this.componentSnapshots,
-    this.availabilityVerified = true,
   }) : id = const Uuid().v4(),
        foodId = foodId ?? const Uuid().v4(),
        foodVersionId = foodVersionId ?? const Uuid().v4(),
        createdAt = DateTime.now();
 
-  factory fromJson(Map<String, dynamic> json) {
-    final id = json['id'] as String;
-    final isLegacyRecipe = json['entryType'] == 'recipe';
-    final food = _$FoodEntryFromJson({
-      ...json,
-      if (!json.containsKey('foodId')) 'foodId': _legacyIdentity('food', id),
-      if (!json.containsKey('foodVersionId'))
-        'foodVersionId': _legacyIdentity('version', id),
-      if (!json.containsKey('parentEntryId'))
-        'parentEntryId': json['parentRecipeId'],
-      if (!json.containsKey('preparationDetails'))
-        'preparationDetails': json['recipeMetadata'],
-      if (isLegacyRecipe) ...{
-        // Legacy recipes contain totals but no ingredient snapshots.
-        'entryType': 'manualCustom',
-        'originalValues': {
-          ...?json['originalValues'] as Map<String, dynamic>?,
-          '_legacyRecipeIngredients': json['recipeIngredients'],
-        },
-      },
-    });
-    if (!food.availabilityVerified) food.setAvailabilityVerified(false);
-    return food;
-  }
+  factory fromJson(Map<String, dynamic> json) => _$FoodEntryFromJson(json);
 
-  static String _legacyIdentity(String kind, String entryId) => const Uuid().v5(
-    Namespace.url.value,
-    'studyu:nutrition:legacy:$kind:$entryId',
-  );
-
-  bool get canWriteAvailability =>
-      availabilityVerified &&
-      (componentSnapshots?.every((food) => food.canWriteAvailability) ?? true);
-
-  /// Use true only for newly constructed data or canonical server responses.
-  void setAvailabilityVerified(bool verified) {
-    availabilityVerified = verified;
-    for (final food in componentSnapshots ?? <FoodEntry>[]) {
-      food.setAvailabilityVerified(verified);
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final json = _$FoodEntryToJson(this);
-    if (!availabilityVerified) json.remove('availabilityVerified');
-    return json;
-  }
-
-  /// Local provenance must not change persisted definition identity.
-  Map<String, dynamic> toJsonForStorage() => toJson()
-    ..remove('availabilityVerified')
-    ..addAll({
-      if (componentSnapshots != null)
-        'componentSnapshots': [
-          for (final food in componentSnapshots!) food.toJsonForStorage(),
-        ],
-    });
+  Map<String, dynamic> toJson() => _$FoodEntryToJson(this);
 
   @override
   String toString() => toJson().toString();

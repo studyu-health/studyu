@@ -20,21 +20,10 @@ void main() {
             if (request.url.queryParameters.containsKey('id')) {
               return _jsonResponse([], request);
             }
-            final row = _definitionRow()
-              ..['snapshot'] = food.toJsonForStorage();
+            final row = _definitionRow()..['snapshot'] = food.toJson();
             return _jsonResponse([row], request);
           }
           final params = jsonDecode(request.body) as Map<String, dynamic>;
-          final snapshot = params['p_snapshot'] as Map<String, dynamic>;
-          expect(jsonEncode(snapshot), isNot(contains('availabilityVerified')));
-          expect(
-            snapshot[NutritionProfile.availabilityWriteIntentKey],
-            NutritionProfile.availabilityWriteIntent,
-          );
-          expect(
-            snapshot['nutrition'] as Map<String, dynamic>,
-            isNot(contains(NutritionProfile.availabilityWriteIntentKey)),
-          );
           final sent = FoodEntry.fromJson(
             params['p_snapshot'] as Map<String, dynamic>,
           );
@@ -47,7 +36,6 @@ void main() {
         }),
       );
       final loaded = (await repository.loadTemplates('subject')).single;
-      expect(loaded.prototype.canWriteAvailability, isTrue);
       expect(loaded.prototype.nutrition.unavailableNutrients, {
         'protein',
         'micros.iron',
@@ -59,7 +47,6 @@ void main() {
         food: food,
         expectedVersionId: 'version-1',
       );
-      expect(saved.prototype.canWriteAvailability, isTrue);
       expect(saved.prototype.nutrition.unavailableNutrients, {
         'protein',
         'micros.iron',
@@ -141,7 +128,7 @@ void main() {
         requests.add(request.url);
         final data = request.url.path.endsWith('/nutrition_food_definition')
             ? {'current_version_id': 'current', 'deleted_at': null}
-            : {'snapshot': food.toJsonForStorage()};
+            : {'snapshot': food.toJson()};
         return _jsonResponse(data, request);
       }),
     );
@@ -152,7 +139,6 @@ void main() {
     );
 
     expect(current!.foodVersionId, 'current');
-    expect(current.canWriteAvailability, isTrue);
     expect(requests.first.queryParameters['subject_id'], 'eq.subject');
     expect(requests.last.queryParameters['food_id'], 'eq.${food.foodId}');
     expect(requests.last.queryParameters['id'], 'eq.current');
@@ -347,7 +333,7 @@ Map<String, dynamic> _definitionRow() => {
   'deleted_at': null,
   'created_at': '2026-07-15T08:00:00.000Z',
   'updated_at': '2026-07-15T08:00:00.000Z',
-  'snapshot': _food().toJsonForStorage(),
+  'snapshot': _food().toJson(),
 };
 
 Map<String, dynamic> _mutationResponse({
@@ -360,7 +346,7 @@ Map<String, dynamic> _mutationResponse({
     'kind': kind,
     'currentVersionId': food?.foodVersionId ?? 'version-1',
     'deletedAt': null,
-    'snapshot': (food ?? _food()).toJsonForStorage(),
+    'snapshot': (food ?? _food()).toJson(),
     'createdAt': '2026-07-15T08:00:00.000Z',
     'updatedAt': '2026-07-15T08:00:00.000Z',
   },

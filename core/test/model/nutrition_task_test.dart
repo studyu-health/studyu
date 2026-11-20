@@ -36,9 +36,9 @@ void main() {
     });
   });
 
-  test('water tracking defaults to off for older nutrition tasks', () {
-    final json = NutritionTask.withId().toJson()..remove('trackWaterIntake');
-
+  test('new nutrition tasks serialize water tracking as disabled', () {
+    final json = NutritionTask.withId().toJson();
+    expect(json['trackWaterIntake'], isFalse);
     expect(NutritionTask.fromJson(json).trackWaterIntake, isFalse);
   });
 

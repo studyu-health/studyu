@@ -11,14 +11,14 @@ class NutritionTask extends Observation {
   String? instructions;
 
   /// Whether to prompt for meal context (location, company, distractions)
-  @JsonKey(defaultValue: true)
+  @JsonKey(required: true, disallowNullValue: true)
   bool collectMealContext = true;
 
   /// Whether participants may create meal entries
-  @JsonKey(defaultValue: true)
+  @JsonKey(required: true, disallowNullValue: true)
   bool allowMeals = true;
 
-  @JsonKey(defaultValue: false)
+  @JsonKey(required: true, disallowNullValue: true)
   bool trackWaterIntake = false;
 
   /// Minimum number of meals required per day (optional)

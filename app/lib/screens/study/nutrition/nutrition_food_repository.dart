@@ -54,7 +54,7 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
         .single();
     return FoodEntry.fromJson(
       Map<String, dynamic>.from(version['snapshot'] as Map),
-    )..setAvailabilityVerified(true);
+    );
   }
 
   Future<SavedFoodTemplate> saveTemplate({
@@ -237,7 +237,6 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
     bool? libraryVisible,
     String? mutationId,
   }) async {
-    final food = FoodEntry.fromJson(snapshot);
     final response = await _supabase.rpc(
       'apply_nutrition_food_mutation',
       params: {
@@ -245,12 +244,7 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
         'p_mutation_id': mutationId ?? const Uuid().v4(),
         'p_food_id': foodId,
         'p_expected_version_id': expectedVersionId,
-        'p_snapshot': {
-          ...food.toJsonForStorage(),
-          if (food.canWriteAvailability)
-            NutritionProfile.availabilityWriteIntentKey:
-                NutritionProfile.availabilityWriteIntent,
-        },
+        'p_snapshot': snapshot,
         'p_deleted': deleted,
         'p_historical_target': historicalTarget,
         'p_historical_entry_id': historicalEntryId,
@@ -258,11 +252,9 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
         'p_library_visible': libraryVisible,
       },
     );
-    final result = NutritionFoodMutationResult.fromJson(
+    return NutritionFoodMutationResult.fromJson(
       Map<String, dynamic>.from(response as Map),
     );
-    result.definition.snapshot.setAvailabilityVerified(true);
-    return result;
   }
 
   SavedFoodTemplate _templateFromDefinition(
@@ -286,7 +278,6 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
     final food = FoodEntry.fromJson(
       Map<String, dynamic>.from(row['snapshot'] as Map),
     );
-    food.setAvailabilityVerified(true);
     final tags = food.originalValues['_libraryTags'];
     return SavedFoodTemplate(
       id: row['id'] as String,

@@ -196,8 +196,8 @@ class DailyRecallEntryViewModel({
 
   bool _hasSamePayload(PendingRecall local, SubjectProgress canonical) =>
       const DeepCollectionEquality().equals(
-        local.recall.toJsonForStorage(),
-        (canonical.result.result as DailyRecall).toJsonForStorage(),
+        local.recall.toJson(),
+        (canonical.result.result as DailyRecall).toJson(),
       );
 
   Future<bool> discardConflictingDraft() async {
@@ -519,7 +519,6 @@ class DailyRecallEntryViewModel({
     waterIntakeMl: waterIntakeMl ?? recall.waterIntakeMl,
     studyDaySnapshot: _studyDaySnapshot ?? recall.studyDaySnapshot,
     lastAutoSavedAt: lastAutoSavedAt ?? recall.lastAutoSavedAt,
-    availabilityVerified: recall.availabilityVerified,
   );
 
   Future<void> clearAutoSave() async {

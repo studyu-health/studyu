@@ -1,3 +1,4 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:studyu_core/core.dart';
 import 'package:test/test.dart';
 
@@ -6,7 +7,6 @@ MealLog consumedMeal({
   DateTime? timestamp,
 }) => MealLog.withId(
   mealType: MealType.other,
-  isLabelExplicitlyUnset: true,
   timePrecision: precision,
   timestamp: timestamp,
   timezone: 'UTC',
@@ -52,14 +52,14 @@ void main() {
     expect(copied.foods.single.id, meal.foods.single.id);
   });
 
-  test('recall JSON copies preserve absent and legacy contexts separately', () {
+  test('recall JSON copies preserve absent and supplied contexts', () {
     final meal = consumedMeal();
-    final legacy = consumedMeal()..mealContext = MealContext.home;
+    final withContext = consumedMeal()..mealContext = MealContext.home;
     final recall = DailyRecall(
       id: 'recall',
       date: DateTime(2026, 7, 15),
       recallMode: RecallMode.realtimeRecord,
-      meals: [meal, legacy],
+      meals: [meal, withContext],
     );
     final restored = DailyRecall.fromJson(recall.toJson());
     expect(restored.meals.first.mealContext, isNull);
@@ -72,7 +72,7 @@ void main() {
     expect(MealLog.fromJson(json).mealContext, isNull);
   });
 
-  test('legacy Home context remains readable and serializable', () {
+  test('home context round-trips', () {
     final json = consumedMeal().toJson()..['mealContext'] = 'home';
     final restored = MealLog.fromJson(json);
     expect(restored.mealContext, MealContext.home);
@@ -121,7 +121,7 @@ void main() {
     expect(meal.isValidForSave(hasSelectedTime: true), isTrue);
   });
 
-  test('legacy skipped meals still require a nonblank reason', () {
+  test('skipped meals require a nonblank reason', () {
     final meal = consumedMeal()
       ..isSkipped = true
       ..foods.clear();
@@ -132,52 +132,20 @@ void main() {
     expect(meal.isValidForSave(hasSelectedTime: false), isTrue);
   });
 
-  test('legacy timestamp without precision loads as approximate', () {
-    final meal = MealLog.withId(
-      mealType: MealType.breakfast,
-      mealContext: MealContext.home,
-      timestamp: DateTime(2026, 7, 15, 8),
-      timezone: 'UTC',
-      isSkipped: false,
-      foods: [],
+  test('a serialized meal must include time precision', () {
+    final json = consumedMeal().toJson()..remove('timePrecision');
+
+    expect(
+      () => MealLog.fromJson(json),
+      throwsA(isA<MissingRequiredKeysException>()),
     );
-    final json = meal.toJson()..remove('timePrecision');
-
-    final restored = MealLog.fromJson(json);
-
-    expect(restored.timestamp, meal.timestamp);
-    expect(restored.timePrecision, MealOccurrenceTimePrecision.approximate);
   });
 
-  test('missing label provenance preserves legacy Other', () {
-    final meal = MealLog.withId(
-      mealType: MealType.other,
-      mealContext: MealContext.home,
-      timezone: 'UTC',
-      isSkipped: false,
-      foods: [],
-    );
-
-    final json = meal.toJson()..remove('isLabelExplicitlyUnset');
-
-    expect(MealLog.fromJson(json).isLabelExplicitlyUnset, isFalse);
+  test('an unlabeled meal round-trips without a custom label', () {
+    final restored = MealLog.fromJson(consumedMeal().toJson());
+    expect(restored.mealType, MealType.other);
+    expect(restored.customMealLabel, isNull);
   });
-
-  test(
-    'explicitly unlabeled meals round-trip separately from legacy Other',
-    () {
-      final meal = MealLog.withId(
-        mealType: MealType.other,
-        isLabelExplicitlyUnset: true,
-        mealContext: MealContext.home,
-        timezone: 'UTC',
-        isSkipped: false,
-        foods: [],
-      );
-
-      expect(MealLog.fromJson(meal.toJson()).isLabelExplicitlyUnset, isTrue);
-    },
-  );
 
   test('unknown time serializes without a fabricated timestamp', () {
     final meal = MealLog.withId(

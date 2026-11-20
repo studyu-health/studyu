@@ -437,7 +437,6 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
           )
         : FoodEntry(
             id: existing.id,
-            availabilityVerified: existing.availabilityVerified,
             foodId: existing.foodId,
             foodVersionId: existing.foodVersionId,
             entryType: FoodEntryType.meal,

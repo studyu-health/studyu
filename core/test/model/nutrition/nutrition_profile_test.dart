@@ -31,13 +31,13 @@ NutritionProfile roundTrip(NutritionProfile source) =>
     );
 
 void main() {
-  test('legacy numeric JSON stays stable and zero stays known', () {
+  test('known zero round-trips without availability metadata', () {
     for (final value in [0.0, 12.5]) {
-      final legacy = profile(value: value, micros: {'iron': 0}).toJson();
-      expect(legacy, isNot(contains('unavailableNutrients')));
-      expect(legacy, isNot(contains('partialNutrients')));
-      final hydrated = NutritionProfile.fromJson(legacy);
-      expect(hydrated.toJson(), legacy);
+      final json = profile(value: value, micros: {'iron': 0}).toJson();
+      expect(json, isNot(contains('unavailableNutrients')));
+      expect(json, isNot(contains('partialNutrients')));
+      final hydrated = NutritionProfile.fromJson(json);
+      expect(hydrated.toJson(), json);
       for (final key in NutritionProfile.nutrientKeys) {
         expect(hydrated.isKnown(key), isTrue, reason: key);
         expect(hydrated.valueFor(key), value, reason: key);

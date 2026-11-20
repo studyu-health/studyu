@@ -50,14 +50,12 @@ FoodEntry _$FoodEntryFromJson(Map<String, dynamic> json) => FoodEntry(
   componentSnapshots: (json['componentSnapshots'] as List<dynamic>?)
       ?.map((e) => FoodEntry.fromJson(e as Map<String, dynamic>))
       .toList(),
-  availabilityVerified: json['availabilityVerified'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$FoodEntryToJson(FoodEntry instance) => <String, dynamic>{
   'id': instance.id,
   'foodId': instance.foodId,
   'foodVersionId': instance.foodVersionId,
-  'availabilityVerified': instance.availabilityVerified,
   'entryType': instance.entryType.toJson(),
   'name': instance.name,
   'brandName': ?instance.brandName,

@@ -57,6 +57,7 @@ MealLog skippedMeal({String? reason}) => MealLog(
   mealContext: MealContext.home,
   locationDescription: 'Kitchen',
   timestamp: DateTime(2026, 7, 15, 8),
+  timePrecision: MealOccurrenceTimePrecision.exact,
   timezone: 'UTC',
   isSkipped: true,
   skipReason: reason,
@@ -72,6 +73,7 @@ MealLog emptyMeal() => MealLog(
   customMealLabel: 'Supper',
   mealContext: MealContext.home,
   timestamp: DateTime(2026, 7, 15, 20),
+  timePrecision: MealOccurrenceTimePrecision.exact,
   timezone: 'UTC',
   isSkipped: false,
   foods: [],
@@ -83,6 +85,7 @@ MealLog editableMeal({String? customMealLabel = 'Supper'}) => MealLog(
   customMealLabel: customMealLabel,
   mealContext: MealContext.home,
   timestamp: DateTime(2026, 7, 15, 20),
+  timePrecision: MealOccurrenceTimePrecision.exact,
   timezone: 'UTC',
   isSkipped: false,
   foods: [testFood()],
@@ -299,6 +302,7 @@ DailyRecall _recallWithFoods(List<FoodEntry> foods, {required int? studyDay}) =>
           id: 'meal-${foods.first.id}',
           mealType: MealType.breakfast,
           mealContext: MealContext.home,
+          timePrecision: MealOccurrenceTimePrecision.unknown,
           timezone: 'UTC',
           isSkipped: false,
           foods: foods,
@@ -942,7 +946,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.getSemantics(find.text('No label')),
+      tester.getSemantics(find.widgetWithText(ListTile, 'No label').last),
       isSemantics(label: 'No label', isSelected: true, hasTapAction: true),
     );
     expect(find.text('Breakfast'), findsOneWidget);
@@ -971,7 +975,6 @@ void main() {
     final meal = (result! as SavedMealEntryResult).meal;
     expect(meal.mealType, MealType.other);
     expect(meal.customMealLabel, isNull);
-    expect(meal.isLabelExplicitlyUnset, isTrue);
   });
 
   testWidgets('meal details apply atomically and dismissal discards edits', (
@@ -1057,6 +1060,7 @@ void main() {
         mealContext: MealContext.other,
         locationDescription: 'Park',
         timestamp: DateTime(2026, 7, 15, 20),
+        timePrecision: MealOccurrenceTimePrecision.exact,
         timezone: 'UTC',
         isSkipped: false,
         foods: [testFood()],

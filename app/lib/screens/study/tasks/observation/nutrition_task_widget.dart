@@ -934,12 +934,10 @@ class _NutritionTaskWidgetState()
         );
       case MealType.other:
         return _MealTimelineCategory(
-          key: meal.isLabelExplicitlyUnset ? 'meal' : 'other',
+          key: 'meal',
           icon: Icons.restaurant_outlined,
           color: Theme.of(context).colorScheme.primary,
-          label: meal.isLabelExplicitlyUnset
-              ? l10n.meal_neutral_label
-              : l10n.meal_type_other,
+          label: l10n.meal_neutral_label,
         );
     }
   }

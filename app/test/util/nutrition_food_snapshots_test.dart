@@ -168,6 +168,7 @@ void main() {
           id: 'meal',
           mealType: MealType.breakfast,
           mealContext: MealContext.home,
+          timePrecision: MealOccurrenceTimePrecision.unknown,
           timezone: 'UTC',
           isSkipped: false,
           foods: [selected, sibling],

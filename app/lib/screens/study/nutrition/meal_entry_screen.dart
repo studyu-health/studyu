@@ -116,7 +116,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
   CompanyContext? _companyContext;
   DistractionContext? _distractionContext;
   String? _customMealLabel;
-  late bool _isLabelExplicitlyUnset;
   String? _locationDescription;
   String? _skipReason;
   late final String _initialMealSnapshot;
@@ -146,7 +145,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       _companyContext = _meal.companyContext;
       _distractionContext = _meal.distractionContext;
       _customMealLabel = _meal.customMealLabel;
-      _isLabelExplicitlyUnset = _meal.isLabelExplicitlyUnset;
       _locationDescription = _meal.locationDescription;
       _skipReason = _meal.skipReason;
     } else {
@@ -154,7 +152,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       _timePrecision = MealOccurrenceTimePrecision.unknown;
       _hasSelectedTime = false;
       _mealType = widget.initialMealType ?? MealType.other;
-      _isLabelExplicitlyUnset = _mealType == MealType.other;
       _mealContext = null;
       _isSkipped = false;
       _meal = MealLog.withId(
@@ -162,7 +159,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         mealContext: _mealContext,
         timestamp: _timestamp,
         timePrecision: _timePrecision,
-        isLabelExplicitlyUnset: _isLabelExplicitlyUnset,
         timezone: DateTime.now().timeZoneName,
         isSkipped: _isSkipped,
         foods: [],
@@ -632,7 +628,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       customMealLabel: _customMealLabel?.trim().isEmpty == true
           ? null
           : _customMealLabel?.trim(),
-      isLabelExplicitlyUnset: _isLabelExplicitlyUnset,
       mealContext: _mealContext,
       locationDescription: clearDetails || _mealContext != MealContext.other
           ? null
@@ -662,7 +657,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     final customLabel = _customMealLabel?.trim();
     return customLabel?.isNotEmpty == true
         ? customLabel!
-        : _mealType == MealType.other && _isLabelExplicitlyUnset
+        : _mealType == MealType.other
         ? AppLocalizations.of(context)!.meal_neutral_label
         : _getMealTypeLabel(_mealType);
   }
@@ -816,8 +811,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     setState(() {
       _mealType = selection.type;
       _customMealLabel = selection.customLabel;
-      _isLabelExplicitlyUnset =
-          _mealType == MealType.other && (_customMealLabel?.isEmpty ?? true);
     });
   }
 

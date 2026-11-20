@@ -20,10 +20,6 @@ class DailyRecall {
   int? studyDaySnapshot;
   DateTime? lastAutoSavedAt;
 
-  /// Local serializer provenance, not availability inferred from numeric values.
-  @JsonKey(defaultValue: false)
-  bool availabilityVerified;
-
   new({
     required this.id,
     required this.date,
@@ -36,7 +32,6 @@ class DailyRecall {
     this.waterIntakeMl,
     this.studyDaySnapshot,
     this.lastAutoSavedAt,
-    this.availabilityVerified = true,
   });
 
   new withId({
@@ -50,44 +45,11 @@ class DailyRecall {
     this.waterIntakeMl,
     this.studyDaySnapshot,
     this.lastAutoSavedAt,
-    this.availabilityVerified = true,
   }) : id = const Uuid().v4();
 
-  factory fromJson(Map<String, dynamic> json) {
-    final recall = _$DailyRecallFromJson(json);
-    if (!recall.availabilityVerified) recall.setAvailabilityVerified(false);
-    return recall;
-  }
+  factory fromJson(Map<String, dynamic> json) => _$DailyRecallFromJson(json);
 
-  bool get canWriteAvailability =>
-      availabilityVerified &&
-      meals
-          .expand((meal) => meal.foods)
-          .every((food) => food.canWriteAvailability);
-
-  /// Use true only for newly constructed data or canonical server responses.
-  void setAvailabilityVerified(bool verified) {
-    availabilityVerified = verified;
-    for (final food in meals.expand((meal) => meal.foods)) {
-      food.setAvailabilityVerified(verified);
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final json = _$DailyRecallToJson(this);
-    if (!availabilityVerified) json.remove('availabilityVerified');
-    return json;
-  }
-
-  Map<String, dynamic> toJsonForStorage() => toJson()
-    ..remove('availabilityVerified')
-    ..['meals'] = [
-      for (final meal in meals)
-        meal.toJson()
-          ..['foods'] = [
-            for (final food in meal.foods) food.toJsonForStorage(),
-          ],
-    ];
+  Map<String, dynamic> toJson() => _$DailyRecallToJson(this);
 
   @override
   String toString() => toJson().toString();
