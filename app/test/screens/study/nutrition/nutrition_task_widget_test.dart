@@ -823,6 +823,48 @@ void main() {
     });
   }
 
+  testWidgets('repeated Exit requests leave the parent route open', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => AppState(),
+        child: MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Parent route')),
+                    body: _NutritionLauncher(
+                      task: nutritionTask(),
+                      onResult: (_) {},
+                    ),
+                  ),
+                ),
+              ),
+              child: const Text('Open diary'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open diary'));
+    await tester.pumpAndSettle();
+
+    final navigationBar = tester.widget<NavigationBar>(
+      find.byType(NavigationBar),
+    );
+    navigationBar.onDestinationSelected!(3);
+    navigationBar.onDestinationSelected!(3);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NutritionTaskWidget), findsNothing);
+    expect(find.text('Parent route'), findsOneWidget);
+  });
+
   testWidgets('Exit asks before leaving below the advisory meal target', (
     tester,
   ) async {

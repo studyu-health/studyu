@@ -79,6 +79,7 @@ class _NutritionTaskWidgetState()
   Timer? _studyDayTimer;
   int? _cupSizeMl;
   bool _isSavingCupSize = false;
+  bool _isExiting = false;
 
   bool get _trackWaterIntake => widget.task?.trackWaterIntake ?? true;
 
@@ -257,22 +258,25 @@ class _NutritionTaskWidgetState()
                 model.currentDayExpired ||
                 !model.isInTaskMode,
             onPopInvokedWithResult: (didPop, _) async {
-              if (didPop || widget.readOnly) return;
-              if (!model.meetsMinimumMeals) {
-                final shouldLeave = await showConfirmationDialog(
-                  context,
-                  title: l10n.min_meals_not_met_title,
-                  message: l10n.min_meals_not_met_message(
-                    widget.task!.minimumMealsRequired!,
-                  ),
-                  cancelLabel: l10n.cancel,
-                  confirmLabel: l10n.leave_anyway,
-                );
-                if (!shouldLeave || !context.mounted) return;
-              }
+              if (didPop || widget.readOnly || _isExiting) return;
+              _isExiting = true;
               try {
+                if (!model.meetsMinimumMeals) {
+                  final shouldLeave = await showConfirmationDialog(
+                    context,
+                    title: l10n.min_meals_not_met_title,
+                    message: l10n.min_meals_not_met_message(
+                      widget.task!.minimumMealsRequired!,
+                    ),
+                    cancelLabel: l10n.cancel,
+                    confirmLabel: l10n.leave_anyway,
+                  );
+                  if (!shouldLeave || !context.mounted) return;
+                }
                 await model.flushPendingAutoSave(persistToDatabase: true);
-                if (context.mounted && !model.hasDraftConflict) {
+                if (context.mounted &&
+                    ModalRoute.of(context)?.isCurrent == true &&
+                    !model.hasDraftConflict) {
                   Navigator.of(context).pop();
                 }
               } catch (error) {
@@ -281,6 +285,8 @@ class _NutritionTaskWidgetState()
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(l10n.could_not_save_results)),
                 );
+              } finally {
+                _isExiting = false;
               }
             },
             child: Scaffold(
