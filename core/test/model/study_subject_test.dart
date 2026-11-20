@@ -162,6 +162,24 @@ void main() {
     expect(subject.getResultsByDate(interventionId: Study.baselineID), isEmpty);
   });
 
+  test('counts scheduled nutrition periods in a custom phase sequence', () {
+    final study = Study('study', 'user')
+      ..schedule = (StudySchedule(sequenceCustom: 'ABAB')
+        ..sequence = PhaseSequence.customized
+        ..phaseDuration = 2
+        ..numberOfCycles = 2);
+    final task = NutritionTask.withId();
+    final subject = StudySubject.fromStudy(study, 'user', ['a', 'b'], null);
+
+    expect(subject.totalTaskCountFor(task), 18);
+
+    task.scheduleRule = TaskScheduleRule.forSpecificDays([0, 0, 2, 99]);
+    expect(subject.totalTaskCountFor(task), 2);
+
+    task.scheduleRule = TaskScheduleRule.forSpecificDays([99]);
+    expect(subject.totalTaskCountFor(task), 0);
+  });
+
   test(
     'keeps an unfinished UTC nutrition period after the local phase ends',
     () {

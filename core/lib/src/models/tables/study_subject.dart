@@ -347,6 +347,14 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   }
 
   int totalTaskCountFor(Task task) {
+    if (task is NutritionTask) {
+      final scheduledDays = task.scheduleRule
+          ?.resolveScheduledDays(study.schedule)
+          .toSet()
+          .length;
+      return (scheduledDays ?? study.schedule.length) *
+          task.schedule.completionPeriods.length;
+    }
     var daysCount = daysPerIntervention;
     if (task is Observation) {
       if (task.scheduleRule != null) {
