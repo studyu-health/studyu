@@ -45,11 +45,10 @@ void main() {
 
     await expectLater(
       subject.upsertNutritionResult(
-        taskId: 'new-task',
-        periodId: 'new-period',
-        recall: _recall('updated', 99),
+        taskId: target.taskId,
+        periodId: target.periodId,
+        recall: _recall('stored', target.studyDaySnapshot)..waterIntakeMl = 250,
         persistenceTarget: target,
-        interventionIdOverride: 'new-intervention',
       ),
       throwsA(isA<SocketException>()),
     );
@@ -62,6 +61,17 @@ void main() {
     expect(saved.completedAt, target.completedAt);
     expect(savedRecall.studyDaySnapshot, target.studyDaySnapshot);
     expect(savedRecall.id, 'stored');
+    expect(savedRecall.waterIntakeMl, isNull);
+
+    await expectLater(
+      subject.upsertNutritionResult(
+        taskId: target.taskId,
+        periodId: 'different-period',
+        recall: savedRecall,
+        persistenceTarget: target,
+      ),
+      throwsStateError,
+    );
   });
 }
 

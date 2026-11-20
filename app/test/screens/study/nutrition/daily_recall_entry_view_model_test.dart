@@ -1,19 +1,127 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../util/mock_nutrition_draft_storage.dart';
+
 void main() {
+  setUp(() => mockNutritionDraftStorage());
+  test('edits a previous-day draft with no server row', () async {
+    final yesterday = DateTime.utc(2026, 7, 15, 12);
+    var now = yesterday.add(const Duration(days: 1));
+    final subject = StudySubject('local-yesterday', 'study', 'user', [])
+      ..study = (Study('study', 'user')
+        ..schedule.includeBaseline = true
+        ..schedule.numberOfCycles = 0
+        ..schedule.phaseDuration = 7)
+      ..startedAt = yesterday;
+    final task = NutritionTask.withId()..trackWaterIntake = true;
+    final period = task.schedule.completionPeriods.single;
+    final draft = DailyRecall.withId(
+      date: yesterday,
+      recallMode: RecallMode.realtimeRecord,
+      studyDaySnapshot: 0,
+      meals: [],
+    );
+    final manager = NutritionRecallAutoSaveManager();
+    final model = DailyRecallEntryViewModel(
+      subject: subject,
+      task: task,
+      completionPeriod: period,
+      existingRecall: draft,
+      historicalMode: true,
+      autoSaveManager: manager,
+      clock: () => now,
+    );
+    addTearDown(model.dispose);
+    final request = NutritionRecallAutoSaveManager.uploadRequests.first;
+    await model.adjustWaterIntake(250);
+    await model.flushPendingAutoSave(persistToDatabase: true);
+
+    expect(await request, subject.id);
+    final pending = (await manager.scanPendingRecalls(subject.id)).single;
+    expect(pending.recall.id, draft.id);
+    expect(pending.recall.waterIntakeMl, 250);
+    expect(pending.recall.entryCompletedAt, isNull);
+    expect(subject.progress, isEmpty);
+
+    now = now.add(const Duration(days: 1));
+    await model.adjustWaterIntake(250);
+    expect(model.historicalEligibilityExpired, isTrue);
+    expect(model.recall.waterIntakeMl, 250);
+  });
+
+  test('failed historical correction requests background retry', () async {
+    final yesterday = DateTime.utc(2026, 7, 15, 12);
+    final subject = StudySubject('retry-subject', 'study', 'user', [])
+      ..study = (Study('study', 'user')
+        ..schedule.includeBaseline = true
+        ..schedule.numberOfCycles = 0)
+      ..startedAt = yesterday;
+    final task = NutritionTask.withId()..trackWaterIntake = true;
+    final period = task.schedule.completionPeriods.single;
+    final manager = NutritionRecallAutoSaveManager();
+    final model = DailyRecallEntryViewModel(
+      subject: subject,
+      task: task,
+      completionPeriod: period,
+      existingRecall: DailyRecall.withId(
+        date: yesterday,
+        recallMode: RecallMode.realtimeRecord,
+        entryCompletedAt: yesterday,
+        studyDaySnapshot: 0,
+        meals: [],
+      ),
+      persistenceTarget: NutritionRecallPersistenceTarget(
+        taskId: task.id,
+        periodId: period.id,
+        interventionId: Study.baselineID,
+        completedAt: yesterday,
+        studyDaySnapshot: 0,
+        nutritionRevision: 0,
+      ),
+      historicalMode: true,
+      autoSaveManager: manager,
+      clock: () => yesterday.add(const Duration(days: 1)),
+      remoteSaver:
+          ({
+            required taskId,
+            required periodId,
+            required recall,
+            persistenceTarget,
+            interventionIdOverride,
+          }) async {
+            throw const SocketException('offline');
+          },
+    );
+    addTearDown(model.dispose);
+    final request = NutritionRecallAutoSaveManager.uploadRequests.first;
+    await model.adjustWaterIntake(250);
+    await model.flushPendingAutoSave(persistToDatabase: true);
+
+    expect(await request, subject.id);
+    expect(
+      (await manager.scanPendingRecalls(subject.id))
+          .single
+          .recall
+          .waterIntakeMl,
+      250,
+    );
+  });
+
   test('rollover preserves the prior draft and rejects new entries', () async {
-    SharedPreferences.setMockInitialValues({});
     var now = DateTime.utc(2025, 7, 16, 23, 59);
     final subject = StudySubject('rollover-subject', 'study', 'user', [])
-      ..study = (Study('study', 'user')..schedule.numberOfCycles = 0)
+      ..study = (Study('study', 'user')
+        ..schedule.numberOfCycles = 0
+        ..schedule.phaseDuration = 7
+        ..schedule.includeBaseline = true)
       ..startedAt = DateTime.utc(2025, 7, 15);
     final task = NutritionTask.withId()..trackWaterIntake = true;
     final period = task.schedule.completionPeriods.single;
@@ -43,12 +151,14 @@ void main() {
   });
 
   test('reloading a newer canonical recall preserves the old draft', () async {
-    SharedPreferences.setMockInitialValues({});
     final now = DateTime.utc(2026, 7, 16, 12);
     final task = NutritionTask.withId()..trackWaterIntake = true;
     final period = task.schedule.completionPeriods.single;
     final subject = StudySubject('subject-reload', 'study', 'user', [])
-      ..study = (Study('study', 'user')..schedule.numberOfCycles = 0)
+      ..study = (Study('study', 'user')
+        ..schedule.numberOfCycles = 0
+        ..schedule.phaseDuration = 7
+        ..schedule.includeBaseline = true)
       ..startedAt = now;
     final completed = DailyRecall.withId(
       date: now,
@@ -109,12 +219,14 @@ void main() {
   test(
     'a server conflict refreshes saved progress without losing the local draft',
     () async {
-      SharedPreferences.setMockInitialValues({});
       final now = DateTime.utc(2026, 7, 16, 12);
       final task = NutritionTask.withId()..trackWaterIntake = true;
       final period = task.schedule.completionPeriods.single;
       final subject = StudySubject('subject-conflict', 'study', 'user', [])
-        ..study = (Study('study', 'user')..schedule.numberOfCycles = 0)
+        ..study = (Study('study', 'user')
+          ..schedule.numberOfCycles = 0
+          ..schedule.phaseDuration = 7
+          ..schedule.includeBaseline = true)
         ..startedAt = now;
       final completed = DailyRecall.withId(
         date: now,
@@ -195,7 +307,6 @@ void main() {
   );
 
   test('new recall uses the authoritative UTC study day', () {
-    SharedPreferences.setMockInitialValues({});
     final subject = _LocalDaySubject()
       ..startedAt = DateTime.now().subtract(const Duration(days: 1))
       ..study = (Study('study', 'owner')
@@ -215,7 +326,6 @@ void main() {
   });
 
   test('water adjustments preserve and autosave a water-only draft', () async {
-    SharedPreferences.setMockInitialValues({});
     final now = DateTime.now();
     final study = Study('study', 'owner')
       ..schedule.numberOfCycles = 0
@@ -232,7 +342,7 @@ void main() {
       recallMode: RecallMode.realtimeRecord,
       meals: [],
     );
-    expect(draft.toJsonForStorage(), isNot(contains('waterIntakeMl')));
+    expect(draft.toJson(), isNot(contains('waterIntakeMl')));
     expect(DailyRecall.fromJson(draft.toJson()).waterIntakeMl, isNull);
     await manager.saveRecall(
       recall: draft..waterIntakeMl = 500,
@@ -265,7 +375,7 @@ void main() {
 
     await viewModel.adjustWaterIntake(-1000);
     expect(viewModel.recall.waterIntakeMl, 0);
-    expect(viewModel.recall.toJsonForStorage()['waterIntakeMl'], 0);
+    expect(viewModel.recall.toJson()['waterIntakeMl'], 0);
     expect(viewModel.recall.entryCompletedAt, isNull);
     expect(subject.progress, isEmpty);
     await viewModel.flushPendingAutoSave();
@@ -278,8 +388,6 @@ void main() {
   test(
     'autosave keeps an incomplete recall local without completing progress',
     () async {
-      SharedPreferences.setMockInitialValues({});
-
       final study = Study('study', 'owner')
         ..schedule.numberOfCycles = 0
         ..schedule.includeBaseline = true;
@@ -332,6 +440,7 @@ void main() {
         await NutritionRecallAutoSaveManager().loadRecall(
           subjectId: subject.id,
           taskId: task.id,
+          periodId: period.id,
           studyDay: 0,
         ),
         isNotNull,
@@ -340,8 +449,6 @@ void main() {
   );
 
   test('exit flushes a scheduled draft without recording completion', () async {
-    SharedPreferences.setMockInitialValues({});
-
     final study = Study('study', 'owner')
       ..schedule.numberOfCycles = 0
       ..schedule.includeBaseline = true;
@@ -377,6 +484,7 @@ void main() {
       await NutritionRecallAutoSaveManager().loadRecall(
         subjectId: subject.id,
         taskId: task.id,
+        periodId: period.id,
         studyDay: 0,
       ),
       isNotNull,
@@ -389,6 +497,7 @@ void main() {
       await NutritionRecallAutoSaveManager().loadRecall(
         subjectId: subject.id,
         taskId: task.id,
+        periodId: period.id,
         studyDay: 0,
       ),
       isNull,
@@ -396,8 +505,6 @@ void main() {
   });
 
   test('exit waits for active and scheduled autosaves', () async {
-    SharedPreferences.setMockInitialValues({});
-
     final study = Study('study', 'owner')
       ..schedule.numberOfCycles = 0
       ..schedule.includeBaseline = true;
@@ -458,6 +565,7 @@ void main() {
       await autoSaveManager.loadRecall(
         subjectId: subject.id,
         taskId: task.id,
+        periodId: period.id,
         studyDay: 0,
       ),
       isNull,
@@ -496,8 +604,6 @@ void main() {
   test(
     'rollover retains a conflicting draft when its study day is complete',
     () async {
-      SharedPreferences.setMockInitialValues({});
-
       final study = Study('study', 'owner')
         ..schedule.numberOfCycles = 0
         ..schedule.includeBaseline = true;
@@ -508,6 +614,7 @@ void main() {
             ..study = study
             ..startedAt = yesterday;
       final task = NutritionTask.withId();
+      final period = task.schedule.completionPeriods.single;
       final manager = NutritionRecallAutoSaveManager();
       final draft = DailyRecall.withId(
         date: yesterday,
@@ -531,7 +638,7 @@ void main() {
           resultType: 'DailyRecall',
           result: Result<DailyRecall>.app(
             type: 'DailyRecall',
-            periodId: 'period',
+            periodId: period.id,
             result: completed,
           ),
         )..completedAt = completed.entryCompletedAt,
@@ -541,7 +648,7 @@ void main() {
         subjectId: subject.id,
         taskId: task.id,
         interventionId: 'baseline',
-        periodId: 'period',
+        periodId: period.id,
         studyDaySnapshot: 0,
       );
 
@@ -555,6 +662,7 @@ void main() {
         await manager.loadRecall(
           subjectId: subject.id,
           taskId: task.id,
+          periodId: period.id,
           studyDay: 0,
         ),
         isNotNull,

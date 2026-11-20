@@ -30,23 +30,9 @@ void main() {
         expect(request.method, 'POST');
         final body = jsonDecode(request.body) as Map<String, dynamic>;
         uploads.add(body);
-        final isNutrition = request.url.path.endsWith('/save_nutrition_recall');
-        if (!isNutrition) {
-          expect(request.url.path, endsWith('/subject_progress'));
-        }
-        final response = isNutrition
-            ? {
-                'subject_id': body['p_subject_id'],
-                'task_id': body['p_task_id'],
-                'intervention_id': body['p_intervention_id'],
-                'completed_at': body['p_completed_at'],
-                'result_type': 'DailyRecall',
-                'result': body['p_result'],
-                'nutrition_revision': 0,
-              }
-            : [body];
+        expect(request.url.path, endsWith('/subject_progress'));
         return http.Response(
-          jsonEncode(response),
+          jsonEncode([body]),
           201,
           headers: const {'content-type': 'application/json'},
           request: request,
@@ -107,26 +93,32 @@ void main() {
     },
   );
 
-  test('sync skips expired recalls and still uploads other progress', () async {
-    final start = DateTime.utc(2020);
-    final remote = _subject(start);
-    final local = _subject(start);
-    final remoteRecall = _nutrition(start);
-    final localRecall = _nutrition(start, title: 'Stale');
-    final queued = _progress(start.add(const Duration(hours: 2)));
-    final expired = _nutrition(start.add(const Duration(days: 1)), studyDay: 1);
-    remote.progress = [remoteRecall];
-    local.progress = [localRecall, expired, queued];
-    await Cache.storeSubject(local);
+  test(
+    'sync keeps remote nutrition and still uploads other progress',
+    () async {
+      final start = DateTime.utc(2020);
+      final remote = _subject(start);
+      final local = _subject(start);
+      final remoteRecall = _nutrition(start);
+      final localRecall = _nutrition(start, title: 'Stale');
+      final queued = _progress(start.add(const Duration(hours: 2)));
+      final expired = _nutrition(
+        start.add(const Duration(days: 1)),
+        studyDay: 1,
+      );
+      remote.progress = [remoteRecall];
+      local.progress = [localRecall, expired, queued];
+      await Cache.storeSubject(local);
 
-    final synchronized = await Cache.synchronize(remote);
+      final synchronized = await Cache.synchronize(remote);
 
-    expect(uploads, [queued.toJson()]);
-    expect(synchronized.progress, [remoteRecall, queued]);
-    expect((await Cache.loadSubject()).progress, contains(expired));
-  });
+      expect(uploads, [queued.toJson()]);
+      expect(synchronized.progress, [remoteRecall, queued]);
+      expect((await Cache.loadSubject()).progress, synchronized.progress);
+    },
+  );
 
-  test('sync replays a completed nutrition recall as create-only', () async {
+  test('sync does not replay cached completed nutrition as a draft', () async {
     final now = DateTime.now().toUtc();
     final start = DateTime.utc(now.year, now.month, now.day);
     final remote = _subject(start);
@@ -135,9 +127,8 @@ void main() {
 
     await Cache.synchronize(remote);
 
-    expect(uploads.single['p_expected_revision'], isNull);
-    expect(uploads.single['p_completed_at'], now.toIso8601String());
-    expect(remote.progress.single.result.result, isA<DailyRecall>());
+    expect(uploads, isEmpty);
+    expect(remote.progress, isEmpty);
   });
 }
 

@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
-import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_flutter_common/studyu_flutter_common.dart';
@@ -121,6 +119,7 @@ class Cache() {
             (progress) =>
                 progress.subjectId == remoteSubject.id &&
                 progress.completedAt != null &&
+                progress.resultType != 'DailyRecall' &&
                 !savedTimes.contains(progress.completedAt!.toUtc()),
           )
           .toList();
@@ -130,39 +129,12 @@ class Cache() {
       }
 
       if (!kIsWeb) await uploadBlobFiles();
-      final todayStudyDay = remoteSubject.startedAt == null
-          ? null
-          : nutritionStudyDayFor(remoteSubject, DateTime.now());
       var allSaved = true;
       for (final progress in pending) {
         final completedAt = progress.completedAt!.toUtc();
         if (savedTimes.contains(completedAt)) continue;
-        final recall = progress.result.result;
-        if (recall is DailyRecall &&
-            (recall.entryCompletedAt == null ||
-                todayStudyDay == null ||
-                !isWritableNutritionStudyDay(
-                  recall.studyDaySnapshot,
-                  todayStudyDay,
-                ))) {
-          allSaved = false;
-          continue;
-        }
         try {
-          if (recall is DailyRecall) {
-            await remoteSubject.upsertNutritionResult(
-              taskId: progress.taskId,
-              periodId:
-                  progress.result.periodId ??
-                  NutritionRecallAutoSaveManager.defaultPeriodId,
-              recall: recall,
-              completionDateOverride: completedAt,
-              interventionIdOverride: progress.interventionId,
-              createOnly: true,
-            );
-          } else {
-            remoteSubject.progress.add(await progress.save());
-          }
+          remoteSubject.progress.add(await progress.save());
           savedTimes.add(completedAt);
         } catch (error) {
           allSaved = false;

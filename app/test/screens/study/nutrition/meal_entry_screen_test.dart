@@ -448,6 +448,7 @@ Future<void> chooseMealTime(
 }
 
 void main() {
+  setUp(() => mockNutritionDraftStorage());
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test('meal clone does not share nested food metadata', () {
@@ -595,9 +596,7 @@ void main() {
     'unknown answer clears a selected timestamp and labels remain optional',
     (tester) async {
       MealLog? result;
-      final original = editableMeal(customMealLabel: null)
-        ..isLabelExplicitlyUnset = true
-        ..mealContext = null;
+      final original = editableMeal(customMealLabel: null)..mealContext = null;
       await openMealEntry(
         tester,
         original,
@@ -614,7 +613,6 @@ void main() {
       expect(result!.timestamp, isNull);
       expect(result!.timePrecision, MealOccurrenceTimePrecision.unknown);
       expect(result!.customMealLabel, isNull);
-      expect(result!.isLabelExplicitlyUnset, isTrue);
       expect(result!.mealContext, isNull);
       expect(original.timestamp, isNotNull);
     },

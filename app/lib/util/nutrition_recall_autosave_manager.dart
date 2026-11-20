@@ -2,62 +2,49 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:http/http.dart' show ClientException;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
+import 'package:studyu_flutter_common/studyu_flutter_common.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 typedef NutritionRecallSubmitter = Future<void> Function(
   PendingRecall pending,
   DailyRecall recall,
 );
-typedef NutritionRecallStringWriter = Future<bool> Function(
-  SharedPreferences preferences,
-  String key,
-  String value,
-);
-typedef NutritionRecallKeyRemover = Future<bool> Function(
-  SharedPreferences preferences,
-  String key,
-);
 
 class NutritionRecallAutoSaveManager({
-  final SharedPreferences? _preferences,
   final NutritionRecallSubmitter? _submitter,
-  NutritionRecallStringWriter? stringWriter,
-  NutritionRecallKeyRemover? keyRemover,
 }) {
-  static const String _keyPrefix = 'studyu_nutrition_autosave';
-  static const Duration debounceDuration = Duration(seconds: 2);
+  static const _keyPrefix = 'studyu_nutrition_drafts_v1';
+  static const debounceDuration = Duration(seconds: 2);
+  static final _mutationQueues = <String, Future<void>>{};
+  static final _uploadRequests = StreamController<String>.broadcast();
 
-  static const String standaloneTaskId = 'standalone';
-  static const String unknownInterventionId = 'unknown';
-  static const String defaultPeriodId = 'default';
+  static Stream<String> get uploadRequests => _uploadRequests.stream;
 
-  final NutritionRecallStringWriter _stringWriter =
-      stringWriter ?? _defaultStringWriter;
-  final NutritionRecallKeyRemover _keyRemover =
-      keyRemover ?? _defaultKeyRemover;
-  static final Map<String, Future<void>> _mutationQueues = {};
-  SharedPreferences? _prefs;
+  static void requestUpload(String subjectId) => _uploadRequests.add(subjectId);
+
+  static bool isRetryableError(Object error) =>
+      error is SocketException ||
+      error is ClientException ||
+      error is TimeoutException ||
+      error is PostgrestException &&
+          const {
+            '500',
+            '502',
+            '503',
+            '504',
+            '55P03',
+            'PGRST000',
+            'PGRST001',
+            'PGRST002',
+          }.contains(error.code);
+
   bool _isSubmitting = false;
-
-  static Future<bool> _defaultStringWriter(
-    SharedPreferences preferences,
-    String key,
-    String value,
-  ) => preferences.setString(key, value);
-
-  static Future<bool> _defaultKeyRemover(
-    SharedPreferences preferences,
-    String key,
-  ) => preferences.remove(key);
-
-  Future<SharedPreferences> _getPrefs() async {
-    return _prefs ??= _preferences ?? await SharedPreferences.getInstance();
-  }
 
   Future<void> saveRecall({
     required DailyRecall recall,
@@ -69,14 +56,8 @@ class NutritionRecallAutoSaveManager({
     DateTime? progressCompletedAt,
     int? nutritionRevision,
   }) {
-    final storageKey = _buildStorageKey(
-      subjectId,
-      taskId,
-      periodId,
-      studyDaySnapshot,
-    );
-    final now = DateTime.now().toUtc().toIso8601String();
-    final dataJson = jsonEncode({
+    final identity = _identity(taskId, periodId, studyDaySnapshot);
+    final draft = {
       'recall': recall.toJson(),
       'metadata': {
         'subjectId': subjectId,
@@ -84,29 +65,15 @@ class NutritionRecallAutoSaveManager({
         'interventionId': interventionId,
         'periodId': periodId,
         'studyDaySnapshot': studyDaySnapshot,
-        'progressCompletedAt': progressCompletedAt?.toIso8601String(),
+        'progressCompletedAt': progressCompletedAt?.toUtc().toIso8601String(),
         'nutritionRevision': ?nutritionRevision,
-        'createdAt': now,
-        'lastModifiedAt': now,
+        'lastModifiedAt': DateTime.now().toUtc().toIso8601String(),
       },
-    });
-
+    };
     return _mutateForSubject(subjectId, () async {
-      final prefs = await _getPrefs();
-      await _writeString(prefs, storageKey, dataJson);
-      await _updateIndex(prefs, subjectId, taskId, periodId, studyDaySnapshot);
-      await _removeMatchingLegacyCache(
-        prefs,
-        subjectId,
-        taskId,
-        periodId,
-        studyDaySnapshot,
-      );
-
-      StudyULogger.debug(
-        '[AutoSave] Saved recall | subject=$subjectId task=$taskId '
-        'period=$periodId studyDay=$studyDaySnapshot meals=${recall.meals.length}',
-      );
+      final drafts = await _readDrafts(subjectId);
+      drafts[identity] = draft;
+      await _writeDrafts(subjectId, drafts);
     });
   }
 
@@ -130,47 +97,31 @@ class NutritionRecallAutoSaveManager({
     return operation;
   }
 
-  Future<void> _writeString(
-    SharedPreferences preferences,
-    String key,
-    String value,
-  ) async {
-    if (!await _stringWriter(preferences, key, value)) {
-      throw StateError('Failed to save nutrition recall cache.');
-    }
+  String _subjectKey(String subjectId) => '${_keyPrefix}_$subjectId';
+
+  Future<Map<String, dynamic>> _readDrafts(String subjectId) async {
+    final stored = await SecureStorage.read(_subjectKey(subjectId));
+    return stored == null
+        ? <String, dynamic>{}
+        : jsonDecode(stored) as Map<String, dynamic>;
   }
 
-  Future<void> _removeKey(SharedPreferences preferences, String key) async {
-    if (!await _keyRemover(preferences, key)) {
-      throw StateError('Failed to remove nutrition recall cache.');
-    }
-  }
+  Future<void> _writeDrafts(String subjectId, Map<String, dynamic> drafts) =>
+      drafts.isEmpty
+      ? SecureStorage.delete(_subjectKey(subjectId))
+      : SecureStorage.write(_subjectKey(subjectId), jsonEncode(drafts));
 
-  /// Reads a recall for an exact period. Without [periodId], it returns the
-  /// only matching task/day cache for backward-compatible standalone callers.
   Future<DailyRecall?> loadRecall({
     required String subjectId,
     required String taskId,
     required int studyDay,
-    String? periodId,
-  }) async {
-    if (periodId != null) {
-      final pending = await loadPendingRecall(
-        subjectId: subjectId,
-        taskId: taskId,
-        periodId: periodId,
-        studyDay: studyDay,
-      );
-      return pending?.recall;
-    }
-    final matches = (await scanPendingRecalls(subjectId))
-        .where(
-          (pending) =>
-              pending.taskId == taskId && pending.studyDaySnapshot == studyDay,
-        )
-        .toList();
-    return matches.length == 1 ? matches.single.recall : null;
-  }
+    required String periodId,
+  }) async => (await loadPendingRecall(
+    subjectId: subjectId,
+    taskId: taskId,
+    periodId: periodId,
+    studyDay: studyDay,
+  ))?.recall;
 
   Future<PendingRecall?> loadPendingRecall({
     required String subjectId,
@@ -178,80 +129,41 @@ class NutritionRecallAutoSaveManager({
     required String periodId,
     required int studyDay,
   }) async {
-    final prefs = await _getPrefs();
-    final storageKey = _buildStorageKey(subjectId, taskId, periodId, studyDay);
-    final stored = prefs.getString(storageKey);
-    final current = stored == null
-        ? null
-        : _pendingFromJson(stored, storageKey: storageKey);
-    if (current != null) return current;
-
-    final legacyKey = _buildLegacyStorageKey(subjectId, taskId, studyDay);
-    final legacy = prefs.getString(legacyKey);
-    final legacyPending = legacy == null
-        ? null
-        : _pendingFromJson(legacy, storageKey: legacyKey);
-    return legacyPending?.periodId == periodId ? legacyPending : null;
+    final identity = _identity(taskId, periodId, studyDay);
+    final drafts = await _readDrafts(subjectId);
+    return _pendingFromJson(drafts[identity], identity);
   }
 
-  Future<List<PendingRecall>> scanPendingRecalls(String subjectId) async {
-    final prefs = await _getPrefs();
-    final draftPrefix = '${_keyPrefix}_${subjectId}_';
-    final pendingByIdentity = <String, PendingRecall>{};
+  Future<List<PendingRecall>> scanPendingRecalls(String subjectId) async =>
+      _pendingFrom(await _readDrafts(subjectId));
 
-    // The payload can survive a failed index write or an app restart.
-    for (final key in prefs.getKeys().where(
-      (key) => key.startsWith(draftPrefix),
-    )) {
-      final dataJson = prefs.get(key);
-      if (dataJson is! String) continue;
-      final pending = _pendingFromJson(dataJson, storageKey: key);
-      if (pending == null || pending.subjectId != subjectId) continue;
-      final identity = _identity(
-        pending.taskId,
-        pending.periodId,
-        pending.studyDaySnapshot,
-      );
-      final existing = pendingByIdentity[identity];
-      if (existing == null ||
-          pending.lastModifiedAtDate.isAfter(existing.lastModifiedAtDate)) {
-        pendingByIdentity[identity] = pending;
-      }
-    }
+  List<PendingRecall> _pendingFrom(Map<String, dynamic> drafts) => [
+    for (final entry in drafts.entries)
+      ?_pendingFromJson(entry.value, entry.key),
+  ];
 
-    return pendingByIdentity.values.toList();
-  }
-
-  PendingRecall? _pendingFromJson(
-    String dataJson, {
-    required String storageKey,
-  }) {
+  PendingRecall? _pendingFromJson(Object? stored, String storageKey) {
+    if (stored == null) return null;
     try {
-      final data = Map<String, dynamic>.from(
-        jsonDecode(dataJson) as Map<String, dynamic>,
-      );
-      final metadata = Map<String, dynamic>.from(
-        data['metadata'] as Map<String, dynamic>,
-      );
-      final progressCompletedAt = metadata['progressCompletedAt'] as String?;
+      final data = stored as Map<String, dynamic>;
+      final metadata = data['metadata'] as Map<String, dynamic>;
+      final completedAt = metadata['progressCompletedAt'] as String?;
       return PendingRecall(
-        recall: DailyRecall.fromJson(
-          Map<String, dynamic>.from(data['recall'] as Map<String, dynamic>),
-        ),
+        recall: DailyRecall.fromJson(data['recall'] as Map<String, dynamic>),
         subjectId: metadata['subjectId'] as String,
         taskId: metadata['taskId'] as String,
         interventionId: metadata['interventionId'] as String,
-        periodId: metadata['periodId'] as String? ?? defaultPeriodId,
-        studyDaySnapshot: (metadata['studyDaySnapshot'] as num).toInt(),
+        periodId: metadata['periodId'] as String,
+        studyDaySnapshot: metadata['studyDaySnapshot'] as int,
         lastModifiedAt: metadata['lastModifiedAt'] as String,
-        progressCompletedAt: progressCompletedAt == null
+        progressCompletedAt: completedAt == null
             ? null
-            : DateTime.tryParse(progressCompletedAt),
-        nutritionRevision: (metadata['nutritionRevision'] as num?)?.toInt(),
+            : DateTime.parse(completedAt),
+        nutritionRevision: metadata['nutritionRevision'] as int?,
         storageKey: storageKey,
       );
     } catch (error) {
-      StudyULogger.error('Failed to parse pending recall: $error');
+      StudyULogger.warning('Could not read a stored nutrition draft.');
       return null;
     }
   }
@@ -265,11 +177,11 @@ class NutritionRecallAutoSaveManager({
     String? entryId,
     List<SubjectProgress> canonicalProgress = const [],
   }) => _mutateForSubject(subjectId, () async {
-    final prefs = await _getPrefs();
-    final pending = await scanPendingRecalls(subjectId);
-    for (final entry in pending.where(
-      (pending) => pending.studyDaySnapshot == studyDaySnapshot,
-    )) {
+    final drafts = await _readDrafts(subjectId);
+    var changed = false;
+    for (final entry in _pendingFrom(
+      drafts,
+    ).where((pending) => pending.studyDaySnapshot == studyDaySnapshot)) {
       final updatedRecall = replaceNutritionFoodSnapshots(
         entry.recall,
         definition,
@@ -295,102 +207,59 @@ class NutritionRecallAutoSaveManager({
               jsonEncode(entry.recall.toJson())) {
         continue;
       }
-      final stored = prefs.getString(entry.storageKey);
-      if (stored == null) continue;
-      final data = jsonDecode(stored) as Map<String, dynamic>;
+      final data = drafts[entry.storageKey] as Map<String, dynamic>;
       final metadata = data['metadata'] as Map<String, dynamic>;
       metadata['lastModifiedAt'] = DateTime.now().toUtc().toIso8601String();
       if (revision != null) metadata['nutritionRevision'] = revision;
-      data
-        ..['recall'] = updatedRecall.toJson()
-        ..['metadata'] = metadata;
-      await _writeString(prefs, entry.storageKey, jsonEncode(data));
+      data['recall'] = updatedRecall.toJson();
+      changed = true;
     }
+    if (changed) await _writeDrafts(subjectId, drafts);
   });
 
   Future<void> deleteRecall({
     required String subjectId,
     required String taskId,
     required int studyDay,
-    String? periodId,
+    required String periodId,
   }) => _mutateForSubject(subjectId, () async {
-    final prefs = await _getPrefs();
-    final pending = await scanPendingRecalls(subjectId);
-    final matches = pending.where((entry) {
-      return entry.taskId == taskId &&
-          entry.studyDaySnapshot == studyDay &&
-          (periodId == null || entry.periodId == periodId);
-    });
-    for (final entry in matches) {
-      await _removeKey(prefs, entry.storageKey);
-      await _removeFromIndex(
-        prefs,
-        subjectId,
-        entry.taskId,
-        entry.periodId,
-        entry.studyDaySnapshot,
-      );
+    final drafts = await _readDrafts(subjectId);
+    if (drafts.remove(_identity(taskId, periodId, studyDay)) != null) {
+      await _writeDrafts(subjectId, drafts);
     }
   });
 
-  Future<void> deleteSubjectDrafts(String subjectId) =>
-      _mutateForSubject(subjectId, () async {
-        final prefs = await _getPrefs();
-        final draftPrefix = '${_keyPrefix}_${subjectId}_';
-        for (final key in prefs.getKeys().where(
-          (key) => key.startsWith(draftPrefix),
-        )) {
-          await _removeKey(prefs, key);
-        }
-        for (final key in [
-          '${_keyPrefix}_index_$subjectId',
-          '${_keyPrefix}_last_study_day_$subjectId',
-        ]) {
-          if (prefs.containsKey(key)) await _removeKey(prefs, key);
-        }
-      });
-
-  Future<bool> _deleteRecallIfUnchanged(PendingRecall pending) {
-    return _mutateForSubject(pending.subjectId, () async {
-      final prefs = await _getPrefs();
-      final dataJson = prefs.getString(pending.storageKey);
-      if (dataJson == null) return true;
-      final current = _pendingFromJson(
-        dataJson,
-        storageKey: pending.storageKey,
-      );
-      if (current?.lastModifiedAt != pending.lastModifiedAt ||
-          current?.nutritionRevision != pending.nutritionRevision) {
-        return false;
-      }
-
-      await _removeKey(prefs, pending.storageKey);
-      await _removeFromIndex(
-        prefs,
-        pending.subjectId,
-        pending.taskId,
-        pending.periodId,
-        pending.studyDaySnapshot,
-      );
-      return true;
-    });
-  }
+  Future<void> deleteSubjectDrafts(String subjectId) => _mutateForSubject(
+    subjectId,
+    () => SecureStorage.delete(_subjectKey(subjectId)),
+  );
 
   Future<bool> deletePendingRecall(PendingRecall pending) =>
-      _deleteRecallIfUnchanged(pending);
+      _mutateForSubject(pending.subjectId, () async {
+        final drafts = await _readDrafts(pending.subjectId);
+        final stored = drafts[pending.storageKey];
+        if (stored == null) return true;
+        if (!_isUnchanged(pending, stored)) return false;
+        drafts.remove(pending.storageKey);
+        await _writeDrafts(pending.subjectId, drafts);
+        return true;
+      });
+
+  bool _isUnchanged(PendingRecall pending, Object? stored) {
+    final current = _pendingFromJson(stored, pending.storageKey);
+    return current?.lastModifiedAt == pending.lastModifiedAt &&
+        current?.nutritionRevision == pending.nutritionRevision;
+  }
 
   Future<bool> _updateRecallIfUnchanged(
     PendingRecall pending,
     DailyRecall recall,
   ) => _mutateForSubject(pending.subjectId, () async {
-    final prefs = await _getPrefs();
-    final stored = prefs.getString(pending.storageKey);
-    if (stored == null) return false;
-    final data = jsonDecode(stored) as Map<String, dynamic>;
-    final metadata = data['metadata'] as Map<String, dynamic>;
-    if (metadata['lastModifiedAt'] != pending.lastModifiedAt) return false;
-    data['recall'] = recall.toJson();
-    await _writeString(prefs, pending.storageKey, jsonEncode(data));
+    final drafts = await _readDrafts(pending.subjectId);
+    final stored = drafts[pending.storageKey];
+    if (!_isUnchanged(pending, stored)) return false;
+    (stored as Map<String, dynamic>)['recall'] = recall.toJson();
+    await _writeDrafts(pending.subjectId, drafts);
     return true;
   });
 
@@ -399,24 +268,32 @@ class NutritionRecallAutoSaveManager({
     required DailyRecall uploaded,
     required int? previousRevision,
   }) => _mutateForSubject(saved.subjectId, () async {
-    final local = await loadPendingRecall(
-      subjectId: saved.subjectId,
-      taskId: saved.taskId,
-      periodId: saved.result.periodId!,
-      studyDay: uploaded.studyDaySnapshot!,
+    final identity = _identity(
+      saved.taskId,
+      saved.result.periodId!,
+      uploaded.studyDaySnapshot!,
     );
+    final drafts = await _readDrafts(saved.subjectId);
+    final data = drafts[identity];
+    final local = _pendingFromJson(data, identity);
     if (local == null ||
         local.recall.id != uploaded.id ||
         local.nutritionRevision != previousRevision) {
       return;
     }
-    final prefs = await _getPrefs();
-    final stored =
-        jsonDecode(prefs.getString(local.storageKey)!) as Map<String, dynamic>;
-    final metadata = stored['metadata'] as Map<String, dynamic>;
-    metadata['progressCompletedAt'] = saved.completedAt!.toIso8601String();
-    metadata['nutritionRevision'] = saved.nutritionRevision;
-    await _writeString(prefs, local.storageKey, jsonEncode(stored));
+    if (local.matchesUploadedRecall(uploaded)) {
+      drafts.remove(identity);
+    } else {
+      final stored = data as Map<String, dynamic>;
+      final metadata = stored['metadata'] as Map<String, dynamic>;
+      metadata['progressCompletedAt'] = saved.completedAt!
+          .toUtc()
+          .toIso8601String();
+      metadata['nutritionRevision'] = saved.nutritionRevision;
+      local.recall.entryCompletedAt ??= uploaded.entryCompletedAt;
+      stored['recall'] = local.recall.toJson();
+    }
+    await _writeDrafts(saved.subjectId, drafts);
   });
 
   /// Returns true when a transport failure needs a retry.
@@ -439,7 +316,6 @@ class NutritionRecallAutoSaveManager({
       var needsRetry = false;
       for (final pending in pendingRecalls) {
         if (pending.subjectId != subject.id ||
-            pending.taskId == standaloneTaskId ||
             !isWritableNutritionStudyDay(
               pending.studyDaySnapshot,
               todayStudyDay,
@@ -448,14 +324,28 @@ class NutritionRecallAutoSaveManager({
         }
 
         final isPreviousDay = pending.studyDaySnapshot < todayStudyDay;
-        final target = pending.progressCompletedAt == null
-            ? null
-            : _findPersistenceTarget(subject, pending);
-        if (pending.progressCompletedAt != null && target == null) continue;
-
-        if (target != null && !pending.canReplace(target)) {
+        final canonical = _findCompletedRecall(subject, pending);
+        final canonicalRecall = canonical?.result.result as DailyRecall?;
+        if (canonicalRecall != null &&
+            pending.matchesUploadedRecall(canonicalRecall)) {
+          try {
+            await deletePendingRecall(pending);
+          } catch (error) {
+            needsRetry = true;
+            StudyULogger.warning(
+              'Could not clear a synced nutrition draft: $error',
+            );
+          }
           continue;
         }
+
+        final target =
+            pending.progressCompletedAt == null ||
+                canonical?.completedAt != pending.progressCompletedAt
+            ? null
+            : canonical;
+        if (target != null && !pending.canReplace(target)) continue;
+        if (pending.progressCompletedAt != null && target == null) continue;
 
         final existingCompletion =
             (target?.result.result as DailyRecall?)?.entryCompletedAt;
@@ -464,15 +354,7 @@ class NutritionRecallAutoSaveManager({
             existingCompletion == null) {
           continue;
         }
-        if (target == null &&
-            _hasCompletedProgressFor(
-              subject,
-              taskId: pending.taskId,
-              periodId: pending.periodId,
-              studyDay: pending.studyDaySnapshot,
-            )) {
-          continue;
-        }
+        if (target == null && canonical != null) continue;
         final recall = pending.recall
           ..studyDaySnapshot = pending.studyDaySnapshot;
         recall.entryCompletedAt ??=
@@ -497,9 +379,19 @@ class NutritionRecallAutoSaveManager({
             final linkageChanged = recall.meals
                 .expand((meal) => meal.foods)
                 .any((food) => versionsBefore[food.id] != food.foodVersionId);
-            if (linkageChanged &&
-                !await _updateRecallIfUnchanged(pending, recall)) {
-              continue;
+            if (linkageChanged) {
+              if (!await _updateRecallIfUnchanged(pending, recall)) continue;
+            } else {
+              final current = await loadPendingRecall(
+                subjectId: pending.subjectId,
+                taskId: pending.taskId,
+                periodId: pending.periodId,
+                studyDay: pending.studyDaySnapshot,
+              );
+              if (current?.lastModifiedAt != pending.lastModifiedAt ||
+                  current?.nutritionRevision != pending.nutritionRevision) {
+                continue;
+              }
             }
             final saved = await subject.upsertNutritionResult(
               taskId: pending.taskId,
@@ -508,13 +400,7 @@ class NutritionRecallAutoSaveManager({
               completionDateOverride: isPreviousDay
                   ? recall.entryCompletedAt
                   : null,
-              interventionIdOverride:
-                  pending.interventionId == unknownInterventionId
-                  ? null
-                  : pending.interventionId,
-              createOnly:
-                  target == null &&
-                  !_hasMatchingIncompleteRecall(subject, pending),
+              interventionIdOverride: pending.interventionId,
               persistenceTarget: target == null
                   ? null
                   : NutritionRecallPersistenceTarget(
@@ -523,11 +409,9 @@ class NutritionRecallAutoSaveManager({
                       interventionId: target.interventionId,
                       completedAt: target.completedAt!,
                       studyDaySnapshot: pending.studyDaySnapshot,
-                      nutritionRevision:
-                          pending.nutritionRevision ?? target.nutritionRevision,
+                      nutritionRevision: target.nutritionRevision,
                     ),
             );
-            await _deleteRecallIfUnchanged(pending);
             await acknowledgeRecallSave(
               saved: saved,
               uploaded: recall,
@@ -535,11 +419,9 @@ class NutritionRecallAutoSaveManager({
             );
             continue;
           }
-          await _deleteRecallIfUnchanged(pending);
+          await deletePendingRecall(pending);
         } catch (error) {
-          if (error is SocketException ||
-              error is ClientException ||
-              error is TimeoutException) {
+          if (isRetryableError(error)) {
             needsRetry = true;
             StudyULogger.warning(
               'Network error while submitting nutrition recall for study day '
@@ -553,73 +435,34 @@ class NutritionRecallAutoSaveManager({
           }
         }
       }
-      await updateLastKnownStudyDay(subject.id, todayStudyDay);
       return needsRetry;
     } finally {
       _isSubmitting = false;
     }
   }
 
-  SubjectProgress? _findPersistenceTarget(
+  SubjectProgress? _findCompletedRecall(
     StudySubject subject,
     PendingRecall pending,
   ) {
+    SubjectProgress? latest;
     for (final progress in subject.resultsFor(pending.taskId)) {
       if (progress.resultType != 'DailyRecall' ||
-          progress.completedAt != pending.progressCompletedAt ||
-          (progress.result.periodId != null &&
-              progress.result.periodId != pending.periodId) ||
+          progress.result.periodId != pending.periodId ||
+          progress.completedAt == null ||
           progress.interventionId != pending.interventionId) {
         continue;
       }
       final recall = progress.result.result;
       if (recall is DailyRecall &&
-          (recall.studyDaySnapshot ??
-                  nutritionStudyDayFor(subject, progress.completedAt!)) ==
-              pending.studyDaySnapshot) {
-        return progress;
+          recall.entryCompletedAt != null &&
+          recall.studyDaySnapshot == pending.studyDaySnapshot &&
+          (latest == null ||
+              progress.nutritionRevision > latest.nutritionRevision)) {
+        latest = progress;
       }
     }
-    return null;
-  }
-
-  bool _hasMatchingIncompleteRecall(
-    StudySubject subject,
-    PendingRecall pending,
-  ) => subject.resultsFor(pending.taskId).any((progress) {
-    final recall = progress.result.result;
-    if (recall is! DailyRecall || recall.entryCompletedAt != null) return false;
-    final day =
-        recall.studyDaySnapshot ??
-        (progress.completedAt == null
-            ? null
-            : nutritionStudyDayFor(subject, progress.completedAt!));
-    return day == pending.studyDaySnapshot &&
-        (progress.result.periodId == null ||
-            progress.result.periodId == pending.periodId);
-  });
-
-  bool _hasCompletedProgressFor(
-    StudySubject subject, {
-    required String taskId,
-    required String periodId,
-    required int studyDay,
-  }) {
-    return subject.progress.any((progress) {
-      if (progress.taskId != taskId || progress.resultType != 'DailyRecall') {
-        return false;
-      }
-      final resultPeriodId = progress.result.periodId;
-      if (resultPeriodId != periodId && resultPeriodId != null) return false;
-      final result = progress.result.result;
-      if (result is! DailyRecall || result.entryCompletedAt == null) {
-        return false;
-      }
-      if (result.studyDaySnapshot == studyDay) return true;
-      return result.studyDaySnapshot == null &&
-          progress.completedAt != null &&
-          nutritionStudyDayFor(subject, progress.completedAt!) == studyDay;
-    });
+    return latest;
   }
 
   DateTime _rolloverCompletionTime(DailyRecall recall, DateTime dayStart) {
@@ -635,137 +478,8 @@ class NutritionRecallAutoSaveManager({
         : completionCandidate;
   }
 
-  Future<int?> getLastKnownStudyDay(String subjectId) async {
-    final prefs = await _getPrefs();
-    final value = prefs.getString('${_keyPrefix}_last_study_day_$subjectId');
-    return value == null ? null : int.tryParse(value);
-  }
-
-  Future<void> updateLastKnownStudyDay(String subjectId, int studyDay) =>
-      _mutateForSubject(subjectId, () async {
-        final prefs = await _getPrefs();
-        await _writeString(
-          prefs,
-          '${_keyPrefix}_last_study_day_$subjectId',
-          studyDay.toString(),
-        );
-      });
-
-  String _buildStorageKey(
-    String subjectId,
-    String taskId,
-    String periodId,
-    int studyDay,
-  ) => '${_keyPrefix}_${subjectId}_${taskId}_${periodId}_$studyDay';
-
-  String _buildLegacyStorageKey(
-    String subjectId,
-    String taskId,
-    int studyDay,
-  ) => '${_keyPrefix}_${subjectId}_${taskId}_$studyDay';
-
   String _identity(String taskId, String periodId, int studyDay) =>
       '$taskId\u0000$periodId\u0000$studyDay';
-
-  Future<List<dynamic>> _readIndex(
-    SharedPreferences prefs,
-    String subjectId,
-  ) async {
-    final indexJson = prefs.getString('${_keyPrefix}_index_$subjectId');
-    if (indexJson == null) return [];
-    try {
-      return List<dynamic>.from(jsonDecode(indexJson) as List);
-    } catch (error) {
-      StudyULogger.error('Failed to parse nutrition recall index: $error');
-      return [];
-    }
-  }
-
-  Future<void> _updateIndex(
-    SharedPreferences prefs,
-    String subjectId,
-    String taskId,
-    String periodId,
-    int studyDay,
-  ) async {
-    final index = await _readIndex(prefs, subjectId);
-    final contains = index.any((entry) {
-      if (entry is! Map) return false;
-      return entry['taskId'] == taskId &&
-          entry['periodId'] == periodId &&
-          entry['studyDaySnapshot'] == studyDay;
-    });
-    if (!contains) {
-      index.add({
-        'taskId': taskId,
-        'periodId': periodId,
-        'studyDaySnapshot': studyDay,
-      });
-      await _writeString(
-        prefs,
-        '${_keyPrefix}_index_$subjectId',
-        jsonEncode(index),
-      );
-    }
-  }
-
-  Future<void> _removeMatchingLegacyCache(
-    SharedPreferences prefs,
-    String subjectId,
-    String taskId,
-    String periodId,
-    int studyDay,
-  ) async {
-    final legacyKey = _buildLegacyStorageKey(subjectId, taskId, studyDay);
-    final dataJson = prefs.getString(legacyKey);
-    final legacy = dataJson == null
-        ? null
-        : _pendingFromJson(dataJson, storageKey: legacyKey);
-    if (legacy?.periodId != periodId) return;
-    await _removeKey(prefs, legacyKey);
-    final index = await _readIndex(prefs, subjectId);
-    final retained = index
-        .where((entry) => entry is! String || entry != '${taskId}_$studyDay')
-        .toList();
-    final indexKey = '${_keyPrefix}_index_$subjectId';
-    if (retained.length == index.length) return;
-    await _writeString(prefs, indexKey, jsonEncode(retained));
-  }
-
-  Future<void> _removeFromIndex(
-    SharedPreferences prefs,
-    String subjectId,
-    String taskId,
-    String periodId,
-    int studyDay,
-  ) async {
-    final index = await _readIndex(prefs, subjectId);
-    final legacyKey = _buildLegacyStorageKey(subjectId, taskId, studyDay);
-    final legacyJson = prefs.getString(legacyKey);
-    final legacy = legacyJson == null
-        ? null
-        : _pendingFromJson(legacyJson, storageKey: legacyKey);
-    final retained = index.where((entry) {
-      if (entry is Map) {
-        return !(entry['taskId'] == taskId &&
-            entry['periodId'] == periodId &&
-            entry['studyDaySnapshot'] == studyDay);
-      }
-      if (entry is! String) return true;
-      final separator = entry.lastIndexOf('_');
-      return !(separator > 0 &&
-          entry.substring(0, separator) == taskId &&
-          int.tryParse(entry.substring(separator + 1)) == studyDay &&
-          legacy?.periodId == periodId);
-    }).toList();
-    final indexKey = '${_keyPrefix}_index_$subjectId';
-    if (retained.length == index.length) return;
-    if (retained.isEmpty) {
-      await _removeKey(prefs, indexKey);
-    } else {
-      await _writeString(prefs, indexKey, jsonEncode(retained));
-    }
-  }
 }
 
 class PendingRecall({
@@ -784,12 +498,21 @@ class PendingRecall({
       DateTime.tryParse(lastModifiedAt) ??
       DateTime.fromMillisecondsSinceEpoch(0);
 
+  bool matchesUploadedRecall(DailyRecall uploaded) {
+    if (recall.id != uploaded.id) return false;
+    final comparable = DailyRecall.fromJson(recall.toJson())
+      ..entryCompletedAt ??= uploaded.entryCompletedAt;
+    return const DeepCollectionEquality().equals(
+      comparable.toJson(),
+      uploaded.toJson(),
+    );
+  }
+
   bool canReplace(SubjectProgress progress) {
     final canonical = progress.result.result as DailyRecall;
     if (recall.id != canonical.id) return false;
     final base = nutritionRevision;
-    if (base != null && base != progress.nutritionRevision) return false;
-    if (base == null && progress.nutritionRevision != 0) return false;
+    if (base != progress.nutritionRevision) return false;
     final serverTime = canonical.lastAutoSavedAt ?? progress.completedAt;
     final localTime = recall.lastAutoSavedAt ?? lastModifiedAtDate;
     return serverTime == null || localTime.isAfter(serverTime);

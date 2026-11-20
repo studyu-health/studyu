@@ -133,13 +133,16 @@ class DailyRecallEntryViewModel({
   }
 
   Future<void> _initialize() async {
-    if (subject == null) return;
+    if (subject?.startedAt == null) return;
     if (!revalidateEligibility()) return;
 
-    _studyDaySnapshot ??= nutritionStudyDayFor(
-      subject!,
-      _hasExistingRecall ? recall.date : clock(),
-    );
+    if (_studyDaySnapshot == null && !_hasExistingRecall) {
+      _studyDaySnapshot = nutritionStudyDayFor(subject!, clock());
+    }
+    if (_studyDaySnapshot == null) {
+      _requiresReopen = true;
+      return;
+    }
     _interventionId ??=
         interventionId ??
         subject!.getNutritionInterventionForStudyDay(_studyDaySnapshot!)?.id;
@@ -170,7 +173,7 @@ class DailyRecallEntryViewModel({
   Future<PendingRecall?> _loadPendingDraft() =>
       _autoSaveManager.loadPendingRecall(
         subjectId: subject!.id,
-        taskId: task?.id ?? NutritionRecallAutoSaveManager.standaloneTaskId,
+        taskId: task!.id,
         periodId: _periodId!,
         studyDay: _studyDaySnapshot!,
       );
@@ -237,52 +240,41 @@ class DailyRecallEntryViewModel({
       return false;
     }
 
-    SubjectProgress? latestProgress;
-    DailyRecall? latestRecall;
-    DateTime? latestSavedAt;
-    var exactPeriod = false;
-    var legacyMatches = 0;
-    for (final progress in subject!.progress) {
-      if (progress.taskId != taskId ||
-          progress.resultType != 'DailyRecall' ||
-          (progress.result.periodId != null &&
-              progress.result.periodId != periodId)) {
-        continue;
-      }
-      final candidate = progress.result.result;
-      if (candidate is! DailyRecall) continue;
-      final candidateStudyDay =
-          candidate.studyDaySnapshot ??
-          (progress.completedAt == null
-              ? null
-              : nutritionStudyDayFor(subject!, progress.completedAt!));
-      if (candidateStudyDay != studyDay) continue;
-
-      final candidateMatchesPeriod = progress.result.periodId == periodId;
-      if (exactPeriod && !candidateMatchesPeriod) continue;
-      if (!candidateMatchesPeriod) legacyMatches++;
-      final candidateSavedAt =
-          candidate.lastAutoSavedAt ?? progress.completedAt;
-      if (latestProgress == null ||
-          (candidateMatchesPeriod && !exactPeriod) ||
-          (candidateSavedAt != null &&
-              (latestSavedAt == null ||
-                  candidateSavedAt.isAfter(latestSavedAt)))) {
-        exactPeriod = candidateMatchesPeriod;
-        latestProgress = progress;
-        latestRecall = candidate;
-        latestSavedAt = candidateSavedAt;
-      }
-    }
-    if (latestProgress == null || latestRecall == null) return false;
-
-    if (!exactPeriod && legacyMatches != 1) {
-      _requiresReopen = true;
-      return false;
-    }
+    final latestProgress = _findCanonicalProgress(taskId, periodId, studyDay);
+    if (latestProgress == null) return false;
+    final latestRecall = latestProgress.result.result as DailyRecall;
 
     _adoptCanonicalRecall(latestProgress, latestRecall, periodId, studyDay);
     return true;
+  }
+
+  SubjectProgress? _findCanonicalProgress(
+    String taskId,
+    String periodId,
+    int studyDay,
+  ) {
+    SubjectProgress? latestProgress;
+    for (final progress in subject!.progress) {
+      if (progress.taskId != taskId ||
+          progress.resultType != 'DailyRecall' ||
+          progress.result.periodId != periodId ||
+          progress.completedAt == null) {
+        continue;
+      }
+      final candidate = progress.result.result;
+      if (candidate is! DailyRecall ||
+          candidate.entryCompletedAt == null ||
+          candidate.studyDaySnapshot != studyDay) {
+        continue;
+      }
+      if (latestProgress == null ||
+          progress.nutritionRevision > latestProgress.nutritionRevision ||
+          progress.nutritionRevision == latestProgress.nutritionRevision &&
+              progress.completedAt!.isAfter(latestProgress.completedAt!)) {
+        latestProgress = progress;
+      }
+    }
+    return latestProgress;
   }
 
   void _adoptCanonicalRecall(
@@ -291,21 +283,44 @@ class DailyRecallEntryViewModel({
     String periodId,
     int studyDay,
   ) {
-    _canonicalProgress = progress;
+    _pinCanonicalProgress(progress, periodId, studyDay);
     recall = _copyRecall(canonical);
     _hasExistingRecall = true;
-    _interventionId = progress.interventionId;
-    if (progress.completedAt case final completedAt?) {
-      _persistenceTarget = NutritionRecallPersistenceTarget(
-        taskId: progress.taskId,
-        periodId: periodId,
-        interventionId: progress.interventionId,
-        completedAt: completedAt,
-        studyDaySnapshot: studyDay,
-        nutritionRevision: progress.nutritionRevision,
-      );
-    }
     lastSaveTime = recall.lastAutoSavedAt;
+  }
+
+  void _pinCanonicalProgress(
+    SubjectProgress progress,
+    String periodId,
+    int studyDay,
+  ) {
+    _canonicalProgress = progress;
+    _interventionId = progress.interventionId;
+    _persistenceTarget = NutritionRecallPersistenceTarget(
+      taskId: progress.taskId,
+      periodId: periodId,
+      interventionId: progress.interventionId,
+      completedAt: progress.completedAt!,
+      studyDaySnapshot: studyDay,
+      nutritionRevision: progress.nutritionRevision,
+    );
+  }
+
+  void _pinUploadedDraft() {
+    if (persistenceTarget != null || !historicalMode) return;
+    final progress = _findCanonicalProgress(
+      task!.id,
+      _periodId!,
+      _studyDaySnapshot!,
+    );
+    final canonical = progress?.result.result;
+    if (progress == null ||
+        canonical is! DailyRecall ||
+        canonical.id != recall.id) {
+      return;
+    }
+    _pinCanonicalProgress(progress, _periodId!, _studyDaySnapshot!);
+    recall.entryCompletedAt = canonical.entryCompletedAt;
   }
 
   Future<void> refreshConflictingRecall() async {
@@ -522,12 +537,19 @@ class DailyRecallEntryViewModel({
   );
 
   Future<void> clearAutoSave() async {
-    if (!canEdit || subject == null || _studyDaySnapshot == null) return;
+    if (!canEdit ||
+        subject == null ||
+        _studyDaySnapshot == null ||
+        _periodId == null) {
+      return;
+    }
+    await _localSaveFuture;
 
     await _autoSaveManager.deleteRecall(
       subjectId: subject!.id,
-      taskId: task?.id ?? NutritionRecallAutoSaveManager.standaloneTaskId,
+      taskId: task!.id,
       studyDay: _studyDaySnapshot!,
+      periodId: _periodId!,
     );
   }
 
@@ -540,7 +562,12 @@ class DailyRecallEntryViewModel({
     _autoSaveTimer?.cancel();
     _autoSaveTimer = null;
     await _localSaveFuture;
-    if (persistToDatabase && (hadScheduledSave || requireRemoteSuccess)) {
+    if (persistToDatabase && historicalMode && persistenceTarget == null) {
+      if (shouldSaveToDb && subject != null) {
+        NutritionRecallAutoSaveManager.requestUpload(subject!.id);
+      }
+    } else if (persistToDatabase &&
+        (hadScheduledSave || requireRemoteSuccess)) {
       await _performAutoSave(propagateErrors: requireRemoteSuccess);
     } else {
       await _remoteSaveQueue;
@@ -551,7 +578,9 @@ class DailyRecallEntryViewModel({
     if (readOnly ||
         _persistenceSuspended ||
         subject == null ||
-        _studyDaySnapshot == null) {
+        _studyDaySnapshot == null ||
+        _periodId == null ||
+        _interventionId == null) {
       return;
     }
     StudyULogger.debug(
@@ -574,6 +603,7 @@ class DailyRecallEntryViewModel({
         !revalidateEditingEligibility()) {
       return;
     }
+    _pinUploadedDraft();
     final savedAt = clock().toUtc();
     recall = _copyWithRecall(lastAutoSavedAt: savedAt);
     lastSaveTime = savedAt;
@@ -581,14 +611,9 @@ class DailyRecallEntryViewModel({
     Future<void> saveLocal() => _autoSaveManager.saveRecall(
       recall: recallToSave,
       subjectId: subject!.id,
-      taskId:
-          persistenceTarget?.taskId ??
-          task?.id ??
-          NutritionRecallAutoSaveManager.standaloneTaskId,
-      interventionId:
-          _interventionId ??
-          NutritionRecallAutoSaveManager.unknownInterventionId,
-      periodId: _periodId ?? NutritionRecallAutoSaveManager.defaultPeriodId,
+      taskId: task!.id,
+      interventionId: _interventionId!,
+      periodId: _periodId!,
       studyDaySnapshot: _studyDaySnapshot!,
       progressCompletedAt: persistenceTarget?.completedAt,
       nutritionRevision: persistenceTarget?.nutritionRevision,
@@ -606,8 +631,14 @@ class DailyRecallEntryViewModel({
   }
 
   Future<void> _performAutoSaveAfterLocalSave() async {
-    await _localSaveFuture;
-    await _performAutoSave();
+    try {
+      await _localSaveFuture;
+      await _performAutoSave();
+    } catch (error, stackTrace) {
+      StudyULogger.warning(
+        'Could not finish nutrition autosave: $error\n$stackTrace',
+      );
+    }
   }
 
   Future<void> _performAutoSave({bool propagateErrors = false}) {
@@ -655,7 +686,6 @@ class DailyRecallEntryViewModel({
               recall: recallToSave,
               persistenceTarget: persistenceTarget,
               interventionIdOverride: _interventionId,
-              createOnly: persistenceTarget == null,
             );
             _canonicalProgress = saved;
             _persistenceTarget = NutritionRecallPersistenceTarget(
@@ -666,6 +696,7 @@ class DailyRecallEntryViewModel({
               studyDaySnapshot: _studyDaySnapshot!,
               nutritionRevision: saved.nutritionRevision,
             );
+            await _localSaveFuture;
             await _autoSaveManager.acknowledgeRecallSave(
               saved: saved,
               uploaded: recallToSave,
@@ -691,6 +722,9 @@ class DailyRecallEntryViewModel({
           }
           if (!_isDisposed) await refreshConflictingRecall();
         }
+        if (NutritionRecallAutoSaveManager.isRetryableError(error)) {
+          NutritionRecallAutoSaveManager.requestUpload(subject!.id);
+        }
         StudyULogger.warning(
           '[DailyRecallVM] Remote auto-save failed; local recall is retained: '
           '$error\n$stackTrace',
@@ -712,9 +746,9 @@ class DailyRecallEntryViewModel({
     if (activeSubject == null || activeSubject.startedAt == null) return true;
     final today = nutritionStudyDayFor(activeSubject, clock());
     if (historicalMode) {
-      if (target == null) return true;
+      final studyDay = target?.studyDaySnapshot ?? _studyDaySnapshot;
       if (_historicalEligibilityExpired) return false;
-      if (target.studyDaySnapshot == today - 1) return true;
+      if (studyDay == null || studyDay == today - 1) return true;
       _historicalEligibilityExpired = true;
     } else {
       if (_currentDayExpired) return false;
