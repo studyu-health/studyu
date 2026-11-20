@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(18);
+SELECT plan(23);
 
 SELECT tests.create_supabase_user('nutrition_revision_owner', 'nutrition_revision_owner@studyu.health');
 SELECT tests.create_supabase_user('nutrition_revision_other', 'nutrition_revision_other@studyu.health');
@@ -139,6 +139,42 @@ SELECT throws_ok(
     $$SELECT public.advance_owned_study_subject_day('a7100000-0000-4000-8000-000000000001', 1)$$,
     '22023', 'invalid study subject day advance',
     'running-study participant cannot advance the authoritative clock'
+);
+
+SELECT lives_ok(
+    $$UPDATE public.study_subject SET is_deleted = true
+      WHERE id = 'a7100000-0000-4000-8000-000000000001'$$,
+    'a participant can withdraw while retaining their progress'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(tests.revision_test_result(550), 1)$$,
+    '42501', 'nutrition progress subject is not owned by caller',
+    'the recall RPC rejects a withdrawn participant'
+);
+SELECT throws_ok(
+    $$INSERT INTO public.subject_progress (
+        subject_id, completed_at, intervention_id, task_id, result_type, result
+    ) VALUES (
+        'a7100000-0000-4000-8000-000000000001', now() + interval '2 hours',
+        'intervention-a', 'legacy-task-2', 'DailyRecall', tests.revision_test_result()
+    )$$,
+    '42501', 'nutrition progress subject is not owned by caller',
+    'a legacy client cannot add progress after withdrawal'
+);
+SELECT throws_ok(
+    $$UPDATE public.subject_progress
+      SET result = tests.revision_test_result(500)
+      WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()$$,
+    '42501', 'nutrition progress subject is not owned by caller',
+    'a legacy client cannot edit progress after withdrawal'
+);
+SELECT throws_ok(
+    $$SELECT public.apply_nutrition_food_mutation(
+        'a7100000-0000-4000-8000-000000000001', gen_random_uuid(),
+        gen_random_uuid(), null, '{}'::jsonb
+    )$$,
+    '42501', 'nutrition definition subject is not owned by caller',
+    'a withdrawn participant cannot mutate food definitions'
 );
 
 SELECT tests.authenticate_as('nutrition_revision_other');
