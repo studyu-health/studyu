@@ -73,6 +73,10 @@ BEGIN
     IF NOT studyu_private.lock_nutrition_subject_for_write(p_subject_id, true) THEN
         RAISE EXCEPTION 'nutrition definition subject is not owned by caller' USING ERRCODE = '42501';
     END IF;
+    IF p_propagate_study_day IS NOT NULL THEN
+        -- Use the recall creation lock before taking any food version locks.
+        PERFORM pg_advisory_xact_lock(hashtextextended(p_subject_id::text, 2));
+    END IF;
     INSERT INTO studyu_private.nutrition_maintenance_context
     VALUES (txid_current(), p_subject_id, 'mutation');
     v_response := studyu_private.apply_nutrition_food_mutation(
