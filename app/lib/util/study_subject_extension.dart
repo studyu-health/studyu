@@ -29,6 +29,7 @@ class const NutritionRecallPersistenceTarget({
     'interventionId': interventionId,
     'completedAt': completedAt.toUtc().toIso8601String(),
     'studyDaySnapshot': studyDaySnapshot,
+    'nutritionRevision': nutritionRevision,
   };
 }
 

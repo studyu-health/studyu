@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(101);
+SELECT plan(102);
 
 SELECT
     tests.create_supabase_user('nutrition_owner', 'nutrition_owner@studyu.health');
@@ -194,7 +194,7 @@ INSERT INTO nutrition_results VALUES (
         )::uuid,
         '{"id":"edited-snapshot","foodId":"20000000-0000-0000-0000-000000000001","foodVersionId":"30000000-0000-0000-0000-000000000000","entryType":"singleIngredient","name":"New","amount":1,"unit":"serving","servingSizeGrams":100,"portionEstimationMethod":"standardUnit","portionState":"asServed","nutrition":{"energyKcal":150,"protein":2,"carbs":2,"fat":2,"sugars":0,"fiber":0,"saturatedFat":0,"transFat":0,"cholesterol":0,"sodium":0,"waterContent":0,"micros":{}},"source":"manual","confidenceScore":1,"createdAt":"2026-07-15T08:00:00.000Z","originalValues":{}}'::jsonb,
         FALSE,
-        '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4}'::jsonb,
+        '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4,"nutritionRevision":0}'::jsonb,
         5,
         NULL,
         'historical-entry'
@@ -471,7 +471,7 @@ INSERT INTO nutrition_results VALUES (
             )
         ),
         FALSE,
-        '{"taskId":"historical-composite-task","periodId":"period-composite","interventionId":"intervention-composite","completedAt":"2026-07-15T13:00:00Z","studyDaySnapshot":4}'::jsonb,
+        '{"taskId":"historical-composite-task","periodId":"period-composite","interventionId":"intervention-composite","completedAt":"2026-07-15T13:00:00Z","studyDaySnapshot":4,"nutritionRevision":0}'::jsonb,
         NULL,
         NULL,
         'historical-composite-entry'
@@ -785,7 +785,7 @@ SELECT throws_ok(
     ((SELECT response FROM nutrition_results WHERE label = 'historical') #>> '{definition,currentVersionId}')::uuid,
     (SELECT response #> '{definition,snapshot}' FROM nutrition_results WHERE label = 'historical'),
     false,
-    '{"taskId":"locked-task","periodId":"period-old","interventionId":"intervention-a","completedAt":"2026-07-14T12:00:00Z","studyDaySnapshot":3}'::jsonb,
+    '{"taskId":"locked-task","periodId":"period-old","interventionId":"intervention-a","completedAt":"2026-07-14T12:00:00Z","studyDaySnapshot":3,"nutritionRevision":0}'::jsonb,
     4,
     NULL,
     'locked-entry'
@@ -808,7 +808,7 @@ SELECT throws_ok(
     ((SELECT response FROM nutrition_results WHERE label = 'historical') #>> '{definition,currentVersionId}')::uuid,
     (SELECT response #> '{definition,snapshot}' FROM nutrition_results WHERE label = 'historical'),
     false,
-    '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4}'::jsonb,
+    '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4,"nutritionRevision":0}'::jsonb,
     6,
     NULL,
     'historical-entry'
@@ -1002,7 +1002,7 @@ SELECT throws_ok(
     ((SELECT response FROM nutrition_results WHERE label = 'historical') #>> '{definition,currentVersionId}')::uuid,
     (SELECT response #> '{definition,snapshot}' FROM nutrition_results WHERE label = 'historical'),
     false,
-    '{"taskId":"missing","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4}'::jsonb,
+    '{"taskId":"missing","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4,"nutritionRevision":0}'::jsonb,
     5,
     NULL,
     'historical-entry'
@@ -1017,6 +1017,19 @@ SELECT is(
     'post-version target failures roll back the entire mutation'
 );
 
+SELECT throws_ok(
+    $$SELECT public.apply_nutrition_food_mutation(
+        '10000000-0000-0000-0000-000000000001', gen_random_uuid(),
+        '20000000-0000-0000-0000-000000000001',
+        ((SELECT response FROM nutrition_results WHERE label = 'historical') #>> '{definition,currentVersionId}')::uuid,
+        (SELECT response #> '{definition,snapshot}' FROM nutrition_results WHERE label = 'historical'),
+        false,
+        '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4,"nutritionRevision":0}',
+        null, null, 'historical-entry'
+    )$$,
+    '40001', 'stale nutrition recall revision',
+    'a historical correction rejects the revision from before the previous edit'
+);
 SELECT throws_ok(
     $$SELECT public.apply_nutrition_food_mutation(
     '10000000-0000-0000-0000-000000000001',
@@ -1037,7 +1050,7 @@ SELECT throws_ok(
       '"30000000-0000-0000-0000-000000000022"'::jsonb
     ),
     false,
-    '{"taskId":"missing-composite","periodId":"period-composite","interventionId":"intervention-composite","completedAt":"2026-07-15T13:00:00Z","studyDaySnapshot":4}'::jsonb,
+    '{"taskId":"missing-composite","periodId":"period-composite","interventionId":"intervention-composite","completedAt":"2026-07-15T13:00:00Z","studyDaySnapshot":4,"nutritionRevision":0}'::jsonb,
     NULL,
     NULL,
     'historical-composite-entry'
@@ -1064,7 +1077,7 @@ SELECT throws_ok(
     ((SELECT response FROM nutrition_results WHERE label = 'historical') #>> '{definition,currentVersionId}')::uuid,
     (SELECT response #> '{definition,snapshot}' FROM nutrition_results WHERE label = 'historical'),
     false,
-    '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4}'::jsonb,
+    '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4,"nutritionRevision":1}'::jsonb,
     5,
     NULL,
     'other-food-entry'
@@ -1118,7 +1131,7 @@ INSERT INTO nutrition_results VALUES (
             WHERE label = 'historical'
         ),
         FALSE,
-        '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4}'::jsonb,
+        '{"taskId":"historical-task","periodId":"period-a","interventionId":"intervention-a","completedAt":"2026-07-15T12:00:00Z","studyDaySnapshot":4,"nutritionRevision":1}'::jsonb,
         5,
         NULL,
         'historical-entry'

@@ -31,6 +31,7 @@ sealed class const MealEntryResult();
 final class const SavedMealEntryResult(
   final MealLog meal, {
   final bool definitionMutated = false,
+  final int? expectedNutritionRevision,
 }) extends MealEntryResult;
 
 final class const DeletedMealEntryResult() extends MealEntryResult;
@@ -134,6 +135,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
   bool _hasAttemptedSave = false;
   bool _isSaving = false;
   bool _definitionMutated = false;
+  int? _definitionMutationRevision;
   bool _saveToMyItems = true;
   String? _reusableFoodId;
   bool _propagateToCurrentStudyDay = false;
@@ -313,7 +315,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     final prepare = widget.prepareHistoricalDefinitionEdit;
     if (editReusableDefinition && prepare != null) {
       historicalTarget = await prepare(
-        historicalTarget?.nutritionRevision,
+        _definitionMutationRevision ?? historicalTarget?.nutritionRevision,
       );
       if (!mounted || historicalTarget == null) return;
     }
@@ -350,6 +352,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
           repository: widget.foodRepository,
           canEditRecall: _revalidateHistoricalEligibility,
+          onHistoricalDefinitionSaved: (revision) {
+            _definitionMutationRevision = revision;
+          },
         ),
       );
     }
@@ -506,6 +511,10 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         result.definition.snapshot,
       );
       final progress = _reconcileProgress(subject, result.progress);
+      final updatedRecall = progress
+          .where((item) => item.completedAt == historicalTarget.completedAt)
+          .firstOrNull;
+      _definitionMutationRevision = updatedRecall?.nutritionRevision;
       final autoSaveManager = NutritionRecallAutoSaveManager();
       await Future.wait([
         if (_propagateToCurrentStudyDay)
@@ -755,7 +764,13 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       if (!mounted || !_revalidateHistoricalEligibility()) return;
 
       _meal = meal;
-      _pop(SavedMealEntryResult(meal, definitionMutated: _definitionMutated));
+      _pop(
+        SavedMealEntryResult(
+          meal,
+          definitionMutated: _definitionMutated,
+          expectedNutritionRevision: _definitionMutationRevision,
+        ),
+      );
     } catch (error, stackTrace) {
       StudyULogger.error('Failed to save nutrition meal: $error\n$stackTrace');
       if (mounted) {

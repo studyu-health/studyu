@@ -474,8 +474,7 @@ DECLARE
   v_component_food_id uuid;
   v_component_version_id uuid;
   v_component_definition public.nutrition_food_definition%ROWTYPE;
-  v_target public.subject_progress%ROWTYPE;
-  v_target_count integer;
+  v_target record;
   v_progress jsonb := '[]'::jsonb;
   v_progress_row jsonb;
   v_selected_historical_update_count integer := 0;
@@ -514,6 +513,8 @@ BEGIN
       )) OR
       (p_historical_target IS NOT NULL AND (
         p_deleted OR
+        jsonb_typeof(p_historical_target->'nutritionRevision') IS DISTINCT FROM 'number' OR
+        (p_historical_target->>'nutritionRevision') !~ '^[0-9]{1,18}$' OR
         NULLIF(p_historical_entry_id, '') IS NULL OR
         (
           p_propagate_study_day IS NOT NULL AND
@@ -676,21 +677,6 @@ BEGIN
 
 
   IF p_historical_target IS NOT NULL THEN
-    SELECT count(*) INTO v_target_count
-    FROM public.subject_progress
-    WHERE subject_id = p_subject_id
-      AND task_id = p_historical_target->>'taskId'
-      AND intervention_id = p_historical_target->>'interventionId'
-      AND completed_at = (p_historical_target->>'completedAt')::timestamptz
-      AND result_type = 'DailyRecall'
-      AND result->>'periodId' = p_historical_target->>'periodId'
-      AND (result #>> '{result,studyDaySnapshot}')::integer =
-          (p_historical_target->>'studyDaySnapshot')::integer;
-    IF v_target_count <> 1 THEN
-      RAISE EXCEPTION 'historical nutrition recall target is missing or ambiguous'
-        USING ERRCODE = 'P0002';
-    END IF;
-
     SELECT * INTO v_target
     FROM public.subject_progress
     WHERE subject_id = p_subject_id
@@ -702,6 +688,14 @@ BEGIN
       AND (result #>> '{result,studyDaySnapshot}')::integer =
           (p_historical_target->>'studyDaySnapshot')::integer
     FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'historical nutrition recall target is missing or ambiguous'
+        USING ERRCODE = 'P0002';
+    END IF;
+    IF v_target.nutrition_revision IS DISTINCT FROM
+        (p_historical_target->>'nutritionRevision')::bigint THEN
+      RAISE EXCEPTION 'stale nutrition recall revision' USING ERRCODE = '40001';
+    END IF;
     IF NOT public.nutrition_result_has_food(
       v_target.result, p_food_id, p_historical_entry_id
     ) THEN

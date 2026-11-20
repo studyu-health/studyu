@@ -986,16 +986,12 @@ class _NutritionTaskWidgetState()
               ? model.persistenceTarget
               : null,
           canEditRecall: model.revalidateEditingEligibility,
-          prepareHistoricalDefinitionEdit: (_) async {
-            model.resumePersistence();
-            try {
-              return await _flushHistoricalRecallBeforeNestedMutation(context, model)
-                  ? model.persistenceTarget
-                  : null;
-            } finally {
-              model.suspendPersistence();
-            }
-          },
+          prepareHistoricalDefinitionEdit: (expectedRevision) =>
+              _prepareHistoricalDefinitionEdit(
+                context,
+                model,
+                expectedRevision,
+              ),
           foodRepository: widget.foodRepository,
           templateViewModel: _templateViewModel,
         ),
@@ -1021,16 +1017,12 @@ class _NutritionTaskWidgetState()
               ? model.persistenceTarget
               : null,
           canEditRecall: model.revalidateEditingEligibility,
-          prepareHistoricalDefinitionEdit: (_) async {
-            model.resumePersistence();
-            try {
-              return await _flushHistoricalRecallBeforeNestedMutation(context, model)
-                  ? model.persistenceTarget
-                  : null;
-            } finally {
-              model.suspendPersistence();
-            }
-          },
+          prepareHistoricalDefinitionEdit: (expectedRevision) =>
+              _prepareHistoricalDefinitionEdit(
+                context,
+                model,
+                expectedRevision,
+              ),
           foodRepository: widget.foodRepository,
           templateViewModel: _templateViewModel,
         ),
@@ -1064,11 +1056,7 @@ class _NutritionTaskWidgetState()
       try {
         await model.flushPendingAutoSave();
       } catch (error) {
-        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.could_not_save_results),
-          ),
-        );
+        if (context.mounted) _showNutritionSaveError(context);
         return null;
       }
       if (!context.mounted || !model.revalidateEditingEligibility())
@@ -1087,41 +1075,70 @@ class _NutritionTaskWidgetState()
         DiscardedMealEntryResult() => true,
         _ => false,
       };
-      if (definitionMutated) await model.reloadCanonicalRecall();
+      if (definitionMutated) {
+        await model.reloadCanonicalRecall();
+        if (!context.mounted) return null;
+        if (result case SavedMealEntryResult(:final expectedNutritionRevision?)
+            when model.persistenceTarget?.nutritionRevision !=
+                expectedNutritionRevision) {
+          _showNutritionSaveError(context, conflict: true);
+          return null;
+        }
+      }
       return result;
     } finally {
       if (suspendPersistence) model.resumePersistence();
     }
   }
 
-  Future<bool> _flushHistoricalRecallBeforeNestedMutation(
+  Future<NutritionRecallPersistenceTarget?> _prepareHistoricalDefinitionEdit(
     BuildContext context,
     DailyRecallEntryViewModel model,
+    int? expectedRevision,
   ) async {
     if (!_isHistoricalMode ||
-        widget.readOnly ||
+        !model.revalidateEditingEligibility() ||
         model.persistenceTarget == null) {
-      return true;
+      return null;
     }
     try {
+      model.resumePersistence();
+      await model.reloadCanonicalRecall();
+      if (!context.mounted || !model.revalidateEditingEligibility())
+        return null;
+      if (model.persistenceTarget?.nutritionRevision != expectedRevision) {
+        _showNutritionSaveError(context, conflict: true);
+        return null;
+      }
       await model.flushPendingAutoSave(
         persistToDatabase: true,
         requireRemoteSuccess: true,
       );
-      return !model.historicalEligibilityExpired;
+      if (!context.mounted || !model.revalidateEditingEligibility())
+        return null;
+      return model.persistenceTarget;
     } catch (error, stackTrace) {
-      StudyULogger.error(
-        'Failed to flush historical nutrition recall: $error\n$stackTrace',
+      StudyULogger.warning(
+        'Could not prepare the nutrition definition edit: $error\n$stackTrace',
       );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.could_not_save_results),
-          ),
-        );
-      }
-      return false;
+      if (context.mounted) _showNutritionSaveError(context);
+      return null;
+    } finally {
+      model.suspendPersistence();
     }
+  }
+
+  void _showNutritionSaveError(BuildContext context, {bool conflict = false}) {
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          conflict
+              ? l10n.nutrition_recall_conflict_message
+              : l10n.could_not_save_results,
+        ),
+      ),
+    );
   }
 
   Future<void> _confirmDeleteMeal(

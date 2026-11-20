@@ -31,6 +31,7 @@ class const FoodEntryScreen({
   final bool historicalMode = false,
   final NutritionRecallPersistenceTarget? historicalTarget,
   final bool editReusableDefinition = false,
+  final ValueChanged<int>? onHistoricalDefinitionSaved,
   final bool hasCurrentStudyDayMatches = false,
   final bool showCurrentMealOnlyNotice = false,
   final bool isExternalLibraryCopy = false,
@@ -54,6 +55,7 @@ class const FoodEntryScreen({
     bool historicalMode = false,
     NutritionRecallPersistenceTarget? historicalTarget,
     bool editReusableDefinition = false,
+    ValueChanged<int>? onHistoricalDefinitionSaved,
     bool hasCurrentStudyDayMatches = false,
     bool showCurrentMealOnlyNotice = false,
     bool isExternalLibraryCopy = false,
@@ -72,6 +74,7 @@ class const FoodEntryScreen({
       historicalMode: historicalMode,
       historicalTarget: historicalTarget,
       editReusableDefinition: editReusableDefinition,
+      onHistoricalDefinitionSaved: onHistoricalDefinitionSaved,
       hasCurrentStudyDayMatches: hasCurrentStudyDayMatches,
       showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
       isExternalLibraryCopy: isExternalLibraryCopy,
@@ -299,6 +302,14 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
           result.definition.snapshot,
         );
         final progress = _reconcileProgress(subject, result.progress);
+        final updatedRecall = progress
+            .where((item) => item.completedAt == historicalTarget.completedAt)
+            .firstOrNull;
+        if (updatedRecall != null) {
+          widget.onHistoricalDefinitionSaved?.call(
+            updatedRecall.nutritionRevision,
+          );
+        }
         final autoSaveManager = NutritionRecallAutoSaveManager();
         await Future.wait([
           if (_propagateToCurrentStudyDay)
