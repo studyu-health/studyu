@@ -511,10 +511,10 @@ class PendingRecall({
   bool canReplace(SubjectProgress progress) {
     final canonical = progress.result.result as DailyRecall;
     if (recall.id != canonical.id) return false;
-    final base = nutritionRevision;
-    if (base != progress.nutritionRevision) return false;
-    final serverTime = canonical.lastAutoSavedAt ?? progress.completedAt;
-    final localTime = recall.lastAutoSavedAt ?? lastModifiedAtDate;
-    return serverTime == null || localTime.isAfter(serverTime);
+    return nutritionRevision == progress.nutritionRevision &&
+        progressCompletedAt == progress.completedAt &&
+        periodId == progress.result.periodId &&
+        studyDaySnapshot == canonical.studyDaySnapshot &&
+        !matchesUploadedRecall(canonical);
   }
 }

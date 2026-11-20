@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
@@ -186,7 +185,7 @@ class DailyRecallEntryViewModel({
     final canonical = _canonicalProgress;
     if (canonical != null &&
         !local.canReplace(canonical) &&
-        !_hasSamePayload(local, canonical)) {
+        !local.matchesUploadedRecall(canonical.result.result as DailyRecall)) {
       _conflictingDraft = local;
       return;
     }
@@ -196,12 +195,6 @@ class DailyRecallEntryViewModel({
       lastSaveTime = local.recall.lastAutoSavedAt;
     }
   }
-
-  bool _hasSamePayload(PendingRecall local, SubjectProgress canonical) =>
-      const DeepCollectionEquality().equals(
-        local.recall.toJson(),
-        (canonical.result.result as DailyRecall).toJson(),
-      );
 
   Future<bool> discardConflictingDraft() async {
     final pending = _conflictingDraft;

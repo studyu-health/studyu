@@ -968,6 +968,60 @@ void main() {
     },
   );
 
+  test(
+    'uploads a pinned correction after the device clock rolls back',
+    () async {
+      final today = DateTime.utc(2026, 7, 17, 12);
+      final completedAt = today.subtract(const Duration(days: 1));
+      final subject = _subject(daysAgo: 2)
+        ..startedAt = today.subtract(const Duration(days: 2));
+      final canonical = _recall('clock-change', studyDay: 1)
+        ..entryCompletedAt = completedAt
+        ..lastAutoSavedAt = today
+        ..waterIntakeMl = 250;
+      subject.progress.add(
+        SubjectProgress(
+            subjectId: subject.id,
+            interventionId: 'intervention',
+            taskId: 'task',
+            resultType: 'DailyRecall',
+            result: Result<DailyRecall>.app(
+              type: 'DailyRecall',
+              periodId: 'period',
+              result: canonical,
+            ),
+          )
+          ..completedAt = completedAt
+          ..nutritionRevision = 3,
+      );
+      final uploaded = <DailyRecall>[];
+      final manager = NutritionRecallAutoSaveManager(
+        submitter: (_, recall) async => uploaded.add(recall),
+      );
+      await manager.saveRecall(
+        recall: DailyRecall.fromJson(canonical.toJson())
+          ..lastAutoSavedAt = today.subtract(const Duration(hours: 2))
+          ..waterIntakeMl = 500,
+        subjectId: subject.id,
+        taskId: 'task',
+        periodId: 'period',
+        interventionId: 'intervention',
+        studyDaySnapshot: 1,
+        progressCompletedAt: completedAt,
+        nutritionRevision: 3,
+      );
+
+      await manager.submitPendingRecalls(
+        subject: subject,
+        trackProgress: true,
+        now: today,
+      );
+
+      expect(uploaded.single.waterIntakeMl, 500);
+      expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+    },
+  );
+
   test('retries a transient upload failure before the draft expires', () async {
     var attempts = 0;
     final manager = NutritionRecallAutoSaveManager(
