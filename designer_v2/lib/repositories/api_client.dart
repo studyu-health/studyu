@@ -360,12 +360,7 @@ class StudyUApiClient({
   }) => _fetchStudy(studyId, withParticipantActivity, withInvites);
 
   @override
-  Future<Study> fetchStudyForExport(StudyID studyId) async {
-    final study = await fetchStudy(studyId, withParticipantActivity: false);
-    study.participants = await _fetchExportParticipants(studyId);
-    study.participantsProgress = await _fetchExportProgress(studyId);
-    return study;
-  }
+  Future<Study> fetchStudyForExport(StudyID studyId) => fetchStudy(studyId);
 
   @override
   Future<void> deleteStudy(Study study) async {

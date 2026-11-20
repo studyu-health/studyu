@@ -8,28 +8,34 @@ extension _StudyExportQueries on StudyUApiClient {
   ) async {
     await _testDelay();
     final columns = [
-      ...(withParticipantActivity
-          ? StudyUApiClient.studyWithParticipantActivityColumns
-          : StudyUApiClient.studyColumns),
+      ...StudyUApiClient.studyColumns,
       if (withInvites) StudyUApiClient.studyInviteColumn,
     ];
     final request = getById<Study>(studyId, selectedColumns: columns);
-    return await _awaitGuarded(
+    final study = await _awaitGuarded(
       request,
       onError: {
         PostgrestErrorCodes.isNotSingleItem: (e) =>
             throw StudyNotFoundException(),
       },
     );
+    if (withParticipantActivity) {
+      study.participants = await _fetchStudyParticipants(studyId);
+      study.participantsProgress = await _fetchStudyProgress(studyId);
+    }
+    return study;
   }
 
-  Future<List<StudySubject>> _fetchExportParticipants(StudyID studyId) async {
+  Future<List<StudySubject>> _fetchStudyParticipants(StudyID studyId) async {
     final participants = <StudySubject>[];
     String? lastId;
     while (true) {
       var query = this.supabaseClient
           .from(StudySubject.tableName)
-          .select()
+          .select(
+            'id,study_id,user_id,selected_intervention_ids,started_at,'
+            'invite_code,is_deleted',
+          )
           .eq('study_id', studyId);
       if (lastId != null) query = query.gt('id', lastId);
       final page = await _awaitGuarded(
@@ -41,14 +47,17 @@ extension _StudyExportQueries on StudyUApiClient {
     }
   }
 
-  Future<List<SubjectProgress>> _fetchExportProgress(StudyID studyId) async {
+  Future<List<SubjectProgress>> _fetchStudyProgress(StudyID studyId) async {
     final records = <SubjectProgress>[];
     String? lastCompletedAt;
     String? lastSubjectId;
     while (true) {
       var query = this.supabaseClient
           .from('study_progress_export')
-          .select()
+          .select(
+            'completed_at,subject_id,started_at,intervention_id,task_id,'
+            'result_type,result',
+          )
           .eq('study_id', studyId);
       if (lastCompletedAt != null) {
         query = query.or(

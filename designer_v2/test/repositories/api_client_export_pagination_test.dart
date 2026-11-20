@@ -8,7 +8,8 @@ import 'package:studyu_designer_v2/repositories/api_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
-  test('export fetches every page of participants and progress', () async {
+  Future<void> checkPaging({required bool forExport}) async {
+    final studyQueries = <Uri>[];
     final participantQueries = <Uri>[];
     final progressQueries = <Uri>[];
     const studyId = 'study-id';
@@ -30,6 +31,7 @@ void main() {
       final Object response;
       switch (request.uri.path) {
         case '/rest/v1/study':
+          studyQueries.add(request.uri);
           response = study.toJson();
         case '/rest/v1/study_subject':
           participantQueries.add(request.uri);
@@ -55,16 +57,25 @@ void main() {
     });
 
     final api = StudyUApiClient(supabaseClient: client);
-    final export = await api.fetchStudyForExport(studyId);
+    final result = forExport
+        ? await api.fetchStudyForExport(studyId)
+        : await api.fetchStudy(studyId);
 
-    expect(export.participants!.map((p) => p.id), ['subject-a', 'subject-b']);
-    expect(export.participantsProgress!.map((p) => p.subjectId), [
+    expect(result.participants!.map((p) => p.id), ['subject-a', 'subject-b']);
+    expect(result.participantsProgress!.map((p) => p.subjectId), [
       'subject-a',
       'subject-b',
     ]);
+    if (forExport) {
+      expect(
+        result.exportData.interventionsData.map((row) => row['invite_code']),
+        unorderedEquals(['invite-subject-a', 'invite-subject-b']),
+      );
+    }
+    expect(studyQueries.single.queryParameters['id'], 'eq.$studyId');
     expect(
-      export.exportData.interventionsData.map((row) => row['invite_code']),
-      unorderedEquals(['invite-subject-a', 'invite-subject-b']),
+      studyQueries.single.queryParameters['select'],
+      isNot(contains('study_progress_export')),
     );
     expect(participantQueries, hasLength(3));
     expect(progressQueries, hasLength(3));
@@ -82,7 +93,53 @@ void main() {
       '(completed_at.gt.$completedAt,'
       'and(completed_at.eq.$completedAt,subject_id.gt.subject-a))',
     );
-  });
+  }
+
+  test(
+    'export fetches every page of participants and progress',
+    () => checkPaging(forExport: true),
+  );
+  test(
+    'monitoring fetches every page of participants and progress',
+    () => checkPaging(forExport: false),
+  );
+
+  test(
+    'monitoring requests no participant data for an inaccessible study',
+    () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final client = SupabaseClient(
+        'http://${server.address.address}:${server.port}',
+        'test-anon-key',
+        authOptions: const AuthClientOptions(autoRefreshToken: false),
+      );
+      addTearDown(() async {
+        await client.dispose();
+        await server.close(force: true);
+      });
+
+      final paths = <String>[];
+      server.listen((request) async {
+        paths.add(request.uri.path);
+        request.response.statusCode = HttpStatus.notAcceptable;
+        request.response.headers.contentType = ContentType.json;
+        request.response.write(
+          jsonEncode({
+            'code': 'PGRST116',
+            'message': 'JSON object requested, multiple (or no) rows returned',
+          }),
+        );
+        await request.response.close();
+      });
+
+      final api = StudyUApiClient(supabaseClient: client);
+      await expectLater(
+        api.fetchStudy('inaccessible'),
+        throwsA(isA<StudyNotFoundException>()),
+      );
+      expect(paths, ['/rest/v1/study']);
+    },
+  );
 }
 
 Map<String, dynamic> _participant(
