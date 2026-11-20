@@ -8,6 +8,21 @@ double? parseNutritionAmount(String input) {
   return amount != null && amount.isFinite && amount >= 0 ? amount : null;
 }
 
+/// Finds the local occurrences of a clock time within the selected UTC day.
+List<DateTime> localMealTimesOnUtcDay(
+  DateTime day, {
+  required int hour,
+  required int minute,
+}) {
+  final start = DateTime.utc(day.year, day.month, day.day);
+  final matches = <DateTime>[];
+  for (var offset = 0; offset < Duration.minutesPerDay; offset++) {
+    final local = start.add(Duration(minutes: offset)).toLocal();
+    if (local.hour == hour && local.minute == minute) matches.add(local);
+  }
+  return matches;
+}
+
 MealLog cloneMealLog(MealLog meal) => MealLog.fromJson(
   jsonDecode(jsonEncode(meal.toJson())) as Map<String, dynamic>,
 );

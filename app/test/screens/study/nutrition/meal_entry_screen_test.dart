@@ -15,6 +15,7 @@ import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 
+import '../../../util/mock_nutrition_draft_storage.dart';
 import 'fake_nutrition_food_repository.dart';
 
 FoodEntry testFood() => FoodEntry(
@@ -425,6 +426,7 @@ Future<void> chooseMealTime(
   String precision, {
   required String hour,
   required String minute,
+  DayPeriod? period,
 }) async {
   await tester.tap(find.text('Time'));
   await tester.pumpAndSettle();
@@ -436,6 +438,11 @@ Future<void> chooseMealTime(
   final fields = find.byType(TextField);
   await tester.enterText(fields.at(0), hour);
   await tester.enterText(fields.at(1), minute);
+  if (period != null) {
+    final label = period == DayPeriod.am ? 'AM' : 'PM';
+    await tester.tap(find.text(label).last);
+    await tester.pumpAndSettle();
+  }
   await tester.tap(find.text('OK'));
   await tester.pumpAndSettle();
 }
@@ -779,6 +786,35 @@ void main() {
     expect(result!.timestamp!.minute, 30);
     expect(result!.timestamp, isNot(DateTime(2026, 7, 15, 20)));
     expect(result!.timePrecision, MealOccurrenceTimePrecision.exact);
+  });
+
+  testWidgets('meal time uses the selected UTC day at its local boundary', (
+    tester,
+  ) async {
+    final utcDay = DateTime.utc(2024, 2, 3);
+    final latestMinute = DateTime.utc(2024, 2, 3, 23, 59);
+    final local = latestMinute.toLocal();
+    final meal = editableMeal()
+      ..timestamp = null
+      ..timePrecision = MealOccurrenceTimePrecision.unknown;
+    MealLog? result;
+    await openMealEntry(
+      tester,
+      meal,
+      occurrenceDate: utcDay,
+      onResult: (value) => result = value,
+    );
+    await chooseMealTime(
+      tester,
+      'Exact time',
+      hour: (local.hour % 12 == 0 ? 12 : local.hour % 12).toString(),
+      minute: local.minute.toString(),
+      period: local.hour < 12 ? DayPeriod.am : DayPeriod.pm,
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(result!.timestamp, latestMinute);
+    expect(result!.timestamp!.isUtc, isTrue);
   });
 
   testWidgets('approximate meal time can be reopened and changed', (

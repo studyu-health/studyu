@@ -971,10 +971,8 @@ class _NutritionTaskWidgetState()
           task: widget.task,
           initialFoods: foods,
           recallPhoto: recallPhoto,
-          occurrenceDate:
-              recallPhoto?.createDateTime ??
-              (_isHistoricalMode ? model.recall.date : DateTime.now()),
-          historicalTarget: widget.persistenceTarget,
+          occurrenceDate: _mealOccurrenceDate(model),
+          historicalTarget: _isHistoricalMode ? model.persistenceTarget : null,
           canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,
         ),
@@ -995,8 +993,8 @@ class _NutritionTaskWidgetState()
         MealEntryScreen.route(
           existingMeal: meal,
           task: widget.task,
-          occurrenceDate: model.recall.date,
-          historicalTarget: widget.persistenceTarget,
+          occurrenceDate: _mealOccurrenceDate(model),
+          historicalTarget: _isHistoricalMode ? model.persistenceTarget : null,
           canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,
         ),
@@ -1010,6 +1008,14 @@ class _NutritionTaskWidgetState()
       case DiscardedMealEntryResult() || null:
         break;
     }
+  }
+
+  DateTime _mealOccurrenceDate(DailyRecallEntryViewModel model) {
+    final subject = model.subject;
+    final day = model.studyDaySnapshot;
+    return subject?.startedAt != null && day != null
+        ? subject!.nutritionDateForStudyDay(day)
+        : model.recall.date;
   }
 
   Future<MealEntryResult?> _openMealEditor(
@@ -1239,11 +1245,13 @@ class const _MealTimelineCard({
         ? l10n.time_not_remembered
         : meal.timePrecision == MealOccurrenceTimePrecision.approximate
         ? l10n.about_time(
-            MaterialLocalizations.of(context)
-                .formatTimeOfDay(TimeOfDay.fromDateTime(meal.timestamp!)),
+            MaterialLocalizations.of(context).formatTimeOfDay(
+              TimeOfDay.fromDateTime(meal.timestamp!.toLocal()),
+            ),
           )
-        : MaterialLocalizations.of(context)
-              .formatTimeOfDay(TimeOfDay.fromDateTime(meal.timestamp!));
+        : MaterialLocalizations.of(
+            context,
+          ).formatTimeOfDay(TimeOfDay.fromDateTime(meal.timestamp!.toLocal()));
 
     final subtitle = [
       time,

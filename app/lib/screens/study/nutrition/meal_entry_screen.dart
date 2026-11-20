@@ -110,6 +110,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
   late MealType _mealType;
   late MealContext? _mealContext;
   DateTime? _timestamp;
+  String? _selectedTimeZoneName;
   late MealOccurrenceTimePrecision _timePrecision;
   late bool _hasSelectedTime;
   late bool _isSkipped;
@@ -636,7 +637,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           ? null
           : _timestamp,
       timePrecision: _timePrecision,
-      timezone: _meal.timezone,
+      timezone: _selectedTimeZoneName ?? _meal.timezone,
       isSkipped: _isSkipped,
       skipReason: normalizeSkipped && !_isSkipped ? null : _skipReason?.trim(),
       companyContext: clearDetails ? null : _companyContext,
@@ -871,27 +872,78 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       return;
     }
 
+    final existingLocalTime =
+        (selection.timestamp ?? widget.recallPhoto?.createDateTime)?.toLocal();
     final picked = await showTimePicker(
       context: context,
-      initialTime: selection.timestamp == null
+      initialTime: existingLocalTime == null
           ? TimeOfDay.now()
-          : TimeOfDay.fromDateTime(selection.timestamp!),
+          : TimeOfDay.fromDateTime(existingLocalTime),
     );
     if (picked == null || !mounted) return;
-    final date = _timePrecision == MealOccurrenceTimePrecision.unknown
-        ? widget.occurrenceDate ?? DateTime.now()
-        : selection.timestamp ?? widget.occurrenceDate ?? DateTime.now();
-    setState(() {
-      _timestamp = DateTime(
+    final selectedDay = widget.occurrenceDate;
+    final DateTime? timestamp;
+    if (selectedDay?.isUtc == true) {
+      final times = localMealTimesOnUtcDay(
+        selectedDay!,
+        hour: picked.hour,
+        minute: picked.minute,
+      );
+      if (times.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.time_picker_validation_range,
+            ),
+          ),
+        );
+        return;
+      }
+      timestamp = times.length == 1
+          ? times.single
+          : await _chooseLocalMealTime(times);
+    } else {
+      final date = existingLocalTime ?? selectedDay ?? DateTime.now();
+      timestamp = DateTime(
         date.year,
         date.month,
         date.day,
         picked.hour,
         picked.minute,
       );
+    }
+    final selectedTime = timestamp;
+    if (selectedTime == null || !mounted) return;
+    setState(() {
+      _timestamp = selectedDay?.isUtc == true
+          ? selectedTime.toUtc()
+          : selectedTime;
+      _selectedTimeZoneName = selectedTime.timeZoneName;
       _timePrecision = selection.precision;
       _hasSelectedTime = true;
     });
+  }
+
+  Future<DateTime?> _chooseLocalMealTime(List<DateTime> times) {
+    final l10n = AppLocalizations.of(context)!;
+    final material = MaterialLocalizations.of(context);
+    return showDialog<DateTime>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(l10n.datetime_picker_validation_required),
+        children: [
+          for (final time in times)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(dialogContext, time),
+              child: Text(
+                '${material.formatMediumDate(time)} · '
+                '${TimeOfDay.fromDateTime(time).format(dialogContext)} '
+                '${time.timeZoneName}',
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   String _getMealTypeLabel(MealType type) {
@@ -1272,8 +1324,10 @@ class const _TimeSelector({
         : timestamp == null || precision == MealOccurrenceTimePrecision.unknown
         ? l10n.time_not_remembered
         : precision == MealOccurrenceTimePrecision.approximate
-        ? l10n.about_time(TimeOfDay.fromDateTime(timestamp!).format(context))
-        : TimeOfDay.fromDateTime(timestamp!).format(context);
+        ? l10n.about_time(
+            TimeOfDay.fromDateTime(timestamp!.toLocal()).format(context),
+          )
+        : TimeOfDay.fromDateTime(timestamp!.toLocal()).format(context);
     return _SettingsRow(
       icon: Icons.access_time_rounded,
       label: l10n.time,

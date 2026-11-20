@@ -66,6 +66,24 @@ FoodEntry foodEntry({double amount = 2}) => FoodEntry(
 );
 
 void main() {
+  test('local selections map into the UTC day at its two boundaries', () {
+    final day = DateTime.utc(2026, 2, 3);
+    final end = day.add(const Duration(days: 1));
+    for (final instant in [day, end.subtract(const Duration(minutes: 1))]) {
+      final local = instant.toLocal();
+      final times = localMealTimesOnUtcDay(
+        day,
+        hour: local.hour,
+        minute: local.minute,
+      );
+      expect(times.map((time) => time.toUtc()), contains(instant));
+      expect(
+        times.every((time) => !time.isBefore(day) && time.isBefore(end)),
+        isTrue,
+      );
+    }
+  });
+
   test('duplicates food with fresh identity and isolated nested state', () {
     final source = foodEntry();
     final duplicate = duplicateFoodEntry(source);
