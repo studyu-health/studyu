@@ -9,8 +9,15 @@ import 'package:studyu_app/screens/study/nutrition/open_food_facts_attribution.d
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
+sealed class const BarcodeScanResult();
+
+final class const BarcodeFoodFound(final UnifiedFoodResult food)
+    extends BarcodeScanResult;
+
+final class const BarcodeManualEntryRequested() extends BarcodeScanResult;
+
 class const BarcodeScannerScreen({super.key}) extends StatefulWidget {
-  static MaterialPageRoute<UnifiedFoodResult> route() =>
+  static MaterialPageRoute<BarcodeScanResult> route() =>
       MaterialPageRoute(builder: (_) => const BarcodeScannerScreen());
 
   @override
@@ -120,7 +127,10 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
 
       if (result.status == ProductResultV3.statusSuccess &&
           result.product != null) {
-        Navigator.pop(context, openFoodFactsSearchResult(result.product!));
+        Navigator.pop(
+          context,
+          BarcodeFoodFound(openFoodFactsSearchResult(result.product!)),
+        );
         return;
       }
 
@@ -135,7 +145,10 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
           if (usdaResult.foods.isNotEmpty) {
             final usdaFood = usdaResult.foods.first;
 
-            Navigator.pop(context, usdaFoodSearchResult(usdaFood));
+            Navigator.pop(
+              context,
+              BarcodeFoodFound(usdaFoodSearchResult(usdaFood)),
+            );
             return;
           }
         } catch (usdaError) {
@@ -162,6 +175,7 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
       message: l10n.barcode_scanner_not_found_message(barcode),
       retryLabel: l10n.barcode_scanner_scan_again,
       exitLabel: l10n.add_manually,
+      exitResult: const BarcodeManualEntryRequested(),
     );
   }
 
@@ -180,6 +194,7 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
     required String message,
     required String retryLabel,
     required String exitLabel,
+    BarcodeScanResult? exitResult,
   }) async {
     final shouldExit = await showDialog<bool>(
       context: context,
@@ -202,7 +217,7 @@ class _BarcodeScannerScreenState() extends State<BarcodeScannerScreen> {
     );
     if (!mounted) return;
     if (shouldExit == true) {
-      Navigator.pop(context);
+      Navigator.pop(context, exitResult);
       return;
     }
     setState(() {

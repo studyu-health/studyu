@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/barcode_scanner_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search/food_search_requests.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
@@ -271,6 +272,76 @@ void main() {
 
     expect(transport.requests, isEmpty);
   });
+
+  for (final library in [false, true]) {
+    testWidgets(
+      'barcode manual action opens the food editor (library: $library)',
+      (tester) async {
+        final original = MobileScannerPlatform.instance;
+        MobileScannerPlatform.instance = _ScannerPlatform();
+        addTearDown(() => MobileScannerPlatform.instance = original);
+        transport.product = {};
+        final templates = TemplateViewModel(
+          userId: 'subject',
+          repository: _EmptyRepository(),
+        );
+        addTearDown(templates.dispose);
+        final l10n = lookupAppLocalizations(const Locale('en'));
+
+        await tester.pumpWidget(
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => AppState()),
+              ChangeNotifierProvider.value(value: templates),
+            ],
+            child: _app(
+              home: library
+                  ? const Scaffold(
+                      body: FoodLibrary(includeExternalLibrary: true),
+                    )
+                  : const FoodSearchScreen(mealLabel: 'Dinner'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip(l10n.scan_barcode));
+        await tester.pumpAndSettle();
+        await http.runWithClient(
+          () async {
+            tester.widget<MobileScanner>(find.byType(MobileScanner)).onDetect!(
+              const BarcodeCapture(
+                barcodes: [
+                  Barcode(
+                    format: BarcodeFormat.ean13,
+                    rawValue: '0123456789012',
+                  ),
+                ],
+              ),
+            );
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 300));
+          },
+          () => MockClient(
+            (_) async => http.Response(
+              '{"totalHits":0,"currentPage":1,"totalPages":0,"foods":[]}',
+              200,
+            ),
+          ),
+        );
+
+        await tester.tap(find.text(l10n.add_manually));
+        await tester.pumpAndSettle();
+        expect(find.byType(FoodEntryScreen), findsOneWidget);
+        expect(find.byType(BarcodeScannerScreen), findsNothing);
+        expect(
+          tester
+              .widget<FoodEntryScreen>(find.byType(FoodEntryScreen))
+              .mealLabel,
+          library ? isNull : 'Dinner',
+        );
+      },
+    );
+  }
 
   for (final hasGramServing in [false, true]) {
     testWidgets(

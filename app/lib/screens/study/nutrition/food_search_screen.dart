@@ -830,8 +830,15 @@ class _FoodSearchScreenContentState()
   Future<void> _scanBarcode() async {
     _removeTransfer();
     final result = await Navigator.push(context, BarcodeScannerScreen.route());
-    if (result == null || !mounted) return;
-    _selectResult(result, null);
+    if (!mounted) return;
+    switch (result) {
+      case BarcodeFoodFound(:final food):
+        _selectResult(food, null);
+      case BarcodeManualEntryRequested():
+        _addManually();
+      case null:
+        break;
+    }
   }
 
   List<FoodSearchHistoryItem> _recentMatches(String query) {
