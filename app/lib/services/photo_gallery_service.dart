@@ -6,11 +6,16 @@ import 'package:studyu_app/models/photo_reference.dart';
 
 /// Service for querying device photo gallery.
 class PhotoGalleryService() {
-  /// Local midnight boundaries for the calendar date containing [date].
-  static ({DateTime start, DateTime end}) localDayRange(DateTime date) => (
-    start: DateTime(date.year, date.month, date.day),
-    end: DateTime(date.year, date.month, date.day + 1),
-  );
+  /// Midnight boundaries in the calendar of [date].
+  static ({DateTime start, DateTime end}) dayRange(DateTime date) => date.isUtc
+      ? (
+          start: DateTime.utc(date.year, date.month, date.day),
+          end: DateTime.utc(date.year, date.month, date.day + 1),
+        )
+      : (
+          start: DateTime(date.year, date.month, date.day),
+          end: DateTime(date.year, date.month, date.day + 1),
+        );
 
   /// Check if photo gallery permission is granted.
   Future<bool> hasPermission() async {
@@ -42,12 +47,12 @@ class PhotoGalleryService() {
     return state.isAuth || state == PermissionState.limited;
   }
 
-  /// Get all photos taken on the local calendar date.
+  /// Get all photos taken on the calendar date in [date].
   Future<List<PhotoReference>> getPhotosForDate(DateTime date) async {
     final hasAccess = await hasPermission();
     if (!hasAccess) return [];
 
-    final range = localDayRange(date);
+    final range = dayRange(date);
     final filterOption = FilterOptionGroup(
       createTimeCond: DateTimeCond(min: range.start, max: range.end),
       orders: [const OrderOption()],
@@ -72,6 +77,11 @@ class PhotoGalleryService() {
             id: asset.id,
             createDateTime: asset.createDateTime,
           ),
+        )
+        .where(
+          (photo) =>
+              !photo.createDateTime.isBefore(range.start) &&
+              photo.createDateTime.isBefore(range.end),
         )
         .toList();
   }

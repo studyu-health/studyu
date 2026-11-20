@@ -6,9 +6,9 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/photo_reference.dart';
 import 'package:studyu_app/services/photo_gallery_service.dart';
 
-/// A section that displays photos from a local calendar date.
+/// A section that displays photos from a calendar date.
 class const PhotoRecallSection({
-  /// The local calendar date to show photos for.
+  /// The calendar date and time basis for the photo query.
   required final DateTime date,
 
   /// Callback when a photo is tapped.
@@ -41,10 +41,13 @@ class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
   @override
   void didUpdateWidget(covariant PhotoRecallSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!DateUtils.isSameDay(oldWidget.date, widget.date) && _hasPermission) {
+    if (!_matchesDate(oldWidget.date) && _hasPermission) {
       _loadPhotos();
     }
   }
+
+  bool _matchesDate(DateTime date) =>
+      date.isUtc == widget.date.isUtc && DateUtils.isSameDay(date, widget.date);
 
   @override
   void dispose() {
@@ -72,14 +75,14 @@ class _PhotoRecallSectionState() extends State<PhotoRecallSection> {
 
     try {
       final photos = await _photoService.getPhotosForDate(date);
-      if (mounted && DateUtils.isSameDay(date, widget.date)) {
+      if (mounted && _matchesDate(date)) {
         setState(() {
           _photos = photos;
           _isLoading = false;
         });
       }
     } catch (_) {
-      if (mounted && DateUtils.isSameDay(date, widget.date)) {
+      if (mounted && _matchesDate(date)) {
         setState(() => _isLoading = false);
       }
     }

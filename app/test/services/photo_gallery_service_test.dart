@@ -14,12 +14,17 @@ void main() {
   });
 
   test('local day range uses calendar-day boundaries', () {
-    final range = PhotoGalleryService.localDayRange(
-      DateTime(2026, 7, 15, 18, 30),
-    );
+    final range = PhotoGalleryService.dayRange(DateTime(2026, 7, 15, 18, 30));
 
     expect(range.start, DateTime(2026, 7, 15));
     expect(range.end, DateTime(2026, 7, 16));
+  });
+
+  test('UTC range uses UTC midnight boundaries', () {
+    final range = PhotoGalleryService.dayRange(DateTime.utc(2026, 7, 15, 18));
+
+    expect(range.start, DateTime.utc(2026, 7, 15));
+    expect(range.end, DateTime.utc(2026, 7, 16));
   });
 
   test('loads every photo from the aggregate album', () async {
@@ -65,14 +70,17 @@ void main() {
               requestedSize = arguments['size'] as int;
               return {
                 'data': List.generate(
-                  25,
+                  26,
                   (index) => {
                     'id': 'photo-$index',
                     'type': 1,
                     'width': 100,
                     'height': 100,
                     'createDt':
-                        DateTime(2026, 7, 15, 12).millisecondsSinceEpoch ~/
+                        (index == 25
+                                ? DateTime(2026, 7, 16)
+                                : DateTime(2026, 7, 15, 12))
+                            .millisecondsSinceEpoch ~/
                         1000,
                   },
                 ),
