@@ -52,6 +52,51 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('ingredient quantity keeps its unit and scales nutrition', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final ingredient = _food()..unit = 'slice';
+    final repository = FakeNutritionFoodRepository();
+    final templates = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(templates.dispose);
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(
+        initialName: 'Meal',
+        initialFoods: [ingredient],
+        templateViewModel: templates,
+      ),
+      (_) {},
+      templates,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    final edit = find.byTooltip(l10n.food_quantity_edit_amount);
+    await tester.ensureVisible(edit);
+    await tester.tap(edit);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, l10n.food_quantity_amount),
+      '2',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, l10n.save));
+    await tester.pumpAndSettle();
+    expect(find.textContaining(l10n.kcal_value('200')), findsWidgets);
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    final recipe = (await repository.loadTemplates('subject')).single.prototype;
+    expect(recipe.nutrition.energyKcal, 200);
+    expect(recipe.componentFoods!.single.unit, 'slice');
+    expect(recipe.componentSnapshots!.single.unit, 'slice');
+    expect(recipe.componentSnapshots!.single.amount, 2);
+    expect(recipe.componentSnapshots!.single.nutrition.energyKcal, 200);
+  });
+
   testWidgets('repeat taps submit one meal template while saving', (
     tester,
   ) async {

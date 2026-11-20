@@ -308,16 +308,9 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     });
   }
 
-  void _updateFoodAmount(int index, double amount, String unit) {
+  void _updateFoodAmount(int index, double amount) {
     setState(() {
-      _foods[index] = FoodComposition(
-        id: _foods[index].id,
-        parentEntryId: _foods[index].parentEntryId,
-        foodId: _foods[index].foodId,
-        amount: amount,
-        unit: unit,
-        sortOrder: _foods[index].sortOrder,
-      );
+      _foods[index].amount = amount;
       _cachedNutrition = null;
     });
   }
@@ -818,8 +811,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
                   composition: composition,
                   theme: theme,
                   onRemove: () => _removeFood(index),
-                  onUpdateAmount: (amount, unit) =>
-                      _updateFoodAmount(index, amount, unit),
+                  onUpdateAmount: (amount) => _updateFoodAmount(index, amount),
                 );
               }),
 
@@ -1254,7 +1246,7 @@ class const _FoodCard({
   required final FoodComposition composition,
   required final ThemeData theme,
   required final VoidCallback onRemove,
-  required final Function(double amount, String unit) onUpdateAmount,
+  required final ValueChanged<double> onUpdateAmount,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1263,6 +1255,7 @@ class const _FoodCard({
         ? Icons.restaurant_menu_outlined
         : Icons.restaurant_outlined;
     final imageUrl = foodImageUrl(food);
+    final energy = food.nutrition.energyKcal * composition.amount / food.amount;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -1291,7 +1284,7 @@ class const _FoodCard({
           ),
         ),
         subtitle: Text(
-          '${composition.amount} ${composition.unit} • ${food.nutrition.isKnown('energyKcal') ? l10n.kcal_value(food.nutrition.energyKcal.toStringAsFixed(0)) : '— kcal'}${food.nutrition.isPartial('energyKcal') ? ' (${l10n.nutrition_partial})' : ''}',
+          '${composition.amount} ${composition.unit} • ${food.nutrition.isKnown('energyKcal') ? l10n.kcal_value(energy.toStringAsFixed(0)) : '— kcal'}${food.nutrition.isPartial('energyKcal') ? ' (${l10n.nutrition_partial})' : ''}',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -1323,7 +1316,6 @@ class const _FoodCard({
     final amountController = TextEditingController(
       text: composition.amount.toString(),
     );
-    final unitController = TextEditingController(text: composition.unit);
 
     showDialog(
       context: context,
@@ -1336,16 +1328,11 @@ class const _FoodCard({
               controller: amountController,
               decoration: InputDecoration(
                 labelText: l10n.food_quantity_amount,
+                suffixText: composition.unit,
                 border: const OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: unitController,
-              decoration: InputDecoration(
-                labelText: l10n.nutrition_unit_label,
-                border: const OutlineInputBorder(),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
             ),
           ],
@@ -1364,7 +1351,7 @@ class const _FoodCard({
                 );
                 return;
               }
-              onUpdateAmount(amount, unitController.text);
+              onUpdateAmount(amount);
               Navigator.pop(context);
             },
             child: Text(l10n.save),
