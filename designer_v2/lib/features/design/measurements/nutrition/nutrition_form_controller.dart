@@ -33,8 +33,6 @@ class NutritionFormViewModel({
   final FormControl<bool> collectMealContextControl = FormControl(value: true);
   final FormControl<bool> allowMealsControl = FormControl(value: true);
   final FormControl<bool> trackWaterIntakeControl = FormControl(value: false);
-  final FormControl<bool> requireDailyCompletionConfirmationControl =
-      FormControl(value: false);
   final FormControl<int> minimumMealsRequiredControl = FormControl();
   final FormArray<String> customMealTypesControl = FormArray<String>([]);
 
@@ -78,8 +76,6 @@ class NutritionFormViewModel({
     'collectMealContext': collectMealContextControl,
     'allowMeals': allowMealsControl,
     'trackWaterIntake': trackWaterIntakeControl,
-    'requireDailyCompletionConfirmation':
-        requireDailyCompletionConfirmationControl,
     'minimumMealsRequired': minimumMealsRequiredControl,
     'customMealTypes': customMealTypesControl,
     ...scheduleFormControls,
@@ -94,8 +90,6 @@ class NutritionFormViewModel({
     collectMealContextControl.value = data.collectMealContext;
     allowMealsControl.value = data.allowMeals;
     trackWaterIntakeControl.value = data.trackWaterIntake;
-    requireDailyCompletionConfirmationControl.value =
-        data.requireDailyCompletionConfirmation;
     minimumMealsRequiredControl.value = data.minimumMealsRequired;
 
     customMealTypesControl.clear();
@@ -116,8 +110,6 @@ class NutritionFormViewModel({
       collectMealContext: collectMealContextControl.value ?? true,
       allowMeals: allowMealsControl.value ?? true,
       trackWaterIntake: trackWaterIntakeControl.value ?? false,
-      requireDailyCompletionConfirmation:
-          requireDailyCompletionConfirmationControl.value ?? false,
       minimumMealsRequired: minimumMealsRequiredControl.value,
       customMealTypes: () {
         final types = customMealTypesControl.controls

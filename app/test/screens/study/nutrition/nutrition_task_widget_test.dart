@@ -92,14 +92,12 @@ NutritionTask nutritionTask({
   String? instructions,
   int? minimumMeals,
   List<String>? customMealTypes,
-  bool requireDailyCompletionConfirmation = true,
 }) => NutritionTask.withId()
   ..id = 'nutrition-task'
   ..title = 'Nutrition'
   ..instructions = instructions
   ..minimumMealsRequired = minimumMeals
-  ..customMealTypes = customMealTypes
-  ..requireDailyCompletionConfirmation = requireDailyCompletionConfirmation;
+  ..customMealTypes = customMealTypes;
 
 NutritionProfile nutrition(double energyKcal) => NutritionProfile(
   energyKcal: energyKcal,
@@ -706,7 +704,7 @@ void main() {
   testWidgets('never renders manual completion controls', (tester) async {
     await tester.pumpWidget(
       nutritionTaskApp(
-        nutritionTask(requireDailyCompletionConfirmation: false),
+        nutritionTask(),
         existingRecall: recall([meal('meal', MealType.breakfast)]),
       ),
     );

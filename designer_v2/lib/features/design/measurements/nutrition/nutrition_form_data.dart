@@ -20,7 +20,6 @@ class NutritionFormData({
   final bool collectMealContext = true,
   final bool allowMeals = true,
   final bool trackWaterIntake = false,
-  final bool requireDailyCompletionConfirmation = false,
   final int? minimumMealsRequired,
   final List<String>? customMealTypes,
   final TaskScheduleRule? scheduleRule,
@@ -44,8 +43,6 @@ class NutritionFormData({
       collectMealContext: nutritionTask.collectMealContext,
       allowMeals: nutritionTask.allowMeals,
       trackWaterIntake: nutritionTask.trackWaterIntake,
-      requireDailyCompletionConfirmation:
-          nutritionTask.requireDailyCompletionConfirmation,
       minimumMealsRequired: nutritionTask.minimumMealsRequired,
       customMealTypes: nutritionTask.customMealTypes,
       scheduleRule: nutritionTask.scheduleRule,
@@ -61,8 +58,6 @@ class NutritionFormData({
     nutritionTask.collectMealContext = collectMealContext;
     nutritionTask.allowMeals = allowMeals;
     nutritionTask.trackWaterIntake = trackWaterIntake;
-    nutritionTask.requireDailyCompletionConfirmation =
-        requireDailyCompletionConfirmation;
     nutritionTask.minimumMealsRequired = minimumMealsRequired;
     nutritionTask.customMealTypes = customMealTypes;
     nutritionTask.scheduleRule = scheduleRule;
@@ -84,7 +79,6 @@ class NutritionFormData({
       collectMealContext: collectMealContext,
       allowMeals: allowMeals,
       trackWaterIntake: trackWaterIntake,
-      requireDailyCompletionConfirmation: requireDailyCompletionConfirmation,
       minimumMealsRequired: minimumMealsRequired,
       customMealTypes: customMealTypes != null
           ? List.from(customMealTypes!)

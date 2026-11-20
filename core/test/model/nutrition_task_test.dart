@@ -48,25 +48,6 @@ void main() {
     expect(NutritionTask.fromJson(task.toJson()).trackWaterIntake, isTrue);
   });
 
-  test('missing completion confirmation defaults to required', () {
-    final task = NutritionTask.withId();
-    final json = task.toJson()..remove('requireDailyCompletionConfirmation');
-
-    expect(
-      NutritionTask.fromJson(json).requireDailyCompletionConfirmation,
-      isTrue,
-    );
-  });
-
-  test('serializes an explicitly optional daily completion', () {
-    final task = NutritionTask.withId()
-      ..requireDailyCompletionConfirmation = false;
-
-    final restored = NutritionTask.fromJson(task.toJson());
-
-    expect(restored.requireDailyCompletionConfirmation, isFalse);
-  });
-
   test('only completed daily recalls satisfy task completion', () {
     final date = DateTime(2026, 7, 15);
     final period = CompletionPeriod(

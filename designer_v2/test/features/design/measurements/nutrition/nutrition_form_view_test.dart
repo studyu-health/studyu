@@ -11,25 +11,6 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 void main() {
   setUpAll(() => AppTranslation.setForTesting(AppLocalizationsEn()));
 
-  test('preserves the hidden legacy completion setting', () {
-    final formViewModel = NutritionFormViewModel(
-      study: Study.withId('study-1'),
-    );
-    formViewModel.requireDailyCompletionConfirmationControl.value = true;
-
-    expect(
-      formViewModel.buildFormData().requireDailyCompletionConfirmation,
-      isTrue,
-    );
-    expect(
-      formViewModel
-          .buildFormData()
-          .toNutritionTask()
-          .requireDailyCompletionConfirmation,
-      isTrue,
-    );
-  });
-
   test('allows an empty optional minimum meal count', () {
     final formViewModel = NutritionFormViewModel(
       study: Study.withId('study-1'),

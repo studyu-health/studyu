@@ -21,13 +21,6 @@ class NutritionTask extends Observation {
   @JsonKey(defaultValue: false)
   bool trackWaterIntake = false;
 
-  /// Whether participants must explicitly confirm their daily nutrition log.
-  ///
-  /// Existing serialized tasks default to true for backwards compatibility;
-  /// new tasks may opt into autosave-only completion by setting this to false.
-  @JsonKey(defaultValue: true)
-  bool requireDailyCompletionConfirmation = true;
-
   /// Minimum number of meals required per day (optional)
   int? minimumMealsRequired;
 
