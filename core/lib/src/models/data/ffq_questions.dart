@@ -208,7 +208,8 @@ class FFQQuestions() {
       ..title = 'Food Frequency Questionnaire (FFQ)'
       ..header = introText
       ..footer = 'Thank you for completing the Food Frequency Questionnaire!'
-      ..questions.questions = createQuestions();
+      ..questions.questions = createQuestions()
+      ..scheduleRule = TaskScheduleRule.forPerCycle(0, targetCycles: [0]);
 
     task.schedule = Schedule()
       ..completionPeriods = [
@@ -225,11 +226,6 @@ class FFQQuestions() {
   /// 14-day FFQ: returns the survey for day index 0..13 (Day 1..14). Each has one cluster of DHQ3 questions.
   static QuestionnaireTask createFFQTaskForDay(int dayIndex) {
     return Dhq3Questions.createTaskForDay(dayIndex);
-  }
-
-  static bool isFFQTask(String taskTitle) {
-    return taskTitle.contains('Food Frequency Questionnaire') ||
-        taskTitle.contains('FFQ');
   }
 
   /// True if this is one of the 14 named DHQ3 surveys (e.g. "About you", "Beverages", "Fruits").

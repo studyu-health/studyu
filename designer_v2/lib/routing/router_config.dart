@@ -266,55 +266,7 @@ class RouterConf() {
               queryParams: state.uri.queryParameters,
             );
             return MaterialPage(
-              child: Consumer(
-                builder: (context, ref, child) {
-                  final studyState = ref.watch(
-                    studyControllerProvider(routeArgs.studyId),
-                  );
-                  if (studyState.study.asData?.value == null) {
-                    return const Scaffold(
-                      body: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-
-                  final formViewModel = ref.watch(
-                    measurementFormViewModelProvider(routeArgs),
-                  );
-                  if (formViewModel is NutritionFormViewModel) {
-                    return StudyFormScaffold<ManagedFormViewModel>(
-                      studyId: routeArgs.studyId,
-                      formViewModelBuilder: (_) =>
-                          formViewModel as ManagedFormViewModel,
-                      formViewBuilder: (formViewModel) => TwoColumnLayout.split(
-                        leftWidget: NutritionFormView(
-                          formViewModel:
-                              formViewModel as NutritionFormViewModel,
-                        ),
-                        rightWidget: NutritionPreview(routeArgs: routeArgs),
-                        flexLeft: 7,
-                        constraintsLeft: const BoxConstraints(minWidth: 500.0),
-                        scrollRight: false,
-                        paddingRight: null,
-                      ),
-                    );
-                  }
-                  return StudyFormScaffold<MeasurementSurveyFormViewModel>(
-                    studyId: routeArgs.studyId,
-                    formViewModelBuilder: (_) =>
-                        formViewModel as MeasurementSurveyFormViewModel,
-                    formViewBuilder: (formViewModel) => TwoColumnLayout.split(
-                      leftWidget: MeasurementSurveyFormView(
-                        formViewModel: formViewModel,
-                      ),
-                      rightWidget: SurveyPreview(routeArgs: routeArgs),
-                      flexLeft: 7,
-                      constraintsLeft: const BoxConstraints(minWidth: 500.0),
-                      scrollRight: false,
-                      paddingRight: null,
-                    ),
-                  );
-                },
-              ),
+              child: MeasurementFormRouteView(routeArgs: routeArgs),
             );
           },
         ),
@@ -453,6 +405,64 @@ class RouterConf() {
     }
 
     return searchRouteNames(routes)!;
+  }
+}
+
+class const MeasurementFormRouteView({
+  required final MeasurementFormRouteArgs routeArgs,
+  super.key,
+}) extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final studyState = ref.watch(studyControllerProvider(routeArgs.studyId));
+    if (studyState.study.asData?.value == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final formViewModel = ref.watch(
+      measurementFormViewModelProvider(routeArgs),
+    );
+    if (formViewModel == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          context.goNamed(
+            studyEditMeasurementsRouteName,
+            pathParameters: {RouteParams.studyId: routeArgs.studyId},
+          );
+        }
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (formViewModel is NutritionFormViewModel) {
+      return StudyFormScaffold<ManagedFormViewModel>(
+        studyId: routeArgs.studyId,
+        formViewModelBuilder: (_) => formViewModel,
+        formViewBuilder: (formViewModel) => TwoColumnLayout.split(
+          leftWidget: NutritionFormView(
+            formViewModel: formViewModel as NutritionFormViewModel,
+          ),
+          rightWidget: NutritionPreview(routeArgs: routeArgs),
+          flexLeft: 7,
+          constraintsLeft: const BoxConstraints(minWidth: 500.0),
+          scrollRight: false,
+          paddingRight: null,
+        ),
+      );
+    }
+    return StudyFormScaffold<MeasurementSurveyFormViewModel>(
+      studyId: routeArgs.studyId,
+      formViewModelBuilder: (_) =>
+          formViewModel as MeasurementSurveyFormViewModel,
+      formViewBuilder: (formViewModel) => TwoColumnLayout.split(
+        leftWidget: MeasurementSurveyFormView(formViewModel: formViewModel),
+        rightWidget: SurveyPreview(routeArgs: routeArgs),
+        flexLeft: 7,
+        constraintsLeft: const BoxConstraints(minWidth: 500.0),
+        scrollRight: false,
+        paddingRight: null,
+      ),
+    );
   }
 }
 

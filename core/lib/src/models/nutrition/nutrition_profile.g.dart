@@ -22,6 +22,16 @@ NutritionProfile _$NutritionProfileFromJson(Map<String, dynamic> json) =>
       micros: (json['micros'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(k, (e as num).toDouble()),
       ),
+      unavailableNutrients:
+          (json['unavailableNutrients'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toSet() ??
+          const {},
+      partialNutrients:
+          (json['partialNutrients'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toSet() ??
+          const {},
     );
 
 Map<String, dynamic> _$NutritionProfileToJson(NutritionProfile instance) =>
@@ -38,4 +48,6 @@ Map<String, dynamic> _$NutritionProfileToJson(NutritionProfile instance) =>
       'sodium': instance.sodium,
       'waterContent': instance.waterContent,
       'micros': instance.micros,
+      'unavailableNutrients': instance.unavailableNutrients.toList(),
+      'partialNutrients': instance.partialNutrients.toList(),
     };

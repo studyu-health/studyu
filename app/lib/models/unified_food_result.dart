@@ -9,6 +9,13 @@ class UnifiedFoodResult({
   final String? brand,
   final String? imageUrl,
   final double? calories,
+
+  /// Grams represented by [calories], including a 100 g reference when needed.
+  final double? calorieBasisGrams,
+
+  /// Grams represented by one source serving, when known.
+  final double? servingSizeGrams,
+  final String? servingVolumeLabel,
   required final FoodSource source,
 
   /// Holds [Product] (from OpenFoodFacts) or [UsdaFoodItem] (from App)

@@ -326,6 +326,55 @@ void main() {
       Theme.of(tester.element(acknowledgement)).colorScheme.error,
     );
   });
+
+  testWidgets('retries local cleanup after deleting the remote subject', (
+    tester,
+  ) async {
+    var cleanupAttempts = 0;
+    const secureStorage = MethodChannel(
+      'plugins.it_nomads.com/flutter_secure_storage',
+    );
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(secureStorage, (call) async {
+      if (call.method == 'delete') {
+        cleanupAttempts++;
+        throw PlatformException(code: 'test cleanup error');
+      }
+      return null;
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(secureStorage, null));
+    final study = Study('study', 'researcher')..title = 'Nutrition study';
+    final subject = _DeletedSubject()..study = study;
+    final state = AppState()..activeSubject = subject;
+    addTearDown(state.dispose);
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          locale: const Locale('en'),
+          home: Scaffold(body: DeleteAlertDialog(subject: subject)),
+        ),
+      ),
+    );
+
+    final delete = find.widgetWithText(
+      ElevatedButton,
+      'Leave and delete my data',
+    );
+    await tester.tap(find.byType(Checkbox));
+    await tester.pump();
+    await tester.tap(delete);
+    await tester.pumpAndSettle();
+    expect(subject.deleteCalls, 1);
+    expect(cleanupAttempts, 1);
+
+    await tester.tap(delete);
+    await tester.pumpAndSettle();
+    expect(subject.deleteCalls, 1);
+    expect(cleanupAttempts, 2);
+  });
 }
 
 class _TestAppLanguage() extends ChangeNotifier implements AppLanguage {
@@ -343,4 +392,16 @@ class _TestAppLanguage() extends ChangeNotifier implements AppLanguage {
 
   @override
   Future<void> synchronizeWithServer() async {}
+}
+
+class _DeletedSubject() extends StudySubject {
+  this : super('subject', 'study', 'user', []);
+
+  int deleteCalls = 0;
+
+  @override
+  Future<StudySubject> delete() async {
+    deleteCalls++;
+    return this;
+  }
 }

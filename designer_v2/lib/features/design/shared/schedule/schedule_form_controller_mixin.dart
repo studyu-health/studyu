@@ -39,6 +39,7 @@ mixin WithScheduleControls {
       : null;
 
   StreamSubscription? _reminderControlStream;
+  bool _timePickerSynchronizationInitialized = false;
 
   late final scheduleFormControls = {
     'isTimeRestricted': isTimeRestrictedControl,
@@ -47,6 +48,25 @@ mixin WithScheduleControls {
     'hasReminder': hasReminderControl,
     'reminderTime': reminderTimeControl,
   };
+
+  void ensureTimePickerSynchronization() {
+    if (_timePickerSynchronizationInitialized) return;
+    _timePickerSynchronizationInitialized = true;
+
+    reminderTimePickerControl.valueChanges.listen((value) {
+      if (value != null) reminderTimeControl.value = Time.fromTimeOfDay(value);
+    });
+    restrictedTimeStartPickerControl.valueChanges.listen((value) {
+      if (value != null) {
+        restrictedTimeStartControl.value = Time.fromTimeOfDay(value);
+      }
+    });
+    restrictedTimeEndPickerControl.valueChanges.listen((value) {
+      if (value != null) {
+        restrictedTimeEndControl.value = Time.fromTimeOfDay(value);
+      }
+    });
+  }
 
   void setScheduleControlsFrom(IFormDataWithSchedule data) {
     isTimeRestrictedControl.value = data.isTimeLocked;

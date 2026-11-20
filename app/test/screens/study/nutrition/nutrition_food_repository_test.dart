@@ -1,0 +1,636 @@
+import 'dart:convert';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
+import 'package:studyu_core/core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../util/mock_nutrition_draft_storage.dart';
+
+void main() {
+  test(
+    'repository mutation and library hydration preserve availability',
+    () async {
+      final food = _food()
+        ..nutrition.unavailableNutrients = {'protein', 'micros.iron'}
+        ..nutrition.partialNutrients = {'energyKcal'};
+      final repository = NutritionFoodRepository(
+        client: _client((request) async {
+          if (request.url.path.endsWith('/list_nutrition_library')) {
+            if (request.url.queryParameters.containsKey('id')) {
+              return _jsonResponse([], request);
+            }
+            final row = _definitionRow()..['snapshot'] = food.toJson();
+            return _jsonResponse([row], request);
+          }
+          final params = jsonDecode(request.body) as Map<String, dynamic>;
+          final sent = FoodEntry.fromJson(
+            params['p_snapshot'] as Map<String, dynamic>,
+          );
+          expect(
+            sent.nutrition.unavailableNutrients,
+            food.nutrition.unavailableNutrients,
+          );
+          expect(sent.nutrition.partialNutrients, {'energyKcal'});
+          return _jsonResponse(_mutationResponse(food: sent), request);
+        }),
+      );
+      final loaded = (await repository.loadTemplates('subject')).single;
+      expect(loaded.prototype.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
+      expect(loaded.prototype.nutrition.partialNutrients, {'energyKcal'});
+      final saved = await repository.saveTemplate(
+        subjectId: 'subject',
+        name: 'Food',
+        food: food,
+        expectedVersionId: 'version-1',
+      );
+      expect(saved.prototype.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
+      final mutation = await repository.mutateHistoricalDefinition(
+        subjectId: 'subject',
+        snapshot: food,
+        expectedVersionId: 'version-1',
+        entryId: food.id,
+        target: {},
+      );
+      expect(mutation.definition.snapshot.nutrition.partialNutrients, {
+        'energyKcal',
+      });
+    },
+  );
+
+  test('loads the Library for the requested subject', () async {
+    late http.Request libraryRequest;
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        if (request.url.queryParameters.containsKey('id')) {
+          return _jsonResponse([], request);
+        }
+        libraryRequest = request;
+        return _jsonResponse([_definitionRow()], request);
+      }),
+    );
+
+    final templates = await repository.loadTemplates('subject');
+
+    expect(templates.single.id, 'food-definition');
+    expect(templates.single.prototype.foodVersionId, 'version-1');
+    expect(templates.single.tags, ['fruit']);
+    expect(libraryRequest.url.path, endsWith('/rpc/list_nutrition_library'));
+    expect(jsonDecode(libraryRequest.body), {'p_subject_id': 'subject'});
+  });
+
+  test('library continues when the service caps the page size', () async {
+    final requests = <Uri>[];
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        requests.add(request.url);
+        final cursor = request.url.queryParameters['id'];
+        final rows = [
+          if (cursor == null) _definitionRow()..['id'] = 'food-000',
+          if (cursor == null || cursor == 'gt.food-000')
+            _definitionRow()..['id'] = 'food-001',
+          if (cursor == 'gt.food-001') _definitionRow()..['id'] = 'food-002',
+        ];
+        return _jsonResponse(rows, request);
+      }),
+    );
+
+    final templates = await repository.loadTemplates('subject');
+
+    expect(templates.map((template) => template.id), [
+      'food-000',
+      'food-001',
+      'food-002',
+    ]);
+    expect(requests.map((uri) => uri.queryParameters['order']), [
+      'id.asc.nullslast',
+      'id.asc.nullslast',
+      'id.asc.nullslast',
+    ]);
+    expect(requests.map((uri) => uri.queryParameters['id']), [
+      null,
+      'gt.food-001',
+      'gt.food-002',
+    ]);
+  });
+
+  test('current food definition loads the owner-scoped snapshot', () async {
+    final food = _food()..foodVersionId = 'current';
+    final requests = <Uri>[];
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        requests.add(request.url);
+        final data = request.url.path.endsWith('/nutrition_food_definition')
+            ? {'current_version_id': 'current', 'deleted_at': null}
+            : {'snapshot': food.toJson()};
+        return _jsonResponse(data, request);
+      }),
+    );
+
+    final current = await repository.loadCurrentFoodDefinition(
+      subjectId: 'subject',
+      foodId: food.foodId,
+    );
+
+    expect(current!.foodVersionId, 'current');
+    expect(requests.first.queryParameters['subject_id'], 'eq.subject');
+    expect(requests.last.queryParameters['food_id'], 'eq.${food.foodId}');
+    expect(requests.last.queryParameters['id'], 'eq.current');
+  });
+
+  test('historical mutation returns explicit update counts', () async {
+    late Map<String, dynamic> params;
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        params = jsonDecode(request.body) as Map<String, dynamic>;
+        return _jsonResponse(_mutationResponse(), request);
+      }),
+    );
+
+    final result = await repository.mutateHistoricalDefinition(
+      subjectId: 'subject',
+      snapshot: _food(),
+      expectedVersionId: 'version-1',
+      entryId: 'selected-entry',
+      target: const {'taskId': 'task'},
+      currentStudyDay: 5,
+      mutationId: 'mutation',
+    );
+
+    expect(params['p_historical_entry_id'], 'selected-entry');
+    expect(params['p_food_id'], 'food-definition');
+    expect(params['p_propagate_study_day'], 5);
+    expect(result.progress, hasLength(3));
+    expect(result.selectedHistoricalUpdateCount, 1);
+    expect(result.todayUpdateCount, 3);
+  });
+
+  test('historical mutation forwards null propagation', () async {
+    late Map<String, dynamic> params;
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        params = jsonDecode(request.body) as Map<String, dynamic>;
+        return _jsonResponse(_mutationResponse(), request);
+      }),
+    );
+
+    await repository.mutateHistoricalDefinition(
+      subjectId: 'subject',
+      snapshot: _food(),
+      expectedVersionId: 'version-1',
+      entryId: 'selected-entry',
+      target: const {'taskId': 'task'},
+    );
+
+    expect(params['p_propagate_study_day'], isNull);
+  });
+
+  test('historical composite setup uses the mutation transaction', () async {
+    final requests = <http.BaseRequest>[];
+    late Map<String, dynamic> params;
+    final meal = _meal([
+      _food(
+        id: 'existing-component',
+        foodId: 'existing-definition',
+        versionId: 'existing-version',
+      ),
+      _food(
+        id: 'missing-component',
+        foodId: 'missing-definition',
+        versionId: 'missing-version',
+      ),
+    ]);
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        requests.add(request);
+        params = jsonDecode(request.body) as Map<String, dynamic>;
+        return _jsonResponse(
+          _mutationResponse(food: meal, kind: 'meal'),
+          request,
+        );
+      }),
+    );
+
+    await repository.mutateHistoricalDefinition(
+      subjectId: 'subject',
+      snapshot: meal,
+      expectedVersionId: meal.foodVersionId,
+      entryId: 'selected-meal',
+      target: const {'taskId': 'task'},
+    );
+
+    expect(requests, hasLength(1));
+    expect(params['p_food_id'], 'meal-definition');
+    expect(params['p_propagate_study_day'], isNull);
+    expect(
+      (params['p_snapshot'] as Map<String, dynamic>)['componentSnapshots'],
+      hasLength(2),
+    );
+    expect(
+      ((params['p_snapshot'] as Map<String, dynamic>)['componentFoods']
+              as List<dynamic>)
+          .map((component) => (component as Map<String, dynamic>)['foodId']),
+      ['existing-definition', 'missing-definition'],
+    );
+  });
+
+  for (final definitionExists in [false, true]) {
+    test(
+      'repairs every duplicate occurrence version ($definitionExists)',
+      () async {
+        final repository = NutritionFoodRepository(
+          client: _client((request) async {
+            if (request.url.path.endsWith('/nutrition_food_definition')) {
+              return _jsonResponse(
+                definitionExists
+                    ? [
+                        {
+                          'id': 'food-definition',
+                          'current_version_id': 'version-1',
+                        },
+                      ]
+                    : [],
+                request,
+              );
+            }
+            if (request.method == 'GET') return _jsonResponse([], request);
+            return _jsonResponse(_mutationResponse(), request);
+          }),
+        );
+        final foods = [
+          _food(id: 'first', versionId: 'provisional-1'),
+          _food(id: 'second', versionId: 'provisional-2'),
+        ];
+
+        await repository.ensureDefinitions(subjectId: 'subject', foods: foods);
+
+        expect(foods.map((food) => food.foodVersionId), [
+          'version-1',
+          'version-1',
+        ]);
+      },
+    );
+  }
+
+  test('recovers when another upload creates the food definition', () async {
+    final requests = <String>[];
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        final operation = request.url.pathSegments.last;
+        requests.add(operation);
+        switch (operation) {
+          case 'nutrition_food_definition':
+            expect(request.url.queryParameters['subject_id'], 'eq.subject');
+            if (requests.length == 1) return _jsonResponse([], request);
+            expect(request.url.queryParameters['id'], 'eq.food-definition');
+            return _jsonResponse([
+              {'current_version_id': 'current-version'},
+            ], request);
+          case 'apply_nutrition_food_mutation':
+            final params = jsonDecode(request.body) as Map<String, dynamic>;
+            expect(params['p_expected_version_id'], isNull);
+            return _mutationFailure(request);
+          case 'nutrition_food_version':
+            return _jsonResponse([
+              {'id': 'previous-version', 'food_id': 'food-definition'},
+            ], request);
+          default:
+            fail('Unexpected request for $operation');
+        }
+      }),
+    );
+    final localFood = _food(id: 'new', versionId: 'local-version')
+      ..amount = 2
+      ..nutrition.energyKcal = 200;
+    final linkedFood = _food(id: 'existing', versionId: 'previous-version');
+    final now = DateTime.utc(2026, 7, 15, 12);
+    final recall = DailyRecall.withId(
+      date: now,
+      recallMode: RecallMode.realtimeRecord,
+      meals: [
+        MealLog.withId(
+          mealType: MealType.lunch,
+          timestamp: now,
+          timezone: 'UTC',
+          isSkipped: false,
+          foods: [localFood, linkedFood],
+        ),
+      ],
+    );
+
+    final prepared = await repository.prepareRecallForUpload(
+      subjectId: 'subject',
+      recall: recall,
+    );
+
+    final preparedFoods = prepared.meals.single.foods;
+    expect(preparedFoods.first.toJson(), {
+      ...localFood.toJson(),
+      'foodVersionId': 'current-version',
+    });
+    expect(preparedFoods.last.toJson(), linkedFood.toJson());
+    expect(localFood.foodVersionId, 'local-version');
+    expect(requests, [
+      'nutrition_food_definition',
+      'apply_nutrition_food_mutation',
+      'nutrition_food_definition',
+      'nutrition_food_version',
+    ]);
+  });
+
+  for (final isVersionConflict in [true, false]) {
+    test(
+      'surfaces unresolved initial create errors ($isVersionConflict)',
+      () async {
+        var reads = 0;
+        final message = isVersionConflict
+            ? 'stale nutrition definition version'
+            : 'other write conflict';
+        final repository = NutritionFoodRepository(
+          client: _client((request) async {
+            if (request.method == 'GET') {
+              reads++;
+              return _jsonResponse([], request);
+            }
+            return _mutationFailure(request, message: message);
+          }),
+        );
+        final food = _food(versionId: 'local-version');
+
+        await expectLater(
+          repository.ensureDefinitions(subjectId: 'subject', foods: [food]),
+          throwsA(
+            isA<PostgrestException>().having(
+              (error) => error.message,
+              'message',
+              message,
+            ),
+          ),
+        );
+
+        expect(reads, isVersionConflict ? 2 : 1);
+        expect(food.foodVersionId, 'local-version');
+      },
+    );
+  }
+
+  test(
+    'creates one-serving definitions without changing logged amounts',
+    () async {
+      final requests = <http.BaseRequest>[];
+      final repository = NutritionFoodRepository(
+        client: _client((request) async {
+          requests.add(request);
+          if (request.method == 'GET') return _jsonResponse([], request);
+          final params = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(params['p_food_id'], 'food-definition');
+          expect(params['p_expected_version_id'], isNull);
+          expect(params['p_library_visible'], isFalse);
+          expect(params['p_mutation_id'], isA<String>());
+          final prototype = FoodEntry.fromJson(
+            params['p_snapshot'] as Map<String, dynamic>,
+          );
+          expect(prototype.amount, 1);
+          expect(prototype.nutrition.energyKcal, 100);
+          return _jsonResponse(_mutationResponse(food: prototype), request);
+        }),
+      );
+      final food = _food()
+        ..amount = 2
+        ..nutrition.energyKcal = 200;
+
+      await repository.ensureDefinitions(subjectId: 'subject', foods: [food]);
+
+      expect(requests, hasLength(2));
+      expect(food.foodVersionId, 'version-1');
+      expect(food.amount, 2);
+      expect(food.nutrition.energyKcal, 200);
+    },
+  );
+
+  test(
+    'foreground upload links a new ingredient in an existing meal',
+    () async {
+      mockNutritionDraftStorage();
+      final now = DateTime.utc(2026, 7, 15, 12);
+      final subject = StudySubject('subject', 'study', 'user', [])
+        ..study = (Study('study', 'user')..schedule.numberOfCycles = 0)
+        ..startedAt = now;
+      final task = NutritionTask.withId();
+      final meal = _meal([_food(versionId: 'local-version')]);
+      final requests = <String>[];
+      final supabase = _client((request) async {
+        final operation = request.url.pathSegments.last;
+        requests.add(operation);
+        if (operation == 'nutrition_food_definition') {
+          final mealLookup = request.url.queryParameters['id']!.contains(
+            'meal-definition',
+          );
+          return _jsonResponse([
+            if (mealLookup)
+              {'id': 'meal-definition', 'current_version_id': 'meal-version'},
+          ], request);
+        }
+        if (operation == 'nutrition_food_version') {
+          return _jsonResponse([
+            {'id': 'meal-version', 'food_id': 'meal-definition'},
+          ], request);
+        }
+        final params = jsonDecode(request.body) as Map<String, dynamic>;
+        if (operation == 'apply_nutrition_food_mutation') {
+          expect(params['p_food_id'], 'food-definition');
+          return _jsonResponse(_mutationResponse(), request);
+        }
+        expect(operation, 'save_nutrition_recall');
+        final result = params['p_result'] as Map<String, dynamic>;
+        final saved = DailyRecall.fromJson(
+          result['result'] as Map<String, dynamic>,
+        );
+        expect(
+          saved
+              .meals
+              .single
+              .foods
+              .single
+              .componentSnapshots!
+              .single
+              .foodVersionId,
+          'version-1',
+        );
+        return _jsonResponse({
+          'subject_id': subject.id,
+          'intervention_id': Study.baselineID,
+          'task_id': task.id,
+          'completed_at': params['p_completed_at'],
+          'result_type': 'DailyRecall',
+          'result': result,
+        }, request);
+      });
+      setEnv(
+        'https://example.supabase.co',
+        'test-key',
+        supabaseClient: supabase,
+      );
+      final manager = NutritionRecallAutoSaveManager();
+      final model = DailyRecallEntryViewModel(
+        subject: subject,
+        task: task,
+        completionPeriod: task.schedule.completionPeriods.single,
+        autoSaveManager: manager,
+        clock: () => now,
+      );
+      addTearDown(model.dispose);
+      await model.initialized;
+      model.recall.entryCompletedAt = now;
+      model.addMeal(
+        MealLog.withId(
+          mealType: MealType.lunch,
+          timestamp: now,
+          timezone: 'UTC',
+          isSkipped: false,
+          foods: [meal],
+        ),
+      );
+
+      await model.flushPendingAutoSave(
+        persistToDatabase: true,
+        requireRemoteSuccess: true,
+      );
+
+      expect(requests, [
+        'nutrition_food_definition',
+        'apply_nutrition_food_mutation',
+        'nutrition_food_definition',
+        'nutrition_food_version',
+        'save_nutrition_recall',
+      ]);
+      expect(subject.progress, hasLength(1));
+      expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+      expect(meal.componentSnapshots!.single.foodVersionId, 'local-version');
+    },
+  );
+}
+
+http.Response _jsonResponse(Object? body, http.BaseRequest request) =>
+    http.Response(
+      jsonEncode(body),
+      200,
+      headers: const {'content-type': 'application/json'},
+      request: request,
+    );
+
+http.Response _mutationFailure(
+  http.BaseRequest request, {
+  String message = 'stale nutrition definition version',
+}) => http.Response(
+  jsonEncode({'code': '40001', 'message': message}),
+  500,
+  headers: const {'content-type': 'application/json'},
+  request: request,
+);
+
+SupabaseClient _client(MockClientHandler handler) => SupabaseClient(
+  'https://example.supabase.co',
+  'test-key',
+  httpClient: MockClient(handler),
+);
+
+Map<String, dynamic> _definitionRow() => {
+  'id': 'food-definition',
+  'subject_id': 'subject',
+  'deleted_at': null,
+  'created_at': '2026-07-15T08:00:00.000Z',
+  'updated_at': '2026-07-15T08:00:00.000Z',
+  'snapshot': _food().toJson(),
+};
+
+Map<String, dynamic> _mutationResponse({
+  FoodEntry? food,
+  String kind = 'food',
+}) => {
+  'definition': {
+    'id': food?.foodId ?? 'food-definition',
+    'subjectId': 'subject',
+    'kind': kind,
+    'currentVersionId': food?.foodVersionId ?? 'version-1',
+    'deletedAt': null,
+    'snapshot': (food ?? _food()).toJson(),
+    'createdAt': '2026-07-15T08:00:00.000Z',
+    'updatedAt': '2026-07-15T08:00:00.000Z',
+  },
+  'progress': const [
+    {'task_id': 'historical-task'},
+    {'task_id': 'today-task-a'},
+    {'task_id': 'today-task-b'},
+  ],
+  'selectedHistoricalUpdateCount': 1,
+  'todayUpdateCount': 3,
+};
+
+FoodEntry _meal(List<FoodEntry> components) {
+  final meal = _food(
+    id: 'meal-snapshot',
+    foodId: 'meal-definition',
+    versionId: 'meal-version',
+  )..entryType = FoodEntryType.meal;
+  meal.componentFoods = [
+    for (var index = 0; index < components.length; index++)
+      FoodComposition(
+        id: 'composition-$index',
+        parentEntryId: meal.id,
+        foodId: components[index].foodId,
+        amount: components[index].amount,
+        unit: components[index].unit,
+        sortOrder: index,
+      ),
+  ];
+  meal.componentSnapshots = components;
+  return meal;
+}
+
+FoodEntry _food({
+  String id = 'snapshot',
+  String foodId = 'food-definition',
+  String versionId = 'version-1',
+}) => FoodEntry(
+  id: id,
+  foodId: foodId,
+  foodVersionId: versionId,
+  entryType: FoodEntryType.singleIngredient,
+  name: 'Apple',
+  amount: 1,
+  unit: 'serving',
+  servingSizeGrams: 100,
+  portionEstimationMethod: PortionEstimationMethod.standardUnit,
+  portionState: PortionState.asServed,
+  nutrition: NutritionProfile(
+    energyKcal: 100,
+    protein: 1,
+    carbs: 1,
+    fat: 1,
+    sugars: 0,
+    fiber: 0,
+    saturatedFat: 0,
+    transFat: 0,
+    cholesterol: 0,
+    sodium: 0,
+    waterContent: 0,
+    micros: const {},
+  ),
+  source: FoodSource.manual,
+  confidenceScore: 1,
+  createdAt: DateTime.utc(2026, 7, 15, 8),
+  originalValues: const {
+    '_libraryTags': ['fruit'],
+  },
+);

@@ -55,6 +55,12 @@ class StudyRepository({
   }
 
   @override
+  Future<void> exportResults(StudyID studyId) async {
+    final study = await apiClient.fetchStudyForExport(studyId);
+    await study.exportData.downloadAsZip();
+  }
+
+  @override
   Future<void> deleteParticipants(Study study) {
     final wrappedModel = get(study.id);
     if (wrappedModel == null) {
@@ -238,7 +244,7 @@ class StudyRepository({
         type: StudyActionType.export,
         label: StudyActionType.export.string,
         onExecute: () {
-          runAsync(() => model.exportData.downloadAsZip());
+          runAsync(() => exportResults(model.id));
         },
         isAvailable: model.canExport(currentUser),
       ),
@@ -288,7 +294,7 @@ class StudyRepository({
                 confirmLabel: action.label,
                 onDownloadBackup: () async {
                   model.downloadDefinition();
-                  await model.exportData.downloadAsZip();
+                  await exportResults(model.id);
                 },
                 onCloseInstead: () async {
                   Navigator.of(dialogContext).pop(false);

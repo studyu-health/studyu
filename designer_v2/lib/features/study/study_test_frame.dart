@@ -323,71 +323,72 @@ class _PreviewFrameState() extends ConsumerState<PreviewFrame> {
                   formGroup: formViewModel.form,
                   child: ReactiveFormConsumer(
                     builder: (context, form, child) {
-                      if (formViewModel.form.hasErrors) {
-                        return const DisabledFrame();
-                      }
                       return SizedBox(
                         width: previewWidth,
                         height: previewHeight,
                         child: FittedBox(
                           alignment: Alignment.topCenter,
                           fit: BoxFit.scaleDown,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Stack(
-                                children: [
-                                  if (_frameActivated)
-                                    _activeFrameController!.frameWidget
-                                  else
-                                    const PhoneContainer(
-                                      innerContent: SizedBox.expand(),
+                          child: formViewModel.form.hasErrors
+                              ? const DisabledFrame()
+                              : Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        if (_frameActivated)
+                                          _activeFrameController!.frameWidget
+                                        else
+                                          const PhoneContainer(
+                                            innerContent: SizedBox.expand(),
+                                          ),
+                                        if (_overlayStage ==
+                                            PreviewOverlayStage.error)
+                                          Positioned.fill(
+                                            child: ErrorFrame(
+                                              title: isLocalDevelopment
+                                                  ? tr.preview_overlay_local_unavailable_title
+                                                  : tr.preview_overlay_remote_unavailable_title,
+                                              message:
+                                                  _overlayMessage ??
+                                                  (isLocalDevelopment
+                                                      ? tr.preview_overlay_local_unavailable_message
+                                                      : tr.preview_overlay_remote_unavailable_message),
+                                            ),
+                                          ),
+                                        if (_overlayStage !=
+                                                PreviewOverlayStage.none &&
+                                            _overlayStage !=
+                                                PreviewOverlayStage.error)
+                                          Positioned.fill(
+                                            child: LoadingFrame(
+                                              configuredUrl:
+                                                  configuredPreviewOrigin,
+                                              isLocalDevelopment:
+                                                  isLocalDevelopment,
+                                              stage: _overlayStage,
+                                              message: _overlayMessage,
+                                            ),
+                                          ),
+                                      ],
                                     ),
-                                  if (_overlayStage ==
-                                      PreviewOverlayStage.error)
-                                    Positioned.fill(
-                                      child: ErrorFrame(
-                                        title: isLocalDevelopment
-                                            ? tr.preview_overlay_local_unavailable_title
-                                            : tr.preview_overlay_remote_unavailable_title,
-                                        message:
-                                            _overlayMessage ??
-                                            (isLocalDevelopment
-                                                ? tr.preview_overlay_local_unavailable_message
-                                                : tr.preview_overlay_remote_unavailable_message),
-                                      ),
+                                    const SizedBox(height: 8.0),
+                                    FrameControlsWidget(
+                                      onRefresh: () {
+                                        unawaited(
+                                          _runHealthCheckAndLoad(
+                                            frameController!.previewSrc,
+                                          ),
+                                        );
+                                      },
+                                      onOpenNewTab:
+                                          _activeFrameController?.openNewPage,
+                                      enabled: state.canTest,
+                                      openNewTabEnabled:
+                                          state.canTest && _frameActivated,
                                     ),
-                                  if (_overlayStage !=
-                                          PreviewOverlayStage.none &&
-                                      _overlayStage !=
-                                          PreviewOverlayStage.error)
-                                    Positioned.fill(
-                                      child: LoadingFrame(
-                                        configuredUrl: configuredPreviewOrigin,
-                                        isLocalDevelopment: isLocalDevelopment,
-                                        stage: _overlayStage,
-                                        message: _overlayMessage,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 8.0),
-                              FrameControlsWidget(
-                                onRefresh: () {
-                                  unawaited(
-                                    _runHealthCheckAndLoad(
-                                      frameController!.previewSrc,
-                                    ),
-                                  );
-                                },
-                                onOpenNewTab:
-                                    _activeFrameController?.openNewPage,
-                                enabled: state.canTest,
-                                openNewTabEnabled:
-                                    state.canTest && _frameActivated,
-                              ),
-                            ],
-                          ),
+                                  ],
+                                ),
                         ),
                       );
                     },

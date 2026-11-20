@@ -12,6 +12,7 @@ import 'package:studyu_designer_v2/utils/debug_print.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'api_client.g.dart';
+part 'api_client_study_export.dart';
 
 abstract class StudyUApi() {
   Future<Study> saveStudy(Study study);
@@ -21,6 +22,8 @@ abstract class StudyUApi() {
     bool withParticipantActivity = true,
     bool withInvites = false,
   });
+
+  Future<Study> fetchStudyForExport(StudyID studyId);
 
   Future<List<Study>> getUserStudies({
     bool withParticipantActivity = false,
@@ -354,23 +357,10 @@ class StudyUApiClient({
     StudyID studyId, {
     bool withParticipantActivity = true,
     bool withInvites = false,
-  }) async {
-    await _testDelay();
-    final columns = [
-      ...(withParticipantActivity
-          ? studyWithParticipantActivityColumns
-          : studyColumns),
-      if (withInvites) studyInviteColumn,
-    ];
-    final request = getById<Study>(studyId, selectedColumns: columns);
-    return await _awaitGuarded(
-      request,
-      onError: {
-        PostgrestErrorCodes.isNotSingleItem: (e) =>
-            throw StudyNotFoundException(),
-      },
-    );
-  }
+  }) => _fetchStudy(studyId, withParticipantActivity, withInvites);
+
+  @override
+  Future<Study> fetchStudyForExport(StudyID studyId) => fetchStudy(studyId);
 
   @override
   Future<void> deleteStudy(Study study) async {

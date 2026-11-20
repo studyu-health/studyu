@@ -7,6 +7,7 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 class const StudyMeasurementsRobot(final PatrolTester $) {
   Future<void> tapAddSurveyButton() async {
     await $(tr.form_array_measurements_surveys_new).tap();
+    await $(const ValueKey('measurement-picker-create-survey')).tap();
   }
 
   Future<void> tapAddSurveyQuestionButton() async {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +13,10 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/app_onboarding/study_unavailable_screen.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
+import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/theme.dart' as app_theme;
 import 'package:studyu_app/util/dashboard_showcase.dart';
-import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/debug_screen.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
@@ -40,8 +40,11 @@ bool shouldMarkDashboardShowcaseCompleted({required bool wasStarted}) {
   return wasStarted;
 }
 
-class const DashboardScreen({super.key, final String? error})
-    extends StatefulWidget {
+class const DashboardScreen({
+  super.key,
+  final String? error,
+  final NutritionRecallAutoSaveManager? nutritionAutoSaveManager,
+}) extends StatefulWidget {
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
@@ -67,8 +70,16 @@ class _DashboardScreenState()
   late final TextStyle showcaseActionTextStyle;
   StudySubject? subject;
   List<TaskInstance>? scheduleToday;
-  final _nutritionAutoSaveManager = NutritionRecallAutoSaveManager();
+  late final _nutritionAutoSaveManager =
+      widget.nutritionAutoSaveManager ?? NutritionRecallAutoSaveManager();
+  static const _nutritionRetryDelay = Duration(minutes: 5);
+
   Timer? _midnightSubmitTimer;
+  Timer? _nutritionRetryTimer;
+  StreamSubscription<String>? _nutritionUploadRequests;
+  int _nutritionUploadGeneration = 0;
+  bool _nutritionRetryNeeded = false;
+  bool _submittingNutritionRecalls = false;
   bool _hasCheckedPendingRecalls = false;
   String? _lastSubjectId;
   bool _showcaseCheckStarted = false;
@@ -79,46 +90,87 @@ class _DashboardScreenState()
   bool get _studyIsAvailable => isStudyAvailableForTesting(subject!.study);
 
   bool get showNextDay =>
-      (isDebugMode || context.read<AppState>().isPreview) &&
-      !subject!.completedStudy;
+      context.read<AppState>().isPreview && !subject!.completedStudy;
 
   Future<void> _submitPendingNutritionRecalls() async {
     final currentSubject = subject;
-    if (currentSubject == null) return;
+    final appState = context.read<AppState>();
+    if (currentSubject == null || !appState.trackParticipantProgress) {
+      return;
+    }
+    if (_submittingNutritionRecalls) {
+      _nutritionUploadGeneration++;
+      return;
+    }
 
-    final trackProgress = context.read<AppState>().trackParticipantProgress;
-    if (!trackProgress) return;
-
+    _nutritionRetryTimer?.cancel();
+    final uploadGeneration = _nutritionUploadGeneration;
+    _submittingNutritionRecalls = true;
     try {
-      await _nutritionAutoSaveManager.submitPendingRecalls(
+      if (appState.isPreview) {
+        await _nutritionAutoSaveManager.rekeyTrackedPreviewDrafts(
+          currentSubject,
+        );
+      }
+      final needsRetry = await _nutritionAutoSaveManager.submitPendingRecalls(
         subject: currentSubject,
-        trackProgress: trackProgress,
+        trackProgress: true,
+        trackedPreview: appState.isPreview,
       );
+      if (!mounted || subject?.id != currentSubject.id) return;
+      setState(() => _nutritionRetryNeeded = needsRetry);
+      if (needsRetry) _scheduleNutritionRetry();
     } catch (e) {
       StudyULogger.error('Failed to auto-submit pending nutrition recalls: $e');
+    } finally {
+      _submittingNutritionRecalls = false;
+      if (mounted &&
+          subject != null &&
+          (subject?.id != currentSubject.id ||
+              !_nutritionRetryNeeded &&
+                  _nutritionUploadGeneration != uploadGeneration)) {
+        unawaited(_submitPendingNutritionRecalls());
+      }
+    }
+  }
+
+  void _scheduleNutritionRetry() {
+    _nutritionRetryTimer?.cancel();
+    _nutritionRetryTimer = Timer(
+      _nutritionRetryDelay,
+      _submitPendingNutritionRecalls,
+    );
+  }
+
+  void _handleNutritionUploadRequest(String subjectId) {
+    if (!mounted ||
+        subject?.id != subjectId ||
+        !context.read<AppState>().trackParticipantProgress) {
+      return;
+    }
+    if (_nutritionRetryTimer?.isActive != true) {
+      unawaited(_submitPendingNutritionRecalls());
     }
   }
 
   void _scheduleMidnightSubmitTimer() {
     _midnightSubmitTimer?.cancel();
-
-    final trackProgress = context.read<AppState>().trackParticipantProgress;
-    if (subject == null || !trackProgress) return;
+    if (subject?.startedAt == null) return;
 
     final now = DateTime.now();
-    final tomorrow = DateTime(
-      now.year,
-      now.month,
-      now.day + 1,
-    ).add(const Duration(seconds: 5));
-    final delay = tomorrow.difference(now);
+    final utc = now.toUtc();
+    final utcMidnight = DateTime.utc(utc.year, utc.month, utc.day + 1);
+    final localMidnight = DateTime(now.year, now.month, now.day + 1);
+    final nextMidnight = localMidnight.isBefore(utcMidnight)
+        ? localMidnight
+        : utcMidnight;
 
-    _midnightSubmitTimer = Timer(delay, () async {
+    _midnightSubmitTimer = Timer(nextMidnight.difference(now), () {
       if (!mounted) return;
-      await _submitPendingNutritionRecalls();
-      if (mounted) {
-        _scheduleMidnightSubmitTimer();
-      }
+      final current = DateTime.now();
+      setState(() => scheduleToday = subject?.scheduleFor(current));
+      _scheduleMidnightSubmitTimer();
+      if (!utc.isSameDate(current)) unawaited(_submitPendingNutritionRecalls());
     });
   }
 
@@ -126,6 +178,8 @@ class _DashboardScreenState()
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _nutritionUploadRequests = NutritionRecallAutoSaveManager.uploadRequests
+        .listen(_handleNutritionUploadRequest);
     showcaseActionTextStyle = TextStyle(
       color: app_theme.theme.colorScheme.onPrimary,
     );
@@ -179,6 +233,8 @@ class _DashboardScreenState()
       _lastSubjectId = subject!.id;
       if (subjectChanged) {
         _hasCheckedPendingRecalls = false;
+        _nutritionRetryTimer?.cancel();
+        _nutritionRetryNeeded = false;
       }
 
       scheduleToday = subject!.scheduleFor(DateTime.now());
@@ -211,6 +267,8 @@ class _DashboardScreenState()
     _isDisposing = true;
     WidgetsBinding.instance.removeObserver(this);
     _midnightSubmitTimer?.cancel();
+    _nutritionRetryTimer?.cancel();
+    unawaited(_nutritionUploadRequests?.cancel());
     _dashboardShowcase.dismiss();
     super.dispose();
   }
@@ -307,6 +365,15 @@ class _DashboardScreenState()
               },
               itemBuilder: (context) {
                 return [
+                  if (subject!.startedAt?.isAfter(DateTime.now()) == false &&
+                      subject!.study.observations.any(
+                        (task) => task is NutritionTask,
+                      ))
+                    OverflowMenuItem(
+                      l10n.nutrition_history,
+                      Icons.history,
+                      onTap: _openNutritionHistory,
+                    ),
                   OverflowMenuItem(
                     AppLocalizations.of(context)!.report_history,
                     MdiIcons.history,
@@ -450,6 +517,16 @@ class _DashboardScreenState()
                 ),
               ),
             ),
+          if (_nutritionRetryNeeded)
+            MaterialBanner(
+              content: Text(l10n.could_not_save_results),
+              actions: [
+                TextButton(
+                  onPressed: _submitPendingNutritionRecalls,
+                  child: Text(l10n.try_again),
+                ),
+              ],
+            ),
           // Main content
           Expanded(
             child: Padding(
@@ -470,15 +547,42 @@ class _DashboardScreenState()
                 icon: const Icon(Icons.fast_forward_rounded),
                 onPressed: () async {
                   try {
-                    await subject!.setStartDateBackBy(days: 1);
+                    final appState = context.read<AppState>();
+                    final previewSubject = subject!;
+                    final persist =
+                        appState.isPreview && previewSubject.study.isDraft;
+                    await previewSubject.setStartDateBackBy(
+                      days: 1,
+                      persist: persist,
+                    );
+                    if (persist) {
+                      await _nutritionAutoSaveManager.rekeyTrackedPreviewDrafts(
+                        previewSubject,
+                      );
+                    }
 
+                    if (!mounted) return;
                     setState(() {
                       scheduleToday = subject!.scheduleFor(DateTime.now());
                     });
                     await _submitPendingNutritionRecalls();
                     _scheduleMidnightSubmitTimer();
                     unawaited(_startDashboardShowcaseIfNeeded());
-                  } on SocketException catch (_) {}
+                  } catch (error) {
+                    StudyULogger.warning(
+                      'Could not advance the study day: $error',
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!
+                                .could_not_save_results,
+                          ),
+                        ),
+                      );
+                    }
+                  }
                 },
                 label: Text(AppLocalizations.of(context)!.next_day),
                 style: ElevatedButton.styleFrom(
@@ -488,6 +592,48 @@ class _DashboardScreenState()
               ),
             )
           : null,
+    );
+  }
+
+  Future<void> _openNutritionHistory() async {
+    final activeSubject = subject;
+    if (activeSubject?.startedAt == null) return;
+    final tasks = activeSubject!.study.observations
+        .whereType<NutritionTask>()
+        .toList();
+    if (tasks.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
+    final task = tasks.length == 1
+        ? tasks.single
+        : await showDialog<NutritionTask>(
+            context: context,
+            builder: (dialogContext) => SimpleDialog(
+              title: Text(l10n.nutrition_history),
+              children: [
+                for (final task in tasks)
+                  SimpleDialogOption(
+                    onPressed: () => Navigator.of(dialogContext).pop(task),
+                    child: Text(task.title ?? l10n.nutrition_tracking),
+                  ),
+              ],
+            ),
+          );
+    if (task == null || !mounted || subject?.id != activeSubject.id) return;
+
+    await Navigator.of(context).push(
+      NutritionHistoryScreen.route(
+        subject: activeSubject,
+        task: task,
+        autoSaveManager: context.read<AppState>().previewNutritionDrafts,
+        onOpenRecall: (record) async {
+          await NutritionTaskWidget.openHistoricalRecall(
+            context,
+            subject: activeSubject,
+            task: task,
+            record: record,
+          );
+        },
+      ),
     );
   }
 

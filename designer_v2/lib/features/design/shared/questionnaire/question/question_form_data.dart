@@ -860,8 +860,11 @@ class DateQuestionFormData({
 
   @override
   DateQuestionFormData copy() {
+    final id = const Uuid().v4();
     final data = DateQuestionFormData(
-      questionId: const Uuid().v4(),
+      questionId: Dhq3Questions.isBirthDateQuestionId(questionId)
+          ? '${Dhq3Questions.birthDateQuestionId}-$id'
+          : id,
       questionType: questionType,
       questionText: questionText.withDuplicateLabel(),
       questionInfoText: questionInfoText,

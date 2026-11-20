@@ -52,14 +52,15 @@ abstract class SupabaseObjectFunctions<T extends SupabaseObject>()
   /// If [onlyUpdate] is set to true, the object has to exist in the database, otherwise the result will be empty.
   Future<T> save({bool onlyUpdate = false}) async {
     final tableQuery = env.client.from(tableName(T));
+    final json = this.toJson();
     PostgrestFilterBuilder query;
     if (onlyUpdate) {
-      query = tableQuery.upsert(this.toJson());
+      query = tableQuery.upsert(json);
       for (final entry in primaryKeys.entries) {
         query = query.eq(entry.key, entry.value);
       }
     } else {
-      query = tableQuery.upsert(this.toJson());
+      query = tableQuery.upsert(json);
     }
     return SupabaseQuery.extractSupabaseList<T>(await query.select()).single;
   }

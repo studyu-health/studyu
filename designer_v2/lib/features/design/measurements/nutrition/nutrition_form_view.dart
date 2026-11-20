@@ -52,21 +52,32 @@ class _NutritionFormViewState() extends ConsumerState<NutritionFormView> {
             FormTableRow(
               control: widget.formViewModel.collectMealContextControl,
               label: tr.form_field_nutrition_collect_meal_context,
+              labelHelpText: tr.form_field_nutrition_collect_meal_context_help,
               input: ReactiveSwitch(
                 formControl: widget.formViewModel.collectMealContextControl,
               ),
             ),
             FormTableRow(
-              control: widget.formViewModel.allowRecipesControl,
-              label: tr.form_field_nutrition_allow_recipes,
+              control: widget.formViewModel.allowMealsControl,
+              label: tr.form_field_nutrition_allow_meals,
+              labelHelpText: tr.form_field_nutrition_allow_meals_help,
               input: ReactiveSwitch(
-                formControl: widget.formViewModel.allowRecipesControl,
+                formControl: widget.formViewModel.allowMealsControl,
+              ),
+            ),
+            FormTableRow(
+              control: widget.formViewModel.trackWaterIntakeControl,
+              label: tr.form_field_nutrition_track_water,
+              labelHelpText: tr.form_field_nutrition_track_water_help,
+              input: ReactiveSwitch(
+                formControl: widget.formViewModel.trackWaterIntakeControl,
               ),
             ),
             FormTableRow(
               control: widget.formViewModel.minimumMealsRequiredControl,
               label: tr.form_field_nutrition_minimum_meals_required,
-              input: ReactiveTextField(
+              labelHelpText: tr.form_field_nutrition_minimum_meals_help,
+              input: ReactiveTextField<int>(
                 formControl: widget.formViewModel.minimumMealsRequiredControl,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -106,8 +117,10 @@ class const _CustomMealTypesSection({
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 16,
           children: [
             Text(
               tr.form_field_nutrition_custom_meal_types,
@@ -127,56 +140,52 @@ class const _CustomMealTypesSection({
               ),
           ],
         ),
-        if (formViewModel.customMealTypesControl.controls.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              tr.form_field_nutrition_custom_meal_types_hint,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          )
-        else
-          ReactiveFormArray<String>(
-            formArray: formViewModel.customMealTypesControl,
-            builder: (context, formArray, child) {
-              return Column(
-                children: List.generate(
-                  formArray.controls.length,
-                  (index) => Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ReactiveTextField<String>(
-                            formControl:
-                                formArray.controls[index]
-                                    as FormControl<String>,
-                            decoration: InputDecoration(
-                              hintText:
-                                  '${tr.form_field_nutrition_custom_meal_types} ${index + 1}',
-                              isDense: true,
+        Text(
+          tr.form_field_nutrition_custom_meal_types_hint,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        ReactiveFormArray<String>(
+          formArray: formViewModel.customMealTypesControl,
+          builder: (context, formArray, child) {
+            return Column(
+              children: List.generate(
+                formArray.controls.length,
+                (index) => Padding(
+                  key: ObjectKey(formArray.controls[index]),
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ReactiveTextField<String>(
+                          formControl:
+                              formArray.controls[index] as FormControl<String>,
+                          decoration: InputDecoration(
+                            hintText: tr.form_field_nutrition_meal_type_label(
+                              index + 1,
                             ),
-                            readOnly: isReadonly,
+                            isDense: true,
                           ),
+                          readOnly: isReadonly,
                         ),
-                        if (!isReadonly)
-                          IconButton(
-                            icon: const Icon(
-                              Icons.remove_circle_outline,
-                              size: 20,
-                            ),
-                            onPressed: () => formArray.removeAt(index),
-                            tooltip: 'Remove',
+                      ),
+                      if (!isReadonly)
+                        IconButton(
+                          icon: const Icon(
+                            Icons.remove_circle_outline,
+                            size: 20,
                           ),
-                      ],
-                    ),
+                          onPressed: () => formArray.removeAt(index),
+                          tooltip: tr.action_remove,
+                        ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
+        ),
       ],
     );
   }

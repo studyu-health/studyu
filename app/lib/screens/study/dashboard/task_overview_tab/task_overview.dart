@@ -66,11 +66,11 @@ class _TaskOverviewState() extends State<TaskOverview> {
           TaskBox(
             taskInstance: taskInstance,
             onCompleted: () => _navigateToReportIfStudyCompleted(context),
-            icon: Icon(
-              taskInstance.task is Observation
-                  ? MdiIcons.orderBoolAscendingVariant
-                  : MdiIconsHelper.fromString(widget.interventionIcon!),
-            ),
+            icon: Icon(switch (taskInstance.task) {
+              NutritionTask() => Icons.restaurant_outlined,
+              Observation() => MdiIcons.orderBoolAscendingVariant,
+              _ => MdiIconsHelper.fromString(widget.interventionIcon!),
+            }),
           ),
         );
     }
@@ -81,6 +81,17 @@ class _TaskOverviewState() extends State<TaskOverview> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final subject = widget.subject!;
+    final now = DateTime.now();
+    final localIntervention = subject.getInterventionForDate(now);
+    final nutritionDay = subject.getNutritionStudyDayFor(now);
+    final displayedIntervention =
+        localIntervention ??
+        subject.getNutritionInterventionForStudyDay(nutritionDay);
+    final phaseDuration = subject.study.schedule.phaseDuration;
+    final daysLeft = localIntervention == null && phaseDuration > 0
+        ? phaseDuration - nutritionDay % phaseDuration
+        : subject.daysLeftForPhase(subject.getInterventionIndexForDate(now));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -120,18 +131,15 @@ class _TaskOverviewState() extends State<TaskOverview> {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      '${widget.subject!.daysLeftForPhase(widget.subject!.getInterventionIndexForDate(DateTime.now()))} ${AppLocalizations.of(context)!.days_left}',
+                      '$daysLeft ${l10n.days_left}',
                       style: const TextStyle(color: primaryColor),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 8),
-              InterventionCardTitle(
-                intervention: widget.subject!.getInterventionForDate(
-                  DateTime.now(),
-                ),
-              ),
+              if (displayedIntervention != null)
+                InterventionCardTitle(intervention: displayedIntervention),
               const SizedBox(height: 8),
               _buildShowcase(
                 key: widget.todayTasksShowcaseKey,

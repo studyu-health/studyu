@@ -21,6 +21,7 @@ class const TaskBox({
 class _TaskBoxState() extends State<TaskBox> {
   Future<void> _navigateToTaskScreen() async {
     await context.push<bool>('/${RouteNames.task}', extra: widget.taskInstance);
+    if (!mounted) return;
     widget.onCompleted();
     // Rebuild widget
     setState(() {});

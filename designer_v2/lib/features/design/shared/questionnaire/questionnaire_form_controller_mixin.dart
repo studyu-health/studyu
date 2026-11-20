@@ -73,6 +73,7 @@ mixin WithQuestionnaireControls<D, Q extends QuestionFormViewModel>
     questionFormViewModels.reset(viewModels);
 
     _initializeAvailableQuestionsForConditionals(viewModels);
+    finalizeInitializationBaseline();
   }
 
   void _initializeAvailableQuestionsForConditionals(

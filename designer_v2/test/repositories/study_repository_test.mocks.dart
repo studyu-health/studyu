@@ -311,6 +311,19 @@ class MockStudyUApiClient extends _i1.Mock implements _i13.StudyUApiClient {
   ) as _i5.Future<_i4.Study>);
 
   @override
+  _i5.Future<_i4.Study> fetchStudyForExport(
+    String? studyId,
+  ) => (super.noSuchMethod(
+    Invocation.method(#fetchStudyForExport, [studyId]),
+    returnValue: _i5.Future<_i4.Study>.value(
+      _FakeStudy_2(this, Invocation.method(#fetchStudyForExport, [studyId])),
+    ),
+    returnValueForMissingStub: _i5.Future<_i4.Study>.value(
+      _FakeStudy_2(this, Invocation.method(#fetchStudyForExport, [studyId])),
+    ),
+  ) as _i5.Future<_i4.Study>);
+
+  @override
   _i5.Future<void> deleteStudy(_i4.Study? study) => (super.noSuchMethod(
     Invocation.method(#deleteStudy, [study]),
     returnValue: _i5.Future<void>.value(),

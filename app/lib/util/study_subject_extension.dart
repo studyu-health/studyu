@@ -1,123 +1,127 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 
+int nutritionStudyDayFor(StudySubject subject, DateTime date) =>
+    subject.getNutritionStudyDayFor(date);
+
+bool isWritableNutritionStudyDay(int? studyDay, int todayStudyDay) =>
+    studyDay != null &&
+    studyDay >= 0 &&
+    (studyDay == todayStudyDay || studyDay == todayStudyDay - 1);
+
+/// The immutable identity of an already persisted nutrition recall.
+///
+/// Keeping this with the upsert API prevents a correction from being treated
+/// as a new completion in a different period or intervention.
+class const NutritionRecallPersistenceTarget({
+  required final String taskId,
+  required final String periodId,
+  required final String interventionId,
+  required final DateTime completedAt,
+  required final int studyDaySnapshot,
+  final int? nutritionRevision,
+}) {
+  Map<String, dynamic> toJson() => {
+    'taskId': taskId,
+    'periodId': periodId,
+    'interventionId': interventionId,
+    'completedAt': completedAt.toUtc().toIso8601String(),
+    'studyDaySnapshot': studyDaySnapshot,
+    'nutritionRevision': nutritionRevision,
+  };
+}
+
 extension StudySubjectExtension on StudySubject {
-  /// Updates an existing completed recall or creates a completed result.
-  /// Draft recalls stay in local auto-save storage.
-  Future<void> upsertNutritionResult({
+  Future<SubjectProgress?> fetchNutritionRecall({
+    required String taskId,
+    required String periodId,
+    required int studyDaySnapshot,
+    NutritionRecallPersistenceTarget? target,
+  }) async {
+    final query = client
+        .from(SubjectProgress.tableName)
+        .select()
+        .eq('subject_id', id)
+        .eq('task_id', taskId)
+        .eq('result_type', 'DailyRecall');
+    final match = target == null
+        ? query
+              .eq('result->>periodId', periodId)
+              .eq(
+                'result->result->>studyDaySnapshot',
+                studyDaySnapshot.toString(),
+              )
+        : query
+              .eq('completed_at', target.completedAt.toUtc().toIso8601String())
+              .eq('intervention_id', target.interventionId);
+    final row = await match.limit(2).maybeSingle();
+    if (row == null) return null;
+    return SupabaseQuery.extractSupabaseSingleRow<SubjectProgress>(row);
+  }
+
+  /// Upserts a DailyRecall result without changing an existing recall's
+  /// persistence identity.
+  /// The caller supplies the staged payload, including its canonical date.
+  Future<SubjectProgress> upsertNutritionResult({
     required String taskId,
     required String periodId,
     required DailyRecall recall,
     DateTime? completionDateOverride,
+    NutritionRecallPersistenceTarget? persistenceTarget,
+    String? interventionIdOverride,
   }) async {
-    if (recall.entryCompletedAt == null) {
+    final studyDay = recall.studyDaySnapshot;
+    final completedAt = recall.entryCompletedAt;
+    if (studyDay == null || completedAt == null) {
+      throw StateError('A completed recall must have a study day.');
+    }
+    if (persistenceTarget == null && startedAt == null) {
       throw StateError(
-        'Nutrition drafts cannot be saved as completed progress',
+        'The study must start before saving a nutrition recall.',
       );
     }
 
+    final target = persistenceTarget;
+    if (target != null &&
+        (target.studyDaySnapshot != studyDay ||
+            target.taskId != taskId ||
+            target.periodId != periodId)) {
+      throw StateError('The nutrition recall identity changed.');
+    }
+    final completionDate =
+        target?.completedAt ?? completionDateOverride ?? completedAt;
+    final interventionId =
+        target?.interventionId ??
+        interventionIdOverride ??
+        getNutritionInterventionForStudyDay(studyDay)?.id;
+    if (interventionId == null) {
+      throw StateError('No intervention found for nutrition recall.');
+    }
     final resultObject = Result<DailyRecall>.app(
       type: 'DailyRecall',
       periodId: periodId,
       result: recall,
     );
 
-    String interventionId;
-    final completionDate = completionDateOverride ?? recall.entryCompletedAt!;
-
-    final baseDate = startedAt;
-    final snapshotDate = baseDate != null && recall.studyDaySnapshot != null
-        ? baseDate.add(Duration(days: recall.studyDaySnapshot!))
-        : null;
-    final intervention =
-        (snapshotDate == null ? null : getInterventionForDate(snapshotDate)) ??
-        getInterventionForDate(DateTime.now());
-    if (intervention == null) {
-      throw StateError('No intervention found for nutrition recall');
-    }
-    interventionId = intervention.id;
-
-    // Find existing progress for this task on the same study day
-    final existingIndex = progress.indexWhere(
-      (p) => p.taskId == taskId && _isSameStudyDay(p, recall),
+    final response = await client.rpc<dynamic>(
+      'save_nutrition_recall',
+      params: {
+        'p_subject_id': id,
+        'p_completed_at': completionDate.toUtc().toIso8601String(),
+        'p_intervention_id': interventionId,
+        'p_task_id': taskId,
+        'p_result': resultObject.toJson(),
+        'p_expected_revision': target?.nutritionRevision,
+      },
     );
-
-    // Reuse the same completedAt key for updates to avoid duplicate rows
-    final existingCompletedAt = existingIndex >= 0
-        ? progress[existingIndex].completedAt
-        : null;
-
-    StudyULogger.debug(
-      '[upsertNutritionResult] task=$taskId period=$periodId studyDay=${recall.studyDaySnapshot} '
-      'completionDate=$completionDate completionDateOverride=$completionDateOverride '
-      'existingIndex=$existingIndex existingCompletedAt=$existingCompletedAt '
-      'meals=${recall.meals.length} progressLen=${progress.length}',
+    final row = response is List ? response.single : response;
+    final saved = SupabaseQuery.extractSupabaseSingleRow<SubjectProgress>(
+      Map<String, dynamic>.from(row as Map),
     );
-
-    final progressToSave = SubjectProgress(
-      subjectId: id,
-      interventionId: interventionId,
-      taskId: taskId,
-      result: resultObject,
-      resultType: resultObject.type,
-    )..completedAt = (existingCompletedAt ?? completionDate).toUtc();
-
-    try {
-      final saved = await progressToSave.save();
-      if (existingIndex >= 0) {
-        progress[existingIndex] = saved;
-      } else {
-        progress.add(saved);
-      }
-      await save(onlyUpdate: true);
-    } on SocketException {
-      // Offline - just update local progress
-      if (existingIndex >= 0) {
-        progress[existingIndex] = progressToSave;
-      } else {
-        progress.add(progressToSave);
-      }
-    }
-  }
-
-  bool hasNutritionResultForStudyDay({
-    required String taskId,
-    required DailyRecall recall,
-  }) {
-    return progress.any(
-      (p) => p.taskId == taskId && _isSameStudyDay(p, recall),
-    );
-  }
-
-  bool _isSameStudyDay(SubjectProgress p, DailyRecall recall) {
-    if (p.resultType != 'DailyRecall') return false;
-    try {
-      final existingResult = p.result.result;
-      if (existingResult is! DailyRecall) return false;
-      final existingRecall = existingResult;
-      var match = existingRecall.studyDaySnapshot == recall.studyDaySnapshot;
-
-      // Fallback: older rows may not have studyDaySnapshot set; compare by calculated study day.
-      if (!match &&
-          existingRecall.studyDaySnapshot == null &&
-          recall.studyDaySnapshot != null &&
-          p.completedAt != null) {
-        final existingDay = getDayOfStudyFor(p.completedAt!.toLocal());
-        match = existingDay == recall.studyDaySnapshot;
-      }
-
-      StudyULogger.debug(
-        '[upsertNutritionResult] _isSameStudyDay? $match | existing=${existingRecall.studyDaySnapshot} '
-        'incoming=${recall.studyDaySnapshot} completedAt=${p.completedAt}',
-      );
-      return match;
-    } catch (_) {
-      return false;
-    }
+    applySavedProgress(saved);
+    return saved;
   }
 
   Future<void> addResult<T>({
@@ -132,11 +136,6 @@ extension StudySubjectExtension on StudySubject {
         periodId: periodId,
         result: result,
       ),
-      DailyRecall() => Result<T>.app(
-        type: 'DailyRecall',
-        periodId: periodId,
-        result: result,
-      ),
       bool() => Result<T>.app(type: 'bool', periodId: periodId, result: result),
       _ => Result<T>.app(type: 'unknown', periodId: periodId, result: result),
     };
@@ -145,9 +144,7 @@ extension StudySubjectExtension on StudySubject {
       print('Unsupported question type: $T');
     }
 
-    // Skip multimodal file handling for web
     if (!kIsWeb) {
-      // Move multimodal files to upload directory
       if (resultObject.result is QuestionnaireState) {
         final questionnaireState = resultObject.result as QuestionnaireState;
         for (final answerEntry in questionnaireState.answers.entries.toList()) {
@@ -158,8 +155,6 @@ extension StudySubjectExtension on StudySubject {
               futureBlobFile.localFilePath,
               futureBlobFile.futureBlobId,
             );
-
-            // Replaces Answer<FutureBlobFile> with Answer<String>
             questionnaireState.answers[answerEntry.key] = Answer<String>(
               answer.question,
               answer.timestamp,
@@ -167,45 +162,27 @@ extension StudySubjectExtension on StudySubject {
           }
         }
       }
-      // Upload multimodal files
-      if (!offline) {
-        await Cache.uploadBlobFiles();
-      }
+      if (!offline) await Cache.uploadBlobFiles();
     }
 
-    String interventionId;
-    DateTime completionDate;
-
-    final snapshotDate =
-        startedAt != null &&
-            result is DailyRecall &&
-            result.studyDaySnapshot != null
-        ? startedAt!.add(Duration(days: result.studyDaySnapshot!))
-        : null;
-    final intervention =
-        (snapshotDate == null ? null : getInterventionForDate(snapshotDate)) ??
-        getInterventionForDate(DateTime.now());
+    final intervention = getInterventionForDate(DateTime.now());
     if (intervention == null) {
       throw StateError('No intervention found for result');
     }
-    interventionId = intervention.id;
-    completionDate = result is DailyRecall
-        ? result.entryCompletedAt ?? DateTime.now()
-        : DateTime.now();
 
-    SubjectProgress p = SubjectProgress(
+    var progressToSave = SubjectProgress(
       subjectId: id,
-      interventionId: interventionId,
+      interventionId: intervention.id,
       taskId: taskId,
       result: resultObject,
       resultType: resultObject.type,
     );
     if (offline) {
-      p.completedAt = completionDate.toUtc();
-      progress.add(p);
+      progressToSave.completedAt = DateTime.now().toUtc();
+      progress.add(progressToSave);
     } else {
-      p = await p.save();
-      progress.add(p);
+      progressToSave = await progressToSave.save();
+      progress.add(progressToSave);
       await save(onlyUpdate: true);
     }
   }
