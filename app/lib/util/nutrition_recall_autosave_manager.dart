@@ -194,19 +194,17 @@ class NutritionRecallAutoSaveManager({
 
   Future<List<PendingRecall>> scanPendingRecalls(String subjectId) async {
     final prefs = await _getPrefs();
-    final index = await _readIndex(prefs, subjectId);
+    final draftPrefix = '${_keyPrefix}_${subjectId}_';
     final pendingByIdentity = <String, PendingRecall>{};
 
-    for (final entry in index) {
-      final location = _indexLocation(subjectId, entry);
-      if (location == null) continue;
-      final dataJson = prefs.getString(location.storageKey);
-      if (dataJson == null) continue;
-      final pending = _pendingFromJson(
-        dataJson,
-        storageKey: location.storageKey,
-      );
-      if (pending == null) continue;
+    // The payload can survive a failed index write or an app restart.
+    for (final key in prefs.getKeys().where(
+      (key) => key.startsWith(draftPrefix),
+    )) {
+      final dataJson = prefs.get(key);
+      if (dataJson is! String) continue;
+      final pending = _pendingFromJson(dataJson, storageKey: key);
+      if (pending == null || pending.subjectId != subjectId) continue;
       final identity = _identity(
         pending.taskId,
         pending.periodId,
@@ -673,26 +671,6 @@ class NutritionRecallAutoSaveManager({
     }
   }
 
-  _IndexLocation? _indexLocation(String subjectId, dynamic entry) {
-    if (entry is Map) {
-      final data = Map<String, dynamic>.from(entry);
-      final taskId = data['taskId'] as String?;
-      final periodId = data['periodId'] as String?;
-      final studyDay = data['studyDaySnapshot'];
-      if (taskId == null || periodId == null || studyDay is! num) return null;
-      return _IndexLocation(
-        _buildStorageKey(subjectId, taskId, periodId, studyDay.toInt()),
-      );
-    }
-    if (entry is! String) return null;
-    final separator = entry.lastIndexOf('_');
-    if (separator <= 0) return null;
-    final taskId = entry.substring(0, separator);
-    final studyDay = int.tryParse(entry.substring(separator + 1));
-    if (studyDay == null) return null;
-    return _IndexLocation(_buildLegacyStorageKey(subjectId, taskId, studyDay));
-  }
-
   Future<void> _updateIndex(
     SharedPreferences prefs,
     String subjectId,
@@ -779,8 +757,6 @@ class NutritionRecallAutoSaveManager({
     }
   }
 }
-
-class const _IndexLocation(final String storageKey);
 
 class PendingRecall({
   required final DailyRecall recall,

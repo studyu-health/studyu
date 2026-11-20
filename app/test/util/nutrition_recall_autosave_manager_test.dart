@@ -83,6 +83,35 @@ void main() {
     },
   );
 
+  test('submits a draft after its index write failed', () async {
+    final now = DateTime.utc(2026, 7, 17, 12);
+    final subject = _subject(daysAgo: 2)
+      ..startedAt = now.subtract(const Duration(days: 2));
+    final writer = NutritionRecallAutoSaveManager(
+      stringWriter: (prefs, key, value) => key.contains('_index_')
+          ? Future.value(false)
+          : prefs.setString(key, value),
+    );
+
+    await expectLater(
+      _save(writer, _recall('orphaned', studyDay: 1)),
+      throwsStateError,
+    );
+
+    final submitted = <DailyRecall>[];
+    final reader = NutritionRecallAutoSaveManager(
+      submitter: (_, recall) async => submitted.add(recall),
+    );
+    await reader.submitPendingRecalls(
+      subject: subject,
+      trackProgress: true,
+      now: now,
+    );
+
+    expect(submitted.single.id, 'orphaned');
+    expect(await reader.scanPendingRecalls(subject.id), isEmpty);
+  });
+
   test('deleting a subject removes indexed and orphaned drafts', () async {
     const prefix = 'studyu_nutrition_autosave';
     const orphan = '${prefix}_subject_old_task_2';
