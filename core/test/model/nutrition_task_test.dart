@@ -2,7 +2,7 @@ import 'package:studyu_core/core.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('report extraction excludes legacy drafts', () {
+  test('report extraction excludes incomplete recalls', () {
     final task = NutritionTask.withId();
     final completedAt = DateTime.utc(2026, 9, 22, 18);
     final progress = [
@@ -19,6 +19,7 @@ void main() {
                 date: completedAt,
                 recallMode: RecallMode.realtimeRecord,
                 entryCompletedAt: isComplete ? completedAt : null,
+                studyDaySnapshot: 0,
                 meals: [],
               ),
             ),
@@ -55,12 +56,19 @@ void main() {
       unlockTime: StudyUTimeOfDay(),
       lockTime: StudyUTimeOfDay(hour: 23),
     );
-    final subject = StudySubject('subject', 'study', 'user', []);
+    final task = NutritionTask.withId();
+    task.schedule.completionPeriods = [period];
+    final subject = StudySubject('subject', 'study', 'user', [])
+      ..startedAt = date
+      ..study = (Study('study', 'user')
+        ..schedule.includeBaseline = true
+        ..schedule.numberOfCycles = 0
+        ..observations = [task]);
 
     SubjectProgress progressFor(Result result) => SubjectProgress(
       subjectId: subject.id,
-      interventionId: 'intervention',
-      taskId: 'task',
+      interventionId: Study.baselineID,
+      taskId: task.id,
       resultType: result.type,
       result: result,
     )..completedAt = date;
@@ -75,12 +83,13 @@ void main() {
             date: date,
             recallMode: RecallMode.realtimeRecord,
             entryStartedAt: date,
+            studyDaySnapshot: 0,
             meals: [],
           ),
         ),
       ),
     ];
-    expect(subject.completedTaskInstanceForDay('task', period, date), isFalse);
+    expect(subject.completedTaskInstanceForDay(task.id, period, date), isFalse);
 
     subject.progress = [
       progressFor(
@@ -92,19 +101,20 @@ void main() {
             date: date,
             recallMode: RecallMode.realtimeRecord,
             entryStartedAt: date,
+            studyDaySnapshot: 0,
             entryCompletedAt: date,
             meals: [],
           ),
         ),
       ),
     ];
-    expect(subject.completedTaskInstanceForDay('task', period, date), isTrue);
+    expect(subject.completedTaskInstanceForDay(task.id, period, date), isTrue);
 
     subject.progress = [
       progressFor(
         Result<bool>.app(type: 'bool', periodId: period.id, result: true),
       ),
     ];
-    expect(subject.completedTaskInstanceForDay('task', period, date), isTrue);
+    expect(subject.completedTaskInstanceForDay(task.id, period, date), isTrue);
   });
 }

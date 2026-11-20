@@ -98,18 +98,22 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
     required String interventionId,
   }) {
     final resultsByDate = <DateTime, List<SubjectProgress>>{};
-    progress.where((p) => p.interventionId == interventionId).forEach((p) {
-      final completedAt = p.completedAt!;
-      final result = p.result.result;
-      final timestamp = result is DailyRecall && startedAt != null
-          ? nutritionDateForStudyDay(
-              result.studyDaySnapshot ?? getNutritionStudyDayFor(completedAt),
-            )
-          : completedAt;
+    final nutritionKeys = <(String, int, String)>{};
+    for (final progress in this.progress.where(
+      (progress) => progress.interventionId == interventionId,
+    )) {
+      final result = progress.result.result;
+      final DateTime timestamp;
+      if (result is DailyRecall) {
+        final key = _completedNutritionPeriod(progress);
+        if (key == null || !nutritionKeys.add(key)) continue;
+        timestamp = nutritionDateForStudyDay(key.$2);
+      } else {
+        timestamp = progress.completedAt!;
+      }
       final date = DateTime(timestamp.year, timestamp.month, timestamp.day);
-      resultsByDate.putIfAbsent(date, () => []);
-      resultsByDate[date]!.add(p);
-    });
+      resultsByDate.putIfAbsent(date, () => []).add(progress);
+    }
     return resultsByDate;
   }
 
@@ -238,9 +242,9 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
       final completedAt = sp.completedAt;
       if (sp.subjectId != id || completedAt == null) continue;
       final recall = sp.result.result;
-      final matchesDay = recall is DailyRecall && nutritionDay != null
-          ? (recall.studyDaySnapshot ?? getNutritionStudyDayFor(completedAt)) ==
-                nutritionDay
+      final matchesDay = recall is DailyRecall
+          ? nutritionDay != null &&
+                _completedNutritionPeriod(sp)?.$2 == nutritionDay
           : completedAt.isSameDate(dateTime);
       if (matchesDay) thisTaskProgressToday.add(sp);
     }
@@ -257,11 +261,9 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   ) {
     return getTaskProgressForDay(taskId, dateTime).any((progress) {
       final result = progress.result.result;
-      if (result is DailyRecall && result.entryCompletedAt == null) {
-        return false;
-      }
       final periodId = progress.result.periodId;
-      return periodId == null || periodId == completionPeriod.id;
+      return periodId == completionPeriod.id ||
+          result is! DailyRecall && periodId == null;
     });
   }
 
@@ -269,18 +271,54 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   /// returns true if a given task has been completed for all of its
   /// completionPeriods on a given day
   bool completedTaskForDay(String taskId, DateTime dateTime) {
-    return [
-          ...selectedInterventions.expand((e) => e.tasks),
-          ...study.observations,
-        ]
-        .where((task) => task.id == taskId)
-        .single
-        .schedule
-        .completionPeriods
-        .any((period) => completedTaskInstanceForDay(taskId, period, dateTime));
+    final task = [
+      ...selectedInterventions.expand((e) => e.tasks),
+      ...study.observations,
+    ].where((task) => task.id == taskId).single;
+    final periods = task.schedule.completionPeriods;
+    bool completed(CompletionPeriod period) =>
+        completedTaskInstanceForDay(taskId, period, dateTime);
+    return task is NutritionTask
+        ? periods.isNotEmpty && periods.every(completed)
+        : periods.any(completed);
   }
 
-  int completedTasksFor(Task task) => resultsFor(task.id).length;
+  int completedTasksFor(Task task) {
+    final results = resultsFor(task.id);
+    if (task is! NutritionTask) return results.length;
+    return results.map(_completedNutritionPeriod).nonNulls.toSet().length;
+  }
+
+  (String, int, String)? _completedNutritionPeriod(SubjectProgress progress) {
+    if (progress.subjectId != id ||
+        progress.resultType != 'DailyRecall' ||
+        progress.completedAt == null ||
+        startedAt == null) {
+      return null;
+    }
+    final result = progress.result.result;
+    final period = progress.result.periodId;
+    if (result is! DailyRecall ||
+        result.entryCompletedAt == null ||
+        period == null) {
+      return null;
+    }
+    final day = result.studyDaySnapshot;
+    if (day == null ||
+        getNutritionInterventionForStudyDay(day)?.id !=
+            progress.interventionId) {
+      return null;
+    }
+    final task = study.observations.whereType<NutritionTask>().firstWhereOrNull(
+      (task) => task.id == progress.taskId,
+    );
+    if (task == null ||
+        !task.schedule.completionPeriods.any((item) => item.id == period) ||
+        task.scheduleRule?.isScheduledForDay(day, study.schedule) == false) {
+      return null;
+    }
+    return (task.id, day, period);
+  }
 
   /// Check if all tasks are fully completed on a given day
   /// returns true if all of of the tasks (interventions & observations)

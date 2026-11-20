@@ -31,7 +31,7 @@ void main() {
 
   test('numeric extraction retains only complete values for each nutrient', () {
     final entries = [
-      _food('legacy zero', amount: 1, energy: 0, protein: 0),
+      _food('known zero', amount: 1, energy: 0, protein: 0),
       _food('known', amount: 2, energy: 20, protein: 6),
       _food('unknown', amount: 1, energy: 99, protein: 4)
         ..nutrition.unavailableNutrients = {'energyKcal'},
@@ -56,6 +56,7 @@ void main() {
                 _meal('meal-$i', foods: [entries[i]]),
               ],
               entryCompletedAt: DateTime(2026, 1, i + 1, 18),
+              studyDaySnapshot: i,
             ),
           ),
         )..completedAt = DateTime(2026, 1, i + 1, 18),
@@ -87,6 +88,7 @@ void main() {
       date: DateTime(2026, 9, 22),
       recallMode: RecallMode.realtimeRecord,
       entryCompletedAt: DateTime(2026, 9, 22, 18),
+      studyDaySnapshot: 0,
       meals: [
         _meal(
           'meal',
@@ -148,6 +150,7 @@ MealLog _meal(
     mealType: MealType.lunch,
     mealContext: MealContext.home,
     timestamp: DateTime(2026, 9, 22, 12),
+    timePrecision: MealOccurrenceTimePrecision.approximate,
     timezone: 'UTC',
     isSkipped: isSkipped,
     foods: foods,

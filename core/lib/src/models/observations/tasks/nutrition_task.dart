@@ -45,7 +45,12 @@ class NutritionTask extends Observation {
     for (final e in sourceResults) {
       final result = (e.result as Result<DailyRecall>).result;
       final completionTime = result.entryCompletedAt;
-      if (completionTime == null) continue;
+      if (completionTime == null ||
+          result.studyDaySnapshot == null ||
+          e.result.periodId == null ||
+          e.completedAt == null) {
+        continue;
+      }
 
       final nutrition = result.totalNutrition;
 

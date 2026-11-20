@@ -92,6 +92,76 @@ void main() {
     ]);
   });
 
+  test('counts distinct completed periods on scheduled nutrition days', () {
+    final dayOne = DateTime.utc(2026);
+    final task = NutritionTask.withId()
+      ..title = 'Nutrition'
+      ..scheduleRule = TaskScheduleRule.forSpecificDays([0]);
+    final morning = task.schedule.completionPeriods.single;
+    final evening = CompletionPeriod(
+      id: 'evening',
+      unlockTime: StudyUTimeOfDay(hour: 18),
+      lockTime: StudyUTimeOfDay(hour: 23),
+    );
+    task.schedule.completionPeriods.add(evening);
+    final subject = StudySubject('subject', 'study', 'user', [])
+      ..startedAt = dayOne
+      ..study = (Study('study', 'user')
+        ..schedule.includeBaseline = true
+        ..schedule.numberOfCycles = 0
+        ..schedule.phaseDuration = 3
+        ..observations = [task]);
+
+    SubjectProgress record(
+      int minutes, {
+      int? day = 0,
+      bool completed = true,
+      required String? periodId,
+    }) {
+      final time = dayOne.add(Duration(minutes: minutes));
+      return SubjectProgress(
+        subjectId: subject.id,
+        interventionId: Study.baselineID,
+        taskId: task.id,
+        resultType: 'DailyRecall',
+        result: Result<DailyRecall>.app(
+          type: 'DailyRecall',
+          periodId: periodId,
+          result: DailyRecall.withId(
+            date: time,
+            recallMode: RecallMode.realtimeRecord,
+            studyDaySnapshot: day,
+            entryCompletedAt: completed ? time : null,
+            meals: [],
+          ),
+        ),
+      )..completedAt = time;
+    }
+
+    subject.progress = [
+      record(10, periodId: morning.id),
+      record(11, periodId: morning.id),
+      record(12, periodId: evening.id, completed: false),
+      record(13, periodId: null),
+      record(14, periodId: evening.id, day: null),
+      record(15, periodId: evening.id, day: 1),
+      record(16, periodId: 'unscheduled-period'),
+    ];
+    expect(subject.completedTasksFor(task), 1);
+    expect(subject.completedTaskForDay(task.id, dayOne), isFalse);
+    expect(
+      subject.getResultsByDate(interventionId: Study.baselineID).values.single,
+      hasLength(1),
+    );
+
+    subject.progress.add(record(17, periodId: evening.id));
+    expect(subject.completedTasksFor(task), 2);
+    expect(subject.completedTaskForDay(task.id, dayOne), isTrue);
+
+    subject.startedAt = null;
+    expect(subject.getResultsByDate(interventionId: Study.baselineID), isEmpty);
+  });
+
   test(
     'keeps an unfinished UTC nutrition period after the local phase ends',
     () {

@@ -8,16 +8,16 @@ class ReportUtilities(final StudySubject subject) {
   Iterable<DiagramDatum> convertToDiagramData(Map<DateTime, num> values) {
     final nutritionProgress = {
       for (final progress in subject.progress)
-        if (progress.result.result is DailyRecall &&
-            progress.completedAt != null)
-          progress.completedAt!: progress,
+        if (progress.result.result
+            case DailyRecall(:final entryCompletedAt, :final studyDaySnapshot)
+            when entryCompletedAt != null &&
+                studyDaySnapshot != null &&
+                progress.result.periodId != null &&
+                progress.completedAt != null)
+          progress.completedAt!: (progress, studyDaySnapshot),
     };
     return values.entries.map((entry) {
-      if (nutritionProgress[entry.key] case final progress?) {
-        final recall = progress.result.result as DailyRecall;
-        final day =
-            recall.studyDaySnapshot ??
-            subject.getNutritionStudyDayFor(entry.key);
+      if (nutritionProgress[entry.key] case (final progress, final day)) {
         return DiagramDatum(
           day,
           entry.value,
