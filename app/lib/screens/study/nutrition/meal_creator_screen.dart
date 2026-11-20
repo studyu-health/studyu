@@ -252,7 +252,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       name: name,
       amount: amount,
       unit: 'serving',
-      servingSizeGrams: 100,
+      servingSizeGrams: 0,
       portionEstimationMethod: PortionEstimationMethod.householdMeasure,
       portionState: PortionState.asServed,
       nutrition: NutritionProfile(

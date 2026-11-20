@@ -138,6 +138,45 @@ void main() {
     expect(added!.nutrition.energyKcal, 41);
   });
 
+  testWidgets('quick add keeps the ingredient and recipe weight unknown', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final repository = FakeNutritionFoodRepository();
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(viewModel.dispose);
+    await _pump(
+      tester,
+      () => MealCreatorScreen.route(
+        initialName: 'Soup',
+        initialFoods: [_food()],
+        templateViewModel: viewModel,
+      ),
+      (_) {},
+      viewModel,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip(l10n.nutrition_add_food_manually));
+    await tester.pumpAndSettle();
+    final name = find.widgetWithText(TextField, l10n.food_name);
+    await tester.ensureVisible(name);
+    await tester.enterText(name, 'Unweighed ingredient');
+    final add = find.widgetWithText(FilledButton, l10n.add);
+    await tester.ensureVisible(add);
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    final recipe = (await repository.loadTemplates('subject')).single.prototype;
+    expect(recipe.servingSizeGrams, 0);
+    expect(recipe.componentSnapshots!.last.servingSizeGrams, 0);
+  });
+
   testWidgets('ingredient quantity keeps its unit and scales nutrition', (
     tester,
   ) async {
