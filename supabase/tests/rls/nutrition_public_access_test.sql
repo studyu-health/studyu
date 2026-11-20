@@ -54,26 +54,29 @@ INSERT INTO public.study (
 );
 
 INSERT INTO public.study_subject (
-    id, study_id, user_id, selected_intervention_ids
+    id, study_id, user_id, started_at, selected_intervention_ids
 ) VALUES (
     '80000000-0000-4000-8000-000000000002',
     '80000000-0000-4000-8000-000000000001',
     tests.get_supabase_uid('nutrition_public_subject'),
+    now(),
     ARRAY[]::text[]
 );
 
-SET LOCAL session_replication_role = replica;
+SELECT tests.authenticate_as('nutrition_public_subject');
+SELECT public.save_nutrition_recall(
+    '80000000-0000-4000-8000-000000000002', now(), 'intervention-a', 'nutrition-task',
+    jsonb_build_object(
+        'type', 'DailyRecall', 'periodId', 'nutrition-period',
+        'result', jsonb_build_object(
+            'id', 'nutrition-recall', 'date', now(), 'entryCompletedAt', now(),
+            'recallMode', 'realtimeRecord', 'studyDaySnapshot', 0, 'meals', '[]'::jsonb
+        )
+    )
+);
 INSERT INTO public.subject_progress (
     completed_at, subject_id, intervention_id, task_id, result_type, result
 ) VALUES
-(
-    '2026-08-31 08:00:00+00',
-    '80000000-0000-4000-8000-000000000002',
-    'intervention-a',
-    'nutrition-task',
-    'DailyRecall',
-    '{"type":"DailyRecall","result":{"meals":[]}}'::jsonb
-),
 (
     '2026-08-31 09:00:00+00',
     '80000000-0000-4000-8000-000000000002',
@@ -112,7 +115,6 @@ INSERT INTO public.subject_progress (
         ]
     }'::jsonb
 );
-SET LOCAL session_replication_role = origin;
 
 SELECT tests.authenticate_as('nutrition_public_outsider');
 SELECT is(

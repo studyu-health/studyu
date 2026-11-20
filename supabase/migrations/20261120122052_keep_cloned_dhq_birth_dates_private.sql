@@ -5,6 +5,7 @@ ALTER POLICY "Read access on progress for all if results are public"
 ON public.subject_progress
 USING (
     result_type <> 'DailyRecall'
+    AND result->>'type' IS DISTINCT FROM 'DailyRecall'
     AND NOT jsonb_path_exists(
         result,
         '$.result[*].question ? (@ == "dhq_dob" || @ starts with "dhq_dob-")'

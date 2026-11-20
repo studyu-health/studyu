@@ -386,118 +386,6 @@ AS $$
   )::integer;
 $$;
 
-CREATE FUNCTION public.guard_nutrition_subject_clock()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-BEGIN
-  IF NEW.id IS DISTINCT FROM OLD.id THEN
-    RAISE EXCEPTION 'study subject clock and identity are immutable'
-      USING ERRCODE = '22023';
-  END IF;
-  IF current_setting('studyu.nutrition_maintenance', true) =
-      'advance:' || OLD.id::text THEN
-    RETURN NEW;
-  END IF;
-  IF NEW.started_at IS DISTINCT FROM OLD.started_at OR
-     NEW.study_id IS DISTINCT FROM OLD.study_id OR
-     NEW.user_id IS DISTINCT FROM OLD.user_id THEN
-    RAISE EXCEPTION 'study subject clock and identity are immutable'
-      USING ERRCODE = '22023';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER guard_nutrition_subject_clock
-BEFORE UPDATE ON public.study_subject
-FOR EACH ROW EXECUTE FUNCTION public.guard_nutrition_subject_clock();
-
-CREATE FUNCTION public.guard_nutrition_progress_mutation()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-DECLARE
-  v_subject public.study_subject%ROWTYPE;
-  v_subject_id uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.subject_id ELSE NEW.subject_id END;
-  v_old_day integer;
-  v_new_day integer;
-  v_current_day integer;
-  v_maintenance text :=
-      current_setting('studyu.nutrition_maintenance', true);
-BEGIN
-  IF (TG_OP = 'UPDATE' AND v_maintenance IN (
-        'advance:' || v_subject_id::text,
-        'mutation:' || v_subject_id::text
-      )) OR
-     (TG_OP = 'DELETE' AND
-      v_maintenance = 'delete:' || v_subject_id::text) THEN
-    RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
-  END IF;
-
-  IF (TG_OP = 'INSERT' AND NEW.result_type IS DISTINCT FROM 'DailyRecall') OR
-     (TG_OP = 'UPDATE' AND
-      OLD.result_type IS DISTINCT FROM 'DailyRecall' AND
-      NEW.result_type IS DISTINCT FROM 'DailyRecall') OR
-     (TG_OP = 'DELETE' AND OLD.result_type IS DISTINCT FROM 'DailyRecall') THEN
-    RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
-  END IF;
-
-  SELECT * INTO v_subject
-  FROM public.study_subject
-  WHERE id = v_subject_id AND user_id = auth.uid();
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'nutrition progress subject is not owned by caller'
-      USING ERRCODE = '42501';
-  END IF;
-  v_current_day := public.nutrition_subject_current_day(v_subject);
-
-  BEGIN
-    IF TG_OP <> 'INSERT' AND OLD.result_type = 'DailyRecall' THEN
-      v_old_day := (OLD.result #>> '{result,studyDaySnapshot}')::integer;
-    END IF;
-    IF TG_OP <> 'DELETE' AND NEW.result_type = 'DailyRecall' THEN
-      v_new_day := (NEW.result #>> '{result,studyDaySnapshot}')::integer;
-    END IF;
-  EXCEPTION WHEN invalid_text_representation THEN
-    RAISE EXCEPTION 'invalid nutrition progress study day'
-      USING ERRCODE = '22023';
-  END;
-
-  IF TG_OP = 'INSERT' AND NEW.result_type = 'DailyRecall' THEN
-    IF v_new_day IS NULL OR v_new_day NOT IN (v_current_day - 1, v_current_day) THEN
-      RAISE EXCEPTION 'nutrition recall study day is not writable'
-        USING ERRCODE = '22023';
-    END IF;
-  ELSIF TG_OP = 'UPDATE' AND
-        (OLD.result_type = 'DailyRecall' OR NEW.result_type = 'DailyRecall') THEN
-    IF OLD.result_type IS DISTINCT FROM 'DailyRecall' OR
-       NEW.result_type IS DISTINCT FROM 'DailyRecall' OR
-       NEW.subject_id IS DISTINCT FROM OLD.subject_id OR
-       v_old_day IS NULL OR
-       v_new_day IS DISTINCT FROM v_old_day OR
-       v_old_day NOT IN (v_current_day - 1, v_current_day) THEN
-      RAISE EXCEPTION 'nutrition recall study day is not writable'
-        USING ERRCODE = '22023';
-    END IF;
-  ELSIF TG_OP = 'DELETE' AND OLD.result_type = 'DailyRecall' AND
-        (v_old_day IS NULL OR v_old_day NOT IN (v_current_day - 1, v_current_day)) THEN
-    RAISE EXCEPTION 'nutrition recall study day is not writable'
-      USING ERRCODE = '22023';
-  END IF;
-
-  RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
-END;
-$$;
-
-CREATE TRIGGER guard_nutrition_progress_mutation
-BEFORE INSERT OR UPDATE OR DELETE ON public.subject_progress
-FOR EACH ROW EXECUTE FUNCTION public.guard_nutrition_progress_mutation();
-
 CREATE FUNCTION public.advance_owned_study_subject_day(
     p_subject_id uuid,
     p_days integer
@@ -508,8 +396,6 @@ SET search_path = ''
 AS $$
 DECLARE
   v_completed_at timestamptz;
-  v_previous_maintenance text :=
-      current_setting('studyu.nutrition_maintenance', true);
   v_is_service_role boolean :=
       current_setting('role', true) = 'service_role';
 BEGIN
@@ -521,9 +407,6 @@ BEGIN
     RAISE EXCEPTION 'invalid study subject day advance'
       USING ERRCODE = '22023';
   END IF;
-  PERFORM set_config(
-    'studyu.nutrition_maintenance', 'advance:' || p_subject_id::text, true
-  );
   FOR v_completed_at IN
     SELECT completed_at
     FROM public.subject_progress
@@ -537,9 +420,6 @@ BEGIN
   UPDATE public.study_subject
   SET started_at = started_at - interval '1 day'
   WHERE id = p_subject_id;
-  PERFORM set_config(
-    'studyu.nutrition_maintenance', COALESCE(v_previous_maintenance, ''), true
-  );
 END;
 $$;
 
@@ -551,8 +431,6 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-  v_previous_maintenance text :=
-      current_setting('studyu.nutrition_maintenance', true);
   v_is_service_role boolean :=
       current_setting('role', true) = 'service_role';
 BEGIN
@@ -564,13 +442,7 @@ BEGIN
     RAISE EXCEPTION 'study subject is not owned by caller'
       USING ERRCODE = '42501';
   END IF;
-  PERFORM set_config(
-    'studyu.nutrition_maintenance', 'delete:' || p_subject_id::text, true
-  );
   DELETE FROM public.subject_progress WHERE subject_id = p_subject_id;
-  PERFORM set_config(
-    'studyu.nutrition_maintenance', COALESCE(v_previous_maintenance, ''), true
-  );
 END;
 $$;
 
@@ -609,8 +481,6 @@ DECLARE
   v_selected_historical_update_count integer := 0;
   v_today_update_count integer := 0;
   v_response jsonb;
-  v_previous_maintenance text :=
-      current_setting('studyu.nutrition_maintenance', true);
   v_is_service_role boolean :=
       current_setting('role', true) = 'service_role';
 BEGIN
@@ -659,10 +529,13 @@ BEGIN
   PERFORM pg_advisory_xact_lock(hashtextextended(p_food_id::text, 1));
   SELECT * INTO v_definition
   FROM public.nutrition_food_definition
-  WHERE id = p_food_id AND subject_id = p_subject_id
+  WHERE id = p_food_id
   FOR UPDATE;
 
   IF FOUND THEN
+    IF v_definition.subject_id IS DISTINCT FROM p_subject_id THEN
+      RAISE EXCEPTION 'nutrition definition subject is not owned by caller' USING ERRCODE = '42501';
+    END IF;
     IF p_expected_version_id IS NULL OR (
       v_definition.current_version_id <> p_expected_version_id AND NOT (
         v_definition.deleted_at IS NOT NULL AND
@@ -801,9 +674,6 @@ BEGIN
       updated_at = now()
   WHERE id = p_food_id;
 
-  PERFORM set_config(
-    'studyu.nutrition_maintenance', 'mutation:' || p_subject_id::text, true
-  );
 
   IF p_historical_target IS NOT NULL THEN
     SELECT count(*) INTO v_target_count
@@ -885,9 +755,6 @@ BEGIN
   FROM public.nutrition_food_definition AS definition
   WHERE definition.id = p_food_id;
 
-  PERFORM set_config(
-    'studyu.nutrition_maintenance', COALESCE(v_previous_maintenance, ''), true
-  );
   INSERT INTO public.nutrition_food_mutation (subject_id, mutation_id, response)
   VALUES (p_subject_id, p_mutation_id, v_response);
   RETURN v_response;
@@ -899,10 +766,6 @@ FROM public, anon, authenticated;
 REVOKE ALL ON FUNCTION public.nutrition_subject_current_day(
     public.study_subject
 )
-FROM public, anon, authenticated;
-REVOKE ALL ON FUNCTION public.guard_nutrition_subject_clock()
-FROM public, anon, authenticated;
-REVOKE ALL ON FUNCTION public.guard_nutrition_progress_mutation()
 FROM public, anon, authenticated;
 REVOKE ALL ON FUNCTION public.advance_owned_study_subject_day(uuid, integer)
 FROM public, anon;

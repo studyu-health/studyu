@@ -119,7 +119,7 @@ SELECT throws_ok(
     $$UPDATE public.subject_progress SET result = result
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'locked-task'$$,
-    '22023', 'nutrition recall study day is not writable',
+    '42501', 'direct nutrition recall writes are not allowed',
     'caller-controlled settings cannot authorize locked recall updates'
 );
 SELECT set_config(
@@ -130,7 +130,7 @@ SELECT throws_ok(
     $$DELETE FROM public.subject_progress
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'locked-task'$$,
-    '22023', 'nutrition recall study day is not writable',
+    '42501', 'direct nutrition recall writes are not allowed',
     'caller-controlled settings cannot authorize locked recall deletion'
 );
 SELECT set_config('studyu.nutrition_maintenance', '', TRUE);
@@ -378,6 +378,8 @@ INSERT INTO nutrition_results VALUES (
     )
 );
 
+RESET ROLE;
+SET LOCAL session_replication_role = replica;
 INSERT INTO public.subject_progress (
     completed_at, subject_id, intervention_id, task_id, result_type, result
 ) VALUES
@@ -428,6 +430,9 @@ SET
         '{result,lastAutoSavedAt}', to_jsonb(GREATEST(now(), completed_at) + interval '1 second')
     )
 WHERE task_id = 'current-composite-task';
+
+SET LOCAL session_replication_role = origin;
+SELECT tests.authenticate_as('nutrition_owner');
 
 INSERT INTO nutrition_results VALUES (
     'composite-historical',
@@ -689,8 +694,8 @@ SELECT throws_ok(
       SET result = jsonb_set(result, '{result,meals,0,foods,0,name}', '"Forged"')
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'locked-task'$$,
-    '22023',
-    'nutrition recall study day is not writable',
+    '42501',
+    'direct nutrition recall writes are not allowed',
     'direct writes cannot update locked historical recalls'
 );
 SELECT is(
@@ -706,8 +711,8 @@ SELECT throws_ok(
     $$DELETE FROM public.subject_progress
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'locked-task'$$,
-    '22023',
-    'nutrition recall study day is not writable',
+    '42501',
+    'direct nutrition recall writes are not allowed',
     'direct writes cannot delete locked historical recalls'
 );
 SELECT is(
@@ -726,8 +731,8 @@ SELECT throws_ok(
         result_type,
         jsonb_set(result, '{result,studyDaySnapshot}', '2')
       FROM public.subject_progress WHERE task_id = 'locked-task'$$,
-    '22023',
-    'nutrition recall study day is not writable',
+    '42501',
+    'direct nutrition recall writes are not allowed',
     'direct writes cannot insert out-of-window historical recalls'
 );
 SELECT throws_ok(
@@ -735,8 +740,8 @@ SELECT throws_ok(
       SET result = jsonb_set(result, '{result,studyDaySnapshot}', '3')
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'historical-task'$$,
-    '22023',
-    'nutrition recall study day is not writable',
+    '42501',
+    'direct nutrition recall writes are not allowed',
     'direct writes cannot change a recall study-day identity'
 );
 SELECT throws_ok(
@@ -747,7 +752,7 @@ SELECT throws_ok(
       )
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'historical-task'$$,
-    '40001', 'nutrition recall update requires a revision',
+    '42501', 'direct nutrition recall writes are not allowed',
     'a historical food mutation protects the affected recall from direct writes'
 );
 
@@ -1297,7 +1302,7 @@ SELECT throws_ok(
         jsonb_set(result, '{result,studyDaySnapshot}', '2')
       FROM public.subject_progress WHERE task_id = 'locked-task'$$,
     '42501',
-    'nutrition progress subject is not owned by caller',
+    'direct nutrition recall writes are not allowed',
     'service role cannot directly insert an out-of-window recall'
 );
 SELECT throws_ok(
@@ -1308,7 +1313,7 @@ SELECT throws_ok(
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'locked-task'$$,
     '42501',
-    'nutrition progress subject is not owned by caller',
+    'direct nutrition recall writes are not allowed',
     'service role cannot directly update a protected recall'
 );
 SELECT throws_ok(
@@ -1316,7 +1321,7 @@ SELECT throws_ok(
       WHERE subject_id = '10000000-0000-0000-0000-000000000001'
         AND task_id = 'locked-task'$$,
     '42501',
-    'nutrition progress subject is not owned by caller',
+    'direct nutrition recall writes are not allowed',
     'service role cannot directly delete a protected recall'
 );
 SELECT set_config('role', 'postgres', TRUE);

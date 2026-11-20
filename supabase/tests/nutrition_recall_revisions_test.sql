@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(29);
+SELECT plan(30);
 
 SELECT tests.create_supabase_user('nutrition_revision_owner', 'nutrition_revision_owner@studyu.health');
 SELECT tests.create_supabase_user('nutrition_revision_other', 'nutrition_revision_other@studyu.health');
@@ -15,22 +15,11 @@ INSERT INTO public.study_subject (
     ARRAY[]::text[]
 );
 
-SET LOCAL session_replication_role = replica;
-INSERT INTO public.subject_progress (
-    subject_id, completed_at, intervention_id, task_id, result_type, result
-) VALUES (
-    'a7100000-0000-4000-8000-000000000001', now() - interval '1 day',
-    'intervention-a', 'nutrition-task', 'DailyRecall',
-    '{"type":"DailyRecall","periodId":"period-a","result":{"meals":[]}}'
-);
-SET LOCAL session_replication_role = origin;
-
 CREATE FUNCTION tests.revision_test_result(
     p_water integer DEFAULT 250, p_saved_at timestamptz DEFAULT now()
 ) RETURNS jsonb LANGUAGE sql STABLE AS $$
     SELECT jsonb_build_object(
         'type', 'DailyRecall', 'periodId', 'period-a',
-        'nutritionAvailabilityWriteIntent', 'explicit-v1',
         'result', jsonb_build_object(
             'id', 'nutrition-revision-fixture', 'date', now(), 'recallMode', 'realtimeRecord',
             'studyDaySnapshot', 3, 'entryCompletedAt', now(), 'lastAutoSavedAt', p_saved_at,
@@ -81,10 +70,20 @@ SELECT throws_ok(
     $$SELECT tests.revision_test_save(
         jsonb_set(
             tests.revision_test_result(), '{result,meals}',
-            '[{"id":"meal","mealType":"breakfast","timezone":"UTC","isSkipped":false,"foods":[{}]}]'
+            '[{"id":"meal","mealType":"breakfast","timezone":"UTC","timePrecision":"unknown","isSkipped":false,"foods":[{}]}]'
         )
     )$$,
     '22023', 'invalid nutrition recall', 'save rejects an invalid nested food snapshot'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(), '{result,studyDaySnapshot}', '3.1')
+    )$$,
+    '22023', 'invalid nutrition recall', 'save requires an integer study day'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(tests.revision_test_result() #- '{result,entryCompletedAt}')$$,
+    '22023', 'invalid nutrition recall', 'save rejects incomplete recalls'
 );
 SELECT is(
     (tests.revision_test_save(tests.revision_test_result())).nutrition_revision,
@@ -112,8 +111,8 @@ SELECT throws_ok(
     $$UPDATE public.subject_progress
       SET result = tests.revision_test_result(450)
       WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()$$,
-    '40001', 'nutrition recall update requires a revision',
-    'a changed legacy write cannot overwrite a revision-protected recall'
+    '42501', 'direct nutrition recall writes are not allowed',
+    'a direct write cannot overwrite a recall'
 );
 SELECT is(
     (SELECT result #>> '{result,waterIntakeMl}' FROM public.subject_progress
@@ -121,56 +120,52 @@ SELECT is(
     '350', 'failed writes preserve the current recall'
 );
 SELECT throws_ok(
-    $$UPDATE public.subject_progress
-      SET result = tests.revision_test_result(500, now() + interval '1 second')
-      WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()$$,
-    '40001', 'nutrition recall update requires a revision',
-    'a later legacy timestamp does not bypass revision protection'
-);
-SELECT is(
-    (SELECT nutrition_revision FROM public.subject_progress
-     WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()),
-    1::bigint, 'a rejected legacy write preserves the revision'
-);
-SELECT lives_ok(
     $$INSERT INTO public.subject_progress (
         subject_id, completed_at, intervention_id, task_id, result_type, result
     ) VALUES (
         'a7100000-0000-4000-8000-000000000001', now() + interval '1 hour',
-        'intervention-a', 'legacy-task', 'DailyRecall', tests.revision_test_result()
+        'intervention-a', 'nutrition-task', 'DailyRecall', tests.revision_test_result()
     )$$,
-    'older clients can still create recalls'
-);
-SELECT is(
-    (
-        public.save_nutrition_recall(
-            'a7100000-0000-4000-8000-000000000001', now() + interval '1 hour',
-            'intervention-a', 'legacy-task', tests.revision_test_result()
-        )
-    ).nutrition_revision,
-    0::bigint, 'a no-op RPC adopts a legacy recall without changing its revision'
+    '42501', 'direct nutrition recall writes are not allowed',
+    'a direct write cannot insert a recall'
 );
 SELECT throws_ok(
-    $$UPDATE public.subject_progress
-      SET result = tests.revision_test_result(500, now() + interval '2 hours')
-      WHERE subject_id = 'a7100000-0000-4000-8000-000000000001'
-        AND task_id = 'legacy-task'$$,
-    '40001', 'nutrition recall update requires a revision',
-    'an exact retry protects the legacy row from future direct changes'
+    $$INSERT INTO public.subject_progress (
+        subject_id, completed_at, intervention_id, task_id, result_type, result
+    ) VALUES (
+        'a7100000-0000-4000-8000-000000000001', now() + interval '1 hour',
+        'intervention-a', 'nutrition-task', 'QuestionnaireState', tests.revision_test_result()
+    )$$,
+    '22023', 'nutrition recall result types must match',
+    'the row and payload must both identify a nutrition recall'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(550), '{periodId}', '"other-period"'), 1
+    )$$,
+    '40001', 'nutrition recall identity changed',
+    'an update cannot change the period'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(550), '{result,studyDaySnapshot}', '2'), 1
+    )$$,
+    '40001', 'nutrition recall identity changed',
+    'an update cannot change the study day'
 );
 SELECT lives_ok(
     $$SELECT tests.revision_test_save(
         jsonb_set(tests.revision_test_result(550), '{result,studyDaySnapshot}', '2'),
-        0,
-        now() - interval '1 day'
+        null, now() - interval '1 day'
     )$$,
-    'the revision RPC can correct an eligible recall without a stored study day'
+    'the same period can have a recall on a different writable study day'
 );
-SELECT is(
-    (SELECT result #>> '{result,studyDaySnapshot}' FROM public.subject_progress
-     WHERE subject_id = 'a7100000-0000-4000-8000-000000000001'
-       AND completed_at = now() - interval '1 day'),
-    '2', 'the corrected legacy recall stores the inferred UTC study day'
+SELECT lives_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(550), '{periodId}', '"other-period"'),
+        null, now() + interval '1 hour'
+    )$$,
+    'the same study day can have a recall for a different period'
 );
 SELECT throws_ok(
     $$SELECT public.advance_owned_study_subject_day('a7100000-0000-4000-8000-000000000001', 1)$$,
@@ -195,15 +190,15 @@ SELECT throws_ok(
         'a7100000-0000-4000-8000-000000000001', now() + interval '2 hours',
         'intervention-a', 'legacy-task-2', 'DailyRecall', tests.revision_test_result()
     )$$,
-    '42501', 'nutrition progress subject is not owned by caller',
-    'a legacy client cannot add progress after withdrawal'
+    '42501', 'direct nutrition recall writes are not allowed',
+    'a direct write cannot add progress after withdrawal'
 );
 SELECT throws_ok(
     $$UPDATE public.subject_progress
       SET result = tests.revision_test_result(500)
       WHERE subject_id = 'a7100000-0000-4000-8000-000000000001' AND completed_at = now()$$,
-    '42501', 'nutrition progress subject is not owned by caller',
-    'a legacy client cannot edit progress after withdrawal'
+    '42501', 'direct nutrition recall writes are not allowed',
+    'a direct write cannot edit progress after withdrawal'
 );
 SELECT throws_ok(
     $$SELECT public.apply_nutrition_food_mutation(
