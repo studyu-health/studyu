@@ -249,6 +249,34 @@ void main() {
     },
   );
 
+  testWidgets('keeps partial averages without showing trend directions', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(800, 1600);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
+    final subject = _statisticsSubject(addCalendarDays(today, -15), [
+      for (final offset in [1, 2, 8, 9])
+        _record(
+          date: addCalendarDays(today, -offset),
+          studyDay: 15 - offset,
+          energyKcal: offset < 7 ? 400 : 200,
+          partialNutrients: offset == 1
+              ? {'energyKcal', 'protein', 'fiber'}
+              : {},
+        ),
+    ]);
+    await tester.pumpWidget(_statisticsApp(subject));
+    await tester.pumpAndSettle();
+    await _selectPeriod(tester, 'Week');
+
+    expect(find.text('400 kcal (partial)'), findsWidgets);
+    expect(find.textContaining('kcal/day'), findsNothing);
+    expect(find.textContaining('g/day'), findsNothing);
+  });
+
   testWidgets('moves aggregate charts and comparisons by the selected range', (
     tester,
   ) async {

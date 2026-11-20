@@ -303,7 +303,6 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     required String label,
     required NutritionProfile nutrition,
     required int? change,
-    bool partialChange = false,
   }) {
     final theme = Theme.of(context);
     final energy = _energyUnavailable(nutrition) ? null : nutrition.energyKcal;
@@ -327,17 +326,13 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
         ),
         if (change != null) ...[
           const SizedBox(height: 8),
-          _energyChange(context, change, partial: partialChange),
+          _energyChange(context, change),
         ],
       ],
     );
   }
 
-  Widget _energyChange(
-    BuildContext context,
-    int change, {
-    required bool partial,
-  }) {
+  Widget _energyChange(BuildContext context, int change) {
     final l10n = AppLocalizations.of(context)!;
     final sign = change > 0 ? '+' : (change < 0 ? '−' : '');
     final value =
@@ -373,7 +368,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
                 const SizedBox(width: 4),
                 Flexible(
                   child: Text(
-                    _withPartial(context, changeLabel, partial),
+                    changeLabel,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: colors.onSecondaryContainer,
                     ),
@@ -401,13 +396,9 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     required bool canCompare,
   }) {
     final nutrition = current.averageNutrition;
-    final baseline = canCompare ? previous.averageNutrition : null;
-    final change =
-        baseline == null ||
-            _energyUnavailable(nutrition) ||
-            _energyUnavailable(baseline)
-        ? null
-        : (nutrition.energyKcal - baseline.energyKcal).round();
+    final change = canCompare
+        ? _averageChange(current, previous, 'energyKcal')?.round()
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -416,9 +407,6 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
           label: AppLocalizations.of(context)!.nutrition_daily_average,
           nutrition: nutrition,
           change: change,
-          partialChange:
-              nutrition.isPartial('energyKcal') ||
-              (baseline?.isPartial('energyKcal') ?? false),
         ),
         const SizedBox(height: 16),
         Card(
@@ -831,17 +819,11 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
                     context,
                     l10n.protein,
                     _averageChange(current, previous, 'protein'),
-                    partial:
-                        current.partialNutrients.contains('protein') ||
-                        previous.partialNutrients.contains('protein'),
                   ),
                   _changeRow(
                     context,
                     l10n.fibre,
                     _averageChange(current, previous, 'fiber'),
-                    partial:
-                        current.partialNutrients.contains('fiber') ||
-                        previous.partialNutrients.contains('fiber'),
                   ),
                 ],
               )
@@ -850,12 +832,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     );
   }
 
-  Widget _changeRow(
-    BuildContext context,
-    String label,
-    double? change, {
-    bool partial = false,
-  }) {
+  Widget _changeRow(BuildContext context, String label, double? change) {
     final l10n = AppLocalizations.of(context)!;
     if (change == null) {
       return Row(
@@ -883,7 +860,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: 4),
-          Text(_withPartial(context, value, partial)),
+          Text(value),
         ],
       ),
     );
@@ -1039,6 +1016,10 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     NutritionStatisticsPeriod previous,
     String key,
   ) {
+    if (current.partialNutrients.contains(key) ||
+        previous.partialNutrients.contains(key)) {
+      return null;
+    }
     final currentValue = current.averageFor(key);
     final previousValue = previous.averageFor(key);
     return currentValue == null || previousValue == null
