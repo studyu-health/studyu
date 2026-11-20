@@ -31,7 +31,8 @@ Suggested search hint:
 
 Suggested editor notice:
 
-> **Copied from external library**  
+> **Copied from external library**
+>
 > Review serving size and nutrition values before saving. Saving creates an independent item in My foods.
 
 Suggested generic failure message:
