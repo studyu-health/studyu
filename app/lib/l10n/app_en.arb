@@ -1370,7 +1370,7 @@
   "nutrition_history": "History",
   "nutrition_history_empty": "No past food diaries yet.",
   "nutrition_history_latest_study_day": "Latest study day",
-  "nutrition_history_latest_study_day_description": "Your latest study day remains editable so you can add or correct entries the following morning.",
+  "nutrition_history_latest_study_day_description": "You can add or correct entries for the previous study day.",
   "nutrition_history_previous_study_days": "Previous study days",
   "nutrition_history_no_foods_logged": "No foods logged",
   "historical_editing_date": "Editing {date}",
@@ -1484,5 +1484,8 @@
   "nutrition_recall_discard_failed": "Could not discard the draft. Try again.",
   "nutrition_recall_conflict_reopen": "Open the nutrition task again. If you still see an older version, reload the study.",
   "nutrition_recall_view_draft": "View draft",
-  "nutrition_recall_view_saved": "View saved version"
+  "nutrition_recall_view_saved": "View saved version",
+  "nutrition_history_local_draft": "Draft saved on this device",
+  "nutrition_history_expired_draft": "Sync window ended. This draft is only on this device.",
+  "nutrition_history_discard_expired_draft": "Delete this draft from this device? This cannot be undone."
 }

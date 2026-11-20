@@ -72,8 +72,10 @@ class const NutritionTaskWidget({
         .where((period) => period.id == record.periodId)
         .firstOrNull;
     final target = record.persistenceTarget;
+    final draftCanEdit =
+        record.pending?.progressCompletedAt == null || target != null;
     final canEdit =
-        target != null &&
+        draftCanEdit &&
         isEditableNutritionRecallDay(
           studyDaySnapshot: record.studyDaySnapshot,
           currentStudyDay: nutritionStudyDayFor(subject, DateTime.now()),
@@ -1058,7 +1060,11 @@ class _NutritionTaskWidgetState()
     BuildContext context,
     DailyRecallEntryViewModel model,
   ) async {
-    if (!_isHistoricalMode || widget.readOnly) return true;
+    if (!_isHistoricalMode ||
+        widget.readOnly ||
+        model.persistenceTarget == null) {
+      return true;
+    }
     try {
       await model.flushPendingAutoSave(
         persistToDatabase: true,

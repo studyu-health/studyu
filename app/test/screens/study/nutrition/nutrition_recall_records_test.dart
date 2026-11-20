@@ -1,49 +1,69 @@
-import 'dart:convert';
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
 
-void main() {
-  test('legacy recall and a period-qualified draft count only once', () async {
-    SharedPreferences.setMockInitialValues({});
-    final now = DateTime.utc(2026, 7, 17);
-    final yesterday = now.subtract(const Duration(days: 1));
-    final subject = _subject(yesterday);
-    final canonical = _recall('legacy', yesterday, 0);
-    final progress = _progress(recall: canonical, completedAt: yesterday);
-    progress.result = Result<DailyRecall>.app(
-      type: 'DailyRecall',
-      periodId: null,
-      result: canonical,
-    );
-    subject.progress.add(progress);
-    final manager = NutritionRecallAutoSaveManager();
-    await manager.saveRecall(
-      recall: _recall('pending', yesterday, 0),
-      subjectId: subject.id,
-      taskId: 'task',
-      interventionId: 'intervention',
-      periodId: 'period',
-      studyDaySnapshot: 0,
-    );
+import '../../../util/mock_nutrition_draft_storage.dart';
 
+void main() {
+  setUp(() => mockNutritionDraftStorage());
+  test('keeps the latest revision for one period and day', () async {
+    final yesterday = DateTime.utc(2026, 7, 16);
+    final subject = _subject(yesterday);
+    final active = _recall('latest', yesterday, 0)
+      ..entryCompletedAt = yesterday;
+    final old = _recall('old', yesterday, 0)..entryCompletedAt = yesterday;
+    subject.progress.addAll([
+      _progress(recall: active, completedAt: yesterday)..nutritionRevision = 2,
+      _progress(
+        recall: old,
+        completedAt: yesterday.add(const Duration(minutes: 1)),
+      )..nutritionRevision = 1,
+    ]);
     final records = await loadNutritionRecallRecords(
       subject: subject,
       taskId: 'task',
-      autoSaveManager: manager,
-      now: now,
+      now: yesterday.add(const Duration(days: 1)),
     );
 
-    expect(records.single.recall.id, 'legacy');
-    expect(
-      (await manager.scanPendingRecalls(subject.id)).single.recall.id,
-      'pending',
-    );
+    expect(records.single.recall.id, 'latest');
+    expect(records.single.isCompleted, isTrue);
   });
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  test(
+    'statistics excludes an expired draft but history preserves it',
+    () async {
+      final date = DateTime.utc(2026, 7, 16);
+      final now = date.add(const Duration(days: 2));
+      final subject = _subject(date);
+      final draft = _recall('local', date, 0);
+      final manager = NutritionRecallAutoSaveManager();
+      await manager.saveRecall(
+        recall: draft,
+        subjectId: subject.id,
+        taskId: 'task',
+        periodId: 'period',
+        interventionId: 'intervention',
+        studyDaySnapshot: 0,
+      );
+
+      final statistics = await loadNutritionRecallRecords(
+        subject: subject,
+        taskId: 'task',
+        now: now,
+      );
+      final history = await loadNutritionRecallRecords(
+        subject: subject,
+        taskId: 'task',
+        now: now,
+        showLocalDraftsSeparately: true,
+      );
+
+      expect(statistics, isEmpty);
+      expect(history.single.pending?.recall.id, 'local');
+      expect(history.single.isCompleted, isFalse);
+    },
+  );
 
   test('nutrition study day uses the UTC calendar across offset midnights', () {
     final subject = _subject(DateTime.parse('2026-07-15T23:30:00-10:00'));
@@ -104,40 +124,19 @@ void main() {
       ),
     );
 
-    SharedPreferences.setMockInitialValues({
-      'studyu_nutrition_autosave_index_subject': jsonEncode([
-        {
-          'taskId': 'task',
-          'periodId': 'period',
-          'studyDaySnapshot': recallStudyDay,
-        },
-      ]),
-      'studyu_nutrition_autosave_subject_task_period_$recallStudyDay':
-          jsonEncode({
-            'recall': _recall(
-              'local',
-              now.subtract(const Duration(days: 1)),
-              recallStudyDay,
-            ).toJson(),
-            'metadata': {
-              'subjectId': subject.id,
-              'taskId': 'task',
-              'interventionId': 'intervention',
-              'periodId': 'period',
-              'studyDaySnapshot': recallStudyDay,
-              'createdAt': now
-                  .subtract(const Duration(hours: 2))
-                  .toIso8601String(),
-              'lastModifiedAt': now
-                  .subtract(const Duration(hours: 1))
-                  .toIso8601String(),
-            },
-          }),
-    });
-    final manager = NutritionRecallAutoSaveManager(
-      preferences: await SharedPreferences.getInstance(),
+    final manager = NutritionRecallAutoSaveManager();
+    await manager.saveRecall(
+      recall: _recall(
+        'local',
+        now.subtract(const Duration(days: 1)),
+        recallStudyDay,
+      ),
+      subjectId: subject.id,
+      taskId: 'task',
+      periodId: 'period',
+      interventionId: 'intervention',
+      studyDaySnapshot: recallStudyDay,
     );
-
     final records = await loadNutritionRecallRecords(
       subject: subject,
       taskId: 'task',
@@ -169,7 +168,7 @@ SubjectProgress _progress({
   result: Result<DailyRecall>.app(
     type: 'DailyRecall',
     periodId: 'period',
-    result: recall,
+    result: recall..entryCompletedAt = completedAt,
   ),
 )..completedAt = completedAt;
 

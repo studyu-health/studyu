@@ -2960,7 +2960,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_history_latest_study_day_description =>
-      'Your latest study day remains editable so you can add or correct entries the following morning.';
+      '이전 연구일의 기록을 추가하거나 수정할 수 있습니다.';
 
   @override
   String get nutrition_history_previous_study_days => 'Previous study days';
@@ -3288,4 +3288,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_recall_view_saved => '저장된 버전 보기';
+
+  @override
+  String get nutrition_history_local_draft => '이 기기에 저장된 초안';
+
+  @override
+  String get nutrition_history_expired_draft =>
+      '동기화 기간이 끝났습니다. 이 초안은 이 기기에만 있습니다.';
+
+  @override
+  String get nutrition_history_discard_expired_draft =>
+      '이 기기에서 이 초안을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
 }

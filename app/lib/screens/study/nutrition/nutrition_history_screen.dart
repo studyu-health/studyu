@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
+import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_core/core.dart';
 
 typedef NutritionRecallOpener = Future<void> Function(
@@ -42,7 +44,14 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
       loadNutritionRecallRecords(
         subject: widget.subject,
         taskId: widget.task.id,
+        showLocalDraftsSeparately: true,
       );
+
+  void _reloadRecords() {
+    setState(() {
+      _records = _loadRecords();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +68,7 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
           if (snapshot.hasError) {
             return Center(
               child: FilledButton(
-                onPressed: () => setState(() => _records = _loadRecords()),
+                onPressed: _reloadRecords,
                 child: Text(l10n.try_again),
               ),
             );
@@ -84,12 +93,7 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
               const SizedBox(height: 4),
               Text(l10n.nutrition_history_latest_study_day_description),
               const SizedBox(height: 8),
-              _recallCard(
-                context,
-                latest,
-                currentStudyDay: currentStudyDay,
-                showEditableAction: true,
-              ),
+              _recallCard(context, latest, currentStudyDay: currentStudyDay),
               if (records.length > 1) ...[
                 const SizedBox(height: 24),
                 Text(
@@ -117,29 +121,36 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
     BuildContext context,
     NutritionRecallRecord record, {
     required int currentStudyDay,
-    bool showEditableAction = false,
   }) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
+    final draftCanEdit =
+        record.pending?.progressCompletedAt == null ||
+        record.persistenceTarget != null;
     final editable =
-        record.persistenceTarget != null &&
+        draftCanEdit &&
         isEditableNutritionRecallDay(
           studyDaySnapshot: record.studyDaySnapshot,
           currentStudyDay: currentStudyDay,
-          hasUnambiguousPeriod:
-              record.hasUnambiguousPeriod &&
-              _hasCompletionPeriod(record.periodId),
+          hasUnambiguousPeriod: _hasCompletionPeriod(record.periodId),
         );
     final foodNames = record.recall.meals
         .expand((meal) => meal.foods)
         .map((food) => food.name)
         .toList();
     final additionalFoodCount = foodNames.length - 2;
-    final isEditableLatest = showEditableAction && editable;
+    final pending = record.pending;
+    final expired =
+        pending != null && record.studyDaySnapshot < currentStudyDay - 1;
+    final previewStatus = expired
+        ? l10n.nutrition_history_expired_draft
+        : pending == null
+        ? null
+        : l10n.nutrition_history_local_draft;
 
     return Card(
-      elevation: isEditableLatest ? 2 : null,
-      color: isEditableLatest
+      elevation: editable ? 2 : null,
+      color: editable
           ? Color.alphaBlend(
               colorScheme.primaryContainer.withValues(alpha: 0.55),
               colorScheme.surface,
@@ -151,16 +162,20 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
         onTap: () async {
           await widget.onOpenRecall(record);
           if (!mounted) return;
-          setState(() {
-            _records = _loadRecords();
-          });
+          _reloadRecords();
         },
         title: Text(
           '${MaterialLocalizations.of(context).formatMediumDate(widget.subject.nutritionDateForStudyDay(record.studyDaySnapshot))} UTC',
         ),
-        subtitle: foodNames.isEmpty
-            ? Text(l10n.nutrition_history_no_foods_logged)
-            : Row(
+        subtitle: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (previewStatus != null) Text(previewStatus),
+            if (foodNames.isEmpty)
+              Text(l10n.nutrition_history_no_foods_logged)
+            else
+              Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
@@ -173,14 +188,47 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
                   if (additionalFoodCount > 0) Text(' +$additionalFoodCount'),
                 ],
               ),
-        trailing: Icon(
-          isEditableLatest ? Icons.edit_outlined : Icons.chevron_right,
+          ],
         ),
+        trailing: expired
+            ? IconButton(
+                tooltip: l10n.nutrition_recall_discard_draft,
+                onPressed: () => _discardExpiredDraft(pending),
+                icon: const Icon(Icons.delete_outline),
+              )
+            : Icon(editable ? Icons.edit_outlined : Icons.chevron_right),
       ),
     );
   }
 
-  bool _hasCompletionPeriod(String? id) =>
-      id != null &&
+  Future<void> _discardExpiredDraft(PendingRecall pending) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showConfirmationDialog(
+      context,
+      title: l10n.nutrition_recall_discard_draft,
+      message: l10n.nutrition_history_discard_expired_draft,
+      cancelLabel: l10n.cancel,
+      confirmLabel: l10n.nutrition_recall_discard_draft,
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) return;
+    try {
+      if (await NutritionRecallAutoSaveManager().deletePendingRecall(pending)) {
+        if (mounted) _reloadRecords();
+        return;
+      }
+    } catch (error, stackTrace) {
+      StudyULogger.warning(
+        'Could not discard a nutrition draft: $error\n$stackTrace',
+      );
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.nutrition_recall_discard_failed)),
+    );
+    _reloadRecords();
+  }
+
+  bool _hasCompletionPeriod(String id) =>
       widget.task.schedule.completionPeriods.any((period) => period.id == id);
 }

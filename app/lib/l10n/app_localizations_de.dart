@@ -3056,7 +3056,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_history_latest_study_day_description =>
-      'Ihr letzter Studientag bleibt bearbeitbar, sodass Sie Einträge am folgenden Morgen hinzufügen oder korrigieren können.';
+      'Sie können Einträge für den vorherigen Studientag hinzufügen oder korrigieren.';
 
   @override
   String get nutrition_history_previous_study_days => 'Frühere Studientage';
@@ -3398,4 +3398,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_recall_view_saved => 'Gespeicherte Version anzeigen';
+
+  @override
+  String get nutrition_history_local_draft =>
+      'Entwurf auf diesem Gerät gespeichert';
+
+  @override
+  String get nutrition_history_expired_draft =>
+      'Die Frist zum Synchronisieren ist abgelaufen. Dieser Entwurf liegt nur auf diesem Gerät.';
+
+  @override
+  String get nutrition_history_discard_expired_draft =>
+      'Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden.';
 }

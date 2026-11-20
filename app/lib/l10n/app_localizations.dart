@@ -5416,7 +5416,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_history_latest_study_day_description.
   ///
   /// In en, this message translates to:
-  /// **'Your latest study day remains editable so you can add or correct entries the following morning.'**
+  /// **'You can add or correct entries for the previous study day.'**
   String get nutrition_history_latest_study_day_description;
 
   /// No description provided for @nutrition_history_previous_study_days.
@@ -5976,6 +5976,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View saved version'**
   String get nutrition_recall_view_saved;
+
+  /// No description provided for @nutrition_history_local_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved on this device'**
+  String get nutrition_history_local_draft;
+
+  /// No description provided for @nutrition_history_expired_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync window ended. This draft is only on this device.'**
+  String get nutrition_history_expired_draft;
+
+  /// No description provided for @nutrition_history_discard_expired_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this draft from this device? This cannot be undone.'**
+  String get nutrition_history_discard_expired_draft;
 }
 
 class _AppLocalizationsDelegate

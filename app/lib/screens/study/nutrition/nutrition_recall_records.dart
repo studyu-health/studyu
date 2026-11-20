@@ -8,45 +8,38 @@ export 'package:studyu_app/util/study_subject_extension.dart'
 class const NutritionRecallRecord({
   required final DailyRecall recall,
   required final String taskId,
-  required final String? periodId,
+  required final String periodId,
   required final String interventionId,
   required final int studyDaySnapshot,
   final SubjectProgress? progress,
+  final PendingRecall? pending,
 }) {
+  bool get isCompleted =>
+      pending == null && progress != null && recall.entryCompletedAt != null;
+
   NutritionRecallPersistenceTarget? get persistenceTarget {
     final completedAt = progress?.completedAt;
-    if (periodId == null || completedAt == null) return null;
+    if (completedAt == null) return null;
     return NutritionRecallPersistenceTarget(
       taskId: taskId,
-      periodId: periodId!,
+      periodId: periodId,
       interventionId: interventionId,
       completedAt: completedAt,
       studyDaySnapshot: studyDaySnapshot,
       nutritionRevision: progress!.nutritionRevision,
     );
   }
-
-  bool get hasUnambiguousPeriod => periodId != null;
-
-  NutritionRecallRecord withLocalRecall(PendingRecall pending) =>
-      NutritionRecallRecord(
-        recall: pending.recall,
-        taskId: taskId,
-        periodId: periodId,
-        interventionId: interventionId,
-        studyDaySnapshot: studyDaySnapshot,
-        progress: progress,
-      );
 }
 
 /// Loads the launched task's remote recalls and locally pending drafts.
 ///
-/// A local draft may supersede its matching remote record only while it is a
-/// current/previous study-day correction and is newer than the remote payload.
+/// Statistics use server recalls and unsubmitted entries from the current day.
+/// History shows local drafts, including drafts outside the sync window.
 Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
   required StudySubject subject,
   required String taskId,
   NutritionRecallAutoSaveManager? autoSaveManager,
+  bool showLocalDraftsSeparately = false,
   DateTime? now,
 }) async {
   final todayStudyDay = nutritionStudyDayFor(subject, now ?? DateTime.now());
@@ -57,17 +50,18 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
       continue;
     }
     final result = progress.result.result;
-    if (result is! DailyRecall) continue;
-    final studyDay =
-        result.studyDaySnapshot ??
-        (progress.completedAt == null
-            ? null
-            : nutritionStudyDayFor(subject, progress.completedAt!));
-    if (studyDay == null) continue;
+    if (result is! DailyRecall ||
+        result.entryCompletedAt == null ||
+        progress.completedAt == null) {
+      continue;
+    }
+    final studyDay = result.studyDaySnapshot;
+    final periodId = progress.result.periodId;
+    if (studyDay == null || periodId == null) continue;
     final record = NutritionRecallRecord(
       recall: result,
       taskId: taskId,
-      periodId: progress.result.periodId,
+      periodId: periodId,
       interventionId: progress.interventionId,
       studyDaySnapshot: studyDay,
       progress: progress,
@@ -88,31 +82,42 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
       local.studyDaySnapshot,
     );
     final remote = records[identity];
-    if (remote == null) {
-      final legacy =
-          records[_recordIdentity(taskId, null, local.studyDaySnapshot)];
-      if (legacy != null) continue;
-      records[identity] = NutritionRecallRecord(
-        recall: local.recall,
-        taskId: local.taskId,
-        periodId: local.periodId,
-        interventionId: local.interventionId,
-        studyDaySnapshot: local.studyDaySnapshot,
-      );
+    if (remote != null && local.matchesUploadedRecall(remote.recall)) {
       continue;
     }
     final canReplace =
-        local.studyDaySnapshot == todayStudyDay ||
-        local.studyDaySnapshot == todayStudyDay - 1;
-    if (canReplace && local.canReplace(remote.progress!)) {
-      records[identity] = remote.withLocalRecall(local);
+        isWritableNutritionStudyDay(local.studyDaySnapshot, todayStudyDay) &&
+        remote != null &&
+        local.canReplace(remote.progress!);
+    final localRecord = NutritionRecallRecord(
+      recall: local.recall,
+      taskId: local.taskId,
+      periodId: local.periodId,
+      interventionId: local.interventionId,
+      studyDaySnapshot: local.studyDaySnapshot,
+      progress: canReplace ? remote.progress : null,
+      pending: local,
+    );
+    if (showLocalDraftsSeparately) {
+      if (canReplace || remote == null) {
+        records[identity] = localRecord;
+      } else {
+        records['draft:$identity'] = localRecord;
+      }
+    } else if (remote == null && local.studyDaySnapshot == todayStudyDay) {
+      records[identity] = localRecord;
     }
   }
 
   final result = records.values.toList()
-    ..sort(
-      (left, right) => right.studyDaySnapshot.compareTo(left.studyDaySnapshot),
-    );
+    ..sort((left, right) {
+      final byDay = right.studyDaySnapshot.compareTo(left.studyDaySnapshot);
+      if (byDay != 0) return byDay;
+      final leftIsDraft = left.pending != null;
+      final rightIsDraft = right.pending != null;
+      if (leftIsDraft != rightIsDraft) return leftIsDraft ? 1 : -1;
+      return left.periodId.compareTo(right.periodId);
+    });
   return result;
 }
 
@@ -120,15 +125,23 @@ bool isEditableNutritionRecallDay({
   required int studyDaySnapshot,
   required int currentStudyDay,
   required bool hasUnambiguousPeriod,
-}) => hasUnambiguousPeriod && studyDaySnapshot == currentStudyDay - 1;
+}) =>
+    hasUnambiguousPeriod &&
+    studyDaySnapshot >= 0 &&
+    studyDaySnapshot == currentStudyDay - 1;
 
-String _recordIdentity(String taskId, String? periodId, int studyDaySnapshot) =>
-    '$taskId\u0000${periodId ?? '<missing>'}\u0000$studyDaySnapshot';
+String _recordIdentity(String taskId, String periodId, int studyDaySnapshot) =>
+    '$taskId\u0000$periodId\u0000$studyDaySnapshot';
 
 bool _isNewerRemote(
   NutritionRecallRecord candidate,
   NutritionRecallRecord existing,
 ) {
+  final candidateRevision = candidate.progress!.nutritionRevision;
+  final existingRevision = existing.progress!.nutritionRevision;
+  if (candidateRevision != existingRevision) {
+    return candidateRevision > existingRevision;
+  }
   final candidateAt =
       candidate.recall.lastAutoSavedAt ?? candidate.progress?.completedAt;
   final existingAt =

@@ -3018,7 +3018,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_history_latest_study_day_description =>
-      'Your latest study day remains editable so you can add or correct entries the following morning.';
+      'You can add or correct entries for the previous study day.';
 
   @override
   String get nutrition_history_previous_study_days => 'Previous study days';
@@ -3352,4 +3352,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_recall_view_saved => 'View saved version';
+
+  @override
+  String get nutrition_history_local_draft => 'Draft saved on this device';
+
+  @override
+  String get nutrition_history_expired_draft =>
+      'Sync window ended. This draft is only on this device.';
+
+  @override
+  String get nutrition_history_discard_expired_draft =>
+      'Delete this draft from this device? This cannot be undone.';
 }

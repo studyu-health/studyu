@@ -16,6 +16,7 @@ import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_core/core.dart';
 
+import '../../../util/mock_nutrition_draft_storage.dart';
 import 'fake_nutrition_food_repository.dart';
 
 Widget nutritionTaskApp(
@@ -189,7 +190,7 @@ Future<void> _selectSavedSoup(WidgetTester tester) async {
 
 ({NutritionTask task, StudySubject subject}) historicalNavigationSetup(
   String foodName, {
-  required bool hasPersistenceTarget,
+  int daysAgo = 1,
 }) {
   final task = nutritionTask()..id = 'task';
   task.schedule.completionPeriods = [
@@ -204,9 +205,18 @@ Future<void> _selectSavedSoup(WidgetTester tester) async {
   subject.study = (Study('study', 'user')
     ..schedule = (StudySchedule()..numberOfCycles = 0)
     ..interventions = []);
-  final historicalRecall = recall([
-    meal('meal', MealType.breakfast, foods: [food('food', foodName, 100)]),
-  ])..studyDaySnapshot = subject.getDayOfStudyFor(DateTime.now()) - 1;
+  final date = DateTime.now().toUtc().subtract(Duration(days: daysAgo));
+  final historicalRecall =
+      recall([
+          meal(
+            'meal',
+            MealType.breakfast,
+            foods: [food('food', foodName, 100)],
+          ),
+        ])
+        ..date = date
+        ..entryCompletedAt = date
+        ..studyDaySnapshot = subject.getNutritionStudyDayFor(date);
   final progress = SubjectProgress(
     subjectId: subject.id,
     interventionId: 'intervention',
@@ -217,103 +227,93 @@ Future<void> _selectSavedSoup(WidgetTester tester) async {
       periodId: 'period',
       result: historicalRecall,
     ),
-  );
-  if (hasPersistenceTarget) {
-    progress.completedAt = DateTime.now()
-        .subtract(const Duration(days: 1))
-        .toUtc();
-  }
+  )..completedAt = date;
   subject.progress.add(progress);
   return (task: task, subject: subject);
 }
 
 void main() {
-  for (final legacyPeriod in [false, true]) {
-    testWidgets(
-      'conflicting draft is kept until confirmed discard (legacy period: $legacyPeriod)',
-      (tester) async {
-        SharedPreferences.setMockInitialValues({
-          nutritionInstructionsShownKey: true,
-        });
-        final l10n = lookupAppLocalizations(const Locale('en'));
-        final today = DateTime.now();
-        final task = nutritionTask();
-        final subject = StudySubject('subject-draft', 'study', 'user', [])
-          ..startedAt = today
-          ..study = (Study('study', 'user')..schedule.numberOfCycles = 0);
-        final saved = DailyRecall.withId(
-          date: today,
-          recallMode: RecallMode.realtimeRecord,
-          meals: [],
-          studyDaySnapshot: 0,
-          entryCompletedAt: today,
-          lastAutoSavedAt: today,
-          waterIntakeMl: 100,
-        );
-        subject.progress.add(
-          SubjectProgress(
-              subjectId: subject.id,
-              interventionId: 'baseline',
-              taskId: task.id,
-              resultType: 'DailyRecall',
-              result: Result<DailyRecall>.app(
-                type: 'DailyRecall',
-                periodId: legacyPeriod ? null : 'period',
-                result: saved,
-              ),
-            )
-            ..completedAt = today
-            ..nutritionRevision = 1,
-        );
-        final manager = NutritionRecallAutoSaveManager();
-        final local = DailyRecall.fromJson(saved.toJson())
-          ..lastAutoSavedAt = today.add(const Duration(seconds: 1))
-          ..waterIntakeMl = 350;
-        await manager.saveRecall(
-          recall: local,
-          subjectId: subject.id,
-          taskId: task.id,
-          interventionId: 'baseline',
-          periodId: 'period',
-          studyDaySnapshot: 0,
-          progressCompletedAt: today,
-          nutritionRevision: 0,
-        );
-
-        await tester.pumpWidget(
-          nutritionTaskApp(task, appState: AppState()..activeSubject = subject),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text(l10n.nutrition_recall_conflict_title), findsOneWidget);
-        expect(find.text(l10n.log_meal), findsNothing);
-        await tester.tap(find.text(l10n.nutrition_recall_discard_draft));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text(l10n.cancel));
-        await tester.pumpAndSettle();
-        expect(
-          (await manager.scanPendingRecalls(subject.id))
-              .single
-              .recall
-              .waterIntakeMl,
-          350,
-        );
-
-        await tester.tap(find.text(l10n.nutrition_recall_discard_draft));
-        await tester.pumpAndSettle();
-        await tester.tap(
-          find.widgetWithText(
-            FilledButton,
-            l10n.nutrition_recall_discard_draft,
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(await manager.scanPendingRecalls(subject.id), isEmpty);
-        expect(find.text(l10n.nutrition_recall_conflict_title), findsNothing);
-        expect(find.text(l10n.log_meal), findsOneWidget);
-      },
+  setUp(() => mockNutritionDraftStorage());
+  testWidgets('conflicting draft is kept until confirmed discard', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      nutritionInstructionsShownKey: true,
+    });
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final today = DateTime.now();
+    final task = nutritionTask();
+    final subject = StudySubject('subject-draft', 'study', 'user', [])
+      ..startedAt = today
+      ..study = (Study('study', 'user')..schedule.numberOfCycles = 0);
+    final saved = DailyRecall.withId(
+      date: today,
+      recallMode: RecallMode.realtimeRecord,
+      meals: [],
+      studyDaySnapshot: 0,
+      entryCompletedAt: today,
+      lastAutoSavedAt: today,
+      waterIntakeMl: 100,
     );
-  }
+    subject.progress.add(
+      SubjectProgress(
+          subjectId: subject.id,
+          interventionId: 'baseline',
+          taskId: task.id,
+          resultType: 'DailyRecall',
+          result: Result<DailyRecall>.app(
+            type: 'DailyRecall',
+            periodId: 'period',
+            result: saved,
+          ),
+        )
+        ..completedAt = today
+        ..nutritionRevision = 1,
+    );
+    final manager = NutritionRecallAutoSaveManager();
+    final local = DailyRecall.fromJson(saved.toJson())
+      ..lastAutoSavedAt = today.add(const Duration(seconds: 1))
+      ..waterIntakeMl = 350;
+    await manager.saveRecall(
+      recall: local,
+      subjectId: subject.id,
+      taskId: task.id,
+      interventionId: 'baseline',
+      periodId: 'period',
+      studyDaySnapshot: 0,
+      progressCompletedAt: today,
+      nutritionRevision: 0,
+    );
+
+    await tester.pumpWidget(
+      nutritionTaskApp(task, appState: AppState()..activeSubject = subject),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.nutrition_recall_conflict_title), findsOneWidget);
+    expect(find.text(l10n.log_meal), findsNothing);
+    await tester.tap(find.text(l10n.nutrition_recall_discard_draft));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.cancel));
+    await tester.pumpAndSettle();
+    expect(
+      (await manager.scanPendingRecalls(subject.id))
+          .single
+          .recall
+          .waterIntakeMl,
+      350,
+    );
+
+    await tester.tap(find.text(l10n.nutrition_recall_discard_draft));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, l10n.nutrition_recall_discard_draft),
+    );
+    await tester.pumpAndSettle();
+    expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+    expect(find.text(l10n.nutrition_recall_conflict_title), findsNothing);
+    expect(find.text(l10n.log_meal), findsOneWidget);
+  });
 
   testWidgets('timeline identifies missing and partial meal energy', (
     tester,
@@ -496,13 +496,10 @@ void main() {
     },
   );
 
-  testWidgets('history opens a targetless record in the read-only shell', (
+  testWidgets('history opens an older server record in the read-only shell', (
     tester,
   ) async {
-    final setup = historicalNavigationSetup(
-      'Historical apple',
-      hasPersistenceTarget: false,
-    );
+    final setup = historicalNavigationSetup('Historical apple', daysAgo: 2);
 
     await tester.pumpWidget(
       nutritionTaskApp(
@@ -525,13 +522,88 @@ void main() {
     expect(find.byTooltip('Help'), findsNothing);
   });
 
+  testWidgets('history opens a previous-day local draft for editing', (
+    tester,
+  ) async {
+    final setup = historicalNavigationSetup('Draft apple');
+    final progress = setup.subject.progress.removeLast();
+    final draft = progress.result.result as DailyRecall;
+    draft.entryCompletedAt = null;
+    final manager = NutritionRecallAutoSaveManager();
+    await manager.saveRecall(
+      recall: draft,
+      subjectId: setup.subject.id,
+      taskId: setup.task.id,
+      interventionId: progress.interventionId,
+      periodId: progress.result.periodId!,
+      studyDaySnapshot: draft.studyDaySnapshot!,
+    );
+    await tester.pumpWidget(
+      nutritionTaskApp(
+        setup.task,
+        appState: AppState()..activeSubject = setup.subject,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('History'));
+    await tester.pumpAndSettle();
+    expect(find.text('Draft saved on this device'), findsOneWidget);
+    await tester.tap(find.text('Draft apple'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Read-only'), findsNothing);
+    expect(find.text('Log meal'), findsOneWidget);
+    expect(find.text('Draft apple'), findsOneWidget);
+  });
+
+  testWidgets(
+    'history labels an expired correction and lets users discard it',
+    (tester) async {
+      final setup = historicalNavigationSetup('Synced apple', daysAgo: 2);
+      final progress = setup.subject.progress.single;
+      final draft = DailyRecall.fromJson(
+        (progress.result.result as DailyRecall).toJson(),
+      );
+      draft.meals.single.foods.single.name = 'Unsynced apple';
+      final manager = NutritionRecallAutoSaveManager();
+      await manager.saveRecall(
+        recall: draft,
+        subjectId: setup.subject.id,
+        taskId: setup.task.id,
+        interventionId: progress.interventionId,
+        periodId: progress.result.periodId!,
+        studyDaySnapshot: draft.studyDaySnapshot!,
+        progressCompletedAt: progress.completedAt,
+        nutritionRevision: progress.nutritionRevision,
+      );
+      await tester.pumpWidget(
+        nutritionTaskApp(
+          setup.task,
+          appState: AppState()..activeSubject = setup.subject,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('History'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Synced apple'), findsOneWidget);
+      expect(find.text('Unsynced apple'), findsOneWidget);
+      expect(find.textContaining('Sync window ended'), findsOneWidget);
+      await tester.tap(find.byTooltip('Discard draft'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Discard draft'));
+      await tester.pumpAndSettle();
+
+      expect(await manager.scanPendingRecalls(setup.subject.id), isEmpty);
+      expect(find.text('Synced apple'), findsOneWidget);
+      expect(find.text('Unsynced apple'), findsNothing);
+    },
+  );
+
   testWidgets('history refreshes after an opened record closes', (
     tester,
   ) async {
-    final setup = historicalNavigationSetup(
-      'Historical apple',
-      hasPersistenceTarget: false,
-    );
+    final setup = historicalNavigationSetup('Historical apple', daysAgo: 2);
 
     final appState = AppState()
       ..activeSubject = setup.subject
@@ -553,7 +625,8 @@ void main() {
             ),
           ])
           ..studyDaySnapshot =
-              (previous.result.result as DailyRecall).studyDaySnapshot;
+              (previous.result.result as DailyRecall).studyDaySnapshot
+          ..entryCompletedAt = previous.completedAt;
     setup.subject.progress[0] = SubjectProgress(
       subjectId: setup.subject.id,
       interventionId: previous.interventionId,
@@ -607,10 +680,7 @@ void main() {
   testWidgets('returning from history refreshes the mounted food library', (
     tester,
   ) async {
-    final setup = historicalNavigationSetup(
-      'Historical apple',
-      hasPersistenceTarget: false,
-    );
+    final setup = historicalNavigationSetup('Historical apple', daysAgo: 2);
     final repository = FakeNutritionFoodRepository();
 
     await tester.pumpWidget(
@@ -636,10 +706,7 @@ void main() {
   testWidgets('disposing during history does not refresh the food library', (
     tester,
   ) async {
-    final setup = historicalNavigationSetup(
-      'Historical apple',
-      hasPersistenceTarget: false,
-    );
+    final setup = historicalNavigationSetup('Historical apple', daysAgo: 2);
     final repository = FakeNutritionFoodRepository();
 
     await tester.pumpWidget(
@@ -665,10 +732,7 @@ void main() {
   testWidgets('expired historical edit returns to History on app resume', (
     tester,
   ) async {
-    final setup = historicalNavigationSetup(
-      'Editable apple',
-      hasPersistenceTarget: true,
-    );
+    final setup = historicalNavigationSetup('Editable apple');
 
     await tester.pumpWidget(
       nutritionTaskApp(
@@ -1050,7 +1114,7 @@ void main() {
 
     final editor = find.byType(MealEntryScreen);
     expect(tester.widget<MealEntryScreen>(editor).existingMeal, isNull);
-    expect(tester.widget<MealEntryScreen>(editor).occurrenceDate, photoTime);
+    expect(tester.widget<MealEntryScreen>(editor).occurrenceDate, today.date);
     final preview = find.descendant(
       of: editor,
       matching: find.byType(PhotoRecallThumbnail),
@@ -1438,7 +1502,7 @@ void main() {
     );
   });
 
-  testWidgets('historical Other and skipped labels remain visible', (
+  testWidgets('historical neutral and skipped labels remain visible', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -1457,7 +1521,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('Other'), findsOneWidget);
+    expect(find.text('Meal'), findsOneWidget);
     expect(find.textContaining('Early breakfast'), findsOneWidget);
   });
 }

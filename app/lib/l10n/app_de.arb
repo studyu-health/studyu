@@ -1158,7 +1158,7 @@
   "nutrition_history": "Verlauf",
   "nutrition_history_empty": "Noch keine vergangenen Ernährungstagebücher.",
   "nutrition_history_latest_study_day": "Letzter Studientag",
-  "nutrition_history_latest_study_day_description": "Ihr letzter Studientag bleibt bearbeitbar, sodass Sie Einträge am folgenden Morgen hinzufügen oder korrigieren können.",
+  "nutrition_history_latest_study_day_description": "Sie können Einträge für den vorherigen Studientag hinzufügen oder korrigieren.",
   "nutrition_history_previous_study_days": "Frühere Studientage",
   "nutrition_history_no_foods_logged": "Keine Lebensmittel erfasst",
   "historical_editing_date": "{date} bearbeiten",
@@ -1269,5 +1269,8 @@
   "nutrition_recall_discard_failed": "Der Entwurf konnte nicht verworfen werden. Versuchen Sie es erneut.",
   "nutrition_recall_conflict_reopen": "Öffnen Sie die Ernährungsaufgabe erneut. Wenn weiterhin eine alte Version angezeigt wird, laden Sie die Studie neu.",
   "nutrition_recall_view_draft": "Entwurf anzeigen",
-  "nutrition_recall_view_saved": "Gespeicherte Version anzeigen"
+  "nutrition_recall_view_saved": "Gespeicherte Version anzeigen",
+  "nutrition_history_local_draft": "Entwurf auf diesem Gerät gespeichert",
+  "nutrition_history_expired_draft": "Die Frist zum Synchronisieren ist abgelaufen. Dieser Entwurf liegt nur auf diesem Gerät.",
+  "nutrition_history_discard_expired_draft": "Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden."
 }
