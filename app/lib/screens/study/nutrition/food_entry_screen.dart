@@ -341,8 +341,11 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       }
     }
 
-    if (widget.existingFood == null &&
-        (!widget.historicalMode || _saveToMyItems)) {
+    // A current recall saves new food definitions when it syncs.
+    final saveToLibrary = widget.historicalMode
+        ? _saveToMyItems
+        : widget.mealLabel == null;
+    if (widget.existingFood == null && saveToLibrary) {
       if (!mounted) return;
       final userId = appState.activeSubject?.id ?? 'anonymous';
       try {

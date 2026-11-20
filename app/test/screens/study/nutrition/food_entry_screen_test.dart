@@ -249,6 +249,34 @@ void main() {
     expect(find.byTooltip('Search Food Database'), findsNothing);
   });
 
+  testWidgets('current recall can add a food without saving to the library', (
+    tester,
+  ) async {
+    final repository = _TrackingTemplateRepository();
+    final templates = TemplateViewModel(
+      userId: 'subject',
+      repository: repository,
+    );
+    addTearDown(templates.dispose);
+    FoodEntry? result;
+
+    await openFoodEntry(
+      tester,
+      mealLabel: 'Dinner',
+      templateViewModel: templates,
+      onResult: (value) => result = value,
+    );
+    await tester.enterText(inputWithLabel(l10n.food_name), 'Soup');
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Save and add to Dinner'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(result?.name, 'Soup');
+    expect(result?.templateId, isNull);
+    expect(repository.saveCalls, 0);
+  });
+
   testWidgets(
     'historical search saves reusable food by default and returns selection',
     (tester) async {
