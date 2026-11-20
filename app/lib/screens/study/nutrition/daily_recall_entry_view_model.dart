@@ -137,6 +137,7 @@ class DailyRecallEntryViewModel({
 
     if (_studyDaySnapshot == null && !_hasExistingRecall) {
       _studyDaySnapshot = nutritionStudyDayFor(subject!, clock());
+      recall.date = subject!.nutritionDateForStudyDay(_studyDaySnapshot!);
     }
     if (_studyDaySnapshot == null) {
       _requiresReopen = true;

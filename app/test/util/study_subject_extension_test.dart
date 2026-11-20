@@ -19,6 +19,18 @@ void main() {
     );
   });
 
+  test('rejects a nutrition recall before the study starts', () async {
+    final subject = StudySubject('subject', 'study', 'user', []);
+    await expectLater(
+      subject.upsertNutritionResult(
+        taskId: 'task',
+        periodId: 'period',
+        recall: _recall('recall', 0),
+      ),
+      throwsStateError,
+    );
+  });
+
   test('upsert retains canonical progress while offline', () async {
     final completedAt = DateTime.utc(2026, 7, 15, 12);
     final target = NutritionRecallPersistenceTarget(
@@ -28,7 +40,8 @@ void main() {
       completedAt: completedAt,
       studyDaySnapshot: 2,
     );
-    final subject = StudySubject('subject', 'study', 'user', []);
+    final subject = StudySubject('subject', 'study', 'user', [])
+      ..startedAt = DateTime.utc(2026, 7, 13);
     subject.progress.add(
       SubjectProgress(
         subjectId: subject.id,

@@ -76,6 +76,11 @@ extension StudySubjectExtension on StudySubject {
     if (studyDay == null || completedAt == null) {
       throw StateError('A completed recall must have a study day.');
     }
+    if (persistenceTarget == null && startedAt == null) {
+      throw StateError(
+        'The study must start before saving a nutrition recall.',
+      );
+    }
 
     final target = persistenceTarget;
     if (target != null &&
@@ -96,7 +101,10 @@ extension StudySubjectExtension on StudySubject {
     final resultObject = Result<DailyRecall>.app(
       type: 'DailyRecall',
       periodId: periodId,
-      result: recall,
+      result: target == null
+          ? (DailyRecall.fromJson(recall.toJson())
+              ..date = nutritionDateForStudyDay(studyDay))
+          : recall,
     );
 
     final response = await client.rpc<dynamic>(

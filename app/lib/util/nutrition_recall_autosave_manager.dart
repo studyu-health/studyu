@@ -385,8 +385,13 @@ class NutritionRecallAutoSaveManager {
           continue;
         }
         if (target == null && canonical != null) continue;
-        final recall = pending.recall
+        final recall = DailyRecall.fromJson(pending.recall.toJson())
           ..studyDaySnapshot = pending.studyDaySnapshot;
+        if (target == null) {
+          recall.date = subject.nutritionDateForStudyDay(
+            pending.studyDaySnapshot,
+          );
+        }
         recall.entryCompletedAt ??=
             existingCompletion ??
             _rolloverCompletionTime(

@@ -430,12 +430,15 @@ void main() {
       final today = subject.getDayOfStudyFor(DateTime.now());
       final completedAt = DateTime.utc(2026, 7, 15, 12);
       final entryCompletedAt = DateTime.utc(2026, 7, 15, 11);
+      final originalDiaryDate = DateTime.utc(2026, 7, 15);
       final canonical = _recall('canonical', studyDay: today - 1)
-        ..entryCompletedAt = entryCompletedAt;
+        ..entryCompletedAt = entryCompletedAt
+        ..date = originalDiaryDate;
       await manager.saveRecall(
         recall: _recall(canonical.id, studyDay: today - 1)
           ..specialOccasion = 'correction'
-          ..entryCompletedAt = entryCompletedAt,
+          ..entryCompletedAt = entryCompletedAt
+          ..date = originalDiaryDate,
         subjectId: subject.id,
         taskId: 'task',
         interventionId: 'intervention',
@@ -468,6 +471,7 @@ void main() {
 
       expect(submitted?.specialOccasion, 'correction');
       expect(submitted?.entryCompletedAt, entryCompletedAt);
+      expect(submitted?.date, originalDiaryDate);
       expect(submittedTarget, completedAt);
       expect(await manager.scanPendingRecalls(subject.id), isEmpty);
     },
@@ -501,7 +505,7 @@ void main() {
       now: now,
     );
 
-    expect(submitted!.date, recallDate);
+    expect(submitted!.date, DateTime.utc(2024, 12, 31));
     expect(
       submitted!.entryCompletedAt,
       DateTime.utc(2024, 12, 31, 23, 59, 59, 999, 999),

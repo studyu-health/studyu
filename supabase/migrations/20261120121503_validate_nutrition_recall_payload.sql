@@ -101,6 +101,7 @@ DECLARE
     v_current_day integer;
     v_study_day integer;
     v_food jsonb;
+    v_row_time timestamptz := p_completed_at;
 BEGIN
     IF NOT studyu_private.lock_nutrition_subject_for_write(p_subject_id) THEN
         RAISE EXCEPTION 'nutrition progress subject is not owned by caller' USING ERRCODE = '42501';
@@ -125,41 +126,49 @@ BEGIN
         PERFORM studyu_private.nutrition_assert_snapshot_owner(p_subject_id, v_food);
     END LOOP;
 
-    SELECT * INTO v_recall FROM public.subject_progress
-    WHERE subject_id = p_subject_id AND completed_at = p_completed_at
-    FOR UPDATE;
-
-    IF NOT FOUND THEN
-        IF p_expected_revision IS NOT NULL THEN
-            RAISE EXCEPTION 'stale nutrition recall revision' USING ERRCODE = '40001';
+    IF p_expected_revision IS NULL THEN
+        -- Serialize recall creation for the same subject. Existing questionnaire
+        -- writes use the same primary key and can still race with an insert.
+        PERFORM pg_advisory_xact_lock(hashtextextended(p_subject_id::text, 2));
+        SELECT * INTO v_recall FROM public.subject_progress
+        WHERE subject_id = p_subject_id AND task_id = p_task_id AND result_type = 'DailyRecall'
+          AND result->>'periodId' = p_result->>'periodId'
+          AND result #>> '{result,studyDaySnapshot}' = v_study_day::text
+        FOR UPDATE;
+        IF FOUND THEN
+            IF v_recall.intervention_id = p_intervention_id AND v_recall.result = p_result THEN
+                RETURN v_recall;
+            END IF;
+            RAISE EXCEPTION 'nutrition recall already exists' USING ERRCODE = '40001';
         END IF;
+
         IF v_current_day IS NULL OR v_study_day NOT IN (v_current_day - 1, v_current_day) THEN
             RAISE EXCEPTION 'nutrition recall study day is not writable' USING ERRCODE = '22023';
         END IF;
 
         INSERT INTO studyu_private.nutrition_maintenance_context
         VALUES (txid_current(), p_subject_id, 'recall_revision');
-        INSERT INTO public.subject_progress (
-            subject_id, completed_at, intervention_id, task_id, result_type, result
-        ) VALUES (
-            p_subject_id, p_completed_at, p_intervention_id, p_task_id, 'DailyRecall', p_result
-        )
-        ON CONFLICT DO NOTHING
-        RETURNING * INTO v_recall;
+        LOOP
+            INSERT INTO public.subject_progress (
+                subject_id, completed_at, intervention_id, task_id, result_type, result
+            ) VALUES (
+                p_subject_id, v_row_time, p_intervention_id, p_task_id, 'DailyRecall', p_result
+            )
+            ON CONFLICT (completed_at, subject_id) DO NOTHING
+            RETURNING * INTO v_recall;
+            EXIT WHEN FOUND;
+            v_row_time := v_row_time + interval '1 microsecond';
+        END LOOP;
         DELETE FROM studyu_private.nutrition_maintenance_context
         WHERE transaction_id = txid_current() AND subject_id = p_subject_id AND operation = 'recall_revision';
+        RETURN v_recall;
+    END IF;
 
-        IF v_recall.subject_id IS NOT NULL THEN
-            RETURN v_recall;
-        END IF;
-
-        -- A matching request may have committed while the unique index blocked the insert.
-        SELECT * INTO v_recall FROM public.subject_progress
-        WHERE subject_id = p_subject_id AND completed_at = p_completed_at
-        FOR UPDATE;
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'nutrition recall already exists' USING ERRCODE = '40001';
-        END IF;
+    SELECT * INTO v_recall FROM public.subject_progress
+    WHERE subject_id = p_subject_id AND completed_at = p_completed_at
+    FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'stale nutrition recall revision' USING ERRCODE = '40001';
     END IF;
 
     IF v_recall.result_type IS DISTINCT FROM 'DailyRecall'
