@@ -1211,29 +1211,14 @@ List<NutritionStatisticsDay> nutritionStatisticsDays(
     final date = dateFor(record.recall.date, record.studyDaySnapshot);
     byDate.putIfAbsent(date, () => []).add(record);
   }
-  final activeSnapshot = activeDay ?? replaced?.studyDaySnapshot;
-  if (activeDate != null && activeRecall != null) {
-    final dateRecords = byDate.putIfAbsent(activeDate, () => []);
-    if (activeSnapshot != null) {
-      dateRecords.add(
-        NutritionRecallRecord(
-          recall: activeRecall,
-          taskId: replaced?.taskId ?? '',
-          periodId: activePeriodId ?? replaced?.periodId,
-          interventionId: replaced?.interventionId ?? '',
-          studyDaySnapshot: activeSnapshot,
-          progress: replaced?.progress,
-        ),
-      );
-    }
-  }
+  if (activeDate != null) byDate.putIfAbsent(activeDate, () => []);
   final days = byDate.entries.map((entry) {
     final date = entry.key;
     final recordsForDate = entry.value;
+    final active = date == activeDate ? activeRecall : null;
     final recalls = [
       for (final record in recordsForDate) record.recall,
-      if (activeRecall != null && activeSnapshot == null && date == activeDate)
-        activeRecall,
+      ?active,
     ];
     final foods = [
       for (final recall in recalls)
@@ -1241,14 +1226,18 @@ List<NutritionStatisticsDay> nutritionStatisticsDays(
           if (!meal.isSkipped) ...meal.foods,
     ];
     final completedRecord = recordsForDate
-        .where((record) => record.recall.entryCompletedAt != null)
+        .where((record) => record.isCompleted)
         .firstOrNull;
     return NutritionStatisticsDay(
       date: date,
       nutrition: sumNutritionFoods(foods),
-      isRecorded: recalls.every((recall) => recall.entryCompletedAt != null),
+      isRecorded:
+          recordsForDate.every((record) => record.isCompleted) &&
+          (active == null ||
+              (active.entryCompletedAt != null &&
+                  replaced?.isCompleted == true)),
       hasData: foods.isNotEmpty,
-      record: completedRecord ?? recordsForDate.firstOrNull,
+      record: completedRecord ?? replaced ?? recordsForDate.firstOrNull,
     );
   }).toList()..sort((left, right) => left.date.compareTo(right.date));
   return days;

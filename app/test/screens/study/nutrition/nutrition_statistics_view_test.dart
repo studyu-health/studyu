@@ -8,7 +8,10 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart
 import 'package:studyu_app/screens/study/nutrition/nutrition_statistics_view.dart';
 import 'package:studyu_core/core.dart';
 
+import '../../../util/mock_nutrition_draft_storage.dart';
+
 void main() {
+  setUp(() => mockNutritionDraftStorage());
   test('daily and period aggregation preserve partial and unknown zero', () {
     final today = DateTime(2026, 1, 3);
     final known = _record(date: today, studyDay: 3, energyKcal: 0);
@@ -35,6 +38,25 @@ void main() {
     expect(unknown.averageFor('carbs'), isNotNull);
     expect(missing.recall.meals.single.foods.single.nutrition.energyKcal, 999);
   });
+
+  test(
+    'active diary replaces its persisted period without double counting',
+    () {
+      final date = DateTime.utc(2026, 7, 16);
+      final record = _record(date: date, studyDay: 1, energyKcal: 100);
+      final active = _recall(date: date, studyDay: 1, energyKcal: 150);
+
+      final day = nutritionStatisticsDays(
+        [record],
+        activeRecall: active,
+        activeStudyDay: 1,
+        activePeriodId: record.periodId,
+      ).single;
+
+      expect(day.nutrition.energyKcal, 150);
+      expect(day.isRecorded, isFalse);
+    },
+  );
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
@@ -174,7 +196,10 @@ void main() {
         expect(find.text('600 kcal'), findsOneWidget);
         expect(find.textContaining('vs. previous day'), findsNothing);
         await _tapPeriodControl(tester, 'Previous period');
-        expect(find.text('Daily summary'), findsOneWidget);
+        expect(
+          find.text('Daily summary'),
+          completed ? findsOneWidget : findsNothing,
+        );
         expect(find.textContaining('vs. previous day'), findsNothing);
         await _tapPeriodControl(tester, 'Jump to today');
       }
@@ -901,6 +926,7 @@ MealLog _meal({
   Set<String> unavailableNutrients = const {},
   Set<String> partialNutrients = const {},
 }) => MealLog(
+  timePrecision: MealOccurrenceTimePrecision.approximate,
   id: 'meal-$energyKcal',
   mealType: MealType.breakfast,
   mealContext: MealContext.home,
