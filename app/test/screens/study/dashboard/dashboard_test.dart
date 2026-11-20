@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,7 @@ import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overvi
 import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
+import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
 
 import '../../../util/mock_nutrition_draft_storage.dart';
@@ -17,13 +20,14 @@ Widget _dashboardWith(
   int interventionCount, {
   bool withTask = false,
   bool preview = true,
+  bool trackedPreview = false,
   DateTime? startedAt,
   NutritionTask? nutritionTask,
   DailyRecall? historicalRecall,
   NutritionRecallAutoSaveManager? autoSaveManager,
 }) {
   final study = Study('study', 'user')
-    ..status = StudyStatus.running
+    ..status = trackedPreview ? StudyStatus.draft : StudyStatus.running
     ..interventions = List.generate(
       interventionCount,
       (index) => Intervention('intervention-$index', 'Intervention $index'),
@@ -35,11 +39,9 @@ Widget _dashboardWith(
   }
 
   if (nutritionTask != null) study.observations = [nutritionTask];
-  final subject = StudySubject.fromStudy(
+  final subject = _DashboardStudySubject(
     study,
-    'user',
     study.interventions.map((intervention) => intervention.id).toList(),
-    null,
   )..startedAt = startedAt ?? DateTime.now().add(const Duration(days: 1));
   if (nutritionTask != null && historicalRecall != null) {
     final progress = SubjectProgress(
@@ -96,6 +98,30 @@ void main() {
 
     await tester.pump(const Duration(minutes: 1));
     expect(manager.attempts, 3);
+  });
+
+  testWidgets('syncs the new study day after an active preview sync', (
+    tester,
+  ) async {
+    final manager = _HeldNutritionAutoSaveManager();
+    await tester.pumpWidget(
+      _dashboardWith(
+        2,
+        trackedPreview: true,
+        startedAt: DateTime.now().subtract(const Duration(days: 1)),
+        autoSaveManager: manager,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(manager.studyDays, [1]);
+
+    await tester.tap(find.text('Next day'));
+    await tester.pumpAndSettle();
+    expect(manager.studyDays, [1]);
+
+    manager.firstPass.complete(false);
+    await tester.pumpAndSettle();
+    expect(manager.studyDays, [1, 2]);
   });
 
   testWidgets('study with one intervention stays unavailable despite tasks', (
@@ -165,6 +191,17 @@ void main() {
   });
 }
 
+class _DashboardStudySubject(Study study, List<String> selectedInterventionIds)
+    extends StudySubject {
+  this : super.fromStudy(study, 'user', selectedInterventionIds, null);
+
+  @override
+  Future<void> setStartDateBackBy({required int days, bool persist = true}) {
+    expect(persist, isTrue);
+    return super.setStartDateBackBy(days: days, persist: false);
+  }
+}
+
 class _TestNutritionAutoSaveManager() extends NutritionRecallAutoSaveManager {
   int attempts = 0;
   String? subjectId;
@@ -178,5 +215,22 @@ class _TestNutritionAutoSaveManager() extends NutritionRecallAutoSaveManager {
   }) async {
     subjectId = subject.id;
     return ++attempts == 2;
+  }
+}
+
+class _HeldNutritionAutoSaveManager() extends NutritionRecallAutoSaveManager {
+  final firstPass = Completer<bool>();
+  final studyDays = <int>[];
+
+  @override
+  Future<bool> submitPendingRecalls({
+    required StudySubject subject,
+    required bool trackProgress,
+    bool trackedPreview = false,
+    DateTime? now,
+  }) {
+    expect(trackedPreview, isTrue);
+    studyDays.add(nutritionStudyDayFor(subject, DateTime.now()));
+    return studyDays.length == 1 ? firstPass.future : Future.value(false);
   }
 }

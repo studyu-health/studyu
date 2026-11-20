@@ -95,9 +95,11 @@ class _DashboardScreenState()
   Future<void> _submitPendingNutritionRecalls() async {
     final currentSubject = subject;
     final appState = context.read<AppState>();
-    if (currentSubject == null ||
-        _submittingNutritionRecalls ||
-        !appState.trackParticipantProgress) {
+    if (currentSubject == null || !appState.trackParticipantProgress) {
+      return;
+    }
+    if (_submittingNutritionRecalls) {
+      _nutritionUploadGeneration++;
       return;
     }
 
@@ -146,7 +148,6 @@ class _DashboardScreenState()
         !context.read<AppState>().trackParticipantProgress) {
       return;
     }
-    _nutritionUploadGeneration++;
     if (_nutritionRetryTimer?.isActive != true) {
       unawaited(_submitPendingNutritionRecalls());
     }
