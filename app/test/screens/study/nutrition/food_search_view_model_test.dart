@@ -237,6 +237,31 @@ void main() {
     expect(food.originalValues['nutrition'], isNotNull);
   });
 
+  test('OFF preserves nutrient limits without treating them as exact', () {
+    final product = Product.fromJson({
+      'product_name': 'Food',
+      'nutrition': {
+        'aggregated_set': {
+          'preparation': 'as_sold',
+          'per': '100g',
+          'nutrients': {
+            'fat': {'unit': 'g', 'value': 0.5, 'modifier': '<'},
+            'sugars': {'unit': 'g', 'value': 0},
+          },
+        },
+      },
+    });
+
+    final food = convertOpenFoodFactsToFoodEntry(product);
+    expect(food.nutrition.isKnown('fat'), isFalse);
+    expect(food.nutrition.isKnown('sugars'), isTrue);
+    final nutrition = food.originalValues['nutrition'] as Map<String, dynamic>;
+    final source = nutrition['aggregated_set'] as Map<String, dynamic>;
+    final nutrients = source['nutrients'] as Map<String, dynamic>;
+    final fat = nutrients['fat'] as Map<String, dynamic>;
+    expect(fat['modifier'], '<');
+  });
+
   for (final slowOff in [true, false]) {
     for (final pagination in [false, true]) {
       testWidgets('${slowOff ? 'OFF' : 'USDA'} timeout preserves results on '

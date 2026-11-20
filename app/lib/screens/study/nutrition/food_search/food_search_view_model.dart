@@ -520,6 +520,14 @@ Map<String, double?> _openFoodFactsServingNutrients(
       final raw = nutrients[nutrient.offTag];
       if (raw is! Map<String, dynamic>) continue;
       final value = NutritionValue.fromJson(raw);
+      if (value?.modifier
+          case NutrientModifier.lessThan ||
+              NutrientModifier.greaterThan ||
+              NutrientModifier.maximum ||
+              NutrientModifier.minimum ||
+              NutrientModifier.remove) {
+        return null;
+      }
       final measured = value?.value ?? value?.valueComputed;
       if (measured == null || !measured.isFinite || measured < 0) continue;
       final unit = value?.unit;
