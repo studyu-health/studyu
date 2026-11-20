@@ -5,14 +5,34 @@ interface MealContext {
 }
 
 interface NutritionData {
-  energyKcal: number;
-  protein: number;
-  carbs: number;
-  fat: number;
+  energyKcal?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
   sugars?: number;
   fiber?: number;
   saturatedFat?: number;
   sodium?: number;
+}
+
+function normalizeNutrition(nutrition: unknown): NutritionData {
+  if (typeof nutrition !== 'object' || nutrition === null) return {};
+
+  const raw = nutrition as Record<string, unknown>;
+  const normalized: NutritionData = {};
+  const keys = [
+    'energyKcal', 'protein', 'carbs', 'fat', 'sugars',
+    'fiber', 'saturatedFat', 'sodium',
+  ] as const;
+
+  for (const key of keys) {
+    const value = raw[key];
+    if (typeof value === 'number' && Number.isFinite(value) && value >= 0) {
+      normalized[key] = value;
+    }
+  }
+
+  return normalized;
 }
 
 interface AnalyzedFoodItem {
@@ -202,37 +222,9 @@ class OpenAIProvider implements LLMProvider {
       amount: Number(raw.amount) || 1,
       unit: String(raw.unit ?? 'serving'),
       servingSizeGrams: Number(raw.servingSizeGrams) || 100,
-      nutrition: this.validateAndNormalizeNutrition(raw.nutrition),
+      nutrition: normalizeNutrition(raw.nutrition),
       portionReference: raw.portionReference ? String(raw.portionReference) : undefined,
       confidenceScore: Math.max(0, Math.min(1, Number(raw.confidenceScore) || 0.5)),
-    };
-  }
-
-  private validateAndNormalizeNutrition(nutrition: unknown): NutritionData {
-    if (typeof nutrition !== 'object' || nutrition === null) {
-      return {
-        energyKcal: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-        sugars: 0,
-        fiber: 0,
-        saturatedFat: 0,
-        sodium: 0,
-      };
-    }
-
-    const raw = nutrition as Record<string, unknown>;
-
-    return {
-      energyKcal: Number(raw.energyKcal) || 0,
-      protein: Number(raw.protein) || 0,
-      carbs: Number(raw.carbs) || 0,
-      fat: Number(raw.fat) || 0,
-      sugars: Number(raw.sugars) || 0,
-      fiber: Number(raw.fiber) || 0,
-      saturatedFat: Number(raw.saturatedFat) || 0,
-      sodium: Number(raw.sodium) || 0,
     };
   }
 }
@@ -348,37 +340,9 @@ class AnthropicProvider implements LLMProvider {
       amount: Number(raw.amount) || 1,
       unit: String(raw.unit ?? 'serving'),
       servingSizeGrams: Number(raw.servingSizeGrams) || 100,
-      nutrition: this.validateAndNormalizeNutrition(raw.nutrition),
+      nutrition: normalizeNutrition(raw.nutrition),
       portionReference: raw.portionReference ? String(raw.portionReference) : undefined,
       confidenceScore: Math.max(0, Math.min(1, Number(raw.confidenceScore) || 0.5)),
-    };
-  }
-
-  private validateAndNormalizeNutrition(nutrition: unknown): NutritionData {
-    if (typeof nutrition !== 'object' || nutrition === null) {
-      return {
-        energyKcal: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-        sugars: 0,
-        fiber: 0,
-        saturatedFat: 0,
-        sodium: 0,
-      };
-    }
-
-    const raw = nutrition as Record<string, unknown>;
-
-    return {
-      energyKcal: Number(raw.energyKcal) || 0,
-      protein: Number(raw.protein) || 0,
-      carbs: Number(raw.carbs) || 0,
-      fat: Number(raw.fat) || 0,
-      sugars: Number(raw.sugars) || 0,
-      fiber: Number(raw.fiber) || 0,
-      saturatedFat: Number(raw.saturatedFat) || 0,
-      sodium: Number(raw.sodium) || 0,
     };
   }
 }
@@ -487,37 +451,9 @@ class GeminiProvider implements LLMProvider {
       amount: Number(raw.amount) || 1,
       unit: String(raw.unit ?? 'serving'),
       servingSizeGrams: Number(raw.servingSizeGrams) || 100,
-      nutrition: this.validateAndNormalizeNutrition(raw.nutrition),
+      nutrition: normalizeNutrition(raw.nutrition),
       portionReference: raw.portionReference ? String(raw.portionReference) : undefined,
       confidenceScore: Math.max(0, Math.min(1, Number(raw.confidenceScore) || 0.5)),
-    };
-  }
-
-  private validateAndNormalizeNutrition(nutrition: unknown): NutritionData {
-    if (typeof nutrition !== 'object' || nutrition === null) {
-      return {
-        energyKcal: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-        sugars: 0,
-        fiber: 0,
-        saturatedFat: 0,
-        sodium: 0,
-      };
-    }
-
-    const raw = nutrition as Record<string, unknown>;
-
-    return {
-      energyKcal: Number(raw.energyKcal) || 0,
-      protein: Number(raw.protein) || 0,
-      carbs: Number(raw.carbs) || 0,
-      fat: Number(raw.fat) || 0,
-      sugars: Number(raw.sugars) || 0,
-      fiber: Number(raw.fiber) || 0,
-      saturatedFat: Number(raw.saturatedFat) || 0,
-      sodium: Number(raw.sodium) || 0,
     };
   }
 }
