@@ -339,7 +339,7 @@ UnifiedFoodResult openFoodFactsSearchResult(Product product) {
 }
 
 UnifiedFoodResult usdaFoodSearchResult(UsdaFoodItem food) {
-  final caloriesPer100g = food.getNutrientValue(1008);
+  final caloriesPer100g = food.energyKcal100g;
   final servingSizeGrams = _usdaServingGrams(food);
   final calorieBasisGrams = servingSizeGrams ?? defaultFoodReferenceGrams;
 
@@ -434,6 +434,7 @@ studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
   final sourceServingGrams = _usdaServingGrams(food);
   final servingSizeGrams = sourceServingGrams ?? defaultFoodReferenceGrams;
   final scale = servingSizeGrams / 100.0;
+  final calories = food.energyKcal100g;
 
   return studyu.FoodEntry.withId(
     entryType: studyu.FoodEntryType.brandedProduct,
@@ -450,7 +451,7 @@ studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
     portionState: studyu.PortionState.asServed,
     yieldFactor: 1.0,
     nutrition: studyu.NutritionProfile(
-      energyKcal: food.energyKcal100g * scale,
+      energyKcal: (calories ?? 0) * scale,
       protein: food.protein100g * scale,
       carbs: food.carbohydrates100g * scale,
       fat: food.fat100g * scale,
@@ -463,7 +464,7 @@ studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
       waterContent: (food.getNutrientValue(1051) ?? 0) * scale,
       micros: {},
       unavailableNutrients: {
-        if (food.getNutrientValue(1008) == null) 'energyKcal',
+        if (calories == null) 'energyKcal',
         if (food.getNutrientValue(1003) == null) 'protein',
         if (food.getNutrientValue(1005) == null) 'carbs',
         if (food.getNutrientValue(1004) == null) 'fat',

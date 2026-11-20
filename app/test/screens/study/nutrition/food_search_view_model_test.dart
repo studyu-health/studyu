@@ -64,6 +64,32 @@ void main() {
     expect(food.nutrition.energyKcal, 125.5);
   });
 
+  test(
+    'USDA search and saved food use the energy reported for their data type',
+    () {
+      for (final (dataType, nutrients, expected) in [
+        ('Foundation', {2047: 120.0}, 60.0),
+        ('Foundation', {1008: 100.0, 2047: 120.0, 2048: 150.0}, 75.0),
+        ('SR Legacy', {1008: 100.0, 2047: 120.0}, 50.0),
+      ]) {
+        final source = UsdaFoodItem(
+          fdcId: 1,
+          dataType: dataType,
+          servingSize: 50,
+          servingSizeUnit: 'g',
+          foodNutrients: [
+            for (final entry in nutrients.entries)
+              UsdaFoodNutrient(nutrientId: entry.key, value: entry.value),
+          ],
+        );
+        expect(usdaFoodSearchResult(source).calories, expected);
+        final food = convertUsdaToFoodEntry(source);
+        expect(food.nutrition.energyKcal, expected);
+        expect(food.nutrition.isKnown('energyKcal'), isTrue);
+      }
+    },
+  );
+
   test('OFF preview and conversion agree on comma-decimal servings', () async {
     final product = Product.fromJson({
       'code': '123',

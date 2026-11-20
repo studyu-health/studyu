@@ -52,8 +52,12 @@ class UsdaFoodItem({
   }
 
   /// Get energy in kcal per 100g
-  double get energyKcal100g {
-    return getNutrientValue(1008) ?? 0.0; // Energy (kcal)
+  double? get energyKcal100g {
+    final calculatedEnergy = getNutrientValue(2048) ?? getNutrientValue(2047);
+    final legacyEnergy = getNutrientValue(1008);
+    return dataType == 'Foundation'
+        ? calculatedEnergy ?? legacyEnergy
+        : legacyEnergy ?? calculatedEnergy;
   }
 
   /// Get protein in g per 100g
