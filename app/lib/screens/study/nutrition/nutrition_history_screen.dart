@@ -13,17 +13,20 @@ class const NutritionHistoryScreen({
   required final StudySubject subject,
   required final NutritionTask task,
   required final NutritionRecallOpener onOpenRecall,
+  final NutritionRecallAutoSaveManager? autoSaveManager,
   super.key,
 }) extends StatefulWidget {
   static MaterialPageRoute<void> route({
     required StudySubject subject,
     required NutritionTask task,
     required NutritionRecallOpener onOpenRecall,
+    NutritionRecallAutoSaveManager? autoSaveManager,
   }) => MaterialPageRoute(
     builder: (_) => NutritionHistoryScreen(
       subject: subject,
       task: task,
       onOpenRecall: onOpenRecall,
+      autoSaveManager: autoSaveManager,
     ),
   );
 
@@ -33,6 +36,8 @@ class const NutritionHistoryScreen({
 
 class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
   late Future<List<NutritionRecallRecord>> _records;
+  late final _autoSaveManager =
+      widget.autoSaveManager ?? NutritionRecallAutoSaveManager();
 
   @override
   void initState() {
@@ -44,6 +49,7 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
       loadNutritionRecallRecords(
         subject: widget.subject,
         taskId: widget.task.id,
+        autoSaveManager: _autoSaveManager,
         showLocalDraftsSeparately: true,
       );
 
@@ -213,7 +219,7 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
     );
     if (!confirmed || !mounted) return;
     try {
-      if (await NutritionRecallAutoSaveManager().deletePendingRecall(pending)) {
+      if (await _autoSaveManager.deletePendingRecall(pending)) {
         if (mounted) _reloadRecords();
         return;
       }

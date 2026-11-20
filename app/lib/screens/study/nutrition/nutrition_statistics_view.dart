@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_core/core.dart';
 
@@ -14,6 +15,7 @@ class const NutritionStatisticsView({
   final StudySubject? subject,
   final String? taskId,
   final NutritionTask? task,
+  final NutritionRecallAutoSaveManager? autoSaveManager,
   final DailyRecall? activeRecall,
   final int? activeStudyDay,
   final String? activePeriodId,
@@ -76,7 +78,11 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     final subject = widget.subject;
     final taskId = widget.taskId;
     if (subject == null || taskId == null) return Future.value([]);
-    return loadNutritionRecallRecords(subject: subject, taskId: taskId);
+    return loadNutritionRecallRecords(
+      subject: subject,
+      taskId: taskId,
+      autoSaveManager: widget.autoSaveManager,
+    );
   }
 
   @override

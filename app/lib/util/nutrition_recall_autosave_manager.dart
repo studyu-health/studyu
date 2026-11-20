@@ -16,9 +16,15 @@ typedef NutritionRecallSubmitter = Future<void> Function(
   DailyRecall recall,
 );
 
-class NutritionRecallAutoSaveManager({
-  final NutritionRecallSubmitter? _submitter,
-}) {
+class NutritionRecallAutoSaveManager {
+  new({this._submitter}) : _memoryDrafts = null;
+
+  new inMemory() : _submitter = null, _memoryDrafts = {};
+
+  final NutritionRecallSubmitter? _submitter;
+  final Map<String, Map<String, dynamic>>? _memoryDrafts;
+  final _memoryMutationQueues = <String, Future<void>>{};
+
   static const _keyPrefix = 'studyu_nutrition_drafts_v1';
   static const debounceDuration = Duration(seconds: 2);
   static final _mutationQueues = <String, Future<void>>{};
@@ -82,16 +88,19 @@ class NutritionRecallAutoSaveManager({
     Future<T> Function() mutation,
   ) {
     final key = '${_keyPrefix}_$subjectId';
-    final previous = _mutationQueues[key] ?? Future<void>.value();
+    final queues = _memoryDrafts == null
+        ? _mutationQueues
+        : _memoryMutationQueues;
+    final previous = queues[key] ?? Future<void>.value();
     final operation = previous.then<T>(
       (_) => mutation(),
       onError: (_, _) => mutation(),
     );
     final queueTail = operation.then<void>((_) {}, onError: (_, _) {});
-    _mutationQueues[key] = queueTail;
+    queues[key] = queueTail;
     queueTail.whenComplete(() {
-      if (identical(_mutationQueues[key], queueTail)) {
-        _mutationQueues.remove(key);
+      if (identical(queues[key], queueTail)) {
+        queues.remove(key);
       }
     });
     return operation;
@@ -100,16 +109,36 @@ class NutritionRecallAutoSaveManager({
   String _subjectKey(String subjectId) => '${_keyPrefix}_$subjectId';
 
   Future<Map<String, dynamic>> _readDrafts(String subjectId) async {
+    if (_memoryDrafts case final memory?) {
+      return _copyDrafts(memory[subjectId] ?? {});
+    }
     final stored = await SecureStorage.read(_subjectKey(subjectId));
     return stored == null
         ? <String, dynamic>{}
         : jsonDecode(stored) as Map<String, dynamic>;
   }
 
-  Future<void> _writeDrafts(String subjectId, Map<String, dynamic> drafts) =>
-      drafts.isEmpty
-      ? SecureStorage.delete(_subjectKey(subjectId))
-      : SecureStorage.write(_subjectKey(subjectId), jsonEncode(drafts));
+  Future<void> _writeDrafts(
+    String subjectId,
+    Map<String, dynamic> drafts,
+  ) async {
+    if (_memoryDrafts case final memory?) {
+      if (drafts.isEmpty) {
+        memory.remove(subjectId);
+      } else {
+        memory[subjectId] = _copyDrafts(drafts);
+      }
+      return;
+    }
+    if (drafts.isEmpty) {
+      await SecureStorage.delete(_subjectKey(subjectId));
+    } else {
+      await SecureStorage.write(_subjectKey(subjectId), jsonEncode(drafts));
+    }
+  }
+
+  Map<String, dynamic> _copyDrafts(Map<String, dynamic> drafts) =>
+      jsonDecode(jsonEncode(drafts)) as Map<String, dynamic>;
 
   Future<DailyRecall?> loadRecall({
     required String subjectId,
@@ -229,10 +258,8 @@ class NutritionRecallAutoSaveManager({
     }
   });
 
-  Future<void> deleteSubjectDrafts(String subjectId) => _mutateForSubject(
-    subjectId,
-    () => SecureStorage.delete(_subjectKey(subjectId)),
-  );
+  Future<void> deleteSubjectDrafts(String subjectId) =>
+      _mutateForSubject(subjectId, () => _writeDrafts(subjectId, {}));
 
   Future<bool> deletePendingRecall(PendingRecall pending) =>
       _mutateForSubject(pending.subjectId, () async {
@@ -302,7 +329,10 @@ class NutritionRecallAutoSaveManager({
     required bool trackProgress,
     DateTime? now,
   }) async {
-    if (_isSubmitting || !trackProgress || subject.startedAt == null) {
+    if (_memoryDrafts != null ||
+        _isSubmitting ||
+        !trackProgress ||
+        subject.startedAt == null) {
       return false;
     }
     _isSubmitting = true;

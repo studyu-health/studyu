@@ -259,6 +259,7 @@ class _NutritionTaskWidgetState()
         interventionId: widget.interventionId,
         readOnly: widget.readOnly,
         historicalMode: _isHistoricalMode,
+        autoSaveManager: appState.previewNutritionDrafts,
       )..shouldSaveToDb = appState.trackParticipantProgress;
       if (!_isHistoricalMode) {
         _templateViewModel = TemplateViewModel(
@@ -348,6 +349,7 @@ class _NutritionTaskWidgetState()
                           subject: appState.activeSubject,
                           taskId: widget.task?.id,
                           task: widget.task,
+                          autoSaveManager: appState.previewNutritionDrafts,
                           activeRecall: model.recall,
                           activeStudyDay: model.studyDaySnapshot,
                           activePeriodId:
@@ -705,6 +707,7 @@ class _NutritionTaskWidgetState()
       NutritionHistoryScreen.route(
         subject: subject,
         task: task,
+        autoSaveManager: context.read<AppState>().previewNutritionDrafts,
         onOpenRecall: (record) => _openRecall(context, subject, task, record),
       ),
     );
@@ -979,7 +982,9 @@ class _NutritionTaskWidgetState()
           initialFoods: foods,
           recallPhoto: recallPhoto,
           occurrenceDate: _mealOccurrenceDate(model),
-          historicalTarget: _isHistoricalMode ? model.persistenceTarget : null,
+          historicalTarget: _isHistoricalMode && model.shouldSaveToDb
+              ? model.persistenceTarget
+              : null,
           canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,
           templateViewModel: _templateViewModel,
@@ -1002,7 +1007,9 @@ class _NutritionTaskWidgetState()
           existingMeal: meal,
           task: widget.task,
           occurrenceDate: _mealOccurrenceDate(model),
-          historicalTarget: _isHistoricalMode ? model.persistenceTarget : null,
+          historicalTarget: _isHistoricalMode && model.shouldSaveToDb
+              ? model.persistenceTarget
+              : null,
           canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,
           templateViewModel: _templateViewModel,

@@ -608,6 +608,7 @@ class _DashboardScreenState()
       NutritionHistoryScreen.route(
         subject: activeSubject,
         task: task,
+        autoSaveManager: context.read<AppState>().previewNutritionDrafts,
         onOpenRecall: (record) async {
           await NutritionTaskWidget.openHistoricalRecall(
             context,

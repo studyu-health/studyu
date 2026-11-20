@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/notifications.dart';
+import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/schedule_notifications.dart';
 import 'package:studyu_core/core.dart';
 
@@ -24,7 +25,22 @@ enum StudyOnboardingPhase() {
 class AppState() with ChangeNotifier {
   Study? selectedStudy;
   List<Intervention>? selectedInterventions;
-  StudySubject? activeSubject;
+  StudySubject? _activeSubject;
+  NutritionRecallAutoSaveManager? _previewNutritionDrafts;
+
+  StudySubject? get activeSubject => _activeSubject;
+
+  set activeSubject(StudySubject? subject) {
+    if (!identical(_activeSubject, subject)) _previewNutritionDrafts = null;
+    _activeSubject = subject;
+  }
+
+  NutritionRecallAutoSaveManager? get previewNutritionDrafts {
+    if (trackParticipantProgress) return null;
+    return _previewNutritionDrafts ??=
+        NutritionRecallAutoSaveManager.inMemory();
+  }
+
   String? inviteCode;
   List<String>? preselectedInterventionIds;
   StudyNotifications? studyNotifications;
@@ -144,6 +160,7 @@ class AppState() with ChangeNotifier {
   /// Sets [isPreview] to the given value and updates [selectedStudy]
   /// to the active subject's study. Notifies listeners of the change.
   void updatePreviewMode(bool preview) {
+    if (isPreview != preview) _previewNutritionDrafts = null;
     isPreview = preview;
     selectedStudy = activeSubject?.study;
     notifyListeners();
