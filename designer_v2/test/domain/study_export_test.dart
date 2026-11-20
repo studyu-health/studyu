@@ -33,12 +33,14 @@ void main() {
                   date: DateTime(2026, 1, index + 1),
                   recallMode: RecallMode.realtimeRecord,
                   entryCompletedAt: DateTime(2026, 1, index + 1, 18),
+                  studyDaySnapshot: index,
                   meals: [
                     MealLog(
                       id: 'meal',
                       mealType: MealType.lunch,
                       mealContext: MealContext.home,
                       timestamp: DateTime(2026),
+                      timePrecision: MealOccurrenceTimePrecision.approximate,
                       timezone: 'UTC',
                       isSkipped: false,
                       foods: foods,
@@ -52,9 +54,9 @@ void main() {
       ];
       final rows = study.exportData.measurementsData;
       final byDate = {for (final row in rows) row['measurement_time']: row};
-      final legacy = byDate[DateTime(2026, 1, 1, 18).toString()]!;
-      expect(legacy['total_calories'], 0);
-      expect(legacy['total_calories_status'], 'complete');
+      final knownZero = byDate[DateTime(2026, 1, 1, 18).toString()]!;
+      expect(knownZero['total_calories'], 0);
+      expect(knownZero['total_calories_status'], 'complete');
       final unknown = byDate[DateTime(2026, 1, 2, 18).toString()]!;
       expect(unknown['total_calories'], '');
       expect(unknown['total_calories_status'], 'unknown');
@@ -75,17 +77,21 @@ void main() {
     },
   );
 
-  test('exports the saved study day and uses UTC dates for legacy recalls', () {
+  test('exports the recorded study day and skips recalls without one', () {
     final study = Study('study', 'owner')..participants = [];
     final startedAt = DateTime.utc(2026, 1, 1, 23);
     final completedAt = DateTime.utc(2026, 1, 2, 8);
     study.participantsProgress = [
-      _recallProgress(startedAt, completedAt, studyDay: 0),
-      _recallProgress(startedAt, completedAt.add(const Duration(hours: 1))),
+      _recallProgress(startedAt, completedAt),
+      _recallProgress(
+        startedAt,
+        completedAt.add(const Duration(hours: 1)),
+        studyDay: null,
+      ),
     ];
 
     final rows = study.exportData.measurementsData;
-    expect(rows.map((row) => row['current_day_of_study']), ['1', '0']);
+    expect(rows.single['current_day_of_study'], '0');
   });
 
   test('exports zero water and keeps unanswered water empty', () {
@@ -106,7 +112,7 @@ void main() {
     expect(rows.last, containsPair('water_intake_ml', null));
   });
 
-  test('excludes legacy nutrition drafts from measurement exports', () {
+  test('excludes unfinished nutrition recalls from measurement exports', () {
     final study = Study('study', 'owner')..participants = [];
     final startedAt = DateTime.utc(2026);
     final completedAt = DateTime.utc(2026, 1, 2);
@@ -164,12 +170,16 @@ void main() {
     final completedAt = DateTime.utc(2026, 1, 2);
     study.participantsProgress = [
       _recallProgress(null, completedAt, studyDay: 1),
-      _recallProgress(null, completedAt.add(const Duration(hours: 1))),
+      _recallProgress(
+        null,
+        completedAt.add(const Duration(hours: 1)),
+        studyDay: 2,
+      ),
     ];
 
     final rows = study.exportData.measurementsData;
     expect(rows.map((row) => row['participant_started_at']), ['', '']);
-    expect(rows.map((row) => row['current_day_of_study']), ['', '1']);
+    expect(rows.map((row) => row['current_day_of_study']), ['2', '1']);
   });
 
   test('exports shared preset question IDs in their own survey columns', () {
@@ -219,7 +229,7 @@ void main() {
 SubjectProgress _recallProgress(
   DateTime? startedAt,
   DateTime completedAt, {
-  int? studyDay,
+  int? studyDay = 0,
   int? waterIntakeMl,
   bool isComplete = true,
 }) =>

@@ -46,14 +46,6 @@ extension StudyExportX on Study {
     }).toList();
   }
 
-  static int _utcStudyDay(DateTime date, DateTime startedAt) {
-    final utcDate = date.toUtc();
-    final utcStart = startedAt.toUtc();
-    return DateTime.utc(utcDate.year, utcDate.month, utcDate.day)
-        .difference(DateTime.utc(utcStart.year, utcStart.month, utcStart.day))
-        .inDays;
-  }
-
   StudyExportData get exportData {
     final List<Map<String, dynamic>> measurementsData = [];
     final List<Map<String, dynamic>> interventionsData = [];
@@ -109,18 +101,21 @@ extension StudyExportX on Study {
           ? record.result.result as DailyRecall
           : null;
       final recallCompletion = dailyRecall?.entryCompletedAt;
-      if (dailyRecall != null && recallCompletion == null) continue;
+      if (dailyRecall != null &&
+          (recallCompletion == null ||
+              dailyRecall.studyDaySnapshot == null ||
+              record.result.periodId == null)) {
+        continue;
+      }
 
       final intervention = getIntervention(record.interventionId);
       final startedAt = record.startedAt;
       final completedAt = record.completedAt!;
-      final studyDay =
-          dailyRecall?.studyDaySnapshot ??
-          (startedAt == null
-              ? null
-              : dailyRecall == null
-              ? completedAt.difference(startedAt).inDays
-              : _utcStudyDay(completedAt, startedAt));
+      final studyDay = dailyRecall == null
+          ? startedAt == null
+                ? null
+                : completedAt.difference(startedAt).inDays
+          : dailyRecall.studyDaySnapshot;
       final Map<String, dynamic> rowShared = {
         'participant_id': record.subjectId,
         'participant_started_at': startedAt?.toString() ?? '',
