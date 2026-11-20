@@ -268,7 +268,6 @@ Future<_TrackingNutritionFoodRepository> _openValidNewHistoricalMeal(
   await openFoodSearchFromMeal(tester);
   await tester.tap(find.text('Create food'));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Save to My items for future use'));
   await tester.enterText(find.byType(TextFormField).first, 'Historical toast');
   await tester.tap(
     find.widgetWithText(FilledButton, 'Save and add to Breakfast'),
