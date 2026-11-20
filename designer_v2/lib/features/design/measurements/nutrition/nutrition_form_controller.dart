@@ -58,6 +58,16 @@ class NutritionFormViewModel({
     control: form,
     validators: [
       Validators.delegate((_) {
+        final unavailableWindows = [
+          for (final period
+              in formData?.additionalCompletionPeriods ??
+                  const <CompletionPeriod>[])
+            if (!period.unlockTime.earlierThan(period.lockTime))
+              period.formatted(),
+        ];
+        if (unavailableWindows.isNotEmpty) {
+          return {'unavailableCompletionWindow': unavailableWindows.join(', ')};
+        }
         if (!isTimeRestricted) return null;
         final start =
             restrictedTimeStartControl.value?.toStudyUTimeOfDay() ??
@@ -71,8 +81,10 @@ class NutritionFormViewModel({
       }),
     ],
     validationMessages: {
-      'unavailableCompletionWindow': (_) =>
-          tr.form_field_nutrition_completion_window_error,
+      'unavailableCompletionWindow': (error) {
+        final message = tr.form_field_nutrition_completion_window_error;
+        return error is String ? '$message ($error)' : message;
+      },
     },
   );
 

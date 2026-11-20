@@ -1290,5 +1290,5 @@
   "form_field_nutrition_track_water_help": "Allow participants to log how much water they drink each day.",
   "form_survey_template_days_outside_study": "Some days fall outside the study. Select individual available days.",
   "form_survey_template_day_outside_study": "Outside the study",
-  "form_field_nutrition_completion_window_error": "Leave at least one full minute between the start and end times."
+  "form_field_nutrition_completion_window_error": "Each nutrition window must start at or before its end time."
 }

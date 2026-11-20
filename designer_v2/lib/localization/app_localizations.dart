@@ -5556,7 +5556,7 @@ abstract class AppLocalizations {
   /// No description provided for @form_field_nutrition_completion_window_error.
   ///
   /// In en, this message translates to:
-  /// **'Leave at least one full minute between the start and end times.'**
+  /// **'Each nutrition window must start at or before its end time.'**
   String get form_field_nutrition_completion_window_error;
 }
 

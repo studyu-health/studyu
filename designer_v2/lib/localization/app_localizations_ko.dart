@@ -3158,5 +3158,5 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get form_field_nutrition_completion_window_error =>
-      '시작 시간과 종료 시간 사이에 최소 1분이 있어야 합니다.';
+      '각 영양 기록 시간대의 시작 시간은 종료 시간보다 빠르거나 같아야 합니다.';
 }

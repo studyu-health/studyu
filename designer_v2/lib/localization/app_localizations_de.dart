@@ -3296,5 +3296,5 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get form_field_nutrition_completion_window_error =>
-      'Zwischen Start- und Endzeit muss mindestens eine volle Minute liegen.';
+      'Jedes Zeitfenster für die Ernährungserfassung muss vor oder zur Endzeit beginnen.';
 }

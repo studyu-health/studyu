@@ -3266,5 +3266,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get form_field_nutrition_completion_window_error =>
-      'Leave at least one full minute between the start and end times.';
+      'Each nutrition window must start at or before its end time.';
 }
