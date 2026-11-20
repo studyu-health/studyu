@@ -173,6 +173,7 @@ class _TestNutritionAutoSaveManager() extends NutritionRecallAutoSaveManager {
   Future<bool> submitPendingRecalls({
     required StudySubject subject,
     required bool trackProgress,
+    bool trackedPreview = false,
     DateTime? now,
   }) async {
     subjectId = subject.id;

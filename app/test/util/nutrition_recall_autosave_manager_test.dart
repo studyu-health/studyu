@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'mock_nutrition_draft_storage.dart';
 
@@ -67,6 +71,168 @@ void main() {
       expect(pending.recall.entryCompletedAt, oldTimestamp);
     },
   );
+
+  group('a staged create after tracked preview advances', () {
+    final now = DateTime.utc(2026, 7, 17, 12);
+    final oldDate = DateTime.utc(2026, 7, 17);
+    final shiftedDate = DateTime.utc(2026, 7, 16);
+    final movedTimestamp = now.subtract(const Duration(days: 1));
+    late NutritionRecallAutoSaveManager manager;
+    late StudySubject subject;
+    late DailyRecall staged;
+    late MockClientHandler handleRequest;
+
+    setUpAll(() {
+      final supabase = SupabaseClient(
+        'https://example.supabase.co',
+        'test-key',
+        httpClient: MockClient((request) => handleRequest(request)),
+      );
+      setEnv(
+        'https://example.supabase.co',
+        'test-key',
+        supabaseClient: supabase,
+      );
+      addTearDown(supabase.dispose);
+    });
+
+    setUp(() async {
+      subject = _subject(daysAgo: 1)
+        ..startedAt = now.subtract(const Duration(days: 1));
+      manager = NutritionRecallAutoSaveManager();
+      staged = _recall('preview-create', studyDay: 1)
+        ..date = oldDate
+        ..entryStartedAt = now
+        ..entryCompletedAt = now
+        ..lastAutoSavedAt = now
+        ..waterIntakeMl = 250;
+      await _save(manager, staged);
+      final pending = (await manager.scanPendingRecalls(subject.id)).single;
+      expect(await manager.stageRecallUpload(pending, staged), isTrue);
+      await _save(
+        manager,
+        DailyRecall.fromJson(staged.toJson())..waterIntakeMl = 500,
+      );
+      await subject.setStartDateBackBy(days: 1, persist: false);
+    });
+
+    Future<bool> submit() => manager.submitPendingRecalls(
+      subject: subject,
+      trackProgress: true,
+      trackedPreview: true,
+      now: now,
+    );
+
+    Map<String, dynamic> progressJson(Map<String, dynamic> result) => {
+      'subject_id': subject.id,
+      'task_id': 'task',
+      'intervention_id': 'intervention',
+      'completed_at': movedTimestamp.toIso8601String(),
+      'result_type': 'DailyRecall',
+      'nutrition_revision': 0,
+      'result': result,
+    };
+
+    void expectIdentityQuery(http.Request request) {
+      expect(request.method, 'GET');
+      expect(request.url.path, endsWith('/subject_progress'));
+      expect(
+        request.url.queryParameters,
+        containsPair('subject_id', 'eq.subject'),
+      );
+      expect(request.url.queryParameters, containsPair('task_id', 'eq.task'));
+      expect(
+        request.url.queryParameters,
+        containsPair('result->>periodId', 'eq.period'),
+      );
+      expect(
+        request.url.queryParameters,
+        containsPair('result->result->>studyDaySnapshot', 'eq.1'),
+      );
+    }
+
+    test('restages newer edits after the server confirms absence', () async {
+      final methods = <String>[];
+      handleRequest = (request) async {
+        methods.add(request.method);
+        if (request.method == 'GET') {
+          expectIdentityQuery(request);
+          return _jsonResponse(request, []);
+        }
+        expect(request.url.path, endsWith('/save_nutrition_recall'));
+        final params = jsonDecode(request.body) as Map<String, dynamic>;
+        final payload = params['p_result'] as Map<String, dynamic>;
+        final sent = DailyRecall.fromJson(
+          payload['result'] as Map<String, dynamic>,
+        );
+        final pending = (await manager.scanPendingRecalls(subject.id)).single;
+        expect(sent.date, shiftedDate);
+        expect(sent.waterIntakeMl, 500);
+        expect(sent.toJson(), pending.stagedUpload!.toJson());
+        expect(params['p_expected_revision'], isNull);
+        return _jsonResponse(request, progressJson(payload));
+      };
+
+      expect(await submit(), isFalse);
+      expect(methods, ['GET', 'POST']);
+      expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+    });
+
+    test(
+      'rebases newer edits on an exact save that the server moved',
+      () async {
+        final methods = <String>[];
+        handleRequest = (request) async {
+          methods.add(request.method);
+          if (request.method == 'GET') {
+            expectIdentityQuery(request);
+            return _jsonResponse(request, [
+              progressJson(
+                Result<DailyRecall>.app(
+                  type: 'DailyRecall',
+                  periodId: 'period',
+                  result: staged,
+                ).toJson(),
+              ),
+            ]);
+          }
+          expect(request.url.path, endsWith('/save_nutrition_recall'));
+          final params = jsonDecode(request.body) as Map<String, dynamic>;
+          final payload = params['p_result'] as Map<String, dynamic>;
+          final sent = DailyRecall.fromJson(
+            payload['result'] as Map<String, dynamic>,
+          );
+          expect(sent.date, oldDate);
+          expect(sent.waterIntakeMl, 500);
+          expect(params['p_expected_revision'], 0);
+          expect(params['p_completed_at'], movedTimestamp.toIso8601String());
+          return _jsonResponse(
+            request,
+            progressJson(payload)..['nutrition_revision'] = 1,
+          );
+        };
+
+        expect(await submit(), isFalse);
+        expect(methods, ['GET', 'POST']);
+        final saved = subject.progress.single;
+        expect(saved.completedAt, movedTimestamp);
+        expect(saved.nutritionRevision, 1);
+        expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+      },
+    );
+
+    test('keeps the snapshot when the server lookup fails', () async {
+      handleRequest = (request) async {
+        expectIdentityQuery(request);
+        throw const SocketException('offline');
+      };
+
+      expect(await submit(), isTrue);
+      final pending = (await manager.scanPendingRecalls(subject.id)).single;
+      expect(pending.stagedUpload?.toJson(), staged.toJson());
+      expect(pending.recall.waterIntakeMl, 500);
+    });
+  });
 
   test(
     'stale corrections stay local even with a newer device timestamp',
@@ -1294,6 +1460,13 @@ void main() {
     expect(await manager.scanPendingRecalls(subject.id), hasLength(1));
   });
 }
+
+http.Response _jsonResponse(http.Request request, Object body) => http.Response(
+  jsonEncode(body),
+  200,
+  headers: const {'content-type': 'application/json'},
+  request: request,
+);
 
 Future<void> _save(
   NutritionRecallAutoSaveManager manager,

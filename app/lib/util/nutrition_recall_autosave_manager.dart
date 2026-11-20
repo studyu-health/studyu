@@ -28,6 +28,7 @@ class NutritionRecallAutoSaveManager {
   static const _keyPrefix = 'studyu_nutrition_drafts_v1';
   static const debounceDuration = Duration(seconds: 2);
   static final _mutationQueues = <String, Future<void>>{};
+  static final _invalidatedSubjectIds = <String>{};
   static final _uploadRequests = StreamController<String>.broadcast();
 
   static Stream<String> get uploadRequests => _uploadRequests.stream;
@@ -120,6 +121,7 @@ class NutritionRecallAutoSaveManager {
     if (_memoryDrafts case final memory?) {
       return _copyDrafts(memory[subjectId] ?? {});
     }
+    if (_invalidatedSubjectIds.contains(subjectId)) return {};
     final stored = await SecureStorage.read(_subjectKey(subjectId));
     return stored == null
         ? <String, dynamic>{}
@@ -140,7 +142,7 @@ class NutritionRecallAutoSaveManager {
     }
     if (drafts.isEmpty) {
       await SecureStorage.delete(_subjectKey(subjectId));
-    } else {
+    } else if (!_invalidatedSubjectIds.contains(subjectId)) {
       await SecureStorage.write(_subjectKey(subjectId), jsonEncode(drafts));
     }
   }
@@ -274,8 +276,10 @@ class NutritionRecallAutoSaveManager {
     }
   });
 
-  Future<void> deleteSubjectDrafts(String subjectId) =>
-      _mutateForSubject(subjectId, () => _writeDrafts(subjectId, {}));
+  Future<void> deleteSubjectDrafts(String subjectId) {
+    if (_memoryDrafts == null) _invalidatedSubjectIds.add(subjectId);
+    return _mutateForSubject(subjectId, () => _writeDrafts(subjectId, {}));
+  }
 
   Future<void> rekeyTrackedPreviewDrafts(StudySubject subject) =>
       _mutateForSubject(subject.id, () async {
@@ -416,19 +420,21 @@ class NutritionRecallAutoSaveManager {
     return unchanged ? null : _pendingFromJson(stored, local.storageKey);
   }
 
-  Future<void> _removeExpiredUpload(PendingRecall pending) =>
+  Future<PendingRecall?> _clearStagedUpload(PendingRecall pending) =>
       _mutateForSubject(pending.subjectId, () async {
         final drafts = await _readDrafts(pending.subjectId);
         final stored = drafts[pending.storageKey];
-        if (!_isUnchanged(pending, stored)) return;
+        if (!_isUnchanged(pending, stored)) return null;
         (stored as Map<String, dynamic>).remove('upload');
         await _writeDrafts(pending.subjectId, drafts);
+        return _pendingFromJson(stored, pending.storageKey);
       });
 
-  /// Returns true when a transport failure needs a retry.
+  /// Returns true if pending recalls need another sync attempt.
   Future<bool> submitPendingRecalls({
     required StudySubject subject,
     required bool trackProgress,
+    bool trackedPreview = false,
     DateTime? now,
   }) async {
     if (_memoryDrafts != null ||
@@ -455,24 +461,22 @@ class NutritionRecallAutoSaveManager {
         )) {
           if (pending.stagedUpload != null &&
               pending.studyDaySnapshot < todayStudyDay - 1) {
-            await _removeExpiredUpload(pending);
+            await _clearStagedUpload(pending);
           }
           continue;
         }
 
         final isPreviousDay = pending.studyDaySnapshot < todayStudyDay;
         var canonical = _findCompletedRecall(subject, pending);
-        if (pending.stagedUpload != null && _submitter == null) {
+        final staged = pending.stagedUpload;
+        if (staged != null && _submitter == null) {
+          final SubjectProgress? remote;
           try {
-            final remote = await subject.fetchNutritionRecall(
+            remote = await subject.fetchNutritionRecall(
               taskId: pending.taskId,
               periodId: pending.periodId,
               studyDaySnapshot: pending.studyDaySnapshot,
             );
-            if (remote != null) {
-              subject.applySavedProgress(remote);
-              canonical = _findCompletedRecall(subject, pending) ?? remote;
-            }
           } catch (error) {
             if (isRetryableError(error)) {
               needsRetry = true;
@@ -482,6 +486,23 @@ class NutritionRecallAutoSaveManager {
               'Could not check the outcome of an earlier nutrition upload: $error',
             );
             continue;
+          }
+          if (remote != null) {
+            subject.applySavedProgress(remote);
+            canonical = _findCompletedRecall(subject, pending) ?? remote;
+          } else if (trackedPreview &&
+              canonical == null &&
+              pending.progressCompletedAt == null &&
+              pending.stagedBaseRevision == null &&
+              !staged.date.isAtSameMomentAs(
+                subject.nutritionDateForStudyDay(pending.studyDaySnapshot),
+              )) {
+            final unstaged = await _clearStagedUpload(pending);
+            if (unstaged == null) {
+              needsRetry = true;
+              continue;
+            }
+            pending = unstaged;
           }
         }
         final canonicalRecall = canonical?.result.result as DailyRecall?;

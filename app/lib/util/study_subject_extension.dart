@@ -63,6 +63,7 @@ extension StudySubjectExtension on StudySubject {
 
   /// Upserts a DailyRecall result without changing an existing recall's
   /// persistence identity.
+  /// The caller supplies the staged payload, including its canonical date.
   Future<SubjectProgress> upsertNutritionResult({
     required String taskId,
     required String periodId,
@@ -101,10 +102,7 @@ extension StudySubjectExtension on StudySubject {
     final resultObject = Result<DailyRecall>.app(
       type: 'DailyRecall',
       periodId: periodId,
-      result: target == null
-          ? (DailyRecall.fromJson(recall.toJson())
-              ..date = nutritionDateForStudyDay(studyDay))
-          : recall,
+      result: recall,
     );
 
     final response = await client.rpc<dynamic>(

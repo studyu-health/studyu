@@ -113,6 +113,7 @@ class _DashboardScreenState()
       final needsRetry = await _nutritionAutoSaveManager.submitPendingRecalls(
         subject: currentSubject,
         trackProgress: true,
+        trackedPreview: appState.isPreview,
       );
       if (!mounted || subject?.id != currentSubject.id) return;
       setState(() => _nutritionRetryNeeded = needsRetry);
