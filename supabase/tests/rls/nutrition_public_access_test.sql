@@ -42,10 +42,10 @@ INSERT INTO public.study (
     'running',
     '[]'::jsonb,
     '[]'::jsonb,
+    '[{"id":"nutrition-task","type":"nutrition","schedule":{"completionPeriods":[{"id":"nutrition-period"}]}}]'::jsonb,
+    '[{"id":"intervention-a"},{"id":"intervention-b"}]'::jsonb,
     '[]'::jsonb,
-    '[]'::jsonb,
-    '[]'::jsonb,
-    '{}'::jsonb,
+    '{"phaseDuration":7,"numberOfCycles":1,"includeBaseline":false,"sequence":"alternating"}'::jsonb,
     '{}'::jsonb,
     '[]'::jsonb,
     tests.get_supabase_uid('nutrition_public_owner'),
@@ -60,7 +60,7 @@ INSERT INTO public.study_subject (
     '80000000-0000-4000-8000-000000000001',
     tests.get_supabase_uid('nutrition_public_subject'),
     now(),
-    ARRAY[]::text[]
+    ARRAY['intervention-a','intervention-b']
 );
 
 SELECT tests.authenticate_as('nutrition_public_subject');

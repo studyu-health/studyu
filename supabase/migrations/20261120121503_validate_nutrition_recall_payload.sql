@@ -90,6 +90,111 @@ REVOKE ALL ON FUNCTION studyu_private.nutrition_timestamp_is_valid(text),
 studyu_private.nutrition_recall_is_valid(jsonb)
 FROM PUBLIC, anon, authenticated, service_role;
 
+CREATE FUNCTION studyu_private.nutrition_intervention_for_day(
+    p_subject_id uuid, p_schedule jsonb, p_selected text[], p_study_day integer
+) RETURNS text LANGUAGE plpgsql IMMUTABLE SET search_path = ''
+AS $$
+DECLARE
+    v_phase_duration integer := (p_schedule->>'phaseDuration')::integer;
+    v_cycle_count integer := (p_schedule->>'numberOfCycles')::integer;
+    v_include_baseline boolean := (p_schedule->>'includeBaseline')::boolean;
+    v_sequence text := p_schedule->>'sequence';
+    v_custom_sequence text := upper(COALESCE(p_schedule->>'sequenceCustom', 'ABAB'));
+    v_phase integer;
+    v_cycle integer;
+    v_position integer;
+    v_phases_per_cycle integer;
+BEGIN
+    IF v_phase_duration IS NULL OR v_phase_duration <= 0 OR v_cycle_count IS NULL
+       OR v_cycle_count < 0 OR v_include_baseline IS NULL OR p_study_day < 0 THEN
+        RETURN NULL;
+    END IF;
+    v_phase := p_study_day / v_phase_duration;
+    IF v_include_baseline THEN
+        IF v_phase = 0 THEN RETURN '__baseline'; END IF;
+        v_phase := v_phase - 1;
+    END IF;
+
+    v_phases_per_cycle := CASE WHEN v_sequence = 'customized'
+        THEN length(v_custom_sequence) ELSE 2 END;
+    IF v_phases_per_cycle = 0 THEN RETURN NULL; END IF;
+    v_cycle := v_phase / v_phases_per_cycle;
+    IF v_cycle >= v_cycle_count THEN RETURN NULL; END IF;
+    v_position := v_phase % v_phases_per_cycle;
+
+    CASE v_sequence
+        WHEN 'alternating' THEN
+            RETURN p_selected[v_position + 1];
+        WHEN 'counterBalanced' THEN
+            RETURN p_selected[1 + (v_position + (v_cycle + 1) / 2) % 2];
+        WHEN 'randomized' THEN
+            IF v_cycle > 0 AND get_byte(sha256(convert_to(
+                p_subject_id::text || ':' || v_cycle::text, 'UTF8'
+            )), 0) % 2 = 1 THEN
+                v_position := 1 - v_position;
+            END IF;
+            RETURN p_selected[v_position + 1];
+        WHEN 'customized' THEN
+            RETURN CASE substr(v_custom_sequence, v_position + 1, 1)
+                WHEN 'A' THEN p_selected[1] WHEN 'B' THEN p_selected[2] END;
+        ELSE
+            RETURN NULL;
+    END CASE;
+END;
+$$;
+
+CREATE FUNCTION studyu_private.nutrition_task_is_scheduled(
+    p_rule jsonb, p_schedule jsonb, p_study_day integer
+) RETURNS boolean LANGUAGE plpgsql IMMUTABLE SET search_path = ''
+AS $$
+DECLARE
+    v_interval integer;
+    v_start integer;
+    v_day_of_cycle integer;
+    v_baseline_days integer;
+    v_cycle_days integer;
+    v_offset integer;
+    v_cycle integer;
+BEGIN
+    IF p_rule IS NULL OR p_rule = 'null'::jsonb THEN RETURN true; END IF;
+
+    CASE p_rule->>'type'
+        WHEN 'specificDays' THEN
+            RETURN COALESCE(p_rule->'specificDays' @> jsonb_build_array(p_study_day), false);
+        WHEN 'everyNDays' THEN
+            v_interval := COALESCE((p_rule->>'intervalDays')::integer, 1);
+            v_start := COALESCE((p_rule->>'startDayOffset')::integer, 0);
+            RETURN v_interval > 0 AND p_study_day >= v_start
+                AND (p_study_day - v_start) % NULLIF(v_interval, 0) = 0;
+        WHEN 'perCycle' THEN
+            v_day_of_cycle := COALESCE((p_rule->>'dayOfCycle')::integer, 0);
+            v_baseline_days := CASE WHEN (p_schedule->>'includeBaseline')::boolean
+                THEN (p_schedule->>'phaseDuration')::integer ELSE 0 END;
+            IF COALESCE((p_rule->>'includeBaseline')::boolean, false)
+               AND p_study_day = v_day_of_cycle AND p_study_day < v_baseline_days THEN
+                RETURN true;
+            END IF;
+            v_cycle_days := (p_schedule->>'phaseDuration')::integer *
+                CASE WHEN p_schedule->>'sequence' = 'customized'
+                    THEN length(COALESCE(p_schedule->>'sequenceCustom', 'ABAB')) ELSE 2 END;
+            v_offset := p_study_day - v_baseline_days - v_day_of_cycle;
+            IF v_cycle_days <= 0 OR v_offset < 0 OR v_offset % v_cycle_days <> 0 THEN
+                RETURN false;
+            END IF;
+            v_cycle := v_offset / v_cycle_days;
+            RETURN v_cycle < (p_schedule->>'numberOfCycles')::integer
+                AND (COALESCE(p_rule->'targetCycles', 'null'::jsonb) IN ('null', '[]')
+                    OR p_rule->'targetCycles' @> jsonb_build_array(v_cycle));
+        ELSE
+            RETURN false;
+    END CASE;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION studyu_private.nutrition_intervention_for_day(uuid, jsonb, text[], integer),
+studyu_private.nutrition_task_is_scheduled(jsonb, jsonb, integer)
+FROM PUBLIC, anon, authenticated, service_role;
+
 CREATE FUNCTION public.save_nutrition_recall(
     p_subject_id uuid, p_completed_at timestamptz, p_intervention_id text,
     p_task_id text, p_result jsonb, p_expected_revision bigint DEFAULT null
@@ -99,6 +204,9 @@ AS $$
 DECLARE
     v_recall public.subject_progress%ROWTYPE;
     v_current_day integer;
+    v_subject public.study_subject%ROWTYPE;
+    v_study public.study%ROWTYPE;
+    v_assigned_intervention text;
     v_study_day integer;
     v_food jsonb;
     v_row_time timestamptz := p_completed_at;
@@ -119,8 +227,9 @@ BEGIN
     END IF;
 
     v_study_day := (p_result #>> '{result,studyDaySnapshot}')::integer;
-    SELECT public.nutrition_subject_current_day(subject) INTO v_current_day
-    FROM public.study_subject AS subject WHERE id = p_subject_id;
+    SELECT * INTO v_subject FROM public.study_subject WHERE id = p_subject_id;
+    SELECT * INTO v_study FROM public.study WHERE id = v_subject.study_id;
+    v_current_day := public.nutrition_subject_current_day(v_subject);
 
     FOR v_food IN SELECT * FROM studyu_private.nutrition_recall_foods(p_result) LOOP
         PERFORM studyu_private.nutrition_assert_snapshot_owner(
@@ -146,6 +255,29 @@ BEGIN
 
         IF v_current_day IS NULL OR v_study_day NOT IN (v_current_day - 1, v_current_day) THEN
             RAISE EXCEPTION 'nutrition recall study day is not writable' USING ERRCODE = '22023';
+        END IF;
+
+        IF ((p_result #>> '{result,date}')::timestamptz AT TIME ZONE 'UTC')::date
+           IS DISTINCT FROM (v_subject.started_at AT TIME ZONE 'UTC')::date + v_study_day THEN
+            RAISE EXCEPTION 'nutrition recall date does not match its study day' USING ERRCODE = '22023';
+        END IF;
+
+        v_assigned_intervention := studyu_private.nutrition_intervention_for_day(
+            p_subject_id, v_study.schedule, v_subject.selected_intervention_ids, v_study_day
+        );
+        IF v_assigned_intervention IS DISTINCT FROM p_intervention_id
+           OR (v_assigned_intervention <> '__baseline' AND NOT EXISTS (
+               SELECT 1 FROM jsonb_array_elements(v_study.interventions) AS intervention
+               WHERE intervention->>'id' = v_assigned_intervention
+           ))
+           OR NOT EXISTS (
+               SELECT 1 FROM jsonb_array_elements(v_study.observations) AS task
+               CROSS JOIN LATERAL jsonb_array_elements(task #> '{schedule,completionPeriods}') AS period
+               WHERE task->>'id' = p_task_id AND task->>'type' = 'nutrition'
+                 AND period->>'id' = p_result->>'periodId'
+                 AND studyu_private.nutrition_task_is_scheduled(task->'scheduleRule', v_study.schedule, v_study_day)
+           ) THEN
+            RAISE EXCEPTION 'nutrition recall is not assigned to this study day' USING ERRCODE = '22023';
         END IF;
 
         INSERT INTO studyu_private.nutrition_maintenance_context
@@ -179,6 +311,7 @@ BEGIN
        OR v_recall.result->>'periodId' IS DISTINCT FROM p_result->>'periodId'
        OR v_recall.result #>> '{result,studyDaySnapshot}' IS DISTINCT FROM v_study_day::text
        OR v_recall.result #>> '{result,id}' IS DISTINCT FROM p_result #>> '{result,id}'
+       OR v_recall.result #>> '{result,date}' IS DISTINCT FROM p_result #>> '{result,date}'
     THEN
         RAISE EXCEPTION 'nutrition recall identity changed' USING ERRCODE = '40001';
     END IF;

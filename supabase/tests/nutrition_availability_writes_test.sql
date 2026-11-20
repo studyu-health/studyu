@@ -17,10 +17,10 @@ INSERT INTO public.study (
     '{}',
     '{}',
     '{}',
-    '[]',
-    '[]',
+    '[{"id":"availability-task","type":"nutrition","schedule":{"completionPeriods":[{"id":"availability-period"}]}}]',
+    '[{"id":"availability-intervention"},{"id":"other-intervention"}]',
     '{}',
-    '{}',
+    '{"phaseDuration":7,"numberOfCycles":1,"includeBaseline":false,"sequence":"alternating"}',
     '{}',
     '{}'
 );
@@ -33,14 +33,14 @@ VALUES
     'a0000000-0000-0000-0000-000000000001',
     tests.get_supabase_uid('availability_owner'),
     now() - interval '2 days',
-    ARRAY[]::text[]
+    ARRAY['availability-intervention','other-intervention']
 ),
 (
     'a1000000-0000-0000-0000-000000000002',
     'a0000000-0000-0000-0000-000000000001',
     tests.get_supabase_uid('availability_other'),
     now() - interval '2 days',
-    ARRAY[]::text[]
+    ARRAY['availability-intervention','other-intervention']
 );
 
 CREATE FUNCTION tests.availability_food(
@@ -93,7 +93,11 @@ CREATE FUNCTION tests.availability_write_recall(
 BEGIN
     PERFORM public.save_nutrition_recall(
         p_subject_id, p_time, 'availability-intervention', 'availability-task',
-        jsonb_set(p_result, '{result,entryCompletedAt}', to_jsonb(p_time)),
+        jsonb_set(jsonb_set(p_result, '{result,entryCompletedAt}', to_jsonb(p_time)),
+            '{result,date}', to_jsonb(now() - make_interval(
+                days => 2 - (p_result #>> '{result,studyDaySnapshot}')::integer
+            ))
+        ),
         (
             SELECT nutrition_revision FROM public.subject_progress
             WHERE subject_id = p_subject_id AND completed_at = p_time
@@ -189,7 +193,7 @@ SELECT lives_ok(
         'a1000000-0000-0000-0000-000000000001', gen_random_uuid(), 'a2000000-0000-0000-0000-000000000001',
         (tests.availability_current()->>'foodVersionId')::uuid,
         tests.availability_current() || '{"name":"Edited availability food"}',
-        false, '{"taskId":"availability-task","interventionId":"availability-intervention","periodId":"availability-period","completedAt":"2026-10-04 14:00:00+00","studyDaySnapshot":1}',
+        false, '{"taskId":"availability-task","interventionId":"availability-intervention","periodId":"availability-period","completedAt":"2026-10-04 14:00:00+00","studyDaySnapshot":1,"nutritionRevision":0}',
         2, null, 'availability-entry'
     )$$,
     'the historical mutation updates the selected recall and propagates to today'
@@ -216,6 +220,24 @@ SELECT throws_ok(
     )))$$,
     '22023', 'nutrition food version does not match food',
     'the recall RPC rejects an unrelated food and version pair'
+);
+SELECT lives_ok(
+    $$SELECT tests.availability_mutate(tests.availability_meal(tests.availability_current()))$$,
+    'a saved meal can reference a stored ingredient version'
+);
+SELECT throws_ok(
+    $$SELECT tests.availability_write_recall(tests.availability_recall(jsonb_set(
+        tests.availability_current('a2000000-0000-0000-0000-000000000002'),
+        '{componentSnapshots,0,foodVersionId}', '"a3000000-0000-0000-0000-000000000099"'
+    )))$$,
+    '22023', 'nutrition food version does not exist',
+    'the recall RPC rejects an unresolved nested food version'
+);
+SELECT lives_ok(
+    $$SELECT tests.availability_write_recall(tests.availability_recall(
+        tests.availability_current('a2000000-0000-0000-0000-000000000002')
+    ))$$,
+    'the recall RPC accepts the stored meal and ingredient versions'
 );
 SELECT set_config('tests.availability_foreign_version', tests.availability_current()->>'foodVersionId', true);
 

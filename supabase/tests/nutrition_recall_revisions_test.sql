@@ -1,18 +1,38 @@
 BEGIN;
 
-SELECT plan(30);
+SELECT no_plan();
 
 SELECT tests.create_supabase_user('nutrition_revision_owner', 'nutrition_revision_owner@studyu.health');
 SELECT tests.create_supabase_user('nutrition_revision_other', 'nutrition_revision_other@studyu.health');
+
+INSERT INTO public.study (
+    id, user_id, title, status, contact, description, icon_name, questionnaire,
+    eligibility_criteria, observations, interventions, consent, schedule, report_specification,
+    results
+)
+SELECT
+    'a7100000-0000-4000-8000-000000000002',
+    user_id, 'Recall revision fixture', 'running',
+    contact, description, icon_name, questionnaire, eligibility_criteria,
+    '[
+        {"id":"nutrition-task","type":"nutrition","schedule":{"completionPeriods":[{"id":"period-a"},{"id":"other-period"}]}},
+        {"id":"specific-nutrition-task","type":"nutrition","schedule":{"completionPeriods":[{"id":"period-a"}]},"scheduleRule":{"type":"specificDays","specificDays":[2]}},
+        {"id":"questionnaire-task","type":"questionnaire","schedule":{"completionPeriods":[{"id":"period-a"}]}}
+    ]',
+    '[{"id":"intervention-a"},{"id":"intervention-b"}]',
+    consent,
+    '{"phaseDuration":7,"numberOfCycles":2,"includeBaseline":false,"sequence":"alternating"}',
+    report_specification, results
+FROM public.study WHERE id = '22222222-2222-4222-8222-222222222222';
 
 INSERT INTO public.study_subject (
     id, study_id, user_id, started_at, selected_intervention_ids
 ) VALUES (
     'a7100000-0000-4000-8000-000000000001',
-    '22222222-2222-4222-8222-222222222222',
+    'a7100000-0000-4000-8000-000000000002',
     tests.get_supabase_uid('nutrition_revision_owner'),
     now() - interval '3 days',
-    ARRAY[]::text[]
+    ARRAY['intervention-a','intervention-b']
 );
 
 CREATE FUNCTION tests.revision_test_result(
@@ -29,13 +49,29 @@ CREATE FUNCTION tests.revision_test_result(
 $$;
 CREATE FUNCTION tests.revision_test_save(
     p_result jsonb, p_expected_revision bigint DEFAULT null,
-    p_completed_at timestamptz DEFAULT now()
+    p_completed_at timestamptz DEFAULT now(), p_task_id text DEFAULT 'nutrition-task',
+    p_intervention_id text DEFAULT 'intervention-a'
 ) RETURNS public.subject_progress LANGUAGE sql AS $$
     SELECT public.save_nutrition_recall(
         'a7100000-0000-4000-8000-000000000001', p_completed_at,
-        'intervention-a', 'nutrition-task', p_result, p_expected_revision
+        p_intervention_id, p_task_id, p_result, p_expected_revision
     );
 $$;
+
+SELECT is(
+    studyu_private.nutrition_intervention_for_day(
+        '00000000-0000-4000-8000-000000000001',
+        '{"phaseDuration":1,"numberOfCycles":2,"includeBaseline":false,"sequence":"randomized"}',
+        ARRAY['intervention-a','intervention-b'], 2
+    ), 'intervention-a', 'cycle one uses the same stable ordering as Dart'
+);
+SELECT is(
+    studyu_private.nutrition_intervention_for_day(
+        '00000000-0000-4000-8000-000000000001',
+        '{"phaseDuration":1,"numberOfCycles":2,"includeBaseline":false,"sequence":"randomized"}',
+        ARRAY['intervention-a','intervention-b'], 0
+    ), 'intervention-a', 'the first randomized cycle preserves enrollment order'
+);
 
 SELECT tests.authenticate_as('nutrition_revision_owner');
 SELECT throws_ok(
@@ -155,7 +191,10 @@ SELECT throws_ok(
 );
 SELECT lives_ok(
     $$SELECT tests.revision_test_save(
-        jsonb_set(tests.revision_test_result(550), '{result,studyDaySnapshot}', '2'),
+        jsonb_set(
+            jsonb_set(tests.revision_test_result(550), '{result,studyDaySnapshot}', '2'),
+            '{result,date}', to_jsonb(now() - interval '1 day')
+        ),
         null, now() - interval '1 day'
     )$$,
     'the same period can have a recall on a different writable study day'
@@ -163,9 +202,49 @@ SELECT lives_ok(
 SELECT lives_ok(
     $$SELECT tests.revision_test_save(
         jsonb_set(tests.revision_test_result(550), '{periodId}', '"other-period"'),
-        null, now() + interval '1 hour'
+        null, now()
     )$$,
-    'the same study day can have a recall for a different period'
+    'a different period can use the same requested completion timestamp'
+);
+SELECT is(
+    (tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(550), '{periodId}', '"other-period"'), null, now()
+    )).completed_at,
+    now() + interval '1 microsecond',
+    'retry returns the row allocated for the same recall'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(tests.revision_test_result(), p_task_id => 'questionnaire-task')$$,
+    '22023', 'nutrition recall is not assigned to this study day',
+    'nutrition cannot complete a questionnaire task'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(), '{periodId}', '"unscheduled-period"')
+    )$$,
+    '22023', 'nutrition recall is not assigned to this study day',
+    'nutrition cannot complete a period outside the task'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(tests.revision_test_result(), p_task_id => 'specific-nutrition-task')$$,
+    '22023', 'nutrition recall is not assigned to this study day',
+    'nutrition cannot complete a task on an unscheduled day'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(), '{periodId}', '"other-period"'),
+        p_task_id => 'specific-nutrition-task', p_intervention_id => 'intervention-b'
+    )$$,
+    '22023', 'nutrition recall is not assigned to this study day',
+    'nutrition cannot complete a task under an unassigned intervention'
+);
+SELECT throws_ok(
+    $$SELECT tests.revision_test_save(
+        jsonb_set(tests.revision_test_result(), '{result,date}', to_jsonb(now() - interval '1 day')),
+        p_task_id => 'specific-nutrition-task'
+    )$$,
+    '22023', 'nutrition recall date does not match its study day',
+    'nutrition requires the occurrence date to match the UTC study day'
 );
 SELECT throws_ok(
     $$SELECT public.advance_owned_study_subject_day('a7100000-0000-4000-8000-000000000001', 1)$$,
