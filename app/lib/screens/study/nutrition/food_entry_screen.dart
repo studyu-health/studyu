@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
@@ -438,9 +437,35 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   FoodEntry? _buildFoodEntry() {
     if (!_formKey.currentState!.validate()) return null;
 
+    final nutrientControllers = {
+      'energyKcal': _energyController,
+      'protein': _proteinController,
+      'carbs': _carbsController,
+      'fat': _fatController,
+      'sugars': _sugarsController,
+      'fiber': _fiberController,
+      'saturatedFat': _saturatedFatController,
+      'sodium': _sodiumController,
+    };
+    final optionalInputs = [
+      ...nutrientControllers.values,
+      _yieldFactorController,
+      _ediblePortionController,
+    ];
+    if (optionalInputs.any(
+      (field) =>
+          field.text.trim().isNotEmpty &&
+          parseNutritionAmount(field.text) == null,
+    )) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.free_text_numeric_error)));
+      return null;
+    }
+
     final existingNutrition = _nutritionBasis?.nutrition;
     double enteredValue(String key, TextEditingController controller) =>
-        double.tryParse(controller.text) ??
+        parseNutritionAmount(controller.text) ??
         (existingNutrition != null && !existingNutrition.isKnown(key)
             ? existingNutrition.valueFor(key)
             : 0);
@@ -465,18 +490,8 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       },
       partialNutrients: {...?existingNutrition?.partialNutrients},
     );
-    final nutrientControllers = {
-      'energyKcal': _energyController,
-      'protein': _proteinController,
-      'carbs': _carbsController,
-      'fat': _fatController,
-      'sugars': _sugarsController,
-      'fiber': _fiberController,
-      'saturatedFat': _saturatedFatController,
-      'sodium': _sodiumController,
-    };
     for (final entry in nutrientControllers.entries) {
-      final value = double.tryParse(entry.value.text);
+      final value = parseNutritionAmount(entry.value.text);
       if (value == null) {
         nutrition.unavailableNutrients.add(entry.key);
         nutrition.partialNutrients.remove(entry.key);
@@ -493,7 +508,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       }
     }
 
-    final amount = double.parse(_amountController.text);
+    final amount = parseNutritionAmount(_amountController.text)!;
     final savedNutrition = _showServings
         ? scaleNutritionProfile(nutrition, amount)
         : nutrition;
@@ -509,7 +524,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
             : _descriptionController.text,
         amount: amount,
         unit: _unitController.text,
-        servingSizeGrams: double.parse(_servingSizeController.text),
+        servingSizeGrams: parseNutritionAmount(_servingSizeController.text)!,
         portionReference: _portionReferenceController.text.isEmpty
             ? null
             : _portionReferenceController.text,
@@ -517,10 +532,10 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
         portionState: _portionState,
         yieldFactor: _yieldFactorController.text.isEmpty
             ? null
-            : double.tryParse(_yieldFactorController.text),
+            : parseNutritionAmount(_yieldFactorController.text),
         ediblePortion: _ediblePortionController.text.isEmpty
             ? null
-            : double.tryParse(_ediblePortionController.text),
+            : parseNutritionAmount(_ediblePortionController.text),
         nutrition: savedNutrition,
         source: _source,
         confidenceScore: 1.0,
@@ -541,7 +556,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
           : _descriptionController.text
       ..amount = amount
       ..unit = _unitController.text
-      ..servingSizeGrams = double.parse(_servingSizeController.text)
+      ..servingSizeGrams = parseNutritionAmount(_servingSizeController.text)!
       ..portionReference = _portionReferenceController.text.isEmpty
           ? null
           : _portionReferenceController.text
@@ -549,10 +564,10 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       ..portionState = _portionState
       ..yieldFactor = _yieldFactorController.text.isEmpty
           ? null
-          : double.tryParse(_yieldFactorController.text)
+          : parseNutritionAmount(_yieldFactorController.text)
       ..ediblePortion = _ediblePortionController.text.isEmpty
           ? null
-          : double.tryParse(_ediblePortionController.text)
+          : parseNutritionAmount(_ediblePortionController.text)
       ..nutrition = savedNutrition
       ..modifiedAt = DateTime.now();
   }
@@ -1001,8 +1016,8 @@ class const _EssentialFieldsCard({
                   decimal: true,
                 ),
                 validator: (value) {
-                  final amount = double.tryParse(value ?? '');
-                  return amount == null || !amount.isFinite || amount <= 0
+                  final amount = parseNutritionAmount(value ?? '');
+                  return amount == null || amount <= 0
                       ? l10n.food_quantity_invalid_amount
                       : null;
                 },
@@ -1017,13 +1032,12 @@ class const _EssentialFieldsCard({
                 border: const OutlineInputBorder(),
                 suffixText: 'g',
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-              ],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
-                final grams = double.tryParse(value ?? '');
-                return grams == null || !grams.isFinite || grams <= 0
+                final grams = parseNutritionAmount(value ?? '');
+                return grams == null || grams <= 0
                     ? l10n.food_quantity_invalid_amount
                     : null;
               },
@@ -1040,10 +1054,9 @@ class const _EssentialFieldsCard({
                 hintText: '0',
                 suffixText: 'kcal',
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-              ],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -1092,12 +1105,9 @@ class const _EssentialFieldsCard({
                         vertical: 12,
                       ),
                     ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,2}'),
-                      ),
-                    ],
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1115,12 +1125,9 @@ class const _EssentialFieldsCard({
                         vertical: 12,
                       ),
                     ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,2}'),
-                      ),
-                    ],
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1138,12 +1145,9 @@ class const _EssentialFieldsCard({
                         vertical: 12,
                       ),
                     ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,2}'),
-                      ),
-                    ],
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ),
               ],
@@ -1246,12 +1250,9 @@ class _DetailedNutritionCardState() extends State<_DetailedNutritionCard> {
                               vertical: 12,
                             ),
                           ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -1267,12 +1268,9 @@ class _DetailedNutritionCardState() extends State<_DetailedNutritionCard> {
                               vertical: 12,
                             ),
                           ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                         ),
                       ),
                     ],
@@ -1292,12 +1290,9 @@ class _DetailedNutritionCardState() extends State<_DetailedNutritionCard> {
                               vertical: 12,
                             ),
                           ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -1313,12 +1308,9 @@ class _DetailedNutritionCardState() extends State<_DetailedNutritionCard> {
                               vertical: 12,
                             ),
                           ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                         ),
                       ),
                     ],
@@ -1540,12 +1532,9 @@ class _AdvancedOptionsCardState() extends State<_AdvancedOptionsCard> {
                             border: const OutlineInputBorder(),
                             hintText: widget.l10n.yield_factor_hint,
                           ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,4}'),
-                            ),
-                          ],
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -1557,12 +1546,9 @@ class _AdvancedOptionsCardState() extends State<_AdvancedOptionsCard> {
                             border: const OutlineInputBorder(),
                             hintText: widget.l10n.edible_portion_hint,
                           ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,4}'),
-                            ),
-                          ],
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                         ),
                       ),
                     ],

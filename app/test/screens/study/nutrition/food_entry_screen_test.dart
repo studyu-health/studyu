@@ -13,6 +13,7 @@ import 'fake_nutrition_food_repository.dart';
 Widget foodEntryApp({
   FoodEntry? existingFood,
   bool showSearchAction = true,
+  Locale locale = const Locale('en'),
   bool historicalMode = false,
   bool isExternalLibraryCopy = false,
   String? mealLabel,
@@ -23,7 +24,7 @@ Widget foodEntryApp({
   child: MaterialApp(
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
-    locale: const Locale('en'),
+    locale: locale,
     home: Builder(
       builder: (context) => Scaffold(
         body: Center(
@@ -53,6 +54,7 @@ Future<void> openFoodEntry(
   WidgetTester tester, {
   FoodEntry? existingFood,
   bool showSearchAction = true,
+  Locale locale = const Locale('en'),
   bool historicalMode = false,
   bool isExternalLibraryCopy = false,
   String? mealLabel,
@@ -63,6 +65,7 @@ Future<void> openFoodEntry(
     foodEntryApp(
       existingFood: existingFood,
       showSearchAction: showSearchAction,
+      locale: locale,
       historicalMode: historicalMode,
       isExternalLibraryCopy: isExternalLibraryCopy,
       mealLabel: mealLabel,
@@ -233,6 +236,36 @@ void main() {
         'waterContent',
       ]),
     );
+  });
+
+  testWidgets('comma decimals retain the complete value in German', (
+    tester,
+  ) async {
+    const locale = Locale('de');
+    final german = lookupAppLocalizations(locale);
+    FoodEntry? result;
+    await openFoodEntry(
+      tester,
+      locale: locale,
+      existingFood: existingOffFood({}),
+      onResult: (value) => result = value,
+    );
+    final energy = inputWithLabel(german.energy_kcal);
+    final weight = inputWithLabel(german.nutrition_values_are_for);
+    final save = find.byType(FloatingActionButton);
+    await tester.enterText(energy, '1,5,5');
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    expect(result, isNull);
+    expect(find.byType(FoodEntryScreen), findsOneWidget);
+
+    await tester.enterText(energy, '1,5');
+    await tester.enterText(weight, '12,5');
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+
+    expect(result?.nutrition.energyKcal, 1.5);
+    expect(result?.servingSizeGrams, 12.5);
   });
 
   testWidgets('shows database search outside the search flow', (tester) async {

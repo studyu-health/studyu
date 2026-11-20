@@ -378,16 +378,16 @@ void main() {
         await tester.tap(find.text('Open'));
         await tester.pumpAndSettle();
         if (editingLog) {
-          await tester.enterText(servingsField, '3');
+          await tester.enterText(servingsField, '3,5');
         } else {
           expect(servingsField, findsNothing);
         }
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();
-        expect(meal.amount, 3);
-        expect(meal.nutrition.energyKcal, 300);
+        expect(meal.amount, 3.5);
+        expect(meal.nutrition.energyKcal, 350);
         expect(meal.componentFoods!.single.amount, 1);
-        expect(flattenNutritionFoodEntries([meal]).single.amount, 3);
+        expect(flattenNutritionFoodEntries([meal]).single.amount, 3.5);
       }
     },
   );

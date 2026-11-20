@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
@@ -223,9 +222,9 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
 
   void _quickAddFood() {
     final name = _quickNameController.text.trim();
-    final amount = _parseMealNumber(_quickAmountController.text);
+    final amount = parseNutritionAmount(_quickAmountController.text);
     final caloriesText = _quickCaloriesController.text.trim();
-    final calories = _parseMealNumber(caloriesText);
+    final calories = parseNutritionAmount(caloriesText);
     final l10n = AppLocalizations.of(context)!;
 
     if (name.isEmpty) {
@@ -234,14 +233,13 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       return;
     }
 
-    if (amount == null || !amount.isFinite || amount <= 0) {
+    if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.food_quantity_invalid_amount)),
       );
       return;
     }
-    if (caloriesText.isNotEmpty &&
-        (calories == null || !calories.isFinite || calories < 0)) {
+    if (caloriesText.isNotEmpty && calories == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.nutrition_invalid_calories)));
@@ -317,8 +315,8 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
 
   double get _ingredientServings {
     if (widget.editLoggedAmount) return 1;
-    final servings = double.tryParse(_servingsController.text);
-    return servings != null && servings.isFinite && servings > 0 ? servings : 1;
+    final servings = parseNutritionAmount(_servingsController.text);
+    return servings != null && servings > 0 ? servings : 1;
   }
 
   NutritionProfile _calculateTotalNutrition() {
@@ -375,13 +373,11 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         return null;
       }
 
-      final rawWeight = _parseMealNumber(rawWeightInput);
-      final cookedWeight = _parseMealNumber(cookedWeightInput);
+      final rawWeight = parseNutritionAmount(rawWeightInput);
+      final cookedWeight = parseNutritionAmount(cookedWeightInput);
       if (rawWeight == null ||
-          !rawWeight.isFinite ||
           rawWeight <= 0 ||
           cookedWeight == null ||
-          !cookedWeight.isFinite ||
           cookedWeight <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.food_quantity_invalid_amount)),
@@ -398,7 +394,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     }
 
     final existing = widget.existingMeal;
-    final servings = double.parse(_servingsController.text);
+    final servings = parseNutritionAmount(_servingsController.text)!;
     final components = [
       for (var index = 0; index < _foods.length; index++)
         FoodComposition(
@@ -676,7 +672,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         !_invalidComponents &&
         _nameController.text.isNotEmpty &&
         _foods.isNotEmpty;
-    final servingsCount = double.tryParse(_servingsController.text) ?? 1;
+    final servingsCount = parseNutritionAmount(_servingsController.text) ?? 1;
 
     final scaffold = Scaffold(
       appBar: AppBar(
@@ -938,16 +934,9 @@ class const _MealInfoCard({
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,2}'),
-                        ),
-                      ],
                       validator: (value) {
-                        final servings = double.tryParse(value ?? '');
-                        if (servings == null ||
-                            !servings.isFinite ||
-                            servings <= 0) {
+                        final servings = parseNutritionAmount(value ?? '');
+                        if (servings == null || servings <= 0) {
                           return l10n.food_quantity_invalid_amount;
                         }
                         return null;
@@ -1003,12 +992,9 @@ class const _PreparationDetailsCard({
                     border: const OutlineInputBorder(),
                     isDense: true,
                   ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d+\.?\d{0,2}'),
-                    ),
-                  ],
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1020,12 +1006,9 @@ class const _PreparationDetailsCard({
                     border: const OutlineInputBorder(),
                     isDense: true,
                   ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d+\.?\d{0,2}'),
-                    ),
-                  ],
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                 ),
               ),
             ],
@@ -1170,7 +1153,9 @@ class _QuickAddFormState() extends State<_QuickAddForm> {
                       border: const OutlineInputBorder(),
                       isDense: true,
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     onSubmitted: (_) => _submitAndFocusNext(),
                   ),
                 ),
@@ -1184,7 +1169,9 @@ class _QuickAddFormState() extends State<_QuickAddForm> {
                       border: const OutlineInputBorder(),
                       isDense: true,
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     onSubmitted: (_) => widget.onAdd(),
                   ),
                 ),
@@ -1358,8 +1345,8 @@ class const _FoodCard({
           ),
           FilledButton(
             onPressed: () {
-              final amount = _parseMealNumber(amountController.text);
-              if (amount == null || !amount.isFinite || amount <= 0) {
+              final amount = parseNutritionAmount(amountController.text);
+              if (amount == null || amount <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(l10n.food_quantity_invalid_amount)),
                 );
@@ -1375,6 +1362,3 @@ class const _FoodCard({
     );
   }
 }
-
-double? _parseMealNumber(String text) =>
-    double.tryParse(text.trim().replaceFirst(',', '.'));

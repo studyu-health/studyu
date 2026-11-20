@@ -3,6 +3,11 @@ import 'dart:convert';
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
 
+double? parseNutritionAmount(String input) {
+  final amount = double.tryParse(input.trim().replaceFirst(',', '.'));
+  return amount != null && amount.isFinite && amount >= 0 ? amount : null;
+}
+
 MealLog cloneMealLog(MealLog meal) => MealLog.fromJson(
   jsonDecode(jsonEncode(meal.toJson())) as Map<String, dynamic>,
 );
