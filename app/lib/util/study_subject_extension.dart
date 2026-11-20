@@ -3,15 +3,8 @@ import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/temporary_storage_handler.dart';
 import 'package:studyu_core/core.dart';
 
-int nutritionStudyDayFor(StudySubject subject, DateTime date) {
-  final current = date.toUtc();
-  final started = subject.startedAt!.toUtc();
-  return DateTime.utc(
-    current.year,
-    current.month,
-    current.day,
-  ).difference(DateTime.utc(started.year, started.month, started.day)).inDays;
-}
+int nutritionStudyDayFor(StudySubject subject, DateTime date) =>
+    subject.getNutritionStudyDayFor(date);
 
 bool isWritableNutritionStudyDay(int? studyDay, int todayStudyDay) =>
     studyDay != null &&
@@ -182,13 +175,9 @@ extension StudySubjectExtension on StudySubject {
   }
 
   String _interventionIdForRecall(DailyRecall recall) {
-    final baseDate = startedAt;
-    final snapshotDate = baseDate != null && recall.studyDaySnapshot != null
-        ? baseDate.add(Duration(days: recall.studyDaySnapshot!))
-        : null;
-    final intervention =
-        (snapshotDate == null ? null : getInterventionForDate(snapshotDate)) ??
-        getInterventionForDate(DateTime.now());
+    final studyDay =
+        recall.studyDaySnapshot ?? getNutritionStudyDayFor(recall.date);
+    final intervention = getNutritionInterventionForStudyDay(studyDay);
     if (intervention == null) {
       throw StateError('No intervention found for nutrition recall');
     }

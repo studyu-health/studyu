@@ -74,7 +74,7 @@ class DailyRecallEntryViewModel({
       recall = DailyRecall.withId(
         date: now,
         recallMode: RecallMode.realtimeRecord,
-        entryStartedAt: now,
+        entryStartedAt: now.toUtc(),
         meals: [],
       );
     }
@@ -142,9 +142,7 @@ class DailyRecallEntryViewModel({
     );
     _interventionId ??=
         interventionId ??
-        subject!
-            .getInterventionForDate(_hasExistingRecall ? recall.date : clock())
-            ?.id;
+        subject!.getNutritionInterventionForStudyDay(_studyDaySnapshot!)?.id;
     _periodId ??= completionPeriod?.id;
 
     final didHydrateRemoteRecall = !readOnly && _hydrateCurrentRemoteRecall();
@@ -531,7 +529,7 @@ class DailyRecallEntryViewModel({
   /// Retained for existing callers; late corrections never call this path.
   DailyRecall markCompleted() {
     if (readOnly || !revalidateEditingEligibility()) return recall;
-    recall = _copyWithRecall(entryCompletedAt: DateTime.now());
+    recall = _copyWithRecall(entryCompletedAt: clock().toUtc());
     notifyListeners();
     return recall;
   }
@@ -589,7 +587,7 @@ class DailyRecallEntryViewModel({
         !revalidateEditingEligibility()) {
       return;
     }
-    final savedAt = clock();
+    final savedAt = clock().toUtc();
     recall = _copyWithRecall(lastAutoSavedAt: savedAt);
     lastSaveTime = savedAt;
     final recallToSave = DailyRecall.fromJson(recall.toJson());

@@ -99,11 +99,14 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   }) {
     final resultsByDate = <DateTime, List<SubjectProgress>>{};
     progress.where((p) => p.interventionId == interventionId).forEach((p) {
-      final date = DateTime(
-        p.completedAt!.year,
-        p.completedAt!.month,
-        p.completedAt!.day,
-      );
+      final completedAt = p.completedAt!;
+      final result = p.result.result;
+      final timestamp = result is DailyRecall && startedAt != null
+          ? nutritionDateForStudyDay(
+              result.studyDaySnapshot ?? getNutritionStudyDayFor(completedAt),
+            )
+          : completedAt;
+      final date = DateTime(timestamp.year, timestamp.month, timestamp.day);
       resultsByDate.putIfAbsent(date, () => []);
       resultsByDate[date]!.add(p);
     });
@@ -127,6 +130,31 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
           ),
         )
         .inDays;
+  }
+
+  /// Nutrition study days follow the server's UTC calendar.
+  int getNutritionStudyDayFor(DateTime date) {
+    final utc = date.toUtc();
+    return DateTime.utc(
+      utc.year,
+      utc.month,
+      utc.day,
+    ).difference(nutritionDateForStudyDay(0)).inDays;
+  }
+
+  DateTime nutritionDateForStudyDay(int studyDay) {
+    final start = startedAt!.toUtc();
+    return DateTime.utc(start.year, start.month, start.day + studyDay);
+  }
+
+  Intervention? getNutritionInterventionForStudyDay(int studyDay) {
+    if (studyDay < 0 || studyDay >= study.schedule.length) return null;
+    final order = interventionOrder;
+    final index = studyDay ~/ study.schedule.phaseDuration;
+    if (index >= order.length) return null;
+    return selectedInterventions.firstWhereOrNull(
+      (intervention) => intervention.id == order[index],
+    );
   }
 
   int getInterventionIndexForDate(DateTime date) {
@@ -202,10 +230,18 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
     DateTime dateTime,
   ) {
     final List<SubjectProgress> thisTaskProgressToday = [];
-    for (final SubjectProgress sp in resultsFor(taskId)) {
-      if (sp.subjectId == id && sp.completedAt!.isSameDate(dateTime)) {
-        thisTaskProgressToday.add(sp);
-      }
+    final nutritionDay = startedAt == null
+        ? null
+        : getNutritionStudyDayFor(dateTime);
+    for (final sp in resultsFor(taskId)) {
+      final completedAt = sp.completedAt;
+      if (sp.subjectId != id || completedAt == null) continue;
+      final recall = sp.result.result;
+      final matchesDay = recall is DailyRecall && nutritionDay != null
+          ? (recall.studyDaySnapshot ?? getNutritionStudyDayFor(completedAt)) ==
+                nutritionDay
+          : completedAt.isSameDate(dateTime);
+      if (matchesDay) thisTaskProgressToday.add(sp);
     }
     return thisTaskProgressToday;
   }
@@ -223,11 +259,8 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
       if (result is DailyRecall && result.entryCompletedAt == null) {
         return false;
       }
-      if (progress.result.periodId == null) {
-        // fallback to support studies without periodIds
-        return progress.completedAt!.isSameDate(dateTime);
-      }
-      return progress.result.periodId == completionPeriod.id;
+      final periodId = progress.result.periodId;
+      return periodId == null || periodId == completionPeriod.id;
     });
   }
 
@@ -285,17 +318,24 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   List<TaskInstance> scheduleFor(DateTime dateTime) {
     final activeIntervention = getInterventionForDate(dateTime);
     final List<TaskInstance> taskSchedule = [];
-    if (activeIntervention == null) return taskSchedule;
-
-    for (final task in activeIntervention.tasks) {
+    for (final task in activeIntervention?.tasks ?? const <Task>[]) {
       if (task.title == null) continue;
       for (final completionPeriod in task.schedule.completionPeriods) {
         taskSchedule.add(TaskInstance(task, completionPeriod.id));
       }
     }
     final studyDayIndex = getDayOfStudyFor(dateTime);
+    final nutritionDay = getNutritionStudyDayFor(dateTime);
+    final inNutritionSchedule =
+        !dateTime.isBefore(startedAt!) &&
+        nutritionDay >= 0 &&
+        nutritionDay < study.schedule.length;
 
     for (final observation in study.observations) {
+      final isNutrition = observation is NutritionTask;
+      if (isNutrition ? !inNutritionSchedule : activeIntervention == null) {
+        continue;
+      }
       final title = observation.title;
       if (title == null) {
         for (final completionPeriod in observation.schedule.completionPeriods) {
@@ -307,7 +347,7 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
       // Scheduled survey: show only on matching days
       if (observation.scheduleRule != null) {
         if (!observation.scheduleRule!.isScheduledForDay(
-          studyDayIndex,
+          isNutrition ? nutritionDay : studyDayIndex,
           study.schedule,
         )) {
           continue;

@@ -386,7 +386,8 @@ class _NutritionTaskWidgetState()
   String _historicalDateTitle(BuildContext context, AppLocalizations l10n) {
     final date = MaterialLocalizations.of(context)
         .formatMediumDate(widget.historicalDate!);
-    return widget.readOnly ? date : l10n.historical_editing_date(date);
+    final label = widget.historicalDate!.isUtc ? '$date UTC' : date;
+    return widget.readOnly ? label : l10n.historical_editing_date(label);
   }
 
   PreferredSizeWidget _buildAppBar(
@@ -696,7 +697,9 @@ class _NutritionTaskWidgetState()
         task: task,
         completionPeriod: period,
         persistenceTarget: target,
-        historicalDate: record.recall.date,
+        historicalDate: subject.nutritionDateForStudyDay(
+          record.studyDaySnapshot,
+        ),
         interventionId: record.interventionId,
         readOnly: !canEdit,
         foodRepository: widget.foodRepository,
@@ -734,6 +737,13 @@ class _NutritionTaskWidgetState()
     ThemeData theme,
     AppLocalizations l10n,
   ) {
+    final subject = model.subject;
+    final day = model.studyDaySnapshot;
+    final studyDate = subject?.startedAt != null && day != null
+        ? subject!.nutritionDateForStudyDay(day)
+        : null;
+    final dateLabel = MaterialLocalizations.of(context)
+        .formatMediumDate(studyDate ?? recall.date);
     final entries =
         [
           for (var index = 0; index < recall.meals.length; index++)
@@ -776,8 +786,7 @@ class _NutritionTaskWidgetState()
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        MaterialLocalizations.of(context)
-                            .formatMediumDate(recall.date),
+                        studyDate == null ? dateLabel : '$dateLabel UTC',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -957,7 +966,9 @@ class _NutritionTaskWidgetState()
           task: widget.task,
           initialFoods: foods,
           recallPhoto: recallPhoto,
-          occurrenceDate: model.recall.date,
+          occurrenceDate:
+              recallPhoto?.createDateTime ??
+              (_isHistoricalMode ? model.recall.date : DateTime.now()),
           historicalTarget: widget.persistenceTarget,
           canEditRecall: model.revalidateEditingEligibility,
           foodRepository: widget.foodRepository,

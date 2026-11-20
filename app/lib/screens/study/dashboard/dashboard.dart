@@ -119,27 +119,22 @@ class _DashboardScreenState()
 
   void _scheduleMidnightSubmitTimer() {
     _midnightSubmitTimer?.cancel();
+    if (subject?.startedAt == null) return;
 
-    final trackProgress = context.read<AppState>().trackParticipantProgress;
-    if (subject == null || !trackProgress) return;
+    final now = DateTime.now();
+    final utc = now.toUtc();
+    final utcMidnight = DateTime.utc(utc.year, utc.month, utc.day + 1);
+    final localMidnight = DateTime(now.year, now.month, now.day + 1);
+    final nextMidnight = localMidnight.isBefore(utcMidnight)
+        ? localMidnight
+        : utcMidnight;
 
-    final now = DateTime.now().toUtc();
-    final tomorrow = DateTime.utc(
-      now.year,
-      now.month,
-      now.day + 1,
-    ).add(const Duration(seconds: 5));
-    final delay = tomorrow.difference(now);
-
-    _midnightSubmitTimer = Timer(delay, () async {
+    _midnightSubmitTimer = Timer(nextMidnight.difference(now), () {
       if (!mounted) return;
-      await _submitPendingNutritionRecalls();
-      if (mounted) {
-        setState(() {
-          scheduleToday = subject?.scheduleFor(DateTime.now());
-        });
-        _scheduleMidnightSubmitTimer();
-      }
+      final current = DateTime.now();
+      setState(() => scheduleToday = subject?.scheduleFor(current));
+      _scheduleMidnightSubmitTimer();
+      if (!utc.isSameDate(current)) unawaited(_submitPendingNutritionRecalls());
     });
   }
 

@@ -7,6 +7,7 @@ import 'package:studyu_app/screens/study/tasks/intervention/checkmark_task_widge
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/screens/study/tasks/observation/questionnaire_task_widget.dart';
 import 'package:studyu_app/util/cache.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_core/core.dart';
 
@@ -49,6 +50,26 @@ class _TaskScreenState() extends State<TaskScreen> {
     if (!mounted) return;
     final nutritionTask = taskInstance.task as NutritionTask;
     final completionPeriod = taskInstance.completionPeriod;
+    final state = context.read<AppState>();
+    final now = DateTime.now();
+    final isScheduled =
+        subject
+            ?.scheduleFor(now)
+            .any(
+              (instance) =>
+                  instance.task.id == nutritionTask.id &&
+                  instance.id == completionPeriod.id,
+            ) ??
+        false;
+    if (!isScheduled ||
+        (!state.isPreview &&
+            !isDebugMode &&
+            !completionPeriod.contains(
+              StudyUTimeOfDay(hour: now.hour, minute: now.minute),
+            ))) {
+      Navigator.of(context).pop(false);
+      return;
+    }
     final result = await Navigator.of(context).push(
       MaterialPageRoute<DailyRecall>(
         builder: (context) => Consumer<AppState>(

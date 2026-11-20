@@ -90,9 +90,14 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        final today = DateUtils.dateOnly(DateTime.now());
+        final now = DateTime.now();
+        final subject = widget.subject;
+        final today = DateUtils.dateOnly(
+          subject?.startedAt == null ? now : now.toUtc(),
+        );
         final statisticsDays = nutritionStatisticsDays(
           snapshot.data!,
+          subject: subject,
           activeRecall: widget.activeRecall,
           activeStudyDay: widget.activeStudyDay,
           activePeriodId: widget.activePeriodId,
@@ -1174,10 +1179,17 @@ class const NutritionStatisticsPeriod(
 
 List<NutritionStatisticsDay> nutritionStatisticsDays(
   List<NutritionRecallRecord> records, {
+  StudySubject? subject,
   DailyRecall? activeRecall,
   int? activeStudyDay,
   String? activePeriodId,
 }) {
+  DateTime dateFor(DateTime recallDate, int? studyDay) => DateUtils.dateOnly(
+    subject?.startedAt != null && studyDay != null
+        ? subject!.nutritionDateForStudyDay(studyDay)
+        : recallDate.toLocal(),
+  );
+
   final activeDay = activeStudyDay ?? activeRecall?.studyDaySnapshot;
   bool matchesActiveRecord(NutritionRecallRecord record) =>
       activeRecall != null &&
@@ -1189,14 +1201,14 @@ List<NutritionStatisticsDay> nutritionStatisticsDays(
   final byDate = <DateTime, List<NutritionRecallRecord>>{};
   final activeDate = activeRecall == null
       ? null
-      : DateUtils.dateOnly(activeRecall.date.toLocal());
+      : dateFor(activeRecall.date, activeDay);
   NutritionRecallRecord? replaced;
   for (final record in records) {
     if (matchesActiveRecord(record)) {
       replaced ??= record;
       continue;
     }
-    final date = DateUtils.dateOnly(record.recall.date.toLocal());
+    final date = dateFor(record.recall.date, record.studyDaySnapshot);
     byDate.putIfAbsent(date, () => []).add(record);
   }
   final activeSnapshot = activeDay ?? replaced?.studyDaySnapshot;

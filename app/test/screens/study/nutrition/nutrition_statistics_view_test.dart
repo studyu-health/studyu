@@ -41,9 +41,9 @@ void main() {
   testWidgets(
     'opens today and updates the calorie change with the live diary',
     (tester) async {
-      final today = DateUtils.dateOnly(DateTime.now());
+      final today = DateUtils.dateOnly(DateTime.now().toUtc());
       final yesterday = addCalendarDays(today, -1);
-      final subject = _statisticsSubject(yesterday, [
+      final subject = _statisticsSubject(addCalendarDays(yesterday, -1), [
         _record(date: yesterday, studyDay: 1, energyKcal: 500),
         _record(date: today, studyDay: 2, energyKcal: 900),
       ]);
@@ -83,13 +83,13 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
     final semantics = tester.ensureSemantics();
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final yesterday = addCalendarDays(today, -1);
     final oldest = addCalendarDays(today, -3);
 
     await tester.pumpWidget(
       _statisticsApp(
-        _statisticsSubject(oldest, [
+        _statisticsSubject(addCalendarDays(oldest, -1), [
           _record(date: oldest, studyDay: 1, energyKcal: 400),
           _record(date: yesterday, studyDay: 3, energyKcal: 500),
         ]),
@@ -144,7 +144,7 @@ void main() {
   testWidgets(
     'hides changes when calories or diary completion are incomplete',
     (tester) async {
-      final today = DateUtils.dateOnly(DateTime.now());
+      final today = DateUtils.dateOnly(DateTime.now().toUtc());
       final yesterday = addCalendarDays(today, -1);
       final earlier = addCalendarDays(today, -2);
       for (final (completed, unavailable, partial) in [
@@ -152,7 +152,7 @@ void main() {
         (true, {'energyKcal'}, <String>{}),
         (true, <String>{}, {'energyKcal'}),
       ]) {
-        final subject = _statisticsSubject(earlier, [
+        final subject = _statisticsSubject(addCalendarDays(earlier, -1), [
           _record(date: earlier, studyDay: 1, energyKcal: 400),
           _record(
             date: yesterday,
@@ -188,7 +188,7 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final subject = _statisticsSubject(addCalendarDays(today, -40), [
       for (final (offset, energy) in [
         (1, 400.0),
@@ -257,6 +257,19 @@ void main() {
     },
   );
 
+  test('groups records by UTC study day despite local recorder dates', () {
+    final localDate = DateTime(2026, 1, 3);
+    final subject = StudySubject('subject', 'study', 'user', [])
+      ..startedAt = DateTime.utc(2026);
+    final days = nutritionStatisticsDays([
+      _record(date: localDate, studyDay: 1, energyKcal: 100),
+      _record(date: localDate, studyDay: 2, energyKcal: 150),
+    ], subject: subject);
+
+    expect(days.map((day) => day.date), [DateTime(2026, 1, 2), localDate]);
+    expect(days.map((day) => day.nutrition.energyKcal), [100, 150]);
+  });
+
   testWidgets('shows localized averages for completed study days', (
     tester,
   ) async {
@@ -265,9 +278,9 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
     final semantics = tester.ensureSemantics();
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final subject = StudySubject('subject', 'study', 'user', [])
-      ..startedAt = today.subtract(const Duration(days: 1));
+      ..startedAt = _utcDate(addCalendarDays(today, -1));
     final recall = _recall(
       date: today,
       studyDay: 1,
@@ -377,10 +390,10 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final yesterday = addCalendarDays(today, -1);
     final subject = StudySubject('subject', 'study', 'user', [])
-      ..startedAt = yesterday;
+      ..startedAt = _utcDate(addCalendarDays(yesterday, -1));
     final recall = _recall(
       date: yesterday,
       studyDay: 1,
@@ -441,7 +454,7 @@ void main() {
   });
 
   test('excludes incomplete today from averages but keeps it in charts', () {
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final records = [
       _record(
         date: today.subtract(const Duration(days: 2)),
@@ -481,9 +494,9 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final subject = StudySubject('subject', 'study', 'user', [])
-      ..startedAt = addCalendarDays(today, -6);
+      ..startedAt = _utcDate(addCalendarDays(today, -7));
     for (final (offset, studyDay) in [(6, 1), (4, 3)]) {
       final recall = _recall(
         date: addCalendarDays(today, -offset),
@@ -514,10 +527,10 @@ void main() {
   });
 
   testWidgets('labels incomplete today as today so far', (tester) async {
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final yesterday = addCalendarDays(today, -1);
     final subject = StudySubject('subject', 'study', 'user', [])
-      ..startedAt = yesterday;
+      ..startedAt = _utcDate(addCalendarDays(yesterday, -1));
     final completedRecall = _recall(
       date: yesterday,
       studyDay: 1,
@@ -578,9 +591,9 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final subject = StudySubject('subject', 'study', 'user', [])
-      ..startedAt = today.subtract(const Duration(days: 1));
+      ..startedAt = _utcDate(addCalendarDays(today, -1));
     subject.progress.add(
       _progress(
         _recall(
@@ -630,9 +643,9 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
     final semantics = tester.ensureSemantics();
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final subject = StudySubject('subject', 'study', 'user', [])
-      ..startedAt = today.subtract(const Duration(days: 1));
+      ..startedAt = _utcDate(addCalendarDays(today, -2));
     subject.progress.add(
       _progress(
         _recall(
@@ -692,7 +705,7 @@ void main() {
   });
 
   test('shows recorded zeros but hides incomplete and missing days', () {
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final period = nutritionStatisticsPeriod(
       nutritionStatisticsDays([
         _record(
@@ -733,7 +746,7 @@ void main() {
   });
 
   test('compares equal-length periods using recorded days only', () {
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final statisticsDays = nutritionStatisticsDays([
       _record(
         date: today.subtract(const Duration(days: 1)),
@@ -800,8 +813,11 @@ StudySubject _statisticsSubject(
   DateTime startedAt,
   List<NutritionRecallRecord> records,
 ) => StudySubject('subject', 'study', 'user', [])
-  ..startedAt = startedAt
+  ..startedAt = _utcDate(startedAt)
   ..progress.addAll(records.map((record) => record.progress!));
+
+DateTime _utcDate(DateTime date) =>
+    DateTime.utc(date.year, date.month, date.day);
 
 Future<void> _selectPeriod(WidgetTester tester, String label) async {
   final control = find.text(label);

@@ -75,7 +75,7 @@ class NutritionRecallAutoSaveManager({
       periodId,
       studyDaySnapshot,
     );
-    final now = DateTime.now().toIso8601String();
+    final now = DateTime.now().toUtc().toIso8601String();
     final dataJson = jsonEncode({
       'recall': recall.toJson(),
       'metadata': {
@@ -299,7 +299,7 @@ class NutritionRecallAutoSaveManager({
       if (stored == null) continue;
       final data = jsonDecode(stored) as Map<String, dynamic>;
       final metadata = data['metadata'] as Map<String, dynamic>;
-      metadata['lastModifiedAt'] = DateTime.now().toIso8601String();
+      metadata['lastModifiedAt'] = DateTime.now().toUtc().toIso8601String();
       if (revision != null) metadata['nutritionRevision'] = revision;
       data
         ..['recall'] = updatedRecall.toJson()
@@ -476,7 +476,11 @@ class NutritionRecallAutoSaveManager({
         final recall = pending.recall
           ..studyDaySnapshot = pending.studyDaySnapshot;
         recall.entryCompletedAt ??=
-            existingCompletion ?? _rolloverCompletionTime(recall);
+            existingCompletion ??
+            _rolloverCompletionTime(
+              recall,
+              subject.nutritionDateForStudyDay(pending.studyDaySnapshot),
+            );
         recall.lastAutoSavedAt ??= recall.entryCompletedAt;
         try {
           if (_submitter != null) {
@@ -618,17 +622,10 @@ class NutritionRecallAutoSaveManager({
     });
   }
 
-  DateTime _rolloverCompletionTime(DailyRecall recall) {
-    final dayStart = DateTime(
-      recall.date.year,
-      recall.date.month,
-      recall.date.day,
-    );
-    final dayEnd = DateTime(
-      recall.date.year,
-      recall.date.month,
-      recall.date.day + 1,
-    ).subtract(const Duration(microseconds: 1));
+  DateTime _rolloverCompletionTime(DailyRecall recall, DateTime dayStart) {
+    final dayEnd = dayStart
+        .add(const Duration(days: 1))
+        .subtract(const Duration(microseconds: 1));
     final completionCandidate =
         recall.lastAutoSavedAt ?? recall.entryStartedAt ?? DateTime.now();
     return completionCandidate.isBefore(dayStart)

@@ -1050,7 +1050,7 @@ void main() {
 
     final editor = find.byType(MealEntryScreen);
     expect(tester.widget<MealEntryScreen>(editor).existingMeal, isNull);
-    expect(tester.widget<MealEntryScreen>(editor).occurrenceDate, today.date);
+    expect(tester.widget<MealEntryScreen>(editor).occurrenceDate, photoTime);
     final preview = find.descendant(
       of: editor,
       matching: find.byType(PhotoRecallThumbnail),

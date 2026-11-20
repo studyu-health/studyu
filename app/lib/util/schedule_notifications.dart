@@ -14,6 +14,7 @@ Future<int> scheduleReminderForDate(
   String body,
   StudyNotification studyNotification,
   NotificationDetails notificationDetails,
+  StudySubject subject,
 ) async {
   var currentId = id;
   final task = studyNotification.taskInstance.task;
@@ -28,7 +29,23 @@ Future<int> scheduleReminderForDate(
       reminder.hour,
       reminder.minute,
     );
-    if (date.isSameDate(DateTime.now()) &&
+    if (task is NutritionTask) {
+      if (reminderTime.isBefore(DateTime.now()) ||
+          !subject
+              .scheduleFor(reminderTime)
+              .any(
+                (instance) =>
+                    instance.task.id == task.id &&
+                    instance.id == studyNotification.taskInstance.id,
+              ) ||
+          subject.completedTaskInstanceForDay(
+            task.id,
+            studyNotification.taskInstance.completionPeriod,
+            reminderTime,
+          )) {
+        continue;
+      }
+    } else if (date.isSameDate(DateTime.now()) &&
         !StudyUTimeOfDay(
           hour: date.hour,
           minute: date.minute,
@@ -121,8 +138,18 @@ Future<void> scheduleNotifications(BuildContext context) async {
 
   for (int index = 0; index <= 7; index++) {
     final date = DateTime.now().add(Duration(days: index));
-    final tasks = subject.scheduleFor(date);
+    final tasks = subject
+        .scheduleFor(date)
+        .where((instance) => instance.task is! NutritionTask);
     studyNotificationList.addAll(_buildNotificationList(subject, date, tasks));
+    for (final task in subject.study.observations.whereType<NutritionTask>()) {
+      if (task.title?.isNotEmpty != true) continue;
+      for (final period in task.schedule.completionPeriods) {
+        studyNotificationList.add(
+          StudyNotification(TaskInstance(task, period.id), date),
+        );
+      }
+    }
   }
   var id = 0;
   for (final StudyNotification notification in studyNotificationList) {
@@ -132,6 +159,7 @@ Future<void> scheduleNotifications(BuildContext context) async {
       body,
       notification,
       notificationDetails,
+      subject,
     );
     id = currentId;
   }
@@ -140,7 +168,7 @@ Future<void> scheduleNotifications(BuildContext context) async {
 List<StudyNotification> _buildNotificationList(
   StudySubject subject,
   DateTime date,
-  List<TaskInstance> tasks,
+  Iterable<TaskInstance> tasks,
 ) {
   final List<StudyNotification> taskNotifications = [];
   for (final TaskInstance taskInstance in tasks) {

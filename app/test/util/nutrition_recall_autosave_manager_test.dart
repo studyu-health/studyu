@@ -678,34 +678,38 @@ void main() {
     },
   );
 
-  test('previous-day completion stays on the recall calendar date', () async {
-    final prefs = await SharedPreferences.getInstance();
+  test('rollover clamps completion to the captured UTC study day', () async {
     DailyRecall? submitted;
     final manager = NutritionRecallAutoSaveManager(
-      preferences: prefs,
       submitter: (_, recall) async => submitted = recall,
     );
-    final subject = _subject(daysAgo: 2);
-    final recallDate = DateTime(2024, 12, 31);
-    final today = subject.getDayOfStudyFor(DateTime.now());
+    final now = DateTime.utc(2025, 1, 1, 12);
+    final subject = _subject(daysAgo: 2)
+      ..startedAt = DateTime.utc(2024, 12, 30, 12);
+    final recallDate = DateTime.parse('2025-01-01T00:30:00+01:00');
     await _save(
       manager,
       DailyRecall(
-        id: 'after-midnight',
+        id: 'after-local-midnight',
         date: recallDate,
         recallMode: RecallMode.realtimeRecord,
-        entryStartedAt: recallDate.add(const Duration(hours: 20)),
-        lastAutoSavedAt: DateTime(2025, 1, 1, 0, 5),
-        meals: [_meal('after-midnight')],
-        studyDaySnapshot: today - 1,
+        entryStartedAt: recallDate,
+        lastAutoSavedAt: DateTime.utc(2025, 1, 1, 0, 5),
+        meals: [_meal('after-local-midnight')],
+        studyDaySnapshot: 1,
       ),
     );
 
-    await manager.submitPendingRecalls(subject: subject, trackProgress: true);
+    await manager.submitPendingRecalls(
+      subject: subject,
+      trackProgress: true,
+      now: now,
+    );
 
+    expect(submitted!.date, recallDate);
     expect(
       submitted!.entryCompletedAt,
-      DateTime(2024, 12, 31, 23, 59, 59, 999, 999),
+      DateTime.utc(2024, 12, 31, 23, 59, 59, 999, 999),
     );
   });
 

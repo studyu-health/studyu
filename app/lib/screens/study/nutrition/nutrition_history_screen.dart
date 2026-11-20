@@ -157,8 +157,7 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
           });
         },
         title: Text(
-          MaterialLocalizations.of(context)
-              .formatMediumDate(record.recall.date),
+          '${MaterialLocalizations.of(context).formatMediumDate(widget.subject.nutritionDateForStudyDay(record.studyDaySnapshot))} UTC',
         ),
         subtitle: foodNames.isEmpty
             ? Text(l10n.nutrition_history_no_foods_logged)
