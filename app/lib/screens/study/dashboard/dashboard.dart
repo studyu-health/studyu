@@ -72,6 +72,8 @@ class _DashboardScreenState()
 
   Timer? _midnightSubmitTimer;
   Timer? _nutritionRetryTimer;
+  StreamSubscription<String>? _nutritionUploadRequests;
+  int _nutritionUploadGeneration = 0;
   bool _nutritionRetryNeeded = false;
   bool _submittingNutritionRecalls = false;
   bool _hasCheckedPendingRecalls = false;
@@ -95,6 +97,7 @@ class _DashboardScreenState()
     }
 
     _nutritionRetryTimer?.cancel();
+    final uploadGeneration = _nutritionUploadGeneration;
     _submittingNutritionRecalls = true;
     try {
       final needsRetry = await _nutritionAutoSaveManager.submitPendingRecalls(
@@ -102,13 +105,10 @@ class _DashboardScreenState()
         trackProgress: true,
       );
       if (!mounted || subject?.id != currentSubject.id) return;
-      setState(() => _nutritionRetryNeeded = needsRetry);
-      if (needsRetry) {
-        _nutritionRetryTimer = Timer(
-          _nutritionRetryDelay,
-          _submitPendingNutritionRecalls,
-        );
-      }
+      final needsAnotherAttempt =
+          needsRetry || _nutritionUploadGeneration != uploadGeneration;
+      setState(() => _nutritionRetryNeeded = needsAnotherAttempt);
+      if (needsAnotherAttempt) _scheduleNutritionRetry();
     } catch (e) {
       StudyULogger.error('Failed to auto-submit pending nutrition recalls: $e');
     } finally {
@@ -117,6 +117,25 @@ class _DashboardScreenState()
         unawaited(_submitPendingNutritionRecalls());
       }
     }
+  }
+
+  void _scheduleNutritionRetry() {
+    _nutritionRetryTimer?.cancel();
+    _nutritionRetryTimer = Timer(
+      _nutritionRetryDelay,
+      _submitPendingNutritionRecalls,
+    );
+  }
+
+  void _handleNutritionUploadRequest(String subjectId) {
+    if (!mounted ||
+        subject?.id != subjectId ||
+        !context.read<AppState>().trackParticipantProgress) {
+      return;
+    }
+    _nutritionUploadGeneration++;
+    setState(() => _nutritionRetryNeeded = true);
+    _scheduleNutritionRetry();
   }
 
   void _scheduleMidnightSubmitTimer() {
@@ -144,6 +163,8 @@ class _DashboardScreenState()
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _nutritionUploadRequests = NutritionRecallAutoSaveManager.uploadRequests
+        .listen(_handleNutritionUploadRequest);
     showcaseActionTextStyle = TextStyle(
       color: app_theme.theme.colorScheme.onPrimary,
     );
@@ -232,6 +253,7 @@ class _DashboardScreenState()
     WidgetsBinding.instance.removeObserver(this);
     _midnightSubmitTimer?.cancel();
     _nutritionRetryTimer?.cancel();
+    unawaited(_nutritionUploadRequests?.cancel());
     _dashboardShowcase.dismiss();
     super.dispose();
   }

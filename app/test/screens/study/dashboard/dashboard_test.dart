@@ -10,6 +10,8 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_core/core.dart';
 
+import '../../../util/mock_nutrition_draft_storage.dart';
+
 Widget _dashboardWith(
   int interventionCount, {
   bool withTask = false,
@@ -66,6 +68,8 @@ Widget _dashboardWith(
 }
 
 void main() {
+  setUp(mockNutritionDraftStorage);
+
   testWidgets('study with one intervention stays unavailable despite tasks', (
     tester,
   ) async {
