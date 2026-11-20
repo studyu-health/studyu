@@ -116,7 +116,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       PortionEstimationMethod.householdMeasure;
   PortionState _portionState = PortionState.asServed;
   FoodSource _source = FoodSource.manual;
-  bool _saveToMyItems = true;
+  bool _saveToMyItems = false;
   bool _propagateToCurrentStudyDay = false;
   late final String _initialSnapshot;
   bool _allowPop = false;

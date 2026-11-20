@@ -213,7 +213,6 @@ void main() {
       historicalMode: true,
       onResult: (value) => result = value,
     );
-    await tester.tap(find.byType(CheckboxListTile));
     await tester.enterText(inputWithLabel(l10n.food_name), 'Zero food');
     await tester.enterText(inputWithLabel(l10n.energy_kcal), '0');
     await tester.enterText(inputWithLabel(l10n.protein), '0');
@@ -311,7 +310,7 @@ void main() {
   });
 
   testWidgets(
-    'historical search saves reusable food by default and returns selection',
+    'historical search saves reusable food after opt-in and returns selection',
     (tester) async {
       final repository = _TrackingTemplateRepository();
       FoodSearchSelection? result;
@@ -353,7 +352,9 @@ void main() {
         CheckboxListTile,
         'Save to My items for future use',
       );
-      expect(tester.widget<CheckboxListTile>(saveToMyItems).value, isTrue);
+      expect(tester.widget<CheckboxListTile>(saveToMyItems).value, isFalse);
+      await tester.tap(saveToMyItems);
+      await tester.pump();
       expect(find.byTooltip('Search Food Database'), findsNothing);
 
       await tester.enterText(inputWithLabel(l10n.food_name), 'Historical soup');
@@ -371,7 +372,7 @@ void main() {
   );
 
   testWidgets(
-    'historical manual food opt-out returns occurrence without reusable save',
+    'historical manual food returns an occurrence without a Library write',
     (tester) async {
       final repository = _TrackingTemplateRepository();
       final templateViewModel = TemplateViewModel(
@@ -388,8 +389,6 @@ void main() {
         onResult: (value) => result = value,
       );
 
-      await tester.tap(find.text('Save to My items for future use'));
-      await tester.pump();
       expect(
         tester
             .widget<CheckboxListTile>(
