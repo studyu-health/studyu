@@ -1289,5 +1289,6 @@
   "form_field_nutrition_track_water": "Wasseraufnahme erfassen",
   "form_field_nutrition_track_water_help": "Teilnehmende können erfassen, wie viel Wasser sie täglich trinken.",
   "form_survey_template_days_outside_study": "Einige Tage liegen außerhalb der Studiendauer. Wählen Sie einzelne verfügbare Tage aus.",
-  "form_survey_template_day_outside_study": "Außerhalb der Studiendauer"
+  "form_survey_template_day_outside_study": "Außerhalb der Studiendauer",
+  "form_field_nutrition_completion_window_error": "Zwischen Start- und Endzeit muss mindestens eine volle Minute liegen."
 }

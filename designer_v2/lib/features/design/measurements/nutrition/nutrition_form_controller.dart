@@ -42,9 +42,42 @@ class NutritionFormViewModel({
   @override
   FormValidationConfigSet get sharedValidationConfig => {
     StudyFormValidationSet.draft: [titleRequired],
-    StudyFormValidationSet.publish: [titleRequired, minimumMealsMin],
-    StudyFormValidationSet.test: [titleRequired, minimumMealsMin],
+    StudyFormValidationSet.publish: [
+      titleRequired,
+      minimumMealsMin,
+      validCompletionWindow,
+    ],
+    StudyFormValidationSet.test: [
+      titleRequired,
+      minimumMealsMin,
+      validCompletionWindow,
+    ],
   };
+
+  FormControlValidation get validCompletionWindow => FormControlValidation(
+    control: form,
+    validators: [
+      Validators.delegate((_) {
+        if (!isTimeRestricted) return null;
+        final start =
+            restrictedTimeStartControl.value?.toStudyUTimeOfDay() ??
+            ScheduleX.unrestrictedTime.first;
+        final end =
+            restrictedTimeEndControl.value?.toStudyUTimeOfDay() ??
+            ScheduleX.unrestrictedTime.last;
+        final availableMinutes =
+            (end.hour - start.hour) * 60 + end.minute - start.minute - 1;
+        // The participant app excludes the start and end minutes.
+        return availableMinutes > 0
+            ? null
+            : {'unavailableCompletionWindow': true};
+      }),
+    ],
+    validationMessages: {
+      'unavailableCompletionWindow': (_) =>
+          tr.form_field_nutrition_completion_window_error,
+    },
+  );
 
   FormControlValidation get titleRequired => FormControlValidation(
     control: titleControl,

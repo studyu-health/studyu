@@ -5552,6 +5552,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Outside the study'**
   String get form_survey_template_day_outside_study;
+
+  /// No description provided for @form_field_nutrition_completion_window_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave at least one full minute between the start and end times.'**
+  String get form_field_nutrition_completion_window_error;
 }
 
 class _AppLocalizationsDelegate

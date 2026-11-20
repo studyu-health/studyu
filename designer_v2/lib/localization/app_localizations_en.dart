@@ -3262,4 +3262,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get form_survey_template_day_outside_study => 'Outside the study';
+
+  @override
+  String get form_field_nutrition_completion_window_error =>
+      'Leave at least one full minute between the start and end times.';
 }

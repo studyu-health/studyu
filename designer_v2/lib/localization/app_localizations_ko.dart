@@ -3155,4 +3155,8 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get form_survey_template_day_outside_study => '연구 기간 외';
+
+  @override
+  String get form_field_nutrition_completion_window_error =>
+      '시작 시간과 종료 시간 사이에 최소 1분이 있어야 합니다.';
 }

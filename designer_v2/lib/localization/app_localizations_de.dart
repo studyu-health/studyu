@@ -3293,4 +3293,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get form_survey_template_day_outside_study =>
       'Außerhalb der Studiendauer';
+
+  @override
+  String get form_field_nutrition_completion_window_error =>
+      'Zwischen Start- und Endzeit muss mindestens eine volle Minute liegen.';
 }
