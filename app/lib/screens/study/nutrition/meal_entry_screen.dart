@@ -415,11 +415,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         subjectId: subject.id,
         foodId: occurrence.foodId,
       );
-      if (definition == null ||
-          definition.foodVersionId == occurrence.foodVersionId) {
-        return occurrence;
-      }
-      return applyNutritionFoodSnapshot(occurrence, definition);
+      return definition == null
+          ? occurrence
+          : applyNutritionFoodSnapshot(occurrence, definition);
     } catch (error, stackTrace) {
       StudyULogger.error(
         'Failed to load current nutrition definition: $error\n$stackTrace',

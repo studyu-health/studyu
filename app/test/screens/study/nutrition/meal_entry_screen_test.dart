@@ -1619,41 +1619,46 @@ void main() {
     },
   );
 
-  testWidgets('historical reusable edit uses the current definition version', (
-    tester,
-  ) async {
-    final setup = _historicalEditingSetup();
-    final repository = _TrackingNutritionFoodRepository(todayUpdateCount: 0)
-      ..currentDefinition = (testFood()
-        ..name = 'Current apple'
-        ..foodVersionId = 'current-version'
-        ..amount = 1);
-    MealLog? result;
-    await openMealEntry(
+  for (final version in ['food-version', 'newer-version']) {
+    testWidgets('historical reusable edit loads canonical values for $version', (
       tester,
-      _mealWithMatchingDefinitions(),
-      historicalTarget: setup.target,
-      foodRepository: repository,
-      appState: setup.appState,
-      onResult: (meal) => result = meal,
-    );
+    ) async {
+      final setup = _historicalEditingSetup();
+      final repository = _TrackingNutritionFoodRepository(todayUpdateCount: 0)
+        ..currentDefinition = (testFood()
+          ..name = 'Current apple'
+          ..foodVersionId = version
+          ..nutrition.energyKcal = 73
+          ..amount = 1);
+      MealLog? result;
+      await openMealEntry(
+        tester,
+        _mealWithMatchingDefinitions(),
+        historicalTarget: setup.target,
+        foodRepository: repository,
+        appState: setup.appState,
+        onResult: (meal) => result = meal,
+      );
 
-    await tester.tap(find.byTooltip('More options').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit reusable food'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('More options').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Edit reusable food'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Current apple'), findsOneWidget);
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-    expect(repository.expectedVersions, ['current-version']);
-    expect(repository.submittedSnapshot!.id, 'food');
+      expect(find.text('Current apple'), findsOneWidget);
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(repository.expectedVersions, [version]);
+      expect(repository.submittedSnapshot!.id, 'food');
+      expect(repository.submittedSnapshot!.nutrition.energyKcal, 73);
 
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-    expect(result!.foods.first.amount, 2);
-    expect(result!.foods.first.foodVersionId, 'updated-food-version');
-  });
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(result!.foods.first.amount, 2);
+      expect(result!.foods.first.nutrition.energyKcal, 146);
+      expect(result!.foods.first.foodVersionId, 'updated-food-version');
+    });
+  }
 
   testWidgets(
     'historical reusable edit normalizes definition and reports opt-out',
