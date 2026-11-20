@@ -13,6 +13,7 @@ class const StudyMonitorItem({
   required final DateTime lastActivityAt,
   required final int currentDayOfStudy,
   required final int studyDurationInDays,
+  required final bool isStudyRunning,
   required final int completedInterventions,
   required final int missedInterventions,
   required final int completedSurveys,
@@ -60,7 +61,9 @@ extension StudyMonitoringX on Study {
     return total;
   }
 
-  List<StudyMonitorItem> get monitorData {
+  List<StudyMonitorItem> get monitorData => monitorDataAt(DateTime.now());
+
+  List<StudyMonitorItem> monitorDataAt(DateTime now) {
     final schedule = this.schedule;
     final interventions = this.interventions;
     final observations = this.observations;
@@ -77,9 +80,27 @@ extension StudyMonitoringX on Study {
       progresses.sort((b, a) => a.completedAt!.compareTo(b.completedAt!));
     }
 
-    final requiredSurveyTaskIds = observations.map((o) => o.id).toSet();
-    final totalSurveyTasksPerDay = observations.length;
     final totalDays = schedule.length;
+    final requiredSurveyTaskIds = observations
+        .where((task) => task is! NutritionTask)
+        .map((task) => task.id)
+        .toSet();
+    final nutritionPeriodsByDay = List.generate(
+      totalDays,
+      (_) => <String, Set<String>>{},
+    );
+    final allDays = List.generate(totalDays, (day) => day);
+    var totalNutritionPeriods = 0;
+    for (final task in observations.whereType<NutritionTask>()) {
+      final periods = task.schedule.completionPeriods.map((p) => p.id).toSet();
+      if (periods.isEmpty) continue;
+      final scheduledDays =
+          task.scheduleRule?.resolveScheduledDays(schedule).toSet() ?? allDays;
+      for (final day in scheduledDays) {
+        nutritionPeriodsByDay[day][task.id] = periods;
+        totalNutritionPeriods += periods.length;
+      }
+    }
 
     final interventionMap = {for (final i in interventions) i.id: i};
 
@@ -87,7 +108,7 @@ extension StudyMonitoringX on Study {
     participants.sort((a, b) => a.startedAt!.compareTo(b.startedAt!));
 
     final items = <StudyMonitorItem>[];
-    final nowUtc = DateTime.now().toUtc();
+    final nowUtc = now.toUtc();
 
     for (final participant in participants) {
       final progresses = progressMap[participant.id] ?? [];
@@ -97,13 +118,19 @@ extension StudyMonitoringX on Study {
           : start;
 
       final daysSinceStart = nowUtc.difference(start).inDays;
-      final currentDayOfStudy = min(daysSinceStart, totalDays);
+      final elapsedSurveyDays = daysSinceStart.clamp(0, totalDays);
+      final elapsedNutritionDays = totalNutritionPeriods == 0
+          ? 0
+          : participant.getNutritionStudyDayFor(now).clamp(0, totalDays);
+      final currentDayOfStudy = max(elapsedSurveyDays, elapsedNutritionDays);
       final daysInBaseline = schedule.includeBaseline
           ? schedule.phaseDuration
           : 0;
 
       int completedInterventions = 0;
       int completedSurveys = 0;
+      int completedNutritionPeriods = 0;
+      int elapsedNutritionPeriods = 0;
       final missedTasksPerDay = <Set<String>>[];
       final completedTasksPerDay = <Set<String>>[];
 
@@ -111,13 +138,37 @@ extension StudyMonitoringX on Study {
         participant.selectedInterventionIds,
         participantId: participant.id,
       );
+      final completedNutritionByTask = <(int, String), Set<String>>{};
+      for (final progress in progresses) {
+        final recall = progress.result.result;
+        if (recall is! DailyRecall) continue;
+        final day = recall.studyDaySnapshot;
+        final periodId = progress.result.periodId;
+        if (recall.entryCompletedAt == null ||
+            day == null ||
+            day < 0 ||
+            day >= elapsedNutritionDays ||
+            periodId == null ||
+            nutritionPeriodsByDay[day][progress.taskId]?.contains(periodId) !=
+                true) {
+          continue;
+        }
+        final phase = day ~/ schedule.phaseDuration;
+        if (phase >= interventionOrder.length ||
+            interventionOrder[phase] != progress.interventionId) {
+          continue;
+        }
+        completedNutritionByTask
+            .putIfAbsent((day, progress.taskId), () => {})
+            .add(periodId);
+      }
 
       for (int day = 0; day < currentDayOfStudy; day++) {
         final dayStart = start.add(Duration(days: day));
         final dayEnd = start.add(Duration(days: day + 1));
 
         Set<String> requiredInterventionTaskIds = {};
-        if (day >= daysInBaseline) {
+        if (day < elapsedSurveyDays && day >= daysInBaseline) {
           final phaseIndex = day ~/ schedule.phaseDuration;
           if (phaseIndex < interventionOrder.length) {
             final interventionId = interventionOrder[phaseIndex];
@@ -132,17 +183,17 @@ extension StudyMonitoringX on Study {
 
         final requiredTaskIds = {
           ...requiredInterventionTaskIds,
-          ...requiredSurveyTaskIds,
+          if (day < elapsedSurveyDays) ...requiredSurveyTaskIds,
         };
 
-        final completedForDay = progresses
-            .where(
-              (p) =>
-                  p.completedAt!.isAfter(dayStart) &&
-                  p.completedAt!.isBefore(dayEnd),
-            )
-            .map((p) => p.taskId)
-            .toSet();
+        final completedForDay = {
+          if (day < elapsedSurveyDays)
+            for (final progress in progresses)
+              if (progress.result.result is! DailyRecall &&
+                  progress.completedAt!.isAfter(dayStart) &&
+                  progress.completedAt!.isBefore(dayEnd))
+                progress.taskId,
+        };
 
         final missedForDay = requiredTaskIds.difference(completedForDay);
         missedTasksPerDay.add(missedForDay);
@@ -150,6 +201,19 @@ extension StudyMonitoringX on Study {
         final completedForDayRequired = requiredTaskIds.intersection(
           completedForDay,
         );
+        if (day < elapsedNutritionDays) {
+          for (final task in nutritionPeriodsByDay[day].entries) {
+            final completedPeriods =
+                completedNutritionByTask[(day, task.key)]?.length ?? 0;
+            elapsedNutritionPeriods += task.value.length;
+            completedNutritionPeriods += completedPeriods;
+            if (completedPeriods == task.value.length) {
+              completedForDayRequired.add(task.key);
+            } else {
+              missedForDay.add(task.key);
+            }
+          }
+        }
         completedTasksPerDay.add(completedForDayRequired);
 
         completedSurveys += requiredSurveyTaskIds
@@ -160,11 +224,15 @@ extension StudyMonitoringX on Study {
             .length;
       }
 
-      final totalSurveys = currentDayOfStudy * totalSurveyTasksPerDay;
-      final totalInterventions = max(0, currentDayOfStudy - daysInBaseline);
+      final totalSurveys = elapsedSurveyDays * requiredSurveyTaskIds.length;
+      final totalInterventions = max(0, elapsedSurveyDays - daysInBaseline);
 
       final missedInterventions = totalInterventions - completedInterventions;
-      final missedSurveys = totalSurveys - completedSurveys;
+      final missedSurveys =
+          totalSurveys -
+          completedSurveys +
+          elapsedNutritionPeriods -
+          completedNutritionPeriods;
 
       final totalInterventionTasks = _calculateTotalInterventionTasks(
         interventions: interventions,
@@ -172,7 +240,12 @@ extension StudyMonitoringX on Study {
         participant: participant,
       );
 
-      final totalSurveyTasks = totalSurveyTasksPerDay * totalDays;
+      final totalSurveyTasks =
+          requiredSurveyTaskIds.length * totalDays + totalNutritionPeriods;
+      final usesRollingDays =
+          totalNutritionPeriods == 0 ||
+          requiredSurveyTaskIds.isNotEmpty ||
+          totalInterventionTasks > 0;
 
       items.add(
         StudyMonitorItem(
@@ -183,9 +256,12 @@ extension StudyMonitoringX on Study {
           lastActivityAt: lastActivityAt,
           currentDayOfStudy: currentDayOfStudy,
           studyDurationInDays: totalDays,
+          isStudyRunning:
+              usesRollingDays && elapsedSurveyDays < totalDays ||
+              totalNutritionPeriods > 0 && elapsedNutritionDays < totalDays,
           completedInterventions: completedInterventions,
           missedInterventions: missedInterventions,
-          completedSurveys: completedSurveys,
+          completedSurveys: completedSurveys + completedNutritionPeriods,
           missedSurveys: missedSurveys,
           droppedOut: participant.isDeleted,
           missedTasksPerDay: missedTasksPerDay,
@@ -405,7 +481,7 @@ extension ListX on List<StudyMonitorItem> {
   );
 
   static bool Function(StudyMonitorItem p) get studyStillRunning =>
-      (StudyMonitorItem p) => p.currentDayOfStudy < p.studyDurationInDays;
+      (p) => p.isStudyRunning;
 
   static bool Function(StudyMonitorItem p) get inactive =>
       (p) =>
