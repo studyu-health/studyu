@@ -512,9 +512,9 @@ final class _OfflineMealRepository() extends NutritionFoodRepository {
     required FoodEntry food,
     List<String>? tags,
     String? expectedVersionId,
-  }) async {
+  }) {
     writeAttempts++;
-    throw StateError('offline');
+    return Future.error(StateError('offline'));
   }
 }
 

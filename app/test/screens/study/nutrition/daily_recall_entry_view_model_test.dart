@@ -89,16 +89,13 @@ void main() {
       historicalMode: true,
       autoSaveManager: manager,
       clock: () => yesterday.add(const Duration(days: 1)),
-      remoteSaver:
-          ({
-            required taskId,
-            required periodId,
-            required recall,
-            persistenceTarget,
-            interventionIdOverride,
-          }) async {
-            throw const SocketException('offline');
-          },
+      remoteSaver: ({
+        required taskId,
+        required periodId,
+        required recall,
+        persistenceTarget,
+        interventionIdOverride,
+      }) => Future.error(const SocketException('offline')),
     );
     addTearDown(model.dispose);
     final request = NutritionRecallAutoSaveManager.uploadRequests.first;

@@ -10,12 +10,15 @@ void mockNutritionDraftStorage({void Function(MethodCall)? beforeCall}) {
   messenger.setMockMethodCallHandler(channel, (call) async {
     beforeCall?.call(call);
     final arguments = call.arguments as Map<Object?, Object?>;
-    final key = arguments['key'] as String;
+    final key = arguments['key'] as String?;
+    if (key == null) throw ArgumentError.notNull('key');
     switch (call.method) {
       case 'read':
         return values[key];
       case 'write':
-        values[key] = arguments['value'] as String;
+        final value = arguments['value'] as String?;
+        if (value == null) throw ArgumentError.notNull('value');
+        values[key] = value;
       case 'delete':
         values.remove(key);
       default:
