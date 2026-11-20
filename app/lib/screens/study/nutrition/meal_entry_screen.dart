@@ -76,6 +76,10 @@ class const MealEntryScreen({
   final NutritionFoodRepository? foodRepository,
   final TemplateViewModel? templateViewModel,
   final bool Function()? canEditRecall,
+  final Future<NutritionRecallPersistenceTarget?> Function(
+    int? expectedRevision,
+  )?
+  prepareHistoricalDefinitionEdit,
   super.key,
 }) extends StatefulWidget {
   static MaterialPageRoute<MealEntryResult> route({
@@ -89,6 +93,8 @@ class const MealEntryScreen({
     NutritionFoodRepository? foodRepository,
     TemplateViewModel? templateViewModel,
     bool Function()? canEditRecall,
+    Future<NutritionRecallPersistenceTarget?> Function(int? expectedRevision)?
+    prepareHistoricalDefinitionEdit,
   }) => MaterialPageRoute(
     builder: (_) => MealEntryScreen(
       existingMeal: existingMeal,
@@ -101,6 +107,7 @@ class const MealEntryScreen({
       foodRepository: foodRepository,
       templateViewModel: templateViewModel,
       canEditRecall: canEditRecall,
+      prepareHistoricalDefinitionEdit: prepareHistoricalDefinitionEdit,
     ),
   );
 
@@ -302,9 +309,17 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         !_revalidateHistoricalEligibility()) {
       return;
     }
+    var historicalTarget = widget.historicalTarget;
+    final prepare = widget.prepareHistoricalDefinitionEdit;
+    if (editReusableDefinition && prepare != null) {
+      historicalTarget = await prepare(
+        historicalTarget?.nutritionRevision,
+      );
+      if (!mounted || historicalTarget == null) return;
+    }
     if (editReusableDefinition &&
         editableFood.entryType == FoodEntryType.meal) {
-      await _editCompositeMealDefinition(food, editableFood);
+      await _editCompositeMealDefinition(food, editableFood, historicalTarget);
       return;
     }
     final hasCurrentDayMatches =
@@ -329,7 +344,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           existingFood: editableFood,
           editLoggedAmount: !editReusableDefinition,
           showSearchAction: false,
-          historicalTarget: widget.historicalTarget,
+          historicalTarget: historicalTarget,
           editReusableDefinition: editReusableDefinition,
           hasCurrentStudyDayMatches: hasCurrentDayMatches,
           showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
@@ -447,6 +462,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
   Future<void> _editCompositeMealDefinition(
     FoodEntry existingMeal,
     FoodEntry editableMeal,
+    NutritionRecallPersistenceTarget? historicalTarget,
   ) async {
     final editableDefinition = normalizeNutritionFoodDefinition(editableMeal);
     final hasCurrentDayMatches = await _hasCurrentStudyDayMatches(
@@ -468,7 +484,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     }
 
     final subject = Provider.of<AppState>(context, listen: false).activeSubject;
-    final historicalTarget = widget.historicalTarget;
     if (subject == null || historicalTarget == null) return;
     final currentStudyDay = _propagateToCurrentStudyDay
         ? nutritionStudyDayFor(subject, DateTime.now())
@@ -703,7 +718,10 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         StudyULogger.warning(
           'Nutrition definitions remain queued for retry: $error\n$stackTrace',
         );
-        if (historicalTarget != null) rethrow;
+        if (historicalTarget != null &&
+            !NutritionRecallAutoSaveManager.isRetryableError(error)) {
+          rethrow;
+        }
       }
       if (!mounted || !_revalidateHistoricalEligibility()) return;
 
@@ -721,6 +739,15 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
             meal: meal,
             foodId: _reusableFoodId ??= const Uuid().v4(),
           );
+        } catch (error) {
+          if (!NutritionRecallAutoSaveManager.isRetryableError(error)) {
+            rethrow;
+          }
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.could_not_save_results)),
+            );
+          }
         } finally {
           viewModel.dispose();
         }

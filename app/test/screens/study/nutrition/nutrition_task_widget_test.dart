@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -599,6 +601,39 @@ void main() {
       expect(find.text('Unsynced apple'), findsNothing);
     },
   );
+
+  testWidgets('a synced historical meal opens and saves while offline', (
+    tester,
+  ) async {
+    final setup = historicalNavigationSetup('Saved apple');
+    final progress = setup.subject.progress.single;
+    final period = setup.task.schedule.completionPeriods.single;
+    final manager = NutritionRecallAutoSaveManager();
+    final repository = _OfflineDefinitionRepository();
+    await tester.pumpWidget(
+      nutritionTaskApp(
+        setup.task,
+        foodRepository: repository,
+        appState: AppState()..activeSubject = setup.subject,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('History'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Saved apple'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Saved apple'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MealEntryScreen), findsOneWidget);
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MealEntryScreen), findsNothing);
+    final draft = (await manager.scanPendingRecalls(setup.subject.id)).single;
+    expect(draft.periodId, period.id);
+    expect(draft.progressCompletedAt, progress.completedAt);
+    expect(draft.nutritionRevision, progress.nutritionRevision);
+  });
 
   testWidgets('history refreshes after an opened record closes', (
     tester,
@@ -1524,4 +1559,12 @@ void main() {
     expect(find.text('Meal'), findsOneWidget);
     expect(find.textContaining('Early breakfast'), findsOneWidget);
   });
+}
+
+class _OfflineDefinitionRepository() extends FakeNutritionFoodRepository {
+  @override
+  Future<void> ensureDefinitions({
+    required String subjectId,
+    required Iterable<FoodEntry> foods,
+  }) async => throw const SocketException('offline');
 }

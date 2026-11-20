@@ -986,6 +986,16 @@ class _NutritionTaskWidgetState()
               ? model.persistenceTarget
               : null,
           canEditRecall: model.revalidateEditingEligibility,
+          prepareHistoricalDefinitionEdit: (_) async {
+            model.resumePersistence();
+            try {
+              return await _flushHistoricalRecallBeforeNestedMutation(context, model)
+                  ? model.persistenceTarget
+                  : null;
+            } finally {
+              model.suspendPersistence();
+            }
+          },
           foodRepository: widget.foodRepository,
           templateViewModel: _templateViewModel,
         ),
@@ -1011,6 +1021,16 @@ class _NutritionTaskWidgetState()
               ? model.persistenceTarget
               : null,
           canEditRecall: model.revalidateEditingEligibility,
+          prepareHistoricalDefinitionEdit: (_) async {
+            model.resumePersistence();
+            try {
+              return await _flushHistoricalRecallBeforeNestedMutation(context, model)
+                  ? model.persistenceTarget
+                  : null;
+            } finally {
+              model.suspendPersistence();
+            }
+          },
           foodRepository: widget.foodRepository,
           templateViewModel: _templateViewModel,
         ),
@@ -1039,10 +1059,20 @@ class _NutritionTaskWidgetState()
     DailyRecallEntryViewModel model,
     Future<MealEntryResult?> Function(NavigatorState) open,
   ) async {
-    if (!model.revalidateEditingEligibility() ||
-        !await _flushHistoricalRecallBeforeNestedMutation(context, model) ||
-        !context.mounted) {
-      return null;
+    if (!model.revalidateEditingEligibility()) return null;
+    if (_isHistoricalMode) {
+      try {
+        await model.flushPendingAutoSave();
+      } catch (error) {
+        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.could_not_save_results),
+          ),
+        );
+        return null;
+      }
+      if (!context.mounted || !model.revalidateEditingEligibility())
+        return null;
     }
 
     final suspendPersistence = _isHistoricalMode && !widget.readOnly;
