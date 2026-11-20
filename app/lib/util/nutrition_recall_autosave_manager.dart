@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:http/http.dart' show ClientException;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
@@ -417,12 +419,15 @@ class NutritionRecallAutoSaveManager({
     await _writeString(prefs, local.storageKey, jsonEncode(stored));
   });
 
-  Future<void> submitPendingRecalls({
+  /// Returns true when a transport failure needs a retry.
+  Future<bool> submitPendingRecalls({
     required StudySubject subject,
     required bool trackProgress,
     DateTime? now,
   }) async {
-    if (_isSubmitting || !trackProgress || subject.startedAt == null) return;
+    if (_isSubmitting || !trackProgress || subject.startedAt == null) {
+      return false;
+    }
     _isSubmitting = true;
 
     try {
@@ -431,6 +436,7 @@ class NutritionRecallAutoSaveManager({
         now ?? DateTime.now(),
       );
       final pendingRecalls = await scanPendingRecalls(subject.id);
+      var needsRetry = false;
       for (final pending in pendingRecalls) {
         if (pending.subjectId != subject.id ||
             pending.taskId == standaloneTaskId ||
@@ -526,19 +532,25 @@ class NutritionRecallAutoSaveManager({
             continue;
           }
           await _deleteRecallIfUnchanged(pending);
-        } on SocketException {
-          StudyULogger.warning(
-            'Network error while submitting nutrition recall for study day '
-            '${pending.studyDaySnapshot}. Will retry later.',
-          );
         } catch (error) {
-          StudyULogger.error(
-            'Failed to submit nutrition recall for study day '
-            '${pending.studyDaySnapshot}: $error',
-          );
+          if (error is SocketException ||
+              error is ClientException ||
+              error is TimeoutException) {
+            needsRetry = true;
+            StudyULogger.warning(
+              'Network error while submitting nutrition recall for study day '
+              '${pending.studyDaySnapshot}. Will retry later.',
+            );
+          } else {
+            StudyULogger.error(
+              'Failed to submit nutrition recall for study day '
+              '${pending.studyDaySnapshot}: $error',
+            );
+          }
         }
       }
       await updateLastKnownStudyDay(subject.id, todayStudyDay);
+      return needsRetry;
     } finally {
       _isSubmitting = false;
     }

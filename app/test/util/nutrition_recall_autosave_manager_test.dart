@@ -1205,19 +1205,29 @@ void main() {
     },
   );
 
-  test('failed previous-day upload retains the pending recall', () async {
-    final prefs = await SharedPreferences.getInstance();
+  test('retries a transient upload failure before the draft expires', () async {
+    var attempts = 0;
     final manager = NutritionRecallAutoSaveManager(
-      preferences: prefs,
-      submitter: (_, _) => throw const SocketException('offline'),
+      submitter: (_, _) async {
+        if (++attempts == 1) throw const SocketException('offline');
+      },
     );
-    final subject = _subject(daysAgo: 2);
-    final today = subject.getDayOfStudyFor(DateTime.now());
-    await _save(manager, _recall('retry', studyDay: today - 1));
+    final now = DateTime.utc(2026, 7, 17, 12);
+    final subject = _subject(daysAgo: 2)
+      ..startedAt = now.subtract(const Duration(days: 2));
+    await _save(manager, _recall('retry', studyDay: 1));
 
-    await manager.submitPendingRecalls(subject: subject, trackProgress: true);
-
+    Future<bool> submit(DateTime time) => manager.submitPendingRecalls(
+      subject: subject,
+      trackProgress: true,
+      now: time,
+    );
+    expect(await submit(now), isTrue);
     expect(await manager.scanPendingRecalls(subject.id), hasLength(1));
+
+    expect(await submit(now.add(const Duration(minutes: 5))), isFalse);
+    expect(attempts, 2);
+    expect(await manager.scanPendingRecalls(subject.id), isEmpty);
   });
 
   test('expired drafts stay cached without an upload attempt', () async {

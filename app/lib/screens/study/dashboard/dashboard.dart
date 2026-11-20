@@ -66,7 +66,12 @@ class _DashboardScreenState()
   StudySubject? subject;
   List<TaskInstance>? scheduleToday;
   final _nutritionAutoSaveManager = NutritionRecallAutoSaveManager();
+  static const _nutritionRetryDelay = Duration(minutes: 5);
+
   Timer? _midnightSubmitTimer;
+  Timer? _nutritionRetryTimer;
+  bool _nutritionRetryNeeded = false;
+  bool _submittingNutritionRecalls = false;
   bool _hasCheckedPendingRecalls = false;
   String? _lastSubjectId;
   bool _showcaseCheckStarted = false;
@@ -81,18 +86,34 @@ class _DashboardScreenState()
 
   Future<void> _submitPendingNutritionRecalls() async {
     final currentSubject = subject;
-    if (currentSubject == null) return;
+    if (currentSubject == null ||
+        _submittingNutritionRecalls ||
+        !context.read<AppState>().trackParticipantProgress) {
+      return;
+    }
 
-    final trackProgress = context.read<AppState>().trackParticipantProgress;
-    if (!trackProgress) return;
-
+    _nutritionRetryTimer?.cancel();
+    _submittingNutritionRecalls = true;
     try {
-      await _nutritionAutoSaveManager.submitPendingRecalls(
+      final needsRetry = await _nutritionAutoSaveManager.submitPendingRecalls(
         subject: currentSubject,
-        trackProgress: trackProgress,
+        trackProgress: true,
       );
+      if (!mounted || subject?.id != currentSubject.id) return;
+      setState(() => _nutritionRetryNeeded = needsRetry);
+      if (needsRetry) {
+        _nutritionRetryTimer = Timer(
+          _nutritionRetryDelay,
+          _submitPendingNutritionRecalls,
+        );
+      }
     } catch (e) {
       StudyULogger.error('Failed to auto-submit pending nutrition recalls: $e');
+    } finally {
+      _submittingNutritionRecalls = false;
+      if (mounted && subject != null && subject?.id != currentSubject.id) {
+        unawaited(_submitPendingNutritionRecalls());
+      }
     }
   }
 
@@ -179,6 +200,8 @@ class _DashboardScreenState()
       _lastSubjectId = subject!.id;
       if (subjectChanged) {
         _hasCheckedPendingRecalls = false;
+        _nutritionRetryTimer?.cancel();
+        _nutritionRetryNeeded = false;
       }
 
       scheduleToday = subject!.scheduleFor(DateTime.now());
@@ -211,6 +234,7 @@ class _DashboardScreenState()
     _isDisposing = true;
     WidgetsBinding.instance.removeObserver(this);
     _midnightSubmitTimer?.cancel();
+    _nutritionRetryTimer?.cancel();
     _dashboardShowcase.dismiss();
     super.dispose();
   }
@@ -449,6 +473,16 @@ class _DashboardScreenState()
                   ],
                 ),
               ),
+            ),
+          if (_nutritionRetryNeeded)
+            MaterialBanner(
+              content: Text(l10n.could_not_save_results),
+              actions: [
+                TextButton(
+                  onPressed: _submitPendingNutritionRecalls,
+                  child: Text(l10n.try_again),
+                ),
+              ],
             ),
           // Main content
           Expanded(
