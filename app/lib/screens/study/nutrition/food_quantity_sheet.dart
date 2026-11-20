@@ -5,19 +5,15 @@ import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart
 import 'package:studyu_core/core.dart';
 
 enum FoodQuantityAction() {
-  /// Legacy actions retained for source compatibility.
-  existingMeal,
-  addMealToSelection,
   updateSelection,
   addToMeal,
-  update,
 }
 
 class const FoodQuantitySheet({
   required final FoodEntry food,
   final FoodEntry? baselineFood,
   final String? mealLabel,
-  final FoodQuantityAction action = FoodQuantityAction.existingMeal,
+  final FoodQuantityAction action = FoodQuantityAction.addToMeal,
   final double? initialAmount,
   final bool caloriesKnown = true,
   final bool gramsKnown = true,
@@ -29,7 +25,7 @@ class const FoodQuantitySheet({
     required FoodEntry food,
     FoodEntry? baselineFood,
     String? mealLabel,
-    FoodQuantityAction action = FoodQuantityAction.existingMeal,
+    FoodQuantityAction action = FoodQuantityAction.addToMeal,
     double? initialAmount,
     bool caloriesKnown = true,
     bool gramsKnown = true,
@@ -65,9 +61,6 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
 
   bool get _canEditServingWeight =>
       widget.action == FoodQuantityAction.updateSelection;
-
-  bool get _isEditingAmount =>
-      widget.action == FoodQuantityAction.update || _canEditServingWeight;
 
   FoodEntry get _baselineFood => widget.baselineFood ?? widget.food;
   bool get _gramsKnown => widget.gramsKnown && widget.food.servingSizeGrams > 0;
@@ -311,7 +304,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (_isEditingAmount) ...[
+                  if (_canEditServingWeight) ...[
                     Row(
                       children: [
                         Expanded(
@@ -373,7 +366,7 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                           ],
                         ),
                       ),
-                      if (!_isEditingAmount) closeButton,
+                      if (!_canEditServingWeight) closeButton,
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -647,18 +640,12 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                   ? null
                   : () => Navigator.pop(context, _scaledFood),
               child: Text(switch (widget.action) {
-                FoodQuantityAction.addMealToSelection =>
-                  widget.mealLabel == null
-                      ? l10n.add_food
-                      : l10n.food_quantity_add_to_meal(widget.mealLabel!),
                 FoodQuantityAction.addToMeal =>
                   widget.mealLabel == null
                       ? l10n.add_food
                       : l10n.food_quantity_add_to_meal(widget.mealLabel!),
-                FoodQuantityAction.update ||
                 FoodQuantityAction.updateSelection =>
                   l10n.food_quantity_update_selection,
-                FoodQuantityAction.existingMeal => l10n.update,
               }),
             ),
           ),

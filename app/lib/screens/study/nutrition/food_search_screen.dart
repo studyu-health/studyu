@@ -556,7 +556,6 @@ class _FoodSearchScreenContentState()
     final result = await FoodQuantitySheet.show(
       context,
       food: item.createSelection(),
-      action: FoodQuantityAction.addToMeal,
     );
     if (result != null && mounted) _completeSingleSelection(result);
   }

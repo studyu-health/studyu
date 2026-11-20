@@ -24,7 +24,6 @@ class TemplateViewModel({
 
   bool _isLoading = false;
   String? _error;
-  String _searchQuery = '';
   bool _disposed = false;
   int _loadGeneration = 0;
 
@@ -35,7 +34,6 @@ class TemplateViewModel({
   bool get isLoading => _isLoading;
   NutritionFoodRepository get repository => _repository;
   String? get error => _error;
-  String get searchQuery => _searchQuery;
 
   List<SavedFoodTemplate> get foodTemplates => _foodTemplates;
   List<SavedFoodTemplate> get mealTemplates => _foodTemplates
@@ -192,11 +190,6 @@ class TemplateViewModel({
 
   FoodEntry applyFoodTemplate(SavedFoodTemplate template) {
     return _createFoodFromPrototype(template.prototype, template.id);
-  }
-
-  void setSearchQuery(String query) {
-    _searchQuery = query;
-    _notifyListeners();
   }
 
   FoodEntry _cloneFoodEntry(FoodEntry original) {

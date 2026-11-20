@@ -1,44 +1,29 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
-import 'package:studyu_app/util/template_storage_manager.dart';
 import 'package:studyu_core/core.dart';
 
 import 'fake_nutrition_food_repository.dart';
 
 void main() {
-  setUpAll(() => SharedPreferences.setMockInitialValues({}));
-  setUp(() async {
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.clear();
-  });
-
   test(
     'template storage, application and duplication preserve availability',
     () async {
       final food = _foodEntry(id: 'unknown-food', originalValues: {})
         ..nutrition.unavailableNutrients = {'protein', 'micros.iron'}
         ..nutrition.partialNutrients = {'energyKcal'};
-      final template = _template(
-        id: 'unknown-food',
-        name: 'Food',
-        prototype: food,
-      );
-      await TemplateStorageManager().saveFoodTemplate(template);
-      final stored = (await TemplateStorageManager().loadFoodTemplates(
-        'test-user',
-      )).single;
-      expect(stored.prototype.nutrition.unavailableNutrients, {
-        'protein',
-        'micros.iron',
-      });
-      final repository = FakeNutritionFoodRepository([stored]);
+      final repository = PreviewNutritionFoodRepository();
       final viewModel = TemplateViewModel(
         userId: 'test-user',
         repository: repository,
       );
       addTearDown(viewModel.dispose);
-      await viewModel.loadAllTemplates();
+      await viewModel.saveFoodAsTemplate(name: 'Food', food: food);
+      final stored = viewModel.foodTemplates.single;
+      expect(stored.prototype.nutrition.unavailableNutrients, {
+        'protein',
+        'micros.iron',
+      });
       final applied = viewModel.applyFoodTemplate(stored);
       expect(applied.nutrition.partialNutrients, {'energyKcal'});
       expect(applied.nutrition.unavailableNutrients, {
@@ -74,6 +59,7 @@ void main() {
         mealType: MealType.lunch,
         mealContext: MealContext.home,
         timestamp: DateTime(2026),
+        timePrecision: MealOccurrenceTimePrecision.exact,
         timezone: 'UTC',
         isSkipped: false,
         foods: [known, missing],
@@ -139,139 +125,44 @@ void main() {
   );
 
   test(
-    'custom food and saved meal templates round-trip across managers',
+    'preview library retains changes across view models for its subject',
     () async {
-      final manager = TemplateStorageManager();
-      await manager.saveFoodTemplate(
-        _template(
-          id: 'custom-food',
-          name: 'Custom food',
-          prototype: _foodEntry(
-            id: 'custom-food-prototype',
-            originalValues: {},
-          ),
-        ),
+      final repository = PreviewNutritionFoodRepository();
+      final first = TemplateViewModel(
+        userId: 'test-user',
+        repository: repository,
       );
-      await manager.saveFoodTemplate(
-        _template(
-          id: 'saved-meal',
-          name: 'Saved meal',
-          prototype: _foodEntry(
-            id: 'saved-meal-prototype',
-            entryType: FoodEntryType.meal,
-            originalValues: {},
-          ),
+      addTearDown(first.dispose);
+      final foodId = await first.saveFoodAsTemplate(
+        name: 'Custom food',
+        food: _foodEntry(id: 'food', originalValues: {}),
+      );
+      await first.saveMealAsTemplate(
+        name: 'Saved meal',
+        meal: MealLog.withId(
+          mealType: MealType.lunch,
+          timezone: 'UTC',
+          isSkipped: false,
+          foods: [_foodEntry(id: 'ingredient', originalValues: {})],
         ),
       );
 
-      final templates = await TemplateStorageManager().loadFoodTemplates(
-        'test-user',
+      final reopened = TemplateViewModel(
+        userId: 'test-user',
+        repository: repository,
       );
+      addTearDown(reopened.dispose);
+      await reopened.loadAllTemplates();
+      expect(reopened.foodOnlyTemplates.single.id, foodId);
+      final mealId = reopened.mealTemplates.single.id;
+      final renamed = first.foodOnlyTemplates.single.prototype
+        ..name = 'Renamed';
+      await reopened.updateFoodTemplatePrototype(foodId, renamed);
+      await reopened.deleteFoodTemplate(mealId);
 
-      expect(templates.map((template) => template.id), [
-        'custom-food',
-        'saved-meal',
-      ]);
-      expect(templates[1].prototype.entryType, FoodEntryType.meal);
-      expect(
-        await TemplateStorageManager().loadFoodTemplates('other-user'),
-        isEmpty,
-      );
-    },
-  );
-
-  test('template CRUD persists across managers', () async {
-    final manager = TemplateStorageManager();
-    final food = _template(
-      id: 'custom-food',
-      name: 'Custom food',
-      prototype: _foodEntry(id: 'custom-food-prototype', originalValues: {}),
-    );
-    final meal = _template(
-      id: 'saved-meal',
-      name: 'Saved meal',
-      prototype: _foodEntry(
-        id: 'saved-meal-prototype',
-        entryType: FoodEntryType.meal,
-        originalValues: {},
-      ),
-    );
-
-    await manager.saveFoodTemplate(food);
-    await manager.saveFoodTemplate(meal);
-    food
-      ..name = 'Renamed custom food'
-      ..updatedAt = DateTime.utc(2025, 1, 2);
-    await manager.saveFoodTemplate(food);
-    await manager.deleteFoodTemplate('test-user', meal.id);
-
-    final templates = await TemplateStorageManager().loadFoodTemplates(
-      'test-user',
-    );
-    expect(templates, hasLength(1));
-    expect(templates.single.name, 'Renamed custom food');
-    expect(templates.single.updatedAt, DateTime.utc(2025, 1, 2));
-  });
-
-  test('concurrent template saves preserve both entries', () async {
-    await Future.wait([
-      TemplateStorageManager().saveFoodTemplate(
-        _template(
-          id: 'custom-food',
-          prototype: _foodEntry(
-            id: 'custom-food-prototype',
-            originalValues: {},
-          ),
-        ),
-      ),
-      TemplateStorageManager().saveFoodTemplate(
-        _template(
-          id: 'saved-meal',
-          prototype: _foodEntry(
-            id: 'saved-meal-prototype',
-            entryType: FoodEntryType.meal,
-            originalValues: {},
-          ),
-        ),
-      ),
-    ]);
-
-    final templates = await TemplateStorageManager().loadFoodTemplates(
-      'test-user',
-    );
-    expect(templates.map((template) => template.id).toSet(), {
-      'custom-food',
-      'saved-meal',
-    });
-  });
-
-  test(
-    'corrupt template data surfaces an error without being overwritten',
-    () async {
-      const userId = 'corrupt-user';
-      const key = 'studyu_food_templates_$userId';
-      final prefs = await SharedPreferences.getInstance();
-      final manager = TemplateStorageManager();
-
-      for (final corruptJson in ['{', '[{}]']) {
-        await prefs.setString(key, corruptJson);
-
-        await expectLater(manager.loadFoodTemplates(userId), throwsA(anything));
-        await expectLater(
-          manager.saveFoodTemplate(
-            _template(
-              id: 'replacement',
-              userId: userId,
-              prototype: _foodEntry(
-                id: 'replacement-prototype',
-                originalValues: {},
-              ),
-            ),
-          ),
-          throwsA(anything),
-        );
-        expect(prefs.getString(key), corruptJson);
-      }
+      await first.loadAllTemplates();
+      expect(first.foodTemplates.single.name, 'Renamed');
+      expect(await repository.loadTemplates('other-user'), isEmpty);
     },
   );
 
@@ -448,12 +339,10 @@ Future<TemplateViewModel> _viewModel() async {
 SavedFoodTemplate _template({
   required String id,
   required FoodEntry prototype,
-  String userId = 'test-user',
-  String name = 'Template',
 }) => SavedFoodTemplate(
   id: id,
-  userId: userId,
-  name: name,
+  userId: 'test-user',
+  name: prototype.name,
   isPublic: false,
   createdAt: DateTime.utc(2025),
   prototype: prototype,
