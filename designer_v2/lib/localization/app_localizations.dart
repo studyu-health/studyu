@@ -4760,7 +4760,7 @@ abstract class AppLocalizations {
   /// No description provided for @form_survey_schedule_inactive.
   ///
   /// In en, this message translates to:
-  /// **'When occurrence scheduling is off, the survey appears every study day. Built-in food-frequency questionnaires appear once by default.'**
+  /// **'When occurrence scheduling is off, the survey appears every study day.'**
   String get form_survey_schedule_inactive;
 
   /// No description provided for @form_survey_schedule_separation_help.

@@ -294,10 +294,6 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
       }
     }
     final studyDayIndex = getDayOfStudyFor(dateTime);
-    final phaseDuration = study.schedule.phaseDuration;
-    final firstInterventionStartDay = study.schedule.includeBaseline
-        ? phaseDuration
-        : 0;
 
     for (final observation in study.observations) {
       final title = observation.title;
@@ -320,17 +316,6 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
           taskSchedule.add(TaskInstance(observation, completionPeriod.id));
         }
         continue;
-      }
-
-      // Normal (test) FFQ: one-time on first day of intervention 1
-      if (FFQQuestions.isFFQTask(title)) {
-        final firstInterventionIndex = study.schedule.includeBaseline ? 1 : 0;
-        final interventionIndex = getInterventionIndexForDate(dateTime);
-        if (interventionIndex != firstInterventionIndex ||
-            studyDayIndex != firstInterventionStartDay) {
-          continue;
-        }
-        if (resultsFor(observation.id).isNotEmpty) continue;
       }
 
       for (final completionPeriod in observation.schedule.completionPeriods) {

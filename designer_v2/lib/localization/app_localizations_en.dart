@@ -2796,7 +2796,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get form_survey_schedule_inactive =>
-      'When occurrence scheduling is off, the survey appears every study day. Built-in food-frequency questionnaires appear once by default.';
+      'When occurrence scheduling is off, the survey appears every study day.';
 
   @override
   String get form_survey_schedule_separation_help =>

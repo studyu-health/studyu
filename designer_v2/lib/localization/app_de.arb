@@ -1071,7 +1071,7 @@
   },
   "form_survey_schedule_title": "Zeitplan für das Auftreten",
   "form_survey_schedule_active": "Ein Auftretensmuster ist aktiv",
-  "form_survey_schedule_inactive": "Wenn die Auftretensplanung deaktiviert ist, wird der Fragebogen an jedem Studientag angezeigt. Integrierte Fragebögen zur Verzehrhäufigkeit erscheinen standardmäßig einmal.",
+  "form_survey_schedule_inactive": "Wenn die Auftretensplanung deaktiviert ist, wird der Fragebogen an jedem Studientag angezeigt.",
   "form_survey_schedule_separation_help": "Das Auftreten bestimmt, an welchen Studientagen der Fragebogen angezeigt wird.",
   "form_survey_schedule_pattern_help": "Wähle ein Muster. Ein anderes Muster ersetzt das aktuelle.",
   "form_survey_schedule_specific_days": "Bestimmte Tage",

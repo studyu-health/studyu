@@ -2698,7 +2698,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get form_survey_schedule_inactive =>
-      'When occurrence scheduling is off, the survey appears every study day. Built-in food-frequency questionnaires appear once by default.';
+      '설문 일정이 꺼져 있으면 연구 기간 동안 매일 설문이 표시됩니다.';
 
   @override
   String get form_survey_schedule_separation_help =>

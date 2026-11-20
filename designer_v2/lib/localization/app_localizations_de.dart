@@ -2829,7 +2829,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get form_survey_schedule_inactive =>
-      'Wenn die Auftretensplanung deaktiviert ist, wird der Fragebogen an jedem Studientag angezeigt. Integrierte Fragebögen zur Verzehrhäufigkeit erscheinen standardmäßig einmal.';
+      'Wenn die Auftretensplanung deaktiviert ist, wird der Fragebogen an jedem Studientag angezeigt.';
 
   @override
   String get form_survey_schedule_separation_help =>

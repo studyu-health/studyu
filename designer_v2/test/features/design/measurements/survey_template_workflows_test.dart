@@ -64,6 +64,23 @@ void main() {
     expect(measurements.applyTemplate(template), isNotNull);
   });
 
+  test('renamed FFQ retains its first intervention day schedule', () {
+    final measurements = _measurements();
+    final template = SurveyTemplateRegistry.findById('ffq_26')!;
+    final survey = measurements.applyTemplate(template)!;
+    survey.surveyTitleControl.value = 'Diet survey';
+    final restored = QuestionnaireTask.fromJson(
+      survey.buildFormData().toQuestionnaireTask().toJson(),
+    );
+
+    final schedule = measurements.study.schedule;
+    expect(restored.scheduleRule!.resolveScheduledDays(schedule), [7]);
+    schedule.phaseDuration = 5;
+    expect(restored.scheduleRule!.resolveScheduledDays(schedule), [5]);
+    schedule.includeBaseline = false;
+    expect(restored.scheduleRule!.resolveScheduledDays(schedule), [0]);
+  });
+
   test('applies only the selected multi-day entry and prevents duplicates', () {
     final measurements = _measurements();
     final entry = SurveyTemplateRegistry.findById('dhq3_14day')!.dayEntries![3];

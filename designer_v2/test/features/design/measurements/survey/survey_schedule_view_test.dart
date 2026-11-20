@@ -52,8 +52,7 @@ void main() {
       expect(
         find.text(
           'When occurrence scheduling is off, the survey appears every study '
-          'day. Built-in food-frequency questionnaires appear once by '
-          'default. Choose one pattern. Selecting another pattern replaces '
+          'day. Choose one pattern. Selecting another pattern replaces '
           'the current one.',
         ),
         findsOneWidget,

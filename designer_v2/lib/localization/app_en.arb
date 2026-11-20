@@ -1071,7 +1071,7 @@
   },
   "form_survey_schedule_title": "Occurrence schedule",
   "form_survey_schedule_active": "One occurrence pattern is active",
-  "form_survey_schedule_inactive": "When occurrence scheduling is off, the survey appears every study day. Built-in food-frequency questionnaires appear once by default.",
+  "form_survey_schedule_inactive": "When occurrence scheduling is off, the survey appears every study day.",
   "form_survey_schedule_separation_help": "Occurrence controls which study days show the survey.",
   "form_survey_schedule_pattern_help": "Choose one pattern. Selecting another pattern replaces the current one.",
   "form_survey_schedule_specific_days": "Specific days",
