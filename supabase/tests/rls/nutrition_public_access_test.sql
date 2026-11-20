@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(4);
+SELECT plan(9);
 
 SELECT tests.create_supabase_user(
     'nutrition_public_owner', 'nutrition_public_owner@studyu.health'
@@ -10,6 +10,9 @@ SELECT tests.create_supabase_user(
 );
 SELECT tests.create_supabase_user(
     'nutrition_public_outsider', 'nutrition_public_outsider@studyu.health'
+);
+SELECT tests.create_supabase_user(
+    'nutrition_public_editor', 'nutrition_public_editor@studyu.health'
 );
 
 INSERT INTO public.study (
@@ -28,7 +31,8 @@ INSERT INTO public.study (
     report_specification,
     results,
     user_id,
-    result_sharing
+    result_sharing,
+    collaborator_emails
 ) VALUES (
     '80000000-0000-4000-8000-000000000001',
     '{}'::jsonb,
@@ -45,7 +49,8 @@ INSERT INTO public.study (
     '{}'::jsonb,
     '[]'::jsonb,
     tests.get_supabase_uid('nutrition_public_owner'),
-    'public'
+    'public',
+    ARRAY['nutrition_public_editor@studyu.health']
 );
 
 INSERT INTO public.study_subject (
@@ -74,8 +79,23 @@ INSERT INTO public.subject_progress (
     '80000000-0000-4000-8000-000000000002',
     'intervention-a',
     'questionnaire-task',
-    'Questionnaire',
-    '{"type":"Questionnaire","result":{"answers":[]}}'::jsonb
+    'QuestionnaireState',
+    '{"type":"QuestionnaireState","result":[]}'::jsonb
+),
+(
+    '2026-08-31 10:00:00+00',
+    '80000000-0000-4000-8000-000000000002',
+    'intervention-a',
+    'renamed-diet-survey-task',
+    'QuestionnaireState',
+    '{
+        "type":"QuestionnaireState",
+        "result":[
+            {"question":"dhq_sex","timestamp":"2026-08-31T10:00:00Z","response":"other"},
+            {"question":"dhq_dob","timestamp":"2026-08-31T10:00:00Z",
+                "response":"1990-01-01T00:00:00Z","responseType":"DateTime"}
+        ]
+    }'::jsonb
 );
 SET LOCAL session_replication_role = origin;
 
@@ -99,6 +119,19 @@ SELECT is(
     'public nutrition recalls are hidden from unrelated authenticated users'
 );
 
+SELECT is(
+    (SELECT count(*)::integer FROM public.subject_progress
+     WHERE task_id = 'renamed-diet-survey-task'),
+    0,
+    'unrelated users cannot read saved DHQ birth dates through public results'
+);
+SELECT is(
+    (SELECT count(*)::integer FROM public.study_progress_export
+     WHERE task_id = 'renamed-diet-survey-task'),
+    0,
+    'the export view applies the same birth date restriction'
+);
+
 SELECT tests.authenticate_as('nutrition_public_subject');
 SELECT is(
     (
@@ -110,6 +143,13 @@ SELECT is(
     'subjects can read their own nutrition recalls'
 );
 
+SELECT is(
+    (SELECT count(*)::integer FROM public.subject_progress
+     WHERE task_id = 'renamed-diet-survey-task'),
+    1,
+    'participants can read their own DHQ result'
+);
+
 SELECT tests.authenticate_as('nutrition_public_owner');
 SELECT is(
     (
@@ -119,6 +159,21 @@ SELECT is(
     ),
     1,
     'study owners can read participant nutrition recalls'
+);
+
+SELECT is(
+    (SELECT count(*)::integer FROM public.study_progress_export
+     WHERE task_id = 'renamed-diet-survey-task'),
+    1,
+    'study owners can export their participant DHQ result'
+);
+
+SELECT tests.authenticate_as('nutrition_public_editor');
+SELECT is(
+    (SELECT count(*)::integer FROM public.study_progress_export
+     WHERE task_id = 'renamed-diet-survey-task'),
+    1,
+    'study collaborators can export the participant DHQ result'
 );
 
 SELECT * FROM finish();
