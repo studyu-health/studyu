@@ -199,7 +199,8 @@ void main() {
   test(
     'restoration and unrelated edits cannot verify an older cache',
     () async {
-      canonical = _recall(studyDay: 2);
+      canonical = _recall(studyDay: 2)
+        ..entryCompletedAt = DateTime.now().toUtc();
       stored = _serverResult(canonical);
       final originalServer = jsonEncode(stored);
       final fetched = await SupabaseQuery.getById<StudySubject>(
@@ -234,7 +235,6 @@ void main() {
       expect(viewModel.recall.canWriteAvailability, isFalse);
       expect(viewModel.recall.studyDaySnapshot, 2);
       viewModel.updateUsualIntake(true);
-      viewModel.markCompleted();
       await expectLater(
         viewModel.flushPendingAutoSave(
           persistToDatabase: true,

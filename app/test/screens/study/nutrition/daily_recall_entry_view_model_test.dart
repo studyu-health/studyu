@@ -339,68 +339,63 @@ void main() {
     },
   );
 
-  test(
-    'completion flushes a scheduled draft before marking it complete',
-    () async {
-      SharedPreferences.setMockInitialValues({});
+  test('exit flushes a scheduled draft without recording completion', () async {
+    SharedPreferences.setMockInitialValues({});
 
-      final study = Study('study', 'owner')
-        ..schedule.numberOfCycles = 0
-        ..schedule.includeBaseline = true;
-      final subject = StudySubject('subject-flush', study.id, 'user', const [])
-        ..study = study
-        ..startedAt = DateTime.now().subtract(const Duration(hours: 1));
-      final task = NutritionTask.withId();
-      final period = task.schedule.completionPeriods.single;
-      final viewModel = DailyRecallEntryViewModel(
-        subject: subject,
-        task: task,
-        completionPeriod: period,
-      );
-      addTearDown(viewModel.dispose);
-      await viewModel.initialized;
+    final study = Study('study', 'owner')
+      ..schedule.numberOfCycles = 0
+      ..schedule.includeBaseline = true;
+    final subject = StudySubject('subject-flush', study.id, 'user', const [])
+      ..study = study
+      ..startedAt = DateTime.now().subtract(const Duration(hours: 1));
+    final task = NutritionTask.withId();
+    final period = task.schedule.completionPeriods.single;
+    final viewModel = DailyRecallEntryViewModel(
+      subject: subject,
+      task: task,
+      completionPeriod: period,
+    );
+    addTearDown(viewModel.dispose);
+    await viewModel.initialized;
 
-      viewModel.addMeal(
-        MealLog.withId(
-          mealType: MealType.lunch,
-          mealContext: MealContext.home,
-          timestamp: DateTime.now(),
-          timezone: 'UTC',
-          isSkipped: false,
-          foods: [],
-        ),
-      );
+    viewModel.addMeal(
+      MealLog.withId(
+        mealType: MealType.lunch,
+        mealContext: MealContext.home,
+        timestamp: DateTime.now(),
+        timezone: 'UTC',
+        isSkipped: false,
+        foods: [],
+      ),
+    );
 
-      await viewModel.flushPendingAutoSave();
+    await viewModel.flushPendingAutoSave();
 
-      expect(viewModel.lastSaveTime, isNotNull);
-      expect(viewModel.recall.entryCompletedAt, isNull);
-      expect(
-        await NutritionRecallAutoSaveManager().loadRecall(
-          subjectId: subject.id,
-          taskId: task.id,
-          studyDay: 0,
-        ),
-        isNotNull,
-      );
+    expect(viewModel.lastSaveTime, isNotNull);
+    expect(viewModel.recall.entryCompletedAt, isNull);
+    expect(
+      await NutritionRecallAutoSaveManager().loadRecall(
+        subjectId: subject.id,
+        taskId: task.id,
+        studyDay: 0,
+      ),
+      isNotNull,
+    );
 
-      final completedRecall = viewModel.markCompleted();
-      expect(completedRecall.entryCompletedAt, isNotNull);
-      expect(subject.progress, isEmpty);
+    expect(subject.progress, isEmpty);
 
-      await viewModel.clearAutoSave();
-      expect(
-        await NutritionRecallAutoSaveManager().loadRecall(
-          subjectId: subject.id,
-          taskId: task.id,
-          studyDay: 0,
-        ),
-        isNull,
-      );
-    },
-  );
+    await viewModel.clearAutoSave();
+    expect(
+      await NutritionRecallAutoSaveManager().loadRecall(
+        subjectId: subject.id,
+        taskId: task.id,
+        studyDay: 0,
+      ),
+      isNull,
+    );
+  });
 
-  test('completion flush waits for active and scheduled autosaves', () async {
+  test('exit waits for active and scheduled autosaves', () async {
     SharedPreferences.setMockInitialValues({});
 
     final study = Study('study', 'owner')
@@ -437,29 +432,28 @@ void main() {
     await autoSaveManager.firstSaveStarted.future;
 
     viewModel.updateSpecialOccasion('Birthday');
-    var completionFinished = false;
-    final completion = () async {
+    var flushFinished = false;
+    final flush = () async {
       await viewModel.flushPendingAutoSave();
-      viewModel.markCompleted();
       await viewModel.clearAutoSave();
-      completionFinished = true;
+      flushFinished = true;
     }();
 
-    expect(completionFinished, isFalse);
+    expect(flushFinished, isFalse);
     expect(autoSaveManager.secondSaveStarted.isCompleted, isFalse);
 
     autoSaveManager.releaseFirstSave.complete();
     await autoSaveManager.secondSaveStarted.future;
     await firstFlush;
-    expect(completionFinished, isFalse);
+    expect(flushFinished, isFalse);
 
     autoSaveManager.releaseSecondSave.complete();
-    await completion;
+    await flush;
 
     expect(autoSaveManager.savedRecalls, hasLength(2));
     expect(autoSaveManager.savedRecalls.first.specialOccasion, isNull);
     expect(autoSaveManager.savedRecalls.last.specialOccasion, 'Birthday');
-    expect(viewModel.recall.entryCompletedAt, isNotNull);
+    expect(viewModel.recall.entryCompletedAt, isNull);
     expect(
       await autoSaveManager.loadRecall(
         subjectId: subject.id,

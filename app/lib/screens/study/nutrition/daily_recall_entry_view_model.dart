@@ -503,8 +503,6 @@ class DailyRecallEntryViewModel({
     bool? isUsualIntakeDay,
     String? specialOccasion,
     bool clearSpecialOccasion = false,
-    DateTime? entryCompletedAt,
-    bool clearEntryCompletedAt = false,
     DateTime? lastAutoSavedAt,
     int? waterIntakeMl,
   }) => DailyRecall(
@@ -516,23 +514,13 @@ class DailyRecallEntryViewModel({
         : specialOccasion ?? recall.specialOccasion,
     recallMode: recall.recallMode,
     entryStartedAt: recall.entryStartedAt,
-    entryCompletedAt: clearEntryCompletedAt
-        ? null
-        : entryCompletedAt ?? recall.entryCompletedAt,
+    entryCompletedAt: recall.entryCompletedAt,
     meals: recall.meals,
     waterIntakeMl: waterIntakeMl ?? recall.waterIntakeMl,
     studyDaySnapshot: _studyDaySnapshot ?? recall.studyDaySnapshot,
     lastAutoSavedAt: lastAutoSavedAt ?? recall.lastAutoSavedAt,
     availabilityVerified: recall.availabilityVerified,
   );
-
-  /// Retained for existing callers; late corrections never call this path.
-  DailyRecall markCompleted() {
-    if (readOnly || !revalidateEditingEligibility()) return recall;
-    recall = _copyWithRecall(entryCompletedAt: clock().toUtc());
-    notifyListeners();
-    return recall;
-  }
 
   Future<void> clearAutoSave() async {
     if (!canEdit || subject == null || _studyDaySnapshot == null) return;
