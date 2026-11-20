@@ -46,6 +46,17 @@ BEGIN
     RAISE EXCEPTION 'study subject clock and identity are immutable'
       USING ERRCODE = '22023';
   END IF;
+  IF OLD.started_at IS NOT NULL
+     AND NEW.selected_intervention_ids IS DISTINCT FROM OLD.selected_intervention_ids
+     AND EXISTS (
+       SELECT 1 FROM public.study
+       WHERE study.id = OLD.study_id
+         AND jsonb_typeof(study.observations) = 'array'
+         AND study.observations @> '[{"type":"nutrition"}]'::jsonb
+     ) THEN
+    RAISE EXCEPTION 'nutrition intervention assignment is immutable'
+      USING ERRCODE = '22023';
+  END IF;
   IF EXISTS (
     SELECT 1 FROM studyu_private.nutrition_maintenance_context
     WHERE transaction_id = txid_current() AND subject_id = OLD.id
