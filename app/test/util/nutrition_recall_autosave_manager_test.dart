@@ -900,6 +900,9 @@ void main() {
           progressCompletedAt: completedAt,
           nutritionRevision: revision,
         );
+        final before = (await manager.scanPendingRecalls(saved.subjectId))
+            .single;
+        expect(await manager.stageRecallUpload(before, before.recall), isTrue);
         await manager.rewriteFoodDefinition(
           subjectId: saved.subjectId,
           studyDaySnapshot: 4,
@@ -910,6 +913,12 @@ void main() {
             .single;
         expect(pending.nutritionRevision, expected);
         expect(pending.recall.specialOccasion, 'Local note');
+        if (expected == revision) {
+          expect(pending.stagedBaseRevision, revision);
+          expect(pending.stagedUpload, isNotNull);
+        } else {
+          expect(pending.stagedUpload, isNull);
+        }
       }
 
       await checkRebase(2, 3);
@@ -1023,6 +1032,172 @@ void main() {
 
       expect(uploaded.single.waterIntakeMl, 500);
       expect(await manager.scanPendingRecalls(subject.id), isEmpty);
+    },
+  );
+
+  for (final attemptedRevision in [null, 4]) {
+    test(
+      'rebases newer edits after losing the response at revision $attemptedRevision',
+      () async {
+        final today = DateTime.utc(2026, 7, 17, 12);
+        final day = DateTime.utc(2026, 7, 16);
+        final initialCompletion = day.add(const Duration(hours: 16));
+        final rowTime = initialCompletion.add(const Duration(microseconds: 1));
+        final subject = _subject(daysAgo: 2)
+          ..startedAt = today.subtract(const Duration(days: 2));
+        final first = _recall('sent-recall', studyDay: 1)
+          ..date = day
+          ..entryCompletedAt = attemptedRevision == null
+              ? null
+              : initialCompletion
+          ..lastAutoSavedAt = today
+          ..waterIntakeMl = 250;
+        final sent = DailyRecall.fromJson(first.toJson())
+          ..entryCompletedAt = initialCompletion;
+        final firstManager = NutritionRecallAutoSaveManager();
+        Future<void> store(DailyRecall recall) => firstManager.saveRecall(
+          recall: recall,
+          subjectId: subject.id,
+          taskId: 'task',
+          periodId: 'period',
+          interventionId: 'intervention',
+          studyDaySnapshot: 1,
+          progressCompletedAt: attemptedRevision == null ? null : rowTime,
+          nutritionRevision: attemptedRevision,
+        );
+        await store(first);
+        final pending = (await firstManager.scanPendingRecalls(subject.id))
+            .single;
+        expect(await firstManager.stageRecallUpload(pending, sent), isTrue);
+        await store(DailyRecall.fromJson(first.toJson())..waterIntakeMl = 500);
+
+        final savedRevision = attemptedRevision == null
+            ? 0
+            : attemptedRevision + 1;
+        subject.progress.add(
+          SubjectProgress(
+              subjectId: subject.id,
+              interventionId: 'intervention',
+              taskId: 'task',
+              resultType: 'DailyRecall',
+              result: Result<DailyRecall>.app(
+                type: 'DailyRecall',
+                periodId: 'period',
+                result: sent,
+              ),
+            )
+            ..completedAt = rowTime
+            ..nutritionRevision = savedRevision,
+        );
+        final attempts = <PendingRecall>[];
+        final restarted = NutritionRecallAutoSaveManager(
+          submitter: (pending, _) async => attempts.add(pending),
+        );
+
+        await restarted.submitPendingRecalls(
+          subject: subject,
+          trackProgress: true,
+          now: today,
+        );
+
+        final rebased = attempts.single;
+        expect(rebased.recall.waterIntakeMl, 500);
+        expect(rebased.recall.entryCompletedAt, initialCompletion);
+        expect(rebased.progressCompletedAt, rowTime);
+        expect(rebased.nutritionRevision, savedRevision);
+        expect(rebased.stagedUpload, isNull);
+      },
+    );
+  }
+
+  test(
+    'does not acknowledge a different payload from another device',
+    () async {
+      final now = DateTime.utc(2026, 7, 17, 12);
+      final completion = now.subtract(const Duration(days: 1));
+      final subject = _subject(daysAgo: 2)
+        ..startedAt = now.subtract(const Duration(days: 2));
+      final recall = _recall('shared', studyDay: 1)
+        ..entryCompletedAt = completion
+        ..waterIntakeMl = 250;
+      final manager = NutritionRecallAutoSaveManager(
+        submitter: (_, _) async => fail('Must not replace another revision'),
+      );
+      await manager.saveRecall(
+        recall: recall,
+        subjectId: subject.id,
+        taskId: 'task',
+        periodId: 'period',
+        interventionId: 'intervention',
+        studyDaySnapshot: 1,
+        progressCompletedAt: completion,
+        nutritionRevision: 0,
+      );
+      final pending = (await manager.scanPendingRecalls(subject.id)).single;
+      expect(await manager.stageRecallUpload(pending, recall), isTrue);
+      subject.progress.add(
+        SubjectProgress(
+            subjectId: subject.id,
+            interventionId: 'intervention',
+            taskId: 'task',
+            resultType: 'DailyRecall',
+            result: Result<DailyRecall>.app(
+              type: 'DailyRecall',
+              periodId: 'period',
+              result: DailyRecall.fromJson(recall.toJson())
+                ..waterIntakeMl = 999,
+            ),
+          )
+          ..completedAt = completion
+          ..nutritionRevision = 1,
+      );
+
+      await manager.submitPendingRecalls(
+        subject: subject,
+        trackProgress: true,
+        now: now,
+      );
+
+      final retained = (await manager.scanPendingRecalls(subject.id)).single;
+      expect(retained.recall.waterIntakeMl, 250);
+      expect(retained.nutritionRevision, 0);
+      expect(retained.stagedUpload, isNotNull);
+    },
+  );
+
+  test(
+    'clears an acknowledged draft when upload only resolves linkage',
+    () async {
+      final manager = NutritionRecallAutoSaveManager();
+      final day = DateTime.utc(2026, 7, 16);
+      final draft = _foodRecall('offline', studyDay: 1)
+        ..date = day
+        ..lastAutoSavedAt = day;
+      await _save(manager, draft);
+      final linked = DailyRecall.fromJson(draft.toJson())
+        ..entryCompletedAt = day;
+      linked.meals.single.foods.single.foodVersionId = 'linked-version';
+      final pending = (await manager.scanPendingRecalls('subject')).single;
+      expect(await manager.stageRecallUpload(pending, linked), isTrue);
+      final saved = SubjectProgress(
+        subjectId: 'subject',
+        interventionId: 'intervention',
+        taskId: 'task',
+        resultType: 'DailyRecall',
+        result: Result<DailyRecall>.app(
+          type: 'DailyRecall',
+          periodId: 'period',
+          result: linked,
+        ),
+      )..completedAt = day;
+
+      await manager.acknowledgeRecallSave(
+        saved: saved,
+        uploaded: linked,
+        previousRevision: null,
+      );
+
+      expect(await manager.scanPendingRecalls('subject'), isEmpty);
     },
   );
 

@@ -159,7 +159,10 @@ class DailyRecallEntryViewModel({
     _isCheckingDraft = true;
     try {
       final local = await _loadPendingDraft();
-      if (!_isDisposed && revalidateEligibility()) _applyPendingDraft(local);
+      final recovered = await _recoverPendingDraft(local);
+      if (!_isDisposed && revalidateEligibility()) {
+        _applyPendingDraft(recovered);
+      }
     } catch (error, stackTrace) {
       _requiresReopen = true;
       StudyULogger.warning(
@@ -178,6 +181,20 @@ class DailyRecallEntryViewModel({
         periodId: _periodId!,
         studyDay: _studyDaySnapshot!,
       );
+
+  Future<PendingRecall?> _recoverPendingDraft(PendingRecall? local) async {
+    final canonical = _canonicalProgress;
+    if (_isDisposed ||
+        local == null ||
+        canonical == null ||
+        !local.canAcknowledge(canonical)) {
+      return local;
+    }
+    return await _autoSaveManager.recoverSavedUpload(
+      pending: local,
+      saved: canonical,
+    );
+  }
 
   void _applyPendingDraft(PendingRecall? local) {
     if (local == null) {
@@ -380,7 +397,10 @@ class DailyRecallEntryViewModel({
       if (!readOnly) _hydrateCurrentRemoteRecall();
       if (readOnly) return;
       final local = await _loadPendingDraft();
-      if (!_isDisposed && revalidateEligibility()) _applyPendingDraft(local);
+      final recovered = await _recoverPendingDraft(local);
+      if (!_isDisposed && revalidateEligibility()) {
+        _applyPendingDraft(recovered);
+      }
     } catch (error, stackTrace) {
       _requiresReopen = true;
       StudyULogger.warning(
@@ -682,17 +702,30 @@ class DailyRecallEntryViewModel({
               interventionIdOverride: _interventionId,
             );
           } else {
-            final prepared = await NutritionFoodRepository(client: client)
-                .prepareRecallForUpload(
-                  subjectId: subject!.id,
-                  recall: recallToSave,
-                );
             final previousRevision = persistenceTarget?.nutritionRevision;
             final stored = await _loadPendingDraft();
-            if (stored != null &&
-                stored.nutritionRevision == previousRevision &&
-                stored.matchesUploadedRecall(recallToSave)) {
-              await _autoSaveManager.stageRecallUpload(stored, prepared);
+            if (stored == null) return;
+            if (stored.nutritionRevision != previousRevision) {
+              await _refreshDraftAfterUpload();
+              if (propagateErrors) {
+                throw StateError('The local nutrition draft changed.');
+              }
+              NutritionRecallAutoSaveManager.requestUpload(subject!.id);
+              return;
+            }
+            final prepared =
+                stored.stagedUpload ??
+                await NutritionFoodRepository(client: client)
+                    .prepareRecallForUpload(
+                      subjectId: subject!.id,
+                      recall: stored.recall,
+                    );
+            if (!await _autoSaveManager.stageRecallUpload(stored, prepared)) {
+              if (propagateErrors) {
+                throw StateError('The local nutrition draft changed.');
+              }
+              NutritionRecallAutoSaveManager.requestUpload(subject!.id);
+              return;
             }
             if (_isDisposed ||
                 !_canPersist ||
@@ -722,6 +755,9 @@ class DailyRecallEntryViewModel({
               uploaded: prepared,
               previousRevision: previousRevision,
             );
+            if (propagateErrors && await _loadPendingDraft() != null) {
+              throw StateError('A nutrition update still needs to sync.');
+            }
           }
         }
         lastSaveTime = now;
@@ -757,6 +793,21 @@ class DailyRecallEntryViewModel({
     });
     _remoteSaveQueue = remoteSave.then<void>((_) {}, onError: (_, _) {});
     return remoteSave;
+  }
+
+  Future<void> _refreshDraftAfterUpload() async {
+    final progress = await subject!.fetchNutritionRecall(
+      taskId: task!.id,
+      periodId: _periodId!,
+      studyDaySnapshot: _studyDaySnapshot!,
+      target: persistenceTarget,
+    );
+    final canonical = progress?.result.result;
+    if (_isDisposed || progress == null || canonical is! DailyRecall) return;
+    subject!.applySavedProgress(progress);
+    _adoptCanonicalRecall(progress, canonical, _periodId!, _studyDaySnapshot!);
+    final local = await _recoverPendingDraft(await _loadPendingDraft());
+    if (!_isDisposed && revalidateEligibility()) _applyPendingDraft(local);
   }
 
   bool revalidateEligibility() {

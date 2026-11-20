@@ -63,7 +63,7 @@ class NutritionRecallAutoSaveManager {
     int? nutritionRevision,
   }) {
     final identity = _identity(taskId, periodId, studyDaySnapshot);
-    final draft = {
+    final draft = <String, dynamic>{
       'recall': recall.toJson(),
       'metadata': {
         'subjectId': subjectId,
@@ -78,6 +78,14 @@ class NutritionRecallAutoSaveManager {
     };
     return _mutateForSubject(subjectId, () async {
       final drafts = await _readDrafts(subjectId);
+      final stored = drafts[identity];
+      final previous = _pendingFromJson(stored, identity);
+      if (stored is Map<String, dynamic> &&
+          previous?.recall.id == recall.id &&
+          previous?.nutritionRevision == nutritionRevision &&
+          stored['upload'] != null) {
+        draft['upload'] = stored['upload'];
+      }
       drafts[identity] = draft;
       await _writeDrafts(subjectId, drafts);
     });
@@ -177,6 +185,7 @@ class NutritionRecallAutoSaveManager {
       final data = stored as Map<String, dynamic>;
       final metadata = data['metadata'] as Map<String, dynamic>;
       final completedAt = metadata['progressCompletedAt'] as String?;
+      final upload = data['upload'] as Map<String, dynamic>?;
       return PendingRecall(
         recall: DailyRecall.fromJson(data['recall'] as Map<String, dynamic>),
         subjectId: metadata['subjectId'] as String,
@@ -189,6 +198,10 @@ class NutritionRecallAutoSaveManager {
             ? null
             : DateTime.parse(completedAt),
         nutritionRevision: metadata['nutritionRevision'] as int?,
+        stagedUpload: upload == null
+            ? null
+            : DailyRecall.fromJson(upload['recall'] as Map<String, dynamic>),
+        stagedBaseRevision: upload?['baseRevision'] as int?,
         storageKey: storageKey,
       );
     } catch (error) {
@@ -239,7 +252,10 @@ class NutritionRecallAutoSaveManager {
       final data = drafts[entry.storageKey] as Map<String, dynamic>;
       final metadata = data['metadata'] as Map<String, dynamic>;
       metadata['lastModifiedAt'] = DateTime.now().toUtc().toIso8601String();
-      if (revision != null) metadata['nutritionRevision'] = revision;
+      if (revision != entry.nutritionRevision) {
+        metadata['nutritionRevision'] = revision;
+        data.remove('upload');
+      }
       data['recall'] = updatedRecall.toJson();
       changed = true;
     }
@@ -276,10 +292,16 @@ class NutritionRecallAutoSaveManager {
     final current = _pendingFromJson(stored, pending.storageKey);
     return current?.lastModifiedAt == pending.lastModifiedAt &&
         current?.nutritionRevision == pending.nutritionRevision &&
+        current?.progressCompletedAt == pending.progressCompletedAt &&
         const DeepCollectionEquality().equals(
           current?.recall.toJson(),
           pending.recall.toJson(),
-        );
+        ) &&
+        const DeepCollectionEquality().equals(
+          current?.stagedUpload?.toJson(),
+          pending.stagedUpload?.toJson(),
+        ) &&
+        current?.stagedBaseRevision == pending.stagedBaseRevision;
   }
 
   Future<bool> stageRecallUpload(PendingRecall pending, DailyRecall recall) =>
@@ -287,16 +309,29 @@ class NutritionRecallAutoSaveManager {
         final drafts = await _readDrafts(pending.subjectId);
         final stored = drafts[pending.storageKey];
         if (!_isUnchanged(pending, stored)) return false;
-        if (const DeepCollectionEquality().equals(
-          pending.recall.toJson(),
-          recall.toJson(),
-        )) {
-          return true;
+        if (pending.stagedUpload case final previous?) {
+          return pending.stagedBaseRevision == pending.nutritionRevision &&
+              _sameRecallPayload(previous, recall);
         }
-        (stored as Map<String, dynamic>)['recall'] = recall.toJson();
+        (stored as Map<String, dynamic>)['upload'] = {
+          'recall': recall.toJson(),
+          'editableRecall': pending.recall.toJson(),
+          'baseRevision': pending.nutritionRevision,
+        };
         await _writeDrafts(pending.subjectId, drafts);
         return true;
       });
+
+  Future<PendingRecall?> recoverSavedUpload({
+    required PendingRecall pending,
+    required SubjectProgress saved,
+  }) => _mutateForSubject(pending.subjectId, () async {
+    final drafts = await _readDrafts(pending.subjectId);
+    final stored = drafts[pending.storageKey] as Map<String, dynamic>?;
+    final current = _pendingFromJson(stored, pending.storageKey);
+    if (current == null || !current.canAcknowledge(saved)) return current;
+    return await _acknowledgeUpload(saved, drafts, current, stored!);
+  });
 
   Future<void> acknowledgeRecallSave({
     required SubjectProgress saved,
@@ -309,27 +344,59 @@ class NutritionRecallAutoSaveManager {
       uploaded.studyDaySnapshot!,
     );
     final drafts = await _readDrafts(saved.subjectId);
-    final data = drafts[identity];
-    final local = _pendingFromJson(data, identity);
+    final stored = drafts[identity] as Map<String, dynamic>?;
+    final local = _pendingFromJson(stored, identity);
+    final staged = local?.stagedUpload;
     if (local == null ||
-        local.recall.id != uploaded.id ||
-        local.nutritionRevision != previousRevision) {
+        staged == null ||
+        local.stagedBaseRevision != previousRevision ||
+        !_sameRecallPayload(staged, uploaded) ||
+        !local.canAcknowledge(saved)) {
       return;
     }
-    if (local.matchesUploadedRecall(uploaded)) {
-      drafts.remove(identity);
+    final remaining = await _acknowledgeUpload(saved, drafts, local, stored!);
+    if (remaining != null) requestUpload(saved.subjectId);
+  });
+
+  Future<PendingRecall?> _acknowledgeUpload(
+    SubjectProgress saved,
+    Map<String, dynamic> drafts,
+    PendingRecall local,
+    Map<String, dynamic> stored,
+  ) async {
+    final uploaded = saved.result.result as DailyRecall;
+    final upload = stored['upload'] as Map<String, dynamic>;
+    final unchanged = const DeepCollectionEquality().equals(
+      local.recall.toJson(),
+      upload['editableRecall'],
+    );
+    if (unchanged) {
+      drafts.remove(local.storageKey);
     } else {
-      final stored = data as Map<String, dynamic>;
       final metadata = stored['metadata'] as Map<String, dynamic>;
       metadata['progressCompletedAt'] = saved.completedAt!
           .toUtc()
           .toIso8601String();
       metadata['nutritionRevision'] = saved.nutritionRevision;
-      local.recall.entryCompletedAt ??= uploaded.entryCompletedAt;
-      stored['recall'] = local.recall.toJson();
+      local.recall
+        ..date = uploaded.date
+        ..entryCompletedAt ??= uploaded.entryCompletedAt;
+      stored
+        ..remove('upload')
+        ..['recall'] = local.recall.toJson();
     }
     await _writeDrafts(saved.subjectId, drafts);
-  });
+    return unchanged ? null : _pendingFromJson(stored, local.storageKey);
+  }
+
+  Future<void> _removeExpiredUpload(PendingRecall pending) =>
+      _mutateForSubject(pending.subjectId, () async {
+        final drafts = await _readDrafts(pending.subjectId);
+        final stored = drafts[pending.storageKey];
+        if (!_isUnchanged(pending, stored)) return;
+        (stored as Map<String, dynamic>).remove('upload');
+        await _writeDrafts(pending.subjectId, drafts);
+      });
 
   /// Returns true when a transport failure needs a retry.
   Future<bool> submitPendingRecalls({
@@ -352,19 +419,55 @@ class NutritionRecallAutoSaveManager {
       );
       final pendingRecalls = await scanPendingRecalls(subject.id);
       var needsRetry = false;
-      for (final pending in pendingRecalls) {
-        if (pending.subjectId != subject.id ||
-            !isWritableNutritionStudyDay(
-              pending.studyDaySnapshot,
-              todayStudyDay,
-            )) {
+      for (final draft in pendingRecalls) {
+        var pending = draft;
+        if (pending.subjectId != subject.id) continue;
+        if (!isWritableNutritionStudyDay(
+          pending.studyDaySnapshot,
+          todayStudyDay,
+        )) {
+          if (pending.stagedUpload != null &&
+              pending.studyDaySnapshot < todayStudyDay - 1) {
+            await _removeExpiredUpload(pending);
+          }
           continue;
         }
 
         final isPreviousDay = pending.studyDaySnapshot < todayStudyDay;
-        final canonical = _findCompletedRecall(subject, pending);
+        var canonical = _findCompletedRecall(subject, pending);
+        if (pending.stagedUpload != null && _submitter == null) {
+          try {
+            final remote = await subject.fetchNutritionRecall(
+              taskId: pending.taskId,
+              periodId: pending.periodId,
+              studyDaySnapshot: pending.studyDaySnapshot,
+            );
+            if (remote != null) {
+              subject.applySavedProgress(remote);
+              canonical = _findCompletedRecall(subject, pending) ?? remote;
+            }
+          } catch (error) {
+            if (isRetryableError(error)) {
+              needsRetry = true;
+              continue;
+            }
+            StudyULogger.warning(
+              'Could not check the outcome of an earlier nutrition upload: $error',
+            );
+            continue;
+          }
+        }
         final canonicalRecall = canonical?.result.result as DailyRecall?;
-        if (canonicalRecall != null &&
+        if (canonical != null && pending.canAcknowledge(canonical)) {
+          final remaining = await recoverSavedUpload(
+            pending: pending,
+            saved: canonical,
+          );
+          if (remaining == null) continue;
+          pending = remaining;
+        }
+        if (pending.stagedUpload == null &&
+            canonicalRecall != null &&
             pending.matchesUploadedRecall(canonicalRecall)) {
           try {
             await deletePendingRecall(pending);
@@ -393,9 +496,10 @@ class NutritionRecallAutoSaveManager {
           continue;
         }
         if (target == null && canonical != null) continue;
-        final recall = DailyRecall.fromJson(pending.recall.toJson())
-          ..studyDaySnapshot = pending.studyDaySnapshot;
-        if (target == null) {
+        final recall = DailyRecall.fromJson(
+          (pending.stagedUpload ?? pending.recall).toJson(),
+        )..studyDaySnapshot = pending.studyDaySnapshot;
+        if (target == null && pending.stagedUpload == null) {
           recall.date = subject.nutritionDateForStudyDay(
             pending.studyDaySnapshot,
           );
@@ -411,8 +515,11 @@ class NutritionRecallAutoSaveManager {
           if (_submitter != null) {
             await _submitter(pending, recall);
           } else {
-            final prepared = await NutritionFoodRepository(client: client)
-                .prepareRecallForUpload(subjectId: subject.id, recall: recall);
+            final prepared =
+                pending.stagedUpload ??
+                await NutritionFoodRepository(
+                  client: client,
+                ).prepareRecallForUpload(subjectId: subject.id, recall: recall);
             if (!await stageRecallUpload(pending, prepared)) {
               needsRetry = true;
               continue;
@@ -516,20 +623,37 @@ class PendingRecall({
   required final String lastModifiedAt,
   final DateTime? progressCompletedAt,
   final int? nutritionRevision,
+  final DailyRecall? stagedUpload,
+  final int? stagedBaseRevision,
   required final String storageKey,
 }) {
   DateTime get lastModifiedAtDate =>
       DateTime.tryParse(lastModifiedAt) ??
       DateTime.fromMillisecondsSinceEpoch(0);
 
-  bool matchesUploadedRecall(DailyRecall uploaded) {
-    if (recall.id != uploaded.id) return false;
-    final comparable = DailyRecall.fromJson(recall.toJson())
-      ..entryCompletedAt ??= uploaded.entryCompletedAt;
-    return const DeepCollectionEquality().equals(
-      comparable.toJson(),
-      uploaded.toJson(),
-    );
+  bool matchesUploadedRecall(DailyRecall uploaded) =>
+      _sameRecallPayload(recall, uploaded, normalizeUploadFields: true);
+
+  bool canAcknowledge(SubjectProgress progress, {bool allowMovedRow = false}) {
+    final staged = stagedUpload;
+    final saved = progress.result.result;
+    if (staged == null ||
+        saved is! DailyRecall ||
+        progress.subjectId != subjectId ||
+        progress.taskId != taskId ||
+        progress.result.periodId != periodId ||
+        progress.interventionId != interventionId ||
+        saved.studyDaySnapshot != studyDaySnapshot ||
+        !_sameRecallPayload(staged, saved)) {
+      return false;
+    }
+    final base = stagedBaseRevision;
+    if (nutritionRevision != base) return false;
+    return base == null
+        ? progress.nutritionRevision == 0
+        : (allowMovedRow || progress.completedAt == progressCompletedAt) &&
+              (progress.nutritionRevision == base ||
+                  progress.nutritionRevision == base + 1);
   }
 
   bool canReplace(SubjectProgress progress) {
@@ -541,4 +665,20 @@ class PendingRecall({
         studyDaySnapshot == canonical.studyDaySnapshot &&
         !matchesUploadedRecall(canonical);
   }
+}
+
+// Uploads may finalise a draft and update food linkage. Retain all other data
+// from the editable snapshot when checking whether it changed during upload.
+bool _sameRecallPayload(
+  DailyRecall left,
+  DailyRecall right, {
+  bool normalizeUploadFields = false,
+}) {
+  if (left.id != right.id) return false;
+  final leftJson = left.toJson();
+  final rightJson = right.toJson();
+  if (normalizeUploadFields) {
+    leftJson['entryCompletedAt'] ??= rightJson['entryCompletedAt'];
+  }
+  return const DeepCollectionEquality().equals(leftJson, rightJson);
 }
