@@ -30,6 +30,30 @@ void main() {
     );
   });
 
+  test('duplicated DHQ3 birth date questions retain a private identifier', () {
+    final measurements = _measurements();
+    final entry = SurveyTemplateRegistry.findById('dhq3_14day')!
+        .dayEntries!
+        .first;
+    final survey = measurements.applyTemplateDayEntry(entry)!;
+    final original = survey.questionModels.firstWhere(
+      (question) => Dhq3Questions.isBirthDateQuestionId(question.questionId),
+    );
+
+    final duplicate = original.createDuplicate();
+    final repeatedDuplicate = duplicate.createDuplicate();
+    expect({
+      original.questionId,
+      duplicate.questionId,
+      repeatedDuplicate.questionId,
+    }, hasLength(3));
+    expect(Dhq3Questions.isBirthDateQuestionId(duplicate.questionId), isTrue);
+    expect(
+      Dhq3Questions.isBirthDateQuestionId(repeatedDuplicate.questionId),
+      isTrue,
+    );
+  });
+
   test('applies one single-survey template and prevents duplicates', () {
     final measurements = _measurements();
     final template = SurveyTemplateRegistry.findById('ffq_26')!;

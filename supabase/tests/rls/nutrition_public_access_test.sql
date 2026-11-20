@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(9);
+SELECT plan(10);
 
 SELECT tests.create_supabase_user(
     'nutrition_public_owner', 'nutrition_public_owner@studyu.health'
@@ -96,6 +96,21 @@ INSERT INTO public.subject_progress (
                 "response":"1990-01-01T00:00:00Z","responseType":"DateTime"}
         ]
     }'::jsonb
+),
+(
+    '2026-08-31 11:00:00+00',
+    '80000000-0000-4000-8000-000000000002',
+    'intervention-a',
+    'duplicated-diet-survey-task',
+    'QuestionnaireState',
+    '{
+        "type":"QuestionnaireState",
+        "result":[
+            {"question":"dhq_dob-12345678-1234-4234-8234-123456789abc",
+                "timestamp":"2026-08-31T11:00:00Z","response":"1990-01-01T00:00:00Z",
+                "responseType":"DateTime"}
+        ]
+    }'::jsonb
 );
 SET LOCAL session_replication_role = origin;
 
@@ -130,6 +145,13 @@ SELECT is(
      WHERE task_id = 'renamed-diet-survey-task'),
     0,
     'the export view applies the same birth date restriction'
+);
+
+SELECT is(
+    (SELECT count(*)::integer FROM public.study_progress_export
+     WHERE task_id = 'duplicated-diet-survey-task'),
+    0,
+    'the export view excludes cloned DHQ birth dates'
 );
 
 SELECT tests.authenticate_as('nutrition_public_subject');
@@ -171,9 +193,9 @@ SELECT is(
 SELECT tests.authenticate_as('nutrition_public_editor');
 SELECT is(
     (SELECT count(*)::integer FROM public.study_progress_export
-     WHERE task_id = 'renamed-diet-survey-task'),
-    1,
-    'study collaborators can export the participant DHQ result'
+     WHERE task_id IN ('renamed-diet-survey-task', 'duplicated-diet-survey-task')),
+    2,
+    'study collaborators can export original and cloned DHQ results'
 );
 
 SELECT * FROM finish();
