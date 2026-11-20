@@ -94,9 +94,10 @@ class _DashboardScreenState()
 
   Future<void> _submitPendingNutritionRecalls() async {
     final currentSubject = subject;
+    final appState = context.read<AppState>();
     if (currentSubject == null ||
         _submittingNutritionRecalls ||
-        !context.read<AppState>().trackParticipantProgress) {
+        !appState.trackParticipantProgress) {
       return;
     }
 
@@ -104,6 +105,11 @@ class _DashboardScreenState()
     final uploadGeneration = _nutritionUploadGeneration;
     _submittingNutritionRecalls = true;
     try {
+      if (appState.isPreview) {
+        await _nutritionAutoSaveManager.rekeyTrackedPreviewDrafts(
+          currentSubject,
+        );
+      }
       final needsRetry = await _nutritionAutoSaveManager.submitPendingRecalls(
         subject: currentSubject,
         trackProgress: true,
@@ -540,10 +546,18 @@ class _DashboardScreenState()
                 onPressed: () async {
                   try {
                     final appState = context.read<AppState>();
-                    await subject!.setStartDateBackBy(
+                    final previewSubject = subject!;
+                    final persist =
+                        appState.isPreview && previewSubject.study.isDraft;
+                    await previewSubject.setStartDateBackBy(
                       days: 1,
-                      persist: appState.isPreview && subject!.study.isDraft,
+                      persist: persist,
                     );
+                    if (persist) {
+                      await _nutritionAutoSaveManager.rekeyTrackedPreviewDrafts(
+                        previewSubject,
+                      );
+                    }
 
                     if (!mounted) return;
                     setState(() {

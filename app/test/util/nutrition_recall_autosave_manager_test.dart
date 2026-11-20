@@ -15,6 +15,60 @@ void main() {
   setUp(() => mockNutritionDraftStorage());
 
   test(
+    'rekeys only the matching pinned correction after preview advance',
+    () async {
+      final now = DateTime.utc(2026, 7, 17, 12);
+      final subject = _subject(daysAgo: 2)
+        ..startedAt = now.subtract(const Duration(days: 2));
+      final oldTimestamp = now;
+      final movedTimestamp = now.subtract(const Duration(days: 1));
+      final original = _recall('preview-recall', studyDay: 1)
+        ..entryCompletedAt = oldTimestamp;
+      final progress = SubjectProgress(
+        subjectId: subject.id,
+        taskId: 'task',
+        interventionId: 'intervention',
+        resultType: 'DailyRecall',
+        result: Result<DailyRecall>.app(
+          type: 'DailyRecall',
+          periodId: 'period',
+          result: original,
+        ),
+      )..completedAt = movedTimestamp;
+      subject.progress.add(progress);
+      final manager = NutritionRecallAutoSaveManager();
+      final correction = DailyRecall.fromJson(original.toJson())
+        ..waterIntakeMl = 250;
+      await manager.saveRecall(
+        recall: correction,
+        subjectId: subject.id,
+        taskId: 'task',
+        periodId: 'period',
+        interventionId: 'intervention',
+        studyDaySnapshot: 1,
+        progressCompletedAt: oldTimestamp,
+        nutritionRevision: 2,
+      );
+      progress.nutritionRevision = 3;
+      await manager.rekeyTrackedPreviewDrafts(subject);
+      expect(
+        (await manager.scanPendingRecalls(subject.id))
+            .single
+            .progressCompletedAt,
+        oldTimestamp,
+      );
+
+      progress.nutritionRevision = 2;
+      await manager.rekeyTrackedPreviewDrafts(subject);
+      final pending = (await manager.scanPendingRecalls(subject.id)).single;
+      expect(pending.progressCompletedAt, movedTimestamp);
+      expect(pending.nutritionRevision, 2);
+      expect(pending.recall.waterIntakeMl, 250);
+      expect(pending.recall.entryCompletedAt, oldTimestamp);
+    },
+  );
+
+  test(
     'stale corrections stay local even with a newer device timestamp',
     () async {
       final now = DateTime.utc(2026, 7, 17, 12);

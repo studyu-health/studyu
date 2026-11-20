@@ -277,6 +277,33 @@ class NutritionRecallAutoSaveManager {
   Future<void> deleteSubjectDrafts(String subjectId) =>
       _mutateForSubject(subjectId, () => _writeDrafts(subjectId, {}));
 
+  Future<void> rekeyTrackedPreviewDrafts(StudySubject subject) =>
+      _mutateForSubject(subject.id, () async {
+        final drafts = await _readDrafts(subject.id);
+        var changed = false;
+        for (final pending in _pendingFrom(drafts)) {
+          if (pending.subjectId != subject.id ||
+              pending.progressCompletedAt == null) {
+            continue;
+          }
+          final saved = _findCompletedRecall(subject, pending);
+          if (saved == null ||
+              saved.completedAt == pending.progressCompletedAt ||
+              (saved.result.result as DailyRecall).id != pending.recall.id ||
+              (saved.nutritionRevision != pending.nutritionRevision &&
+                  !pending.canAcknowledge(saved, allowMovedRow: true))) {
+            continue;
+          }
+          final data = drafts[pending.storageKey] as Map<String, dynamic>;
+          final metadata = data['metadata'] as Map<String, dynamic>;
+          metadata['progressCompletedAt'] = saved.completedAt!
+              .toUtc()
+              .toIso8601String();
+          changed = true;
+        }
+        if (changed) await _writeDrafts(subject.id, drafts);
+      });
+
   Future<bool> deletePendingRecall(PendingRecall pending) =>
       _mutateForSubject(pending.subjectId, () async {
         final drafts = await _readDrafts(pending.subjectId);
