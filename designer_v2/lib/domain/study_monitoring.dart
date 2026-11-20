@@ -35,24 +35,19 @@ class const StudyMonitorItem({
 extension StudyMonitoringX on Study {
   int _calculateTotalInterventionTasks({
     required List<Intervention> interventions,
+    required List<String> interventionOrder,
     required StudySchedule schedule,
     required StudySubject participant,
   }) {
-    // Generate the ordered list of intervention IDs and exclude baseline
-    final interventionOrder = schedule
-        .generateInterventionIdsInOrder(
-          participant.selectedInterventionIds,
-          participantId: participant.id,
-        )
-        .where((id) => id != Study.baselineID)
-        .toList();
-
     // Build a map for quick lookup of interventions by ID
     final interventionMap = {for (final i in interventions) i.id: i};
 
     int total = 0;
     for (final id in interventionOrder) {
-      if (!participant.selectedInterventionIds.contains(id)) continue;
+      if (id == Study.baselineID ||
+          !participant.selectedInterventionIds.contains(id)) {
+        continue;
+      }
       final intervention = interventionMap[id];
       if (intervention != null) {
         total += intervention.tasks.length * schedule.phaseDuration;
@@ -90,8 +85,9 @@ extension StudyMonitoringX on Study {
       (_) => <String, Set<String>>{},
     );
     final allDays = List.generate(totalDays, (day) => day);
+    final nutritionTasks = observations.whereType<NutritionTask>();
     var totalNutritionPeriods = 0;
-    for (final task in observations.whereType<NutritionTask>()) {
+    for (final task in nutritionTasks) {
       final periods = task.schedule.completionPeriods.map((p) => p.id).toSet();
       if (periods.isEmpty) continue;
       final scheduledDays =
@@ -136,7 +132,7 @@ extension StudyMonitoringX on Study {
 
       final interventionOrder = schedule.generateInterventionIdsInOrder(
         participant.selectedInterventionIds,
-        participantId: participant.id,
+        participantId: nutritionTasks.isEmpty ? null : participant.id,
       );
       final completedNutritionByTask = <(int, String), Set<String>>{};
       for (final progress in progresses) {
@@ -236,6 +232,7 @@ extension StudyMonitoringX on Study {
 
       final totalInterventionTasks = _calculateTotalInterventionTasks(
         interventions: interventions,
+        interventionOrder: interventionOrder,
         schedule: schedule,
         participant: participant,
       );

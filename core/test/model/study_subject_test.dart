@@ -180,6 +180,24 @@ void main() {
     expect(subject.totalTaskCountFor(task), 0);
   });
 
+  test('nutrition dates use the stable randomized participant order', () {
+    final study = Study('study', 'owner')
+      ..schedule = (StudySchedule()
+        ..sequence = PhaseSequence.randomized
+        ..phaseDuration = 1)
+      ..observations = [NutritionTask.withId()]
+      ..interventions = [Intervention('a', 'A'), Intervention('b', 'B')];
+    final subject = StudySubject(
+      '00000000-0000-4000-8000-000000000002',
+      study.id,
+      'participant',
+      ['a', 'b'],
+    )..study = study;
+
+    expect(subject.getNutritionInterventionForStudyDay(3)?.id, 'b');
+    expect(subject.getNutritionInterventionForStudyDay(4)?.id, 'a');
+  });
+
   test(
     'keeps an unfinished UTC nutrition period after the local phase ends',
     () {

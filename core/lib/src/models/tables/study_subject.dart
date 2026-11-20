@@ -73,7 +73,9 @@ class StudySubject extends SupabaseObjectFunctions<StudySubject> {
   List<String> get interventionOrder =>
       study.schedule.generateInterventionIdsInOrder(
         selectedInterventionIds,
-        participantId: id,
+        participantId: study.observations.any((task) => task is NutritionTask)
+            ? id
+            : null,
       );
 
   List<Intervention> get selectedInterventions {

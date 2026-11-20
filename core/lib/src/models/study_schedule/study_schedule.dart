@@ -42,7 +42,7 @@ class StudySchedule({var String sequenceCustom = 'ABAB'}) {
 
   List<String> generateInterventionIdsInOrder(
     List<String> interventionsIds, {
-    required String participantId,
+    String? participantId,
   }) {
     return [
       if (includeBaseline) Study.baselineID,
