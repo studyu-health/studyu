@@ -53,11 +53,14 @@ void main() {
         fdcId: 1,
         servingSize: 240,
         servingSizeUnit: 'ML',
+        householdServingFullText: '1 cup (240 mL)',
         foodNutrients: [UsdaFoodNutrient(nutrientId: 1008, value: 125.5)],
       ),
     );
     expect(food.unit, 'serving');
     expect(food.servingSizeGrams, 100);
+    expect(food.portionReference, isNull);
+    expect(food.originalValues['householdServingFullText'], '1 cup (240 mL)');
     expect(food.nutrition.energyKcal, 125.5);
   });
 

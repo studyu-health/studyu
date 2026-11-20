@@ -345,7 +345,7 @@ void main() {
 
   for (final hasGramServing in [false, true]) {
     testWidgets(
-      'barcode tray uses source serving weight when known ($hasGramServing)',
+      'barcode retains its nutrition basis across selection ($hasGramServing)',
       (tester) async {
         final original = MobileScannerPlatform.instance;
         MobileScannerPlatform.instance = _ScannerPlatform();
@@ -357,17 +357,39 @@ void main() {
           'nutriments': {'energy-kcal_100g': 125},
         };
         final l10n = lookupAppLocalizations(const Locale('en'));
+        var foods = <studyu.FoodEntry>[];
         await tester.pumpWidget(
           ChangeNotifierProvider(
             create: (_) => AppState(),
             child: _app(
-              home: FoodSearchScreen(
-                mealLabel: 'Meal',
-                repository: _EmptyRepository(),
+              home: Builder(
+                builder: (context) => Scaffold(
+                  body: TextButton(
+                    onPressed: () async {
+                      final selection = await FoodSearchScreen.show(
+                        context,
+                        mealLabel: 'Meal',
+                        initialFoods: foods,
+                        repository: _EmptyRepository(),
+                      );
+                      if (selection != null) {
+                        foods = selection.foods
+                            .map(
+                              (food) =>
+                                  studyu.FoodEntry.fromJson(food.toJson()),
+                            )
+                            .toList();
+                      }
+                    },
+                    child: const Text('Open search'),
+                  ),
+                ),
               ),
             ),
           ),
         );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Open search'));
         await tester.pumpAndSettle();
         await tester.tap(find.byTooltip(l10n.scan_barcode));
         await tester.pumpAndSettle();
@@ -381,14 +403,22 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        final metadata = hasGramServing ? '50 g · 63 kcal' : '100 g · 125 kcal';
         expect(find.text('Test drink'), findsOneWidget);
-        expect(
-          find.text(
-            hasGramServing ? '50 g · 63 kcal' : '1 cup (200 mL) · 125 kcal',
-          ),
-          findsOneWidget,
+        expect(find.text(metadata), findsOneWidget);
+        expect(find.textContaining('1 cup (200 mL)'), findsNothing);
+
+        await tester.tap(
+          find.widgetWithText(FilledButton, 'Add 1 item to Meal'),
         );
-        expect(find.text('100 g · 125 kcal'), findsNothing);
+        await tester.pumpAndSettle();
+        expect(foods.single.servingSizeGrams, hasGramServing ? 50 : 100);
+        expect(foods.single.portionReference, hasGramServing ? '50 g' : isNull);
+        expect(foods.single.nutrition.energyKcal, hasGramServing ? 62.5 : 125);
+
+        await tester.tap(find.text('Open search'));
+        await tester.pumpAndSettle();
+        expect(find.text(metadata), findsOneWidget);
       },
     );
   }

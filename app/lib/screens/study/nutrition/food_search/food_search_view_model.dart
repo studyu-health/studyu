@@ -9,6 +9,8 @@ import 'package:studyu_app/screens/study/nutrition/food_search/food_search_reque
 import 'package:studyu_app/services/usda_api_service.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
+const defaultFoodReferenceGrams = 100.0;
+
 typedef OpenFoodFactsSearch = Future<SearchResult> Function({
   required String query,
   required int page,
@@ -322,7 +324,7 @@ UnifiedFoodResult openFoodFactsSearchResult(Product product) {
     PerSize.oneHundredGrams,
   );
   final servingSizeGrams = _gramsFromMetadata(product.servingSize);
-  final calorieBasisGrams = servingSizeGrams ?? 100.0;
+  final calorieBasisGrams = servingSizeGrams ?? defaultFoodReferenceGrams;
 
   return UnifiedFoodResult(
     id: product.barcode ?? '',
@@ -342,7 +344,7 @@ UnifiedFoodResult openFoodFactsSearchResult(Product product) {
 UnifiedFoodResult usdaFoodSearchResult(UsdaFoodItem food) {
   final caloriesPer100g = food.getNutrientValue(1008);
   final servingSizeGrams = _usdaServingGrams(food);
-  final calorieBasisGrams = servingSizeGrams ?? 100.0;
+  final calorieBasisGrams = servingSizeGrams ?? defaultFoodReferenceGrams;
 
   return UnifiedFoodResult(
     id: food.fdcId.toString(),
@@ -432,7 +434,8 @@ studyu.FoodEntry convertFoodResultToFoodEntry(UnifiedFoodResult result) {
 }
 
 studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
-  final servingSizeGrams = _usdaServingGrams(food) ?? 100.0;
+  final sourceServingGrams = _usdaServingGrams(food);
+  final servingSizeGrams = sourceServingGrams ?? defaultFoodReferenceGrams;
   final scale = servingSizeGrams / 100.0;
 
   return studyu.FoodEntry.withId(
@@ -443,7 +446,9 @@ studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
     amount: 1,
     unit: 'serving',
     servingSizeGrams: servingSizeGrams,
-    portionReference: food.householdServingFullText,
+    portionReference: sourceServingGrams == null
+        ? null
+        : food.householdServingFullText,
     portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
     portionState: studyu.PortionState.asServed,
     yieldFactor: 1.0,
@@ -516,7 +521,8 @@ studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
     if (isUnavailable(Nutrient.cholesterol)) 'cholesterol',
     'waterContent',
   };
-  final servingSizeGrams = _gramsFromMetadata(product.servingSize) ?? 100.0;
+  final sourceServingGrams = _gramsFromMetadata(product.servingSize);
+  final servingSizeGrams = sourceServingGrams ?? defaultFoodReferenceGrams;
 
   return studyu.FoodEntry.withId(
     entryType: studyu.FoodEntryType.brandedProduct,
@@ -526,7 +532,7 @@ studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
     amount: 1,
     unit: 'serving',
     servingSizeGrams: servingSizeGrams,
-    portionReference: product.servingSize,
+    portionReference: sourceServingGrams == null ? null : product.servingSize,
     portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
     portionState: studyu.PortionState.asServed,
     yieldFactor: 1.0,
