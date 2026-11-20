@@ -38,6 +38,8 @@ class DailyRecallEntryViewModel({
       autoSaveManager ?? NutritionRecallAutoSaveManager();
   late DailyRecall recall;
   late final Future<void> _initialization;
+  late final StreamSubscription<SubjectProgress>? _creationSubscription;
+  SubjectProgress? _acknowledgedCreation;
   bool isSaving = false;
   DateTime? lastSaveTime;
 
@@ -78,6 +80,12 @@ class DailyRecallEntryViewModel({
         meals: [],
       );
     }
+    _creationSubscription =
+        historicalMode && !readOnly && _persistenceTarget == null
+        ? NutritionRecallAutoSaveManager.acknowledgedCreations.listen(
+            _acceptAcknowledgedCreation,
+          )
+        : null;
     _initialization = _initialize();
   }
 
@@ -158,11 +166,7 @@ class DailyRecallEntryViewModel({
 
     _isCheckingDraft = true;
     try {
-      final local = await _loadPendingDraft();
-      final recovered = await _recoverPendingDraft(local);
-      if (!_isDisposed && revalidateEligibility()) {
-        _applyPendingDraft(recovered);
-      }
+      await _restorePendingDraft();
     } catch (error, stackTrace) {
       _requiresReopen = true;
       StudyULogger.warning(
@@ -194,6 +198,15 @@ class DailyRecallEntryViewModel({
       pending: local,
       saved: canonical,
     );
+  }
+
+  Future<void> _restorePendingDraft() async {
+    var local = await _recoverPendingDraft(await _loadPendingDraft());
+    final created = _acknowledgedCreation;
+    if (created != null && local?.canAcknowledge(created) == true) {
+      local = await _loadPendingDraft();
+    }
+    if (!_isDisposed && revalidateEligibility()) _applyPendingDraft(local);
   }
 
   void _applyPendingDraft(PendingRecall? local) {
@@ -318,21 +331,26 @@ class DailyRecallEntryViewModel({
     );
   }
 
-  void _pinUploadedDraft() {
-    if (persistenceTarget != null || !historicalMode) return;
-    final progress = _findCanonicalProgress(
-      task!.id,
-      _periodId!,
-      _studyDaySnapshot!,
-    );
-    final canonical = progress?.result.result;
-    if (progress == null ||
+  void _acceptAcknowledgedCreation(SubjectProgress progress) {
+    final canonical = progress.result.result;
+    if (_isDisposed ||
+        persistenceTarget != null ||
         canonical is! DailyRecall ||
-        canonical.id != recall.id) {
+        progress.subjectId != subject?.id ||
+        progress.taskId != task?.id ||
+        progress.result.periodId != _periodId ||
+        progress.interventionId != _interventionId ||
+        canonical.studyDaySnapshot != _studyDaySnapshot ||
+        canonical.id != recall.id ||
+        progress.completedAt == null) {
       return;
     }
     _pinCanonicalProgress(progress, _periodId!, _studyDaySnapshot!);
-    recall.entryCompletedAt = canonical.entryCompletedAt;
+    _acknowledgedCreation = progress;
+    recall
+      ..date = canonical.date
+      ..entryCompletedAt = canonical.entryCompletedAt;
+    notifyListeners();
   }
 
   Future<void> refreshConflictingRecall() async {
@@ -396,11 +414,7 @@ class DailyRecallEntryViewModel({
       if (_isDisposed || _remoteConflict || _requiresReopen) return;
       if (!readOnly) _hydrateCurrentRemoteRecall();
       if (readOnly) return;
-      final local = await _loadPendingDraft();
-      final recovered = await _recoverPendingDraft(local);
-      if (!_isDisposed && revalidateEligibility()) {
-        _applyPendingDraft(recovered);
-      }
+      await _restorePendingDraft();
     } catch (error, stackTrace) {
       _requiresReopen = true;
       StudyULogger.warning(
@@ -429,6 +443,7 @@ class DailyRecallEntryViewModel({
   void dispose() {
     _isDisposed = true;
     _autoSaveTimer?.cancel();
+    unawaited(_creationSubscription?.cancel());
     super.dispose();
   }
 
@@ -626,11 +641,11 @@ class DailyRecallEntryViewModel({
         !revalidateEditingEligibility()) {
       return;
     }
-    _pinUploadedDraft();
     final savedAt = clock().toUtc();
     recall = _copyWithRecall(lastAutoSavedAt: savedAt);
     lastSaveTime = savedAt;
     final recallToSave = DailyRecall.fromJson(recall.toJson());
+    final target = persistenceTarget;
     Future<void> saveLocal() => _autoSaveManager.saveRecall(
       recall: recallToSave,
       subjectId: subject!.id,
@@ -638,8 +653,11 @@ class DailyRecallEntryViewModel({
       interventionId: _interventionId!,
       periodId: _periodId!,
       studyDaySnapshot: _studyDaySnapshot!,
-      progressCompletedAt: persistenceTarget?.completedAt,
-      nutritionRevision: persistenceTarget?.nutritionRevision,
+      progressCompletedAt: target?.completedAt,
+      nutritionRevision: target?.nutritionRevision,
+      acknowledgedCreation: target == null && historicalMode
+          ? () => _acknowledgedCreation
+          : null,
     );
     final localSave = _localSaveFuture.then<void>(
       (_) => saveLocal(),
@@ -806,8 +824,7 @@ class DailyRecallEntryViewModel({
     if (_isDisposed || progress == null || canonical is! DailyRecall) return;
     subject!.applySavedProgress(progress);
     _adoptCanonicalRecall(progress, canonical, _periodId!, _studyDaySnapshot!);
-    final local = await _recoverPendingDraft(await _loadPendingDraft());
-    if (!_isDisposed && revalidateEligibility()) _applyPendingDraft(local);
+    await _restorePendingDraft();
   }
 
   bool revalidateEligibility() {

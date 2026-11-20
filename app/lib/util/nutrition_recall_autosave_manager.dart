@@ -30,8 +30,14 @@ class NutritionRecallAutoSaveManager {
   static final _mutationQueues = <String, Future<void>>{};
   static final _invalidatedSubjectIds = <String>{};
   static final _uploadRequests = StreamController<String>.broadcast();
+  static final _acknowledgedCreations =
+      StreamController<SubjectProgress>.broadcast(sync: true);
 
   static Stream<String> get uploadRequests => _uploadRequests.stream;
+
+  /// Emits a saved row after an exact staged create is acknowledged locally.
+  static Stream<SubjectProgress> get acknowledgedCreations =>
+      _acknowledgedCreations.stream;
 
   static void requestUpload(String subjectId) => _uploadRequests.add(subjectId);
 
@@ -62,28 +68,41 @@ class NutritionRecallAutoSaveManager {
     required int studyDaySnapshot,
     DateTime? progressCompletedAt,
     int? nutritionRevision,
+    SubjectProgress? Function()? acknowledgedCreation,
   }) {
     final identity = _identity(taskId, periodId, studyDaySnapshot);
-    final draft = <String, dynamic>{
-      'recall': recall.toJson(),
-      'metadata': {
-        'subjectId': subjectId,
-        'taskId': taskId,
-        'interventionId': interventionId,
-        'periodId': periodId,
-        'studyDaySnapshot': studyDaySnapshot,
-        'progressCompletedAt': progressCompletedAt?.toUtc().toIso8601String(),
-        'nutritionRevision': ?nutritionRevision,
-        'lastModifiedAt': DateTime.now().toUtc().toIso8601String(),
-      },
-    };
+    final original = recall.toJson();
+    final lastModifiedAt = DateTime.now().toUtc().toIso8601String();
     return _mutateForSubject(subjectId, () async {
       final drafts = await _readDrafts(subjectId);
+      // An earlier operation in this queue can acknowledge the create.
+      final created = acknowledgedCreation?.call();
+      final uploaded = created?.result.result as DailyRecall?;
+      final completedAt = created?.completedAt ?? progressCompletedAt;
+      final revision = created?.nutritionRevision ?? nutritionRevision;
+      final draft = <String, dynamic>{
+        'recall': uploaded == null
+            ? original
+            : (DailyRecall.fromJson(original)
+                    ..date = uploaded.date
+                    ..entryCompletedAt = uploaded.entryCompletedAt)
+                  .toJson(),
+        'metadata': {
+          'subjectId': subjectId,
+          'taskId': taskId,
+          'interventionId': interventionId,
+          'periodId': periodId,
+          'studyDaySnapshot': studyDaySnapshot,
+          'progressCompletedAt': completedAt?.toUtc().toIso8601String(),
+          'nutritionRevision': ?revision,
+          'lastModifiedAt': lastModifiedAt,
+        },
+      };
       final stored = drafts[identity];
       final previous = _pendingFromJson(stored, identity);
       if (stored is Map<String, dynamic> &&
           previous?.recall.id == recall.id &&
-          previous?.nutritionRevision == nutritionRevision &&
+          previous?.nutritionRevision == revision &&
           stored['upload'] != null) {
         draft['upload'] = stored['upload'];
       }
@@ -417,6 +436,10 @@ class NutritionRecallAutoSaveManager {
         ..['recall'] = local.recall.toJson();
     }
     await _writeDrafts(saved.subjectId, drafts);
+    if (local.stagedBaseRevision == null &&
+        !_invalidatedSubjectIds.contains(saved.subjectId)) {
+      _acknowledgedCreations.add(saved);
+    }
     return unchanged ? null : _pendingFromJson(stored, local.storageKey);
   }
 

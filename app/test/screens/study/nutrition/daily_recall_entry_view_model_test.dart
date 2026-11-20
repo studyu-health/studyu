@@ -57,6 +57,151 @@ void main() {
     expect(model.recall.waterIntakeMl, 250);
   });
 
+  group('an open unpinned historical draft', () {
+    final today = DateTime.utc(2026, 7, 16, 12);
+    final shiftedDate = DateTime.utc(2026, 7, 15);
+    late NutritionRecallAutoSaveManager manager;
+    late StudySubject subject;
+    late NutritionTask task;
+    late CompletionPeriod period;
+    late DailyRecallEntryViewModel model;
+    late DailyRecall uploaded;
+    late Completer<void> deletionStarted;
+    late Completer<void> finishDeletion;
+    late List<DailyRecall> remoteWrites;
+    late List<NutritionRecallPersistenceTarget?> remoteTargets;
+
+    setUp(() async {
+      deletionStarted = Completer<void>();
+      finishDeletion = Completer<void>();
+      mockNutritionDraftStorage(
+        beforeCall: (call) {
+          if (call.method == 'delete') {
+            deletionStarted.complete();
+            return finishDeletion.future;
+          }
+        },
+      );
+      remoteWrites = [];
+      remoteTargets = [];
+      subject = StudySubject('local-history', 'study', 'user', [])
+        ..study = (Study('study', 'user')
+          ..schedule.includeBaseline = true
+          ..schedule.numberOfCycles = 0
+          ..schedule.phaseDuration = 7)
+        ..startedAt = shiftedDate;
+      task = NutritionTask.withId()..trackWaterIntake = true;
+      period = task.schedule.completionPeriods.single;
+      manager = NutritionRecallAutoSaveManager();
+      model = DailyRecallEntryViewModel(
+        subject: subject,
+        task: task,
+        completionPeriod: period,
+        existingRecall: DailyRecall.withId(
+          date: DateTime.utc(2026, 7, 16),
+          recallMode: RecallMode.realtimeRecord,
+          studyDaySnapshot: 0,
+          meals: [],
+        ),
+        historicalMode: true,
+        autoSaveManager: manager,
+        clock: () => today,
+        remoteSaver:
+            ({
+              required taskId,
+              required periodId,
+              required recall,
+              required persistenceTarget,
+              interventionIdOverride,
+            }) async {
+              remoteWrites.add(recall);
+              remoteTargets.add(persistenceTarget);
+            },
+      );
+      addTearDown(model.dispose);
+      await model.adjustWaterIntake(250);
+      await model.flushPendingAutoSave();
+      final pending = (await manager.scanPendingRecalls(subject.id)).single;
+      uploaded = DailyRecall.fromJson(pending.recall.toJson())
+        ..date = shiftedDate
+        ..entryCompletedAt = shiftedDate.add(const Duration(hours: 12));
+      expect(await manager.stageRecallUpload(pending, uploaded), isTrue);
+    });
+
+    SubjectProgress savedProgress(DailyRecall recall, int revision) =>
+        SubjectProgress(
+            subjectId: subject.id,
+            taskId: task.id,
+            resultType: 'DailyRecall',
+            interventionId: Study.baselineID,
+            result: Result<DailyRecall>.app(
+              type: 'DailyRecall',
+              periodId: period.id,
+              result: recall,
+            ),
+          )
+          ..completedAt = recall.entryCompletedAt
+          ..nutritionRevision = revision;
+
+    test('does not adopt a competing saved revision', () async {
+      subject.applySavedProgress(
+        savedProgress(
+          DailyRecall.fromJson(uploaded.toJson())..waterIntakeMl = 999,
+          1,
+        ),
+      );
+
+      final retry = NutritionRecallAutoSaveManager.uploadRequests.first;
+      await model.adjustWaterIntake(250);
+      await model.flushPendingAutoSave(persistToDatabase: true);
+
+      expect(model.persistenceTarget, isNull);
+      expect(remoteWrites, isEmpty);
+      expect(await retry, subject.id);
+      final pending = (await manager.scanPendingRecalls(subject.id)).single;
+      expect(pending.recall.waterIntakeMl, 500);
+      expect(pending.nutritionRevision, isNull);
+      expect(pending.stagedUpload?.toJson(), uploaded.toJson());
+    });
+
+    test(
+      'writes queued edits against the proved creation date and revision',
+      () async {
+        final saved = savedProgress(uploaded, 0);
+        subject.applySavedProgress(saved);
+        final acknowledge = manager.acknowledgeRecallSave(
+          saved: saved,
+          uploaded: uploaded,
+          previousRevision: null,
+        );
+        await deletionStarted.future;
+        subject.applySavedProgress(
+          savedProgress(
+            DailyRecall.fromJson(uploaded.toJson())..waterIntakeMl = 999,
+            1,
+          ),
+        );
+
+        await model.adjustWaterIntake(250);
+        expect(model.persistenceTarget, isNull);
+        final flush = model.flushPendingAutoSave(persistToDatabase: true);
+        finishDeletion.complete();
+        await acknowledge;
+        await flush;
+
+        final pending = (await manager.scanPendingRecalls(subject.id)).single;
+        expect(pending.recall.waterIntakeMl, 500);
+        expect(pending.recall.date, shiftedDate);
+        expect(pending.recall.entryCompletedAt, uploaded.entryCompletedAt);
+        expect(pending.nutritionRevision, 0);
+        expect(pending.progressCompletedAt, saved.completedAt);
+        expect(remoteWrites.single.date, shiftedDate);
+        expect(remoteTargets.single?.nutritionRevision, 0);
+        expect(subject.progress.single.nutritionRevision, 1);
+      },
+    );
+  });
+
   test('failed historical correction requests background retry', () async {
     final yesterday = DateTime.utc(2026, 7, 15, 12);
     final subject = StudySubject('retry-subject', 'study', 'user', [])
@@ -699,6 +844,7 @@ class _BlockingAutoSaveManager() extends NutritionRecallAutoSaveManager {
     required int studyDaySnapshot,
     DateTime? progressCompletedAt,
     int? nutritionRevision,
+    SubjectProgress? Function()? acknowledgedCreation,
   }) async {
     savedRecalls.add(recall);
     final saveNumber = savedRecalls.length;
@@ -715,6 +861,7 @@ class _BlockingAutoSaveManager() extends NutritionRecallAutoSaveManager {
       studyDaySnapshot: studyDaySnapshot,
       progressCompletedAt: progressCompletedAt,
       nutritionRevision: nutritionRevision,
+      acknowledgedCreation: acknowledgedCreation,
     );
   }
 }
