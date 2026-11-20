@@ -141,6 +141,32 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
         (row as Map<String, dynamic>)['id'] as String:
             row['current_version_id'] as String,
     };
+    for (final food in byId.values.where(
+      (food) => !currentVersions.containsKey(food.foodId),
+    )) {
+      final NutritionFoodMutationResult result;
+      try {
+        result = await _mutate(
+          subjectId: subjectId,
+          foodId: food.foodId,
+          expectedVersionId: null,
+          snapshot: food.toJson(),
+          libraryVisible: false,
+        );
+      } on PostgrestException catch (error) {
+        if (!isVersionConflict(error)) rethrow;
+        final currentVersionId = await _currentVersionId(
+          subjectId,
+          food.foodId,
+        );
+        if (currentVersionId == null) rethrow;
+        currentVersions[food.foodId] = currentVersionId;
+        continue;
+      }
+      for (final occurrence in sourceById[food.foodId]!) {
+        occurrence.foodVersionId = result.definition.currentVersionId;
+      }
+    }
     if (currentVersions.isNotEmpty) {
       final localVersionIds = sourceById.values
           .expand((entries) => entries)
@@ -162,20 +188,6 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
         if (!validLinkages.contains('${food.foodId}:${food.foodVersionId}')) {
           food.foodVersionId = currentVersions[food.foodId]!;
         }
-      }
-    }
-    for (final food in byId.values.where(
-      (food) => !currentVersions.containsKey(food.foodId),
-    )) {
-      final result = await _mutate(
-        subjectId: subjectId,
-        foodId: food.foodId,
-        expectedVersionId: null,
-        snapshot: food.toJson(),
-        libraryVisible: false,
-      );
-      for (final occurrence in sourceById[food.foodId]!) {
-        occurrence.foodVersionId = result.definition.currentVersionId;
       }
     }
   }

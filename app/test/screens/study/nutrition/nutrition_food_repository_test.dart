@@ -282,6 +282,108 @@ void main() {
     );
   }
 
+  test('recovers when another upload creates the food definition', () async {
+    final requests = <String>[];
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        final operation = request.url.pathSegments.last;
+        requests.add(operation);
+        switch (operation) {
+          case 'nutrition_food_definition':
+            expect(request.url.queryParameters['subject_id'], 'eq.subject');
+            if (requests.length == 1) return _jsonResponse([], request);
+            expect(request.url.queryParameters['id'], 'eq.food-definition');
+            return _jsonResponse([
+              {'current_version_id': 'current-version'},
+            ], request);
+          case 'apply_nutrition_food_mutation':
+            final params = jsonDecode(request.body) as Map<String, dynamic>;
+            expect(params['p_expected_version_id'], isNull);
+            return _mutationFailure(request);
+          case 'nutrition_food_version':
+            return _jsonResponse([
+              {'id': 'previous-version', 'food_id': 'food-definition'},
+            ], request);
+          default:
+            fail('Unexpected request for $operation');
+        }
+      }),
+    );
+    final localFood = _food(id: 'new', versionId: 'local-version')
+      ..amount = 2
+      ..nutrition.energyKcal = 200;
+    final linkedFood = _food(id: 'existing', versionId: 'previous-version');
+    final now = DateTime.utc(2026, 7, 15, 12);
+    final recall = DailyRecall.withId(
+      date: now,
+      recallMode: RecallMode.realtimeRecord,
+      meals: [
+        MealLog.withId(
+          mealType: MealType.lunch,
+          timestamp: now,
+          timezone: 'UTC',
+          isSkipped: false,
+          foods: [localFood, linkedFood],
+        ),
+      ],
+    );
+
+    final prepared = await repository.prepareRecallForUpload(
+      subjectId: 'subject',
+      recall: recall,
+    );
+
+    final preparedFoods = prepared.meals.single.foods;
+    expect(preparedFoods.first.toJson(), {
+      ...localFood.toJson(),
+      'foodVersionId': 'current-version',
+    });
+    expect(preparedFoods.last.toJson(), linkedFood.toJson());
+    expect(localFood.foodVersionId, 'local-version');
+    expect(requests, [
+      'nutrition_food_definition',
+      'apply_nutrition_food_mutation',
+      'nutrition_food_definition',
+      'nutrition_food_version',
+    ]);
+  });
+
+  for (final isVersionConflict in [true, false]) {
+    test(
+      'surfaces unresolved initial create errors ($isVersionConflict)',
+      () async {
+        var reads = 0;
+        final message = isVersionConflict
+            ? 'stale nutrition definition version'
+            : 'other write conflict';
+        final repository = NutritionFoodRepository(
+          client: _client((request) async {
+            if (request.method == 'GET') {
+              reads++;
+              return _jsonResponse([], request);
+            }
+            return _mutationFailure(request, message: message);
+          }),
+        );
+        final food = _food(versionId: 'local-version');
+
+        await expectLater(
+          repository.ensureDefinitions(subjectId: 'subject', foods: [food]),
+          throwsA(
+            isA<PostgrestException>().having(
+              (error) => error.message,
+              'message',
+              message,
+            ),
+          ),
+        );
+
+        expect(reads, isVersionConflict ? 2 : 1);
+        expect(food.foodVersionId, 'local-version');
+      },
+    );
+  }
+
   test(
     'creates one-serving definitions without changing logged amounts',
     () async {
@@ -426,6 +528,16 @@ http.Response _jsonResponse(Object? body, http.BaseRequest request) =>
       headers: const {'content-type': 'application/json'},
       request: request,
     );
+
+http.Response _mutationFailure(
+  http.BaseRequest request, {
+  String message = 'stale nutrition definition version',
+}) => http.Response(
+  jsonEncode({'code': '40001', 'message': message}),
+  500,
+  headers: const {'content-type': 'application/json'},
+  request: request,
+);
 
 SupabaseClient _client(MockClientHandler handler) => SupabaseClient(
   'https://example.supabase.co',
