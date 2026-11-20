@@ -319,7 +319,6 @@ final class FoodSearchViewModel({
 
 UnifiedFoodResult openFoodFactsSearchResult(Product product) {
   final (basis, nutrients) = _openFoodFactsNutrition(product);
-  final referenceGrams = basis?.unit == Unit.G ? basis!.quantity : null;
 
   return UnifiedFoodResult(
     id: product.barcode ?? '',
@@ -327,10 +326,10 @@ UnifiedFoodResult openFoodFactsSearchResult(Product product) {
     brand: product.brands,
     imageUrl: product.imageFrontSmallUrl,
     calories: nutrients['energyKcal'],
-    calorieBasisGrams: referenceGrams,
-    servingSizeGrams: basis?.portionReference != null ? referenceGrams : null,
-    servingVolumeLabel: basis?.unit == Unit.MILLI_L
-        ? basis!.portionReference
+    calorieBasisGrams: basis.grams,
+    servingSizeGrams: basis.portionReference != null ? basis.grams : null,
+    servingVolumeLabel: basis.milliliters != null
+        ? basis.portionReference
         : null,
     source: studyu.FoodSource.openfoodfacts,
     originalData: product,
@@ -490,9 +489,13 @@ studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
   );
 }
 
-typedef _FoodBasis = ({Unit unit, double quantity, String? portionReference});
+typedef _FoodBasis = ({
+  double? grams,
+  double? milliliters,
+  String? portionReference,
+});
 
-(_FoodBasis?, Map<String, double?>) _openFoodFactsNutrition(Product product) {
+(_FoodBasis, Map<String, double?>) _openFoodFactsNutrition(Product product) {
   final nutrition = product.nutrition;
   final inputSets = nutrition?['input_sets'];
   final sets = [
@@ -555,33 +558,42 @@ typedef _FoodBasis = ({Unit unit, double quantity, String? portionReference});
   final milliliters = _positiveQuantity(metadataMl) ?? sourceMlServing;
   final hasGramData = sourceSets.any((set) => set.unit == Unit.G);
   final hasVolumeData = sourceSets.any((set) => set.unit == Unit.MILLI_L);
+  final hasPairedServing = grams != null && milliliters != null;
   final useVolume =
-      (hasVolumeData && !hasGramData) ||
-      (hasVolumeData && grams == null && milliliters != null) ||
+      (hasVolumeData &&
+          (!hasGramData || grams == null && milliliters != null)) ||
       (!hasGramData && grams == null && milliliters != null);
-  final volume = milliliters ?? 100.0;
-  final _FoodBasis? basis = useVolume
-      ? (
-          unit: Unit.MILLI_L,
-          quantity: volume,
-          portionReference: metadataMl <= 0
-              ? '${volume.truncateToDouble() == volume ? volume.toStringAsFixed(0) : volume} mL'
-              : product.servingSize,
-        )
-      : grams != null || hasGramData
-      ? (
-          unit: Unit.G,
-          quantity: grams ?? defaultFoodReferenceGrams,
-          portionReference: metadataGrams == null
-              ? (sourceGramServing == null ? null : '$sourceGramServing g')
-              : product.servingSize,
-        )
+  final referenceGrams = hasPairedServing || !useVolume
+      ? grams ?? (hasGramData ? defaultFoodReferenceGrams : null)
       : null;
+  final referenceMl = hasPairedServing || useVolume
+      ? milliliters ?? 100.0
+      : null;
+  final portionReference = switch ((referenceGrams, referenceMl)) {
+    (final weight?, final volume?) =>
+      metadataGrams != null && metadataMl > 0
+          ? product.servingSize
+          : '${_formatReferenceQuantity(volume)} mL (${_formatReferenceQuantity(weight)} g)',
+    (_, final volume?) =>
+      metadataMl > 0
+          ? product.servingSize
+          : '${_formatReferenceQuantity(volume)} mL',
+    (final weight?, _) when grams != null =>
+      metadataGrams != null
+          ? product.servingSize
+          : '${_formatReferenceQuantity(weight)} g',
+    _ => null,
+  };
+  final basis = (
+    grams: referenceGrams,
+    milliliters: referenceMl,
+    portionReference: portionReference,
+  );
 
   double? amount(Nutrient nutrient, Unit targetUnit) {
-    if (basis == null) return null;
     for (final set in sourceSets) {
-      if (set.unit != basis.unit) continue;
+      final reference = set.unit == Unit.G ? basis.grams : basis.milliliters;
+      if (reference == null) continue;
       final raw = set.nutrients[nutrient.offTag];
       if (raw is! Map<String, dynamic>) continue;
       final value = NutritionValue.fromJson(raw);
@@ -606,7 +618,7 @@ typedef _FoodBasis = ({Unit unit, double quantity, String? portionReference});
         _ => null,
       };
       if (unitFactor == null) continue;
-      final scaled = measured * unitFactor * basis.quantity / set.quantity;
+      final scaled = measured * unitFactor * reference / set.quantity;
       if (scaled.isFinite) return scaled;
     }
     return null;
@@ -632,6 +644,11 @@ typedef _FoodBasis = ({Unit unit, double quantity, String? portionReference});
   );
 }
 
+String _formatReferenceQuantity(double quantity) =>
+    quantity == quantity.truncateToDouble()
+    ? quantity.toStringAsFixed(0)
+    : quantity.toString();
+
 (Unit?, double?) _servingSetBasis(Map<Object?, Object?> set) {
   final quantity = _positiveQuantity(set['per_quantity']);
   final unitTag = set['per_unit'];
@@ -654,8 +671,8 @@ studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
     description: product.genericName,
     amount: 1,
     unit: 'serving',
-    servingSizeGrams: basis?.unit == Unit.G ? basis!.quantity : 0,
-    portionReference: basis?.portionReference,
+    servingSizeGrams: basis.grams ?? 0,
+    portionReference: basis.portionReference,
     portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
     portionState: studyu.PortionState.asServed,
     yieldFactor: 1.0,

@@ -264,6 +264,61 @@ void main() {
     expect(food.nutrition.energyKcal, 80);
   });
 
+  test('OFF combines both known measures for the same serving', () {
+    final product = Product.fromJson({
+      'product_name': 'Drink',
+      'serving_size': '1 cup (240 mL, 250 g)',
+      'nutrition': {
+        'aggregated_set': {
+          'preparation': 'as_sold',
+          'per': '100ml',
+          'nutrients': {
+            'energy-kcal': {'unit': 'kcal', 'value': 50},
+          },
+        },
+        'input_sets': [
+          {
+            'preparation': 'as_sold',
+            'per': '100g',
+            'nutrients': {
+              'fat': {'unit': 'g', 'value': 4},
+            },
+          },
+        ],
+      },
+    });
+
+    final result = openFoodFactsSearchResult(product);
+    final food = convertFoodResultToFoodEntry(result);
+    expect(result.servingSizeGrams, 250);
+    expect(result.calories, 120);
+    expect(food.servingSizeGrams, 250);
+    expect(food.portionReference, '1 cup (240 mL, 250 g)');
+    expect(food.nutrition.energyKcal, 120);
+    expect(food.nutrition.fat, 10);
+  });
+
+  test('OFF keeps measured mass when all nutrients are volume-based', () {
+    final food = convertOpenFoodFactsToFoodEntry(
+      Product.fromJson({
+        'product_name': 'Drink',
+        'serving_size': '1 cup (240 mL, 250 g)',
+        'nutrition': {
+          'aggregated_set': {
+            'preparation': 'as_sold',
+            'per': '100ml',
+            'nutrients': {
+              'energy-kcal': {'unit': 'kcal', 'value': 50},
+            },
+          },
+        },
+      }),
+    );
+
+    expect(food.servingSizeGrams, 250);
+    expect(food.nutrition.energyKcal, 120);
+  });
+
   test('OFF preserves nutrient limits without treating them as exact', () {
     final product = Product.fromJson({
       'product_name': 'Food',
