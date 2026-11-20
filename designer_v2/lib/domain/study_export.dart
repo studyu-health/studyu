@@ -28,6 +28,12 @@ class StudyExportData({
 extension StudyExportX on Study {
   // TODO: add missing records from generated schedule
 
+  static DateTime _recordTime(SubjectProgress record) {
+    final result = record.result.result;
+    return (result is DailyRecall ? result.entryCompletedAt : null) ??
+        record.completedAt!;
+  }
+
   static dynamic _formatQuestionResponse(dynamic response, Question question) {
     if (question is ChoiceQuestion && response is List<String>) {
       return _formatChoiceResponse(response, question);
@@ -53,7 +59,7 @@ extension StudyExportX on Study {
 
     final records = [...?participantsProgress];
     records.sort(
-      (b, a) => a.completedAt!.compareTo(b.completedAt!),
+      (b, a) => _recordTime(a).compareTo(_recordTime(b)),
     ); // descending
     final inviteCodeByParticipant = {
       for (final participant in participants ?? <StudySubject>[])
@@ -137,9 +143,11 @@ extension StudyExportX on Study {
           (o) => o.id == record.taskId,
         );
         final Map<String, dynamic> row = {
-          'measurement_time': completedAt.toString(),
+          'measurement_time': (recallCompletion ?? completedAt).toString(),
           'measurement_id': record.taskId,
           'measurement_name': measurement?.title ?? invalidKey,
+          if (dailyRecall != null)
+            'measurement_period_id': record.result.periodId,
           ...rowShared,
         };
 

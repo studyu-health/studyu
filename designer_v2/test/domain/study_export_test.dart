@@ -94,6 +94,31 @@ void main() {
     expect(rows.single['current_day_of_study'], '0');
   });
 
+  test('exports nutrition periods with their recorded completion time', () {
+    final study = Study('study', 'owner');
+    final startedAt = DateTime.utc(2026);
+    final completedAt = DateTime.utc(
+      2026,
+      1,
+      2,
+    ).subtract(const Duration(microseconds: 1));
+    study.participantsProgress = [
+      _recallProgress(startedAt, completedAt, periodId: 'morning'),
+      _recallProgress(startedAt, completedAt, periodId: 'evening')
+        ..completedAt = completedAt.add(const Duration(microseconds: 1)),
+    ];
+
+    final rows = study.exportData.measurementsData;
+    expect(
+      rows.map((row) => row['measurement_period_id']),
+      unorderedEquals(['morning', 'evening']),
+    );
+    for (final row in rows) {
+      expect(row['measurement_time'], completedAt.toString());
+      expect(row['current_day_of_study'], '0');
+    }
+  });
+
   test('exports zero water and keeps unanswered water empty', () {
     final study = Study('study', 'owner')..participants = [];
     final startedAt = DateTime.utc(2026);
@@ -230,6 +255,7 @@ SubjectProgress _recallProgress(
   DateTime? startedAt,
   DateTime completedAt, {
   int? studyDay = 0,
+  String periodId = 'period',
   int? waterIntakeMl,
   bool isComplete = true,
 }) =>
@@ -240,7 +266,7 @@ SubjectProgress _recallProgress(
         resultType: 'DailyRecall',
         result: Result<DailyRecall>.app(
           type: 'DailyRecall',
-          periodId: 'period',
+          periodId: periodId,
           result: DailyRecall.withId(
             date: completedAt,
             recallMode: RecallMode.realtimeRecord,
