@@ -26,39 +26,36 @@ class Cache() {
   }
 
   static Future<StudySubject> loadSubject({StudySubject? backupSubject}) async {
-    // debugPrint("Load subject from cache");
-    if (await SecureStorage.containsKey(cacheSubjectKey)) {
-      final cachedSubjectStr = await SecureStorage.read(cacheSubjectKey);
-      final cachedSubject =
-          jsonDecode(cachedSubjectStr!) as Map<String, dynamic>;
-      try {
-        return StudySubject.fromJson(cachedSubject);
-      } catch (e) {
-        StudyULogger.warning(
-          "Failed to parse cached subject: $cachedSubjectStr",
-        );
-        if (backupSubject != null) {
-          // Only take progress from cached subject and rest from backup,
-          // as the cached subject might be outdated or corrupted
+    final stored = await SecureStorage.read(cacheSubjectKey);
+    if (stored == null) throw Exception('No cached subject found');
 
-          // compare IDs to make sure we are not mixing up subjects
-          // If IDs do not match we should not use the cached subject
-          if (backupSubject.id != cachedSubject['id']) {
-            throw Exception(
-              "Cached subject ID does not match remote subject ID",
-            );
-          }
-          final cachedProgress = (cachedSubject['progress'] as List?)
-              ?.map((e) => SubjectProgress.fromJson(e as Map<String, dynamic>))
-              .toList();
-          backupSubject.progress = cachedProgress ?? backupSubject.progress;
-          return backupSubject;
-        }
-        throw Exception("No backup subject provided");
-      }
-    } else {
-      throw Exception("No cached subject found");
+    final Map<String, dynamic> cachedSubject;
+    try {
+      cachedSubject = jsonDecode(stored) as Map<String, dynamic>;
+    } catch (_) {
+      throw const FormatException('Could not decode the cached subject.');
     }
+
+    try {
+      return StudySubject.fromJson(cachedSubject);
+    } catch (_) {
+      StudyULogger.warning('Could not parse the cached subject.');
+    }
+
+    if (backupSubject == null) throw Exception('No backup subject provided');
+    if (backupSubject.id != cachedSubject['id']) {
+      throw Exception('Cached subject ID does not match remote subject ID');
+    }
+
+    try {
+      final cachedProgress = (cachedSubject['progress'] as List?)
+          ?.map((e) => SubjectProgress.fromJson(e as Map<String, dynamic>))
+          .toList();
+      backupSubject.progress = cachedProgress ?? backupSubject.progress;
+    } catch (_) {
+      throw const FormatException('Could not decode cached subject progress.');
+    }
+    return backupSubject;
   }
 
   static Future<void> storeAnalytics(StudyUAnalytics analytics) async {

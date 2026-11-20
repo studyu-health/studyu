@@ -581,7 +581,7 @@ class _LoadingScreenState() extends State<LoadingScreen> {
       // Only fall back to cache for network errors (device offline)
       try {
         final cached = await Cache.loadSubject();
-        StudyULogger.info("Loaded subject from cache: $cached");
+        StudyULogger.info('Loaded the cached subject.');
         return cached;
       } catch (e) {
         StudyULogger.warning("No subject found in cache");

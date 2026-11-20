@@ -72,6 +72,21 @@ void main() {
     await directory.delete(recursive: true);
   });
 
+  test('malformed subject cache errors omit the stored data', () async {
+    cachedSubject = '{"recall": "private diary entry"';
+
+    await expectLater(
+      Cache.loadSubject(),
+      throwsA(
+        isA<FormatException>().having(
+          (error) => error.source,
+          'source',
+          isNull,
+        ),
+      ),
+    );
+  });
+
   test(
     'sync uploads missing progress even when both caches have equal counts',
     () async {
