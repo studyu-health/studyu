@@ -564,121 +564,105 @@ class const DeleteAlertDialog({super.key, required final StudySubject? subject})
 
 class _DeleteAlertDialogState() extends State<DeleteAlertDialog> {
   bool acknowledged = false;
+  bool _remoteDeleted = false;
+  bool _isDeleting = false;
+
+  Future<void> _deleteParticipation() async {
+    if (_isDeleting) return;
+    setState(() => _isDeleting = true);
+    final subject = widget.subject!;
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      if (!_remoteDeleted) {
+        try {
+          await subject.delete();
+        } on PostgrestException catch (error) {
+          if (error.code != 'PGRST116') rethrow;
+        }
+        _remoteDeleted = true;
+      }
+      await NutritionRecallAutoSaveManager().deleteSubjectDrafts(subject.id);
+      RestoreAccountService.clearCache();
+      await deleteLocalData();
+      await FitbitHandler.deleteFitbitCredentials(subject.studyId);
+      if (!mounted) return;
+      await cancelNotifications(context);
+      if (!mounted) return;
+      context.read<AppState>().clearAccountState();
+      context.pop(true);
+    } on SocketException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.no_internet_connection)));
+    } catch (error) {
+      StudyULogger.warning('Could not finish deleting study data: $error');
+      if (!mounted) return;
+      final message = error is PostgrestException
+          ? error.message
+          : error.toString();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.error_occurred_with_message(message))),
+      );
+    } finally {
+      if (mounted) setState(() => _isDeleting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AlertDialog(
-      title: Text(l10n.leave_study_delete_data_title),
-      actionsOverflowButtonSpacing: 12,
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.leave_study_delete_data_body(
-                widget.subject!.study.title ?? l10n.not_available,
+    return PopScope(
+      canPop: !_isDeleting && !_remoteDeleted,
+      child: AlertDialog(
+        title: Text(l10n.leave_study_delete_data_title),
+        actionsOverflowButtonSpacing: 12,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.leave_study_delete_data_body(
+                  widget.subject!.study.title ?? l10n.not_available,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              dense: true,
-              visualDensity: VisualDensity.compact,
-              title: Text(
-                l10n.acknowledge_consequences,
-                style: Theme.of(context).textTheme.bodyMedium,
+              const SizedBox(height: 12),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                dense: true,
+                visualDensity: VisualDensity.compact,
+                title: Text(
+                  l10n.acknowledge_consequences,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                value: acknowledged,
+                onChanged: _isDeleting || _remoteDeleted
+                    ? null
+                    : (value) => setState(() => acknowledged = value ?? false),
               ),
-              value: acknowledged,
-              onChanged: (value) {
-                setState(() => acknowledged = value ?? false);
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        OutlinedButton(onPressed: context.pop, child: Text(l10n.stay_in_study)),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.delete),
-          label: Text(l10n.leave_delete_data),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.error,
-            foregroundColor: colorScheme.onError,
+            ],
           ),
-          onPressed: acknowledged
-              ? () async {
-                  try {
-                    await widget.subject!.delete();
-                  } on SocketException catch (_) {
-                    // Device is offline — preserve local data so nothing is lost
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            AppLocalizations.of(context)!
-                                .no_internet_connection,
-                          ),
-                        ),
-                      );
-                    }
-                    return;
-                  } on PostgrestException catch (e) {
-                    if (e.code != 'PGRST116') {
-                      // Unexpected DB error — don't clear local data
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              AppLocalizations.of(context)!
-                                  .error_occurred_with_message(e.message),
-                            ),
-                          ),
-                        );
-                      }
-                      return;
-                    }
-                    // PGRST116: subject already deleted from DB — proceed with local cleanup
-                  }
-                  // Reached when delete succeeded or subject was already gone from DB
-                  try {
-                    await NutritionRecallAutoSaveManager().deleteSubjectDrafts(
-                      widget.subject!.id,
-                    );
-                  } catch (error) {
-                    StudyULogger.warning(
-                      'Could not remove local nutrition drafts: $error',
-                    );
-                    if (!context.mounted) return;
-                    final l10n = AppLocalizations.of(context)!;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          l10n.error_occurred_with_message('$error'),
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-                  RestoreAccountService.clearCache();
-                  await deleteLocalData();
-                  await FitbitHandler.deleteFitbitCredentials(
-                    widget.subject!.studyId,
-                  );
-                  if (context.mounted) await cancelNotifications(context);
-                  if (context.mounted) {
-                    // Clear the in-memory active study state so the
-                    // participant can legitimately enroll in a new study.
-                    context.read<AppState>().clearAccountState();
-                    context.pop(true);
-                  }
-                }
-              : null,
         ),
-      ],
+        actions: [
+          OutlinedButton(
+            onPressed: _isDeleting || _remoteDeleted ? null : context.pop,
+            child: Text(l10n.stay_in_study),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.delete),
+            label: Text(l10n.leave_delete_data),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            onPressed: acknowledged && !_isDeleting
+                ? _deleteParticipation
+                : null,
+          ),
+        ],
+      ),
     );
   }
 }
