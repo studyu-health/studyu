@@ -3255,4 +3255,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get form_field_nutrition_track_water_help =>
       'Allow participants to log how much water they drink each day.';
+
+  @override
+  String get form_survey_template_days_outside_study =>
+      'Some days fall outside the study. Select individual available days.';
+
+  @override
+  String get form_survey_template_day_outside_study => 'Outside the study';
 }

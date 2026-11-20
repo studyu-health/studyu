@@ -1287,5 +1287,7 @@
   "form_field_report_data_source_hint": "Select a data source",
   "form_field_report_data_source_empty": "No scale survey question defined",
   "form_field_nutrition_track_water": "Track water intake",
-  "form_field_nutrition_track_water_help": "Allow participants to log how much water they drink each day."
+  "form_field_nutrition_track_water_help": "Allow participants to log how much water they drink each day.",
+  "form_survey_template_days_outside_study": "Some days fall outside the study. Select individual available days.",
+  "form_survey_template_day_outside_study": "Outside the study"
 }

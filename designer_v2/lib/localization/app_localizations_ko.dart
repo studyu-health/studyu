@@ -3148,4 +3148,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get form_field_nutrition_track_water_help =>
       '참여자가 매일 마신 물의 양을 기록할 수 있습니다.';
+
+  @override
+  String get form_survey_template_days_outside_study =>
+      '일부 날짜가 연구 기간을 벗어납니다. 선택할 수 있는 날짜를 개별적으로 선택하세요.';
+
+  @override
+  String get form_survey_template_day_outside_study => '연구 기간 외';
 }

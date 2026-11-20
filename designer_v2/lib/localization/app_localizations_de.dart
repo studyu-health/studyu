@@ -3285,4 +3285,12 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get form_field_nutrition_track_water_help =>
       'Teilnehmende können erfassen, wie viel Wasser sie täglich trinken.';
+
+  @override
+  String get form_survey_template_days_outside_study =>
+      'Einige Tage liegen außerhalb der Studiendauer. Wählen Sie einzelne verfügbare Tage aus.';
+
+  @override
+  String get form_survey_template_day_outside_study =>
+      'Außerhalb der Studiendauer';
 }

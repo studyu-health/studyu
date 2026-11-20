@@ -243,11 +243,15 @@ class MeasurementsFormViewModel({
     return viewModel;
   }
 
-  Future<void> addPredefinedMeasurements({
+  Future<bool> addPredefinedMeasurements({
     required bool includeNutrition,
     required Iterable<SurveyTemplate> templates,
     required Iterable<SurveyTemplateDayEntry> dayEntries,
   }) async {
+    if (dayEntries.any((entry) => !canScheduleTemplateDay(entry))) {
+      return false;
+    }
+
     var changed = false;
 
     for (final template in templates) {
@@ -268,19 +272,23 @@ class MeasurementsFormViewModel({
     }
 
     if (changed) await save();
+    return true;
   }
+
+  bool canScheduleTemplateDay(SurveyTemplateDayEntry entry) =>
+      entry.dayIndex >= 0 && _templateStudyDay(entry) < study.schedule.length;
+
+  int _templateStudyDay(SurveyTemplateDayEntry entry) =>
+      study.schedule.baselineLength + entry.dayIndex;
 
   MeasurementSurveyFormViewModel? _viewModelForDayEntry(
     SurveyTemplateDayEntry entry,
   ) {
-    final task = entry.buildTask();
-    final phaseDuration = study.schedule.phaseDuration;
-    final baseDay = study.schedule.includeBaseline ? phaseDuration : 0;
-    final dayIndex = entry.dayIndex;
-    final studyDay = dayIndex < 7
-        ? baseDay + dayIndex
-        : baseDay + phaseDuration + (dayIndex - 7);
-    task.scheduleRule = TaskScheduleRule.forSpecificDays([studyDay]);
+    if (!canScheduleTemplateDay(entry)) return null;
+    final task = entry.buildTask()
+      ..scheduleRule = TaskScheduleRule.forSpecificDays([
+        _templateStudyDay(entry),
+      ]);
     return _viewModelForTask(task);
   }
 

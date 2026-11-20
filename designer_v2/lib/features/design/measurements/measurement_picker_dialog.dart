@@ -233,12 +233,19 @@ class _MeasurementPickerDialogState()
     setState(() => _isSubmitting = true);
 
     try {
-      await widget.formViewModel.addPredefinedMeasurements(
+      final added = await widget.formViewModel.addPredefinedMeasurements(
         includeNutrition: _nutritionSelected,
         templates: _selectedTemplates,
         dayEntries: _selectedDayEntries,
       );
-      if (mounted) Navigator.of(context).pop();
+      if (!mounted) return;
+      if (added) {
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr.form_survey_template_days_outside_study)),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -697,9 +704,19 @@ class _TemplateItemState() extends State<_TemplateItem> {
     final colorScheme = theme.colorScheme;
     final template = widget.template;
     final dayEntries = template.dayEntries ?? const <SurveyTemplateDayEntry>[];
+    final addedEntries = dayEntries
+        .where(
+          (entry) => widget.formViewModel.isSurveyWithTitleAdded(entry.title),
+        )
+        .toSet();
+    final unscheduledEntries = dayEntries
+        .where((entry) => !widget.formViewModel.canScheduleTemplateDay(entry))
+        .toSet();
     final availableDayEntries = dayEntries
         .where(
-          (entry) => !widget.formViewModel.isSurveyWithTitleAdded(entry.title),
+          (entry) =>
+              !addedEntries.contains(entry) &&
+              !unscheduledEntries.contains(entry),
         )
         .toList();
     final selectedDayEntries = availableDayEntries
@@ -708,7 +725,7 @@ class _TemplateItemState() extends State<_TemplateItem> {
     final allAvailableDaysSelected =
         availableDayEntries.isNotEmpty &&
         selectedDayEntries.length == availableDayEntries.length;
-    final addedDayCount = dayEntries.length - availableDayEntries.length;
+    final addedDayCount = addedEntries.length;
     final anyDaySelected = selectedDayEntries.isNotEmpty;
     final checkedDayCount = addedDayCount + selectedDayEntries.length;
     final allDaysChecked =
@@ -718,6 +735,7 @@ class _TemplateItemState() extends State<_TemplateItem> {
     final enabled = template.isMultiDay
         ? availableDayEntries.isNotEmpty
         : !_isAlreadyAdded;
+    final allDaysAvailable = unscheduledEntries.isEmpty && enabled;
 
     final header = Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -759,7 +777,8 @@ class _TemplateItemState() extends State<_TemplateItem> {
               ],
             ),
           ),
-          if (!enabled) ...[
+          if ((!template.isMultiDay && !enabled) ||
+              (template.isMultiDay && addedDayCount == dayEntries.length)) ...[
             const SizedBox(width: 8),
             _AddedBadge(text: tr.form_survey_template_added_to_study),
           ],
@@ -771,7 +790,7 @@ class _TemplateItemState() extends State<_TemplateItem> {
               onChanged: (value) => widget.onChanged(template, value ?? false),
             ),
           ],
-          if (template.isMultiDay && enabled) ...[
+          if (template.isMultiDay && addedDayCount < dayEntries.length) ...[
             const SizedBox(width: 8),
             IconButton(
               key: ValueKey('measurement-picker-expand-${template.id}'),
@@ -813,7 +832,7 @@ class _TemplateItemState() extends State<_TemplateItem> {
                       key: ValueKey('measurement-picker-all-${template.id}'),
                       dense: true,
                       tristate: true,
-                      enabled: availableDayEntries.isNotEmpty,
+                      enabled: allDaysAvailable,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 24,
                       ),
@@ -828,7 +847,7 @@ class _TemplateItemState() extends State<_TemplateItem> {
                           : anyDaysChecked
                           ? null
                           : false,
-                      onChanged: availableDayEntries.isEmpty
+                      onChanged: !allDaysAvailable
                           ? null
                           : (_) => widget.onDayEntriesChanged(
                               availableDayEntries,
@@ -841,7 +860,9 @@ class _TemplateItemState() extends State<_TemplateItem> {
                         ),
                       ),
                       subtitle: Text(
-                        tr.form_survey_template_select_every_survey,
+                        unscheduledEntries.isEmpty
+                            ? tr.form_survey_template_select_every_survey
+                            : tr.form_survey_template_days_outside_study,
                       ),
                     ),
                     for (final entry in dayEntries)
@@ -849,6 +870,9 @@ class _TemplateItemState() extends State<_TemplateItem> {
                         entry: entry,
                         selected: widget.selectedDayEntries.contains(entry),
                         enabled: availableDayEntries.contains(entry),
+                        outsideStudy:
+                            !addedEntries.contains(entry) &&
+                            unscheduledEntries.contains(entry),
                         onChanged: widget.onDayEntryChanged,
                       ),
                   ],
@@ -866,6 +890,7 @@ class const _DayEntryTile({
   required final SurveyTemplateDayEntry entry,
   required final bool selected,
   required final bool enabled,
+  required final bool outsideStudy,
   required final void Function(SurveyTemplateDayEntry, bool) onChanged,
 }) extends StatelessWidget {
   @override
@@ -900,7 +925,9 @@ class const _DayEntryTile({
         tileColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
         contentPadding: const EdgeInsets.symmetric(horizontal: 24),
         title: title,
-        trailing: const _AddedBadge(),
+        trailing: outsideStudy
+            ? Text(tr.form_survey_template_day_outside_study)
+            : const _AddedBadge(),
       );
     }
 

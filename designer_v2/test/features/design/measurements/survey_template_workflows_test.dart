@@ -126,6 +126,46 @@ void main() {
     );
   });
 
+  test('schedules DHQ3 on consecutive days after baseline', () async {
+    final measurements = _measurements();
+    measurements.study.schedule.phaseDuration = 5;
+    final entries = SurveyTemplateRegistry.findById('dhq3_14day')!.dayEntries!;
+
+    expect(
+      await measurements.addPredefinedMeasurements(
+        includeNutrition: false,
+        templates: [],
+        dayEntries: entries,
+      ),
+      isTrue,
+    );
+    final days = measurements.measurementViewModels
+        .whereType<MeasurementSurveyFormViewModel>()
+        .map((survey) => survey.previewDays.single);
+    expect(days, List.generate(14, (index) => index + 5));
+  });
+
+  test('rejects the selection when a DHQ3 day is outside the study', () async {
+    final measurements = _measurements();
+    measurements.study.schedule
+      ..includeBaseline = false
+      ..numberOfCycles = 1
+      ..phaseDuration = 5;
+    final entries = SurveyTemplateRegistry.findById('dhq3_14day')!.dayEntries!;
+
+    expect(measurements.canScheduleTemplateDay(entries[9]), isTrue);
+    expect(measurements.canScheduleTemplateDay(entries[10]), isFalse);
+    expect(
+      await measurements.addPredefinedMeasurements(
+        includeNutrition: true,
+        templates: [],
+        dayEntries: entries,
+      ),
+      isFalse,
+    );
+    expect(measurements.measurementViewModels, isEmpty);
+  });
+
   test('disabled occurrence schedule delegates to the default schedule', () {
     final survey = MeasurementSurveyFormViewModel(
       study: Study.withId('study-1'),

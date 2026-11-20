@@ -102,6 +102,44 @@ void main() {
     expect(surveys, hasLength(1));
     expect(surveys.single.buildFormData().title, entry.title);
   });
+
+  testWidgets('disables DHQ3 days outside a short study', (tester) async {
+    final measurements = _measurements();
+    measurements.study.schedule
+      ..includeBaseline = false
+      ..numberOfCycles = 1
+      ..phaseDuration = 5;
+    await _pumpPicker(tester, measurements);
+
+    final expandButton = find.byKey(
+      const ValueKey('measurement-picker-expand-dhq3_14day'),
+    );
+    await tester.ensureVisible(expandButton);
+    await tester.pump();
+    await tester.tap(expandButton);
+    await tester.pump();
+
+    final allDays = tester.widget<CheckboxListTile>(
+      find.byKey(const ValueKey('measurement-picker-all-dhq3_14day')),
+    );
+    expect(allDays.onChanged, isNull);
+    expect(
+      tester
+          .widget<CheckboxListTile>(
+            find.byKey(const ValueKey('measurement-picker-day-9')),
+          )
+          .onChanged,
+      isNotNull,
+    );
+    expect(
+      tester
+          .widget<ListTile>(
+            find.byKey(const ValueKey('measurement-picker-day-10')),
+          )
+          .enabled,
+      isFalse,
+    );
+  });
 }
 
 Future<void> _pumpPicker(
