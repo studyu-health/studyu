@@ -222,9 +222,9 @@ void main() {
     );
 
     test('keeps the snapshot when the server lookup fails', () async {
-      handleRequest = (request) async {
+      handleRequest = (request) {
         expectIdentityQuery(request);
-        throw const SocketException('offline');
+        return Future.error(const SocketException('offline'));
       };
 
       expect(await submit(), isTrue);
