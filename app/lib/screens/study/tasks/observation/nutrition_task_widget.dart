@@ -347,6 +347,7 @@ class _NutritionTaskWidgetState()
                           isVisible: _selectedDestination == 1,
                           subject: appState.activeSubject,
                           taskId: widget.task?.id,
+                          task: widget.task,
                           activeRecall: model.recall,
                           activeStudyDay: model.studyDaySnapshot,
                           activePeriodId:

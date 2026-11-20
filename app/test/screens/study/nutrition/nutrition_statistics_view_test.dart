@@ -58,6 +58,49 @@ void main() {
     },
   );
 
+  test('requires all scheduled periods to count a complete day', () {
+    final day = DateTime.utc(2026, 7, 16);
+    final task = NutritionTask.withId()
+      ..schedule.completionPeriods = [
+        CompletionPeriod.noId(
+          unlockTime: StudyUTimeOfDay(hour: 8),
+          lockTime: StudyUTimeOfDay(hour: 12),
+        ),
+        CompletionPeriod.noId(
+          unlockTime: StudyUTimeOfDay(hour: 17),
+          lockTime: StudyUTimeOfDay(hour: 21),
+        ),
+      ];
+    final first = _record(
+      date: day,
+      studyDay: 1,
+      energyKcal: 100,
+      periodId: task.schedule.completionPeriods.first.id,
+    );
+    final second = _record(
+      date: day,
+      studyDay: 1,
+      energyKcal: 150,
+      periodId: task.schedule.completionPeriods.last.id,
+    );
+
+    final incomplete = nutritionStatisticsPeriod(
+      nutritionStatisticsDays([first], task: task),
+      endDate: day,
+      dayCount: 1,
+    );
+    expect(incomplete.recordedCount, 0);
+    expect(incomplete.averageFor('energyKcal'), isNull);
+
+    final complete = nutritionStatisticsPeriod(
+      nutritionStatisticsDays([first, second], task: task),
+      endDate: day,
+      dayCount: 1,
+    );
+    expect(complete.recordedCount, 1);
+    expect(complete.averageFor('energyKcal'), 250);
+  });
+
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets(
@@ -862,6 +905,7 @@ NutritionRecallRecord _record({
   required double energyKcal,
   double carbs = 0.2,
   bool completed = true,
+  String periodId = 'period',
   Set<String> unavailableNutrients = const {},
   Set<String> partialNutrients = const {},
 }) {
@@ -877,24 +921,25 @@ NutritionRecallRecord _record({
   return NutritionRecallRecord(
     recall: recall,
     taskId: 'task',
-    periodId: 'period',
+    periodId: periodId,
     interventionId: 'intervention',
     studyDaySnapshot: studyDay,
-    progress: _progress(recall),
+    progress: _progress(recall, periodId: periodId),
   );
 }
 
-SubjectProgress _progress(DailyRecall recall) => SubjectProgress(
-  subjectId: 'subject',
-  interventionId: 'intervention',
-  taskId: 'task',
-  resultType: 'DailyRecall',
-  result: Result<DailyRecall>.app(
-    type: 'DailyRecall',
-    periodId: 'period',
-    result: recall,
-  ),
-)..completedAt = recall.date.add(const Duration(hours: 12));
+SubjectProgress _progress(DailyRecall recall, {String periodId = 'period'}) =>
+    SubjectProgress(
+      subjectId: 'subject',
+      interventionId: 'intervention',
+      taskId: 'task',
+      resultType: 'DailyRecall',
+      result: Result<DailyRecall>.app(
+        type: 'DailyRecall',
+        periodId: periodId,
+        result: recall,
+      ),
+    )..completedAt = recall.date.add(const Duration(hours: 12));
 
 DailyRecall _recall({
   required DateTime date,

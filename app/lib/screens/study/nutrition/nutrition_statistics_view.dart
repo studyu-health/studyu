@@ -13,6 +13,7 @@ import 'package:studyu_core/core.dart';
 class const NutritionStatisticsView({
   final StudySubject? subject,
   final String? taskId,
+  final NutritionTask? task,
   final DailyRecall? activeRecall,
   final int? activeStudyDay,
   final String? activePeriodId,
@@ -98,6 +99,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
         final statisticsDays = nutritionStatisticsDays(
           snapshot.data!,
           subject: subject,
+          task: widget.task,
           activeRecall: widget.activeRecall,
           activeStudyDay: widget.activeStudyDay,
           activePeriodId: widget.activePeriodId,
@@ -1180,6 +1182,7 @@ class const NutritionStatisticsPeriod(
 List<NutritionStatisticsDay> nutritionStatisticsDays(
   List<NutritionRecallRecord> records, {
   StudySubject? subject,
+  NutritionTask? task,
   DailyRecall? activeRecall,
   int? activeStudyDay,
   String? activePeriodId,
@@ -1228,14 +1231,37 @@ List<NutritionStatisticsDay> nutritionStatisticsDays(
     final completedRecord = recordsForDate
         .where((record) => record.isCompleted)
         .firstOrNull;
+    final allRecordsCompleted =
+        recordsForDate.every((record) => record.isCompleted) &&
+        (active == null ||
+            (active.entryCompletedAt != null && replaced?.isCompleted == true));
+    final completedPeriods = {
+      for (final record in recordsForDate)
+        if (record.isCompleted) record.periodId,
+      if (active?.entryCompletedAt != null && replaced?.isCompleted == true)
+        replaced!.periodId,
+    };
+    final scheduledPeriods = task?.schedule.completionPeriods;
+    final day = active != null
+        ? activeDay
+        : recordsForDate.firstOrNull?.studyDaySnapshot;
+    final scheduleRule = task?.scheduleRule;
+    final isScheduled =
+        scheduleRule == null ||
+        (subject != null &&
+            day != null &&
+            scheduleRule.isScheduledForDay(day, subject.study.schedule));
     return NutritionStatisticsDay(
       date: date,
       nutrition: sumNutritionFoods(foods),
       isRecorded:
-          recordsForDate.every((record) => record.isCompleted) &&
-          (active == null ||
-              (active.entryCompletedAt != null &&
-                  replaced?.isCompleted == true)),
+          allRecordsCompleted &&
+          isScheduled &&
+          (scheduledPeriods == null ||
+              scheduledPeriods.isNotEmpty &&
+                  scheduledPeriods.every(
+                    (period) => completedPeriods.contains(period.id),
+                  )),
       hasData: foods.isNotEmpty,
       record: completedRecord ?? replaced ?? recordsForDate.firstOrNull,
     );
