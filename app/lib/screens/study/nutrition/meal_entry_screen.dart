@@ -15,7 +15,6 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
-import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
@@ -887,7 +886,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       if (_distractionContext != null)
         _getDistractionContextLabel(_distractionContext!, l10n),
     ];
-    return details.isEmpty ? l10n.not_added : details.join(' • ');
+    return details.isEmpty ? l10n.optional : details.join(' • ');
   }
 
   Future<void> _selectTime() async {
@@ -1056,6 +1055,17 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final hasValidTime = _buildMeal().hasValidTimeAnswer(
+      hasSelectedTime: _hasSelectedTime,
+    );
+    final saveHint = _isSkipped
+        ? null
+        : _meal.foods.isEmpty
+        ? l10n.add_food_before_saving
+        : !hasValidTime
+        ? l10n.nutrition_select_time_to_save
+        : null;
 
     return PopScope(
       canPop: _allowPop || (!_isSaving && !_hasUnsavedChanges),
@@ -1064,20 +1074,45 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       },
       child: Scaffold(
         appBar: AppBar(title: Text(_pageTitle)),
-        floatingActionButton: NutritionSaveButton(
-          onPressed: !_isSaving && (_isSkipped || _isMealValid)
-              ? _saveMeal
-              : null,
+        bottomNavigationBar: Material(
+          color: theme.colorScheme.surface,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (saveHint != null) ...[
+                        Text(
+                          saveHint,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      FilledButton.icon(
+                        onPressed: !_isSaving && (_isSkipped || _isMealValid)
+                            ? _saveMeal
+                            : null,
+                        icon: const Icon(Icons.check),
+                        label: Text(l10n.nutrition_save_meal),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            16,
-            16,
-            16 +
-                NutritionSaveButton.scrollClearance +
-                MediaQuery.paddingOf(context).bottom,
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1130,7 +1165,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                       ? _openMealBuilder
                       : null,
                 ),
-                const SizedBox(height: 16),
               ],
               if (widget.existingMeal?.isSkipped == true)
                 Card(
@@ -1169,36 +1203,40 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                   ),
                 ),
               if (!_isSkipped) ...[
-                const SizedBox(height: 16),
-                _TimeSelector(
-                  timestamp: _timestamp,
-                  precision: _timePrecision,
-                  hasSelection: _hasSelectedTime,
-                  showValidationError:
-                      _hasAttemptedSave &&
-                      !_buildMeal().hasValidTimeAnswer(
-                        hasSelectedTime: _hasSelectedTime,
-                      ),
-                  onSelectTime: _selectTime,
-                  onSetNow: _canUseCurrentTime(DateTime.now())
-                      ? _setTimeToNow
-                      : null,
-                ),
                 const SizedBox(height: 8),
-                if (widget.task?.collectMealContext ?? true)
-                  _SettingsRow(
-                    icon: Icons.tune,
-                    label: l10n.meal_details,
-                    value: _mealDetailsSummary(l10n),
-                    onTap: _editMealDetails,
-                  )
-                else
-                  _SettingsRow(
-                    icon: Icons.label_outline,
-                    label: l10n.meal_label,
-                    value: _mealTypeChoiceLabel(_mealTypeSelection, l10n),
-                    onTap: _selectMealType,
+                Card(
+                  margin: EdgeInsets.zero,
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      _TimeSelector(
+                        timestamp: _timestamp,
+                        precision: _timePrecision,
+                        hasSelection: _hasSelectedTime,
+                        showValidationError: _hasAttemptedSave && !hasValidTime,
+                        onSelectTime: _selectTime,
+                        onSetNow: _canUseCurrentTime(DateTime.now())
+                            ? _setTimeToNow
+                            : null,
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      if (widget.task?.collectMealContext ?? true)
+                        _SettingsRow(
+                          icon: Icons.tune,
+                          label: l10n.meal_details,
+                          value: _mealDetailsSummary(l10n),
+                          onTap: _editMealDetails,
+                        )
+                      else
+                        _SettingsRow(
+                          icon: Icons.label_outline,
+                          label: l10n.meal_label,
+                          value: _mealTypeChoiceLabel(_mealTypeSelection, l10n),
+                          onTap: _selectMealType,
+                        ),
+                    ],
                   ),
+                ),
               ],
               if (widget.existingMeal != null) ...[
                 const SizedBox(height: 24),
@@ -1229,28 +1267,38 @@ class const _SettingsRow({
   required final String value,
   required final VoidCallback onTap,
   final String? errorText,
-  final Widget? trailing,
+  final bool inlineChevron = false,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        onTap: onTap,
-        leading: Icon(icon),
-        title: Text(label),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return ListTile(
+      onTap: onTap,
+      leading: Icon(icon),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      minLeadingWidth: 24,
+      horizontalTitleGap: 12,
+      title: Text(label),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (inlineChevron)
+            Row(
+              spacing: 2,
+              children: [
+                Flexible(child: Text(value)),
+                const Icon(Icons.chevron_right, size: 18),
+              ],
+            )
+          else
             Text(value),
-            if (errorText != null)
-              Text(
-                errorText!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-          ],
-        ),
-        trailing: trailing ?? const Icon(Icons.chevron_right),
+          if (errorText != null)
+            Text(
+              errorText!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+        ],
       ),
+      trailing: inlineChevron ? null : const Icon(Icons.chevron_right),
     );
   }
 }
@@ -1379,15 +1427,24 @@ class const _TimeSelector({
             TimeOfDay.fromDateTime(timestamp!.toLocal()).format(context),
           )
         : TimeOfDay.fromDateTime(timestamp!.toLocal()).format(context);
-    return _SettingsRow(
-      icon: Icons.access_time_rounded,
-      label: l10n.time,
-      value: value,
-      errorText: showValidationError ? l10n.required_error : null,
-      onTap: onSelectTime,
-      trailing: onSetNow == null
-          ? null
-          : TextButton(onPressed: onSetNow, child: Text(l10n.time_now)),
+    return Row(
+      children: [
+        Expanded(
+          child: _SettingsRow(
+            icon: Icons.access_time_rounded,
+            label: l10n.time,
+            value: value,
+            errorText: showValidationError ? l10n.required_error : null,
+            onTap: onSelectTime,
+            inlineChevron: true,
+          ),
+        ),
+        if (onSetNow != null)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 8),
+            child: TextButton(onPressed: onSetNow, child: Text(l10n.time_now)),
+          ),
+      ],
     );
   }
 }
@@ -1410,41 +1467,25 @@ class const _FoodListSection({
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) => Row(
-            spacing: 4,
+        SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
             children: [
-              Expanded(
-                child: Text(
-                  allowMeals
-                      ? l10n.nutrition_logged_foods_and_meals
-                      : l10n.food_items,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              Text(
+                l10n.nutrition_meal_items,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              if (meal.foods.isNotEmpty && saveToLibrary != null)
-                IconButton(
-                  tooltip: l10n.nutrition_create_saved_meal_from_log,
-                  onPressed: saveToLibrary,
-                  icon: const Icon(Icons.bookmark_add_outlined),
-                ),
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: constraints.maxWidth / 2),
-                child: meal.foods.isEmpty
-                    ? NutritionAddButton(
-                        label: l10n.add_food,
-                        tooltip: allowMeals
-                            ? l10n.nutrition_add_food_or_saved_meal
-                            : null,
-                        onPressed: onAddFood,
-                      )
-                    : TextButton.icon(
-                        onPressed: onAddFood,
-                        icon: const Icon(Icons.edit_outlined),
-                        label: Text(l10n.edit),
-                      ),
+              NutritionAddButton(
+                label: l10n.add_food,
+                tooltip: allowMeals
+                    ? l10n.nutrition_add_food_or_saved_meal
+                    : null,
+                onPressed: onAddFood,
               ),
             ],
           ),
@@ -1478,6 +1519,15 @@ class const _FoodListSection({
               actionMenu: foodActionMenuBuilder(food),
             ),
           ),
+        if (meal.foods.isNotEmpty && saveToLibrary != null)
+          Tooltip(
+            message: l10n.nutrition_create_saved_meal_from_log,
+            child: TextButton.icon(
+              onPressed: saveToLibrary,
+              icon: const Icon(Icons.bookmark_add_outlined),
+              label: Text(l10n.save_to_my_items_action),
+            ),
+          ),
       ],
     );
   }
@@ -1493,7 +1543,8 @@ class const _FoodCard({
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    final icon = food.entryType == FoodEntryType.meal
+    final isSavedMeal = food.entryType == FoodEntryType.meal;
+    final icon = isSavedMeal
         ? Icons.restaurant_menu_outlined
         : Icons.restaurant_outlined;
     final imageUrl = foodImageUrl(food);
@@ -1540,17 +1591,11 @@ class const _FoodCard({
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Semantics(
-                              label: food.entryType == FoodEntryType.meal
-                                  ? l10n.nutrition_saved_meal_badge
-                                  : l10n.nutrition_food_badge,
-                              child: Text(
-                                food.entryType == FoodEntryType.meal
-                                    ? l10n.nutrition_saved_meal_badge
-                                    : l10n.nutrition_food_badge,
+                            if (isSavedMeal)
+                              Text(
+                                l10n.nutrition_saved_meal_badge,
                                 style: theme.textTheme.labelSmall,
                               ),
-                            ),
                             Text(
                               food.name,
                               style: theme.textTheme.titleSmall?.copyWith(

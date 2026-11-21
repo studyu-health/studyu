@@ -629,7 +629,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(MealEntryScreen), findsOneWidget);
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('Save meal'));
     await tester.pumpAndSettle();
     expect(find.byType(MealEntryScreen), findsNothing);
     final draft = (await manager.scanPendingRecalls(setup.subject.id)).single;
@@ -1193,7 +1193,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text("I don't remember"));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('Save meal'));
     await tester.pumpAndSettle();
 
     final saved = model.recall.meals.single;
@@ -1330,7 +1330,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(FoodSearchScreen), findsOneWidget);
     await _selectSavedSoup(tester);
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('Save meal'));
     await tester.pumpAndSettle();
 
     expect(find.byType(MealEntryScreen), findsNothing);

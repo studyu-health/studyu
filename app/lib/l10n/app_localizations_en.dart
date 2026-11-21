@@ -3134,9 +3134,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nutrition_logged_foods_and_meals => 'Foods and saved meals';
-
-  @override
   String get nutrition_add_food_or_saved_meal => 'Add food or saved meal';
 
   @override
@@ -3406,4 +3403,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get time_now => 'Now';
+
+  @override
+  String get nutrition_meal_items => 'Items';
+
+  @override
+  String get nutrition_save_meal => 'Save meal';
+
+  @override
+  String get nutrition_select_time_to_save => 'Select a time to save';
 }

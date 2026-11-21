@@ -3176,10 +3176,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get nutrition_logged_foods_and_meals =>
-      'Lebensmittel und gespeicherte Mahlzeiten';
-
-  @override
   String get nutrition_add_food_or_saved_meal =>
       'Lebensmittel oder gespeicherte Mahlzeit hinzufügen';
 
@@ -3455,4 +3451,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get time_now => 'Jetzt';
+
+  @override
+  String get nutrition_meal_items => 'Einträge';
+
+  @override
+  String get nutrition_save_meal => 'Mahlzeit speichern';
+
+  @override
+  String get nutrition_select_time_to_save =>
+      'Wählen Sie zum Speichern eine Uhrzeit aus';
 }

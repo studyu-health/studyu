@@ -5593,12 +5593,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1 {1 item} other {{count} items}}'**
   String food_selection_items_count(num count);
 
-  /// No description provided for @nutrition_logged_foods_and_meals.
-  ///
-  /// In en, this message translates to:
-  /// **'Foods and saved meals'**
-  String get nutrition_logged_foods_and_meals;
-
   /// No description provided for @nutrition_add_food_or_saved_meal.
   ///
   /// In en, this message translates to:
@@ -6072,6 +6066,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Now'**
   String get time_now;
+
+  /// No description provided for @nutrition_meal_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get nutrition_meal_items;
+
+  /// No description provided for @nutrition_save_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save meal'**
+  String get nutrition_save_meal;
+
+  /// No description provided for @nutrition_select_time_to_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a time to save'**
+  String get nutrition_select_time_to_save;
 }
 
 class _AppLocalizationsDelegate

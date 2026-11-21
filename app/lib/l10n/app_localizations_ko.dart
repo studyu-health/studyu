@@ -2056,7 +2056,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fat => 'Fat';
 
   @override
-  String get optional => 'Optional';
+  String get optional => '선택 사항';
 
   @override
   String get saturated_fat_g => '포화지방 (g)';
@@ -3074,9 +3074,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nutrition_logged_foods_and_meals => 'Foods and saved meals';
-
-  @override
   String get nutrition_add_food_or_saved_meal => 'Add food or saved meal';
 
   @override
@@ -3338,4 +3335,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get time_now => '지금';
+
+  @override
+  String get nutrition_meal_items => '항목';
+
+  @override
+  String get nutrition_save_meal => '식사 저장';
+
+  @override
+  String get nutrition_select_time_to_save => '저장하려면 시간을 선택하세요';
 }

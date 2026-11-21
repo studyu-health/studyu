@@ -1196,7 +1196,6 @@
   "food_quantity_edit_amount": "Menge bearbeiten",
   "food_quantity_nutrition_for_amount": "Nährwerte für {amount} {unit}",
   "food_selection_items_count": "{count, plural, =1 {1 Lebensmittel} other {{count} Lebensmittel}}",
-  "nutrition_logged_foods_and_meals": "Lebensmittel und gespeicherte Mahlzeiten",
   "nutrition_add_food_or_saved_meal": "Lebensmittel oder gespeicherte Mahlzeit hinzufügen",
   "nutrition_food_badge": "Lebensmittel",
   "nutrition_saved_meal_badge": "Gespeicherte Mahlzeit",
@@ -1320,5 +1319,8 @@
   "nutrition_photo_invalid": "Dieses Foto konnte nicht geöffnet werden. Wähle ein anderes Bild oder prüfe den Kamerazugriff.",
   "nutrition_photo_save_failed": "Dein Eintrag wurde gespeichert. Die Fotoänderung konnte nicht gespeichert werden.",
   "nutrition_photo_retry": "Foto erneut speichern",
-  "time_now": "Jetzt"
+  "time_now": "Jetzt",
+  "nutrition_meal_items": "Einträge",
+  "nutrition_save_meal": "Mahlzeit speichern",
+  "nutrition_select_time_to_save": "Wählen Sie zum Speichern eine Uhrzeit aus"
 }
