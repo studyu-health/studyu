@@ -40,6 +40,7 @@ void main() {
   late bool subjectExists;
   late bool rejectIdentity;
   late bool rejectSubjectRead;
+  late bool hasMealPhoto;
 
   Future<void> saveDraft(String subjectId) =>
       NutritionRecallAutoSaveManager().saveRecall(
@@ -84,6 +85,24 @@ void main() {
                 : [
                     if (subjectExists) {'id': pending.subjectId},
                   ];
+          case '/storage/v1/object/list/nutrition-photos':
+            status = 200;
+            final prefix = (jsonDecode(request.body) as Map)['prefix'];
+            body = [
+              if (prefix == 'participant/withdrawn-subject/meal' &&
+                  hasMealPhoto)
+                {'name': 'meal-photo.jpg'},
+            ];
+          case '/storage/v1/object/nutrition-photos':
+            expect(request.method, 'DELETE');
+            expect(jsonDecode(request.body), {
+              'prefixes': ['participant/withdrawn-subject/meal/meal-photo.jpg'],
+            });
+            hasMealPhoto = false;
+            status = 200;
+            body = [
+              {'name': 'meal-photo.jpg'},
+            ];
           default:
             throw StateError('Unexpected request');
         }
@@ -111,6 +130,7 @@ void main() {
     subjectExists = false;
     rejectIdentity = false;
     rejectSubjectRead = false;
+    hasMealPhoto = false;
     failingDeleteKey = null;
     storage = {
       selectedSubjectIdKey: pending.subjectId,
@@ -198,6 +218,7 @@ void main() {
     final state = AppState()..activeSubject = subject;
     addTearDown(state.dispose);
 
+    hasMealPhoto = true;
     failingDeleteKey = cacheSubjectKey;
     await expectLater(
       confirmed.clearStudyData(state),
@@ -208,12 +229,17 @@ void main() {
     expect(storage, isNot(contains(selectedSubjectIdKey)));
     final restored = (await StudyWithdrawalCleanup.load())!;
     expect(restored.confirmed, isTrue);
+    expect(restored.photosDeleted, isTrue);
 
     failingDeleteKey = null;
     await restored.clearStudyData(state);
     expect(await StudyWithdrawalCleanup.load(), isNull);
     expect(state.activeSubject, isNull);
-    expect(requests, isEmpty);
+    expect(requests, [
+      ...List.filled(2, '/storage/v1/object/list/nutrition-photos'),
+      '/storage/v1/object/nutrition-photos',
+      '/storage/v1/object/list/nutrition-photos',
+    ]);
 
     await saveDraft(subject.id);
     await Cache.storeSubject(subject);

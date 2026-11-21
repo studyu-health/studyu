@@ -225,9 +225,14 @@ class _LoadingScreenState() extends State<LoadingScreen> {
       var pending = await StudyWithdrawalCleanup.load();
       if (pending == null) return true;
 
+      if (!pending.confirmed &&
+          await getActiveSubjectId() != pending.subjectId) {
+        return true;
+      }
+      if (!pending.photosDeleted && await _restoreParticipantSession()) {
+        return false;
+      }
       if (!pending.confirmed) {
-        if (await getActiveSubjectId() != pending.subjectId) return true;
-        if (await _restoreParticipantSession()) return false;
         final subjectExists = await pending.remoteSubjectExists();
         if (subjectExists == null) {
           throw StateError('Could not verify the account for study deletion.');

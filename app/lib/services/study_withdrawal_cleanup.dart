@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_app/services/restore_account_service.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/fitbit_handler.dart';
@@ -14,6 +15,7 @@ class const StudyWithdrawalCleanup({
   required final String studyId,
   required final String userId,
   final bool confirmed = false,
+  final bool photosDeleted = false,
 }) {
   static const _key = 'pending_study_withdrawal';
 
@@ -26,6 +28,7 @@ class const StudyWithdrawalCleanup({
       studyId: data['studyId'] as String,
       userId: data['userId'] as String,
       confirmed: data['confirmed'] as bool,
+      photosDeleted: data['photosDeleted'] == true,
     );
   }
 
@@ -36,6 +39,7 @@ class const StudyWithdrawalCleanup({
       'studyId': studyId,
       'userId': userId,
       'confirmed': confirmed,
+      'photosDeleted': photosDeleted,
     }),
   );
 
@@ -71,6 +75,17 @@ class const StudyWithdrawalCleanup({
 
   Future<void> clearStudyData(AppState state) async {
     assert(confirmed);
+    if (!photosDeleted) {
+      await NutritionPhotoStorage.forClient(client)
+          .deleteSubject((userId: userId, subjectId: subjectId));
+      await StudyWithdrawalCleanup(
+        subjectId: subjectId,
+        studyId: studyId,
+        userId: userId,
+        confirmed: true,
+        photosDeleted: true,
+      ).record();
+    }
     Cache.invalidateSubject(subjectId);
     await NutritionRecallAutoSaveManager().deleteSubjectDrafts(subjectId);
     final activeSubjectId = await getActiveSubjectId();
