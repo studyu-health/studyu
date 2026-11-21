@@ -3403,4 +3403,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_photo_retry => 'Retry photo';
+
+  @override
+  String get time_now => 'Now';
 }

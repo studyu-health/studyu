@@ -1319,5 +1319,6 @@
   "nutrition_photo_choose": "Foto auswählen",
   "nutrition_photo_invalid": "Dieses Foto konnte nicht geöffnet werden. Wähle ein anderes Bild oder prüfe den Kamerazugriff.",
   "nutrition_photo_save_failed": "Dein Eintrag wurde gespeichert. Die Fotoänderung konnte nicht gespeichert werden.",
-  "nutrition_photo_retry": "Foto erneut speichern"
+  "nutrition_photo_retry": "Foto erneut speichern",
+  "time_now": "Jetzt"
 }

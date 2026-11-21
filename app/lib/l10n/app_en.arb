@@ -1499,5 +1499,6 @@
   "nutrition_photo_choose": "Choose photo",
   "nutrition_photo_invalid": "Could not open this photo. Try a different image or check camera access.",
   "nutrition_photo_save_failed": "Your entry was saved. The photo change could not be saved.",
-  "nutrition_photo_retry": "Retry photo"
+  "nutrition_photo_retry": "Retry photo",
+  "time_now": "Now"
 }

@@ -3452,4 +3452,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_photo_retry => 'Foto erneut speichern';
+
+  @override
+  String get time_now => 'Jetzt';
 }

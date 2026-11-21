@@ -6066,6 +6066,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry photo'**
   String get nutrition_photo_retry;
+
+  /// No description provided for @time_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get time_now;
 }
 
 class _AppLocalizationsDelegate

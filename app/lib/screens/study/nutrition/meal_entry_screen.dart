@@ -940,12 +940,29 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     }
     final selectedTime = timestamp;
     if (selectedTime == null || !mounted) return;
+    _setMealTime(selectedTime, selection.precision);
+  }
+
+  bool _canUseCurrentTime(DateTime now) {
+    final selectedDay = widget.occurrenceDate;
+    return selectedDay == null ||
+        DateUtils.isSameDay(selectedDay, selectedDay.isUtc ? now.toUtc() : now);
+  }
+
+  void _setTimeToNow() {
+    final now = DateTime.now();
+    if (_canUseCurrentTime(now)) {
+      _setMealTime(now, MealOccurrenceTimePrecision.exact);
+    }
+  }
+
+  void _setMealTime(DateTime localTime, MealOccurrenceTimePrecision precision) {
     setState(() {
-      _timestamp = selectedDay?.isUtc == true
-          ? selectedTime.toUtc()
-          : selectedTime;
-      _selectedTimeZoneName = selectedTime.timeZoneName;
-      _timePrecision = selection.precision;
+      _timestamp = widget.occurrenceDate?.isUtc == true
+          ? localTime.toUtc()
+          : localTime;
+      _selectedTimeZoneName = localTime.timeZoneName;
+      _timePrecision = precision;
       _hasSelectedTime = true;
     });
   }
@@ -1151,6 +1168,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                         hasSelectedTime: _hasSelectedTime,
                       ),
                   onSelectTime: _selectTime,
+                  onSetNow: _canUseCurrentTime(DateTime.now())
+                      ? _setTimeToNow
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 _SettingsRow(
@@ -1200,6 +1220,7 @@ class const _SettingsRow({
   required final String value,
   required final VoidCallback onTap,
   final String? errorText,
+  final Widget? trailing,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1219,7 +1240,7 @@ class const _SettingsRow({
               ),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: trailing ?? const Icon(Icons.chevron_right),
       ),
     );
   }
@@ -1355,6 +1376,7 @@ class const _TimeSelector({
   required final bool hasSelection,
   required final bool showValidationError,
   required final VoidCallback onSelectTime,
+  required final VoidCallback? onSetNow,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1374,6 +1396,9 @@ class const _TimeSelector({
       value: value,
       errorText: showValidationError ? l10n.required_error : null,
       onTap: onSelectTime,
+      trailing: onSetNow == null
+          ? null
+          : TextButton(onPressed: onSetNow, child: Text(l10n.time_now)),
     );
   }
 }

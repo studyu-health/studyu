@@ -97,6 +97,7 @@ Future<void> openMealEntry(
   MealLog? meal, {
   NutritionTask? task,
   MealType? initialMealType,
+  List<FoodEntry> initialFoods = const [],
   DateTime? occurrenceDate,
   NutritionRecallPersistenceTarget? historicalTarget,
   NutritionFoodRepository? foodRepository,
@@ -123,6 +124,7 @@ Future<void> openMealEntry(
                             existingMeal: meal,
                             task: task,
                             initialMealType: initialMealType,
+                            initialFoods: initialFoods,
                             occurrenceDate: occurrenceDate,
                             historicalTarget: historicalTarget,
                             foodRepository:
@@ -474,6 +476,39 @@ void main() {
     expect(identical(clone.foods.single, original.foods.single), isFalse);
   });
 
+  testWidgets('Now sets the exact time without opening the selector', (
+    tester,
+  ) async {
+    MealLog? result;
+    final today = DateTime.now().toUtc();
+    await openMealEntry(
+      tester,
+      null,
+      initialFoods: [testFood()],
+      occurrenceDate: DateTime.utc(today.year, today.month, today.day),
+      onResult: (value) => result = value,
+    );
+    expect(find.text('Select a time'), findsOneWidget);
+
+    final beforeTap = DateTime.now();
+    await tester.tap(find.text('Now'));
+    final afterTap = DateTime.now();
+    await tester.pumpAndSettle();
+    expect(find.text('Select a time'), findsNothing);
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.byType(TimePickerDialog), findsNothing);
+
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(result, isNotNull);
+    expect(result!.timePrecision, MealOccurrenceTimePrecision.exact);
+    expect(result!.timezone, beforeTap.timeZoneName);
+    final timestamp = result!.timestamp!;
+    expect(timestamp.isUtc, isTrue);
+    expect(timestamp.isBefore(beforeTap), isFalse);
+    expect(timestamp.isAfter(afterTap), isFalse);
+  });
+
   testWidgets('canceling the time picker leaves a new answer unanswered', (
     tester,
   ) async {
@@ -747,6 +782,7 @@ void main() {
       onResult: (value) => result = value,
     );
 
+    expect(find.text('Now'), findsNothing);
     await tester.tap(find.text('Time'));
     await tester.pumpAndSettle();
     expect(

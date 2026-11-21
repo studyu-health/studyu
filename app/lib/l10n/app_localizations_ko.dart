@@ -3335,4 +3335,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_photo_retry => '사진 다시 저장';
+
+  @override
+  String get time_now => '지금';
 }
