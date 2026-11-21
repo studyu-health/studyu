@@ -1686,14 +1686,12 @@ void main() {
       );
       await tester.enterText(foodEditorInput('Food Name'), 'Reusable apple');
       await tester.enterText(foodEditorInput('Nutrition values are for'), '80');
-      expect(
-        tester
-            .widget<TextField>(foodEditorInput('Energy (kcal) *'))
-            .controller!
-            .text,
-        '52.0',
-      );
-      await tester.enterText(foodEditorInput('Energy (kcal) *'), '120');
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(FoodEntryScreen)),
+      )!;
+      final energyField = foodEditorInput(l10n.energy_kcal);
+      expect(tester.widget<TextField>(energyField).controller!.text, '52.0');
+      await tester.enterText(energyField, '120');
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 

@@ -486,8 +486,12 @@ class _NutritionSummaryCardState() extends State<NutritionSummaryCard> {
   Widget _row(String label, double value, String unit, String key) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [Text(label), Text(_format(value, unit, key))],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: Text(label)),
+        const SizedBox(width: 12),
+        Text(_format(value, unit, key)),
+      ],
     ),
   );
 

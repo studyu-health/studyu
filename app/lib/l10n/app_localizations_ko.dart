@@ -1975,22 +1975,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get food_information => 'Food Information';
 
   @override
-  String get entry_type => 'Entry Type';
+  String get entry_type => '식품 유형';
 
   @override
   String get food_name => 'Food name *';
 
   @override
-  String get nutrition_values_are_for => 'Nutrition values are for';
+  String get nutrition_values_are_for => '영양 정보의 기준 중량';
 
   @override
-  String get brand_name => 'Brand Name';
+  String get brand_name => '브랜드';
 
   @override
   String get description => 'Description';
 
   @override
-  String get description_hint => 'Optional notes about this food';
+  String get description_hint => '이 식품에 대한 메모 (선택)';
 
   @override
   String get meal_info => 'Meal: Use Meal Creator for combined food management';
@@ -2008,34 +2008,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String get serving_size => 'Serving Size (grams) *';
 
   @override
-  String get portion_reference => 'Portion Reference';
+  String get portion_reference => '분량 기준';
 
   @override
-  String get portion_reference_hint => 'e.g., 1 cup, 3 oz, medium apple';
+  String get portion_reference_hint => '예: 1컵, 중간 크기 사과 1개';
 
   @override
-  String get portion_estimation_method => 'Portion Estimation Method';
+  String get portion_estimation_method => '분량 추정 방법';
 
   @override
-  String get portion_state => 'Portion State';
+  String get portion_state => '음식 상태';
 
   @override
-  String get yield_factor => 'Yield Factor';
+  String get yield_factor => '수율 계수';
 
   @override
-  String get yield_factor_hint => 'e.g., 0.75';
+  String get yield_factor_hint => '예: 0.75';
 
   @override
-  String get edible_portion => 'Edible Portion';
+  String get edible_portion => '섭취 가능 비율';
 
   @override
-  String get edible_portion_hint => 'e.g., 0.85';
+  String get edible_portion_hint => '예: 0.85';
 
   @override
-  String get nutrition_information => 'Nutrition Information';
+  String get nutrition_information => '영양 정보';
 
   @override
-  String get energy_kcal => 'Energy (kcal) *';
+  String get energy_kcal => '열량';
 
   @override
   String get protein_g => 'Protein (g)';
@@ -2059,16 +2059,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get optional => 'Optional';
 
   @override
-  String get saturated_fat_g => 'Sat. Fat (g)';
+  String get saturated_fat_g => '포화지방 (g)';
 
   @override
-  String get sugars_g => 'Sugars (g)';
+  String get sugars_g => '당류 (g)';
 
   @override
-  String get fiber_g => 'Fiber (g)';
+  String get fiber_g => '식이섬유 (g)';
 
   @override
-  String get sodium_mg => 'Sodium (mg)';
+  String get sodium_mg => '나트륨 (mg)';
 
   @override
   String get required_error => 'Required';
@@ -2080,40 +2080,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get enter_serving_size => 'Please enter serving size';
 
   @override
-  String get entry_type_single_ingredient => 'Single Ingredient';
+  String get entry_type_single_ingredient => '단일 재료';
 
   @override
   String get entry_type_meal => 'Meal';
 
   @override
-  String get entry_type_branded_product => 'Branded Product';
+  String get entry_type_branded_product => '브랜드 제품';
 
   @override
-  String get entry_type_manual_entry => 'Manual Entry';
+  String get entry_type_manual_entry => '직접 입력';
 
   @override
-  String get portion_method_household => 'Household Measure';
+  String get portion_method_household => '가정용 계량 단위';
 
   @override
-  String get portion_method_photograph => 'Photograph';
+  String get portion_method_photograph => '사진';
 
   @override
-  String get portion_method_standard_unit => 'Standard Unit';
+  String get portion_method_standard_unit => '표준 단위';
 
   @override
-  String get portion_method_user_weighted => 'User Weighted';
+  String get portion_method_user_weighted => '직접 계량';
 
   @override
-  String get portion_method_unknown => 'Unknown';
+  String get portion_method_unknown => '알 수 없음';
 
   @override
-  String get portion_state_raw => 'Raw';
+  String get portion_state_raw => '조리 전';
 
   @override
-  String get portion_state_cooked => 'Cooked';
+  String get portion_state_cooked => '조리 후';
 
   @override
-  String get portion_state_as_served => 'As Served';
+  String get portion_state_as_served => '제공된 상태';
 
   @override
   String get my_templates => 'My items';
@@ -2516,13 +2516,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get add_food_manually => 'Create food';
 
   @override
-  String get basic_information => 'Basic Information';
+  String get basic_information => '식품 정보';
 
   @override
-  String get macronutrients => 'Macronutrients';
+  String get macronutrients => '다량 영양소';
 
   @override
-  String get detailed_nutrients => 'Detailed Nutrients';
+  String get detailed_nutrients => '상세 영양 정보';
 
   @override
   String get daily_nutrition_total => 'Nutrition summary';
@@ -2742,16 +2742,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get no_matching_templates => 'No matching items';
 
   @override
-  String get detailed_nutrition => 'Detailed Nutrition';
+  String get detailed_nutrition => '상세 영양 정보';
 
   @override
-  String get detailed_nutrition_subtitle => 'Fiber, Sugar, Sodium';
+  String get detailed_nutrition_subtitle => '식이섬유, 당류, 포화지방 및 나트륨';
 
   @override
-  String get advanced_options => 'Advanced Options';
+  String get advanced_options => '추가 정보';
 
   @override
-  String get advanced_options_subtitle => 'Food type, serving size, portions';
+  String get advanced_options_subtitle => '식품 유형, 브랜드 및 분량 정보';
 
   @override
   String get details => 'Details';
@@ -3304,6 +3304,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_choose_recent_meal => '최근 식사 선택';
+
+  @override
+  String get nutrition_known_values_hint => '모르는 영양값은 비워 두세요.';
+
+  @override
+  String get nutrition_food_details_subtitle => '귀리 플레이크처럼 구체적인 이름을 입력하세요.';
 
   @override
   String get nutrition_diary_tab => '일지';

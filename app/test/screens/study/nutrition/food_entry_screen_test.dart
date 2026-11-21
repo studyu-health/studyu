@@ -216,7 +216,7 @@ void main() {
     await tester.enterText(inputWithLabel(l10n.food_name), 'Zero food');
     await tester.enterText(inputWithLabel(l10n.energy_kcal), '0');
     await tester.enterText(inputWithLabel(l10n.protein), '0');
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.tap(find.text(l10n.save));
     await tester.pumpAndSettle();
     expect(result!.nutrition.energyKcal, 0);
     expect(result!.nutrition.isKnown('energyKcal'), isTrue);
@@ -568,14 +568,15 @@ void main() {
         'image_front_small_url': 'https://example.invalid/image.jpg',
       }),
     );
-    final failedImageCardTop = tester.getTopLeft(find.byType(Card).first).dy;
+    final nameField = inputWithLabel(l10n.food_name);
+    final failedImageFieldTop = tester.getTopLeft(nameField).dy;
 
     await tester.pageBack();
     await tester.pumpAndSettle();
     await openFoodEntry(tester, existingFood: existingOffFood(const {}));
-    final absentImageCardTop = tester.getTopLeft(find.byType(Card).first).dy;
+    final absentImageFieldTop = tester.getTopLeft(nameField).dy;
 
-    expect(failedImageCardTop, absentImageCardTop);
+    expect(failedImageFieldTop, absentImageFieldTop);
   });
 
   testWidgets('uses themed cards and unfilled field decorations', (
@@ -591,7 +592,9 @@ void main() {
       isNot(true),
     );
 
-    await tester.tap(find.text('Detailed Nutrition'));
+    final detailedNutrition = find.text(l10n.detailed_nutrition);
+    await tester.ensureVisible(detailedNutrition);
+    await tester.tap(detailedNutrition);
     await tester.pumpAndSettle();
     expect(
       tester

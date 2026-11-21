@@ -3892,13 +3892,13 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_information.
   ///
   /// In en, this message translates to:
-  /// **'Nutrition Information'**
+  /// **'Nutrition information'**
   String get nutrition_information;
 
   /// No description provided for @energy_kcal.
   ///
   /// In en, this message translates to:
-  /// **'Energy (kcal) *'**
+  /// **'Energy'**
   String get energy_kcal;
 
   /// No description provided for @protein_g.
@@ -3946,7 +3946,7 @@ abstract class AppLocalizations {
   /// No description provided for @saturated_fat_g.
   ///
   /// In en, this message translates to:
-  /// **'Sat. Fat (g)'**
+  /// **'Saturated fat (g)'**
   String get saturated_fat_g;
 
   /// No description provided for @sugars_g.
@@ -4678,7 +4678,7 @@ abstract class AppLocalizations {
   /// No description provided for @basic_information.
   ///
   /// In en, this message translates to:
-  /// **'Basic Information'**
+  /// **'Food details'**
   String get basic_information;
 
   /// No description provided for @macronutrients.
@@ -5056,25 +5056,25 @@ abstract class AppLocalizations {
   /// No description provided for @detailed_nutrition.
   ///
   /// In en, this message translates to:
-  /// **'Detailed Nutrition'**
+  /// **'Detailed nutrition'**
   String get detailed_nutrition;
 
   /// No description provided for @detailed_nutrition_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Fiber, Sugar, Sodium'**
+  /// **'Fiber, sugars, saturated fat, and sodium'**
   String get detailed_nutrition_subtitle;
 
   /// No description provided for @advanced_options.
   ///
   /// In en, this message translates to:
-  /// **'Advanced Options'**
+  /// **'Advanced options'**
   String get advanced_options;
 
   /// No description provided for @advanced_options_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Food type, serving size, portions'**
+  /// **'Food type, brand, and portion details'**
   String get advanced_options_subtitle;
 
   /// No description provided for @details.
@@ -6006,6 +6006,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a recent meal'**
   String get nutrition_choose_recent_meal;
+
+  /// No description provided for @nutrition_known_values_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave unknown nutrient values blank.'**
+  String get nutrition_known_values_hint;
+
+  /// No description provided for @nutrition_food_details_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a specific name, such as rolled oats.'**
+  String get nutrition_food_details_subtitle;
 
   /// No description provided for @nutrition_diary_tab.
   ///

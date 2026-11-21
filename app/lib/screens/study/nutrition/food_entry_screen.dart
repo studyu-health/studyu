@@ -7,6 +7,7 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_editor_layout.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
@@ -628,13 +629,15 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.existingFood != null;
-    final useSaveButton = isEditing && !widget.isExternalLibraryCopy;
+    final useSaveButton =
+        !widget.isExternalLibraryCopy &&
+        (isEditing || widget.mealLabel == null);
     final saveFood = _isSaving ? null : _saveFood;
 
     final scaffold = Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.isExternalLibraryCopy
+        title: NutritionEditorTitle(
+          title: widget.isExternalLibraryCopy
               ? l10n.review_copied_food
               : isEditing
               ? l10n.edit_food_title
@@ -668,170 +671,196 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       bottomNavigationBar: useSaveButton
           ? null
           : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: FilledButton.icon(
-                  key: _saveButtonKey,
-                  onPressed: saveFood,
-                  icon: const Icon(Icons.check),
-                  label: Text(
-                    widget.isExternalLibraryCopy
-                        ? l10n.external_library_save_copy
-                        : widget.mealLabel != null
-                        ? l10n.save_and_add_to_meal(widget.mealLabel!)
-                        : l10n.save,
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: 1,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: nutritionEditorWidth,
                   ),
-                ),
-              ),
-            ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            16,
-            16,
-            16 + (useSaveButton ? NutritionSaveButton.scrollClearance : 0),
-          ),
-          children: [
-            // ========== AI ESTIMATION BANNER ==========
-            if (_isAiAnalyzed)
-              _AiEstimationBanner(
-                confidenceScore: widget.confidenceScore!,
-                isLowConfidence: _isLowConfidence,
-                l10n: l10n,
-                theme: theme,
-              ),
-            if (_isAiAnalyzed) const SizedBox(height: 12),
-
-            if (widget.isExternalLibraryCopy) ...[
-              _ExternalCopyNotice(theme: theme, l10n: l10n),
-              const SizedBox(height: 12),
-            ],
-
-            if (widget.showCurrentMealOnlyNotice &&
-                widget.existingFood != null &&
-                !widget.editReusableDefinition &&
-                !widget.isExternalLibraryCopy) ...[
-              Card(
-                color: theme.colorScheme.secondaryContainer,
-                child: ListTile(
-                  leading: Icon(
-                    Icons.info_outline,
-                    color: theme.colorScheme.onSecondaryContainer,
-                  ),
-                  title: Text(
-                    l10n.current_meal_only_banner,
-                    style: TextStyle(
-                      color: theme.colorScheme.onSecondaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        key: _saveButtonKey,
+                        onPressed: saveFood,
+                        icon: const Icon(Icons.check),
+                        label: Text(
+                          widget.isExternalLibraryCopy
+                              ? l10n.external_library_save_copy
+                              : l10n.save_and_add_to_meal(widget.mealLabel!),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-            ],
-
-            if (widget.existingFood == null && widget.historicalMode)
-              CheckboxListTile(
-                value: _saveToMyItems,
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.save_to_my_items),
-                controlAffinity: ListTileControlAffinity.leading,
-                onChanged: (value) =>
-                    setState(() => _saveToMyItems = value ?? false),
-              ),
-
-            if (widget.editReusableDefinition) ...[
-              Text(
-                l10n.food_definition_edit_helper,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              if (widget.hasCurrentStudyDayMatches)
-                CheckboxListTile(
-                  value: _propagateToCurrentStudyDay,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.update_current_day_entries),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  onChanged: (value) => setState(
-                    () => _propagateToCurrentStudyDay = value ?? false,
-                  ),
-                ),
-              const SizedBox(height: 12),
-            ],
-
-            if (_productImageUrl case final imageUrl?)
-              Image.network(
-                imageUrl,
-                width: double.infinity,
-                height: 180,
-                fit: BoxFit.cover,
-                semanticLabel: widget.existingFood!.name,
-                frameBuilder: (_, child, _, _) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: child,
-                  ),
-                ),
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
-              ),
-
-            // ========== ESSENTIAL FIELDS ==========
-            _EssentialFieldsCard(
-              nameController: _nameController,
-              amountController: _showServings ? _amountController : null,
-              servingSizeController: _servingSizeController,
-              unknownServingMass: widget.existingFood?.servingSizeGrams == 0,
-              portionReference: _portionReferenceController.text,
-              energyController: _energyController,
-              proteinController: _proteinController,
-              carbsController: _carbsController,
-              fatController: _fatController,
+            ),
+      body: NutritionEditorForm(
+        formKey: _formKey,
+        bottomClearance: useSaveButton
+            ? NutritionSaveButton.scrollClearance
+            : 0,
+        children: [
+          if (_isAiAnalyzed)
+            _AiEstimationBanner(
+              confidenceScore: widget.confidenceScore!,
+              isLowConfidence: _isLowConfidence,
               l10n: l10n,
               theme: theme,
-              isEditing: isEditing,
             ),
 
-            const SizedBox(height: 12),
+          if (widget.isExternalLibraryCopy)
+            _ExternalCopyNotice(theme: theme, l10n: l10n),
 
-            // ========== DETAILED NUTRITION (Collapsed) ==========
-            _DetailedNutritionCard(
-              fiberController: _fiberController,
-              sugarsController: _sugarsController,
-              saturatedFatController: _saturatedFatController,
-              sodiumController: _sodiumController,
-              l10n: l10n,
+          if (widget.showCurrentMealOnlyNotice &&
+              widget.existingFood != null &&
+              !widget.editReusableDefinition &&
+              !widget.isExternalLibraryCopy)
+            Card(
+              margin: EdgeInsets.zero,
+              color: theme.colorScheme.secondaryContainer,
+              child: ListTile(
+                leading: Icon(
+                  Icons.info_outline,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+                title: Text(
+                  l10n.current_meal_only_banner,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                ),
+              ),
             ),
 
-            const SizedBox(height: 12),
-
-            // ========== ADVANCED OPTIONS (Collapsed) ==========
-            _AdvancedOptionsCard(
-              entryType: _entryType,
-              brandController: _brandController,
-              descriptionController: _descriptionController,
-              portionReferenceController: _portionReferenceController,
-              portionMethod: _portionMethod,
-              portionState: _portionState,
-              yieldFactorController: _yieldFactorController,
-              ediblePortionController: _ediblePortionController,
-              l10n: l10n,
-              onEntryTypeChanged: (value) {
-                if (value != null) setState(() => _entryType = value);
-              },
-              onPortionMethodChanged: (value) {
-                if (value != null) setState(() => _portionMethod = value);
-              },
-              onPortionStateChanged: (value) {
-                if (value != null) setState(() => _portionState = value);
-              },
+          if (widget.existingFood == null && widget.historicalMode)
+            CheckboxListTile(
+              value: _saveToMyItems,
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.save_to_my_items),
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (value) =>
+                  setState(() => _saveToMyItems = value ?? false),
             ),
 
-            const SizedBox(height: 16),
+          if (widget.editReusableDefinition) ...[
+            Text(
+              l10n.food_definition_edit_helper,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (widget.hasCurrentStudyDayMatches)
+              CheckboxListTile(
+                value: _propagateToCurrentStudyDay,
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.update_current_day_entries),
+                controlAffinity: ListTileControlAffinity.leading,
+                onChanged: (value) => setState(
+                  () => _propagateToCurrentStudyDay = value ?? false,
+                ),
+              ),
           ],
-        ),
+
+          _FoodDetailsSection(
+            nameController: _nameController,
+            amountController: _showServings ? _amountController : null,
+            imageUrl: _productImageUrl,
+            foodName: widget.existingFood?.name,
+          ),
+          NutritionEditorSection(
+            title: l10n.nutrition_information,
+            icon: Icons.pie_chart_outline,
+            subtitle: l10n.nutrition_known_values_hint,
+            children: [
+              TextFormField(
+                controller: _servingSizeController,
+                decoration: nutritionFieldDecoration(
+                  l10n.nutrition_values_are_for,
+                  icon: Icons.scale_outlined,
+                  unit: 'g',
+                  helper:
+                      widget.existingFood?.servingSizeGrams == 0 &&
+                          _portionReferenceController.text.isNotEmpty
+                      ? _portionReferenceController.text
+                      : null,
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (value) {
+                  if (widget.existingFood?.servingSizeGrams == 0 &&
+                      (value ?? '').trim().isEmpty) {
+                    return null;
+                  }
+                  final grams = parseNutritionAmount(value ?? '');
+                  return grams == null || grams <= 0
+                      ? l10n.food_quantity_invalid_amount
+                      : null;
+                },
+              ),
+              NutritionEditorFields(
+                minimumFieldWidth: 132,
+                children: [
+                  _NutrientField(
+                    controller: _energyController,
+                    label: l10n.energy_kcal,
+                    unit: 'kcal',
+                  ),
+                  _NutrientField(
+                    controller: _proteinController,
+                    label: l10n.protein,
+                    unit: 'g',
+                  ),
+                ],
+              ),
+              NutritionEditorFields(
+                minimumFieldWidth: 132,
+                children: [
+                  _NutrientField(
+                    controller: _carbsController,
+                    label: l10n.carbohydrate,
+                    unit: 'g',
+                  ),
+                  _NutrientField(
+                    controller: _fatController,
+                    label: l10n.fat,
+                    unit: 'g',
+                  ),
+                ],
+              ),
+            ],
+          ),
+          _DetailedNutritionCard(
+            fiberController: _fiberController,
+            sugarsController: _sugarsController,
+            saturatedFatController: _saturatedFatController,
+            sodiumController: _sodiumController,
+          ),
+          _AdvancedOptionsCard(
+            entryType: _entryType,
+            brandController: _brandController,
+            descriptionController: _descriptionController,
+            portionReferenceController: _portionReferenceController,
+            portionMethod: _portionMethod,
+            portionState: _portionState,
+            yieldFactorController: _yieldFactorController,
+            ediblePortionController: _ediblePortionController,
+            l10n: l10n,
+            onEntryTypeChanged: (value) {
+              if (value != null) setState(() => _entryType = value);
+            },
+            onPortionMethodChanged: (value) {
+              if (value != null) setState(() => _portionMethod = value);
+            },
+            onPortionStateChanged: (value) {
+              if (value != null) setState(() => _portionState = value);
+            },
+          ),
+        ],
       ),
     );
 
@@ -958,236 +987,82 @@ class const _AiEstimationBanner({
   }
 }
 
-class const _EssentialFieldsCard({
+class const _FoodDetailsSection({
   required final TextEditingController nameController,
   final TextEditingController? amountController,
-  required final TextEditingController servingSizeController,
-  required final bool unknownServingMass,
-  required final String portionReference,
-  required final TextEditingController energyController,
-  required final TextEditingController proteinController,
-  required final TextEditingController carbsController,
-  required final TextEditingController fatController,
-  required final AppLocalizations l10n,
-  required final ThemeData theme,
-  required final bool isEditing,
+  final String? imageUrl,
+  final String? foodName,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    final l10n = AppLocalizations.of(context)!;
+    return NutritionEditorSection(
+      title: l10n.basic_information,
+      icon: Icons.restaurant_outlined,
+      subtitle: l10n.nutrition_food_details_subtitle,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Card Header
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(
-                      alpha: 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.restaurant_outlined,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    l10n.basic_information,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Food Name
+            if (imageUrl case final url?)
+              Image.network(
+                url,
+                height: 128,
+                fit: BoxFit.contain,
+                semanticLabel: foodName,
+                frameBuilder: (_, child, frame, _) => frame == null
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: nutritionEditorSpacing,
+                        ),
+                        child: child,
+                      ),
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
             TextFormField(
               controller: nameController,
-              decoration: InputDecoration(
-                labelText: l10n.food_name,
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.edit),
+              decoration: nutritionFieldDecoration(
+                l10n.food_name,
+                icon: Icons.restaurant_outlined,
               ),
-              autofocus: !isEditing,
               textCapitalization: TextCapitalization.words,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return l10n.enter_food_name;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-
-            if (amountController != null) ...[
-              TextFormField(
-                controller: amountController,
-                decoration: InputDecoration(
-                  labelText: l10n.nutrition_servings_required,
-                  border: const OutlineInputBorder(),
-                ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                validator: (value) {
-                  final amount = parseNutritionAmount(value ?? '');
-                  return amount == null || amount <= 0
-                      ? l10n.food_quantity_invalid_amount
-                      : null;
-                },
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            TextFormField(
-              controller: servingSizeController,
-              decoration: InputDecoration(
-                labelText: l10n.nutrition_values_are_for,
-                border: const OutlineInputBorder(),
-                suffixText: 'g',
-                helperText: unknownServingMass && portionReference.isNotEmpty
-                    ? portionReference
-                    : null,
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              validator: (value) {
-                if (unknownServingMass && (value ?? '').trim().isEmpty) {
-                  return null;
-                }
-                final grams = parseNutritionAmount(value ?? '');
-                return grams == null || grams <= 0
-                    ? l10n.food_quantity_invalid_amount
-                    : null;
-              },
-            ),
-            const SizedBox(height: 12),
-
-            // Calories
-            TextFormField(
-              controller: energyController,
-              decoration: InputDecoration(
-                labelText: l10n.energy_kcal,
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.local_fire_department),
-                hintText: '0',
-                suffixText: 'kcal',
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Macros Header
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(
-                    Icons.pie_chart_outline,
-                    size: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Flexible(
-                  child: Text(
-                    l10n.macronutrients,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Macros Row
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: proteinController,
-                    decoration: InputDecoration(
-                      labelText: l10n.protein,
-                      helperText: l10n.optional,
-                      border: const OutlineInputBorder(),
-                      hintText: '0',
-                      suffixText: 'g',
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    controller: carbsController,
-                    decoration: InputDecoration(
-                      labelText: l10n.carbohydrate,
-                      helperText: l10n.optional,
-                      border: const OutlineInputBorder(),
-                      hintText: '0',
-                      suffixText: 'g',
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    controller: fatController,
-                    decoration: InputDecoration(
-                      labelText: l10n.fat,
-                      helperText: l10n.optional,
-                      border: const OutlineInputBorder(),
-                      hintText: '0',
-                      suffixText: 'g',
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                  ),
-                ),
-              ],
+              validator: (value) =>
+                  value == null || value.isEmpty ? l10n.enter_food_name : null,
             ),
           ],
         ),
-      ),
+        if (amountController != null)
+          TextFormField(
+            controller: amountController,
+            decoration: nutritionFieldDecoration(
+              l10n.nutrition_servings_required,
+              icon: Icons.format_list_numbered,
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            validator: (value) {
+              final amount = parseNutritionAmount(value ?? '');
+              return amount == null || amount <= 0
+                  ? l10n.food_quantity_invalid_amount
+                  : null;
+            },
+          ),
+      ],
     );
   }
+}
+
+class const _NutrientField({
+  required final TextEditingController controller,
+  required final String label,
+  final String? unit,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => TextFormField(
+    controller: controller,
+    decoration: nutritionFieldDecoration(label, unit: unit),
+    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+  );
 }
 
 class const _DetailedNutritionCard({
@@ -1195,162 +1070,32 @@ class const _DetailedNutritionCard({
   required final TextEditingController sugarsController,
   required final TextEditingController saturatedFatController,
   required final TextEditingController sodiumController,
-  required final AppLocalizations l10n,
-}) extends StatefulWidget {
-  @override
-  State<_DetailedNutritionCard> createState() => _DetailedNutritionCardState();
-}
-
-class _DetailedNutritionCardState() extends State<_DetailedNutritionCard> {
-  bool _isExpanded = false;
-
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.1,
-                      ),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      Icons.science_outlined,
-                      size: 16,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.l10n.detailed_nutrition,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          widget.l10n.detailed_nutrition_subtitle,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
+    final l10n = AppLocalizations.of(context)!;
+    return NutritionEditorExpansion(
+      icon: Icons.science_outlined,
+      title: l10n.detailed_nutrition,
+      subtitle: l10n.detailed_nutrition_subtitle,
+      children: [
+        NutritionEditorFields(
+          children: [
+            _NutrientField(controller: fiberController, label: l10n.fiber_g),
+            _NutrientField(controller: sugarsController, label: l10n.sugars_g),
+          ],
+        ),
+        NutritionEditorFields(
+          minimumFieldWidth: 184,
+          children: [
+            _NutrientField(
+              controller: saturatedFatController,
+              label: l10n.saturated_fat_g,
             ),
-          ),
-          if (_isExpanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                children: [
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: widget.fiberController,
-                          decoration: InputDecoration(
-                            labelText: widget.l10n.fiber_g,
-                            border: const OutlineInputBorder(),
-                            hintText: '0',
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextFormField(
-                          controller: widget.sugarsController,
-                          decoration: InputDecoration(
-                            labelText: widget.l10n.sugars_g,
-                            border: const OutlineInputBorder(),
-                            hintText: '0',
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: widget.saturatedFatController,
-                          decoration: InputDecoration(
-                            labelText: widget.l10n.saturated_fat_g,
-                            border: const OutlineInputBorder(),
-                            hintText: '0',
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextFormField(
-                          controller: widget.sodiumController,
-                          decoration: InputDecoration(
-                            labelText: widget.l10n.sodium_mg,
-                            border: const OutlineInputBorder(),
-                            hintText: '0',
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
+            _NutrientField(controller: sodiumController, label: l10n.sodium_mg),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -1368,266 +1113,173 @@ class const _AdvancedOptionsCard({
   required final ValueChanged<FoodEntryType?> onEntryTypeChanged,
   required final ValueChanged<PortionEstimationMethod?> onPortionMethodChanged,
   required final ValueChanged<PortionState?> onPortionStateChanged,
-}) extends StatefulWidget {
+}) extends StatelessWidget {
   @override
-  State<_AdvancedOptionsCard> createState() => _AdvancedOptionsCardState();
-}
+  Widget build(BuildContext context) => NutritionEditorExpansion(
+    icon: Icons.tune_outlined,
+    title: l10n.advanced_options,
+    subtitle: l10n.advanced_options_subtitle,
+    children: [
+      DropdownButtonFormField<FoodEntryType>(
+        initialValue: entryType == FoodEntryType.meal
+            ? FoodEntryType.manualCustom
+            : entryType,
+        decoration: InputDecoration(
+          labelText: l10n.entry_type,
+          border: const OutlineInputBorder(),
+          isDense: true,
+        ),
+        isExpanded: true,
+        items: FoodEntryType.values
+            .where((type) => type != FoodEntryType.meal)
+            .map((type) {
+              return DropdownMenuItem(
+                value: type,
+                child: Text(
+                  _getEntryTypeLabel(type),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            })
+            .toList(),
+        onChanged: onEntryTypeChanged,
+      ),
 
-class _AdvancedOptionsCardState() extends State<_AdvancedOptionsCard> {
-  bool _isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.1,
-                      ),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      Icons.tune_outlined,
-                      size: 16,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.l10n.advanced_options,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          widget.l10n.advanced_options_subtitle,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ),
+      if (entryType == FoodEntryType.brandedProduct) ...[
+        TextFormField(
+          controller: brandController,
+          decoration: nutritionFieldDecoration(
+            l10n.brand_name,
+            icon: Icons.local_offer_outlined,
           ),
-          if (_isExpanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                children: [
-                  const SizedBox(height: 8),
-                  // Entry Type Dropdown
-                  DropdownButtonFormField<FoodEntryType>(
-                    initialValue: widget.entryType == FoodEntryType.meal
-                        ? FoodEntryType.manualCustom
-                        : widget.entryType,
-                    decoration: InputDecoration(
-                      labelText: widget.l10n.entry_type,
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    isExpanded: true,
-                    items: FoodEntryType.values
-                        .where((type) => type != FoodEntryType.meal)
-                        .map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(
-                              _getEntryTypeLabel(type),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        })
-                        .toList(),
-                    onChanged: widget.onEntryTypeChanged,
-                  ),
-                  const SizedBox(height: 8),
+        ),
+      ],
 
-                  // Brand (conditional)
-                  if (widget.entryType == FoodEntryType.brandedProduct) ...[
-                    TextFormField(
-                      controller: widget.brandController,
-                      decoration: InputDecoration(
-                        labelText: widget.l10n.brand_name,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
+      TextFormField(
+        controller: descriptionController,
+        decoration: nutritionFieldDecoration(
+          l10n.description,
+          icon: Icons.notes_outlined,
+          hint: l10n.description_hint,
+        ),
+        maxLines: 2,
+        minLines: 1,
+      ),
 
-                  // Description
-                  TextFormField(
-                    controller: widget.descriptionController,
-                    decoration: InputDecoration(
-                      labelText: widget.l10n.description,
-                      border: const OutlineInputBorder(),
-                      hintText: widget.l10n.description_hint,
-                    ),
-                    maxLines: 2,
-                    minLines: 1,
-                  ),
-                  const SizedBox(height: 8),
+      TextFormField(
+        controller: portionReferenceController,
+        decoration: nutritionFieldDecoration(
+          l10n.portion_reference,
+          icon: Icons.straighten_outlined,
+          hint: l10n.portion_reference_hint,
+        ),
+      ),
 
-                  // Portion Reference
-                  TextFormField(
-                    controller: widget.portionReferenceController,
-                    decoration: InputDecoration(
-                      labelText: widget.l10n.portion_reference,
-                      border: const OutlineInputBorder(),
-                      hintText: widget.l10n.portion_reference_hint,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Portion Method & State (side by side)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<PortionEstimationMethod>(
-                          initialValue: widget.portionMethod,
-                          decoration: InputDecoration(
-                            labelText: widget.l10n.portion_estimation_method,
-                            border: const OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                          isExpanded: true,
-                          items: PortionEstimationMethod.values.map((method) {
-                            return DropdownMenuItem(
-                              value: method,
-                              child: Text(
-                                _getPortionMethodLabel(method),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: widget.onPortionMethodChanged,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: DropdownButtonFormField<PortionState>(
-                          initialValue: widget.portionState,
-                          decoration: InputDecoration(
-                            labelText: widget.l10n.portion_state,
-                            border: const OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                          isExpanded: true,
-                          items: PortionState.values.map((state) {
-                            return DropdownMenuItem(
-                              value: state,
-                              child: Text(
-                                _getPortionStateLabel(state),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: widget.onPortionStateChanged,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Yield & Edible Portion (side by side)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: widget.yieldFactorController,
-                          decoration: InputDecoration(
-                            labelText: widget.l10n.yield_factor,
-                            border: const OutlineInputBorder(),
-                            hintText: widget.l10n.yield_factor_hint,
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextFormField(
-                          controller: widget.ediblePortionController,
-                          decoration: InputDecoration(
-                            labelText: widget.l10n.edible_portion,
-                            border: const OutlineInputBorder(),
-                            hintText: widget.l10n.edible_portion_hint,
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+      NutritionEditorFields(
+        minimumFieldWidth: 192,
+        children: [
+          DropdownButtonFormField<PortionEstimationMethod>(
+            initialValue: portionMethod,
+            decoration: InputDecoration(
+              labelText: l10n.portion_estimation_method,
+              border: const OutlineInputBorder(),
+              isDense: true,
             ),
+            isExpanded: true,
+            items: PortionEstimationMethod.values.map((method) {
+              return DropdownMenuItem(
+                value: method,
+                child: Text(
+                  _getPortionMethodLabel(method),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
+            onChanged: onPortionMethodChanged,
+          ),
+          DropdownButtonFormField<PortionState>(
+            initialValue: portionState,
+            decoration: InputDecoration(
+              labelText: l10n.portion_state,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+            isExpanded: true,
+            items: PortionState.values.map((state) {
+              return DropdownMenuItem(
+                value: state,
+                child: Text(
+                  _getPortionStateLabel(state),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
+            onChanged: onPortionStateChanged,
+          ),
         ],
       ),
-    );
-  }
+
+      NutritionEditorFields(
+        children: [
+          TextFormField(
+            controller: yieldFactorController,
+            decoration: InputDecoration(
+              labelText: l10n.yield_factor,
+              border: const OutlineInputBorder(),
+              hintText: l10n.yield_factor_hint,
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          TextFormField(
+            controller: ediblePortionController,
+            decoration: InputDecoration(
+              labelText: l10n.edible_portion,
+              border: const OutlineInputBorder(),
+              hintText: l10n.edible_portion_hint,
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+        ],
+      ),
+    ],
+  );
 
   String _getEntryTypeLabel(FoodEntryType type) {
     switch (type) {
       case FoodEntryType.singleIngredient:
-        return widget.l10n.entry_type_single_ingredient;
+        return l10n.entry_type_single_ingredient;
       case FoodEntryType.meal:
-        return widget.l10n.entry_type_meal;
+        return l10n.entry_type_meal;
       case FoodEntryType.brandedProduct:
-        return widget.l10n.entry_type_branded_product;
+        return l10n.entry_type_branded_product;
       case FoodEntryType.manualCustom:
-        return widget.l10n.entry_type_manual_entry;
+        return l10n.entry_type_manual_entry;
     }
   }
 
   String _getPortionMethodLabel(PortionEstimationMethod method) {
     switch (method) {
       case PortionEstimationMethod.householdMeasure:
-        return widget.l10n.portion_method_household;
+        return l10n.portion_method_household;
       case PortionEstimationMethod.photograph:
-        return widget.l10n.portion_method_photograph;
+        return l10n.portion_method_photograph;
       case PortionEstimationMethod.standardUnit:
-        return widget.l10n.portion_method_standard_unit;
+        return l10n.portion_method_standard_unit;
       case PortionEstimationMethod.userWeighted:
-        return widget.l10n.portion_method_user_weighted;
+        return l10n.portion_method_user_weighted;
       case PortionEstimationMethod.unknown:
-        return widget.l10n.portion_method_unknown;
+        return l10n.portion_method_unknown;
     }
   }
 
   String _getPortionStateLabel(PortionState state) {
     switch (state) {
       case PortionState.raw:
-        return widget.l10n.portion_state_raw;
+        return l10n.portion_state_raw;
       case PortionState.cooked:
-        return widget.l10n.portion_state_cooked;
+        return l10n.portion_state_cooked;
       case PortionState.asServed:
-        return widget.l10n.portion_state_as_served;
+        return l10n.portion_state_as_served;
     }
   }
 }

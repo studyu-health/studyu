@@ -2056,7 +2056,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get food_information => 'Food Information';
 
   @override
-  String get entry_type => 'Entry Type';
+  String get entry_type => 'Lebensmitteltyp';
 
   @override
   String get food_name => 'Lebensmittelname *';
@@ -2065,13 +2065,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nutrition_values_are_for => 'Nährwerte gelten für';
 
   @override
-  String get brand_name => 'Brand Name';
+  String get brand_name => 'Marke';
 
   @override
   String get description => 'Beschreibung';
 
   @override
-  String get description_hint => 'Optional notes about this food';
+  String get description_hint => 'Optionale Notizen zu diesem Lebensmittel';
 
   @override
   String get meal_info => 'Meal: Use Meal Creator for combined food management';
@@ -2089,34 +2089,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get serving_size => 'Serving Size (grams) *';
 
   @override
-  String get portion_reference => 'Portion Reference';
+  String get portion_reference => 'Portionsbezug';
 
   @override
-  String get portion_reference_hint => 'e.g., 1 cup, 3 oz, medium apple';
+  String get portion_reference_hint => 'z. B. 1 Tasse, 1 mittelgroßer Apfel';
 
   @override
-  String get portion_estimation_method => 'Portion Estimation Method';
+  String get portion_estimation_method => 'Methode zur Portionsschätzung';
 
   @override
-  String get portion_state => 'Portion State';
+  String get portion_state => 'Zustand der Portion';
 
   @override
-  String get yield_factor => 'Yield Factor';
+  String get yield_factor => 'Ausbeutefaktor';
 
   @override
-  String get yield_factor_hint => 'e.g., 0.75';
+  String get yield_factor_hint => 'z. B. 0,75';
 
   @override
-  String get edible_portion => 'Edible Portion';
+  String get edible_portion => 'Essbarer Anteil';
 
   @override
-  String get edible_portion_hint => 'e.g., 0.85';
+  String get edible_portion_hint => 'z. B. 0,85';
 
   @override
-  String get nutrition_information => 'Nutrition Information';
+  String get nutrition_information => 'Nährwertangaben';
 
   @override
-  String get energy_kcal => 'Energy (kcal) *';
+  String get energy_kcal => 'Energie';
 
   @override
   String get protein_g => 'Protein (g)';
@@ -2140,16 +2140,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get optional => 'Optional';
 
   @override
-  String get saturated_fat_g => 'Sat. Fat (g)';
+  String get saturated_fat_g => 'Gesättigte Fettsäuren (g)';
 
   @override
-  String get sugars_g => 'Sugars (g)';
+  String get sugars_g => 'Zucker (g)';
 
   @override
-  String get fiber_g => 'Fiber (g)';
+  String get fiber_g => 'Ballaststoffe (g)';
 
   @override
-  String get sodium_mg => 'Sodium (mg)';
+  String get sodium_mg => 'Natrium (mg)';
 
   @override
   String get required_error => 'Erforderlich';
@@ -2161,40 +2161,40 @@ class AppLocalizationsDe extends AppLocalizations {
   String get enter_serving_size => 'Please enter serving size';
 
   @override
-  String get entry_type_single_ingredient => 'Single Ingredient';
+  String get entry_type_single_ingredient => 'Einzelne Zutat';
 
   @override
   String get entry_type_meal => 'Meal';
 
   @override
-  String get entry_type_branded_product => 'Branded Product';
+  String get entry_type_branded_product => 'Markenprodukt';
 
   @override
-  String get entry_type_manual_entry => 'Manual Entry';
+  String get entry_type_manual_entry => 'Manueller Eintrag';
 
   @override
-  String get portion_method_household => 'Household Measure';
+  String get portion_method_household => 'Haushaltsmaß';
 
   @override
-  String get portion_method_photograph => 'Photograph';
+  String get portion_method_photograph => 'Foto';
 
   @override
-  String get portion_method_standard_unit => 'Standard Unit';
+  String get portion_method_standard_unit => 'Standardeinheit';
 
   @override
-  String get portion_method_user_weighted => 'User Weighted';
+  String get portion_method_user_weighted => 'Selbst gewogen';
 
   @override
-  String get portion_method_unknown => 'Unknown';
+  String get portion_method_unknown => 'Unbekannt';
 
   @override
-  String get portion_state_raw => 'Raw';
+  String get portion_state_raw => 'Roh';
 
   @override
-  String get portion_state_cooked => 'Cooked';
+  String get portion_state_cooked => 'Gegart';
 
   @override
-  String get portion_state_as_served => 'As Served';
+  String get portion_state_as_served => 'Wie serviert';
 
   @override
   String get my_templates => 'Meine Elemente';
@@ -2603,13 +2603,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get add_food_manually => 'Lebensmittel erstellen';
 
   @override
-  String get basic_information => 'Basic Information';
+  String get basic_information => 'Lebensmitteldetails';
 
   @override
-  String get macronutrients => 'Macronutrients';
+  String get macronutrients => 'Makronährstoffe';
 
   @override
-  String get detailed_nutrients => 'Detailed Nutrients';
+  String get detailed_nutrients => 'Weitere Nährwerte';
 
   @override
   String get daily_nutrition_total => 'Ernährungsübersicht';
@@ -2832,16 +2832,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get no_matching_templates => 'Keine passenden Elemente';
 
   @override
-  String get detailed_nutrition => 'Detailed Nutrition';
+  String get detailed_nutrition => 'Weitere Nährwerte';
 
   @override
-  String get detailed_nutrition_subtitle => 'Fiber, Sugar, Sodium';
+  String get detailed_nutrition_subtitle =>
+      'Ballaststoffe, Zucker, gesättigte Fettsäuren und Natrium';
 
   @override
-  String get advanced_options => 'Advanced Options';
+  String get advanced_options => 'Weitere Angaben';
 
   @override
-  String get advanced_options_subtitle => 'Food type, serving size, portions';
+  String get advanced_options_subtitle =>
+      'Lebensmitteltyp, Marke und Portionsangaben';
 
   @override
   String get details => 'Details';
@@ -3416,6 +3418,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_choose_recent_meal => 'Eine frühere Mahlzeit auswählen';
+
+  @override
+  String get nutrition_known_values_hint =>
+      'Lassen Sie unbekannte Nährwerte frei.';
+
+  @override
+  String get nutrition_food_details_subtitle =>
+      'Verwenden Sie einen konkreten Namen, z. B. Haferflocken.';
 
   @override
   String get nutrition_diary_tab => 'Tagebuch';

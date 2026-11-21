@@ -2087,10 +2087,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get edible_portion_hint => 'e.g., 0.85';
 
   @override
-  String get nutrition_information => 'Nutrition Information';
+  String get nutrition_information => 'Nutrition information';
 
   @override
-  String get energy_kcal => 'Energy (kcal) *';
+  String get energy_kcal => 'Energy';
 
   @override
   String get protein_g => 'Protein (g)';
@@ -2114,7 +2114,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get optional => 'Optional';
 
   @override
-  String get saturated_fat_g => 'Sat. Fat (g)';
+  String get saturated_fat_g => 'Saturated fat (g)';
 
   @override
   String get sugars_g => 'Sugars (g)';
@@ -2574,7 +2574,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get add_food_manually => 'Create food';
 
   @override
-  String get basic_information => 'Basic Information';
+  String get basic_information => 'Food details';
 
   @override
   String get macronutrients => 'Macronutrients';
@@ -2800,16 +2800,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_matching_templates => 'No matching items';
 
   @override
-  String get detailed_nutrition => 'Detailed Nutrition';
+  String get detailed_nutrition => 'Detailed nutrition';
 
   @override
-  String get detailed_nutrition_subtitle => 'Fiber, Sugar, Sodium';
+  String get detailed_nutrition_subtitle =>
+      'Fiber, sugars, saturated fat, and sodium';
 
   @override
-  String get advanced_options => 'Advanced Options';
+  String get advanced_options => 'Advanced options';
 
   @override
-  String get advanced_options_subtitle => 'Food type, serving size, portions';
+  String get advanced_options_subtitle =>
+      'Food type, brand, and portion details';
 
   @override
   String get details => 'Details';
@@ -3367,6 +3369,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_choose_recent_meal => 'Choose a recent meal';
+
+  @override
+  String get nutrition_known_values_hint =>
+      'Leave unknown nutrient values blank.';
+
+  @override
+  String get nutrition_food_details_subtitle =>
+      'Use a specific name, such as rolled oats.';
 
   @override
   String get nutrition_diary_tab => 'Diary';
