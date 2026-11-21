@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
+import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
@@ -522,6 +523,7 @@ void main() {
     expect(find.text('My items'), findsNothing);
     expect(find.byTooltip('History'), findsNothing);
     expect(find.byTooltip('Help'), findsNothing);
+    expect(find.text('Log again'), findsNothing);
   });
 
   testWidgets('history opens a previous-day local draft for editing', (
@@ -1090,6 +1092,7 @@ void main() {
     expect(find.text('No meals recorded yet'), findsOneWidget);
     expect(find.text('Breakfast'), findsNothing);
     expect(find.text('Log meal'), findsOneWidget);
+    expect(find.text('Log again'), findsNothing);
 
     await tester.tap(find.text('Log meal'));
     await tester.pumpAndSettle();
@@ -1116,6 +1119,115 @@ void main() {
     await tester.tap(find.text('Discard changes'));
     await tester.pumpAndSettle();
     expect(find.text('No meals recorded yet'), findsOneWidget);
+  });
+
+  testWidgets('Log again saves an editable copy of a prior meal to Today', (
+    tester,
+  ) async {
+    final setup = historicalNavigationSetup('Breakfast apple');
+    setup.task.customMealTypes = ['Usual breakfast'];
+    final priorRecall =
+        setup.subject.progress.single.result.result as DailyRecall;
+    final source = priorRecall.meals.single
+      ..mealType = MealType.other
+      ..customMealLabel = 'Usual breakfast';
+    final sourceFood = source.foods.single..amount = 2;
+
+    await tester.pumpWidget(
+      nutritionTaskApp(
+        setup.task,
+        appState: AppState()..activeSubject = setup.subject,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final repeat = find.text('Log again');
+    final model = tester.element(repeat).read<DailyRecallEntryViewModel>();
+    await tester.ensureVisible(repeat);
+    await tester.tap(repeat);
+    await tester.pumpAndSettle();
+    expect(find.text('Choose a recent meal'), findsOneWidget);
+    await tester.tap(find.text('Usual breakfast'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FoodSearchScreen), findsNothing);
+    expect(find.text('Usual breakfast'), findsOneWidget);
+    expect(find.text('Select a time'), findsOneWidget);
+    expect(model.recall.meals, isEmpty);
+    final initialFood = tester
+        .widget<MealEntryScreen>(find.byType(MealEntryScreen))
+        .initialFoods
+        .single;
+    expect(initialFood.amount, 2);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discard changes'));
+    await tester.pumpAndSettle();
+    expect(model.recall.meals, isEmpty);
+
+    await tester.tap(repeat);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Usual breakfast'));
+    await tester.pumpAndSettle();
+
+    final item = find.text('Breakfast apple');
+    await tester.ensureVisible(item);
+    await tester.tap(item);
+    await tester.pumpAndSettle();
+    final servings = find.widgetWithText(TextFormField, 'Servings *');
+    await tester.ensureVisible(servings);
+    await tester.enterText(servings, '3');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Select a time'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text("I don't remember"));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    final saved = model.recall.meals.single;
+    final savedFood = saved.foods.single;
+    expect(saved.id, isNot(source.id));
+    expect(saved.customMealLabel, 'Usual breakfast');
+    expect(saved.mealContext, isNull);
+    expect(saved.timePrecision, MealOccurrenceTimePrecision.unknown);
+    expect(saved.timestamp, isNull);
+    expect(savedFood.id, isNot(sourceFood.id));
+    expect(savedFood.foodId, sourceFood.foodId);
+    expect(savedFood.foodVersionId, sourceFood.foodVersionId);
+    expect(savedFood.amount, 3);
+    expect(priorRecall.meals.single, same(source));
+    expect(priorRecall.meals.single.foods.single.amount, 2);
+  });
+
+  testWidgets('Log again hides meals that contain a disallowed saved meal', (
+    tester,
+  ) async {
+    final setup = historicalNavigationSetup('Breakfast apple');
+    setup.task.allowMeals = false;
+    final priorRecall =
+        setup.subject.progress.single.result.result as DailyRecall;
+    priorRecall.meals.single.foods.add(
+      food('porridge', 'Saved porridge', 160)..entryType = FoodEntryType.meal,
+    );
+    priorRecall.meals.addAll([
+      meal('empty', MealType.lunch),
+      meal('skipped', MealType.dinner, isSkipped: true),
+    ]);
+
+    await tester.pumpWidget(
+      nutritionTaskApp(
+        setup.task,
+        appState: AppState()..activeSubject = setup.subject,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Log meal'), findsOneWidget);
+    expect(find.text('Log again'), findsNothing);
   });
 
   testWidgets('expands Photo Recall and logs a new meal from a photo', (
