@@ -68,6 +68,7 @@ class const _MealDetailsSelection({
 
 class const MealEntryScreen({
   final MealLog? existingMeal,
+  final String? initialCustomMealLabel,
   final NutritionTask? task,
   final MealType? initialMealType,
   final List<FoodEntry> initialFoods = const [],
@@ -85,6 +86,7 @@ class const MealEntryScreen({
 }) extends StatefulWidget {
   static MaterialPageRoute<MealEntryResult> route({
     MealLog? existingMeal,
+    String? initialCustomMealLabel,
     NutritionTask? task,
     MealType? initialMealType,
     List<FoodEntry> initialFoods = const [],
@@ -99,6 +101,7 @@ class const MealEntryScreen({
   }) => MaterialPageRoute(
     builder: (_) => MealEntryScreen(
       existingMeal: existingMeal,
+      initialCustomMealLabel: initialCustomMealLabel,
       task: task,
       initialMealType: initialMealType,
       initialFoods: initialFoods,
@@ -167,6 +170,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     } else {
       _timestamp = null;
       _timePrecision = MealOccurrenceTimePrecision.unknown;
+      _customMealLabel = widget.initialCustomMealLabel;
       _hasSelectedTime = false;
       _mealType = widget.initialMealType ?? MealType.other;
       _mealContext = null;

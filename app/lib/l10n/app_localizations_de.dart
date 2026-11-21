@@ -3410,4 +3410,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get food_library_empty =>
       'In dieser Ansicht gibt es keine Lebensmittel oder Mahlzeiten.';
+
+  @override
+  String get nutrition_log_again => 'Erneut erfassen';
+
+  @override
+  String get nutrition_choose_recent_meal => 'Eine frühere Mahlzeit auswählen';
 }

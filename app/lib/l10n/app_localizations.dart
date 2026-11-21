@@ -5994,6 +5994,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There are no foods or meals to show.'**
   String get food_library_empty;
+
+  /// No description provided for @nutrition_log_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Log again'**
+  String get nutrition_log_again;
+
+  /// No description provided for @nutrition_choose_recent_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a recent meal'**
+  String get nutrition_choose_recent_meal;
 }
 
 class _AppLocalizationsDelegate

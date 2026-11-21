@@ -3298,4 +3298,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get food_library_empty => '표시할 음식이나 식사가 없습니다.';
+
+  @override
+  String get nutrition_log_again => '다시 기록';
+
+  @override
+  String get nutrition_choose_recent_meal => '최근 식사 선택';
 }

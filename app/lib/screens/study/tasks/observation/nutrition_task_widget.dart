@@ -11,6 +11,7 @@ import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model
 import 'package:studyu_app/screens/study/nutrition/food_library_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
@@ -102,6 +103,8 @@ enum _NutritionTab() {
   statistics,
   library,
 }
+
+typedef _RecentMeal = ({DateTime date, MealLog meal});
 
 class _NutritionTaskWidgetState()
     extends State<NutritionTaskWidget>
@@ -792,6 +795,7 @@ class _NutritionTaskWidgetState()
               : comparison;
         });
     final groups = _buildTimelineGroups(context, entries);
+    final recentMeals = _recentMealsFor(model);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -843,6 +847,12 @@ class _NutritionTaskWidgetState()
               ),
           ],
         ),
+        if (recentMeals.isNotEmpty)
+          OutlinedButton.icon(
+            onPressed: () => _logAgain(context, model, recentMeals),
+            icon: const Icon(Icons.replay),
+            label: Text(l10n.nutrition_log_again),
+          ),
         const SizedBox(height: 8),
         if (entries.isEmpty)
           EmptyState(
@@ -965,14 +975,116 @@ class _NutritionTaskWidgetState()
     }
   }
 
+  List<_RecentMeal> _recentMealsFor(DailyRecallEntryViewModel model) {
+    final subject = model.subject;
+    final day = model.studyDaySnapshot;
+    final task = widget.task;
+    if (_isHistoricalMode ||
+        !model.canEdit ||
+        subject == null ||
+        subject.startedAt == null ||
+        task == null ||
+        day == null) {
+      return const [];
+    }
+    return completedNutritionRecallRecords(subject: subject, taskId: task.id)
+        .where(
+          (record) =>
+              record.studyDaySnapshot >= 0 && record.studyDaySnapshot < day,
+        )
+        .expand((record) {
+          final date = subject.nutritionDateForStudyDay(
+            record.studyDaySnapshot,
+          );
+          return record.recall.meals.reversed.map(
+            (meal) => (date: date, meal: meal),
+          );
+        })
+        .where(
+          (entry) =>
+              !entry.meal.isSkipped &&
+              entry.meal.foods.isNotEmpty &&
+              (task.allowMeals ||
+                  !entry.meal.foods.any(
+                    (food) => food.entryType == FoodEntryType.meal,
+                  )),
+        )
+        .take(5)
+        .toList();
+  }
+
+  Future<void> _logAgain(
+    BuildContext context,
+    DailyRecallEntryViewModel model,
+    List<_RecentMeal> recentMeals,
+  ) async {
+    if (!model.revalidateEditingEligibility()) return;
+    final l10n = AppLocalizations.of(context)!;
+    final sourceMeal = await showModalBottomSheet<MealLog>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    l10n.nutrition_choose_recent_meal,
+                    style: Theme.of(sheetContext).textTheme.titleLarge,
+                  ),
+                ),
+              ),
+              for (final entry in recentMeals)
+                ListTile(
+                  title: Text(
+                    _timelineCategory(sheetContext, entry.meal).label,
+                  ),
+                  subtitle: Text(
+                    '${MaterialLocalizations.of(sheetContext).formatMediumDate(entry.date)} UTC\n'
+                    '${entry.meal.foods.map((food) => food.name).join(', ')}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  isThreeLine: true,
+                  onTap: () => Navigator.pop(sheetContext, entry.meal),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (!context.mounted || sourceMeal == null) return;
+    await _addMeal(context, model, repeatedMeal: sourceMeal);
+  }
+
   Future<void> _addMeal(
     BuildContext context,
     DailyRecallEntryViewModel model, {
     PhotoReference? recallPhoto,
+    MealLog? repeatedMeal,
   }) async {
     final result = await _openMealEditor(context, model, (navigator) async {
       var foods = const <FoodEntry>[];
-      if (recallPhoto == null) {
+      String? customMealLabel;
+      if (repeatedMeal != null) {
+        foods = repeatedMeal.foods.map(duplicateFoodEntry).toList();
+        final label = repeatedMeal.customMealLabel?.trim();
+        final customMealTypes =
+            widget.task?.customMealTypes ?? const <String>[];
+        if (label != null &&
+            label.isNotEmpty &&
+            customMealTypes.any((type) => type.trim() == label)) {
+          customMealLabel = label;
+        }
+      } else if (recallPhoto == null) {
         final selection = await FoodSearchScreen.show(
           context,
           mealLabel: AppLocalizations.of(context)!.meal_neutral_label,
@@ -992,6 +1104,8 @@ class _NutritionTaskWidgetState()
       return await navigator.push(
         MealEntryScreen.route(
           task: widget.task,
+          initialMealType: repeatedMeal?.mealType,
+          initialCustomMealLabel: customMealLabel,
           initialFoods: foods,
           recallPhoto: recallPhoto,
           occurrenceDate: _mealOccurrenceDate(model),

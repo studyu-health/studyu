@@ -1272,5 +1272,7 @@
   "nutrition_history_expired_draft": "Die Frist zum Synchronisieren ist abgelaufen. Dieser Entwurf liegt nur auf diesem Gerät.",
   "nutrition_history_discard_expired_draft": "Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden.",
   "nutrition_review_previous_day": "Ernährung vom Vortag prüfen",
-  "food_library_empty": "In dieser Ansicht gibt es keine Lebensmittel oder Mahlzeiten."
+  "food_library_empty": "In dieser Ansicht gibt es keine Lebensmittel oder Mahlzeiten.",
+  "nutrition_log_again": "Erneut erfassen",
+  "nutrition_choose_recent_meal": "Eine frühere Mahlzeit auswählen"
 }
