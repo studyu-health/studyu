@@ -1376,7 +1376,7 @@ void main() {
     await tester.tap(find.text('Log meal'));
     await tester.pumpAndSettle();
     await _selectSavedSoup(tester);
-    await tester.tap(find.text('Meal label'));
+    await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
 
     expect(find.text('Morning meal'), findsOneWidget);

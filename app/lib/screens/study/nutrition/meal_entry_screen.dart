@@ -46,10 +46,7 @@ enum _LibraryEditChoice() {
   currentEntryAndLibrary,
 }
 
-class const _MealTypeSelection(
-  final MealType type, [
-  final String? customLabel,
-]);
+typedef _MealTypeSelection = ({MealType type, String? customLabel});
 
 class const _TimeSelection(
   final DateTime? timestamp,
@@ -57,6 +54,7 @@ class const _TimeSelection(
 );
 
 class const _MealDetailsSelection({
+  required final _MealTypeSelection mealType,
   required final MealContext? mealContext,
   required final CompanyContext? companyContext,
   required final DistractionContext? distractionContext,
@@ -668,6 +666,14 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         : _getMealTypeLabel(_mealType);
   }
 
+  _MealTypeSelection get _mealTypeSelection {
+    final customLabel = _customMealLabel?.trim();
+    return (
+      type: _mealType,
+      customLabel: customLabel?.isNotEmpty == true ? customLabel : null,
+    );
+  }
+
   String get _pageTitle => AppLocalizations.of(context)!.log_meal;
 
   void _pop([MealEntryResult? result]) {
@@ -828,8 +834,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       useSafeArea: true,
       isScrollControlled: true,
       builder: (sheetContext) => _MealTypeSheet(
-        mealType: _mealType,
-        customMealLabel: _customMealLabel,
+        value: _mealTypeSelection,
         customMealTypes: widget.task?.customMealTypes,
       ),
     );
@@ -846,7 +851,10 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       context: context,
       useSafeArea: true,
       isScrollControlled: true,
+      showDragHandle: true,
       builder: (sheetContext) => _MealDetailsSheet(
+        mealType: _mealTypeSelection,
+        customMealTypes: widget.task?.customMealTypes,
         mealContext: _mealContext,
         companyContext: _companyContext,
         distractionContext: _distractionContext,
@@ -856,6 +864,8 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     if (selection == null || !mounted) return;
 
     setState(() {
+      _mealType = selection.mealType.type;
+      _customMealLabel = selection.mealType.customLabel;
       _mealContext = selection.mealContext;
       _companyContext = selection.companyContext;
       _distractionContext = selection.distractionContext;
@@ -865,6 +875,8 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
 
   String _mealDetailsSummary(AppLocalizations l10n) {
     final details = <String>[
+      if (_mealType != MealType.other || _mealTypeSelection.customLabel != null)
+        _mealLabel,
       if (_mealContext == MealContext.other &&
           _locationDescription?.trim().isNotEmpty == true)
         _locationDescription!.trim()
@@ -1173,23 +1185,20 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                       : null,
                 ),
                 const SizedBox(height: 8),
-                _SettingsRow(
-                  icon: Icons.label_outline,
-                  label: l10n.meal_label,
-                  value: _mealLabel == l10n.meal_neutral_label
-                      ? l10n.no_meal_label
-                      : _mealLabel,
-                  onTap: _selectMealType,
-                ),
-                if (widget.task?.collectMealContext ?? true) ...[
-                  const SizedBox(height: 16),
+                if (widget.task?.collectMealContext ?? true)
                   _SettingsRow(
                     icon: Icons.tune,
                     label: l10n.meal_details,
                     value: _mealDetailsSummary(l10n),
                     onTap: _editMealDetails,
+                  )
+                else
+                  _SettingsRow(
+                    icon: Icons.label_outline,
+                    label: l10n.meal_label,
+                    value: _mealTypeChoiceLabel(_mealTypeSelection, l10n),
+                    onTap: _selectMealType,
                   ),
-                ],
               ],
               if (widget.existingMeal != null) ...[
                 const SizedBox(height: 24),
@@ -1247,22 +1256,25 @@ class const _SettingsRow({
 }
 
 class const _MealTypeSheet({
-  required final MealType mealType,
-  required final String? customMealLabel,
+  required final _MealTypeSelection value,
   final List<String>? customMealTypes,
 }) extends StatelessWidget {
   Widget _choiceTile(
     BuildContext context, {
     required _MealTypeSelection choice,
     required String label,
-    required IconData icon,
   }) {
     final selected =
-        mealType == choice.type &&
-        (mealType != MealType.other ||
-            (customMealLabel?.trim() ?? '') == (choice.customLabel ?? ''));
+        value.type == choice.type &&
+        (value.type != MealType.other ||
+            (value.customLabel ?? '') == (choice.customLabel ?? ''));
     return ListTile(
-      leading: Icon(icon),
+      leading: Icon(
+        _mealTypeIcons[choice.type] ??
+            (choice.customLabel == null
+                ? Icons.label_off_outlined
+                : Icons.restaurant_outlined),
+      ),
       title: Text(label),
       selected: selected,
       trailing: selected ? const Icon(Icons.check) : null,
@@ -1273,15 +1285,6 @@ class const _MealTypeSheet({
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final visibleCustomTypes =
-        customMealTypes?.where((label) => label != l10n.meal_type_other) ??
-        const <String>[];
-    const mealTypeIcons = {
-      MealType.breakfast: Icons.breakfast_dining_outlined,
-      MealType.lunch: Icons.lunch_dining_outlined,
-      MealType.dinner: Icons.dinner_dining_outlined,
-      MealType.snack: Icons.cookie_outlined,
-    };
 
     return SafeArea(
       top: false,
@@ -1296,26 +1299,12 @@ class const _MealTypeSheet({
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            for (final entry in mealTypeIcons.entries)
+            for (final choice in _mealTypeChoices(l10n, customMealTypes))
               _choiceTile(
                 context,
-                choice: _MealTypeSelection(entry.key),
-                label: _getMealTypeLabel(entry.key, l10n),
-                icon: entry.value,
+                choice: choice,
+                label: _mealTypeChoiceLabel(choice, l10n),
               ),
-            for (final label in visibleCustomTypes)
-              _choiceTile(
-                context,
-                choice: _MealTypeSelection(MealType.other, label.trim()),
-                label: label,
-                icon: Icons.restaurant_outlined,
-              ),
-            _choiceTile(
-              context,
-              choice: const _MealTypeSelection(MealType.other),
-              label: l10n.no_meal_label,
-              icon: Icons.label_off_outlined,
-            ),
           ],
         ),
       ),
@@ -1594,6 +1583,8 @@ class const _FoodCard({
 }
 
 class const _MealDetailsSheet({
+  required final _MealTypeSelection mealType,
+  required final List<String>? customMealTypes,
   required final MealContext? mealContext,
   required final CompanyContext? companyContext,
   required final DistractionContext? distractionContext,
@@ -1604,6 +1595,7 @@ class const _MealDetailsSheet({
 }
 
 class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
+  late _MealTypeSelection _mealType;
   late MealContext? _mealContext;
   CompanyContext? _companyContext;
   DistractionContext? _distractionContext;
@@ -1612,6 +1604,7 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
   @override
   void initState() {
     super.initState();
+    _mealType = widget.mealType;
     _mealContext = widget.mealContext;
     _companyContext = widget.companyContext;
     _distractionContext = widget.distractionContext;
@@ -1629,125 +1622,145 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
+    final mealTypeChoices = _mealTypeChoices(l10n, widget.customMealTypes);
+    if (!mealTypeChoices.contains(widget.mealType)) {
+      mealTypeChoices.insert(1, widget.mealType);
+    }
+    return SafeArea(
+      top: false,
+      minimum: EdgeInsets.fromLTRB(
         16,
         16,
         16,
         16 + MediaQuery.viewInsetsOf(context).bottom,
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.meal_details,
-              style: Theme.of(context).textTheme.titleLarge,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.meal_details,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  _MealDetailChoices<_MealTypeSelection>(
+                    label: l10n.meal_label,
+                    value: _mealType,
+                    choices: mealTypeChoices,
+                    choiceLabel: (value) => _mealTypeChoiceLabel(value, l10n),
+                    onChanged: (value) => setState(() => _mealType = value),
+                  ),
+                  const SizedBox(height: 12),
+                  _MealDetailChoices<MealContext?>(
+                    label: l10n.where_did_you_eat,
+                    value: _mealContext,
+                    choices: const [null, ...MealContext.values],
+                    choiceLabel: (value) => value == null
+                        ? l10n.not_added
+                        : _getMealContextLabel(value, l10n),
+                    onChanged: (value) => setState(() => _mealContext = value),
+                  ),
+                  if (_mealContext == MealContext.other) ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _locationController,
+                      decoration: InputDecoration(
+                        labelText: l10n.location_description,
+                        hintText: l10n.location_description_hint,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  _MealDetailChoices<CompanyContext?>(
+                    label: l10n.who_were_you_with,
+                    value: _companyContext,
+                    choices: const [null, ...CompanyContext.values],
+                    choiceLabel: (value) => value == null
+                        ? l10n.not_specified
+                        : _getCompanyContextLabel(value, l10n),
+                    onChanged: (value) =>
+                        setState(() => _companyContext = value),
+                  ),
+                  const SizedBox(height: 12),
+                  _MealDetailChoices<DistractionContext?>(
+                    label: l10n.distractions_during_meal,
+                    value: _distractionContext,
+                    choices: const [null, ...DistractionContext.values],
+                    choiceLabel: (value) => value == null
+                        ? l10n.not_specified
+                        : _getDistractionContextLabel(value, l10n),
+                    onChanged: (value) =>
+                        setState(() => _distractionContext = value),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            _DropdownField<MealContext>(
-              label: l10n.where_did_you_eat,
-              icon: Icons.place_outlined,
-              value: _mealContext,
-              items: const [null, ...MealContext.values],
-              itemLabel: (value) => value == null
-                  ? l10n.not_added
-                  : _getMealContextLabel(value, l10n),
-              itemIcon: (value) => switch (value) {
-                null => Icons.remove,
-                MealContext.home => Icons.home_outlined,
-                MealContext.restaurant => Icons.restaurant_outlined,
-                MealContext.takeout => Icons.takeout_dining_outlined,
-                MealContext.vending => Icons.local_drink_outlined,
-                MealContext.other => Icons.more_horiz,
-              },
-              onChanged: (value) => setState(() => _mealContext = value),
-            ),
-            if (_mealContext == MealContext.other) ...[
-              const SizedBox(height: 12),
-              TextField(
-                controller: _locationController,
-                decoration: InputDecoration(
-                  labelText: l10n.location_description,
-                  hintText: l10n.location_description_hint,
-                  border: const OutlineInputBorder(),
-                ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final location = _locationController.text.trim();
+                  Navigator.of(context).pop(
+                    _MealDetailsSelection(
+                      mealType: _mealType,
+                      mealContext: _mealContext,
+                      companyContext: _companyContext,
+                      distractionContext: _distractionContext,
+                      locationDescription:
+                          _mealContext == MealContext.other &&
+                              location.isNotEmpty
+                          ? location
+                          : null,
+                    ),
+                  );
+                },
+                child: Text(l10n.apply),
               ),
             ],
-            const SizedBox(height: 12),
-            _DropdownField<CompanyContext>(
-              label: l10n.who_were_you_with,
-              icon: Icons.group_outlined,
-              value: _companyContext,
-              items: const [null, ...CompanyContext.values],
-              itemLabel: (value) => value == null
-                  ? l10n.not_specified
-                  : _getCompanyContextLabel(value, l10n),
-              itemIcon: (value) => switch (value) {
-                null => Icons.remove,
-                CompanyContext.alone => Icons.person_outline,
-                CompanyContext.family => Icons.family_restroom_outlined,
-                CompanyContext.friends => Icons.group_outlined,
-                CompanyContext.colleagues => Icons.badge_outlined,
-                CompanyContext.other => Icons.more_horiz,
-              },
-              onChanged: (value) => setState(() => _companyContext = value),
-            ),
-            const SizedBox(height: 12),
-            _DropdownField<DistractionContext>(
-              label: l10n.distractions_during_meal,
-              icon: Icons.notifications_outlined,
-              value: _distractionContext,
-              items: const [null, ...DistractionContext.values],
-              itemLabel: (value) => value == null
-                  ? l10n.not_specified
-                  : _getDistractionContextLabel(value, l10n),
-              itemIcon: (value) => switch (value) {
-                null => Icons.remove,
-                DistractionContext.none => Icons.notifications_off_outlined,
-                DistractionContext.tv => Icons.tv_outlined,
-                DistractionContext.phone => Icons.smartphone_outlined,
-                DistractionContext.work => Icons.work_outlined,
-                DistractionContext.other => Icons.more_horiz,
-              },
-              onChanged: (value) => setState(() => _distractionContext = value),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(l10n.cancel),
-                ),
-                const SizedBox(width: 8),
-                FilledButton(
-                  onPressed: () {
-                    final location = _locationController.text.trim();
-                    Navigator.of(context).pop(
-                      _MealDetailsSelection(
-                        mealContext: _mealContext,
-                        companyContext: _companyContext,
-                        distractionContext: _distractionContext,
-                        locationDescription:
-                            _mealContext == MealContext.other &&
-                                location.isNotEmpty
-                            ? location
-                            : null,
-                      ),
-                    );
-                  },
-                  child: Text(l10n.apply),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
+
+const _mealTypeIcons = {
+  MealType.breakfast: Icons.breakfast_dining_outlined,
+  MealType.lunch: Icons.lunch_dining_outlined,
+  MealType.dinner: Icons.dinner_dining_outlined,
+  MealType.snack: Icons.cookie_outlined,
+};
+
+List<_MealTypeSelection> _mealTypeChoices(
+  AppLocalizations l10n,
+  List<String>? customMealTypes,
+) => [
+  for (final type in _mealTypeIcons.keys) (type: type, customLabel: null),
+  for (final label in customMealTypes ?? const <String>[])
+    if (label != l10n.meal_type_other)
+      (type: MealType.other, customLabel: label.trim()),
+  (type: MealType.other, customLabel: null),
+];
+
+String _mealTypeChoiceLabel(_MealTypeSelection choice, AppLocalizations l10n) =>
+    choice.customLabel ??
+    (choice.type == MealType.other
+        ? l10n.no_meal_label
+        : _getMealTypeLabel(choice.type, l10n));
 
 String _getMealTypeLabel(MealType type, AppLocalizations l10n) {
   switch (type) {
@@ -1814,47 +1827,34 @@ String _getDistractionContextLabel(
   }
 }
 
-class const _DropdownField<T>({
+class const _MealDetailChoices<T>({
   required final String label,
-  required final IconData icon,
-  required final T? value,
-  required final List<T?> items,
-  required final String Function(T?) itemLabel,
-  required final IconData Function(T?) itemIcon,
-  required final ValueChanged<T?> onChanged,
+  required final T value,
+  required final List<T> choices,
+  required final String Function(T) choiceLabel,
+  required final ValueChanged<T> onChanged,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<T?>(
-      initialValue: value,
-      isExpanded: true,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      items: [
-        for (final item in items)
-          DropdownMenuItem<T?>(
-            value: item,
-            child: Row(
-              children: [
-                Icon(itemIcon(item), size: 20),
-                const SizedBox(width: 12),
-                Flexible(child: Text(itemLabel(item))),
-              ],
-            ),
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(label, style: Theme.of(context).textTheme.titleSmall),
+        ),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final choice in choices)
+              ChoiceChip(
+                label: Text(choiceLabel(choice)),
+                selected: value == choice,
+                onSelected: (_) => onChanged(choice),
+              ),
+          ],
+        ),
       ],
-      selectedItemBuilder: (context) => [
-        for (final item in items)
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Text(itemLabel(item)),
-          ),
-      ],
-      onChanged: onChanged,
     );
   }
 }

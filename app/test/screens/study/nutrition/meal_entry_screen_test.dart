@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsAction, Tristate;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -402,14 +404,13 @@ Finder foodEditorInput(String label) => find.byWidgetPredicate(
 );
 
 Future<void> selectMealType(WidgetTester tester, String label) async {
-  final mealLabelTrigger = find.text('Meal label');
-  await tester.tap(
-    mealLabelTrigger.evaluate().isNotEmpty
-        ? mealLabelTrigger.last
-        : find.byIcon(Icons.label_outline),
-  );
+  final mealDetails = find.text('Meal details');
+  await tester.ensureVisible(mealDetails);
+  await tester.tap(mealDetails);
   await tester.pumpAndSettle();
-  await tester.tap(find.text(label).last);
+  await tester.tap(findMealDetailsText(label));
+  await tester.pumpAndSettle();
+  await tester.tap(findMealDetailsText('Apply'));
   await tester.pumpAndSettle();
 }
 
@@ -447,6 +448,9 @@ Future<void> chooseMealTime(
   await tester.tap(find.text('OK'));
   await tester.pumpAndSettle();
 }
+
+Finder findMealDetailsText(String label) =>
+    find.descendant(of: find.byType(BottomSheet), matching: find.text(label));
 
 void main() {
   setUp(() => mockNutritionDraftStorage());
@@ -544,7 +548,7 @@ void main() {
       onResult: (value) => result = value,
     );
     await tester.ensureVisible(find.text('Meal details'));
-    expect(find.text('Not added'), findsOneWidget);
+    expect(find.text('Breakfast'), findsOneWidget);
     await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Apply'));
@@ -573,23 +577,16 @@ void main() {
       await tester.ensureVisible(find.text('Meal details'));
       await tester.tap(find.text('Meal details'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is DropdownButtonFormField &&
-              widget.decoration.labelText == 'Where did you eat?',
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Not added').last);
+      await tester.tap(findMealDetailsText('Not added'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Apply'));
       await tester.pumpAndSettle();
-      expect(find.text('Not added'), findsOneWidget);
+      expect(find.text('Supper'), findsOneWidget);
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
       expect(result!.mealContext, isNull);
       expect(result!.locationDescription, isNull);
+      expect(result!.customMealLabel, 'Supper');
       expect(original.mealContext, MealContext.other);
       expect(original.locationDescription, 'Park');
     },
@@ -666,7 +663,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Meal label'), findsOneWidget);
+    expect(find.text('Meal details'), findsOneWidget);
     expect(find.text('Dinner'), findsWidgets);
     expect(
       find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
@@ -878,7 +875,7 @@ void main() {
   ) async {
     await openMealEntry(tester, null);
 
-    await tester.tap(find.text('Meal label'));
+    await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
 
     final sheet = find.byType(BottomSheet);
@@ -893,8 +890,12 @@ void main() {
     );
   });
 
-  testWidgets('meal label picker closes when tapped outside', (tester) async {
-    await openMealEntry(tester, editableMeal());
+  testWidgets('standalone label picker works with context disabled', (
+    tester,
+  ) async {
+    final task = NutritionTask.withId()..collectMealContext = false;
+    await openMealEntry(tester, editableMeal(), task: task);
+    expect(find.text('Meal details'), findsNothing);
     await tester.tap(find.text('Meal label'));
     await tester.pumpAndSettle();
 
@@ -906,6 +907,13 @@ void main() {
 
     expect(find.byType(BottomSheet), findsNothing);
     expect(find.text('Supper'), findsOneWidget);
+
+    await tester.tap(find.text('Meal label'));
+    await tester.pumpAndSettle();
+    await tester.tap(findMealDetailsText('Dinner'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.text('Dinner'), findsOneWidget);
   });
 
   testWidgets('existing meal wins over requested initial values', (
@@ -927,8 +935,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Meal label'), findsOneWidget);
-    expect(find.text('Supper'), findsWidgets);
+    expect(find.text('Meal details'), findsOneWidget);
+    expect(find.text('Supper • Home'), findsOneWidget);
     expect(find.text('Dinner'), findsNothing);
     expect(
       find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
@@ -939,6 +947,8 @@ void main() {
   testWidgets('built-in meal type clears an existing custom label', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 540));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     MealEntryResult? result;
     await openMealEntry(
       tester,
@@ -980,7 +990,7 @@ void main() {
       onEntryResult: (value) => result = value,
     );
 
-    await tester.tap(find.text('Meal label'));
+    await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
 
     expect(find.text('Morning meal'), findsOneWidget);
@@ -988,9 +998,11 @@ void main() {
     expect(find.text('No label'), findsOneWidget);
     expect(find.text('Breakfast'), findsOneWidget);
 
-    await tester.tap(find.text('Evening snack'));
+    await tester.tap(findMealDetailsText('Evening snack'));
     await tester.pumpAndSettle();
-    expect(find.text('Evening snack'), findsWidgets);
+    await tester.tap(findMealDetailsText('Apply'));
+    await tester.pumpAndSettle();
+    expect(find.text('Evening snack • Home'), findsOneWidget);
 
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
@@ -1011,13 +1023,15 @@ void main() {
       task: task,
     );
 
-    await tester.tap(find.text('Meal label'));
+    await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
 
-    expect(
-      tester.getSemantics(find.widgetWithText(ListTile, 'No label').last),
-      isSemantics(label: 'No label', isSelected: true, hasTapAction: true),
-    );
+    final semantics = tester
+        .getSemantics(findMealDetailsText('No label'))
+        .getSemanticsData();
+    expect(semantics.label, 'No label');
+    expect(semantics.flagsCollection.isSelected, Tristate.isTrue);
+    expect(semantics.hasAction(SemanticsAction.tap), isTrue);
     expect(find.text('Breakfast'), findsOneWidget);
   });
 
@@ -1032,10 +1046,7 @@ void main() {
       onEntryResult: (value) => result = value,
     );
 
-    await tester.tap(find.text('Meal label'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ListTile, 'No label').last);
-    await tester.pumpAndSettle();
+    await selectMealType(tester, 'No label');
     expect(find.text('Log meal'), findsOneWidget);
 
     await tester.tap(find.text('Save'));
@@ -1046,7 +1057,7 @@ void main() {
     expect(meal.customMealLabel, isNull);
   });
 
-  testWidgets('meal details apply atomically and dismissal discards edits', (
+  testWidgets('meal detail choices apply together from one sheet', (
     tester,
   ) async {
     MealEntryResult? result;
@@ -1059,62 +1070,56 @@ void main() {
     await tester.ensureVisible(find.text('Meal details'));
     await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is DropdownButtonFormField &&
-            widget.decoration.labelText == 'Who were you with?',
-      ),
+
+    await tester.tap(findMealDetailsText('Lunch'));
+    await tester.pumpAndSettle();
+    await tester.tap(findMealDetailsText('Family'));
+    await tester.pumpAndSettle();
+    final dismissHandle = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.bySemanticsLabel('Dismiss'),
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Family').last);
-    await tester.pumpAndSettle();
-    await tester.drag(find.byType(BottomSheet), const Offset(0, 600));
+    await tester.drag(dismissHandle, const Offset(0, 600));
     await tester.pumpAndSettle();
 
     expect(find.text('Family'), findsNothing);
-    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Supper • Home'), findsOneWidget);
 
     await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is DropdownButtonFormField &&
-            widget.decoration.labelText == 'Who were you with?',
-      ),
-    );
+    await tester.tap(findMealDetailsText('Lunch'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Family').last);
+    await tester.tap(findMealDetailsText('Family'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
     expect(find.text('Family'), findsNothing);
-    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Supper • Home'), findsOneWidget);
 
     await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is DropdownButtonFormField &&
-            widget.decoration.labelText == 'Who were you with?',
-      ),
-    );
+    await tester.tap(findMealDetailsText('Dinner'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Family').last);
+    await tester.tap(findMealDetailsText('Restaurant'));
+    await tester.pumpAndSettle();
+    await tester.tap(findMealDetailsText('Family'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(findMealDetailsText('None'));
+    await tester.tap(findMealDetailsText('None'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Apply'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Home • Family'), findsOneWidget);
+    expect(find.text('Dinner • Restaurant • Family • None'), findsOneWidget);
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    expect(
-      (result! as SavedMealEntryResult).meal.companyContext,
-      CompanyContext.family,
-    );
+    final meal = (result! as SavedMealEntryResult).meal;
+    expect(meal.mealType, MealType.dinner);
+    expect(meal.customMealLabel, isNull);
+    expect(meal.mealContext, MealContext.restaurant);
+    expect(meal.companyContext, CompanyContext.family);
+    expect(meal.distractionContext, DistractionContext.none);
   });
 
   testWidgets('meal details clear a hidden location description', (
@@ -1140,30 +1145,14 @@ void main() {
     await tester.ensureVisible(find.text('Meal details'));
     await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is DropdownButtonFormField &&
-            widget.decoration.labelText == 'Where did you eat?',
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Home').last);
+    await tester.tap(findMealDetailsText('Home'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Apply'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is DropdownButtonFormField &&
-            widget.decoration.labelText == 'Where did you eat?',
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Other').last);
+    await tester.tap(findMealDetailsText('Other').first);
     await tester.pumpAndSettle();
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller?.text,
@@ -1258,9 +1247,9 @@ void main() {
 
       expect(
         tester.getTopLeft(find.text('Foods and saved meals')).dy,
-        lessThan(tester.getTopLeft(find.text('Meal label')).dy),
+        lessThan(tester.getTopLeft(find.text('Meal details')).dy),
       );
-      expect(find.text('Meal details'), findsOneWidget);
+      expect(find.text('Meal label'), findsNothing);
       expect(find.text('Meal Nutrition'), findsNothing);
     },
   );
@@ -1295,7 +1284,7 @@ void main() {
       expect(chip.checkmarkColor, isNull);
     }
 
-    for (final label in ['Meal label', 'Time', 'Apple']) {
+    for (final label in ['Meal details', 'Time', 'Apple']) {
       final card = tester.widget<Card>(
         find.ancestor(of: find.text(label), matching: find.byType(Card)).first,
       );
@@ -2054,7 +2043,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(MealEntryScreen), findsOneWidget);
-    expect(find.text('Dinner'), findsWidgets);
+    expect(find.text('Dinner • Home'), findsOneWidget);
   });
 
   testWidgets('recipe builder return preserves and saves the meal draft', (
