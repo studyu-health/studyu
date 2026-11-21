@@ -44,7 +44,9 @@ void main() {
 
     expect(find.text('Require daily completion'), findsNothing);
 
-    await tester.tap(find.text('Add meal type'));
+    final addMealType = find.text('Add meal type');
+    await tester.ensureVisible(addMealType);
+    await tester.tap(addMealType);
     await tester.pump();
 
     expect(formViewModel.customMealTypesControl.controls, hasLength(1));
@@ -129,5 +131,44 @@ void main() {
     );
     await tester.enterText(survivingField, 'Updated meal');
     expect(viewModel.buildFormData().customMealTypes, ['Updated meal']);
+  });
+
+  testWidgets('the statistics switch saves the setting and explains bias', (
+    tester,
+  ) async {
+    final viewModel = NutritionFormViewModel(study: Study.withId('study-1'));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ReactiveForm(
+              formGroup: viewModel.form,
+              child: NutritionFormView(formViewModel: viewModel),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final statisticsSwitch = find.byWidgetPredicate(
+      (widget) =>
+          widget is ReactiveSwitch &&
+          identical(widget.formControl, viewModel.showStatisticsControl),
+    );
+    expect(find.text('Show nutrition statistics'), findsOneWidget);
+    expect(
+      find.byTooltip(tr.form_field_nutrition_show_statistics_help),
+      findsOneWidget,
+    );
+    expect(viewModel.buildFormData().toNutritionTask().showStatistics, isFalse);
+
+    await tester.ensureVisible(statisticsSwitch);
+    await tester.tap(statisticsSwitch);
+    await tester.pump();
+    expect(viewModel.buildFormData().toNutritionTask().showStatistics, isTrue);
+
+    await tester.tap(statisticsSwitch);
+    await tester.pump();
+    expect(viewModel.buildFormData().toNutritionTask().showStatistics, isFalse);
   });
 }

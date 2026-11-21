@@ -18,6 +18,7 @@ NutritionTask _$NutritionTaskFromJson(Map<String, dynamic> json) {
       'collectMealContext',
       'allowMeals',
       'trackWaterIntake',
+      'showStatistics',
     ],
   );
   return NutritionTask()
@@ -36,6 +37,7 @@ NutritionTask _$NutritionTaskFromJson(Map<String, dynamic> json) {
     ..collectMealContext = json['collectMealContext'] as bool
     ..allowMeals = json['allowMeals'] as bool
     ..trackWaterIntake = json['trackWaterIntake'] as bool
+    ..showStatistics = json['showStatistics'] as bool? ?? false
     ..minimumMealsRequired = (json['minimumMealsRequired'] as num?)?.toInt()
     ..customMealTypes = (json['customMealTypes'] as List<dynamic>?)
         ?.map((e) => e as String)
@@ -55,6 +57,7 @@ Map<String, dynamic> _$NutritionTaskToJson(NutritionTask instance) =>
       'collectMealContext': instance.collectMealContext,
       'allowMeals': instance.allowMeals,
       'trackWaterIntake': instance.trackWaterIntake,
+      'showStatistics': instance.showStatistics,
       'minimumMealsRequired': ?instance.minimumMealsRequired,
       'customMealTypes': ?instance.customMealTypes,
     };

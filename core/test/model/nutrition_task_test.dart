@@ -49,6 +49,19 @@ void main() {
     expect(NutritionTask.fromJson(task.toJson()).trackWaterIntake, isTrue);
   });
 
+  test('nutrition statistics require opt-in in study data', () {
+    final task = NutritionTask.withId();
+    final json = task.toJson();
+
+    expect(json['showStatistics'], isFalse);
+    expect(NutritionTask.fromJson(json).showStatistics, isFalse);
+    json.remove('showStatistics');
+    expect(NutritionTask.fromJson(json).showStatistics, isFalse);
+
+    task.showStatistics = true;
+    expect(NutritionTask.fromJson(task.toJson()).showStatistics, isTrue);
+  });
+
   test('only completed daily recalls satisfy task completion', () {
     final date = DateTime(2026, 7, 15);
     final period = CompletionPeriod(

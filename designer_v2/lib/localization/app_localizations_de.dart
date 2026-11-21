@@ -3297,4 +3297,12 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get form_field_nutrition_completion_window_error =>
       'Jedes Zeitfenster für die Ernährungserfassung muss vor oder zur Endzeit beginnen.';
+
+  @override
+  String get form_field_nutrition_show_statistics =>
+      'Ernährungsstatistiken anzeigen';
+
+  @override
+  String get form_field_nutrition_show_statistics_help =>
+      'Zeigt Teilnehmenden ihre täglichen Nährstoffsummen und Trends. Diese Rückmeldung kann beeinflussen, was sie essen oder dokumentieren, und spätere Einträge verzerren.';
 }

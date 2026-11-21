@@ -3267,4 +3267,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get form_field_nutrition_completion_window_error =>
       'Each nutrition window must start at or before its end time.';
+
+  @override
+  String get form_field_nutrition_show_statistics =>
+      'Show nutrition statistics';
+
+  @override
+  String get form_field_nutrition_show_statistics_help =>
+      'Shows participants their daily nutrition totals and trends. This feedback can change what participants eat or record and bias later entries.';
 }

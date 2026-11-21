@@ -1290,5 +1290,7 @@
   "form_field_nutrition_track_water_help": "Teilnehmende können erfassen, wie viel Wasser sie täglich trinken.",
   "form_survey_template_days_outside_study": "Einige Tage liegen außerhalb der Studiendauer. Wählen Sie einzelne verfügbare Tage aus.",
   "form_survey_template_day_outside_study": "Außerhalb der Studiendauer",
-  "form_field_nutrition_completion_window_error": "Jedes Zeitfenster für die Ernährungserfassung muss vor oder zur Endzeit beginnen."
+  "form_field_nutrition_completion_window_error": "Jedes Zeitfenster für die Ernährungserfassung muss vor oder zur Endzeit beginnen.",
+  "form_field_nutrition_show_statistics": "Ernährungsstatistiken anzeigen",
+  "form_field_nutrition_show_statistics_help": "Zeigt Teilnehmenden ihre täglichen Nährstoffsummen und Trends. Diese Rückmeldung kann beeinflussen, was sie essen oder dokumentieren, und spätere Einträge verzerren."
 }

@@ -3159,4 +3159,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get form_field_nutrition_completion_window_error =>
       '각 영양 기록 시간대의 시작 시간은 종료 시간보다 빠르거나 같아야 합니다.';
+
+  @override
+  String get form_field_nutrition_show_statistics => '영양 통계 표시';
+
+  @override
+  String get form_field_nutrition_show_statistics_help =>
+      '참가자에게 하루 영양 섭취량 합계와 변화 추이를 보여 줍니다. 이 정보는 참가자가 무엇을 먹거나 기록하는지에 영향을 주어 이후 기록에 편향을 일으킬 수 있습니다.';
 }

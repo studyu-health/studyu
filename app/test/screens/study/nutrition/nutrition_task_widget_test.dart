@@ -466,7 +466,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         nutritionTaskApp(
-          nutritionTask(),
+          nutritionTask()..showStatistics = true,
           existingRecall: recall([
             meal(
               'meal',
@@ -517,7 +517,7 @@ void main() {
 
     expect(find.text('Read-only'), findsOneWidget);
     expect(find.text('Historical apple'), findsOneWidget);
-    expect(find.text('Daily summary'), findsOneWidget);
+    expect(find.text('Daily summary'), findsNothing);
     expect(find.text('Statistics'), findsNothing);
     expect(find.text('My items'), findsNothing);
     expect(find.byTooltip('History'), findsNothing);
@@ -821,7 +821,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         nutritionTaskApp(
-          nutritionTask(),
+          nutritionTask()..showStatistics = true,
           existingRecall: recall([
             meal(
               'meal',
@@ -878,6 +878,46 @@ void main() {
     },
   );
 
+  testWidgets('disabling statistics returns to the diary and keeps Library', (
+    tester,
+  ) async {
+    final task = nutritionTask()..showStatistics = true;
+    final existingRecall = recall([
+      meal('meal', MealType.breakfast, foods: [food('apple', 'Apple', 100)]),
+    ])..date = DateTime.now();
+    await tester.pumpWidget(
+      nutritionTaskApp(task, existingRecall: existingRecall),
+    );
+    await tester.pumpAndSettle();
+
+    final navigation = find.byType(NavigationBar);
+    final statistics = find.descendant(
+      of: navigation,
+      matching: find.text('Statistics'),
+    );
+    await tester.tap(statistics);
+    await tester.pumpAndSettle();
+    expect(find.text('Daily summary'), findsOneWidget);
+
+    task.showStatistics = false;
+    await tester.pumpWidget(
+      nutritionTaskApp(task, existingRecall: existingRecall),
+    );
+    await tester.pumpAndSettle();
+    expect(statistics, findsNothing);
+    expect(find.text('Daily summary'), findsNothing);
+    expect(find.text('Log meal'), findsOneWidget);
+
+    await tester.tap(
+      find.descendant(of: navigation, matching: find.text('Library')),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: find.byType(AppBar), matching: find.text('Library')),
+      findsOneWidget,
+    );
+  });
+
   for (final tab in ['Today', 'Statistics', 'Library']) {
     testWidgets('Exit closes $tab without returning a completion result', (
       tester,
@@ -892,7 +932,7 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             locale: const Locale('en'),
             home: _NutritionLauncher(
-              task: nutritionTask(),
+              task: nutritionTask()..showStatistics = tab == 'Statistics',
               existingRecall: recall([meal('meal', MealType.breakfast)]),
               onResult: (value) {
                 didReturn = true;
@@ -956,8 +996,13 @@ void main() {
     final navigationBar = tester.widget<NavigationBar>(
       find.byType(NavigationBar),
     );
-    navigationBar.onDestinationSelected!(3);
-    navigationBar.onDestinationSelected!(3);
+    final exit = navigationBar.destinations.indexWhere(
+      (destination) =>
+          destination is NavigationDestination && destination.label == 'Exit',
+    );
+    expect(exit, isNonNegative);
+    navigationBar.onDestinationSelected!(exit);
+    navigationBar.onDestinationSelected!(exit);
     await tester.pumpAndSettle();
 
     expect(find.byType(NutritionTaskWidget), findsNothing);

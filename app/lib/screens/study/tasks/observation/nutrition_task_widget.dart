@@ -96,16 +96,21 @@ class const NutritionTaskWidget({
   State<NutritionTaskWidget> createState() => _NutritionTaskWidgetState();
 }
 
+enum _NutritionTab() {
+  today,
+  statistics,
+  library,
+}
+
 class _NutritionTaskWidgetState()
     extends State<NutritionTaskWidget>
     with WidgetsBindingObserver {
-  static const _exitDestination = 3;
   static const _cupSizeKey = 'nutrition_water_cup_size_ml';
   static const _defaultCupSizeMl = 250;
 
   DailyRecallEntryViewModel? _viewModel;
   TemplateViewModel? _templateViewModel;
-  int _selectedDestination = 0;
+  _NutritionTab _selectedTab = _NutritionTab.today;
   bool _didHandleExpiredEdit = false;
   Timer? _studyDayTimer;
   int? _cupSizeMl;
@@ -113,6 +118,7 @@ class _NutritionTaskWidgetState()
   bool _isExiting = false;
 
   bool get _trackWaterIntake => widget.task?.trackWaterIntake ?? true;
+  bool get _showStatistics => widget.task?.showStatistics ?? false;
 
   @override
   void initState() {
@@ -129,6 +135,9 @@ class _NutritionTaskWidgetState()
   void didUpdateWidget(covariant NutritionTaskWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     _viewModel?.task = widget.task;
+    if (!_showStatistics && _selectedTab == _NutritionTab.statistics) {
+      _selectedTab = _NutritionTab.today;
+    }
     if (oldWidget.task?.trackWaterIntake == false &&
         _trackWaterIntake &&
         !widget.readOnly &&
@@ -277,6 +286,12 @@ class _NutritionTaskWidgetState()
         builder: (context, model, child) {
           final l10n = AppLocalizations.of(context)!;
           final appState = context.read<AppState>();
+          final tabs = [
+            _NutritionTab.today,
+            if (_showStatistics) _NutritionTab.statistics,
+            _NutritionTab.library,
+          ];
+          final selectedIndex = tabs.indexOf(_selectedTab);
           if (model.historicalEligibilityExpired || model.currentDayExpired) {
             _closeExpiredDiary(
               context,
@@ -335,43 +350,45 @@ class _NutritionTaskWidgetState()
               body: _isHistoricalMode
                   ? _buildToday(context, model, l10n)
                   : IndexedStack(
-                      index: _selectedDestination,
+                      index: selectedIndex,
                       children: [
                         _buildToday(context, model, l10n),
-                        NutritionStatisticsView(
-                          isVisible: _selectedDestination == 1,
-                          subject: appState.activeSubject,
-                          taskId: widget.task?.id,
-                          task: widget.task,
-                          autoSaveManager: appState.previewNutritionDrafts,
-                          activeRecall: model.recall,
-                          activeStudyDay: model.studyDaySnapshot,
-                          activePeriodId:
-                              model.persistenceTarget?.periodId ??
-                              widget.completionPeriod?.id,
-                          onOpenRecall: widget.task == null
-                              ? null
-                              : (record) => _openRecall(
-                                  context,
-                                  appState.activeSubject,
-                                  widget.task!,
-                                  record,
-                                ),
-                        ),
+                        if (_showStatistics)
+                          NutritionStatisticsView(
+                            isVisible: _selectedTab == _NutritionTab.statistics,
+                            subject: appState.activeSubject,
+                            taskId: widget.task?.id,
+                            task: widget.task,
+                            autoSaveManager: appState.previewNutritionDrafts,
+                            activeRecall: model.recall,
+                            activeStudyDay: model.studyDaySnapshot,
+                            activePeriodId:
+                                model.persistenceTarget?.periodId ??
+                                widget.completionPeriod?.id,
+                            onOpenRecall: widget.task == null
+                                ? null
+                                : (record) => _openRecall(
+                                    context,
+                                    appState.activeSubject,
+                                    widget.task!,
+                                    record,
+                                  ),
+                          ),
                         const FoodLibraryScreen(embedded: true),
                       ],
                     ),
               bottomNavigationBar: _isHistoricalMode
                   ? null
                   : NavigationBar(
-                      selectedIndex: _selectedDestination,
+                      selectedIndex: selectedIndex,
                       onDestinationSelected: (index) async {
-                        if (index == _exitDestination) {
+                        if (index == tabs.length) {
                           await Navigator.of(context).maybePop();
                           return;
                         }
-                        setState(() => _selectedDestination = index);
-                        if (index == 2) {
+                        final tab = tabs[index];
+                        setState(() => _selectedTab = tab);
+                        if (tab == _NutritionTab.library) {
                           await _templateViewModel?.loadAllTemplates();
                         }
                       },
@@ -381,11 +398,12 @@ class _NutritionTaskWidgetState()
                           selectedIcon: const Icon(Icons.today),
                           label: l10n.today,
                         ),
-                        NavigationDestination(
-                          icon: const Icon(Icons.bar_chart_outlined),
-                          selectedIcon: const Icon(Icons.bar_chart),
-                          label: l10n.nutrition_statistics,
-                        ),
+                        if (_showStatistics)
+                          NavigationDestination(
+                            icon: const Icon(Icons.bar_chart_outlined),
+                            selectedIcon: const Icon(Icons.bar_chart),
+                            label: l10n.nutrition_statistics,
+                          ),
                         NavigationDestination(
                           icon: const Icon(Icons.bookmark_outline),
                           selectedIcon: const Icon(Icons.bookmark),
@@ -439,23 +457,23 @@ class _NutritionTaskWidgetState()
     title: Text(
       _isHistoricalMode
           ? _historicalDateTitle(context, l10n)
-          : switch (_selectedDestination) {
-              0 => l10n.nutrition_tracking,
-              1 => l10n.nutrition_statistics,
-              _ => l10n.food_library,
+          : switch (_selectedTab) {
+              _NutritionTab.today => l10n.nutrition_tracking,
+              _NutritionTab.statistics => l10n.nutrition_statistics,
+              _NutritionTab.library => l10n.food_library,
             },
     ),
     actions: _isHistoricalMode
         ? const []
         : [
-            if (widget.readOnly && _selectedDestination != 1)
+            if (widget.readOnly && _selectedTab != _NutritionTab.statistics)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: Text(l10n.nutrition_read_only),
                 ),
               ),
-            if (_selectedDestination == 0 && widget.task != null)
+            if (_selectedTab == _NutritionTab.today && widget.task != null)
               IconButton(
                 icon: const Icon(Icons.history_outlined),
                 tooltip: l10n.nutrition_history,
@@ -467,7 +485,7 @@ class _NutritionTaskWidgetState()
               IconButton(
                 icon: const Icon(Icons.help_outline),
                 tooltip: l10n.help,
-                onPressed: _selectedDestination == 1
+                onPressed: _selectedTab == _NutritionTab.statistics
                     ? () => showDialog<void>(
                         context: context,
                         builder: (dialogContext) => AlertDialog(
@@ -484,7 +502,7 @@ class _NutritionTaskWidgetState()
                     : () => Navigator.of(context)
                           .push(NutritionHelpScreen.route(task: widget.task!)),
               ),
-            if (_selectedDestination == 2)
+            if (_selectedTab == _NutritionTab.library)
               FoodLibraryScreen.createButton(context),
           ],
   );
@@ -591,7 +609,7 @@ class _NutritionTaskWidgetState()
               ),
             ),
           ],
-          if (_isHistoricalMode) ...[
+          if (_isHistoricalMode && _showStatistics) ...[
             const SizedBox(height: 24),
             Text(
               l10n.daily_summary,

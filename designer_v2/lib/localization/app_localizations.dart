@@ -5558,6 +5558,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Each nutrition window must start at or before its end time.'**
   String get form_field_nutrition_completion_window_error;
+
+  /// No description provided for @form_field_nutrition_show_statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Show nutrition statistics'**
+  String get form_field_nutrition_show_statistics;
+
+  /// No description provided for @form_field_nutrition_show_statistics_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows participants their daily nutrition totals and trends. This feedback can change what participants eat or record and bias later entries.'**
+  String get form_field_nutrition_show_statistics_help;
 }
 
 class _AppLocalizationsDelegate

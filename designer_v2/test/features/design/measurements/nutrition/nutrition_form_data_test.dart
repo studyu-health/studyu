@@ -193,11 +193,12 @@ void main() {
   }
 
   test(
-    'editing and duplicating a nutrition task preserve water tracking',
+    'editing and duplicating a nutrition task preserve its settings',
     () async {
       final task = NutritionTask.withId()
         ..title = 'Nutrition'
-        ..trackWaterIntake = true;
+        ..trackWaterIntake = true
+        ..showStatistics = true;
       final viewModel = NutritionFormViewModel(
         study: Study('study', 'owner'),
         formData: NutritionFormData.fromDomainModel(task),
@@ -205,15 +206,15 @@ void main() {
       viewModel.titleControl.value = 'Daily nutrition';
       await viewModel.save();
 
-      expect(viewModel.formData!.toNutritionTask().trackWaterIntake, isTrue);
-      expect(
-        viewModel
-            .createDuplicate()
-            .buildFormData()
-            .toNutritionTask()
-            .trackWaterIntake,
-        isTrue,
-      );
+      final saved = viewModel.formData!.toNutritionTask();
+      final duplicate = viewModel
+          .createDuplicate()
+          .buildFormData()
+          .toNutritionTask();
+      for (final edited in [saved, duplicate]) {
+        expect(edited.trackWaterIntake, isTrue);
+        expect(edited.showStatistics, isTrue);
+      }
     },
   );
 }
