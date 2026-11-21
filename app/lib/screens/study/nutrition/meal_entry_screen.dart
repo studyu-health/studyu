@@ -13,9 +13,11 @@ import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart
 import 'package:studyu_app/screens/study/nutrition/nutrition_action_menu.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
+import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
@@ -32,6 +34,7 @@ final class const SavedMealEntryResult(
   final MealLog meal, {
   final bool definitionMutated = false,
   final int? expectedNutritionRevision,
+  final NutritionPhotoChange? photoChange,
 }) extends MealEntryResult;
 
 final class const DeletedMealEntryResult() extends MealEntryResult;
@@ -115,6 +118,7 @@ class const MealEntryScreen({
 
 class _MealEntryScreenState() extends State<MealEntryScreen> {
   late MealLog _meal;
+  NutritionPhotoChange? _photoChange;
   late MealType _mealType;
   late MealContext? _mealContext;
   DateTime? _timestamp;
@@ -649,7 +653,8 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
 
   String get _mealSnapshot => jsonEncode(_buildMeal().toJson());
 
-  bool get _hasUnsavedChanges => _mealSnapshot != _initialMealSnapshot;
+  bool get _hasUnsavedChanges =>
+      _photoChange != null || _mealSnapshot != _initialMealSnapshot;
 
   bool get _isMealValid =>
       _buildMeal().isValidForSave(hasSelectedTime: _hasSelectedTime);
@@ -743,6 +748,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           meal,
           definitionMutated: _definitionMutated,
           expectedNutritionRevision: _definitionMutationRevision,
+          photoChange: meal.isSkipped ? null : _photoChange,
         ),
       );
     } catch (error, stackTrace) {
@@ -1070,6 +1076,19 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                       setState(() => _saveToMyItems = value ?? false),
                 ),
               if (!_isSkipped) ...[
+                if (nutritionPhotoScope(context.watch<AppState?>())
+                    case final scope?)
+                  NutritionPhotoEditor(
+                    photoKey: nutritionPhotoKey(
+                      scope,
+                      NutritionPhotoKind.meal,
+                      _meal.id,
+                    ),
+                    change: _photoChange,
+                    onChanged: (change) =>
+                        setState(() => _photoChange = change),
+                    enabled: !_isSaving,
+                  ),
                 _FoodListSection(
                   meal: _meal,
                   showValidationError: _hasAttemptedSave && _meal.foods.isEmpty,
@@ -1483,17 +1502,24 @@ class const _FoodCard({
                       SizedBox(
                         width: 44,
                         height: 44,
-                        child: imageUrl == null
-                            ? fallbackFoodIcon(theme, icon)
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) =>
-                                      fallbackFoodIcon(theme, icon),
+                        child: NutritionPhotoThumbnail(
+                          photoKey: nutritionPhotoKey(
+                            nutritionPhotoScope(context.watch<AppState?>()),
+                            NutritionPhotoKind.item,
+                            food.foodId,
+                          ),
+                          fallback: imageUrl == null
+                              ? fallbackFoodIcon(theme, icon)
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) =>
+                                        fallbackFoodIcon(theme, icon),
+                                  ),
                                 ),
-                              ),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(

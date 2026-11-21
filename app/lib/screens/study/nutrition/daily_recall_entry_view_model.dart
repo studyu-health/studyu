@@ -492,35 +492,38 @@ class DailyRecallEntryViewModel({
     _scheduleAutoSave('special occasion changed');
   }
 
-  void addMeal(MealLog meal) {
-    if (readOnly || !revalidateEditingEligibility()) return;
+  bool addMeal(MealLog meal) {
+    if (readOnly || !revalidateEditingEligibility()) return false;
     recall.meals.add(meal);
     notifyListeners();
     _scheduleAutoSave('meal added');
+    return true;
   }
 
-  void updateMeal(int index, MealLog meal) {
-    if (readOnly || !revalidateEditingEligibility()) return;
+  bool updateMeal(int index, MealLog meal) {
+    if (readOnly || !revalidateEditingEligibility()) return false;
     recall.meals[index] = meal;
     notifyListeners();
     _scheduleAutoSave('meal edited');
+    return true;
   }
 
-  void updateMealById(String mealId, MealLog meal) {
+  bool updateMealById(String mealId, MealLog meal) {
     final index = recall.meals.indexWhere((entry) => entry.id == mealId);
-    if (index >= 0) updateMeal(index, meal);
+    return index >= 0 && updateMeal(index, meal);
   }
 
-  void removeMeal(int index) {
-    if (readOnly || !revalidateEditingEligibility()) return;
+  bool removeMeal(int index) {
+    if (readOnly || !revalidateEditingEligibility()) return false;
     recall.meals.removeAt(index);
     notifyListeners();
     _scheduleAutoSave('meal removed');
+    return true;
   }
 
-  void removeMealById(String mealId) {
+  bool removeMealById(String mealId) {
     final index = recall.meals.indexWhere((entry) => entry.id == mealId);
-    if (index >= 0) removeMeal(index);
+    return index >= 0 && removeMeal(index);
   }
 
   Future<void> adjustWaterIntake(int deltaMl) async {

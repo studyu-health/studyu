@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
+import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
 Duration selectionAnimationDuration(BuildContext context) =>
@@ -23,6 +25,7 @@ class const FoodItemCard({
   required final String metadata,
   required final IconData icon,
   final String? imageUrl,
+  final NutritionPhotoKey? photoKey,
   final String? typeLabel,
   final TextStyle? titleStyle,
   final int textMaxLines = 1,
@@ -48,19 +51,22 @@ class const FoodItemCard({
                   SizedBox(
                     width: 48,
                     height: 48,
-                    child: imageUrl == null
-                        ? fallback
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
-                              imageUrl!,
-                              width: 48,
-                              height: 48,
-                              fit: BoxFit.cover,
-                              excludeFromSemantics: true,
-                              errorBuilder: (_, _, _) => fallback,
+                    child: NutritionPhotoThumbnail(
+                      photoKey: photoKey,
+                      fallback: imageUrl == null
+                          ? fallback
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(
+                                imageUrl!,
+                                width: 48,
+                                height: 48,
+                                fit: BoxFit.cover,
+                                excludeFromSemantics: true,
+                                errorBuilder: (_, _, _) => fallback,
+                              ),
                             ),
-                          ),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

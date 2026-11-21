@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
+import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/models/unified_food_result.dart';
 import 'package:studyu_app/screens/study/nutrition/barcode_scanner_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
@@ -11,7 +14,9 @@ import 'package:studyu_app/screens/study/nutrition/food_search_bar.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
+import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_app/widgets/empty_state.dart';
@@ -67,12 +72,18 @@ class _FoodLibraryState() extends State<FoodLibrary> {
   TemplateFilter _filter = TemplateFilter.all;
   bool _copyInProgress = false;
   FoodEntry? _pendingCopyDraft;
+  NutritionPhotoChange? _pendingCopyPhoto;
 
   bool get _externalEnabled => widget.includeExternalLibrary;
 
   @override
   void initState() {
     super.initState();
+    unawaited(
+      retryNutritionPhotoDeletes(
+        nutritionPhotoScope(context.read<AppState?>()),
+      ),
+    );
     _setExternalViewModel();
   }
 
@@ -197,6 +208,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         setState(() {
           _copyInProgress = false;
           _pendingCopyDraft = null;
+          _pendingCopyPhoto = null;
         });
       }
     }
@@ -209,16 +221,28 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         existingFood: draft,
         showSearchAction: false,
         isExternalLibraryCopy: true,
+        onPhotoChanged: (change) => _pendingCopyPhoto = change,
       ),
     );
   }
 
   Future<void> _saveCopiedFood(TemplateViewModel viewModel) async {
+    final photoScope = nutritionPhotoScope(context.read<AppState?>());
     while (mounted) {
       final draft = _pendingCopyDraft;
       if (draft == null) return;
       try {
-        await viewModel.saveFoodAsTemplate(name: draft.name, food: draft);
+        final id = await viewModel.saveFoodAsTemplate(
+          name: draft.name,
+          food: draft,
+        );
+        if (mounted) {
+          await saveNutritionPhoto(
+            context,
+            nutritionPhotoKey(photoScope, NutritionPhotoKind.item, id),
+            _pendingCopyPhoto,
+          );
+        }
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -478,6 +502,11 @@ class const FoodLibraryItemCard({
       metadata: metadata,
       icon: icon,
       imageUrl: foodImageUrl(template.prototype),
+      photoKey: nutritionPhotoKey(
+        nutritionPhotoScope(context.watch<AppState?>()),
+        NutritionPhotoKind.item,
+        template.id,
+      ),
       typeLabel: typeLabel,
       selected: isSelected,
       tapLabel:
@@ -579,29 +608,40 @@ class const FoodLibraryItemCard({
     final prototype = _isMeal
         ? studyu.FoodEntry.fromJson(template.prototype.toJson())
         : normalizeNutritionFoodDefinition(template.prototype);
+    NutritionPhotoChange? photoChange;
+    final photoKey = nutritionPhotoKey(
+      nutritionPhotoScope(context.read<AppState?>()),
+      NutritionPhotoKind.item,
+      template.id,
+    );
     final edited = await Navigator.push<studyu.FoodEntry>(
       context,
       _isMeal
           ? MealCreatorScreen.route(
               existingMeal: prototype,
+              onPhotoChanged: (change) => photoChange = change,
               showServings: false,
               templateViewModel: context.read<TemplateViewModel>(),
             )
           : FoodEntryScreen.route(
               existingFood: prototype,
+              onPhotoChanged: (change) => photoChange = change,
               showSearchAction: false,
             ),
     );
     if (edited == null || !context.mounted) return;
     final viewModel = context.read<TemplateViewModel>();
     await _manage(context, () async {
-      await viewModel.updateFoodTemplatePrototype(
+      final saved = await viewModel.updateFoodTemplatePrototype(
         template.id,
         edited.entryType == FoodEntryType.meal
             ? normalizeNutritionFoodDefinition(edited)
             : edited,
         expectedVersionId: template.prototype.foodVersionId,
       );
+      if (saved != null && context.mounted) {
+        await saveNutritionPhoto(context, photoKey, photoChange);
+      }
     });
   }
 
@@ -619,7 +659,16 @@ class const FoodLibraryItemCard({
       isDestructive: true,
     );
     if (confirmed && context.mounted) {
-      await _manage(context, () => viewModel.deleteFoodTemplate(template.id));
+      final key = nutritionPhotoKey(
+        nutritionPhotoScope(context.read<AppState?>()),
+        NutritionPhotoKind.item,
+        template.id,
+      );
+      await _manage(context, () async {
+        if (await viewModel.deleteFoodTemplate(template.id)) {
+          await deleteNutritionPhoto(key);
+        }
+      });
     }
   }
 

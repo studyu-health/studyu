@@ -9,8 +9,10 @@ import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_editor_layout.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
+import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart' as snapshots;
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
@@ -29,6 +31,7 @@ class const MealCreatorScreen({
   final bool showExpansionNotice = false,
   final ValueChanged<bool>? onCurrentDayPropagationChanged,
   final TemplateViewModel? templateViewModel,
+  final ValueChanged<NutritionPhotoChange?>? onPhotoChanged,
   final void Function(FoodEntry food, Offset? source)? onSavedToSelection,
   super.key,
 }) extends StatefulWidget {
@@ -44,6 +47,7 @@ class const MealCreatorScreen({
     ValueChanged<bool>? onCurrentDayPropagationChanged,
     TemplateViewModel? templateViewModel,
     void Function(FoodEntry food, Offset? source)? onSavedToSelection,
+    ValueChanged<NutritionPhotoChange?>? onPhotoChanged,
   }) => MaterialPageRoute(
     builder: (_) => MealCreatorScreen(
       existingMeal: existingMeal,
@@ -57,6 +61,7 @@ class const MealCreatorScreen({
       onCurrentDayPropagationChanged: onCurrentDayPropagationChanged,
       templateViewModel: templateViewModel,
       onSavedToSelection: onSavedToSelection,
+      onPhotoChanged: onPhotoChanged,
     ),
   );
 
@@ -93,6 +98,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   String? _newFoodId;
   String? _copyFoodId;
   final GlobalKey _saveButtonKey = GlobalKey();
+  NutritionPhotoChange? _photoChange;
 
   @override
   void initState() {
@@ -479,6 +485,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
 
   Future<void> _saveMeal() async {
     if (_isSaving) return;
+    final photoScope = nutritionPhotoScope(context.read<AppState?>());
     Offset? saveSource;
     final saveContext = _saveButtonKey.currentContext;
     if (widget.existingMeal == null && saveContext != null) {
@@ -520,6 +527,15 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
           }
           return;
         }
+      }
+      if (mounted && widget.onPhotoChanged != null) {
+        widget.onPhotoChanged!(_photoChange);
+      } else if (mounted && widget.existingMeal == null) {
+        await saveNutritionPhoto(
+          context,
+          nutritionPhotoKey(photoScope, NutritionPhotoKind.item, meal.foodId),
+          _photoChange,
+        );
       }
       if (mounted) {
         final onSavedToSelection =
@@ -600,7 +616,8 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     ],
   });
 
-  bool get _hasUnsavedChanges => _snapshot != _initialSnapshot;
+  bool get _hasUnsavedChanges =>
+      _photoChange != null || _snapshot != _initialSnapshot;
 
   Future<void> _saveAsTemplate() async {
     if (_isSaving) return;
@@ -621,6 +638,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     final l10n = AppLocalizations.of(context)!;
     final appState = Provider.of<AppState>(context, listen: false);
     final userId = appState.activeSubject?.id ?? 'anonymous';
+    final photoScope = nutritionPhotoScope(appState);
 
     final result = await SaveTemplateDialog.show(
       context,
@@ -640,7 +658,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
               ..foodId = _copyFoodId ??= const Uuid().v4()
               ..foodVersionId = const Uuid().v4()
               ..templateId = null;
-        await viewModel.saveFoodAsTemplate(
+        final id = await viewModel.saveFoodAsTemplate(
           name: result.name,
           food: copy,
           tags: result.tags,
@@ -649,6 +667,11 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(l10n.template_saved)));
+          await saveNutritionPhoto(
+            context,
+            nutritionPhotoKey(photoScope, NutritionPhotoKind.item, id),
+            _photoChange,
+          );
         }
       } catch (error, stackTrace) {
         StudyULogger.error('Failed to save meal template: $error\n$stackTrace');
@@ -716,6 +739,20 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
                 ),
               ),
             ),
+          if (nutritionPhotoScope(context.watch<AppState?>()) case final scope?)
+            if (widget.onPhotoChanged != null ||
+                (widget.existingMeal == null &&
+                    widget.onSavedToSelection == null))
+              NutritionPhotoEditor(
+                photoKey: nutritionPhotoKey(
+                  scope,
+                  NutritionPhotoKind.item,
+                  widget.existingMeal?.foodId,
+                ),
+                change: _photoChange,
+                onChanged: (change) => setState(() => _photoChange = change),
+                enabled: !_isSaving,
+              ),
           _MealInfoCard(
             nameController: _nameController,
             descriptionController: _descriptionController,

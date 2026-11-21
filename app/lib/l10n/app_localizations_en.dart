@@ -3377,4 +3377,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String nutrition_meal_foods_section(Object count) {
     return 'Foods ($count)';
   }
+
+  @override
+  String get nutrition_photo_add => 'Add photo';
+
+  @override
+  String get nutrition_photo_replace => 'Replace photo';
+
+  @override
+  String get nutrition_photo_remove => 'Remove photo';
+
+  @override
+  String get nutrition_photo_take => 'Take photo';
+
+  @override
+  String get nutrition_photo_choose => 'Choose photo';
+
+  @override
+  String get nutrition_photo_invalid =>
+      'Could not open this photo. Try a different image or check camera access.';
+
+  @override
+  String get nutrition_photo_save_failed =>
+      'Your entry was saved. The photo change could not be saved.';
+
+  @override
+  String get nutrition_photo_retry => 'Retry photo';
 }

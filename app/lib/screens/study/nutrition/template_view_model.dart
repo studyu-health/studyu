@@ -176,16 +176,17 @@ class TemplateViewModel({
     await loadAllTemplates();
   }
 
-  Future<void> deleteFoodTemplate(String templateId) async {
+  Future<bool> deleteFoodTemplate(String templateId) async {
     final template = _foodTemplates.firstWhereOrNull(
       (item) => item.id == templateId,
     );
-    if (template == null) return;
+    if (template == null) return false;
     await _repository.deleteTemplate(subjectId: userId, template: template);
     _foodTemplates = _foodTemplates
         .where((item) => item.id != templateId)
         .toList();
     await loadAllTemplates();
+    return true;
   }
 
   FoodEntry applyFoodTemplate(SavedFoodTemplate template) {

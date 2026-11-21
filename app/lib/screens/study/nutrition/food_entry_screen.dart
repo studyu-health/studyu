@@ -9,9 +9,11 @@ import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_editor_layout.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
+import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
@@ -39,6 +41,7 @@ class const FoodEntryScreen({
   final NutritionFoodRepository? repository,
   final TemplateViewModel? templateViewModel,
   final bool Function()? canEditRecall,
+  final ValueChanged<NutritionPhotoChange?>? onPhotoChanged,
   final void Function(FoodEntry food, Offset? source)? onSavedToSelection,
   super.key,
 }) extends StatefulWidget {
@@ -64,6 +67,7 @@ class const FoodEntryScreen({
     TemplateViewModel? templateViewModel,
     bool Function()? canEditRecall,
     void Function(FoodEntry food, Offset? source)? onSavedToSelection,
+    ValueChanged<NutritionPhotoChange?>? onPhotoChanged,
   }) => MaterialPageRoute(
     builder: (_) => FoodEntryScreen(
       existingFood: existingFood,
@@ -83,6 +87,7 @@ class const FoodEntryScreen({
       templateViewModel: templateViewModel,
       canEditRecall: canEditRecall,
       onSavedToSelection: onSavedToSelection,
+      onPhotoChanged: onPhotoChanged,
     ),
   );
 
@@ -124,6 +129,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   bool _isSaving = false;
   String? _newFoodId;
   final GlobalKey _saveButtonKey = GlobalKey();
+  NutritionPhotoChange? _photoChange;
 
   /// Whether the food entry data comes from AI analysis.
   bool get _isAiAnalyzed => widget.confidenceScore != null;
@@ -259,6 +265,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     setState(() => _isSaving = true);
     final appState = Provider.of<AppState>(context, listen: false);
     final l10n = AppLocalizations.of(context)!;
+    final photoScope = nutritionPhotoScope(appState);
 
     final historicalTarget = widget.historicalTarget;
     final subject = appState.activeSubject;
@@ -393,6 +400,15 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
       }
     }
 
+    if (mounted && widget.onPhotoChanged != null) {
+      widget.onPhotoChanged!(_photoChange);
+    } else if (mounted && widget.existingFood == null && saveToLibrary) {
+      await saveNutritionPhoto(
+        context,
+        nutritionPhotoKey(photoScope, NutritionPhotoKind.item, food.foodId),
+        _photoChange,
+      );
+    }
     if (mounted) {
       final savedFood = food;
       final onSavedToSelection =
@@ -617,7 +633,8 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     'portionState': _portionState.name,
   });
 
-  bool get _hasUnsavedChanges => _snapshot != _initialSnapshot;
+  bool get _hasUnsavedChanges =>
+      _photoChange != null || _snapshot != _initialSnapshot;
 
   String? get _productImageUrl {
     final value = widget.existingFood?.originalValues['image_front_small_url'];
@@ -742,8 +759,12 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.save_to_my_items),
               controlAffinity: ListTileControlAffinity.leading,
-              onChanged: (value) =>
-                  setState(() => _saveToMyItems = value ?? false),
+              onChanged: _isSaving
+                  ? null
+                  : (value) => setState(() {
+                      _saveToMyItems = value ?? false;
+                      if (!_saveToMyItems) _photoChange = null;
+                    }),
             ),
 
           if (widget.editReusableDefinition) ...[
@@ -765,6 +786,25 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
               ),
           ],
 
+          if (nutritionPhotoScope(context.watch<AppState?>()) case final scope?)
+            if (widget.onPhotoChanged != null ||
+                (widget.existingFood == null &&
+                    !widget.isRecipeIngredient &&
+                    (widget.historicalMode
+                        ? _saveToMyItems
+                        : widget.mealLabel == null)))
+              NutritionPhotoEditor(
+                photoKey: widget.isExternalLibraryCopy
+                    ? null
+                    : nutritionPhotoKey(
+                        scope,
+                        NutritionPhotoKind.item,
+                        widget.existingFood?.foodId,
+                      ),
+                change: _photoChange,
+                onChanged: (change) => setState(() => _photoChange = change),
+                enabled: !_isSaving,
+              ),
           _FoodDetailsSection(
             nameController: _nameController,
             amountController: _showServings ? _amountController : null,

@@ -6018,6 +6018,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Foods ({count})'**
   String nutrition_meal_foods_section(Object count);
+
+  /// No description provided for @nutrition_photo_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get nutrition_photo_add;
+
+  /// No description provided for @nutrition_photo_replace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace photo'**
+  String get nutrition_photo_replace;
+
+  /// No description provided for @nutrition_photo_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get nutrition_photo_remove;
+
+  /// No description provided for @nutrition_photo_take.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get nutrition_photo_take;
+
+  /// No description provided for @nutrition_photo_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo'**
+  String get nutrition_photo_choose;
+
+  /// No description provided for @nutrition_photo_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this photo. Try a different image or check camera access.'**
+  String get nutrition_photo_invalid;
+
+  /// No description provided for @nutrition_photo_save_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your entry was saved. The photo change could not be saved.'**
+  String get nutrition_photo_save_failed;
+
+  /// No description provided for @nutrition_photo_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry photo'**
+  String get nutrition_photo_retry;
 }
 
 class _AppLocalizationsDelegate

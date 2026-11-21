@@ -3310,4 +3310,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String nutrition_meal_foods_section(Object count) {
     return '음식 ($count개)';
   }
+
+  @override
+  String get nutrition_photo_add => '사진 추가';
+
+  @override
+  String get nutrition_photo_replace => '사진 바꾸기';
+
+  @override
+  String get nutrition_photo_remove => '사진 삭제';
+
+  @override
+  String get nutrition_photo_take => '사진 촬영';
+
+  @override
+  String get nutrition_photo_choose => '사진 선택';
+
+  @override
+  String get nutrition_photo_invalid =>
+      '이 사진을 열 수 없습니다. 다른 이미지를 선택하거나 카메라 접근 권한을 확인하세요.';
+
+  @override
+  String get nutrition_photo_save_failed => '항목을 저장했습니다. 사진 변경 사항은 저장하지 못했습니다.';
+
+  @override
+  String get nutrition_photo_retry => '사진 다시 저장';
 }

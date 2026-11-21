@@ -3426,4 +3426,30 @@ class AppLocalizationsDe extends AppLocalizations {
   String nutrition_meal_foods_section(Object count) {
     return 'Lebensmittel ($count)';
   }
+
+  @override
+  String get nutrition_photo_add => 'Foto hinzufügen';
+
+  @override
+  String get nutrition_photo_replace => 'Foto ersetzen';
+
+  @override
+  String get nutrition_photo_remove => 'Foto entfernen';
+
+  @override
+  String get nutrition_photo_take => 'Foto aufnehmen';
+
+  @override
+  String get nutrition_photo_choose => 'Foto auswählen';
+
+  @override
+  String get nutrition_photo_invalid =>
+      'Dieses Foto konnte nicht geöffnet werden. Wähle ein anderes Bild oder prüfe den Kamerazugriff.';
+
+  @override
+  String get nutrition_photo_save_failed =>
+      'Dein Eintrag wurde gespeichert. Die Fotoänderung konnte nicht gespeichert werden.';
+
+  @override
+  String get nutrition_photo_retry => 'Foto erneut speichern';
 }

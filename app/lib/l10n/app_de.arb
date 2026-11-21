@@ -1311,5 +1311,13 @@
   "detailed_nutrients": "Weitere Nährwerte",
   "nutrition_food_details_subtitle": "Verwenden Sie einen konkreten Namen, z. B. Haferflocken.",
   "nutrition_diary_tab": "Tagebuch",
-  "nutrition_meal_foods_section": "Lebensmittel ({count})"
+  "nutrition_meal_foods_section": "Lebensmittel ({count})",
+  "nutrition_photo_add": "Foto hinzufügen",
+  "nutrition_photo_replace": "Foto ersetzen",
+  "nutrition_photo_remove": "Foto entfernen",
+  "nutrition_photo_take": "Foto aufnehmen",
+  "nutrition_photo_choose": "Foto auswählen",
+  "nutrition_photo_invalid": "Dieses Foto konnte nicht geöffnet werden. Wähle ein anderes Bild oder prüfe den Kamerazugriff.",
+  "nutrition_photo_save_failed": "Dein Eintrag wurde gespeichert. Die Fotoänderung konnte nicht gespeichert werden.",
+  "nutrition_photo_retry": "Foto erneut speichern"
 }

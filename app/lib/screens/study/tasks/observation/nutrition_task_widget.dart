@@ -17,10 +17,12 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_help_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_statistics_view.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_water_card.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
+import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_app/widgets/empty_state.dart';
@@ -231,6 +233,13 @@ class _NutritionTaskWidgetState()
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _viewModel?.onAppLifecycleStateChanged(state);
+    if (state == AppLifecycleState.resumed) {
+      unawaited(
+        retryNutritionPhotoDeletes(
+          nutritionPhotoScope(context.read<AppState?>()),
+        ),
+      );
+    }
     if (state == AppLifecycleState.resumed) _scheduleDayCheck();
   }
 
@@ -257,6 +266,7 @@ class _NutritionTaskWidgetState()
   Widget build(BuildContext context) {
     if (_viewModel == null) {
       final appState = Provider.of<AppState>(context, listen: false);
+      unawaited(retryNutritionPhotoDeletes(nutritionPhotoScope(appState)));
       _viewModel = DailyRecallEntryViewModel(
         subject: appState.activeSubject,
         task: widget.task,
@@ -1076,6 +1086,7 @@ class _NutritionTaskWidgetState()
     PhotoReference? recallPhoto,
     MealLog? repeatedMeal,
   }) async {
+    final photoScope = nutritionPhotoScope(context.read<AppState?>());
     final result = await _openMealEditor(context, model, (navigator) async {
       var foods = const <FoodEntry>[];
       String? customMealLabel;
@@ -1129,7 +1140,14 @@ class _NutritionTaskWidgetState()
         ),
       );
     });
-    if (result case SavedMealEntryResult(:final meal)) model.addMeal(meal);
+    if (result case SavedMealEntryResult(:final meal, :final photoChange)
+        when model.addMeal(meal) && context.mounted) {
+      await saveNutritionPhoto(
+        context,
+        nutritionPhotoKey(photoScope, NutritionPhotoKind.meal, meal.id),
+        photoChange,
+      );
+    }
   }
 
   Future<void> _editMeal(
@@ -1137,6 +1155,7 @@ class _NutritionTaskWidgetState()
     DailyRecallEntryViewModel model,
     MealLog meal,
   ) async {
+    final photoKey = _mealPhotoKey(context, meal.id);
     final result = await _openMealEditor(
       context,
       model,
@@ -1161,10 +1180,17 @@ class _NutritionTaskWidgetState()
       ),
     );
     switch (result) {
-      case SavedMealEntryResult(:final meal):
-        model.updateMealById(meal.id, meal);
+      case SavedMealEntryResult(meal: final edited, :final photoChange):
+        if (!model.updateMealById(meal.id, edited) || !context.mounted) return;
+        if (edited.isSkipped && !meal.isSkipped) {
+          await deleteNutritionPhoto(photoKey);
+        } else {
+          await saveNutritionPhoto(context, photoKey, photoChange);
+        }
       case DeletedMealEntryResult():
-        model.removeMealById(meal.id);
+        if (model.removeMealById(meal.id) && context.mounted) {
+          await deleteNutritionPhoto(photoKey);
+        }
       case DiscardedMealEntryResult() || null:
         break;
     }
@@ -1290,8 +1316,17 @@ class _NutritionTaskWidgetState()
       confirmLabel: l10n.delete,
       isDestructive: true,
     );
-    if (confirmed && context.mounted) model.removeMealById(mealId);
+    if (confirmed && context.mounted && model.removeMealById(mealId)) {
+      await deleteNutritionPhoto(_mealPhotoKey(context, mealId));
+    }
   }
+
+  NutritionPhotoKey? _mealPhotoKey(BuildContext context, String mealId) =>
+      nutritionPhotoKey(
+        nutritionPhotoScope(context.read<AppState?>()),
+        NutritionPhotoKind.meal,
+        mealId,
+      );
 
   DateTime? _knownTimestamp(MealLog meal) =>
       meal.timePrecision == MealOccurrenceTimePrecision.unknown
@@ -1450,6 +1485,16 @@ class const _MealTimelineCard({
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
+                if (!meal.isSkipped)
+                  NutritionPhotoThumbnail(
+                    photoKey: nutritionPhotoKey(
+                      nutritionPhotoScope(context.watch<AppState?>()),
+                      NutritionPhotoKind.meal,
+                      meal.id,
+                    ),
+                    fallback: const SizedBox.shrink(),
+                    size: 48,
+                  ),
                 Expanded(
                   child: ExcludeSemantics(
                     child: Column(
