@@ -22,6 +22,7 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_water_card.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/widgets/confirmation_dialog.dart';
+import 'package:studyu_app/widgets/empty_state.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_app/widgets/photo_recall_section.dart';
@@ -844,9 +845,9 @@ class _NutritionTaskWidgetState()
         ),
         const SizedBox(height: 8),
         if (entries.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(l10n.no_meals_recorded),
+          EmptyState(
+            icon: Icons.restaurant_menu_outlined,
+            message: l10n.no_meals_recorded,
           ),
         for (var groupIndex = 0; groupIndex < groups.length; groupIndex++) ...[
           if (groups[groupIndex].isUnknown &&

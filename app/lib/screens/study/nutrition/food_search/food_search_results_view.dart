@@ -349,7 +349,7 @@ class const _FoodSearchListView({
       children.add(const SizedBox(height: 4));
       if (recentMatches.isEmpty) {
         children.add(
-          FoodLibraryEmptyState(
+          EmptyState(
             icon: Icons.history_outlined,
             message: l10n.no_recent_items,
           ),

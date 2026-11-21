@@ -2278,9 +2278,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search_templates => 'Search saved foods and meals…';
 
   @override
-  String get no_templates_saved => 'No items yet';
-
-  @override
   String get save_templates_hint =>
       'Save your favorite meals and foods for quick access';
 
@@ -3042,8 +3039,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Serving description, weight, conversions, and nutrition update the reusable item and selected historical entry. You can also update matching entries in the current study day when available. Selected entry keeps its serving count.';
 
   @override
-  String get nutrition_statistics_empty =>
-      'No nutrition data is available yet.';
+  String get nutrition_statistics_empty => 'No nutrition data for this period.';
 
   @override
   String get nutrition_editable => 'Editable';
@@ -3267,10 +3263,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nutrition_statistics_go_to_today => 'Jump to today';
 
   @override
-  String get nutrition_statistics_day_empty =>
-      'No nutrition entries for this day.';
-
-  @override
   String nutrition_energy_change_from_previous_day(Object value) {
     return '$value vs. previous day';
   }
@@ -3366,4 +3358,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_review_previous_day => 'Review previous day’s nutrition';
+
+  @override
+  String get food_library_empty => 'There are no foods or meals to show.';
 }

@@ -140,6 +140,26 @@ void main() {
     },
   );
 
+  testWidgets('uses one empty message for every statistics period', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _statisticsApp(_statisticsSubject(DateTime.now(), [])),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final emptyMessage = find.text(l10n.nutrition_statistics_empty);
+    expect(emptyMessage, findsOneWidget);
+    for (final label in [
+      l10n.nutrition_statistics_week,
+      l10n.nutrition_statistics_month,
+    ]) {
+      await _selectPeriod(tester, label);
+      expect(emptyMessage, findsOneWidget);
+    }
+  });
+
   testWidgets('navigates past a gap and resets to today at large text sizes', (
     tester,
   ) async {
@@ -170,7 +190,7 @@ void main() {
     expect(find.textContaining('vs. previous day'), findsNothing);
 
     await _tapPeriodControl(tester, 'Previous period');
-    expect(find.text('No nutrition entries for this day.'), findsOneWidget);
+    expect(find.text('No nutrition data for this period.'), findsOneWidget);
     expect(
       tester
           .getSemantics(find.byTooltip('Next period'))
@@ -188,7 +208,7 @@ void main() {
     );
 
     await _tapPeriodControl(tester, 'Next period');
-    expect(find.text('No nutrition entries for this day.'), findsOneWidget);
+    expect(find.text('No nutrition data for this period.'), findsOneWidget);
     await _tapPeriodControl(tester, 'Jump to today');
     expect(find.text('Today'), findsOneWidget);
     expect(find.text('800 kcal'), findsOneWidget);

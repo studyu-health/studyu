@@ -3,6 +3,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/widgets/confirmation_dialog.dart';
+import 'package:studyu_app/widgets/empty_state.dart';
 import 'package:studyu_core/core.dart';
 
 typedef NutritionRecallOpener = Future<void> Function(
@@ -86,7 +87,10 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
               .where((record) => record.studyDaySnapshot < currentStudyDay)
               .toList();
           if (records.isEmpty) {
-            return Center(child: Text(l10n.nutrition_history_empty));
+            return EmptyState(
+              icon: Icons.history_outlined,
+              message: l10n.nutrition_history_empty,
+            );
           }
           final latest = records.first;
           return ListView(

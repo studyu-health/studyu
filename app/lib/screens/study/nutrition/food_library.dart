@@ -14,6 +14,7 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dar
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/widgets/confirmation_dialog.dart';
+import 'package:studyu_app/widgets/empty_state.dart';
 import 'package:studyu_core/core.dart' as studyu;
 import 'package:studyu_core/core.dart';
 
@@ -339,11 +340,9 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         );
       } else if (!showExternal && viewModel.error == null) {
         children.add(
-          FoodLibraryEmptyState(
+          EmptyState(
             icon: _templateFilterIcon(_filter),
-            message: showingMeals || query.isNotEmpty
-                ? l10n.no_matching_templates
-                : l10n.no_templates_saved,
+            message: l10n.food_library_empty,
           ),
         );
       }
@@ -378,9 +377,7 @@ class _FoodLibraryState() extends State<FoodLibrary> {
           ),
           errorMessage: external.hasError ? l10n.external_library_error : null,
           onRetry: () => external.retry(query),
-          emptyMessage: external.hasSearched
-              ? l10n.no_matching_templates
-              : null,
+          emptyMessage: external.hasSearched ? l10n.food_library_empty : null,
           loadingLabel: l10n.external_library_loading,
           resultsLabel: l10n.external_library_results_count,
         ),
@@ -688,34 +685,3 @@ IconData _templateFilterIcon(TemplateFilter filter) => switch (filter) {
   TemplateFilter.foods => Icons.restaurant_outlined,
   TemplateFilter.meals => Icons.restaurant_menu_outlined,
 };
-
-class const FoodLibraryEmptyState({
-  required final IconData icon,
-  required final String message,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Semantics(
-      liveRegion: true,
-      container: true,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 56, color: theme.colorScheme.onSurfaceVariant),
-              const SizedBox(height: 16),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

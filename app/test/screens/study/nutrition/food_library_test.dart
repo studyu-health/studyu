@@ -41,7 +41,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text(l10n.loading_error_title), findsOneWidget);
-    expect(find.text(l10n.no_templates_saved), findsNothing);
+    expect(find.text(l10n.food_library_empty), findsNothing);
 
     repository.failLoad = false;
     await tester.tap(find.text(l10n.try_again));
@@ -49,6 +49,51 @@ void main() {
 
     expect(find.text(l10n.loading_error_title), findsNothing);
     expect(find.text('Local Apple'), findsOneWidget);
+  });
+
+  testWidgets('library uses one empty message for filters and search', (
+    tester,
+  ) async {
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: _ExternalLibraryRepository(const []),
+    );
+    final search = FoodSearchViewModel(
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
+      usdaFoodSearch:
+          ({required query, required page, required pageSize}) async =>
+              UsdaSearchResponse(
+                totalHits: 0,
+                currentPage: page,
+                totalPages: 0,
+                foods: [],
+              ),
+    );
+    addTearDown(viewModel.dispose);
+    addTearDown(search.dispose);
+
+    await _pumpExternalLibrary(tester, viewModel: viewModel, search: search);
+    final emptyMessage = find.text(l10n.food_library_empty);
+    expect(emptyMessage, findsOneWidget);
+
+    for (final filter in [
+      l10n.nutrition_saved_meals_filter,
+      l10n.filter_foods,
+    ]) {
+      await tester.tap(find.widgetWithText(FilterChip, filter));
+      await tester.pumpAndSettle();
+      expect(emptyMessage, findsOneWidget);
+    }
+
+    await tester.enterText(find.byType(TextField), 'apple');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.external_library), findsOneWidget);
+    expect(emptyMessage, findsOneWidget);
   });
 
   testWidgets('library query stays local to its search field', (tester) async {

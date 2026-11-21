@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
+import 'package:studyu_app/widgets/empty_state.dart';
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
 import 'package:studyu_core/core.dart';
 
@@ -182,7 +183,10 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
               ),
               const SizedBox(height: 16),
               if (!hasData)
-                _emptyStatistics(l10n.nutrition_statistics_empty)
+                EmptyState(
+                  icon: Icons.bar_chart_outlined,
+                  message: l10n.nutrition_statistics_empty,
+                )
               else ...[
                 _aggregateOverview(
                   context,
@@ -273,7 +277,10 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
     final l10n = AppLocalizations.of(context)!;
     final data = day.data;
     if (data == null || (!data.hasData && !data.isRecorded)) {
-      return _emptyStatistics(l10n.nutrition_statistics_day_empty);
+      return EmptyState(
+        icon: Icons.bar_chart_outlined,
+        message: l10n.nutrition_statistics_empty,
+      );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,11 +390,6 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
       ],
     );
   }
-
-  Widget _emptyStatistics(String message) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 48),
-    child: Center(child: Text(message, textAlign: TextAlign.center)),
-  );
 
   Widget _aggregateOverview(
     BuildContext context,

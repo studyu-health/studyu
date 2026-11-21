@@ -4255,12 +4255,6 @@ abstract class AppLocalizations {
   /// **'Search saved foods and meals…'**
   String get search_templates;
 
-  /// No description provided for @no_templates_saved.
-  ///
-  /// In en, this message translates to:
-  /// **'No items yet'**
-  String get no_templates_saved;
-
   /// No description provided for @save_templates_hint.
   ///
   /// In en, this message translates to:
@@ -5458,7 +5452,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_statistics_empty.
   ///
   /// In en, this message translates to:
-  /// **'No nutrition data is available yet.'**
+  /// **'No nutrition data for this period.'**
   String get nutrition_statistics_empty;
 
   /// No description provided for @nutrition_editable.
@@ -5833,12 +5827,6 @@ abstract class AppLocalizations {
   /// **'Jump to today'**
   String get nutrition_statistics_go_to_today;
 
-  /// No description provided for @nutrition_statistics_day_empty.
-  ///
-  /// In en, this message translates to:
-  /// **'No nutrition entries for this day.'**
-  String get nutrition_statistics_day_empty;
-
   /// No description provided for @nutrition_energy_change_from_previous_day.
   ///
   /// In en, this message translates to:
@@ -6000,6 +5988,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Review previous day’s nutrition'**
   String get nutrition_review_previous_day;
+
+  /// No description provided for @food_library_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no foods or meals to show.'**
+  String get food_library_empty;
 }
 
 class _AppLocalizationsDelegate

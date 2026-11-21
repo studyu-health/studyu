@@ -871,7 +871,6 @@
   "select_food": "My foods",
   "food_library_search_hint": "Search library",
   "search_templates": "Search saved foods and meals…",
-  "no_templates_saved": "No items yet",
   "save_templates_hint": "Save your favorite meals and foods for quick access",
   "from_template": "From My items",
   "add_new_food": "Add New Food",
@@ -1384,7 +1383,7 @@
   "historical_edit_expired": "This study day is no longer editable.",
   "edit_food_definition": "Edit reusable food",
   "food_definition_edit_helper": "Serving description, weight, conversions, and nutrition update the reusable item and selected historical entry. You can also update matching entries in the current study day when available. Selected entry keeps its serving count.",
-  "nutrition_statistics_empty": "No nutrition data is available yet.",
+  "nutrition_statistics_empty": "No nutrition data for this period.",
   "nutrition_editable": "Editable",
   "nutrition_read_only": "Read-only",
   "nutrition_logging_guidance": "Log each meal and drink as accurately as you can. Include portions and preparation details when you know them.",
@@ -1454,7 +1453,6 @@
   "nutrition_statistics_previous_period": "Previous period",
   "nutrition_statistics_next_period": "Next period",
   "nutrition_statistics_go_to_today": "Jump to today",
-  "nutrition_statistics_day_empty": "No nutrition entries for this day.",
   "nutrition_energy_change_from_previous_day": "{value} vs. previous day",
   "food_selection_remove_title": "Remove {name}?",
   "@food_selection_remove_title": {
@@ -1488,5 +1486,6 @@
   "nutrition_history_local_draft": "Draft saved on this device",
   "nutrition_history_expired_draft": "Sync window ended. This draft is only on this device.",
   "nutrition_history_discard_expired_draft": "Delete this draft from this device? This cannot be undone.",
-  "nutrition_review_previous_day": "Review previous day’s nutrition"
+  "nutrition_review_previous_day": "Review previous day’s nutrition",
+  "food_library_empty": "There are no foods or meals to show."
 }

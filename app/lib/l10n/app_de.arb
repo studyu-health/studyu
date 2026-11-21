@@ -683,7 +683,6 @@
   "select_food": "Meine Lebensmittel",
   "food_library_search_hint": "Bibliothek durchsuchen",
   "search_templates": "Gespeicherte Lebensmittel und Mahlzeiten durchsuchen…",
-  "no_templates_saved": "Noch keine Elemente",
   "save_templates_hint": "Speichern Sie Ihre Lieblingsmahlzeiten und Lebensmittel für schnellen Zugriff",
   "from_template": "Aus meinen Elementen",
   "add_new_food": "Neues Lebensmittel hinzufügen",
@@ -1172,7 +1171,7 @@
   "historical_edit_expired": "Dieser Studientag kann nicht mehr bearbeitet werden.",
   "edit_food_definition": "Wiederverwendbares Lebensmittel bearbeiten",
   "food_definition_edit_helper": "Portionsbeschreibung, Gewicht, Umrechnungen und Nährwerte aktualisieren das wiederverwendbare Element und den ausgewählten historischen Eintrag. Falls passende Einträge im aktuellen Studientag vorhanden sind, können Sie diese bei Bedarf ebenfalls aktualisieren. Die Portionsanzahl des ausgewählten Eintrags bleibt erhalten.",
-  "nutrition_statistics_empty": "Noch keine Ernährungsdaten verfügbar.",
+  "nutrition_statistics_empty": "Für diesen Zeitraum sind keine Ernährungsdaten verfügbar.",
   "nutrition_editable": "Bearbeitbar",
   "nutrition_read_only": "Nur lesen",
   "nutrition_logging_guidance": "Erfassen Sie jede Mahlzeit und jedes Getränk so genau wie möglich. Geben Sie Portionen und Zubereitungsdetails an, wenn Sie sie kennen.",
@@ -1239,7 +1238,6 @@
   "nutrition_statistics_previous_period": "Vorheriger Zeitraum",
   "nutrition_statistics_next_period": "Nächster Zeitraum",
   "nutrition_statistics_go_to_today": "Zu heute springen",
-  "nutrition_statistics_day_empty": "Für diesen Tag sind keine Ernährungseinträge vorhanden.",
   "nutrition_energy_change_from_previous_day": "{value} zum Vortag",
   "food_selection_remove_title": "{name} entfernen?",
   "@food_selection_remove_title": {
@@ -1273,5 +1271,6 @@
   "nutrition_history_local_draft": "Entwurf auf diesem Gerät gespeichert",
   "nutrition_history_expired_draft": "Die Frist zum Synchronisieren ist abgelaufen. Dieser Entwurf liegt nur auf diesem Gerät.",
   "nutrition_history_discard_expired_draft": "Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden.",
-  "nutrition_review_previous_day": "Ernährung vom Vortag prüfen"
+  "nutrition_review_previous_day": "Ernährung vom Vortag prüfen",
+  "food_library_empty": "In dieser Ansicht gibt es keine Lebensmittel oder Mahlzeiten."
 }

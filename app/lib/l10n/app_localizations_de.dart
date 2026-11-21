@@ -2306,9 +2306,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Gespeicherte Lebensmittel und Mahlzeiten durchsuchen…';
 
   @override
-  String get no_templates_saved => 'Noch keine Elemente';
-
-  @override
   String get save_templates_hint =>
       'Speichern Sie Ihre Lieblingsmahlzeiten und Lebensmittel für schnellen Zugriff';
 
@@ -3083,7 +3080,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_statistics_empty =>
-      'Noch keine Ernährungsdaten verfügbar.';
+      'Für diesen Zeitraum sind keine Ernährungsdaten verfügbar.';
 
   @override
   String get nutrition_editable => 'Bearbeitbar';
@@ -3312,10 +3309,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nutrition_statistics_go_to_today => 'Zu heute springen';
 
   @override
-  String get nutrition_statistics_day_empty =>
-      'Für diesen Tag sind keine Ernährungseinträge vorhanden.';
-
-  @override
   String nutrition_energy_change_from_previous_day(Object value) {
     return '$value zum Vortag';
   }
@@ -3413,4 +3406,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_review_previous_day => 'Ernährung vom Vortag prüfen';
+
+  @override
+  String get food_library_empty =>
+      'In dieser Ansicht gibt es keine Lebensmittel oder Mahlzeiten.';
 }

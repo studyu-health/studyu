@@ -2222,9 +2222,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get search_templates => 'Search saved foods and meals…';
 
   @override
-  String get no_templates_saved => 'No items yet';
-
-  @override
   String get save_templates_hint =>
       'Save your favorite meals and foods for quick access';
 
@@ -2984,8 +2981,7 @@ class AppLocalizationsKo extends AppLocalizations {
       'Serving description, weight, conversions, and nutrition update the reusable item and selected historical entry. You can also update matching entries in the current study day when available. Selected entry keeps its serving count.';
 
   @override
-  String get nutrition_statistics_empty =>
-      'No nutrition data is available yet.';
+  String get nutrition_statistics_empty => '이 기간의 영양 데이터가 없습니다.';
 
   @override
   String get nutrition_editable => 'Editable';
@@ -3207,9 +3203,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_statistics_go_to_today => '오늘로 이동';
 
   @override
-  String get nutrition_statistics_day_empty => '이 날짜에는 식사 기록이 없습니다.';
-
-  @override
   String nutrition_energy_change_from_previous_day(Object value) {
     return '전날 대비 $value';
   }
@@ -3302,4 +3295,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_review_previous_day => '이전 연구일의 식사 기록 확인';
+
+  @override
+  String get food_library_empty => '표시할 음식이나 식사가 없습니다.';
 }
