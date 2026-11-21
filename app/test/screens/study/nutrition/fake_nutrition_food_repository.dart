@@ -5,6 +5,7 @@ class FakeNutritionFoodRepository([
   Iterable<SavedFoodTemplate> templates = const [],
 ]) extends NutritionFoodRepository {
   final List<SavedFoodTemplate> _templates = List.of(templates);
+  final _deletedFoodIds = <String, Set<String>>{};
   int loadCalls = 0;
 
   @override
@@ -12,6 +13,12 @@ class FakeNutritionFoodRepository([
     loadCalls++;
     return List.of(_templates);
   }
+
+  @override
+  Future<Set<String>> loadDeletedFoodIds(
+    String subjectId,
+    Set<String> foodIds,
+  ) async => _deletedFoodIds[subjectId]?.intersection(foodIds) ?? {};
 
   @override
   Future<FoodEntry?> loadCurrentFoodDefinition({
@@ -61,5 +68,14 @@ class FakeNutritionFoodRepository([
     required SavedFoodTemplate template,
   }) async {
     _templates.removeWhere((item) => item.id == template.id);
+    await deleteDraftTemplate(subjectId: subjectId, template: template);
+  }
+
+  @override
+  Future<void> deleteDraftTemplate({
+    required String subjectId,
+    required SavedFoodTemplate template,
+  }) async {
+    (_deletedFoodIds[subjectId] ??= {}).add(template.id);
   }
 }

@@ -3,6 +3,20 @@ import 'package:studyu_core/core.dart';
 
 const _historySectionLimit = 5;
 
+typedef FoodSearchDraft = ({
+  DailyRecall recall,
+  String? taskId,
+  String? periodId,
+});
+
+Object foodSearchRecallIdentity(FoodSearchDraft draft) {
+  final studyDay = draft.recall.studyDaySnapshot;
+  if (studyDay != null && draft.taskId != null && draft.periodId != null) {
+    return (draft.taskId, draft.periodId, studyDay);
+  }
+  return draft.recall.id;
+}
+
 final class const FoodSearchHistory({
   required final List<FoodSearchHistoryItem> recent,
   required final List<FoodSearchHistoryItem> frequentlyUsed,
@@ -23,17 +37,40 @@ FoodSearchHistory buildFoodSearchHistory(
   Iterable<SubjectProgress> progress, {
   required String subjectId,
   Set<String>? libraryFoodIds,
+  Iterable<FoodSearchDraft> draftRecalls = const [],
 }) {
   final entries = <String, _HistoryAccumulator>{};
-
+  final synced = <Object, SubjectProgress>{};
   for (final item in progress) {
     if (item.subjectId != subjectId || item.resultType != 'DailyRecall') {
       continue;
     }
     final result = item.result.result;
     if (result is! DailyRecall) continue;
+    final identity = foodSearchRecallIdentity((
+      recall: result,
+      taskId: item.taskId,
+      periodId: item.result.periodId,
+    ));
+    final previous = synced[identity];
+    if (previous != null &&
+        (previous.nutritionRevision > item.nutritionRevision ||
+            (previous.nutritionRevision == item.nutritionRevision &&
+                _lastSavedAt(previous).isAfter(_lastSavedAt(item))))) {
+      continue;
+    }
+    synced[identity] = item;
+  }
+  final recalls = {
+    for (final entry in synced.entries)
+      entry.key: entry.value.result.result as DailyRecall,
+    for (final draft in draftRecalls)
+      foodSearchRecallIdentity(draft): draft.recall,
+  };
 
+  for (final result in recalls.values) {
     for (final meal in result.meals) {
+      if (meal.isSkipped) continue;
       final occurrenceTimestamp =
           meal.timePrecision == MealOccurrenceTimePrecision.unknown
           ? null
@@ -95,6 +132,11 @@ FoodSearchHistory buildFoodSearchHistory(
     recent: recent.take(_historySectionLimit).toList(growable: false),
     frequentlyUsed: visibleFrequentlyUsed,
   );
+}
+
+DateTime _lastSavedAt(SubjectProgress progress) {
+  final recall = progress.result.result as DailyRecall;
+  return recall.lastAutoSavedAt ?? progress.completedAt ?? recall.date;
 }
 
 String foodHistoryIdentity(FoodEntry food) => food.foodId;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
@@ -6,6 +8,41 @@ import 'package:studyu_core/core.dart';
 import 'fake_nutrition_food_repository.dart';
 
 void main() {
+  test(
+    'checks restored draft foods for deletion before showing them',
+    () async {
+      final deleted = _foodEntry(id: 'deleted-food', originalValues: {});
+      final draft = DailyRecall.withId(
+        date: DateTime(2026),
+        recallMode: RecallMode.realtimeRecord,
+        meals: [
+          MealLog.withId(
+            mealType: MealType.lunch,
+            timestamp: DateTime(2026),
+            timezone: 'UTC',
+            isSkipped: false,
+            foods: [deleted],
+          ),
+        ],
+      );
+      final repository = _PendingDeletionCheckRepository();
+      final model = TemplateViewModel(
+        userId: 'test-user',
+        repository: repository,
+        loadDraftRecalls: () async => [
+          (recall: draft, taskId: 'task', periodId: 'period'),
+        ],
+      );
+      addTearDown(model.dispose);
+      await repository.request.future;
+      expect(model.foodTemplates, isEmpty);
+
+      repository.response.complete({deleted.foodId});
+      await model.loadAllTemplates();
+      expect(model.foodTemplates, isEmpty);
+    },
+  );
+
   test(
     'template storage, application and duplication preserve availability',
     () async {
@@ -323,6 +360,21 @@ void main() {
     expect(prototypeComposition.parentEntryId, 'recipe-prototype');
     expect(prototypeComposition.amount, 2);
   });
+}
+
+final class _PendingDeletionCheckRepository()
+    extends FakeNutritionFoodRepository {
+  final request = Completer<void>();
+  final response = Completer<Set<String>>();
+
+  @override
+  Future<Set<String>> loadDeletedFoodIds(
+    String subjectId,
+    Set<String> foodIds,
+  ) {
+    if (!request.isCompleted) request.complete();
+    return response.future;
+  }
 }
 
 Future<TemplateViewModel> _viewModel() async {

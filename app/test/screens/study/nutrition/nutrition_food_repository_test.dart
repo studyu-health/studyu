@@ -89,6 +89,63 @@ void main() {
     expect(jsonDecode(libraryRequest.body), {'p_subject_id': 'subject'});
   });
 
+  test('checks deletion only for requested foods in the subject', () async {
+    final requests = <Uri>[];
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        requests.add(request.url);
+        return _jsonResponse([
+          {'id': 'deleted-food'},
+        ], request);
+      }),
+    );
+
+    expect(await repository.loadDeletedFoodIds('subject', {}), isEmpty);
+    expect(requests, isEmpty);
+    expect(
+      await repository.loadDeletedFoodIds('subject', {'deleted-food', 'fresh'}),
+      {'deleted-food'},
+    );
+    final request = requests.single;
+    expect(request.path, endsWith('/nutrition_food_definition'));
+    expect(request.queryParameters['subject_id'], 'eq.subject');
+    expect(request.queryParameters['deleted_at'], 'not.is.null');
+    expect(request.queryParameters['id'], 'in.("deleted-food","fresh")');
+  });
+
+  test('deletes a draft food without a server version', () async {
+    final food = _food();
+    late Map<String, dynamic> mutation;
+    final repository = NutritionFoodRepository(
+      client: _client((request) async {
+        if (request.method == 'GET') {
+          expect(request.url.queryParameters['subject_id'], 'eq.subject');
+          expect(request.url.queryParameters['id'], 'eq.${food.foodId}');
+          return _jsonResponse([], request);
+        }
+        mutation = jsonDecode(request.body) as Map<String, dynamic>;
+        return _jsonResponse(_mutationResponse(food: food), request);
+      }),
+    );
+
+    await repository.deleteDraftTemplate(
+      subjectId: 'subject',
+      template: SavedFoodTemplate(
+        id: food.foodId,
+        userId: 'subject',
+        name: food.name,
+        isPublic: false,
+        createdAt: food.createdAt,
+        prototype: food,
+      ),
+    );
+
+    expect(mutation['p_subject_id'], 'subject');
+    expect(mutation['p_food_id'], food.foodId);
+    expect(mutation['p_expected_version_id'], isNull);
+    expect(mutation['p_deleted'], isTrue);
+  });
+
   test('library continues when the service caps the page size', () async {
     final requests = <Uri>[];
     final repository = NutritionFoodRepository(

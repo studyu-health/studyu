@@ -8,6 +8,7 @@ import 'package:studyu_app/screens/study/nutrition/food_search/food_search_view_
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_core/core.dart';
 
@@ -60,12 +61,25 @@ class const FoodLibraryScreen({
     }
 
     final appState = Provider.of<AppState>(context, listen: false);
-    final userId = appState.activeSubject?.id ?? 'anonymous';
+    final subject = appState.activeSubject;
+    final draftStorage = appState.previewNutritionDrafts;
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) =>
-              TemplateViewModel(userId: userId, repository: repository),
+          create: (_) => TemplateViewModel(
+            userId: subject?.id ?? 'anonymous',
+            repository:
+                repository ??
+                (appState.trackParticipantProgress
+                    ? null
+                    : PreviewNutritionFoodRepository()),
+            loadDraftRecalls: subject == null
+                ? null
+                : () => loadNutritionDraftsForReuse(
+                    subject: subject,
+                    autoSaveManager: draftStorage,
+                  ),
+          ),
         ),
         ChangeNotifierProvider(
           create: (_) => FoodSearchViewModel(

@@ -112,6 +112,32 @@ void main() {
   });
 
   test(
+    'uses one recall per task, period and study day when a draft overlaps',
+    () {
+      final date = DateTime.utc(2025);
+      final apple = food(id: 'apple', name: 'Apple');
+      final pear = food(id: 'pear', name: 'Pear');
+      final synced = recallProgress('participant', date, [apple, pear]);
+      final oldRecall = synced.result.result as studyu.DailyRecall;
+      oldRecall.studyDaySnapshot = 0;
+      final draft =
+          recallProgress('participant', date, [apple]).result.result
+              as studyu.DailyRecall;
+      draft.studyDaySnapshot = 0;
+
+      final history = buildFoodSearchHistory(
+        [synced],
+        subjectId: 'participant',
+        draftRecalls: [(recall: draft, taskId: 'task', periodId: 'period')],
+      );
+
+      expect(history.recent.single.food.name, 'Apple');
+      expect(history.recent.single.useCount, 1);
+      expect(history.frequentlyUsed, isEmpty);
+    },
+  );
+
+  test(
     'creates a one-serving selection without changing the logged portion',
     () {
       final original = food(id: 'original', name: 'Apple')

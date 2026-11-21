@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search_history.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart';
@@ -17,10 +20,18 @@ enum TemplateFilter() {
 class TemplateViewModel({
   required final String userId,
   NutritionFoodRepository? repository,
+  final Future<List<FoodSearchDraft>> Function()? loadDraftRecalls,
 }) extends ChangeNotifier {
   final NutritionFoodRepository _repository =
       repository ?? NutritionFoodRepository();
   List<SavedFoodTemplate> _foodTemplates = [];
+  List<FoodSearchDraft> _savedDraftRecalls = [];
+  FoodSearchDraft? _activeRecall;
+  List<MealLog> _activeMeals = [];
+  final _draftTemplates = <String, SavedFoodTemplate>{};
+  final _deletedFoodIds = <String>{};
+  final _checkedDraftFoodIds = <String>{};
+  final _checkingDraftFoodIds = <String>{};
 
   bool _isLoading = false;
   String? _error;
@@ -35,17 +46,31 @@ class TemplateViewModel({
   NutritionFoodRepository get repository => _repository;
   String? get error => _error;
 
-  List<SavedFoodTemplate> get foodTemplates => _foodTemplates;
-  List<SavedFoodTemplate> get mealTemplates => _foodTemplates
+  List<SavedFoodTemplate> get foodTemplates => {
+    for (final entry in _draftTemplates.entries)
+      if (_checkedDraftFoodIds.contains(entry.key)) entry.key: entry.value,
+    for (final template in _foodTemplates) template.id: template,
+  }.values.where((template) => !_deletedFoodIds.contains(template.id)).toList();
+
+  List<FoodSearchDraft> get draftRecalls => [
+    for (final recall in _savedDraftRecalls)
+      if (_activeRecall == null ||
+          foodSearchRecallIdentity(recall) !=
+              foodSearchRecallIdentity(_activeRecall!))
+        recall,
+    ?_activeRecall,
+  ];
+
+  List<SavedFoodTemplate> get mealTemplates => foodTemplates
       .where((template) => template.prototype.entryType == FoodEntryType.meal)
       .toList();
-  List<SavedFoodTemplate> get foodOnlyTemplates => _foodTemplates
+  List<SavedFoodTemplate> get foodOnlyTemplates => foodTemplates
       .where((template) => template.prototype.entryType != FoodEntryType.meal)
       .toList();
 
   List<SavedFoodTemplate> filterTemplates(TemplateFilter filter, String query) {
     final templates = switch (filter) {
-      TemplateFilter.all => _foodTemplates,
+      TemplateFilter.all => foodTemplates,
       TemplateFilter.foods => foodOnlyTemplates,
       TemplateFilter.meals => mealTemplates,
     };
@@ -61,6 +86,7 @@ class TemplateViewModel({
     _isLoading = true;
     _error = null;
     _notifyListeners();
+    final drafts = _loadSavedDrafts(generation);
 
     try {
       final templates = await _repository.loadTemplates(userId);
@@ -69,10 +95,97 @@ class TemplateViewModel({
       if (generation == _loadGeneration) _error = error.toString();
       StudyULogger.error('Failed to load templates: $error');
     } finally {
+      await drafts;
+      await _checkDeletedDraftFoods(refresh: true);
       if (generation == _loadGeneration) {
         _isLoading = false;
         _notifyListeners();
       }
+    }
+  }
+
+  Future<void> _loadSavedDrafts(int generation) async {
+    if (loadDraftRecalls == null) return;
+    try {
+      final drafts = await loadDraftRecalls!();
+      if (_disposed || generation != _loadGeneration) return;
+      _savedDraftRecalls = drafts;
+      _rebuildDraftTemplates();
+    } catch (error) {
+      StudyULogger.warning('Failed to load nutrition drafts: $error');
+    }
+  }
+
+  void setActiveRecall(FoodSearchDraft? draft) {
+    final recall = draft?.recall;
+    final meals = recall?.meals ?? const <MealLog>[];
+    if (_activeRecall?.recall.id == recall?.id &&
+        _activeRecall?.recall.date == recall?.date &&
+        _activeRecall?.taskId == draft?.taskId &&
+        _activeRecall?.periodId == draft?.periodId &&
+        listEquals(_activeMeals, meals)) {
+      return;
+    }
+    _activeRecall = draft;
+    _activeMeals = List.of(meals);
+    _rebuildDraftTemplates();
+    unawaited(_checkDeletedDraftFoods());
+  }
+
+  void _rebuildDraftTemplates() {
+    final latest = <String, ({DateTime date, FoodEntry food})>{};
+    for (final draft in draftRecalls) {
+      final recall = draft.recall;
+      for (final meal in recall.meals.where((meal) => !meal.isSkipped)) {
+        for (final food in meal.foods) {
+          if (!food.amount.isFinite || food.amount <= 0) continue;
+          final date = meal.timestamp ?? recall.date;
+          final existing = latest[food.foodId];
+          if (existing == null || !existing.date.isAfter(date)) {
+            latest[food.foodId] = (date: date, food: food);
+          }
+        }
+      }
+    }
+    _draftTemplates
+      ..clear()
+      ..addEntries(
+        latest.entries.map((entry) {
+          final food = rescaleFoodAmount(entry.value.food, 1);
+          return MapEntry(
+            entry.key,
+            SavedFoodTemplate(
+              id: entry.key,
+              userId: userId,
+              name: food.name,
+              isPublic: false,
+              createdAt: food.createdAt,
+              updatedAt: food.modifiedAt,
+              prototype: food,
+            ),
+          );
+        }),
+      );
+    _notifyListeners();
+  }
+
+  Future<void> _checkDeletedDraftFoods({bool refresh = false}) async {
+    final ids = _draftTemplates.keys.toSet();
+    if (!refresh) ids.removeAll(_checkedDraftFoodIds);
+    ids
+      ..removeAll(_deletedFoodIds)
+      ..removeAll(_checkingDraftFoodIds);
+    if (ids.isEmpty) return;
+    _checkingDraftFoodIds.addAll(ids);
+    try {
+      final deleted = await _repository.loadDeletedFoodIds(userId, ids);
+      _deletedFoodIds.addAll(deleted);
+    } catch (error) {
+      StudyULogger.warning('Failed to check deleted nutrition foods: $error');
+    } finally {
+      _checkingDraftFoodIds.removeAll(ids);
+      _checkedDraftFoodIds.addAll(ids);
+      _notifyListeners();
     }
   }
 
@@ -128,12 +241,12 @@ class TemplateViewModel({
     FoodEntry prototype, {
     String? expectedVersionId,
   }) async {
-    var template = _foodTemplates.firstWhereOrNull(
+    var template = foodTemplates.firstWhereOrNull(
       (item) => item.id == templateId,
     );
     if (template == null) {
       await loadAllTemplates();
-      template = _foodTemplates.firstWhereOrNull(
+      template = foodTemplates.firstWhereOrNull(
         (item) => item.id == templateId,
       );
     }
@@ -144,7 +257,9 @@ class TemplateViewModel({
       name: updated.name,
       food: updated,
       tags: template.tags,
-      expectedVersionId: expectedVersionId ?? template.prototype.foodVersionId,
+      expectedVersionId: _isDraftTemplate(templateId)
+          ? null
+          : expectedVersionId ?? template.prototype.foodVersionId,
     );
     _replaceTemplate(result);
     await loadAllTemplates();
@@ -160,7 +275,7 @@ class TemplateViewModel({
   }
 
   Future<void> duplicateFoodTemplate(String templateId) async {
-    final source = _foodTemplates.firstWhere(
+    final source = foodTemplates.firstWhere(
       (template) => template.id == templateId,
     );
     final duplicate = _cloneFoodEntry(source.prototype)
@@ -177,11 +292,19 @@ class TemplateViewModel({
   }
 
   Future<bool> deleteFoodTemplate(String templateId) async {
-    final template = _foodTemplates.firstWhereOrNull(
+    final template = foodTemplates.firstWhereOrNull(
       (item) => item.id == templateId,
     );
     if (template == null) return false;
-    await _repository.deleteTemplate(subjectId: userId, template: template);
+    if (_isDraftTemplate(templateId)) {
+      await _repository.deleteDraftTemplate(
+        subjectId: userId,
+        template: template,
+      );
+    } else {
+      await _repository.deleteTemplate(subjectId: userId, template: template);
+    }
+    _deletedFoodIds.add(templateId);
     _foodTemplates = _foodTemplates
         .where((item) => item.id != templateId)
         .toList();
@@ -190,14 +313,23 @@ class TemplateViewModel({
   }
 
   FoodEntry applyFoodTemplate(SavedFoodTemplate template) {
-    return _createFoodFromPrototype(template.prototype, template.id);
+    return _createFoodFromPrototype(
+      template.prototype,
+      _isDraftTemplate(template.id)
+          ? template.prototype.templateId
+          : template.id,
+    );
   }
+
+  bool _isDraftTemplate(String id) =>
+      _draftTemplates.containsKey(id) &&
+      !_foodTemplates.any((item) => item.id == id);
 
   FoodEntry _cloneFoodEntry(FoodEntry original) {
     return FoodEntry.fromJson(original.toJson());
   }
 
-  FoodEntry _createFoodFromPrototype(FoodEntry prototype, String templateId) {
+  FoodEntry _createFoodFromPrototype(FoodEntry prototype, String? templateId) {
     final food = rescaleFoodAmount(prototype, 1)
       ..id = const Uuid().v4()
       ..originalValues = jsonDecode(

@@ -35,6 +35,25 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
     }
   }
 
+  Future<Set<String>> loadDeletedFoodIds(
+    String subjectId,
+    Set<String> foodIds,
+  ) async {
+    const batchSize = 100;
+    final ids = foodIds.toList();
+    final deleted = <String>{};
+    for (var start = 0; start < ids.length; start += batchSize) {
+      final rows = await _supabase
+          .from('nutrition_food_definition')
+          .select('id')
+          .eq('subject_id', subjectId)
+          .inFilter('id', ids.skip(start).take(batchSize).toList())
+          .not('deleted_at', 'is', null);
+      deleted.addAll(rows.map((row) => row['id'] as String));
+    }
+    return deleted;
+  }
+
   Future<FoodEntry?> loadCurrentFoodDefinition({
     required String subjectId,
     required String foodId,
@@ -215,6 +234,22 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
     );
   }
 
+  Future<void> deleteDraftTemplate({
+    required String subjectId,
+    required SavedFoodTemplate template,
+  }) async {
+    // A food may exist only in an unsynced diary. A null version creates its
+    // first definition and marks it deleted in the same mutation.
+    final currentVersionId = await _currentVersionId(subjectId, template.id);
+    await _mutate(
+      subjectId: subjectId,
+      foodId: template.id,
+      expectedVersionId: currentVersionId,
+      snapshot: template.prototype.toJson(),
+      deleted: true,
+    );
+  }
+
   Future<NutritionFoodMutationResult> mutateHistoricalDefinition({
     required String subjectId,
     required FoodEntry snapshot,
@@ -332,12 +367,19 @@ class NutritionFoodRepository({final SupabaseClient? _client}) {
 /// Keeps a food library for the lifetime of a non-persisted study preview.
 final class PreviewNutritionFoodRepository() extends NutritionFoodRepository {
   final _templates = <String, SavedFoodTemplate>{};
+  final _deletedFoodIds = <String, Set<String>>{};
 
   @override
   Future<List<SavedFoodTemplate>> loadTemplates(String subjectId) async =>
       _templates.values
           .where((template) => template.userId == subjectId)
           .toList();
+
+  @override
+  Future<Set<String>> loadDeletedFoodIds(
+    String subjectId,
+    Set<String> foodIds,
+  ) async => _deletedFoodIds[subjectId]?.intersection(foodIds) ?? {};
 
   @override
   Future<FoodEntry?> loadCurrentFoodDefinition({
@@ -392,6 +434,15 @@ final class PreviewNutritionFoodRepository() extends NutritionFoodRepository {
   }) async {
     if (_templates[template.id]?.userId == subjectId) {
       _templates.remove(template.id);
+      await deleteDraftTemplate(subjectId: subjectId, template: template);
     }
+  }
+
+  @override
+  Future<void> deleteDraftTemplate({
+    required String subjectId,
+    required SavedFoodTemplate template,
+  }) async {
+    (_deletedFoodIds[subjectId] ??= {}).add(template.id);
   }
 }

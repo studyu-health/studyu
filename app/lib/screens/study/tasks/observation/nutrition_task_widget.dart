@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, listEquals;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -116,6 +116,7 @@ class _NutritionTaskWidgetState()
 
   DailyRecallEntryViewModel? _viewModel;
   TemplateViewModel? _templateViewModel;
+  List<SubjectProgress>? _libraryProgress;
   _NutritionTab _selectedTab = _NutritionTab.today;
   bool _didHandleExpiredEdit = false;
   Timer? _studyDayTimer;
@@ -257,9 +258,51 @@ class _NutritionTaskWidgetState()
   void dispose() {
     _studyDayTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    _viewModel?.dispose();
+    _viewModel
+      ?..removeListener(_updateActiveLibraryRecall)
+      ..dispose();
     _templateViewModel?.dispose();
     super.dispose();
+  }
+
+  void _updateActiveLibraryRecall() {
+    final model = _viewModel!;
+    _templateViewModel?.setActiveRecall(
+      model.canEdit &&
+              !model.currentDayExpired &&
+              !model.historicalEligibilityExpired
+          ? (
+              recall: model.recall,
+              taskId: widget.task?.id,
+              periodId:
+                  model.persistenceTarget?.periodId ??
+                  widget.completionPeriod?.id,
+            )
+          : null,
+    );
+  }
+
+  void _initializeLibrary(AppState appState) {
+    if (_templateViewModel != null) return;
+    final subject = appState.activeSubject;
+    final draftStorage = appState.previewNutritionDrafts;
+    _templateViewModel = TemplateViewModel(
+      userId: subject?.id ?? 'anonymous',
+      repository:
+          widget.foodRepository ??
+          (appState.trackParticipantProgress
+              ? null
+              : PreviewNutritionFoodRepository()),
+      loadDraftRecalls: subject == null
+          ? null
+          : () => loadNutritionDraftsForReuse(
+              subject: subject,
+              autoSaveManager: draftStorage,
+            ),
+    );
+    _libraryProgress = subject == null ? null : List.of(subject.progress);
+    _updateActiveLibraryRecall();
+    _viewModel!.addListener(_updateActiveLibraryRecall);
   }
 
   @override
@@ -278,16 +321,7 @@ class _NutritionTaskWidgetState()
         historicalMode: _isHistoricalMode,
         autoSaveManager: appState.previewNutritionDrafts,
       )..shouldSaveToDb = appState.trackParticipantProgress;
-      if (!_isHistoricalMode) {
-        _templateViewModel = TemplateViewModel(
-          userId: appState.activeSubject?.id ?? 'anonymous',
-          repository:
-              widget.foodRepository ??
-              (appState.trackParticipantProgress
-                  ? null
-                  : PreviewNutritionFoodRepository()),
-        );
-      }
+      if (!_isHistoricalMode) _initializeLibrary(appState);
     }
 
     return MultiProvider(
@@ -759,7 +793,7 @@ class _NutritionTaskWidgetState()
       subject: subject,
       task: task,
       record: record,
-      foodRepository: widget.foodRepository,
+      foodRepository: _templateViewModel?.repository ?? widget.foodRepository,
     );
     if (!context.mounted) return;
     if (_trackWaterIntake && !widget.readOnly) await _loadCupSize();
@@ -1210,6 +1244,12 @@ class _NutritionTaskWidgetState()
     Future<MealEntryResult?> Function(NavigatorState) open,
   ) async {
     if (!model.revalidateEditingEligibility()) return null;
+    _initializeLibrary(context.read<AppState>());
+    final progress = model.subject?.progress;
+    if (progress != null && !listEquals(_libraryProgress, progress)) {
+      _libraryProgress = List.of(progress);
+      unawaited(_templateViewModel!.loadAllTemplates());
+    }
     if (_isHistoricalMode) {
       try {
         await model.flushPendingAutoSave();
@@ -1348,7 +1388,6 @@ class _NutritionTaskWidgetState()
   Future<void> _saveMealAsTemplate(BuildContext context, MealLog meal) async {
     if (meal.isSkipped) return;
     final l10n = AppLocalizations.of(context)!;
-    final appState = Provider.of<AppState>(context, listen: false);
     final result = await SaveTemplateDialog.show(
       context,
       initialName:
@@ -1359,10 +1398,11 @@ class _NutritionTaskWidgetState()
       templateType: TemplateType.meal,
     );
     if (result == null || !context.mounted) return;
-    await TemplateViewModel(
-      userId: appState.activeSubject?.id ?? 'anonymous',
-      repository: widget.foodRepository,
-    ).saveMealAsTemplate(name: result.name, meal: meal, tags: result.tags);
+    await _templateViewModel!.saveMealAsTemplate(
+      name: result.name,
+      meal: meal,
+      tags: result.tags,
+    );
     if (context.mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.template_saved)));

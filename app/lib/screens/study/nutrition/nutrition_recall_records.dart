@@ -1,3 +1,4 @@
+import 'package:studyu_app/screens/study/nutrition/food_search_history.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
@@ -49,6 +50,41 @@ List<NutritionRecallRecord> completedNutritionRecallRecords({
 }) =>
     _completedRecordsByIdentity(subject, taskId).values.toList()
       ..sort(_compareRecords);
+
+/// Returns local diaries that can still be synced and have no conflict.
+Future<List<FoodSearchDraft>> loadNutritionDraftsForReuse({
+  required StudySubject subject,
+  NutritionRecallAutoSaveManager? autoSaveManager,
+}) async {
+  if (subject.startedAt == null) return [];
+  final todayStudyDay = nutritionStudyDayFor(subject, DateTime.now());
+  final pending = await (autoSaveManager ?? NutritionRecallAutoSaveManager())
+      .scanPendingRecalls(subject.id);
+  final completed = _completedRecordsByIdentity(subject, null);
+  final drafts = <FoodSearchDraft>[];
+  for (final local in pending) {
+    if (!isWritableNutritionStudyDay(local.studyDaySnapshot, todayStudyDay)) {
+      continue;
+    }
+    final remote =
+        completed[_recordIdentity(
+              local.taskId,
+              local.periodId,
+              local.studyDaySnapshot,
+            )]
+            ?.progress;
+    if (remote == null
+        ? local.progressCompletedAt == null
+        : local.canReplace(remote)) {
+      drafts.add((
+        recall: local.recall,
+        taskId: local.taskId,
+        periodId: local.periodId,
+      ));
+    }
+  }
+  return drafts;
+}
 
 /// Loads remote recalls and local drafts for one task or all tasks.
 ///

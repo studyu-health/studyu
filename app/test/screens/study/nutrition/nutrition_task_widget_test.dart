@@ -1129,6 +1129,75 @@ void main() {
     expect(find.text('No meals recorded yet'), findsOneWidget);
   });
 
+  testWidgets(
+    'saved diary food is available before sync and stays out after Library deletion',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        nutritionInstructionsShownKey: true,
+      });
+      final subject = StudySubject('subject', 'study', 'user', []);
+      final repository = FakeNutritionFoodRepository();
+      await tester.pumpWidget(
+        nutritionTaskApp(
+          nutritionTask(),
+          appState: AppState()..activeSubject = subject,
+          foodRepository: repository,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final logMeal = find.text('Log meal');
+      await tester.tap(logMeal);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Create food'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).first, 'Draft apricot');
+      await tester.tap(find.text('Save and add to Meal'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add 1 item to Meal'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Select a time'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("I don't remember"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save meal'));
+      await tester.pumpAndSettle();
+
+      final draftFood = find.text('Draft apricot');
+      expect(draftFood, findsOneWidget);
+      expect(subject.progress, isEmpty);
+      expect(await repository.loadTemplates(subject.id), isEmpty);
+      await tester.tap(logMeal);
+      await tester.pumpAndSettle();
+      expect(draftFood, findsOneWidget);
+      await tester.tap(find.byType(CloseButton));
+      await tester.pumpAndSettle();
+
+      Finder tab(String label) => find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text(label),
+      );
+      await tester.tap(tab('Library'));
+      await tester.pumpAndSettle();
+      expect(draftFood, findsOneWidget);
+      await tester.tap(find.byTooltip('More options'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tester.pumpAndSettle();
+      expect(draftFood, findsNothing);
+
+      await tester.tap(tab('Diary'));
+      await tester.pumpAndSettle();
+      expect(draftFood, findsOneWidget);
+      await tester.tap(logMeal);
+      await tester.pumpAndSettle();
+      expect(draftFood, findsNothing);
+    },
+  );
+
   testWidgets('Log again saves an editable copy of a prior meal to Today', (
     tester,
   ) async {

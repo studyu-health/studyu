@@ -19,6 +19,7 @@ import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_app/widgets/empty_state.dart';
@@ -172,6 +173,7 @@ class const FoodSearchScreen({
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context, listen: false);
     final activeSubject = appState.activeSubject;
+    final draftStorage = appState.previewNutritionDrafts;
     final userId = activeSubject?.id ?? 'anonymous';
     final inheritedViewModel =
         templateViewModel ?? Provider.of<TemplateViewModel?>(context);
@@ -184,15 +186,14 @@ class const FoodSearchScreen({
         usdaFoodSearch: usdaFoodSearch,
         historicalMode: historicalMode,
         isRecipeIngredient: isRecipeIngredient,
-        history: activeSubject == null
-            ? FoodSearchHistory.empty
-            : buildFoodSearchHistory(
-                activeSubject.progress,
-                subjectId: activeSubject.id,
-                libraryFoodIds: {
-                  for (final template in templates.foodTemplates) template.id,
-                },
-              ),
+        history: buildFoodSearchHistory(
+          activeSubject?.progress ?? const [],
+          subjectId: userId,
+          draftRecalls: templates.draftRecalls,
+          libraryFoodIds: {
+            for (final template in templates.foodTemplates) template.id,
+          },
+        ),
       ),
     );
     if (inheritedViewModel != null) {
@@ -202,7 +203,20 @@ class const FoodSearchScreen({
       );
     }
     return ChangeNotifierProvider(
-      create: (_) => TemplateViewModel(userId: userId, repository: repository),
+      create: (_) => TemplateViewModel(
+        userId: userId,
+        repository:
+            repository ??
+            (appState.trackParticipantProgress
+                ? null
+                : PreviewNutritionFoodRepository()),
+        loadDraftRecalls: activeSubject == null
+            ? null
+            : () => loadNutritionDraftsForReuse(
+                subject: activeSubject,
+                autoSaveManager: draftStorage,
+              ),
+      ),
       child: content,
     );
   }
