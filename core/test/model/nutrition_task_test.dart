@@ -1,3 +1,4 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:studyu_core/core.dart';
 import 'package:test/test.dart';
 
@@ -47,6 +48,29 @@ void main() {
     final task = NutritionTask.withId()..trackWaterIntake = true;
 
     expect(NutritionTask.fromJson(task.toJson()).trackWaterIntake, isTrue);
+  });
+
+  test('loads a study when a nutrition task omits water tracking', () {
+    final taskJson = NutritionTask.withId().toJson()
+      ..remove('trackWaterIntake');
+    final studyJson = Study('study', 'researcher').toJson()
+      ..['observations'] = [taskJson];
+
+    final study = Study.fromJson(studyJson);
+    final task = study.observations.single as NutritionTask;
+
+    expect(task.trackWaterIntake, isFalse);
+    expect(task.toJson()['trackWaterIntake'], isFalse);
+  });
+
+  test('rejects a null water tracking setting', () {
+    final taskJson = NutritionTask.withId().toJson()
+      ..['trackWaterIntake'] = null;
+
+    expect(
+      () => NutritionTask.fromJson(taskJson),
+      throwsA(isA<DisallowedNullValueException>()),
+    );
   });
 
   test('only completed daily recalls satisfy task completion', () {
