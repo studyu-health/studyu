@@ -18,7 +18,7 @@ class NutritionTask extends Observation {
   @JsonKey(required: true, disallowNullValue: true)
   bool allowMeals = true;
 
-  @JsonKey(defaultValue: false, disallowNullValue: true)
+  @JsonKey(required: true, disallowNullValue: true)
   bool trackWaterIntake = false;
 
   /// Minimum number of meals required per day (optional)

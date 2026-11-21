@@ -9,7 +9,11 @@ part of 'nutrition_task.dart';
 NutritionTask _$NutritionTaskFromJson(Map<String, dynamic> json) {
   $checkKeys(
     json,
-    requiredKeys: const ['collectMealContext', 'allowMeals'],
+    requiredKeys: const [
+      'collectMealContext',
+      'allowMeals',
+      'trackWaterIntake',
+    ],
     disallowNullValues: const [
       'collectMealContext',
       'allowMeals',
@@ -31,7 +35,7 @@ NutritionTask _$NutritionTaskFromJson(Map<String, dynamic> json) {
     ..instructions = json['instructions'] as String?
     ..collectMealContext = json['collectMealContext'] as bool
     ..allowMeals = json['allowMeals'] as bool
-    ..trackWaterIntake = json['trackWaterIntake'] as bool? ?? false
+    ..trackWaterIntake = json['trackWaterIntake'] as bool
     ..minimumMealsRequired = (json['minimumMealsRequired'] as num?)?.toInt()
     ..customMealTypes = (json['customMealTypes'] as List<dynamic>?)
         ?.map((e) => e as String)
