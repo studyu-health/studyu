@@ -3100,16 +3100,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_edit_saved_meal => 'Edit saved meal';
 
   @override
-  String nutrition_ingredients_section(Object count) {
-    return 'Ingredients ($count)';
-  }
-
-  @override
-  String get nutrition_add_food_ingredient => 'Add food ingredient';
-
-  @override
   String get nutrition_invalid_saved_meal =>
-      'This saved meal contains incomplete ingredients and cannot be saved. Add valid food ingredients and try again.';
+      '이 식사의 일부 음식에 세부 정보가 없습니다. 정보가 완전한 음식을 추가한 후 다시 시도하세요.';
 
   @override
   String get nutrition_saved_meals_filter => 'Saved meals';
@@ -3124,7 +3116,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_saved_meals_expanded_notice =>
-      'Saved meals were expanded into food ingredients for review. Your new saved meal will contain food ingredients only.';
+      '이 식사를 저장하기 전에 저장된 식사의 개별 음식을 확인하세요.';
 
   @override
   String get enter_meal_name => 'Please enter a meal name';
@@ -3152,16 +3144,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_preparation_method_hint => 'e.g., baked, fried, steamed';
 
   @override
-  String get nutrition_add_food_manually => 'Add food manually';
+  String get nutrition_add_food_manually => '직접 추가';
 
   @override
   String get nutrition_food_name_example => 'e.g., olive oil';
 
   @override
-  String get nutrition_quantity_short => 'Qty';
+  String get nutrition_quantity_short => '수량';
 
   @override
-  String get nutrition_calories_kcal => 'Calories (kcal)';
+  String get nutrition_calories_kcal => '열량';
 
   @override
   String get nutrition_no_foods_yet => 'No foods yet';
@@ -3313,4 +3305,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_diary_tab => '일지';
+
+  @override
+  String nutrition_meal_foods_section(Object count) {
+    return '음식 ($count개)';
+  }
 }

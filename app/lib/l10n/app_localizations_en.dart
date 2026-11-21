@@ -3162,16 +3162,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nutrition_edit_saved_meal => 'Edit saved meal';
 
   @override
-  String nutrition_ingredients_section(Object count) {
-    return 'Ingredients ($count)';
-  }
-
-  @override
-  String get nutrition_add_food_ingredient => 'Add food ingredient';
-
-  @override
   String get nutrition_invalid_saved_meal =>
-      'This saved meal contains incomplete ingredients and cannot be saved. Add valid food ingredients and try again.';
+      'Some foods in this meal have incomplete details. Add foods with complete details and try again.';
 
   @override
   String get nutrition_saved_meals_filter => 'Saved meals';
@@ -3186,7 +3178,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_saved_meals_expanded_notice =>
-      'Saved meals were expanded into food ingredients for review. Your new saved meal will contain food ingredients only.';
+      'Review the individual foods from the saved meals before saving this meal.';
 
   @override
   String get enter_meal_name => 'Please enter a meal name';
@@ -3214,16 +3206,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nutrition_preparation_method_hint => 'e.g., baked, fried, steamed';
 
   @override
-  String get nutrition_add_food_manually => 'Add food manually';
+  String get nutrition_add_food_manually => 'Add manually';
 
   @override
   String get nutrition_food_name_example => 'e.g., olive oil';
 
   @override
-  String get nutrition_quantity_short => 'Qty';
+  String get nutrition_quantity_short => 'Quantity';
 
   @override
-  String get nutrition_calories_kcal => 'Calories (kcal)';
+  String get nutrition_calories_kcal => 'Calories';
 
   @override
   String get nutrition_no_foods_yet => 'No foods yet';
@@ -3380,4 +3372,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_diary_tab => 'Diary';
+
+  @override
+  String nutrition_meal_foods_section(Object count) {
+    return 'Foods ($count)';
+  }
 }

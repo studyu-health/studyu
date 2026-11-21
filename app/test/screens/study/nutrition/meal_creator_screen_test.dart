@@ -18,7 +18,9 @@ import 'fake_nutrition_food_repository.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('zero quantity cannot add a meal ingredient', (tester) async {
+  testWidgets('zero quantity cannot add food while editing a meal', (
+    tester,
+  ) async {
     final l10n = lookupAppLocalizations(const Locale('en'));
     final viewModel = TemplateViewModel(
       userId: 'subject',
@@ -27,13 +29,13 @@ void main() {
     addTearDown(viewModel.dispose);
     await _pump(
       tester,
-      () => MealCreatorScreen.route(initialName: 'Meal'),
+      () => MealCreatorScreen.route(existingMeal: _mealWithFoods([])),
       (_) {},
       viewModel,
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip(l10n.nutrition_add_food_manually));
+    await tester.tap(find.text(l10n.nutrition_add_food_manually));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextField, l10n.food_name),
@@ -50,7 +52,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(l10n.food_quantity_invalid_amount), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(
+      tester
+          .widget<FloatingActionButton>(find.byType(FloatingActionButton))
+          .onPressed,
+      isNull,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -87,7 +94,7 @@ void main() {
     expect(flattenNutritionFoodEntries([added!]), hasLength(2));
   });
 
-  testWidgets('offline recipe can add a detailed manual ingredient', (
+  testWidgets('a new meal can add a manually created food through search', (
     tester,
   ) async {
     final l10n = lookupAppLocalizations(const Locale('en'));
@@ -101,7 +108,6 @@ void main() {
     await _pump(
       tester,
       () => MealCreatorScreen.route(
-        initialName: 'Soup',
         templateViewModel: viewModel,
         onSavedToSelection: (food, _) => added = food,
       ),
@@ -110,7 +116,8 @@ void main() {
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l10n.nutrition_add_food_ingredient));
+    expect(find.text(l10n.nutrition_add_food_manually), findsNothing);
+    await tester.tap(find.text(l10n.add_food));
     await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.add_food_action));
     await tester.pumpAndSettle();
@@ -129,16 +136,24 @@ void main() {
       ),
       '41',
     );
-    await tester.tap(find.widgetWithText(FilledButton, l10n.save));
+    await tester.tap(find.text(l10n.save));
     await tester.pumpAndSettle();
     expect(repository.writeAttempts, 0);
+    expect(find.text(l10n.nutrition_per_serving), findsNothing);
+    expect(find.text('Carrot'), findsOneWidget);
+    await tester.enterText(
+      find.widgetWithText(TextFormField, l10n.template_name_required),
+      'Soup',
+    );
+    await tester.pump();
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     expect(added!.componentSnapshots!.single.name, 'Carrot');
     expect(added!.nutrition.energyKcal, 41);
+    expect(added!.name, 'Soup');
   });
 
-  testWidgets('quick add keeps the ingredient and recipe weight unknown', (
+  testWidgets('quick add while editing keeps food and meal weights unknown', (
     tester,
   ) async {
     final l10n = lookupAppLocalizations(const Locale('en'));
@@ -148,33 +163,34 @@ void main() {
       repository: repository,
     );
     addTearDown(viewModel.dispose);
+    FoodEntry? edited;
     await _pump(
       tester,
       () => MealCreatorScreen.route(
-        initialName: 'Soup',
-        initialFoods: [_food()],
+        existingMeal: _mealWithFoods([_food()]),
         templateViewModel: viewModel,
       ),
-      (_) {},
+      (value) => edited = value,
       viewModel,
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip(l10n.nutrition_add_food_manually));
+    await tester.tap(find.text(l10n.nutrition_add_food_manually));
     await tester.pumpAndSettle();
     final name = find.widgetWithText(TextField, l10n.food_name);
     await tester.ensureVisible(name);
-    await tester.enterText(name, 'Unweighed ingredient');
+    await tester.enterText(name, 'Unweighed food');
     final add = find.widgetWithText(FilledButton, l10n.add);
     await tester.ensureVisible(add);
     await tester.tap(add);
     await tester.pumpAndSettle();
+    expect(find.text(l10n.nutrition_per_serving), findsOneWidget);
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    final recipe = (await repository.loadTemplates('subject')).single.prototype;
-    expect(recipe.servingSizeGrams, 0);
-    expect(recipe.componentSnapshots!.last.servingSizeGrams, 0);
+    expect(edited!.servingSizeGrams, 0);
+    expect(edited!.componentSnapshots!.last.servingSizeGrams, 0);
+    expect(edited!.componentSnapshots!.last.name, 'Unweighed food');
   });
 
   testWidgets('ingredient quantity keeps its unit and scales nutrition', (
@@ -244,7 +260,10 @@ void main() {
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l10n.nutrition_preparation_details));
+    final preparation = find.text(l10n.nutrition_preparation_details);
+    await Scrollable.ensureVisible(tester.element(preparation), alignment: 0.4);
+    await tester.pumpAndSettle();
+    await tester.tap(preparation);
     await tester.pumpAndSettle();
     final rawWeight = find.widgetWithText(
       TextFormField,
@@ -397,7 +416,7 @@ void main() {
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip(l10n.create_meal));
+    await tester.tap(find.byTooltip(l10n.save_as_reusable_meal));
     await tester.pumpAndSettle();
     await tester.enterText(
       find
@@ -607,6 +626,23 @@ final class _OfflineMealRepository() extends NutritionFoodRepository {
     writeAttempts++;
     return Future.error(StateError('offline'));
   }
+}
+
+FoodEntry _mealWithFoods(List<FoodEntry> foods) {
+  final meal = _food()
+    ..entryType = FoodEntryType.meal
+    ..name = 'Soup'
+    ..componentSnapshots = foods;
+  return meal
+    ..componentFoods = [
+      for (final food in foods)
+        FoodComposition.withId(
+          parentEntryId: meal.id,
+          foodId: food.foodId,
+          amount: food.amount,
+          unit: food.unit,
+        ),
+    ];
 }
 
 FoodEntry _food() => FoodEntry.withId(

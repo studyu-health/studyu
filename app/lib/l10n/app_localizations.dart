@@ -5641,22 +5641,10 @@ abstract class AppLocalizations {
   /// **'Edit saved meal'**
   String get nutrition_edit_saved_meal;
 
-  /// No description provided for @nutrition_ingredients_section.
-  ///
-  /// In en, this message translates to:
-  /// **'Ingredients ({count})'**
-  String nutrition_ingredients_section(Object count);
-
-  /// No description provided for @nutrition_add_food_ingredient.
-  ///
-  /// In en, this message translates to:
-  /// **'Add food ingredient'**
-  String get nutrition_add_food_ingredient;
-
   /// No description provided for @nutrition_invalid_saved_meal.
   ///
   /// In en, this message translates to:
-  /// **'This saved meal contains incomplete ingredients and cannot be saved. Add valid food ingredients and try again.'**
+  /// **'Some foods in this meal have incomplete details. Add foods with complete details and try again.'**
   String get nutrition_invalid_saved_meal;
 
   /// No description provided for @nutrition_saved_meals_filter.
@@ -5680,7 +5668,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_saved_meals_expanded_notice.
   ///
   /// In en, this message translates to:
-  /// **'Saved meals were expanded into food ingredients for review. Your new saved meal will contain food ingredients only.'**
+  /// **'Review the individual foods from the saved meals before saving this meal.'**
   String get nutrition_saved_meals_expanded_notice;
 
   /// No description provided for @enter_meal_name.
@@ -5734,7 +5722,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_add_food_manually.
   ///
   /// In en, this message translates to:
-  /// **'Add food manually'**
+  /// **'Add manually'**
   String get nutrition_add_food_manually;
 
   /// No description provided for @nutrition_food_name_example.
@@ -5746,13 +5734,13 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_quantity_short.
   ///
   /// In en, this message translates to:
-  /// **'Qty'**
+  /// **'Quantity'**
   String get nutrition_quantity_short;
 
   /// No description provided for @nutrition_calories_kcal.
   ///
   /// In en, this message translates to:
-  /// **'Calories (kcal)'**
+  /// **'Calories'**
   String get nutrition_calories_kcal;
 
   /// No description provided for @nutrition_no_foods_yet.
@@ -6024,6 +6012,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Diary'**
   String get nutrition_diary_tab;
+
+  /// No description provided for @nutrition_meal_foods_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Foods ({count})'**
+  String nutrition_meal_foods_section(Object count);
 }
 
 class _AppLocalizationsDelegate

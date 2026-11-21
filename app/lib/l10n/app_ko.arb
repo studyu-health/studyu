@@ -588,6 +588,9 @@
   "sugars_g": "당류 (g)",
   "fiber_g": "식이섬유 (g)",
   "sodium_mg": "나트륨 (mg)",
+  "nutrition_add_food_manually": "직접 추가",
+  "nutrition_quantity_short": "수량",
+  "nutrition_calories_kcal": "열량",
   "entry_type": "식품 유형",
   "brand_name": "브랜드",
   "description_hint": "이 식품에 대한 메모 (선택)",
@@ -614,5 +617,8 @@
   "detailed_nutrients": "상세 영양 정보",
   "nutrition_food_details_subtitle": "귀리 플레이크처럼 구체적인 이름을 입력하세요.",
   "nutrition_tracking": "식사 일지",
-  "nutrition_diary_tab": "일지"
+  "nutrition_diary_tab": "일지",
+  "nutrition_meal_foods_section": "음식 ({count}개)",
+  "nutrition_invalid_saved_meal": "이 식사의 일부 음식에 세부 정보가 없습니다. 정보가 완전한 음식을 추가한 후 다시 시도하세요.",
+  "nutrition_saved_meals_expanded_notice": "이 식사를 저장하기 전에 저장된 식사의 개별 음식을 확인하세요."
 }

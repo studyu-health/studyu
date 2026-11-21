@@ -275,59 +275,6 @@ void main() {
       expect(field.decoration?.fillColor, isNull);
     }
 
-    await tester.tap(find.byTooltip('Add food manually'));
-    await tester.pumpAndSettle();
-
-    for (final label in [
-      l10n.food_name,
-      l10n.nutrition_quantity_short,
-      l10n.nutrition_calories_kcal,
-    ]) {
-      final field = tester.widget<TextField>(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is TextField && widget.decoration?.labelText == label,
-        ),
-      );
-      expect(field.decoration?.filled, isNot(true));
-      expect(field.decoration?.fillColor, isNull);
-    }
-
     semantics.dispose();
-  });
-
-  testWidgets('recipe builder uses the shared collapsed nutrition summary', (
-    tester,
-  ) async {
-    await tester.pumpWidget(testApp(const MealCreatorScreen()));
-    await tester.pump();
-
-    await tester.tap(find.byTooltip('Add food manually'));
-    await tester.pumpAndSettle();
-
-    final nameField = find.byWidgetPredicate(
-      (widget) =>
-          widget is TextField && widget.decoration?.labelText == l10n.food_name,
-    );
-    final caloriesField = find.byWidgetPredicate(
-      (widget) =>
-          widget is TextField &&
-          widget.decoration?.labelText == l10n.nutrition_calories_kcal,
-    );
-    await tester.enterText(nameField, 'Test ingredient');
-    await tester.enterText(caloriesField, '100');
-    final addButton = find.widgetWithText(FilledButton, 'Add');
-    await tester.ensureVisible(addButton);
-    await tester.pumpAndSettle();
-    await tester.tap(addButton);
-    await tester.pumpAndSettle();
-
-    expect(find.byType(NutritionSummaryCard), findsOneWidget);
-    expect(find.text(l10n.nutrition_per_serving), findsOneWidget);
-    expect(find.text('1 serving'), findsOneWidget);
-    expect(find.text('100 kcal'), findsOneWidget);
-    expect(find.text('—'), findsNWidgets(3));
-    expect(find.text('0%'), findsNothing);
-    expect(find.text('No data yet'), findsNothing);
   });
 }

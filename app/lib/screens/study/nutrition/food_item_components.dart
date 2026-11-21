@@ -25,6 +25,7 @@ class const FoodItemCard({
   final String? imageUrl,
   final String? typeLabel,
   final TextStyle? titleStyle,
+  final int textMaxLines = 1,
   final bool selected = false,
   final String? tapLabel,
   final ValueChanged<Offset?>? onTap,
@@ -75,7 +76,7 @@ class const FoodItemCard({
                               theme.textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
-                          maxLines: 1,
+                          maxLines: textMaxLines,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
@@ -84,7 +85,7 @@ class const FoodItemCard({
                           child: Text(
                             metadata,
                             key: ValueKey(metadata),
-                            maxLines: 1,
+                            maxLines: textMaxLines,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,

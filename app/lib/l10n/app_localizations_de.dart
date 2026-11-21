@@ -3206,16 +3206,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nutrition_edit_saved_meal => 'Gespeicherte Mahlzeit bearbeiten';
 
   @override
-  String nutrition_ingredients_section(Object count) {
-    return 'Zutaten ($count)';
-  }
-
-  @override
-  String get nutrition_add_food_ingredient => 'Lebensmittelzutat hinzufügen';
-
-  @override
   String get nutrition_invalid_saved_meal =>
-      'Diese gespeicherte Mahlzeit enthält unvollständige Zutaten und kann nicht gespeichert werden. Fügen Sie gültige Lebensmittelzutaten hinzu und versuchen Sie es erneut.';
+      'Bei einigen Lebensmitteln in dieser Mahlzeit fehlen Angaben. Fügen Sie Lebensmittel mit vollständigen Angaben hinzu.';
 
   @override
   String get nutrition_saved_meals_filter => 'Gespeicherte Mahlzeiten';
@@ -3231,7 +3223,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_saved_meals_expanded_notice =>
-      'Gespeicherte Mahlzeiten wurden zur Überprüfung in Lebensmittelzutaten aufgelöst. Ihre neue gespeicherte Mahlzeit enthält nur Lebensmittelzutaten.';
+      'Prüfen Sie die einzelnen Lebensmittel aus den gespeicherten Mahlzeiten vor dem Speichern.';
 
   @override
   String get enter_meal_name => 'Bitte geben Sie einen Mahlzeitnamen ein';
@@ -3260,7 +3252,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'z. B. gebacken, gebraten, gedämpft';
 
   @override
-  String get nutrition_add_food_manually => 'Lebensmittel manuell hinzufügen';
+  String get nutrition_add_food_manually => 'Manuell hinzufügen';
 
   @override
   String get nutrition_food_name_example => 'z. B. Olivenöl';
@@ -3269,7 +3261,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nutrition_quantity_short => 'Menge';
 
   @override
-  String get nutrition_calories_kcal => 'Kalorien (kcal)';
+  String get nutrition_calories_kcal => 'Kalorien';
 
   @override
   String get nutrition_no_foods_yet => 'Noch keine Lebensmittel';
@@ -3429,4 +3421,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_diary_tab => 'Tagebuch';
+
+  @override
+  String nutrition_meal_foods_section(Object count) {
+    return 'Lebensmittel ($count)';
+  }
 }

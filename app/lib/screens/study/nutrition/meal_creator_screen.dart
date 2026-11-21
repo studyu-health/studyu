@@ -7,6 +7,8 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_editor_layout.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_save_button.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
 import 'package:studyu_app/util/nutrition_food_snapshots.dart' as snapshots;
@@ -172,11 +174,12 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
     _quickCaloriesController = TextEditingController();
     _initialSnapshot = _snapshot;
 
-    _servingsController.addListener(() {
-      setState(() {
-        _cachedNutrition = null;
+    _nameController.addListener(() => setState(() {}));
+    if (widget.existingMeal != null) {
+      _servingsController.addListener(() {
+        setState(() => _cachedNutrition = null);
       });
-    });
+    }
   }
 
   @override
@@ -531,7 +534,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
           content: Text(
             _invalidComponents
                 ? AppLocalizations.of(context)!.nutrition_invalid_saved_meal
-                : AppLocalizations.of(context)!.nutrition_add_food_ingredient,
+                : AppLocalizations.of(context)!.add_food_before_saving,
           ),
         ),
       );
@@ -608,7 +611,7 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
           content: Text(
             _invalidComponents
                 ? AppLocalizations.of(context)!.nutrition_invalid_saved_meal
-                : AppLocalizations.of(context)!.nutrition_add_food_ingredient,
+                : AppLocalizations.of(context)!.add_food_before_saving,
           ),
         ),
       );
@@ -663,184 +666,154 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    if (_foods.isNotEmpty && _cachedNutrition == null) {
-      _cachedNutrition = _calculateTotalNutrition();
-    }
-    final nutrition = _cachedNutrition;
+    final isEditing = widget.existingMeal != null;
+    final nutrition = isEditing && _foods.isNotEmpty
+        ? _cachedNutrition ??= _calculateTotalNutrition()
+        : null;
 
     final l10n = AppLocalizations.of(context)!;
     final canSave =
         !_invalidComponents &&
         _nameController.text.isNotEmpty &&
         _foods.isNotEmpty;
-    final servingsCount = parseNutritionAmount(_servingsController.text) ?? 1;
 
     final scaffold = Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.existingMeal == null
-              ? l10n.create_meal
-              : l10n.nutrition_edit_saved_meal,
+        title: NutritionEditorTitle(
+          title: isEditing ? l10n.nutrition_edit_saved_meal : l10n.create_meal,
         ),
         actions: [
           if (_foods.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.bookmark_add_outlined),
-              tooltip: l10n.create_meal,
+              tooltip: l10n.save_as_reusable_meal,
               onPressed: _isSaving ? null : _saveAsTemplate,
             ),
         ],
       ),
-      floatingActionButton: canSave
-          ? NutritionSaveButton(
-              key: _saveButtonKey,
-              onPressed: _isSaving ? null : _saveMeal,
-            )
-          : null,
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (widget.showCurrentMealOnlyNotice &&
-                widget.existingMeal != null) ...[
-              Card(
-                color: theme.colorScheme.secondaryContainer,
-                child: ListTile(
-                  leading: Icon(
-                    Icons.info_outline,
+      floatingActionButton: NutritionSaveButton(
+        key: _saveButtonKey,
+        onPressed: canSave && !_isSaving ? _saveMeal : null,
+      ),
+      body: NutritionEditorForm(
+        formKey: _formKey,
+        bottomClearance: NutritionSaveButton.scrollClearance,
+        children: [
+          if (widget.showCurrentMealOnlyNotice && widget.existingMeal != null)
+            Card(
+              margin: EdgeInsets.zero,
+              color: theme.colorScheme.secondaryContainer,
+              child: ListTile(
+                leading: Icon(
+                  Icons.info_outline,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+                title: Text(
+                  l10n.current_meal_only_banner,
+                  style: TextStyle(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
-                  title: Text(
-                    l10n.current_meal_only_banner,
-                    style: TextStyle(
-                      color: theme.colorScheme.onSecondaryContainer,
-                    ),
+                ),
+              ),
+            ),
+          _MealInfoCard(
+            nameController: _nameController,
+            descriptionController: _descriptionController,
+            servingsController: widget.showServings
+                ? _servingsController
+                : null,
+          ),
+          if (widget.onCurrentDayPropagationChanged != null)
+            Text(
+              l10n.food_definition_edit_helper,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          if (widget.showCurrentDayPropagationOption)
+            CheckboxListTile(
+              value: _updateCurrentDayEntries,
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.update_current_day_entries),
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (value) {
+                final selected = value ?? false;
+                setState(() => _updateCurrentDayEntries = selected);
+                widget.onCurrentDayPropagationChanged?.call(selected);
+              },
+            ),
+          if (widget.showExpansionNotice)
+            Card(
+              margin: EdgeInsets.zero,
+              color: theme.colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  l10n.nutrition_saved_meals_expanded_notice,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-            ],
-
-            // ========== MEAL DETAILS ==========
-            _MealInfoCard(
-              nameController: _nameController,
-              descriptionController: _descriptionController,
-              servingsController: widget.showServings
-                  ? _servingsController
+            ),
+          if (_invalidComponents)
+            Card(
+              margin: EdgeInsets.zero,
+              color: theme.colorScheme.errorContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  l10n.nutrition_invalid_saved_meal,
+                  style: TextStyle(color: theme.colorScheme.onErrorContainer),
+                ),
+              ),
+            ),
+          _FoodsSectionHeader(
+            foodCount: _foods.length,
+            onAddFood: _addFood,
+            onToggleQuickAdd: isEditing
+                ? () => setState(() => _showQuickAdd = !_showQuickAdd)
+                : null,
+            showQuickAdd: _showQuickAdd,
+          ),
+          if (_showQuickAdd)
+            _QuickAddForm(
+              nameController: _quickNameController,
+              amountController: _quickAmountController,
+              caloriesController: _quickCaloriesController,
+              onAdd: _quickAddFood,
+            ),
+          if (_foods.isEmpty)
+            const _EmptyFoodsState()
+          else
+            Column(
+              children: [
+                for (var index = 0; index < _foods.length; index++)
+                  _FoodCard(
+                    food: _componentFoods[index],
+                    composition: _foods[index],
+                    onRemove: () => _removeFood(index),
+                    onUpdateAmount: (amount) =>
+                        _updateFoodAmount(index, amount),
+                  ),
+              ],
+            ),
+          if (nutrition != null)
+            NutritionSummaryCard(
+              nutrition: nutrition,
+              title: l10n.nutrition_per_serving,
+              subtitle: widget.showServings
+                  ? l10n.serving_amount(
+                      parseNutritionAmount(_servingsController.text) ?? 1,
+                    )
                   : null,
-              theme: theme,
-              l10n: l10n,
             ),
-
-            if (widget.onCurrentDayPropagationChanged != null) ...[
-              Text(
-                l10n.food_definition_edit_helper,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            if (widget.showCurrentDayPropagationOption)
-              CheckboxListTile(
-                value: _updateCurrentDayEntries,
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.update_current_day_entries),
-                controlAffinity: ListTileControlAffinity.leading,
-                onChanged: (value) {
-                  final selected = value ?? false;
-                  setState(() => _updateCurrentDayEntries = selected);
-                  widget.onCurrentDayPropagationChanged?.call(selected);
-                },
-              ),
-
-            const SizedBox(height: 12),
-
-            // ========== METADATA (Collapsible) ==========
-            _PreparationDetailsCard(
-              rawWeightController: _rawWeightController,
-              cookedWeightController: _cookedWeightController,
-              preparationMethodController: _preparationMethodController,
-            ),
-
-            const SizedBox(height: 16),
-
-            if (widget.showExpansionNotice)
-              Card(
-                color: theme.colorScheme.secondaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(l10n.nutrition_saved_meals_expanded_notice),
-                ),
-              ),
-
-            if (_invalidComponents)
-              Card(
-                color: theme.colorScheme.errorContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(l10n.nutrition_invalid_saved_meal),
-                ),
-              ),
-
-            // ========== FOODS SECTION ==========
-            _FoodsSectionHeader(
-              foodCount: _foods.length,
-              theme: theme,
-              onAddFood: _addFood,
-              onToggleQuickAdd: () =>
-                  setState(() => _showQuickAdd = !_showQuickAdd),
-              showQuickAdd: _showQuickAdd,
-            ),
-
-            // ========== QUICK ADD FORM ==========
-            if (_showQuickAdd) ...[
-              const SizedBox(height: 12),
-              _QuickAddForm(
-                nameController: _quickNameController,
-                amountController: _quickAmountController,
-                caloriesController: _quickCaloriesController,
-                onAdd: _quickAddFood,
-                theme: theme,
-              ),
-            ],
-
-            const SizedBox(height: 12),
-
-            // ========== FOODS LIST ==========
-            if (_foods.isEmpty)
-              _EmptyFoodsState(theme: theme)
-            else
-              ...List.generate(_foods.length, (index) {
-                final food = _componentFoods[index];
-                final composition = _foods[index];
-
-                return _FoodCard(
-                  food: food,
-                  composition: composition,
-                  theme: theme,
-                  onRemove: () => _removeFood(index),
-                  onUpdateAmount: (amount) => _updateFoodAmount(index, amount),
-                );
-              }),
-
-            const SizedBox(height: 16),
-
-            // ========== NUTRITION SUMMARY ==========
-            if (nutrition != null)
-              NutritionSummaryCard(
-                nutrition: nutrition,
-                title: l10n.nutrition_per_serving,
-                subtitle: widget.showServings
-                    ? l10n.serving_amount(servingsCount)
-                    : null,
-              ),
-
-            const SizedBox(height: NutritionSaveButton.scrollClearance),
-          ],
-        ),
+          _PreparationDetailsCard(
+            rawWeightController: _rawWeightController,
+            cookedWeightController: _cookedWeightController,
+            preparationMethodController: _preparationMethodController,
+          ),
+        ],
       ),
     );
 
@@ -867,101 +840,49 @@ class const _MealInfoCard({
   required final TextEditingController nameController,
   required final TextEditingController descriptionController,
   final TextEditingController? servingsController,
-  required final ThemeData theme,
-  required final AppLocalizations l10n,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(
-                      alpha: 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.restaurant_menu_outlined,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  l10n.meal_details,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: l10n.template_name_required,
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.edit),
-              ),
-              textCapitalization: TextCapitalization.words,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return l10n.enter_meal_name;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                if (servingsController != null) ...[
-                  Expanded(
-                    child: TextFormField(
-                      controller: servingsController,
-                      decoration: InputDecoration(
-                        labelText: l10n.nutrition_servings_required,
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.people_outline),
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (value) {
-                        final servings = parseNutritionAmount(value ?? '');
-                        if (servings == null || servings <= 0) {
-                          return l10n.food_quantity_invalid_amount;
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  flex: 2,
-                  child: TextFormField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: l10n.description,
-                      border: const OutlineInputBorder(),
-                      hintText: l10n.optional,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+    final l10n = AppLocalizations.of(context)!;
+    return NutritionEditorSection(
+      title: l10n.meal_details,
+      children: [
+        TextFormField(
+          controller: nameController,
+          decoration: nutritionFieldDecoration(
+            l10n.template_name_required,
+            icon: Icons.restaurant_menu,
+          ),
+          textCapitalization: TextCapitalization.words,
+          validator: (value) =>
+              value == null || value.isEmpty ? l10n.enter_meal_name : null,
         ),
-      ),
+        if (servingsController != null)
+          TextFormField(
+            controller: servingsController,
+            decoration: nutritionFieldDecoration(
+              l10n.nutrition_servings_required,
+              icon: Icons.format_list_numbered,
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            validator: (value) {
+              final servings = parseNutritionAmount(value ?? '');
+              return servings == null || servings <= 0
+                  ? l10n.food_quantity_invalid_amount
+                  : null;
+            },
+          ),
+        TextFormField(
+          controller: descriptionController,
+          decoration: nutritionFieldDecoration(
+            l10n.description,
+            icon: Icons.notes_outlined,
+            hint: l10n.optional,
+          ),
+          maxLines: 3,
+          minLines: 1,
+        ),
+      ],
     );
   }
 }
@@ -974,67 +895,53 @@ class const _PreparationDetailsCard({
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      child: ExpansionTile(
-        leading: Icon(Icons.science_outlined, color: Colors.grey.shade600),
-        title: Text(l10n.nutrition_preparation_details),
-        subtitle: Text(l10n.nutrition_preparation_details_subtitle),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: rawWeightController,
-                  decoration: InputDecoration(
-                    labelText: l10n.nutrition_raw_weight_grams,
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                ),
+    return NutritionEditorExpansion(
+      icon: Icons.science_outlined,
+      title: l10n.nutrition_preparation_details,
+      subtitle: l10n.nutrition_preparation_details_subtitle,
+      children: [
+        NutritionEditorFields(
+          minimumFieldWidth: 184,
+          children: [
+            TextFormField(
+              controller: rawWeightController,
+              decoration: nutritionFieldDecoration(
+                l10n.nutrition_raw_weight_grams,
+                icon: Icons.scale_outlined,
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextFormField(
-                  controller: cookedWeightController,
-                  decoration: InputDecoration(
-                    labelText: l10n.nutrition_cooked_weight_grams,
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                ),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: preparationMethodController,
-            decoration: InputDecoration(
-              labelText: l10n.nutrition_preparation_method,
-              border: const OutlineInputBorder(),
-              hintText: l10n.nutrition_preparation_method_hint,
-              isDense: true,
             ),
+            TextFormField(
+              controller: cookedWeightController,
+              decoration: nutritionFieldDecoration(
+                l10n.nutrition_cooked_weight_grams,
+                icon: Icons.scale_outlined,
+              ),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+          ],
+        ),
+        TextFormField(
+          controller: preparationMethodController,
+          decoration: nutritionFieldDecoration(
+            l10n.nutrition_preparation_method,
+            icon: Icons.soup_kitchen_outlined,
+            hint: l10n.nutrition_preparation_method_hint,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
 class const _FoodsSectionHeader({
   required final int foodCount,
-  required final ThemeData theme,
   required final VoidCallback onAddFood,
-  required final VoidCallback onToggleQuickAdd,
+  required final VoidCallback? onToggleQuickAdd,
   required final bool showQuickAdd,
 }) extends StatelessWidget {
   @override
@@ -1044,44 +951,31 @@ class const _FoodsSectionHeader({
       alignment: WrapAlignment.spaceBetween,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 8,
-      runSpacing: 8,
       children: [
-        Text(
-          l10n.nutrition_ingredients_section(foodCount),
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.nutrition_meal_foods_section(foodCount),
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
         Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            IconButton.outlined(
-              onPressed: onToggleQuickAdd,
-              icon: Icon(showQuickAdd ? Icons.close : Icons.bolt, size: 18),
-              tooltip: l10n.nutrition_add_food_manually,
-              style: IconButton.styleFrom(
-                minimumSize: const Size(36, 36),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-            FilledButton(
-              onPressed: onAddFood,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+            NutritionAddButton(onPressed: onAddFood, label: l10n.add_food),
+            if (onToggleQuickAdd != null)
+              Semantics(
+                expanded: showQuickAdd,
+                child: TextButton.icon(
+                  onPressed: onToggleQuickAdd,
+                  icon: Icon(
+                    showQuickAdd ? Icons.expand_less : Icons.edit_outlined,
+                  ),
+                  label: Text(l10n.nutrition_add_food_manually),
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.search, size: 18),
-                  const SizedBox(width: 6),
-                  Flexible(child: Text(l10n.nutrition_add_food_ingredient)),
-                ],
-              ),
-            ),
           ],
         ),
       ],
@@ -1094,97 +988,63 @@ class const _QuickAddForm({
   required final TextEditingController amountController,
   required final TextEditingController caloriesController,
   required final VoidCallback onAdd,
-  required final ThemeData theme,
-}) extends StatefulWidget {
-  @override
-  State<_QuickAddForm> createState() => _QuickAddFormState();
-}
-
-class _QuickAddFormState() extends State<_QuickAddForm> {
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Card(
+      margin: EdgeInsets.zero,
       elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: nutritionEditorSpacing,
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.bolt,
-                  color: widget.theme.colorScheme.tertiary,
-                  size: 16,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  l10n.nutrition_add_food_manually,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: widget.theme.colorScheme.tertiary,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Name field - full width
             TextField(
-              controller: widget.nameController,
-              decoration: InputDecoration(
-                labelText: l10n.food_name,
-                hintText: l10n.nutrition_food_name_example,
-                border: const OutlineInputBorder(),
-                isDense: true,
+              controller: nameController,
+              decoration: nutritionFieldDecoration(
+                l10n.food_name,
+                icon: Icons.restaurant_outlined,
+                hint: l10n.nutrition_food_name_example,
               ),
               textCapitalization: TextCapitalization.words,
-              onSubmitted: (_) => _submitAndFocusNext(),
+              onSubmitted: (_) => _submitAndFocusNext(context),
             ),
-            const SizedBox(height: 8),
-            // Amount and Calories - side by side
-            Row(
+            NutritionEditorFields(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: widget.amountController,
-                    decoration: InputDecoration(
-                      labelText: l10n.nutrition_quantity_short,
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    onSubmitted: (_) => _submitAndFocusNext(),
+                TextField(
+                  controller: amountController,
+                  decoration: nutritionFieldDecoration(
+                    l10n.nutrition_quantity_short,
+                    icon: Icons.format_list_numbered,
                   ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  onSubmitted: (_) => _submitAndFocusNext(context),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: widget.caloriesController,
-                    decoration: InputDecoration(
-                      labelText: l10n.nutrition_calories_kcal,
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    onSubmitted: (_) => widget.onAdd(),
+                TextField(
+                  controller: caloriesController,
+                  decoration: nutritionFieldDecoration(
+                    l10n.nutrition_calories_kcal,
+                    icon: Icons.local_fire_department_outlined,
+                    unit: 'kcal',
                   ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  height: 48,
-                  child: FilledButton.tonal(
-                    onPressed: widget.onAdd,
-                    child: Text(l10n.add),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
+                  onSubmitted: (_) => onAdd(),
                 ),
               ],
+            ),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: FilledButton.tonalIcon(
+                onPressed: onAdd,
+                icon: const Icon(Icons.add),
+                label: Text(l10n.add),
+              ),
             ),
           ],
         ),
@@ -1192,47 +1052,37 @@ class _QuickAddFormState() extends State<_QuickAddForm> {
     );
   }
 
-  void _submitAndFocusNext() {
-    if (widget.caloriesController.text.isEmpty) {
+  void _submitAndFocusNext(BuildContext context) {
+    if (caloriesController.text.isEmpty) {
       FocusScope.of(context).nextFocus();
     } else {
-      widget.onAdd();
+      onAdd();
     }
   }
 }
 
-class const _EmptyFoodsState({required final ThemeData theme})
-    extends StatelessWidget {
+class const _EmptyFoodsState() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     return Card(
+      margin: EdgeInsets.zero,
       elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          spacing: 12,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Icon(
-                Icons.restaurant_outlined,
-                size: 32,
-                color: theme.colorScheme.primary,
-              ),
+            Icon(
+              Icons.restaurant_outlined,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.nutrition_no_foods_yet,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.nutrition_search_or_add_food_manually,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.7,
+            Expanded(
+              child: Text(
+                l10n.nutrition_no_foods_yet,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -1246,7 +1096,6 @@ class const _EmptyFoodsState({required final ThemeData theme})
 class const _FoodCard({
   required final FoodEntry food,
   required final FoodComposition composition,
-  required final ThemeData theme,
   required final VoidCallback onRemove,
   required final ValueChanged<double> onUpdateAmount,
 }) extends StatelessWidget {
@@ -1256,60 +1105,36 @@ class const _FoodCard({
     final icon = food.entryType == FoodEntryType.meal
         ? Icons.restaurant_menu_outlined
         : Icons.restaurant_outlined;
-    final imageUrl = foodImageUrl(food);
     final energy = food.nutrition.energyKcal * composition.amount / food.amount;
+    final energyLabel = food.nutrition.isKnown('energyKcal')
+        ? l10n.kcal_value(energy.toStringAsFixed(0))
+        : '— kcal';
+    final partialLabel = food.nutrition.isPartial('energyKcal')
+        ? ' (${l10n.nutrition_partial})'
+        : '';
+    final quantity = composition.unit == 'serving'
+        ? l10n.serving_amount(foodServingAmount(composition.amount))
+        : '${composition.amount} ${composition.unit}';
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      elevation: 0,
-      child: ListTile(
-        leading: SizedBox(
-          width: 44,
-          height: 44,
-          child: imageUrl == null
-              ? fallbackFoodIcon(theme, icon)
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    excludeFromSemantics: true,
-                    errorBuilder: (context, error, stackTrace) =>
-                        fallbackFoodIcon(theme, icon),
-                  ),
-                ),
+    return FoodItemCard(
+      name: food.name,
+      icon: icon,
+      imageUrl: foodImageUrl(food),
+      textMaxLines: 2,
+      metadata: '$quantity · $energyLabel$partialLabel',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.edit_outlined),
+          onPressed: () => _showEditDialog(context),
+          tooltip: l10n.food_quantity_edit_amount,
         ),
-        title: Text(
-          food.name,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+        IconButton(
+          icon: const Icon(Icons.delete_outline),
+          onPressed: onRemove,
+          color: Theme.of(context).colorScheme.error,
+          tooltip: l10n.remove_from_meal,
         ),
-        subtitle: Text(
-          '${composition.amount} ${composition.unit} • ${food.nutrition.isKnown('energyKcal') ? l10n.kcal_value(energy.toStringAsFixed(0)) : '— kcal'}${food.nutrition.isPartial('energyKcal') ? ' (${l10n.nutrition_partial})' : ''}',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, size: 18),
-              onPressed: () => _showEditDialog(context),
-              tooltip: l10n.food_quantity_edit_amount,
-              visualDensity: VisualDensity.compact,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, size: 18),
-              onPressed: onRemove,
-              color: theme.colorScheme.error,
-              tooltip: l10n.remove_from_meal,
-              visualDensity: VisualDensity.compact,
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
@@ -1328,10 +1153,12 @@ class const _FoodCard({
           children: [
             TextField(
               controller: amountController,
-              decoration: InputDecoration(
-                labelText: l10n.food_quantity_amount,
-                suffixText: composition.unit,
-                border: const OutlineInputBorder(),
+              decoration: nutritionFieldDecoration(
+                l10n.food_quantity_amount,
+                icon: Icons.format_list_numbered,
+                unit: composition.unit == 'serving'
+                    ? l10n.food_quantity_serving_unit(1)
+                    : composition.unit,
               ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,

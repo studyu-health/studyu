@@ -1758,10 +1758,13 @@ void main() {
         'Updated fruit bowl',
       );
       await tester.enterText(foodEditorInput('Servings'), '2');
-      await tester.ensureVisible(find.byTooltip('Edit amount'));
-      await tester.drag(find.byType(ListView).last, const Offset(0, -80));
+      final editAmount = find.byTooltip('Edit amount');
+      await Scrollable.ensureVisible(
+        tester.element(editAmount),
+        alignment: 0.5,
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Edit amount'));
+      await tester.tap(editAmount);
       await tester.pumpAndSettle();
       await tester.enterText(find.widgetWithText(TextField, 'Amount'), '1.5');
       await tester.tap(find.widgetWithText(FilledButton, 'Save').last);
