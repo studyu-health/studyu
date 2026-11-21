@@ -130,16 +130,7 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
   }) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    final draftCanEdit =
-        record.pending?.progressCompletedAt == null ||
-        record.persistenceTarget != null;
-    final editable =
-        draftCanEdit &&
-        isEditableNutritionRecallDay(
-          studyDaySnapshot: record.studyDaySnapshot,
-          currentStudyDay: currentStudyDay,
-          hasUnambiguousPeriod: _hasCompletionPeriod(record.periodId),
-        );
+    final editable = record.canEdit(widget.task, currentStudyDay);
     final foodNames = record.recall.meals
         .expand((meal) => meal.foods)
         .map((food) => food.name)
@@ -234,7 +225,4 @@ class _NutritionHistoryScreenState() extends State<NutritionHistoryScreen> {
     );
     _reloadRecords();
   }
-
-  bool _hasCompletionPeriod(String id) =>
-      widget.task.schedule.completionPeriods.any((period) => period.id == id);
 }

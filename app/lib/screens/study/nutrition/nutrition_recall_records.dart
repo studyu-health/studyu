@@ -17,6 +17,17 @@ class const NutritionRecallRecord({
   bool get isCompleted =>
       pending == null && progress != null && recall.entryCompletedAt != null;
 
+  bool canEdit(NutritionTask task, int currentStudyDay) =>
+      taskId == task.id &&
+      (pending?.progressCompletedAt == null || persistenceTarget != null) &&
+      isEditableNutritionRecallDay(
+        studyDaySnapshot: studyDaySnapshot,
+        currentStudyDay: currentStudyDay,
+        hasUnambiguousPeriod: task.schedule.completionPeriods.any(
+          (period) => period.id == periodId,
+        ),
+      );
+
   NutritionRecallPersistenceTarget? get persistenceTarget {
     final completedAt = progress?.completedAt;
     if (completedAt == null) return null;
@@ -31,13 +42,13 @@ class const NutritionRecallRecord({
   }
 }
 
-/// Loads the launched task's remote recalls and locally pending drafts.
+/// Loads remote recalls and local drafts for one task or all tasks.
 ///
 /// Statistics use server recalls and unsubmitted entries from the current day.
 /// History shows local drafts, including drafts outside the sync window.
 Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
   required StudySubject subject,
-  required String taskId,
+  String? taskId,
   NutritionRecallAutoSaveManager? autoSaveManager,
   bool showLocalDraftsSeparately = false,
   DateTime? now,
@@ -46,7 +57,8 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
   final records = <String, NutritionRecallRecord>{};
 
   for (final progress in subject.progress) {
-    if (progress.taskId != taskId || progress.resultType != 'DailyRecall') {
+    if ((taskId != null && progress.taskId != taskId) ||
+        progress.resultType != 'DailyRecall') {
       continue;
     }
     final result = progress.result.result;
@@ -60,13 +72,13 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
     if (studyDay == null || periodId == null) continue;
     final record = NutritionRecallRecord(
       recall: result,
-      taskId: taskId,
+      taskId: progress.taskId,
       periodId: periodId,
       interventionId: progress.interventionId,
       studyDaySnapshot: studyDay,
       progress: progress,
     );
-    final identity = _recordIdentity(taskId, record.periodId, studyDay);
+    final identity = _recordIdentity(record.taskId, record.periodId, studyDay);
     final existing = records[identity];
     if (existing == null || _isNewerRemote(record, existing)) {
       records[identity] = record;
@@ -75,7 +87,8 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
 
   final pending = await (autoSaveManager ?? NutritionRecallAutoSaveManager())
       .scanPendingRecalls(subject.id);
-  for (final local in pending.where((pending) => pending.taskId == taskId)) {
+  for (final local in pending) {
+    if (taskId != null && local.taskId != taskId) continue;
     final identity = _recordIdentity(
       local.taskId,
       local.periodId,

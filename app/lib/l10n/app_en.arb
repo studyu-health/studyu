@@ -1487,5 +1487,6 @@
   "nutrition_recall_view_saved": "View saved version",
   "nutrition_history_local_draft": "Draft saved on this device",
   "nutrition_history_expired_draft": "Sync window ended. This draft is only on this device.",
-  "nutrition_history_discard_expired_draft": "Delete this draft from this device? This cannot be undone."
+  "nutrition_history_discard_expired_draft": "Delete this draft from this device? This cannot be undone.",
+  "nutrition_review_previous_day": "Review previous day’s nutrition"
 }

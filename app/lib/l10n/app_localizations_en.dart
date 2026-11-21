@@ -3363,4 +3363,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nutrition_history_discard_expired_draft =>
       'Delete this draft from this device? This cannot be undone.';
+
+  @override
+  String get nutrition_review_previous_day => 'Review previous day’s nutrition';
 }

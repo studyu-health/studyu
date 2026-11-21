@@ -13,6 +13,9 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/app_onboarding/study_unavailable_screen.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
+import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/theme.dart' as app_theme;
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/debug_mode.dart';
@@ -69,6 +72,7 @@ class _DashboardScreenState()
   late final TextStyle showcaseActionTextStyle;
   StudySubject? subject;
   List<TaskInstance>? scheduleToday;
+  Future<List<NutritionTask>>? _nutritionReviewTasks;
   late final _nutritionAutoSaveManager =
       widget.nutritionAutoSaveManager ?? NutritionRecallAutoSaveManager();
   static const _nutritionRetryDelay = Duration(minutes: 5);
@@ -91,6 +95,65 @@ class _DashboardScreenState()
   bool get showNextDay =>
       (isDebugMode || context.read<AppState>().isPreview) &&
       !subject!.completedStudy;
+
+  NutritionRecallAutoSaveManager get _nutritionHistoryDrafts =>
+      context.read<AppState>().previewNutritionDrafts ??
+      _nutritionAutoSaveManager;
+
+  void _refreshSchedule() {
+    final now = DateTime.now();
+    scheduleToday = subject?.scheduleFor(now);
+    _refreshNutritionReview(now);
+  }
+
+  void _refreshNutritionReview(DateTime now) {
+    _nutritionReviewTasks = null;
+    final activeSubject = subject;
+    if (activeSubject == null || activeSubject.completedStudy) return;
+    final studyDay = activeSubject.getNutritionStudyDayFor(now);
+    if (studyDay <= 0) return;
+
+    final scheduledIds = scheduleToday!.map((item) => item.task.id).toSet();
+    final candidates = activeSubject.study.observations
+        .whereType<NutritionTask>()
+        .where((task) => !scheduledIds.contains(task.id))
+        .toList();
+    if (candidates.isEmpty) return;
+
+    _nutritionReviewTasks =
+        loadNutritionRecallRecords(
+          subject: activeSubject,
+          autoSaveManager: _nutritionHistoryDrafts,
+          showLocalDraftsSeparately: true,
+          now: now,
+        ).then(
+          (records) => [
+            for (final task in candidates)
+              if (records.any((record) => record.canEdit(task, studyDay))) task,
+          ],
+        );
+  }
+
+  Future<void> _openNutritionReview(NutritionTask task) async {
+    final activeSubject = subject!;
+    await Navigator.of(context).push(
+      NutritionHistoryScreen.route(
+        subject: activeSubject,
+        task: task,
+        autoSaveManager: _nutritionHistoryDrafts,
+        onOpenRecall: (record) async {
+          if (!mounted || !identical(subject, activeSubject)) return;
+          await NutritionTaskWidget.openHistoricalRecall(
+            context,
+            subject: activeSubject,
+            task: task,
+            record: record,
+          );
+        },
+      ),
+    );
+    if (mounted) setState(_refreshSchedule);
+  }
 
   Future<void> _submitPendingNutritionRecalls() async {
     final currentSubject = subject;
@@ -118,7 +181,10 @@ class _DashboardScreenState()
         trackedPreview: appState.isPreview,
       );
       if (!mounted || subject?.id != currentSubject.id) return;
-      setState(() => _nutritionRetryNeeded = needsRetry);
+      setState(() {
+        _nutritionRetryNeeded = needsRetry;
+        _refreshNutritionReview(DateTime.now());
+      });
       if (needsRetry) _scheduleNutritionRetry();
     } catch (e) {
       StudyULogger.error('Failed to auto-submit pending nutrition recalls: $e');
@@ -168,7 +234,7 @@ class _DashboardScreenState()
     _midnightSubmitTimer = Timer(nextMidnight.difference(now), () {
       if (!mounted) return;
       final current = DateTime.now();
-      setState(() => scheduleToday = subject?.scheduleFor(current));
+      setState(_refreshSchedule);
       _scheduleMidnightSubmitTimer();
       if (!utc.isSameDate(current)) unawaited(_submitPendingNutritionRecalls());
     });
@@ -210,9 +276,7 @@ class _DashboardScreenState()
     switch (state) {
       case AppLifecycleState.resumed:
         if (subject != null && _studyIsAvailable) {
-          setState(() {
-            scheduleToday = subject!.scheduleFor(DateTime.now());
-          });
+          setState(_refreshSchedule);
           unawaited(_submitPendingNutritionRecalls());
           _scheduleMidnightSubmitTimer();
           unawaited(_startDashboardShowcaseIfNeeded());
@@ -237,7 +301,7 @@ class _DashboardScreenState()
         _nutritionRetryNeeded = false;
       }
 
-      scheduleToday = subject!.scheduleFor(DateTime.now());
+      _refreshSchedule();
       _scheduleMidnightSubmitTimer();
 
       if (!_hasCheckedPendingRecalls &&
@@ -553,9 +617,7 @@ class _DashboardScreenState()
                     }
 
                     if (!mounted) return;
-                    setState(() {
-                      scheduleToday = subject!.scheduleFor(DateTime.now());
-                    });
+                    setState(_refreshSchedule);
                     await _submitPendingNutritionRecalls();
                     _scheduleMidnightSubmitTimer();
                     unawaited(_startDashboardShowcaseIfNeeded());
@@ -665,6 +727,40 @@ class _DashboardScreenState()
       return TaskOverview(
         subject: subject,
         scheduleToday: scheduleToday,
+        afterTodayTasks: _nutritionReviewTasks == null
+            ? null
+            : FutureBuilder<List<NutritionTask>>(
+                future: _nutritionReviewTasks,
+                builder: (context, snapshot) {
+                  final tasks = snapshot.data;
+                  if (snapshot.connectionState != ConnectionState.done ||
+                      tasks == null ||
+                      tasks.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final l10n = AppLocalizations.of(context)!;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Column(
+                      children: [
+                        const Divider(),
+                        for (final task in tasks)
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.restaurant_outlined),
+                              title: Text(l10n.nutrition_review_previous_day),
+                              subtitle: Text(
+                                task.title ?? l10n.nutrition_tracking,
+                              ),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () => _openNutritionReview(task),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
         interventionIcon: subject!.getInterventionForDate(DateTime.now())?.icon,
         progressShowcaseKey: _progressShowcaseKey,
         currentInterventionShowcaseKey: _currentInterventionShowcaseKey,

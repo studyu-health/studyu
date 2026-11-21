@@ -5994,6 +5994,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete this draft from this device? This cannot be undone.'**
   String get nutrition_history_discard_expired_draft;
+
+  /// No description provided for @nutrition_review_previous_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Review previous day’s nutrition'**
+  String get nutrition_review_previous_day;
 }
 
 class _AppLocalizationsDelegate

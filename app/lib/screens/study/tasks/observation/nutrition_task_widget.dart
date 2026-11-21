@@ -71,22 +71,16 @@ class const NutritionTaskWidget({
     final period = task.schedule.completionPeriods
         .where((period) => period.id == record.periodId)
         .firstOrNull;
-    final target = record.persistenceTarget;
-    final draftCanEdit =
-        record.pending?.progressCompletedAt == null || target != null;
-    final canEdit =
-        draftCanEdit &&
-        isEditableNutritionRecallDay(
-          studyDaySnapshot: record.studyDaySnapshot,
-          currentStudyDay: nutritionStudyDayFor(subject, DateTime.now()),
-          hasUnambiguousPeriod: period != null,
-        );
+    final canEdit = record.canEdit(
+      task,
+      nutritionStudyDayFor(subject, DateTime.now()),
+    );
     await Navigator.of(context).push(
       route(
         existingRecall: record.recall,
         task: task,
         completionPeriod: period,
-        persistenceTarget: target,
+        persistenceTarget: record.persistenceTarget,
         historicalDate: subject.nutritionDateForStudyDay(
           record.studyDaySnapshot,
         ),

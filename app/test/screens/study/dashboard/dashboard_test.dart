@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/screens/study/dashboard/dashboard.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
+import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
@@ -21,6 +23,7 @@ Widget _dashboardWith(
   bool trackedPreview = false,
   DateTime? startedAt,
   NutritionTask? nutritionTask,
+  StudySchedule? studySchedule,
   NutritionRecallAutoSaveManager? autoSaveManager,
 }) {
   final study = Study('study', 'user')
@@ -36,6 +39,7 @@ Widget _dashboardWith(
   }
 
   if (nutritionTask != null) study.observations = [nutritionTask];
+  if (studySchedule != null) study.schedule = studySchedule;
   final subject = _DashboardStudySubject(
     study,
     study.interventions.map((intervention) => intervention.id).toList(),
@@ -174,6 +178,123 @@ void main() {
     expect(find.text('Report history'), findsOneWidget);
     expect(find.text('History'), findsNothing);
   });
+
+  for (final saved in [true, false]) {
+    final entryType = saved ? 'saved entry' : 'local draft';
+    testWidgets('corrects a $entryType across an intervention change', (
+      tester,
+    ) async {
+      final now = DateTime.now().toUtc();
+      final task = NutritionTask.withId()
+        ..title = 'Nutrition diary'
+        ..trackWaterIntake = true
+        ..scheduleRule = TaskScheduleRule.forSpecificDays([1, 2]);
+      SharedPreferences.setMockInitialValues({
+        'nutrition_instructions_shown_${task.id}': true,
+      });
+      await tester.pumpWidget(
+        _dashboardWith(
+          2,
+          startedAt: DateTime.utc(now.year, now.month, now.day - 2),
+          nutritionTask: task,
+          studySchedule: StudySchedule()
+            ..includeBaseline = false
+            ..phaseDuration = 3,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final appState = tester
+          .element(find.byType(DashboardScreen))
+          .read<AppState>();
+      final subject = appState.activeSubject!;
+      final drafts = appState.previewNutritionDrafts!;
+      final intervention = subject.getNutritionInterventionForStudyDay(2)!;
+      final period = task.schedule.completionPeriods.single;
+      final date = subject.nutritionDateForStudyDay(2);
+      final recall = DailyRecall.withId(
+        date: date,
+        recallMode: RecallMode.realtimeRecord,
+        entryCompletedAt: saved ? date : null,
+        studyDaySnapshot: 2,
+        meals: [],
+      );
+      if (saved) {
+        subject.progress.add(
+          SubjectProgress(
+            subjectId: subject.id,
+            interventionId: intervention.id,
+            taskId: task.id,
+            resultType: 'DailyRecall',
+            result: Result<DailyRecall>.app(
+              type: 'DailyRecall',
+              periodId: period.id,
+              result: recall,
+            ),
+          )..completedAt = date,
+        );
+      } else {
+        await drafts.saveRecall(
+          recall: recall,
+          subjectId: subject.id,
+          taskId: task.id,
+          interventionId: intervention.id,
+          periodId: period.id,
+          studyDaySnapshot: 2,
+        );
+      }
+
+      final review = find.text('Review previous day’s nutrition');
+      expect(review, findsNothing);
+      await tester.tap(find.text('Next day'));
+      await tester.pumpAndSettle();
+      expect(
+        subject.getNutritionInterventionForStudyDay(3)?.id,
+        isNot(intervention.id),
+      );
+      expect(subject.scheduleFor(now), isEmpty);
+      await tester.tap(review);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('No foods logged'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<NutritionTaskWidget>(find.byType(NutritionTaskWidget))
+            .readOnly,
+        isFalse,
+      );
+
+      final addCup = find.byTooltip('Add a cup of water');
+      await tester.ensureVisible(addCup);
+      await tester.tap(addCup);
+      await tester.pumpAndSettle();
+      final corrected = (await drafts.scanPendingRecalls(subject.id)).single;
+      expect(corrected.recall.waterIntakeMl, 250);
+      expect(corrected.studyDaySnapshot, 2);
+      expect(corrected.interventionId, intervention.id);
+      expect(corrected.periodId, period.id);
+      expect(
+        corrected.progressCompletedAt,
+        saved ? subject.progress.single.completedAt : null,
+      );
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(review, findsOneWidget);
+
+      task.scheduleRule = TaskScheduleRule.forSpecificDays([1, 2, 3]);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(review, findsNothing);
+      expect(subject.scheduleFor(now).single.task.id, task.id);
+
+      await tester.tap(find.text('Next day'));
+      await tester.pumpAndSettle();
+      expect(review, findsNothing);
+    });
+  }
 }
 
 class _DashboardStudySubject(

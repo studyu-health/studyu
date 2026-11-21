@@ -3410,4 +3410,7 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nutrition_history_discard_expired_draft =>
       'Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get nutrition_review_previous_day => 'Ernährung vom Vortag prüfen';
 }

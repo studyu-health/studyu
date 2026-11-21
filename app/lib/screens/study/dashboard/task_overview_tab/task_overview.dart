@@ -16,6 +16,7 @@ import 'package:studyu_flutter_common/studyu_flutter_common.dart';
 class const TaskOverview({
   required final StudySubject? subject,
   required final List<TaskInstance>? scheduleToday,
+  final Widget? afterTodayTasks,
   super.key,
   final String? interventionIcon,
   final GlobalKey? progressShowcaseKey,
@@ -154,7 +155,11 @@ class _TaskOverviewState() extends State<TaskOverview> {
           ),
         ),
         // Todo: find good way to calculate duration of intervention and display it
-        Expanded(child: ListView(children: [...buildScheduleToday(context)])),
+        Expanded(
+          child: ListView(
+            children: [...buildScheduleToday(context), ?widget.afterTodayTasks],
+          ),
+        ),
       ],
     );
   }

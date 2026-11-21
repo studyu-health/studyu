@@ -1272,5 +1272,6 @@
   "nutrition_recall_view_saved": "Gespeicherte Version anzeigen",
   "nutrition_history_local_draft": "Entwurf auf diesem Gerät gespeichert",
   "nutrition_history_expired_draft": "Die Frist zum Synchronisieren ist abgelaufen. Dieser Entwurf liegt nur auf diesem Gerät.",
-  "nutrition_history_discard_expired_draft": "Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden."
+  "nutrition_history_discard_expired_draft": "Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden.",
+  "nutrition_review_previous_day": "Ernährung vom Vortag prüfen"
 }

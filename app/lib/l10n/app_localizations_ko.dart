@@ -3299,4 +3299,7 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get nutrition_history_discard_expired_draft =>
       '이 기기에서 이 초안을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
+
+  @override
+  String get nutrition_review_previous_day => '이전 연구일의 식사 기록 확인';
 }
