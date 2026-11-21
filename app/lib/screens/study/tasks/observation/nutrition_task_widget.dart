@@ -466,6 +466,11 @@ class _NutritionTaskWidgetState()
               _NutritionTab.statistics => l10n.nutrition_statistics,
               _NutritionTab.library => l10n.food_library,
             },
+      style: _isHistoricalMode
+          ? null
+          : TextStyle(
+              fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+            ),
     ),
     actions: _isHistoricalMode
         ? const []
