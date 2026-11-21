@@ -63,7 +63,7 @@ class const FoodCreationButton({
       padding: const EdgeInsetsDirectional.only(end: 8),
       child: NutritionAddButton(
         onPressed: () => _create(context),
-        filled: filled,
+        filled: filled && onCreateMeal != null,
         label: onCreateMeal == null ? l10n.add_food_action : l10n.create,
       ),
     );
