@@ -488,6 +488,7 @@ void main() {
       expect(find.byIcon(Icons.history_outlined), findsNothing);
       expect(find.byIcon(Icons.help_outline), findsNothing);
       expect(find.text('Log meal'), findsNothing);
+      expect(find.byTooltip('More options'), findsNothing);
       expect(find.text('600 mL'), findsOneWidget);
       expect(find.byTooltip('Add a cup of water'), findsNothing);
       expect(find.byTooltip('Remove a cup of water'), findsNothing);
@@ -1472,18 +1473,13 @@ void main() {
 
     await tester.tap(find.byTooltip('More options'));
     await tester.pumpAndSettle();
-    final actions = find.byType(BottomSheet);
-    final deleteAction = find.descendant(
-      of: actions,
-      matching: find.text('Delete'),
-    );
+    final deleteAction = find.text('Delete');
     expect(
-      find.descendant(of: actions, matching: find.text('Breakfast')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: actions, matching: find.text('Edit')),
-      findsOneWidget,
+      tester.getTopLeft(find.text('Edit')).dy,
+      closeTo(
+        tester.getBottomLeft(find.byTooltip('More options')).dy,
+        kMinInteractiveDimension,
+      ),
     );
     await tester.tap(deleteAction);
     await tester.pumpAndSettle();
@@ -1521,7 +1517,15 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('Apple'));
+    expect(find.byTooltip('More options'), findsNWidgets(2));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey('meal-breakfast')),
+        matching: find.byTooltip('More options'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Delete meal'));
     await tester.tap(find.text('Delete meal'));

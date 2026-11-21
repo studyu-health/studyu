@@ -12,7 +12,7 @@ import 'package:studyu_app/screens/study/nutrition/food_library_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
-import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_action_menu.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_help_screen.dart';
@@ -1384,11 +1384,6 @@ class const _MealTimelineGroupHeader({
   }
 }
 
-enum _MealTimelineAction() {
-  edit,
-  delete,
-}
-
 class const _MealTimelineCard({
   super.key,
   required final MealLog meal,
@@ -1397,38 +1392,6 @@ class const _MealTimelineCard({
   final VoidCallback? onSaveTemplate,
   final VoidCallback? onDelete,
 }) extends StatelessWidget {
-  Future<void> _showActions(BuildContext context, String subtitle) async {
-    final l10n = AppLocalizations.of(context)!;
-    final action = await showNutritionActionSheet<_MealTimelineAction>(
-      context,
-      title: categoryLabel,
-      subtitle: subtitle,
-      actions: [
-        NutritionSheetAction(
-          value: _MealTimelineAction.edit,
-          label: l10n.edit,
-          icon: Icons.edit_outlined,
-        ),
-        if (onDelete != null)
-          NutritionSheetAction(
-            value: _MealTimelineAction.delete,
-            label: l10n.delete,
-            icon: Icons.delete_outline,
-            isDestructive: true,
-          ),
-      ],
-    );
-    if (!context.mounted) return;
-    switch (action) {
-      case _MealTimelineAction.edit:
-        onTap?.call();
-      case _MealTimelineAction.delete:
-        onDelete?.call();
-      case null:
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1515,11 +1478,22 @@ class const _MealTimelineCard({
                     ),
                   ),
                 ),
-                if (onTap != null)
-                  IconButton(
-                    icon: const Icon(Icons.more_vert, size: 20),
-                    tooltip: l10n.more_options,
-                    onPressed: () => _showActions(context, subtitle),
+                if (onTap case final edit?)
+                  NutritionActionMenu(
+                    itemBuilder: (context) => [
+                      nutritionActionMenuItem(
+                        l10n.edit,
+                        Icons.edit_outlined,
+                        edit,
+                      ),
+                      if (onDelete case final delete?)
+                        nutritionActionMenuItem(
+                          l10n.delete,
+                          Icons.delete_outline,
+                          delete,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                    ],
                   ),
               ],
             ),

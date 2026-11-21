@@ -10,6 +10,7 @@ import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_action_menu.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
@@ -593,23 +594,23 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         ? l10n.nutrition_edit_saved_meal
         : l10n.edit_food_title;
 
-    return PopupMenuButton<VoidCallback>(
-      icon: const Icon(Icons.more_vert, size: 20),
-      tooltip: l10n.more_options,
-      position: PopupMenuPosition.under,
+    return NutritionActionMenu(
       enabled: !_isSaving,
-      onSelected: (action) => action(),
       itemBuilder: (context) {
         if (!_revalidateHistoricalEligibility()) return [];
         return [
-          _foodMenuItem(editLabel, Icons.edit_outlined, () => _editFood(food)),
+          nutritionActionMenuItem(
+            editLabel,
+            Icons.edit_outlined,
+            () => _editFood(food),
+          ),
           if (isHistorical)
-            _foodMenuItem(
+            nutritionActionMenuItem(
               l10n.edit_food_definition,
               Icons.sync_outlined,
               () => _editFood(food, editReusableDefinition: true),
             ),
-          _foodMenuItem(
+          nutritionActionMenuItem(
             l10n.remove_from_meal,
             Icons.delete_outline,
             () => _removeFood(food),
@@ -619,24 +620,6 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       },
     );
   }
-
-  PopupMenuItem<VoidCallback> _foodMenuItem(
-    String label,
-    IconData icon,
-    VoidCallback action, {
-    Color? color,
-  }) => PopupMenuItem(
-    value: action,
-    child: Row(
-      spacing: 8,
-      children: [
-        Icon(icon, color: color),
-        Flexible(
-          child: Text(label, style: TextStyle(color: color)),
-        ),
-      ],
-    ),
-  );
 
   MealLog _buildMeal({bool normalizeSkipped = false}) {
     final clearDetails = normalizeSkipped && _isSkipped;
