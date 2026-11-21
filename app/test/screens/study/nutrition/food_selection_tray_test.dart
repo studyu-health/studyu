@@ -19,7 +19,7 @@ import 'fake_nutrition_food_repository.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('search header Create opens meal creation from the basket', (
+  testWidgets('the Create popup opens meal creation from the basket', (
     tester,
   ) async {
     _setSurfaceSize(tester);
@@ -33,9 +33,27 @@ void main() {
       matching: find.text('Create'),
     );
 
+    final createFood = find.text('Create food');
+    final createMeal = find.text('Create meal');
     await tester.tap(create);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Create meal'));
+    final menuPosition = tester.getTopRight(createFood);
+    final toolbar = tester.getRect(find.byType(AppBar));
+    expect(menuPosition.dy, greaterThan(tester.getBottomLeft(create).dy));
+    expect(menuPosition.dy, lessThan(toolbar.bottom + kToolbarHeight));
+    expect(find.byType(BottomSheet), findsNothing);
+
+    await tester.tapAt(toolbar.topLeft + const Offset(8, 8));
+    await tester.pumpAndSettle();
+    expect(createFood, findsNothing);
+    expect(
+      find.byKey(const ValueKey('selection-expanded-list')),
+      findsOneWidget,
+    );
+
+    await tester.tap(create);
+    await tester.pumpAndSettle();
+    await tester.tap(createMeal);
     await tester.pumpAndSettle();
     expect(find.byType(MealCreatorScreen), findsOneWidget);
 

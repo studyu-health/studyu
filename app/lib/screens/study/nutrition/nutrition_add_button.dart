@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
-import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
-
-enum _FoodCreationAction() {
-  food,
-  meal,
-}
 
 class const FoodCreationButton({
   required final VoidCallback onCreateFood,
@@ -21,33 +15,46 @@ class const FoodCreationButton({
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final action = await showNutritionActionSheet<_FoodCreationAction>(
-      context,
-      title: l10n.create,
-      actions: [
-        NutritionSheetAction(
-          value: _FoodCreationAction.food,
-          label: l10n.add_food_action,
-          icon: Icons.restaurant_outlined,
+    final trigger = context.findRenderObject()! as RenderBox;
+    final overlay =
+        Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final anchor = MatrixUtils.transformRect(
+      trigger.getTransformTo(overlay),
+      Offset.zero & trigger.size,
+    );
+    final action = await showMenu<VoidCallback>(
+      context: context,
+      semanticLabel: l10n.create,
+      position: RelativeRect.fromSize(
+        Rect.fromLTRB(anchor.left, anchor.bottom, anchor.right, anchor.bottom),
+        overlay.size,
+      ),
+      items: [
+        _menuItem(
+          onCreateFood,
+          Icons.restaurant_outlined,
+          l10n.add_food_action,
         ),
-        NutritionSheetAction(
-          value: _FoodCreationAction.meal,
-          label: l10n.create_meal,
-          icon: Icons.restaurant_menu_outlined,
-        ),
+        _menuItem(createMeal, Icons.restaurant_menu_outlined, l10n.create_meal),
       ],
     );
-    if (!context.mounted) return;
-
-    switch (action) {
-      case _FoodCreationAction.food:
-        onCreateFood();
-      case _FoodCreationAction.meal:
-        createMeal();
-      case null:
-        break;
-    }
+    if (context.mounted) action?.call();
   }
+
+  PopupMenuItem<VoidCallback> _menuItem(
+    VoidCallback action,
+    IconData icon,
+    String label,
+  ) => PopupMenuItem(
+    value: action,
+    child: Row(
+      spacing: 8,
+      children: [
+        Icon(icon),
+        Flexible(child: Text(label)),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
