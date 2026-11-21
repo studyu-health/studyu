@@ -574,5 +574,7 @@
   "food_library_empty": "표시할 음식이나 식사가 없습니다.",
   "nutrition_statistics_empty": "이 기간의 영양 데이터가 없습니다.",
   "nutrition_log_again": "다시 기록",
-  "nutrition_choose_recent_meal": "최근 식사 선택"
+  "nutrition_choose_recent_meal": "최근 식사 선택",
+  "nutrition_tracking": "식사 일지",
+  "nutrition_diary_tab": "일지"
 }

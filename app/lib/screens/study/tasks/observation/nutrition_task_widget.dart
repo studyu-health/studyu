@@ -400,7 +400,7 @@ class _NutritionTaskWidgetState()
                         NavigationDestination(
                           icon: const Icon(Icons.today_outlined),
                           selectedIcon: const Icon(Icons.today),
-                          label: l10n.today,
+                          label: l10n.nutrition_diary_tab,
                         ),
                         if (_showStatistics)
                           NavigationDestination(

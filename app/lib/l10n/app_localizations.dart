@@ -5260,7 +5260,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_tracking.
   ///
   /// In en, this message translates to:
-  /// **'Nutrition tracking'**
+  /// **'Food diary'**
   String get nutrition_tracking;
 
   /// No description provided for @nutrition_statistics.
@@ -6006,6 +6006,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a recent meal'**
   String get nutrition_choose_recent_meal;
+
+  /// No description provided for @nutrition_diary_tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary'**
+  String get nutrition_diary_tab;
 }
 
 class _AppLocalizationsDelegate

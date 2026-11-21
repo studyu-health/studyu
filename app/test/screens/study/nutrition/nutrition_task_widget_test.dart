@@ -869,9 +869,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Energy by study day'), findsOneWidget);
       await tester.tap(
-        find.descendant(of: navigation, matching: find.text('Today')),
+        find.descendant(of: navigation, matching: find.text('Diary')),
       );
       await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.text('Food diary'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Daily summary'), findsNothing);
 
       await tester.tap(statistics);
@@ -920,7 +927,7 @@ void main() {
     );
   });
 
-  for (final tab in ['Today', 'Statistics', 'Library']) {
+  for (final tab in ['Diary', 'Statistics', 'Library']) {
     testWidgets('Exit closes $tab without returning a completion result', (
       tester,
     ) async {

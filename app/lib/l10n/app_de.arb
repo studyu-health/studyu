@@ -1063,7 +1063,7 @@
     }
   },
   "today": "Heute",
-  "nutrition_tracking": "Ernährungserfassung",
+  "nutrition_tracking": "Ernährungstagebuch",
   "nutrition_statistics": "Statistik",
   "nutrition_days_recorded": "{recorded} von {total} Tagen erfasst",
   "@nutrition_days_recorded": {
@@ -1274,5 +1274,6 @@
   "nutrition_review_previous_day": "Ernährung vom Vortag prüfen",
   "food_library_empty": "In dieser Ansicht gibt es keine Lebensmittel oder Mahlzeiten.",
   "nutrition_log_again": "Erneut erfassen",
-  "nutrition_choose_recent_meal": "Eine frühere Mahlzeit auswählen"
+  "nutrition_choose_recent_meal": "Eine frühere Mahlzeit auswählen",
+  "nutrition_diary_tab": "Tagebuch"
 }

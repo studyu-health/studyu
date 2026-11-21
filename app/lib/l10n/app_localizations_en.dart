@@ -2912,7 +2912,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leave_anyway => 'Leave anyway';
 
   @override
-  String get nutrition_tracking => 'Nutrition tracking';
+  String get nutrition_tracking => 'Food diary';
 
   @override
   String get nutrition_statistics => 'Statistics';
@@ -3367,4 +3367,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_choose_recent_meal => 'Choose a recent meal';
+
+  @override
+  String get nutrition_diary_tab => 'Diary';
 }

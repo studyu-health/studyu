@@ -1275,7 +1275,7 @@
     }
   },
   "leave_anyway": "Leave anyway",
-  "nutrition_tracking": "Nutrition tracking",
+  "nutrition_tracking": "Food diary",
   "nutrition_statistics": "Statistics",
   "nutrition_days_recorded": "{recorded} of {total} days recorded",
   "@nutrition_days_recorded": {
@@ -1489,5 +1489,6 @@
   "nutrition_review_previous_day": "Review previous day’s nutrition",
   "food_library_empty": "There are no foods or meals to show.",
   "nutrition_log_again": "Log again",
-  "nutrition_choose_recent_meal": "Choose a recent meal"
+  "nutrition_choose_recent_meal": "Choose a recent meal",
+  "nutrition_diary_tab": "Diary"
 }
