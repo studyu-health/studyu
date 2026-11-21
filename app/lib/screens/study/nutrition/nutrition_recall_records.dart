@@ -42,6 +42,14 @@ class const NutritionRecallRecord({
   }
 }
 
+/// Returns completed recalls from subject progress, newest study day first.
+List<NutritionRecallRecord> completedNutritionRecallRecords({
+  required StudySubject subject,
+  required String taskId,
+}) =>
+    _completedRecordsByIdentity(subject, taskId).values.toList()
+      ..sort(_compareRecords);
+
 /// Loads remote recalls and local drafts for one task or all tasks.
 ///
 /// Statistics use server recalls and unsubmitted entries from the current day.
@@ -54,36 +62,7 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
   DateTime? now,
 }) async {
   final todayStudyDay = nutritionStudyDayFor(subject, now ?? DateTime.now());
-  final records = <String, NutritionRecallRecord>{};
-
-  for (final progress in subject.progress) {
-    if ((taskId != null && progress.taskId != taskId) ||
-        progress.resultType != 'DailyRecall') {
-      continue;
-    }
-    final result = progress.result.result;
-    if (result is! DailyRecall ||
-        result.entryCompletedAt == null ||
-        progress.completedAt == null) {
-      continue;
-    }
-    final studyDay = result.studyDaySnapshot;
-    final periodId = progress.result.periodId;
-    if (studyDay == null || periodId == null) continue;
-    final record = NutritionRecallRecord(
-      recall: result,
-      taskId: progress.taskId,
-      periodId: periodId,
-      interventionId: progress.interventionId,
-      studyDaySnapshot: studyDay,
-      progress: progress,
-    );
-    final identity = _recordIdentity(record.taskId, record.periodId, studyDay);
-    final existing = records[identity];
-    if (existing == null || _isNewerRemote(record, existing)) {
-      records[identity] = record;
-    }
-  }
+  final records = _completedRecordsByIdentity(subject, taskId);
 
   final pending = await (autoSaveManager ?? NutritionRecallAutoSaveManager())
       .scanPendingRecalls(subject.id);
@@ -122,16 +101,52 @@ Future<List<NutritionRecallRecord>> loadNutritionRecallRecords({
     }
   }
 
-  final result = records.values.toList()
-    ..sort((left, right) {
-      final byDay = right.studyDaySnapshot.compareTo(left.studyDaySnapshot);
-      if (byDay != 0) return byDay;
-      final leftIsDraft = left.pending != null;
-      final rightIsDraft = right.pending != null;
-      if (leftIsDraft != rightIsDraft) return leftIsDraft ? 1 : -1;
-      return left.periodId.compareTo(right.periodId);
-    });
-  return result;
+  return records.values.toList()..sort(_compareRecords);
+}
+
+Map<String, NutritionRecallRecord> _completedRecordsByIdentity(
+  StudySubject subject,
+  String? taskId,
+) {
+  final records = <String, NutritionRecallRecord>{};
+  for (final progress in subject.progress) {
+    if ((taskId != null && progress.taskId != taskId) ||
+        progress.resultType != 'DailyRecall') {
+      continue;
+    }
+    final result = progress.result.result;
+    if (result is! DailyRecall ||
+        result.entryCompletedAt == null ||
+        progress.completedAt == null) {
+      continue;
+    }
+    final studyDay = result.studyDaySnapshot;
+    final periodId = progress.result.periodId;
+    if (studyDay == null || periodId == null) continue;
+    final record = NutritionRecallRecord(
+      recall: result,
+      taskId: progress.taskId,
+      periodId: periodId,
+      interventionId: progress.interventionId,
+      studyDaySnapshot: studyDay,
+      progress: progress,
+    );
+    final identity = _recordIdentity(record.taskId, record.periodId, studyDay);
+    final existing = records[identity];
+    if (existing == null || _isNewerRemote(record, existing)) {
+      records[identity] = record;
+    }
+  }
+  return records;
+}
+
+int _compareRecords(NutritionRecallRecord left, NutritionRecallRecord right) {
+  final byDay = right.studyDaySnapshot.compareTo(left.studyDaySnapshot);
+  if (byDay != 0) return byDay;
+  final leftIsDraft = left.pending != null;
+  final rightIsDraft = right.pending != null;
+  if (leftIsDraft != rightIsDraft) return leftIsDraft ? 1 : -1;
+  return left.periodId.compareTo(right.periodId);
 }
 
 bool isEditableNutritionRecallDay({
