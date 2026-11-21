@@ -30,6 +30,9 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets('food draft asks before leaving', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(
       testApp(
         Builder(
@@ -53,13 +56,23 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Discard unsaved changes?'), findsOneWidget);
-    await tester.tap(find.text('Continue editing'));
+    final continueEditing = find.widgetWithText(
+      TextButton,
+      l10n.continue_editing,
+    );
+    final discard = find.widgetWithText(FilledButton, l10n.discard_changes);
+    final continueCenter = tester.getCenter(continueEditing);
+    final discardCenter = tester.getCenter(discard);
+    expect(continueCenter.dy, closeTo(discardCenter.dy, 1));
+    expect(continueCenter.dx, lessThan(discardCenter.dx));
+
+    await tester.tap(continueEditing);
     await tester.pumpAndSettle();
     expect(find.byType(FoodEntryScreen), findsOneWidget);
 
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Discard changes'));
+    await tester.tap(discard);
     await tester.pumpAndSettle();
     expect(find.byType(FoodEntryScreen), findsNothing);
   });

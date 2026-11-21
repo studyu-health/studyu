@@ -19,6 +19,7 @@ Future<UnsavedChangesAction?> showUnsavedChangesDialog(
     cancelLabel: continueLabel,
     confirmLabel: discardLabel,
     isDestructive: true,
+    sideBySideActions: true,
   );
   return discard ? UnsavedChangesAction.discard : null;
 }
