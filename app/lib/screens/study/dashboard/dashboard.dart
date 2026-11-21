@@ -17,6 +17,7 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/theme.dart' as app_theme;
 import 'package:studyu_app/util/dashboard_showcase.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/util/debug_screen.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_core/core.dart';
@@ -90,7 +91,8 @@ class _DashboardScreenState()
   bool get _studyIsAvailable => isStudyAvailableForTesting(subject!.study);
 
   bool get showNextDay =>
-      context.read<AppState>().isPreview && !subject!.completedStudy;
+      (isDebugMode || context.read<AppState>().isPreview) &&
+      !subject!.completedStudy;
 
   Future<void> _submitPendingNutritionRecalls() async {
     final currentSubject = subject;

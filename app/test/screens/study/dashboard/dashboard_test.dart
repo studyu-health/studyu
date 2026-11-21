@@ -10,6 +10,7 @@ import 'package:studyu_app/screens/study/dashboard/dashboard.dart';
 import 'package:studyu_app/screens/study/dashboard/task_overview_tab/task_overview.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_history_screen.dart';
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
+import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_core/core.dart';
@@ -42,6 +43,7 @@ Widget _dashboardWith(
   final subject = _DashboardStudySubject(
     study,
     study.interventions.map((intervention) => intervention.id).toList(),
+    expectPersistedAdvance: preview && trackedPreview,
   )..startedAt = startedAt ?? DateTime.now().add(const Duration(days: 1));
   if (nutritionTask != null && historicalRecall != null) {
     final progress = SubjectProgress(
@@ -124,6 +126,33 @@ void main() {
     expect(manager.studyDays, [1, 2]);
   });
 
+  testWidgets('advances the study day in debug without preview', (
+    tester,
+  ) async {
+    await DashboardShowcaseStorage.markCompleted();
+    final startedAt = DateTime.now().subtract(const Duration(days: 1));
+    await tester.pumpWidget(
+      _dashboardWith(
+        2,
+        preview: false,
+        startedAt: startedAt,
+        autoSaveManager: _TestNutritionAutoSaveManager(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Next day'));
+    await tester.pumpAndSettle();
+
+    final appState = tester
+        .element(find.byType(DashboardScreen))
+        .read<AppState>();
+    expect(
+      appState.activeSubject!.startedAt,
+      startedAt.subtract(const Duration(days: 1)),
+    );
+  });
+
   testWidgets('study with one intervention stays unavailable despite tasks', (
     tester,
   ) async {
@@ -191,13 +220,16 @@ void main() {
   });
 }
 
-class _DashboardStudySubject(Study study, List<String> selectedInterventionIds)
-    extends StudySubject {
+class _DashboardStudySubject(
+  Study study,
+  List<String> selectedInterventionIds, {
+  required final bool expectPersistedAdvance,
+}) extends StudySubject {
   this : super.fromStudy(study, 'user', selectedInterventionIds, null);
 
   @override
   Future<void> setStartDateBackBy({required int days, bool persist = true}) {
-    expect(persist, isTrue);
+    expect(persist, expectPersistedAdvance);
     return super.setStartDateBackBy(days: days, persist: false);
   }
 }
