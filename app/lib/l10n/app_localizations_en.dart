@@ -3163,9 +3163,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Some foods in this meal have incomplete details. Add foods with complete details and try again.';
 
   @override
-  String get nutrition_saved_meals_filter => 'Saved meals';
-
-  @override
   String nutrition_add_food_to_meal(Object meal) {
     return 'Add food to $meal';
   }
@@ -3412,4 +3409,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_select_time_to_save => 'Select a time to save';
+
+  @override
+  String get nutrition_library_available_filters => 'Available filters';
+
+  @override
+  String get nutrition_library_selected_filters => 'Selected filters';
+
+  @override
+  String get nutrition_library_created_by_me => 'Created by me';
+
+  @override
+  String get nutrition_library_remove_filter => 'Remove filter';
 }

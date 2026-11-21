@@ -70,11 +70,14 @@ class _FoodLibraryState() extends State<FoodLibrary> {
   FoodSearchViewModel? _ownedExternalViewModel;
   FoodSearchViewModel? _externalViewModel;
   TemplateFilter _filter = TemplateFilter.all;
+  bool _createdByMe = false;
   bool _copyInProgress = false;
   FoodEntry? _pendingCopyDraft;
   NutritionPhotoChange? _pendingCopyPhoto;
 
   bool get _externalEnabled => widget.includeExternalLibrary;
+  bool get _canSearchExternal =>
+      !_createdByMe && _filter != TemplateFilter.meals;
 
   @override
   void initState() {
@@ -156,15 +159,21 @@ class _FoodLibraryState() extends State<FoodLibrary> {
 
   void _onSearchChanged(String value) {
     setState(() {});
-    _externalViewModel?.search(_filter == TemplateFilter.meals ? '' : value);
+    if (_canSearchExternal) _externalViewModel?.search(value);
   }
 
-  void _onFilterChanged(TemplateFilter filter) {
-    if (filter == _filter) return;
-    setState(() => _filter = filter);
-    _externalViewModel?.search(
-      filter == TemplateFilter.meals ? '' : _searchController.text,
-    );
+  void _setFilters(TemplateFilter filter, bool createdByMe) {
+    if (filter == _filter && createdByMe == _createdByMe) return;
+    final couldSearchExternal = _canSearchExternal;
+    setState(() {
+      _filter = filter;
+      _createdByMe = createdByMe;
+    });
+    if (couldSearchExternal != _canSearchExternal) {
+      _externalViewModel?.search(
+        _canSearchExternal ? _searchController.text : '',
+      );
+    }
   }
 
   Future<void> _scanBarcode() async {
@@ -309,14 +318,23 @@ class _FoodLibraryState() extends State<FoodLibrary> {
         .filterTemplates(_filter, query)
         .where(
           (template) =>
-              widget.allowMeals ||
-              template.prototype.entryType != studyu.FoodEntryType.meal,
+              (widget.allowMeals ||
+                  template.prototype.entryType != studyu.FoodEntryType.meal) &&
+              (!_createdByMe || template.prototype.source == FoodSource.manual),
         )
         .toList();
     final external = _externalViewModel;
     final showExternal =
-        external != null && query.isNotEmpty && _filter != TemplateFilter.meals;
-    final children = <Widget>[];
+        external != null && query.isNotEmpty && _canSearchExternal;
+    final children = <Widget>[
+      _FoodLibraryToolbar(
+        selectedFilter: _filter,
+        createdByMe: _createdByMe,
+        allowMeals: widget.allowMeals,
+        onChanged: _setFilters,
+      ),
+      const SizedBox(height: 8),
+    ];
 
     final showingMeals = _filter == TemplateFilter.meals;
     if (viewModel.error != null) {
@@ -425,15 +443,6 @@ class _FoodLibraryState() extends State<FoodLibrary> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SizedBox(width: double.infinity, child: widget.header),
           ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _FoodLibraryToolbar(
-            selectedFilter: _filter,
-            l10n: l10n,
-            onChanged: _onFilterChanged,
-          ),
-        ),
-        const SizedBox(height: 8),
         Expanded(
           child: NotificationListener<ScrollNotification>(
             onNotification: (notification) {
@@ -699,32 +708,88 @@ class const FoodLibraryItemCard({
 
 class const _FoodLibraryToolbar({
   required final TemplateFilter selectedFilter,
-  required final AppLocalizations l10n,
-  required final ValueChanged<TemplateFilter> onChanged,
+  required final bool createdByMe,
+  required final bool allowMeals,
+  required final void Function(TemplateFilter, bool) onChanged,
 }) extends StatelessWidget {
-  String _label(TemplateFilter filter) => switch (filter) {
-    TemplateFilter.all => l10n.filter_all,
-    TemplateFilter.foods => l10n.filter_foods,
-    TemplateFilter.meals => l10n.nutrition_saved_meals_filter,
-  };
+  String _label(AppLocalizations l10n, TemplateFilter filter) =>
+      switch (filter) {
+        TemplateFilter.all => l10n.filter_all,
+        TemplateFilter.foods => l10n.filter_foods,
+        TemplateFilter.meals => l10n.filter_meals,
+      };
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (final filter in TemplateFilter.values) ...[
+    final l10n = AppLocalizations.of(context)!;
+    final headingStyle = Theme.of(context).textTheme.labelLarge;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.nutrition_library_available_filters,
+            style: headingStyle,
+          ),
+        ),
+        Wrap(
+          spacing: 8,
+          children: [
             FilterChip(
-              selected: selectedFilter == filter,
-              label: Text(_label(filter)),
-              onSelected: (_) => onChanged(filter),
-              visualDensity: VisualDensity.compact,
+              selected: selectedFilter == TemplateFilter.all && !createdByMe,
+              label: Text(l10n.filter_all),
+              onSelected: (_) => onChanged(TemplateFilter.all, false),
             ),
-            const SizedBox(width: 6),
+            for (final filter in [
+              TemplateFilter.foods,
+              if (allowMeals) TemplateFilter.meals,
+            ])
+              FilterChip(
+                selected: selectedFilter == filter,
+                label: Text(_label(l10n, filter)),
+                onSelected: (selected) => onChanged(
+                  selected ? filter : TemplateFilter.all,
+                  createdByMe,
+                ),
+              ),
+            FilterChip(
+              selected: createdByMe,
+              label: Text(l10n.nutrition_library_created_by_me),
+              onSelected: (selected) => onChanged(selectedFilter, selected),
+            ),
           ],
+        ),
+        if (selectedFilter != TemplateFilter.all || createdByMe) ...[
+          const SizedBox(height: 4),
+          Semantics(
+            header: true,
+            child: Text(
+              l10n.nutrition_library_selected_filters,
+              style: headingStyle,
+            ),
+          ),
+          Wrap(
+            spacing: 8,
+            children: [
+              if (selectedFilter != TemplateFilter.all)
+                InputChip(
+                  label: Text(_label(l10n, selectedFilter)),
+                  deleteButtonTooltipMessage:
+                      l10n.nutrition_library_remove_filter,
+                  onDeleted: () => onChanged(TemplateFilter.all, createdByMe),
+                ),
+              if (createdByMe)
+                InputChip(
+                  label: Text(l10n.nutrition_library_created_by_me),
+                  deleteButtonTooltipMessage:
+                      l10n.nutrition_library_remove_filter,
+                  onDeleted: () => onChanged(selectedFilter, false),
+                ),
+            ],
+          ),
         ],
-      ),
+      ],
     );
   }
 }

@@ -3206,9 +3206,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bei einigen Lebensmitteln in dieser Mahlzeit fehlen Angaben. Fügen Sie Lebensmittel mit vollständigen Angaben hinzu.';
 
   @override
-  String get nutrition_saved_meals_filter => 'Gespeicherte Mahlzeiten';
-
-  @override
   String nutrition_add_food_to_meal(Object meal) {
     return 'Lebensmittel zu $meal hinzufügen';
   }
@@ -3461,4 +3458,16 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nutrition_select_time_to_save =>
       'Wählen Sie zum Speichern eine Uhrzeit aus';
+
+  @override
+  String get nutrition_library_available_filters => 'Verfügbare Filter';
+
+  @override
+  String get nutrition_library_selected_filters => 'Ausgewählte Filter';
+
+  @override
+  String get nutrition_library_created_by_me => 'Von mir erstellt';
+
+  @override
+  String get nutrition_library_remove_filter => 'Filter entfernen';
 }

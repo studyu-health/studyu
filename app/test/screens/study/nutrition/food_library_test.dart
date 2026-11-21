@@ -80,10 +80,7 @@ void main() {
     final emptyMessage = find.text(l10n.food_library_empty);
     expect(emptyMessage, findsOneWidget);
 
-    for (final filter in [
-      l10n.nutrition_saved_meals_filter,
-      l10n.filter_foods,
-    ]) {
+    for (final filter in [l10n.filter_meals, l10n.filter_foods]) {
       await tester.tap(find.widgetWithText(FilterChip, filter));
       await tester.pumpAndSettle();
       expect(emptyMessage, findsOneWidget);
@@ -94,6 +91,98 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l10n.external_library), findsOneWidget);
     expect(emptyMessage, findsOneWidget);
+  });
+
+  testWidgets('library combines type and creator filters', (tester) async {
+    final viewModel = TemplateViewModel(
+      userId: 'subject',
+      repository: FakeNutritionFoodRepository([
+        _template(_food('apple', 'Apple jam')),
+        _template(_food('pear', 'Pear jam')),
+        _template(_food('imported', 'Catalog apple')..source = FoodSource.usda),
+        _template(_food('bowl', 'Apple bowl')..entryType = FoodEntryType.meal),
+      ]),
+    );
+    var externalRequests = 0;
+    final search = FoodSearchViewModel(
+      openFoodFactsSearch: ({
+        required query,
+        required page,
+        required pageSize,
+      }) async => const SearchResult(products: []),
+      usdaFoodSearch:
+          ({required query, required page, required pageSize}) async {
+            externalRequests++;
+            return UsdaSearchResponse(
+              totalHits: 1,
+              currentPage: 1,
+              totalPages: 1,
+              foods: [_externalFood()],
+            );
+          },
+    );
+    addTearDown(viewModel.dispose);
+    addTearDown(search.dispose);
+
+    await _pumpExternalLibrary(tester, viewModel: viewModel, search: search);
+    Future<void> select(String label) async {
+      await tester.tap(find.widgetWithText(FilterChip, label));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> remove(String label) async {
+      await tester.tap(
+        find.descendant(
+          of: find.widgetWithText(InputChip, label),
+          matching: find.byTooltip(l10n.nutrition_library_remove_filter),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final createdByMe = l10n.nutrition_library_created_by_me;
+    await select(createdByMe);
+    await select(l10n.filter_foods);
+    await tester.enterText(find.byType(TextField), 'apple');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(InputChip, createdByMe), findsOneWidget);
+    expect(find.widgetWithText(InputChip, l10n.filter_foods), findsOneWidget);
+    expect(find.text('Apple jam'), findsOneWidget);
+    expect(find.text('Pear jam'), findsNothing);
+    expect(find.text('Catalog apple'), findsNothing);
+    expect(find.text('Apple bowl'), findsNothing);
+    expect(externalRequests, 0);
+
+    await select(l10n.filter_meals);
+    expect(find.widgetWithText(InputChip, createdByMe), findsOneWidget);
+    expect(find.widgetWithText(InputChip, l10n.filter_foods), findsNothing);
+    expect(find.text('Apple jam'), findsNothing);
+    expect(find.text('Apple bowl'), findsOneWidget);
+
+    await remove(l10n.filter_meals);
+    expect(find.text('Apple jam'), findsOneWidget);
+    expect(find.text('Apple bowl'), findsOneWidget);
+    expect(find.text('Catalog apple'), findsNothing);
+    expect(externalRequests, 0);
+
+    await select(l10n.filter_foods);
+    await remove(createdByMe);
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(InputChip, l10n.filter_foods), findsOneWidget);
+    expect(find.text('Apple jam'), findsOneWidget);
+    expect(find.text('Catalog apple'), findsOneWidget);
+    expect(find.text('External Apple'), findsOneWidget);
+    expect(find.text('Apple bowl'), findsNothing);
+    expect(externalRequests, 1);
+
+    await select(createdByMe);
+    await select(l10n.filter_all);
+    expect(find.byType(InputChip), findsNothing);
+    expect(find.text('Catalog apple'), findsOneWidget);
+    expect(find.text('Apple bowl'), findsOneWidget);
   });
 
   testWidgets('library query stays local to its search field', (tester) async {
@@ -313,9 +402,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(requests, 1);
 
-    await tester.tap(
-      find.widgetWithText(FilterChip, l10n.nutrition_saved_meals_filter),
-    );
+    await tester.tap(find.widgetWithText(FilterChip, l10n.filter_meals));
     await tester.pump();
     response.complete(
       UsdaSearchResponse(

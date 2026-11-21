@@ -2240,13 +2240,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get delete_template_confirmation => '이 항목이 라이브러리에서 삭제됩니다.';
 
   @override
-  String get filter_all => 'All';
+  String get filter_all => '전체';
 
   @override
-  String get filter_meals => 'Meals';
+  String get filter_meals => '식사';
 
   @override
-  String get filter_foods => 'Foods';
+  String get filter_foods => '음식';
 
   @override
   String items_count(int count) {
@@ -3101,9 +3101,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '이 식사의 일부 음식에 세부 정보가 없습니다. 정보가 완전한 음식을 추가한 후 다시 시도하세요.';
 
   @override
-  String get nutrition_saved_meals_filter => 'Saved meals';
-
-  @override
   String nutrition_add_food_to_meal(Object meal) {
     return 'Add food to $meal';
   }
@@ -3344,4 +3341,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_select_time_to_save => '저장하려면 시간을 선택하세요';
+
+  @override
+  String get nutrition_library_available_filters => '사용 가능한 필터';
+
+  @override
+  String get nutrition_library_selected_filters => '선택한 필터';
+
+  @override
+  String get nutrition_library_created_by_me => '내가 만든 항목';
+
+  @override
+  String get nutrition_library_remove_filter => '필터 제거';
 }

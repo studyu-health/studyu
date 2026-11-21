@@ -633,5 +633,12 @@
   "nutrition_meal_items": "항목",
   "nutrition_save_meal": "식사 저장",
   "nutrition_select_time_to_save": "저장하려면 시간을 선택하세요",
-  "optional": "선택 사항"
+  "optional": "선택 사항",
+  "nutrition_library_available_filters": "사용 가능한 필터",
+  "nutrition_library_selected_filters": "선택한 필터",
+  "nutrition_library_created_by_me": "내가 만든 항목",
+  "nutrition_library_remove_filter": "필터 제거",
+  "filter_all": "전체",
+  "filter_foods": "음식",
+  "filter_meals": "식사"
 }

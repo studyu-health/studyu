@@ -5641,12 +5641,6 @@ abstract class AppLocalizations {
   /// **'Some foods in this meal have incomplete details. Add foods with complete details and try again.'**
   String get nutrition_invalid_saved_meal;
 
-  /// No description provided for @nutrition_saved_meals_filter.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved meals'**
-  String get nutrition_saved_meals_filter;
-
   /// No description provided for @nutrition_add_food_to_meal.
   ///
   /// In en, this message translates to:
@@ -6084,6 +6078,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select a time to save'**
   String get nutrition_select_time_to_save;
+
+  /// No description provided for @nutrition_library_available_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Available filters'**
+  String get nutrition_library_available_filters;
+
+  /// No description provided for @nutrition_library_selected_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected filters'**
+  String get nutrition_library_selected_filters;
+
+  /// No description provided for @nutrition_library_created_by_me.
+  ///
+  /// In en, this message translates to:
+  /// **'Created by me'**
+  String get nutrition_library_created_by_me;
+
+  /// No description provided for @nutrition_library_remove_filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove filter'**
+  String get nutrition_library_remove_filter;
 }
 
 class _AppLocalizationsDelegate

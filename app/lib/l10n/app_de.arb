@@ -1204,7 +1204,6 @@
   "nutrition_create_saved_meal_from_log": "Mahlzeit aus diesem Protokoll erstellen",
   "nutrition_edit_saved_meal": "Gespeicherte Mahlzeit bearbeiten",
   "nutrition_invalid_saved_meal": "Bei einigen Lebensmitteln in dieser Mahlzeit fehlen Angaben. Fügen Sie Lebensmittel mit vollständigen Angaben hinzu.",
-  "nutrition_saved_meals_filter": "Gespeicherte Mahlzeiten",
   "nutrition_add_food_to_meal": "Lebensmittel zu {meal} hinzufügen",
   "nutrition_search_foods_or_brands": "Lebensmittel oder Marken suchen",
   "nutrition_saved_meals_expanded_notice": "Prüfen Sie die einzelnen Lebensmittel aus den gespeicherten Mahlzeiten vor dem Speichern.",
@@ -1322,5 +1321,9 @@
   "time_now": "Jetzt",
   "nutrition_meal_items": "Einträge",
   "nutrition_save_meal": "Mahlzeit speichern",
-  "nutrition_select_time_to_save": "Wählen Sie zum Speichern eine Uhrzeit aus"
+  "nutrition_select_time_to_save": "Wählen Sie zum Speichern eine Uhrzeit aus",
+  "nutrition_library_available_filters": "Verfügbare Filter",
+  "nutrition_library_selected_filters": "Ausgewählte Filter",
+  "nutrition_library_created_by_me": "Von mir erstellt",
+  "nutrition_library_remove_filter": "Filter entfernen"
 }

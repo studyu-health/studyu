@@ -1422,7 +1422,6 @@
   "nutrition_create_saved_meal_from_log": "Create meal from this log",
   "nutrition_edit_saved_meal": "Edit saved meal",
   "nutrition_invalid_saved_meal": "Some foods in this meal have incomplete details. Add foods with complete details and try again.",
-  "nutrition_saved_meals_filter": "Saved meals",
   "nutrition_add_food_to_meal": "Add food to {meal}",
   "nutrition_search_foods_or_brands": "Search foods or brands",
   "nutrition_saved_meals_expanded_notice": "Review the individual foods from the saved meals before saving this meal.",
@@ -1502,5 +1501,9 @@
   "time_now": "Now",
   "nutrition_meal_items": "Items",
   "nutrition_save_meal": "Save meal",
-  "nutrition_select_time_to_save": "Select a time to save"
+  "nutrition_select_time_to_save": "Select a time to save",
+  "nutrition_library_available_filters": "Available filters",
+  "nutrition_library_selected_filters": "Selected filters",
+  "nutrition_library_created_by_me": "Created by me",
+  "nutrition_library_remove_filter": "Remove filter"
 }
