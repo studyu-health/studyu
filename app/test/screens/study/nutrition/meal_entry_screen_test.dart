@@ -2265,11 +2265,24 @@ void main() {
     await openMealEntry(tester, editableMeal());
     expect(find.text('Apple'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('More options'));
+    final options = find.byTooltip('More options');
+    final remove = find.text('Remove from meal');
+    await tester.tap(options);
     await tester.pumpAndSettle();
 
+    expect(
+      tester.getTopLeft(find.text('Edit food')).dy,
+      closeTo(tester.getBottomLeft(options).dy, kMinInteractiveDimension),
+    );
+    await tester.tapAt(tester.getCenter(find.byType(AppBar)));
+    await tester.pumpAndSettle();
+    expect(remove, findsNothing);
+    expect(find.text('Apple'), findsOneWidget);
+
+    await tester.tap(options);
+    await tester.pumpAndSettle();
     expect(find.text('Save to My items'), findsNothing);
-    await tester.tap(find.text('Remove from meal'));
+    await tester.tap(remove);
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsNothing);

@@ -10,7 +10,6 @@ import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
-import 'package:studyu_app/screens/study/nutrition/nutrition_action_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
@@ -37,12 +36,6 @@ final class const SavedMealEntryResult(
 final class const DeletedMealEntryResult() extends MealEntryResult;
 
 final class const DiscardedMealEntryResult() extends MealEntryResult;
-
-enum _FoodAction() {
-  edit,
-  editDefinition,
-  remove,
-}
 
 enum _LibraryEditChoice() {
   currentEntry,
@@ -591,65 +584,59 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     setState(() => _meal.foods.removeAt(index));
   }
 
-  Future<void> _showFoodActions(FoodEntry food) async {
-    if (_isSaving || !_revalidateHistoricalEligibility()) return;
+  Widget _buildFoodActionMenu(FoodEntry food) {
     final l10n = AppLocalizations.of(context)!;
-    final action = await showNutritionActionSheet<_FoodAction>(
-      context,
-      title: food.name,
-      subtitle: _foodActionSubtitle(food, l10n),
-      actions: [
-        NutritionSheetAction(
-          value: _FoodAction.edit,
-          label: widget.historicalTarget != null
-              ? l10n.edit_this_entry
-              : food.entryType == FoodEntryType.meal
-              ? l10n.nutrition_edit_saved_meal
-              : l10n.edit_food_title,
-          icon: Icons.edit_outlined,
-        ),
-        if (widget.historicalTarget != null)
-          NutritionSheetAction(
-            value: _FoodAction.editDefinition,
-            label: l10n.edit_food_definition,
-            icon: Icons.sync_outlined,
+    final isHistorical = widget.historicalTarget != null;
+    final editLabel = isHistorical
+        ? l10n.edit_this_entry
+        : food.entryType == FoodEntryType.meal
+        ? l10n.nutrition_edit_saved_meal
+        : l10n.edit_food_title;
+
+    return PopupMenuButton<VoidCallback>(
+      icon: const Icon(Icons.more_vert, size: 20),
+      tooltip: l10n.more_options,
+      position: PopupMenuPosition.under,
+      enabled: !_isSaving,
+      onSelected: (action) => action(),
+      itemBuilder: (context) {
+        if (!_revalidateHistoricalEligibility()) return [];
+        return [
+          _foodMenuItem(editLabel, Icons.edit_outlined, () => _editFood(food)),
+          if (isHistorical)
+            _foodMenuItem(
+              l10n.edit_food_definition,
+              Icons.sync_outlined,
+              () => _editFood(food, editReusableDefinition: true),
+            ),
+          _foodMenuItem(
+            l10n.remove_from_meal,
+            Icons.delete_outline,
+            () => _removeFood(food),
+            color: Theme.of(context).colorScheme.error,
           ),
-        NutritionSheetAction(
-          value: _FoodAction.remove,
-          label: l10n.remove_from_meal,
-          icon: Icons.delete_outline,
-          isDestructive: true,
-        ),
-      ],
+        ];
+      },
     );
-    if (!mounted) return;
-    switch (action) {
-      case _FoodAction.edit:
-        await _editFood(food);
-      case _FoodAction.editDefinition:
-        await _editFood(food, editReusableDefinition: true);
-      case _FoodAction.remove:
-        _removeFood(food);
-      case null:
-        break;
-    }
   }
 
-  String _foodActionSubtitle(FoodEntry food, AppLocalizations l10n) {
-    final amount = food.amount == food.amount.roundToDouble()
-        ? food.amount.round().toString()
-        : food.amount.toStringAsFixed(1);
-    final serving = food.unit.trim().isEmpty
-        ? l10n.serving_amount(food.amount)
-        : '$amount ${food.unit.trim()}';
-    final energy = food.nutrition.isKnown('energyKcal')
-        ? l10n.kcal_value(food.nutrition.energyKcal.round().toString())
-        : '— kcal';
-    final partial = food.nutrition.isPartial('energyKcal')
-        ? ' (${l10n.nutrition_partial})'
-        : '';
-    return '$serving · $energy$partial';
-  }
+  PopupMenuItem<VoidCallback> _foodMenuItem(
+    String label,
+    IconData icon,
+    VoidCallback action, {
+    Color? color,
+  }) => PopupMenuItem(
+    value: action,
+    child: Row(
+      spacing: 8,
+      children: [
+        Icon(icon, color: color),
+        Flexible(
+          child: Text(label, style: TextStyle(color: color)),
+        ),
+      ],
+    ),
+  );
 
   MealLog _buildMeal({bool normalizeSkipped = false}) {
     final clearDetails = normalizeSkipped && _isSkipped;
@@ -1106,7 +1093,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                   allowMeals: _allowMeals,
                   onAddFood: _openFoodSearch,
                   onFoodTap: _editFood,
-                  onFoodActions: _showFoodActions,
+                  foodActionMenuBuilder: _buildFoodActionMenu,
                   onSaveToLibrary:
                       widget.historicalTarget == null && _allowMeals
                       ? _openMealBuilder
@@ -1393,7 +1380,7 @@ class const _FoodListSection({
   required final MealLog meal,
   required final VoidCallback onAddFood,
   required final Future<void> Function(FoodEntry) onFoodTap,
-  required final Future<void> Function(FoodEntry) onFoodActions,
+  required final Widget Function(FoodEntry) foodActionMenuBuilder,
   required final VoidCallback? onSaveToLibrary,
   required final bool allowMeals,
   final bool showValidationError = false,
@@ -1472,7 +1459,7 @@ class const _FoodListSection({
             (food) => _FoodCard(
               food: food,
               onTap: () => onFoodTap(food),
-              onOverflow: () => onFoodActions(food),
+              actionMenu: foodActionMenuBuilder(food),
             ),
           ),
       ],
@@ -1483,7 +1470,7 @@ class const _FoodListSection({
 class const _FoodCard({
   required final FoodEntry food,
   required final VoidCallback onTap,
-  required final VoidCallback onOverflow,
+  required final Widget actionMenu,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1564,11 +1551,7 @@ class const _FoodCard({
                 ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.more_vert, size: 20),
-              tooltip: l10n.more_options,
-              onPressed: onOverflow,
-            ),
+            actionMenu,
           ],
         ),
       ),
