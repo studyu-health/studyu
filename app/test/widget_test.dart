@@ -337,6 +337,14 @@ void main() {
 
     expect(find.byType(WelcomeScreen), findsOneWidget);
     expect(find.byType(InviteCodeDialog), findsOneWidget);
+    expect(
+      tester.testTextInput.setClientArgs,
+      containsPair('autocorrect', false),
+    );
+    expect(
+      tester.testTextInput.setClientArgs,
+      containsPair('enableSuggestions', false),
+    );
     expect(find.text('Enter invite code'), findsOneWidget);
     expect(
       find.text('Enter the code shared by your study team.'),
