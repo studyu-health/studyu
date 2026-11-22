@@ -185,3 +185,4 @@ interview/
 /.qwen/
 # Widget Preview related
 .widget_preview/
+.codex/
