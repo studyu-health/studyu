@@ -220,16 +220,55 @@ void main() {
     expect(cardEnergy(), findsOneWidget);
   });
 
-  testWidgets('the whole result adds a serving and keeps the query', (
+  testWidgets('adding and incrementing a result keep the current search', (
     tester,
   ) async {
-    await _pumpSearch(tester);
+    const query = 'appl';
+    final requests = <String>[];
+    await _pumpSearch(tester, query: null, onSearchRequest: requests.add);
+
+    final search = find.byType(TextField);
+    await tester.showKeyboard(search);
+    for (var length = 1; length <= query.length; length++) {
+      final text = query.substring(0, length);
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: length),
+        ),
+      );
+      await tester.pump();
+      expect(tester.widget<TextField>(search).controller!.text, text);
+      expect(tester.widget<TextField>(search).focusNode!.hasFocus, isTrue);
+    }
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    final keyboardArguments =
+        tester.testTextInput.log
+                .lastWhere((call) => call.method == 'TextInput.setClient')
+                .arguments
+            as List<Object?>;
+    expect(keyboardArguments[1], containsPair('autocorrect', false));
+    expect(keyboardArguments[1], containsPair('enableSuggestions', false));
+    expect(requests, [query, query]);
 
     final result = find.text('External Apple');
     final card = find.ancestor(of: result, matching: find.byType(Card)).first;
+    final resultCard = find.descendant(of: card, matching: result);
+    final searchField = tester.widget<TextField>(search);
+    void expectSearchUnchanged() {
+      expect(searchField.controller!.text, query);
+      expect(resultCard.hitTestable(), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(requests, [query, query]);
+    }
+
     expect(find.widgetWithText(TextButton, 'Add'), findsNothing);
     await tester.tapAt(tester.getRect(card).centerRight.translate(-6, 0));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    expectSearchUnchanged();
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expectSearchUnchanged();
 
     expect(find.byType(FoodEntryScreen), findsNothing);
     expect(find.text('1 item · 78 kcal'), findsOneWidget);
@@ -251,14 +290,13 @@ void main() {
         matching: find.byTooltip('Increase External Apple'),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    expectSearchUnchanged();
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
     expect(find.byType(FoodEntryScreen), findsNothing);
     expect(find.text('1 item · 156 kcal'), findsOneWidget);
-    expect(
-      tester.widget<TextField>(find.byType(TextField)).controller!.text,
-      'apple',
-    );
+    expectSearchUnchanged();
   });
 
   testWidgets('selector preserves underlying list state through navigation', (
@@ -864,6 +902,7 @@ Future<void> _pumpSearch(
   TextScaler? textScaler,
   FakeNutritionFoodRepository? repository,
   ValueChanged<FoodSearchSelection?>? onResult,
+  ValueChanged<String>? onSearchRequest,
   Locale locale = const Locale('en'),
   UsdaFoodItem? externalFood,
 }) async {
@@ -871,17 +910,24 @@ Future<void> _pumpSearch(
     required String query,
     required int page,
     required int pageSize,
-  }) async => const SearchResult(products: []);
+  }) async {
+    onSearchRequest?.call(query);
+    return const SearchResult(products: []);
+  }
+
   Future<UsdaSearchResponse> usdaFoodSearch({
     required String query,
     required int page,
     required int pageSize,
-  }) async => UsdaSearchResponse(
-    totalHits: 1,
-    currentPage: page,
-    totalPages: 1,
-    foods: [externalFood ?? _externalFood()],
-  );
+  }) async {
+    onSearchRequest?.call(query);
+    return UsdaSearchResponse(
+      totalHits: 1,
+      currentPage: page,
+      totalPages: 1,
+      foods: [externalFood ?? _externalFood()],
+    );
+  }
 
   await tester.pumpWidget(
     ChangeNotifierProvider(

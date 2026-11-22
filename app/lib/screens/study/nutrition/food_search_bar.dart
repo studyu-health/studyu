@@ -17,6 +17,8 @@ class const FoodSearchBar({
       child: TextField(
         controller: controller,
         focusNode: focusNode,
+        autocorrect: false,
+        enableSuggestions: false,
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: const Icon(Icons.search),
