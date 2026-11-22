@@ -3280,10 +3280,16 @@ class AppLocalizationsKo extends AppLocalizations {
       '이 기기에서 이 초안을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
 
   @override
+  String get time_now => '지금';
+
+  @override
   String get nutrition_review_previous_day => '이전 연구일의 식사 기록 확인';
 
   @override
   String get food_library_empty => '표시할 음식이나 식사가 없습니다.';
+
+  @override
+  String get nutrition_known_values_hint => '모르는 영양값은 비워 두세요.';
 
   @override
   String get nutrition_log_again => '다시 기록';
@@ -3292,7 +3298,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_choose_recent_meal => '최근 식사 선택';
 
   @override
-  String get nutrition_known_values_hint => '모르는 영양값은 비워 두세요.';
+  String get nutrition_meal_items => '항목';
+
+  @override
+  String get nutrition_save_meal => '식사 저장';
+
+  @override
+  String get nutrition_select_time_to_save => '저장하려면 시간을 선택하세요';
 
   @override
   String get nutrition_food_details_subtitle => '귀리 플레이크처럼 구체적인 이름을 입력하세요.';
@@ -3329,18 +3341,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_photo_retry => '사진 다시 저장';
-
-  @override
-  String get time_now => '지금';
-
-  @override
-  String get nutrition_meal_items => '항목';
-
-  @override
-  String get nutrition_save_meal => '식사 저장';
-
-  @override
-  String get nutrition_select_time_to_save => '저장하려면 시간을 선택하세요';
 
   @override
   String get nutrition_library_available_filters => '사용 가능한 필터';

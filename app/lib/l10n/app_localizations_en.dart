@@ -3345,10 +3345,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Delete this draft from this device? This cannot be undone.';
 
   @override
+  String get time_now => 'Now';
+
+  @override
   String get nutrition_review_previous_day => 'Review previous day’s nutrition';
 
   @override
   String get food_library_empty => 'There are no foods or meals to show.';
+
+  @override
+  String get nutrition_known_values_hint =>
+      'Leave unknown nutrient values blank.';
 
   @override
   String get nutrition_log_again => 'Log again';
@@ -3357,8 +3364,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nutrition_choose_recent_meal => 'Choose a recent meal';
 
   @override
-  String get nutrition_known_values_hint =>
-      'Leave unknown nutrient values blank.';
+  String get nutrition_meal_items => 'Items';
+
+  @override
+  String get nutrition_save_meal => 'Save meal';
+
+  @override
+  String get nutrition_select_time_to_save => 'Select a time to save';
 
   @override
   String get nutrition_food_details_subtitle =>
@@ -3397,18 +3409,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_photo_retry => 'Retry photo';
-
-  @override
-  String get time_now => 'Now';
-
-  @override
-  String get nutrition_meal_items => 'Items';
-
-  @override
-  String get nutrition_save_meal => 'Save meal';
-
-  @override
-  String get nutrition_select_time_to_save => 'Select a time to save';
 
   @override
   String get nutrition_library_available_filters => 'Available filters';

@@ -5959,6 +5959,12 @@ abstract class AppLocalizations {
   /// **'Delete this draft from this device? This cannot be undone.'**
   String get nutrition_history_discard_expired_draft;
 
+  /// No description provided for @time_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get time_now;
+
   /// No description provided for @nutrition_review_previous_day.
   ///
   /// In en, this message translates to:
@@ -5970,6 +5976,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There are no foods or meals to show.'**
   String get food_library_empty;
+
+  /// No description provided for @nutrition_known_values_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave unknown nutrient values blank.'**
+  String get nutrition_known_values_hint;
 
   /// No description provided for @nutrition_log_again.
   ///
@@ -5983,11 +5995,23 @@ abstract class AppLocalizations {
   /// **'Choose a recent meal'**
   String get nutrition_choose_recent_meal;
 
-  /// No description provided for @nutrition_known_values_hint.
+  /// No description provided for @nutrition_meal_items.
   ///
   /// In en, this message translates to:
-  /// **'Leave unknown nutrient values blank.'**
-  String get nutrition_known_values_hint;
+  /// **'Items'**
+  String get nutrition_meal_items;
+
+  /// No description provided for @nutrition_save_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save meal'**
+  String get nutrition_save_meal;
+
+  /// No description provided for @nutrition_select_time_to_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a time to save'**
+  String get nutrition_select_time_to_save;
 
   /// No description provided for @nutrition_food_details_subtitle.
   ///
@@ -6054,30 +6078,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry photo'**
   String get nutrition_photo_retry;
-
-  /// No description provided for @time_now.
-  ///
-  /// In en, this message translates to:
-  /// **'Now'**
-  String get time_now;
-
-  /// No description provided for @nutrition_meal_items.
-  ///
-  /// In en, this message translates to:
-  /// **'Items'**
-  String get nutrition_meal_items;
-
-  /// No description provided for @nutrition_save_meal.
-  ///
-  /// In en, this message translates to:
-  /// **'Save meal'**
-  String get nutrition_save_meal;
-
-  /// No description provided for @nutrition_select_time_to_save.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a time to save'**
-  String get nutrition_select_time_to_save;
 
   /// No description provided for @nutrition_library_available_filters.
   ///

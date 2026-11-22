@@ -3392,11 +3392,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden.';
 
   @override
+  String get time_now => 'Jetzt';
+
+  @override
   String get nutrition_review_previous_day => 'Ernährung vom Vortag prüfen';
 
   @override
   String get food_library_empty =>
       'In dieser Ansicht gibt es keine Lebensmittel oder Mahlzeiten.';
+
+  @override
+  String get nutrition_known_values_hint =>
+      'Lassen Sie unbekannte Nährwerte frei.';
 
   @override
   String get nutrition_log_again => 'Erneut erfassen';
@@ -3405,8 +3412,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nutrition_choose_recent_meal => 'Eine frühere Mahlzeit auswählen';
 
   @override
-  String get nutrition_known_values_hint =>
-      'Lassen Sie unbekannte Nährwerte frei.';
+  String get nutrition_meal_items => 'Einträge';
+
+  @override
+  String get nutrition_save_meal => 'Mahlzeit speichern';
+
+  @override
+  String get nutrition_select_time_to_save =>
+      'Wählen Sie zum Speichern eine Uhrzeit aus';
 
   @override
   String get nutrition_food_details_subtitle =>
@@ -3445,19 +3458,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_photo_retry => 'Foto erneut speichern';
-
-  @override
-  String get time_now => 'Jetzt';
-
-  @override
-  String get nutrition_meal_items => 'Einträge';
-
-  @override
-  String get nutrition_save_meal => 'Mahlzeit speichern';
-
-  @override
-  String get nutrition_select_time_to_save =>
-      'Wählen Sie zum Speichern eine Uhrzeit aus';
 
   @override
   String get nutrition_library_available_filters => 'Verfügbare Filter';
