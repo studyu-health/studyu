@@ -1317,12 +1317,7 @@ class const _MealTypeSheet({
         (value.type != MealType.other ||
             (value.customLabel ?? '') == (choice.customLabel ?? ''));
     return ListTile(
-      leading: Icon(
-        _mealTypeIcons[choice.type] ??
-            (choice.customLabel == null
-                ? Icons.label_off_outlined
-                : Icons.restaurant_outlined),
-      ),
+      leading: Icon(_mealTypeChoiceIcon(choice)),
       title: Text(label),
       selected: selected,
       trailing: selected ? const Icon(Icons.check) : null,
@@ -1698,6 +1693,7 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
                     value: _mealType,
                     choices: mealTypeChoices,
                     choiceLabel: (value) => _mealTypeChoiceLabel(value, l10n),
+                    choiceIcon: _mealTypeChoiceIcon,
                     onChanged: (value) => setState(() => _mealType = value),
                   ),
                   const SizedBox(height: 12),
@@ -1708,6 +1704,14 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
                     choiceLabel: (value) => value == null
                         ? l10n.not_added
                         : _getMealContextLabel(value, l10n),
+                    choiceIcon: (value) => switch (value) {
+                      null => Icons.remove,
+                      MealContext.home => Icons.home_outlined,
+                      MealContext.restaurant => Icons.restaurant_outlined,
+                      MealContext.takeout => Icons.takeout_dining_outlined,
+                      MealContext.vending => Icons.local_drink_outlined,
+                      MealContext.other => Icons.more_horiz,
+                    },
                     onChanged: (value) => setState(() => _mealContext = value),
                   ),
                   if (_mealContext == MealContext.other) ...[
@@ -1729,6 +1733,14 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
                     choiceLabel: (value) => value == null
                         ? l10n.not_specified
                         : _getCompanyContextLabel(value, l10n),
+                    choiceIcon: (value) => switch (value) {
+                      null => Icons.remove,
+                      CompanyContext.alone => Icons.person_outline,
+                      CompanyContext.family => Icons.family_restroom_outlined,
+                      CompanyContext.friends => Icons.group_outlined,
+                      CompanyContext.colleagues => Icons.badge_outlined,
+                      CompanyContext.other => Icons.more_horiz,
+                    },
                     onChanged: (value) =>
                         setState(() => _companyContext = value),
                   ),
@@ -1740,6 +1752,15 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
                     choiceLabel: (value) => value == null
                         ? l10n.not_specified
                         : _getDistractionContextLabel(value, l10n),
+                    choiceIcon: (value) => switch (value) {
+                      null => Icons.remove,
+                      DistractionContext.none =>
+                        Icons.notifications_off_outlined,
+                      DistractionContext.tv => Icons.tv_outlined,
+                      DistractionContext.phone => Icons.smartphone_outlined,
+                      DistractionContext.work => Icons.work_outlined,
+                      DistractionContext.other => Icons.more_horiz,
+                    },
                     onChanged: (value) =>
                         setState(() => _distractionContext = value),
                   ),
@@ -1783,19 +1804,31 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
   }
 }
 
-const _mealTypeIcons = {
-  MealType.breakfast: Icons.breakfast_dining_outlined,
-  MealType.lunch: Icons.lunch_dining_outlined,
-  MealType.dinner: Icons.dinner_dining_outlined,
-  MealType.snack: Icons.cookie_outlined,
-};
+IconData _mealTypeChoiceIcon(_MealTypeSelection choice) =>
+    switch (choice.type) {
+      MealType.breakfast => Icons.breakfast_dining_outlined,
+      MealType.brunch => Icons.brunch_dining_outlined,
+      MealType.lunch => Icons.lunch_dining_outlined,
+      MealType.dinner => Icons.dinner_dining_outlined,
+      MealType.snack => Icons.cookie_outlined,
+      MealType.other =>
+        choice.customLabel == null
+            ? Icons.label_off_outlined
+            : Icons.restaurant_outlined,
+    };
 
 List<_MealTypeSelection> _mealTypeChoices(
   AppLocalizations l10n,
   List<String>? customMealTypes,
 ) => [
   (type: MealType.other, customLabel: null),
-  for (final type in _mealTypeIcons.keys) (type: type, customLabel: null),
+  for (final type in const [
+    MealType.breakfast,
+    MealType.lunch,
+    MealType.dinner,
+    MealType.snack,
+  ])
+    (type: type, customLabel: null),
   for (final label in customMealTypes ?? const <String>[])
     if (label != l10n.meal_type_other)
       (type: MealType.other, customLabel: label.trim()),
@@ -1877,6 +1910,7 @@ class const _MealDetailChoices<T>({
   required final T value,
   required final List<T> choices,
   required final String Function(T) choiceLabel,
+  required final IconData Function(T) choiceIcon,
   required final ValueChanged<T> onChanged,
 }) extends StatelessWidget {
   @override
@@ -1893,7 +1927,14 @@ class const _MealDetailChoices<T>({
           children: [
             for (final choice in choices)
               ChoiceChip(
-                label: Text(choiceLabel(choice)),
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  children: [
+                    Icon(choiceIcon(choice), size: 18),
+                    Flexible(child: Text(choiceLabel(choice))),
+                  ],
+                ),
                 selected: value == choice,
                 onSelected: (_) => onChanged(choice),
               ),
