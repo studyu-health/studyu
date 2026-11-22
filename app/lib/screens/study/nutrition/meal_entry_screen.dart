@@ -62,9 +62,9 @@ class const _MealDetailsSelection({
 
 class const MealEntryScreen({
   final MealLog? existingMeal,
-  final String? initialCustomMealLabel,
   final NutritionTask? task,
   final MealType? initialMealType,
+  final String? initialCustomMealLabel,
   final List<FoodEntry> initialFoods = const [],
   final PhotoReference? recallPhoto,
   final DateTime? occurrenceDate,
@@ -80,9 +80,9 @@ class const MealEntryScreen({
 }) extends StatefulWidget {
   static MaterialPageRoute<MealEntryResult> route({
     MealLog? existingMeal,
-    String? initialCustomMealLabel,
     NutritionTask? task,
     MealType? initialMealType,
+    String? initialCustomMealLabel,
     List<FoodEntry> initialFoods = const [],
     PhotoReference? recallPhoto,
     DateTime? occurrenceDate,
@@ -95,9 +95,9 @@ class const MealEntryScreen({
   }) => MaterialPageRoute(
     builder: (_) => MealEntryScreen(
       existingMeal: existingMeal,
-      initialCustomMealLabel: initialCustomMealLabel,
       task: task,
       initialMealType: initialMealType,
+      initialCustomMealLabel: initialCustomMealLabel,
       initialFoods: initialFoods,
       recallPhoto: recallPhoto,
       occurrenceDate: occurrenceDate,
@@ -165,9 +165,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     } else {
       _timestamp = null;
       _timePrecision = MealOccurrenceTimePrecision.unknown;
-      _customMealLabel = widget.initialCustomMealLabel;
       _hasSelectedTime = false;
       _mealType = widget.initialMealType ?? MealType.other;
+      _customMealLabel = widget.initialCustomMealLabel;
       _mealContext = null;
       _isSkipped = false;
       _meal = MealLog.withId(
