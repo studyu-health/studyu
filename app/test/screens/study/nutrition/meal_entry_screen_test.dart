@@ -902,6 +902,10 @@ void main() {
 
     expect(find.byType(BottomSheet), findsOneWidget);
     expect(find.text('Cancel'), findsNothing);
+    expect(
+      tester.getTopLeft(findMealDetailsText('No label')).dy,
+      lessThan(tester.getTopLeft(findMealDetailsText('Breakfast')).dy),
+    );
 
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
@@ -1071,6 +1075,13 @@ void main() {
     await tester.ensureVisible(find.text('Meal details'));
     await tester.tap(find.text('Meal details'));
     await tester.pumpAndSettle();
+
+    final mealLabels = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.textContaining(RegExp(r'^(No label|Supper|Breakfast)$')),
+    );
+    expect(findMealDetailsText('Supper'), findsOneWidget);
+    expect(tester.widget<Text>(mealLabels.first).data, 'No label');
 
     await tester.tap(findMealDetailsText('Lunch'));
     await tester.pumpAndSettle();

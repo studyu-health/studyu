@@ -1794,11 +1794,11 @@ List<_MealTypeSelection> _mealTypeChoices(
   AppLocalizations l10n,
   List<String>? customMealTypes,
 ) => [
+  (type: MealType.other, customLabel: null),
   for (final type in _mealTypeIcons.keys) (type: type, customLabel: null),
   for (final label in customMealTypes ?? const <String>[])
     if (label != l10n.meal_type_other)
       (type: MealType.other, customLabel: label.trim()),
-  (type: MealType.other, customLabel: null),
 ];
 
 String _mealTypeChoiceLabel(_MealTypeSelection choice, AppLocalizations l10n) =>
