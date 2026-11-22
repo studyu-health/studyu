@@ -3334,11 +3334,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Glasgröße konnte nicht gespeichert werden.';
 
   @override
-  String nutrition_water_per_cup(Object volume) {
-    return '$volume pro Glas';
-  }
-
-  @override
   String get nutrition_current_day_ended =>
       'Dieser Ernährungstag ist beendet. Öffnen Sie die Ernährungsaufgabe erneut, um fortzufahren.';
 

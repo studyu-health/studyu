@@ -3289,11 +3289,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not save the cup size.';
 
   @override
-  String nutrition_water_per_cup(Object volume) {
-    return '$volume per cup';
-  }
-
-  @override
   String get nutrition_current_day_ended =>
       'This nutrition day has ended. Open the nutrition task again to continue.';
 

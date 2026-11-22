@@ -25,12 +25,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('250 mL per cup'));
+    await tester.tap(find.byTooltip('Cup size'));
     await tester.pumpAndSettle();
+    expect(find.text('250'), findsOneWidget);
     await tester.enterText(find.byType(TextFormField), '400');
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    expect(find.text('400 mL per cup'), findsOneWidget);
+    expect(find.text('500 mL'), findsOneWidget);
+    await tester.tap(find.byTooltip('Add a cup of water'));
+    await tester.pumpAndSettle();
+    expect(find.text('900 mL'), findsOneWidget);
   });
 }

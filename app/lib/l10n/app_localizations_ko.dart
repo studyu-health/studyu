@@ -3226,11 +3226,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_water_cup_size_save_error => '컵 용량을 저장하지 못했습니다.';
 
   @override
-  String nutrition_water_per_cup(Object volume) {
-    return '컵당 $volume';
-  }
-
-  @override
   String get nutrition_current_day_ended =>
       '이 영양 기록일이 끝났습니다. 계속하려면 영양 기록 과제를 다시 여세요.';
 

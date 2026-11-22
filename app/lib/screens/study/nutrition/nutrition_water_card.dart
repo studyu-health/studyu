@@ -31,57 +31,41 @@ class const NutritionWaterCard({
           children: [
             Icon(Icons.local_drink_outlined, color: theme.colorScheme.primary),
             Expanded(
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 4,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.nutrition_water,
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      Semantics(
-                        liveRegion: !readOnly,
-                        child: Text(
-                          readOnly && waterIntakeMl == null
-                              ? l10n.nutrition_water_unlogged
-                              : volume(amountMl),
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    l10n.nutrition_water,
+                    style: theme.textTheme.titleMedium,
                   ),
-                  if (!readOnly)
-                    Tooltip(
-                      message:
-                          '${l10n.nutrition_water_cup_size} · ${volume(cupSizeMl)}',
-                      child: TextButton.icon(
-                        onPressed: onEditCupSize,
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.colorScheme.onSurfaceVariant,
-                          iconSize: 16,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          textStyle: theme.textTheme.labelMedium,
-                        ),
-                        icon: const Icon(Icons.edit_outlined),
-                        label: Text(
-                          l10n.nutrition_water_per_cup(volume(cupSizeMl)),
-                        ),
+                  Semantics(
+                    liveRegion: !readOnly,
+                    child: Text(
+                      readOnly && waterIntakeMl == null
+                          ? l10n.nutrition_water_unlogged
+                          : volume(amountMl),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
             if (!readOnly)
               Row(
                 mainAxisSize: MainAxisSize.min,
-                spacing: 8,
                 children: [
+                  IconButton(
+                    tooltip: l10n.nutrition_water_cup_size,
+                    onPressed: onEditCupSize,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    iconSize: 18,
+                    alignment: AlignmentDirectional.centerEnd,
+                    icon: const Icon(Icons.edit_outlined),
+                  ),
+                  const SizedBox(width: 6),
                   IconButton.outlined(
                     tooltip: l10n.nutrition_water_remove_cup,
                     onPressed: adjust == null || amountMl == 0
@@ -89,6 +73,7 @@ class const NutritionWaterCard({
                         : () => adjust(-cupSizeMl),
                     icon: const Icon(Icons.remove),
                   ),
+                  const SizedBox(width: 8),
                   IconButton.filledTonal(
                     tooltip: l10n.nutrition_water_add_cup,
                     onPressed: adjust == null ? null : () => adjust(cupSizeMl),

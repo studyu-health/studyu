@@ -1467,7 +1467,6 @@
   "nutrition_water_cup_size": "Cup size",
   "nutrition_water_cup_size_invalid": "Enter 1 to 9999 mL.",
   "nutrition_water_cup_size_save_error": "Could not save the cup size.",
-  "nutrition_water_per_cup": "{volume} per cup",
   "nutrition_current_day_ended": "This nutrition day has ended. Open the nutrition task again to continue.",
   "nutrition_food_definition_conflict": "A newer version of this item is available. Open the editor again to edit the current version.",
   "nutrition_invalid_calories": "Enter zero or a positive number of calories.",
