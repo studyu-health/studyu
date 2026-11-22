@@ -1124,6 +1124,7 @@ class _NutritionTaskWidgetState()
     final result = await _openMealEditor(context, model, (navigator) async {
       var foods = const <FoodEntry>[];
       String? customMealLabel;
+      final opensFoodSearch = repeatedMeal == null && recallPhoto == null;
       if (repeatedMeal != null) {
         foods = repeatedMeal.foods.map(duplicateFoodEntry).toList();
         final label = repeatedMeal.customMealLabel?.trim();
@@ -1134,7 +1135,7 @@ class _NutritionTaskWidgetState()
             customMealTypes.any((type) => type.trim() == label)) {
           customMealLabel = label;
         }
-      } else if (recallPhoto == null) {
+      } else if (opensFoodSearch) {
         final selection = await FoodSearchScreen.show(
           context,
           mealLabel: AppLocalizations.of(context)!.meal_neutral_label,
@@ -1153,6 +1154,7 @@ class _NutritionTaskWidgetState()
       }
       return await navigator.push(
         MealEntryScreen.route(
+          animateIn: !opensFoodSearch,
           task: widget.task,
           initialMealType: repeatedMeal?.mealType,
           initialCustomMealLabel: customMealLabel,

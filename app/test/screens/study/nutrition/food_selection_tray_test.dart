@@ -797,20 +797,30 @@ void main() {
     expect(find.text('Selected items'), findsOneWidget);
   });
 
-  testWidgets('confirmation returns final FoodSearchSelection route result', (
-    tester,
-  ) async {
-    FoodSearchSelection? selection;
-    await _pumpSearch(tester, onResult: (value) => selection = value);
+  testWidgets(
+    'confirmation slides the picker down before returning the selection',
+    (tester) async {
+      FoodSearchSelection? selection;
+      await _pumpSearch(tester, onResult: (value) => selection = value);
 
-    await _addExternalApple(tester);
-    await tester.tap(find.widgetWithText(FilledButton, 'Add 1 item to Lunch'));
-    await tester.pumpAndSettle();
+      await _addExternalApple(tester);
+      final picker = find.byType(FoodSearchScreen);
+      final top = tester.getTopLeft(picker).dy;
+      await tester.tap(
+        find.widgetWithText(FilledButton, 'Add 1 item to Lunch'),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.getTopLeft(picker).dy, greaterThan(top));
+      expect(selection, isNull);
+      await tester.pumpAndSettle();
 
-    expect(find.byType(FoodSearchScreen), findsNothing);
-    expect(selection?.foods.single.name, 'External Apple');
-    expect(selection?.foods.single.amount, 1);
-  });
+      expect(picker, findsNothing);
+      expect(selection?.foods.single.name, 'External Apple');
+      expect(selection?.foods.single.amount, 1);
+    },
+    variant: const TargetPlatformVariant({TargetPlatform.iOS}),
+  );
 
   testWidgets('Library row adds directly to the basket', (tester) async {
     final repository = FakeNutritionFoodRepository([_libraryTemplate()]);

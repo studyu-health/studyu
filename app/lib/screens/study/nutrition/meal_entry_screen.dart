@@ -29,6 +29,13 @@ import 'package:uuid/uuid.dart';
 
 sealed class const MealEntryResult();
 
+class _MealEntryRoute({required super.builder, required final bool animateIn})
+    extends MaterialPageRoute<MealEntryResult> {
+  @override
+  Duration get transitionDuration =>
+      animateIn ? super.transitionDuration : Duration.zero;
+}
+
 final class const SavedMealEntryResult(
   final MealLog meal, {
   final bool definitionMutated = false,
@@ -79,6 +86,7 @@ class const MealEntryScreen({
   super.key,
 }) extends StatefulWidget {
   static MaterialPageRoute<MealEntryResult> route({
+    bool animateIn = true,
     MealLog? existingMeal,
     NutritionTask? task,
     MealType? initialMealType,
@@ -92,7 +100,8 @@ class const MealEntryScreen({
     bool Function()? canEditRecall,
     Future<NutritionRecallPersistenceTarget?> Function(int? expectedRevision)?
     prepareHistoricalDefinitionEdit,
-  }) => MaterialPageRoute(
+  }) => _MealEntryRoute(
+    animateIn: animateIn,
     builder: (_) => MealEntryScreen(
       existingMeal: existingMeal,
       task: task,

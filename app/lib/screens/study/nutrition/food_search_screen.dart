@@ -153,8 +153,8 @@ class const FoodSearchScreen({
     bool historicalMode = false,
     NutritionFoodRepository? repository,
     TemplateViewModel? templateViewModel,
-  }) => Navigator.of(context).push(
-    MaterialPageRoute<FoodSearchSelection>(
+  }) async {
+    final route = MaterialPageRoute<FoodSearchSelection>(
       fullscreenDialog: true,
       builder: (_) => FoodSearchScreen(
         allowMeals: allowMeals,
@@ -166,8 +166,11 @@ class const FoodSearchScreen({
         repository: repository,
         templateViewModel: templateViewModel,
       ),
-    ),
-  );
+    );
+    final selection = await Navigator.of(context).push(route);
+    if (selection != null) await route.completed;
+    return selection;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -262,7 +265,6 @@ class _FoodSearchScreenContentState()
   ImageInfo? _activeTransferImage;
 
   late final FoodSearchViewModel _searchViewModel;
-  bool _isConfirming = false;
   bool _isConfirmingRemoval = false;
   bool _allowPop = false;
   bool _selectionChanged = false;
@@ -625,10 +627,12 @@ class _FoodSearchScreenContentState()
   }
 
   void _confirmSelection(FoodSelectionStore store) {
-    if (_isConfirming || (store.isEmpty && !_updatesExistingMeal)) return;
+    if ((store.isEmpty && !_updatesExistingMeal) ||
+        ModalRoute.of(context)?.isCurrent != true) {
+      return;
+    }
     _removeTransfer();
-    setState(() => _isConfirming = true);
-    _pop(FoodSearchSelection(store.materialize()));
+    Navigator.of(context).pop(FoodSearchSelection(store.materialize()));
   }
 
   void _pop([Object? result]) {
@@ -993,7 +997,6 @@ class _FoodSearchScreenContentState()
                   mealLabel: widget.mealLabel!,
                   updatesExistingMeal: _updatesExistingMeal,
                   maxHeight: bodyConstraints.maxHeight,
-                  isConfirming: _isConfirming,
                   onConfirm: () => _confirmSelection(store),
                   onEdit: _editTrayItem,
                   onIncrement: _incrementTraySelection,

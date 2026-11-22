@@ -9,7 +9,6 @@ class const _SelectionPeekTray({
   required final String mealLabel,
   required final bool updatesExistingMeal,
   required final double maxHeight,
-  required final bool isConfirming,
   required final VoidCallback onConfirm,
   required final ValueChanged<FoodSelectionItem> onEdit,
   required final void Function(String key, Offset? source) onIncrement,
@@ -169,9 +168,7 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
             Padding(
               padding: EdgeInsets.fromLTRB(16, 8, 16, _isExpanded ? 8 : 12),
               child: FilledButton(
-                onPressed:
-                    widget.isConfirming ||
-                        (widget.store.isEmpty && !widget.updatesExistingMeal)
+                onPressed: widget.store.isEmpty && !widget.updatesExistingMeal
                     ? null
                     : widget.onConfirm,
                 child: Text(

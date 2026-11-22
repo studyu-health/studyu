@@ -177,7 +177,7 @@ FakeNutritionFoodRepository _savedSoupRepository() =>
       ),
     ]);
 
-Future<void> _selectSavedSoup(WidgetTester tester) async {
+Future<void> _selectSavedSoup(WidgetTester tester, {bool settle = true}) async {
   await tester.tap(find.text('Library'));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Saved soup'));
@@ -188,7 +188,8 @@ Future<void> _selectSavedSoup(WidgetTester tester) async {
       matching: find.byType(FilledButton),
     ),
   );
-  await tester.pumpAndSettle();
+  await tester.pump();
+  if (settle) await tester.pumpAndSettle();
 }
 
 ({NutritionTask task, StudySubject subject}) historicalNavigationSetup(
@@ -1113,7 +1114,11 @@ void main() {
 
     await tester.tap(find.text('Log meal'));
     await tester.pumpAndSettle();
-    await _selectSavedSoup(tester);
+    await _selectSavedSoup(tester, settle: false);
+    expect(find.byType(MealEntryScreen, skipOffstage: false), findsNothing);
+    await tester.pumpAndSettle();
+    final route = ModalRoute.of(tester.element(find.byType(MealEntryScreen)))!;
+    expect(route.transitionDuration, Duration.zero);
 
     expect(
       find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
