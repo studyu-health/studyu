@@ -11,6 +11,7 @@ import 'package:studyu_designer_v2/localization/app_translation.dart';
 /// Heavily inspired by [CloseButton]
 class const DismissButton({
   final String? text,
+  final bool autofocus = true,
 
   /// An override callback to perform instead of the default behavior which is
   /// to pop the [Navigator].
@@ -28,7 +29,7 @@ class const DismissButton({
     assert(debugCheckHasMaterialLocalizations(context));
     return KeyboardListener(
       focusNode: FocusNode(),
-      autofocus: true,
+      autofocus: autofocus,
       onKeyEvent: (key) {
         if (key.logicalKey.keyLabel == "Escape") {
           Navigator.maybePop(context);

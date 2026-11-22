@@ -92,6 +92,7 @@ class const InviteCodeFormView({
               input: isEditableCodeField
                   ? ReactiveTextField(
                       formControl: formViewModel.codeControl,
+                      autofocus: true,
                       validationMessages:
                           formViewModel.codeControl.validationMessages,
                       decoration: InputDecoration(

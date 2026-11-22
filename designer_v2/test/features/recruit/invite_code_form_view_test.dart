@@ -4,11 +4,12 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reactive_forms/reactive_forms.dart';
 import 'package:studyu_core/core.dart';
 import 'package:studyu_core/env.dart' as env;
+import 'package:studyu_designer_v2/common_views/form_buttons.dart';
 import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/common_views/qr_code_preview_dialog.dart';
+import 'package:studyu_designer_v2/common_views/sidesheet/sidesheet_form.dart';
 import 'package:studyu_designer_v2/features/recruit/invite_code_form_controller.dart';
 import 'package:studyu_designer_v2/features/recruit/invite_code_form_repository.dart';
 import 'package:studyu_designer_v2/features/recruit/invite_code_form_view.dart';
@@ -57,7 +58,9 @@ void main() {
     );
   });
 
-  testWidgets('invite link and QR code follow the code field', (tester) async {
+  testWidgets('new invite sidebar focuses the code and updates its previews', (
+    tester,
+  ) async {
     final study = Study('study-12345678', 'owner-id')..title = 'Test study';
     final viewModel = InviteCodeFormViewModel(
       study: study,
@@ -72,10 +75,16 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
-            body: ReactiveForm(
-              formGroup: viewModel.form,
-              child: SingleChildScrollView(
-                child: InviteCodeFormView(formViewModel: viewModel),
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showFormSideSheet(
+                  context: context,
+                  formViewModel: viewModel,
+                  formViewBuilder: (formViewModel) =>
+                      InviteCodeFormView(formViewModel: formViewModel),
+                  actionButtons: const [DismissButton(autofocus: false)],
+                ),
+                child: Text(tr.action_button_code_new),
               ),
             ),
           ),
@@ -83,7 +92,21 @@ void main() {
       ),
     );
 
-    await tester.enterText(find.byType(TextField).first, ' New-Code ');
+    await tester.tap(find.text(tr.action_button_code_new));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final codeField = find.byType(TextField);
+    final codeEditor = find.descendant(
+      of: codeField,
+      matching: find.byType(EditableText),
+    );
+    expect(
+      tester.widget<EditableText>(codeEditor).focusNode.hasPrimaryFocus,
+      isTrue,
+    );
+
+    await tester.enterText(codeField, ' New-Code ');
     await tester.pump(const Duration(milliseconds: 250));
 
     const expectedLink = 'https://app.studyu.health/invite/new-code';
