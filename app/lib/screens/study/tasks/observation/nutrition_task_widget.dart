@@ -8,6 +8,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/models/photo_reference.dart';
 import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
+import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
@@ -1474,6 +1475,9 @@ class const _MealTimelineCard({
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final foodNames = meal.foods.map((food) => food.name).join(', ');
+    final photoScope = meal.isSkipped
+        ? null
+        : nutritionPhotoScope(context.watch<AppState?>());
     final nutrition = sumNutritionFoods(meal.foods);
     final energy = l10n.kcal_value(nutrition.energyKcal.toStringAsFixed(0));
     final energyLabel = !nutrition.isKnown('energyKcal')
@@ -1528,14 +1532,27 @@ class const _MealTimelineCard({
             child: Row(
               children: [
                 if (!meal.isSkipped)
-                  NutritionPhotoThumbnail(
-                    photoKey: nutritionPhotoKey(
-                      nutritionPhotoScope(context.watch<AppState?>()),
-                      NutritionPhotoKind.meal,
-                      meal.id,
+                  NutritionPhotoGrid(
+                    sources: [
+                      for (final food in meal.foods)
+                        (
+                          photoKey: nutritionPhotoKey(
+                            photoScope,
+                            NutritionPhotoKind.item,
+                            food.foodId,
+                          ),
+                          imageUrl: foodImageUrl(food),
+                        ),
+                    ],
+                    fallback: NutritionPhotoThumbnail(
+                      photoKey: nutritionPhotoKey(
+                        photoScope,
+                        NutritionPhotoKind.meal,
+                        meal.id,
+                      ),
+                      fallback: const SizedBox.shrink(),
+                      size: 48,
                     ),
-                    fallback: const SizedBox.shrink(),
-                    size: 48,
                   ),
                 Expanded(
                   child: ExcludeSemantics(

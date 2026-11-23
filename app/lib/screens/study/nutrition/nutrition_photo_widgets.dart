@@ -122,6 +122,181 @@ class const NutritionPhotoThumbnail({
   }
 }
 
+typedef NutritionPhotoSource = ({
+  NutritionPhotoKey? photoKey,
+  String? imageUrl,
+});
+
+class const NutritionPhotoGrid({
+  super.key,
+  required final List<NutritionPhotoSource> sources,
+  required final Widget fallback,
+  final double size = 48,
+  final double spacing = 12,
+}) extends StatefulWidget {
+  @override
+  State<NutritionPhotoGrid> createState() => _NutritionPhotoGridState();
+}
+
+class _NutritionPhotoGridState() extends State<NutritionPhotoGrid> {
+  static const _photoLimit = 4;
+  final _storage = NutritionPhotoStorage.current;
+  Future<List<Widget>>? _photos;
+  int _revision = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _storage?.changedPath.addListener(_onPhotoChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _photos ??= _loadPhotos();
+  }
+
+  @override
+  void didUpdateWidget(NutritionPhotoGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final previous = oldWidget.sources;
+    final current = widget.sources;
+    if (previous.length != current.length ||
+        Iterable<int>.generate(current.length).any(
+          (index) =>
+              previous[index].photoKey?.path != current[index].photoKey?.path ||
+              previous[index].imageUrl != current[index].imageUrl,
+        )) {
+      _reloadPhotos();
+    }
+  }
+
+  @override
+  void dispose() {
+    _storage?.changedPath.removeListener(_onPhotoChanged);
+    super.dispose();
+  }
+
+  Future<List<Widget>> _loadPhotos() async {
+    final revision = _revision;
+    final photos = <Widget>[];
+    final remaining = widget.sources
+        .where((source) => source.photoKey != null || source.imageUrl != null)
+        .iterator;
+    while (mounted && revision == _revision && photos.length < _photoLimit) {
+      final batch = <Future<Widget?>>[
+        for (
+          var index = photos.length;
+          index < _photoLimit && remaining.moveNext();
+          index++
+        )
+          _loadPhoto(remaining.current, revision),
+      ];
+      if (batch.isEmpty) break;
+      photos.addAll((await Future.wait(batch)).whereType<Widget>());
+    }
+    return photos;
+  }
+
+  Future<Widget?> _loadPhoto(NutritionPhotoSource source, int revision) async {
+    if (source.photoKey case final key?) {
+      try {
+        final bytes = await _storage?.download(key);
+        if (bytes != null) {
+          return SizedBox.expand(
+            key: ValueKey(key.path),
+            child: _PhotoImage(bytes: bytes),
+          );
+        }
+      } on Exception {
+        // Use the catalog photo if the private download fails.
+      }
+    }
+    final url = source.imageUrl;
+    if (url == null || !mounted || revision != _revision) return null;
+    final image = NetworkImage(url);
+    var failed = false;
+    await precacheImage(image, context, onError: (_, _) => failed = true);
+    if (failed) return null;
+    return SizedBox.expand(
+      child: Image(
+        image: image,
+        fit: BoxFit.cover,
+        excludeFromSemantics: true,
+        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+      ),
+    );
+  }
+
+  void _onPhotoChanged() {
+    final changedPath = _storage?.changedPath.value?.path;
+    if (changedPath == null ||
+        widget.sources.any((source) => source.photoKey?.path == changedPath)) {
+      setState(_reloadPhotos);
+    }
+  }
+
+  void _reloadPhotos() {
+    _revision++;
+    _photos = _loadPhotos();
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<Widget>>(
+    key: ValueKey(_revision),
+    future: _photos,
+    builder: (context, snapshot) {
+      final photos = snapshot.data;
+      if (photos == null || photos.isEmpty) return widget.fallback;
+      return Padding(
+        padding: EdgeInsets.only(right: widget.spacing),
+        child: SizedBox.square(
+          dimension: widget.size,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: _NutritionPhotoGridCells(photos: photos),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class const _NutritionPhotoGridCells({required final List<Widget> photos})
+    extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    if (photos.length == 1) {
+      return photos.single;
+    }
+    if (photos.length == 2 || photos.length == 3) {
+      return Row(
+        children: [for (final photo in photos) Expanded(child: photo)],
+      );
+    }
+    return Column(
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              Expanded(child: photos[0]),
+              Expanded(child: photos[1]),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Row(
+            children: [
+              Expanded(child: photos[2]),
+              Expanded(child: photos[3]),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class const NutritionPhotoEditor({
   super.key,
   final NutritionPhotoKey? photoKey,

@@ -1,8 +1,13 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:image/image.dart' as image;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,11 +18,14 @@ import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
+import 'package:studyu_app/services/nutrition_photo_storage.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
 import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_core/core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../util/mock_nutrition_draft_storage.dart';
 import 'fake_nutrition_food_repository.dart';
@@ -91,6 +99,105 @@ class _NutritionLauncherState() extends State<_NutritionLauncher> {
 const nutritionInstructionsShownKey =
     'nutrition_instructions_shown_nutrition-task';
 const _photoManagerChannel = MethodChannel('com.fluttercandies/photo_manager');
+
+const _nutritionPhotoScope = (userId: 'participant', subjectId: 'subject');
+final _storedNutritionPhotos = <String, Uint8List>{};
+bool _nutritionPhotoSupabaseInitialized = false;
+
+NutritionPhotoKey _itemPhotoKey(String foodId) =>
+    NutritionPhotoKey(_nutritionPhotoScope, NutritionPhotoKind.item, foodId);
+
+Future<void> _initializeNutritionPhotoSupabase() async {
+  if (_nutritionPhotoSupabaseInitialized) return;
+  await Supabase.initialize(
+    url: 'http://localhost',
+    publishableKey: 'test-key',
+    httpClient: MockClient((request) async {
+      final photo = _storedNutritionPhotos[request.url.path];
+      if (request.method == 'GET' && photo != null) {
+        return http.Response.bytes(
+          photo,
+          200,
+          headers: {'content-type': 'image/jpeg'},
+        );
+      }
+      return http.Response(
+        '{"statusCode":"404","message":"Object not found"}',
+        404,
+        headers: {'content-type': 'application/json'},
+      );
+    }),
+    authOptions: const FlutterAuthClientOptions(
+      autoRefreshToken: false,
+      detectSessionInUri: false,
+      persistSession: false,
+    ),
+  );
+  await Supabase.instance.client.auth.recoverSession(
+    jsonEncode({
+      'access_token': 'participant-token',
+      'token_type': 'bearer',
+      'user': {'id': 'participant', 'app_metadata': <String, dynamic>{}},
+    }),
+  );
+  _nutritionPhotoSupabaseInitialized = true;
+}
+
+void _storeItemPhotos(String mealId, int foodCount) {
+  _storedNutritionPhotos.clear();
+  for (var index = 0; index < foodCount; index++) {
+    final key = _itemPhotoKey('$mealId-$index-definition');
+    _storedNutritionPhotos['/storage/v1/object/nutrition-photos/${key.path}'] =
+        Uint8List.fromList([255, 216]);
+  }
+}
+
+AppState _photoParticipant() =>
+    AppState()
+      ..activeSubject = StudySubject('subject', 'study', 'participant', []);
+
+class _CatalogPhotoClient(final Map<Uri, Uint8List> _photos)
+    extends Fake
+    implements HttpClient {
+  @override
+  Future<HttpClientRequest> getUrl(Uri url) async =>
+      _CatalogPhotoRequest(_photos[url]!);
+}
+
+class _CatalogPhotoRequest(final Uint8List _bytes)
+    extends Fake
+    implements HttpClientRequest {
+  @override
+  Future<HttpClientResponse> close() async => _CatalogPhotoResponse(_bytes);
+}
+
+class _CatalogPhotoResponse(final Uint8List _bytes)
+    extends Stream<List<int>>
+    with Fake
+    implements HttpClientResponse {
+  @override
+  int get statusCode => HttpStatus.ok;
+
+  @override
+  int get contentLength => _bytes.length;
+
+  @override
+  HttpClientResponseCompressionState get compressionState =>
+      HttpClientResponseCompressionState.notCompressed;
+
+  @override
+  StreamSubscription<List<int>> listen(
+    void Function(List<int>)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) => Stream<List<int>>.value(_bytes).listen(
+    onData,
+    onError: onError,
+    onDone: onDone,
+    cancelOnError: cancelOnError,
+  );
+}
 
 NutritionTask nutritionTask({
   String? instructions,
@@ -364,6 +471,179 @@ void main() {
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_photoManagerChannel, null);
+  });
+
+  testWidgets('timeline photo grid splits one to four item photos', (
+    tester,
+  ) async {
+    await _initializeNutritionPhotoSupabase();
+    SharedPreferences.setMockInitialValues({
+      nutritionInstructionsShownKey: true,
+    });
+    const cases = [
+      ('one', 1, [Size(48, 48)]),
+      ('two', 2, [Size(24, 48), Size(24, 48)]),
+      ('three', 3, [Size(16, 48), Size(16, 48), Size(16, 48)]),
+      ('four', 4, [Size(24, 24), Size(24, 24), Size(24, 24), Size(24, 24)]),
+    ];
+    for (final (id, foodCount, expectedSizes) in cases) {
+      _storeItemPhotos(id, foodCount);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      await tester.pumpWidget(
+        nutritionTaskApp(
+          nutritionTask(),
+          appState: _photoParticipant(),
+          existingRecall: recall([
+            meal(
+              id,
+              MealType.breakfast,
+              foods: [
+                for (var index = 0; index < foodCount; index++)
+                  food('$id-$index', '$id $index', 100),
+              ],
+            ),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final grid = find.byType(NutritionPhotoGrid);
+      for (var index = 0; index < expectedSizes.length; index++) {
+        final key = _itemPhotoKey('$id-$index-definition');
+        expect(
+          tester.getSize(
+            find.descendant(of: grid, matching: find.byKey(ValueKey(key.path))),
+          ),
+          expectedSizes[index],
+        );
+      }
+    }
+  });
+
+  testWidgets('timeline photo grid shows the first four available photos', (
+    tester,
+  ) async {
+    await _initializeNutritionPhotoSupabase();
+    SharedPreferences.setMockInitialValues({
+      nutritionInstructionsShownKey: true,
+    });
+    _storeItemPhotos('five', 5);
+    await tester.pumpWidget(
+      nutritionTaskApp(
+        nutritionTask(),
+        appState: _photoParticipant(),
+        existingRecall: recall([
+          meal(
+            'five',
+            MealType.breakfast,
+            foods: [
+              food('missing-photo', 'Food without a photo', 100),
+              for (var index = 0; index < 5; index++)
+                food('five-$index', 'Food $index', 100),
+            ],
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final grid = find.byType(NutritionPhotoGrid);
+    for (var index = 0; index < 4; index++) {
+      final key = _itemPhotoKey('five-$index-definition');
+      expect(
+        tester.getSize(
+          find.descendant(of: grid, matching: find.byKey(ValueKey(key.path))),
+        ),
+        const Size(24, 24),
+      );
+    }
+    expect(
+      find.descendant(
+        of: grid,
+        matching: find.byKey(ValueKey(_itemPhotoKey('five-4-definition').path)),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('diary card shows both catalog photos from a saved entry', (
+    tester,
+  ) async {
+    await _initializeNutritionPhotoSupabase();
+    _storedNutritionPhotos.clear();
+    SharedPreferences.setMockInitialValues({
+      nutritionInstructionsShownKey: true,
+    });
+    const urls = [
+      'https://example.test/apple.png',
+      'https://example.test/pear.png',
+    ];
+    final foods = [
+      food('apple', 'Apple', 100)
+        ..originalValues['image_front_small_url'] = urls[0],
+      food('pear', 'Pear', 100)..originalValues['image_url'] = urls[1],
+    ];
+    final client = _CatalogPhotoClient({
+      Uri.parse(urls[0]): image.encodePng(image.Image(width: 8, height: 8)),
+      Uri.parse(urls[1]): image.encodePng(image.Image(width: 16, height: 8)),
+    });
+    debugNetworkImageHttpClientProvider = () => client;
+    try {
+      final placeholder = find.byType(SizedBox);
+      await tester.pumpWidget(const SizedBox.shrink());
+      final context = tester.element(placeholder);
+      await tester.runAsync(() async {
+        await Future.wait(
+          urls.map((url) => precacheImage(NetworkImage(url), context)),
+        );
+      });
+      await tester.pumpWidget(
+        nutritionTaskApp(
+          nutritionTask(),
+          appState: _photoParticipant(),
+          existingRecall: recall([
+            meal('fruit', MealType.breakfast, foods: foods),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final renderedPhotos = find.descendant(
+        of: find.byType(NutritionPhotoGrid),
+        matching: find.byType(RawImage),
+      );
+      expect(
+        tester
+            .widgetList<RawImage>(renderedPhotos)
+            .map((photo) => photo.image?.width),
+        [8, 16],
+      );
+    } finally {
+      debugNetworkImageHttpClientProvider = null;
+    }
+  });
+
+  testWidgets('photo grid keeps the fallback when item photos are missing', (
+    tester,
+  ) async {
+    await _initializeNutritionPhotoSupabase();
+    _storedNutritionPhotos.clear();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NutritionPhotoGrid(
+            sources: [(photoKey: _itemPhotoKey('missing'), imageUrl: null)],
+            fallback: const Text('Fallback photo'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fallback photo'), findsOneWidget);
+    expect(find.byKey(ValueKey(_itemPhotoKey('missing').path)), findsNothing);
   });
 
   testWidgets('water logging is hidden when the study has it disabled', (
