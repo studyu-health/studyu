@@ -315,11 +315,14 @@ class TemplateViewModel({
   FoodEntry applyFoodTemplate(SavedFoodTemplate template) {
     return _createFoodFromPrototype(
       template.prototype,
-      _isDraftTemplate(template.id)
-          ? template.prototype.templateId
-          : template.id,
+      foodTemplateId(template),
     );
   }
+
+  String? foodTemplateId(SavedFoodTemplate template) =>
+      _isDraftTemplate(template.id)
+      ? template.prototype.templateId
+      : template.id;
 
   bool _isDraftTemplate(String id) =>
       _draftTemplates.containsKey(id) &&

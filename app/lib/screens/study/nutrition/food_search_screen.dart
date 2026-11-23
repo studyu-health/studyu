@@ -588,7 +588,7 @@ class _FoodSearchScreenContentState()
   void _addHistoryItem(FoodSearchHistoryItem item, Offset? source) {
     if (!_isAllowedFood(item.food)) return;
     final food = item.createSelection();
-    _addToSelection(food, key: canonicalFoodSelectionKey(food), source: source);
+    _addToSelection(food, key: _selectionKeyForHistory(item), source: source);
   }
 
   studyu.FoodEntry _foodEntryForResult(UnifiedFoodResult result) =>
@@ -626,7 +626,31 @@ class _FoodSearchScreenContentState()
   void _addFoodTemplate(studyu.SavedFoodTemplate template, Offset? source) {
     if (!_isAllowedFood(template.prototype)) return;
     final food = _foodEntryForTemplate(template);
-    _addToSelection(food, key: canonicalFoodSelectionKey(food), source: source);
+    _addToSelection(
+      food,
+      key: _selectionKeyForTemplate(template),
+      source: source,
+    );
+  }
+
+  String _selectionKeyForTemplate(studyu.SavedFoodTemplate template) {
+    final templateId = context.read<TemplateViewModel>().foodTemplateId(
+      template,
+    );
+    final key = templateId != null && templateId.isNotEmpty
+        ? 'template:$templateId'
+        : canonicalFoodSelectionKey(template.prototype);
+    return _selectionStore?.keyForFoodDefinition(
+          template.prototype.foodId,
+          key,
+        ) ??
+        key;
+  }
+
+  String _selectionKeyForHistory(FoodSearchHistoryItem item) {
+    final food = item.food;
+    final key = canonicalFoodSelectionKey(food);
+    return _selectionStore?.keyForFoodDefinition(food.foodId, key) ?? key;
   }
 
   void _confirmSelection(FoodSelectionStore store) {
@@ -1157,6 +1181,8 @@ class _FoodSearchScreenContentState()
                         onRetry: _retrySearch,
                         allowMeals: widget.allowMeals,
                         selectionStore: _selectionStore,
+                        selectionKeyForTemplate: _selectionKeyForTemplate,
+                        selectionKeyForHistory: _selectionKeyForHistory,
                         selectionKeyForResult: (result) =>
                             canonicalFoodSelectionKey(
                               _foodEntryForResult(result),

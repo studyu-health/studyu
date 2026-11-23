@@ -48,6 +48,14 @@ final class FoodSelectionStore() extends ChangeNotifier {
 
   FoodSelectionItem? itemFor(String key) => _items[key];
 
+  String keyForFoodDefinition(String foodId, String preferredKey) {
+    if (_items[preferredKey]?.baseFood.foodId == foodId) return preferredKey;
+    for (final item in _items.values) {
+      if (item.baseFood.foodId == foodId) return item.key;
+    }
+    return preferredKey;
+  }
+
   void seed(Iterable<studyu.FoodEntry> foods) {
     for (final food in foods) {
       final canonicalKey = canonicalFoodSelectionKey(food);

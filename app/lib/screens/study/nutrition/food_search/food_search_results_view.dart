@@ -54,6 +54,7 @@ class const _HistoryFoodCard({
   final ValueChanged<Offset?>? onAdd,
   required final ThemeData theme,
   final FoodSelectionStore? selectionStore,
+  required final String selectionKey,
   required final ValueChanged<Offset?> onIncrement,
   required final VoidCallback onDecrement,
 }) extends StatelessWidget {
@@ -70,7 +71,7 @@ class const _HistoryFoodCard({
       NutritionPhotoKind.item,
       food.foodId,
     );
-    final selected = selectionStore?.itemFor(canonicalFoodSelectionKey(food));
+    final selected = selectionStore?.itemFor(selectionKey);
     final metadata = foodTotalMetadata(
       l10n,
       selected?.baseFood ?? food,
@@ -253,6 +254,9 @@ class const _FoodSearchListView({
   required final VoidCallback onRetry,
   final bool allowMeals = true,
   final FoodSelectionStore? selectionStore,
+  required final String Function(studyu.SavedFoodTemplate)
+  selectionKeyForTemplate,
+  required final String Function(FoodSearchHistoryItem) selectionKeyForHistory,
   final String Function(UnifiedFoodResult)? selectionKeyForResult,
   required final ValueChanged<String> onDecrementSelection,
 }) extends StatelessWidget {
@@ -264,16 +268,13 @@ class const _FoodSearchListView({
         : null,
     theme: theme,
     selectionStore: selectionStore,
+    selectionKey: selectionKeyForHistory(item),
     onIncrement: (source) => onAddHistory(item, source),
-    onDecrement: () =>
-        onDecrementSelection(canonicalFoodSelectionKey(item.food)),
+    onDecrement: () => onDecrementSelection(selectionKeyForHistory(item)),
   );
 
-  String _templateKey(studyu.SavedFoodTemplate template) =>
-      'template:${template.id}';
-
   Widget _templateCard(studyu.SavedFoodTemplate template) {
-    final key = _templateKey(template);
+    final key = selectionKeyForTemplate(template);
     final selected = selectionStore?.itemFor(key);
     return FoodLibraryItemCard(
       template: template,
@@ -327,13 +328,15 @@ class const _FoodSearchListView({
         onAdd: onAddFoodTemplate,
         addOnTap: selectionStore != null,
         isSelected: (template) =>
-            selectionStore?.itemFor(_templateKey(template)) != null,
+            selectionStore?.itemFor(selectionKeyForTemplate(template)) != null,
         selectedQuantity: (template) =>
-            selectionStore?.itemFor(_templateKey(template))?.amount,
-        selectedFood: (template) =>
-            selectionStore?.itemFor(_templateKey(template))?.baseFood,
+            selectionStore?.itemFor(selectionKeyForTemplate(template))?.amount,
+        selectedFood: (template) => selectionStore
+            ?.itemFor(selectionKeyForTemplate(template))
+            ?.baseFood,
         onIncrement: onAddFoodTemplate,
-        onDecrement: (template) => onDecrementSelection(_templateKey(template)),
+        onDecrement: (template) =>
+            onDecrementSelection(selectionKeyForTemplate(template)),
         showManagementActions: false,
         showLibraryHeading: false,
       );
