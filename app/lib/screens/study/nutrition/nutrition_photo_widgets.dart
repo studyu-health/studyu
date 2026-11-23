@@ -200,56 +200,60 @@ class _NutritionPhotoEditorState() extends State<NutritionPhotoEditor> {
     final change = widget.change ?? pending;
     final bytes = change == null ? stored : change.bytes;
     final enabled = widget.enabled && !_picking;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (bytes != null)
-          SizedBox(
-            width: 144,
-            height: 112,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: _PhotoImage(bytes: bytes),
-            ),
-          ),
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            TextButton.icon(
-              onPressed: enabled ? _pick : null,
-              icon: const Icon(Icons.add_a_photo_outlined),
-              label: Text(
-                bytes == null
-                    ? l10n.nutrition_photo_add
-                    : l10n.nutrition_photo_replace,
-              ),
-            ),
-            if (bytes != null)
-              TextButton(
-                onPressed: enabled
-                    ? () => widget.onChanged(
-                        stored == null && pending == null
-                            ? null
-                            : const NutritionPhotoChange.remove(),
-                      )
-                    : null,
-                child: Text(l10n.nutrition_photo_remove),
-              ),
-            if (pending != null && widget.change == null)
-              TextButton(
-                onPressed: enabled
-                    ? () => saveNutritionPhoto(context, key, pending)
-                    : null,
-                child: Text(l10n.nutrition_photo_retry),
-              ),
-            if (_picking)
-              const SizedBox.square(
-                dimension: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-          ],
+    final actionChildren = <Widget>[
+      if (bytes != null) ...[
+        TextButton.icon(
+          onPressed: enabled ? _pick : null,
+          icon: const Icon(Icons.add_a_photo_outlined),
+          label: Text(l10n.nutrition_photo_replace),
+        ),
+        TextButton(
+          onPressed: enabled
+              ? () => widget.onChanged(
+                  stored == null && pending == null
+                      ? null
+                      : const NutritionPhotoChange.remove(),
+                )
+              : null,
+          child: Text(l10n.nutrition_photo_remove),
         ),
       ],
+      if (pending != null && widget.change == null)
+        TextButton(
+          onPressed: enabled
+              ? () => saveNutritionPhoto(context, key, pending)
+              : null,
+          child: Text(l10n.nutrition_photo_retry),
+        ),
+      if (_picking)
+        const SizedBox.square(
+          dimension: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+    ];
+    final actions = actionChildren.isEmpty
+        ? null
+        : Wrap(
+            alignment: bytes == null
+                ? WrapAlignment.start
+                : WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            children: actionChildren,
+          );
+    if (bytes == null) {
+      return _NutritionPhotoFrame(
+        photo: _EmptyPhotoPlaceholder(
+          onPressed: enabled ? _pick : null,
+          label: l10n.nutrition_photo_add,
+        ),
+        actions: actions,
+      );
+    }
+
+    return _NutritionPhotoFrame(
+      photo: _PhotoImage(bytes: bytes),
+      actions: actions,
     );
   }
 
@@ -264,6 +268,116 @@ class _NutritionPhotoEditorState() extends State<NutritionPhotoEditor> {
             builder: _controls,
           );
   }
+}
+
+class const NutritionPhotoPreview({
+  final NutritionPhotoKey? photoKey,
+  final String? imageUrl,
+  final String? semanticLabel,
+  final EdgeInsets padding = EdgeInsets.zero,
+}) extends StatelessWidget {
+  Widget _preview(BuildContext context, Uint8List? bytes) {
+    if (bytes != null) {
+      return Padding(
+        padding: padding,
+        child: _NutritionPhotoFrame(photo: _PhotoImage(bytes: bytes)),
+      );
+    }
+    final url = imageUrl;
+    if (url == null) return const SizedBox.shrink();
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      semanticLabel: semanticLabel,
+      frameBuilder: (_, child, frame, _) => frame == null
+          ? const SizedBox.shrink()
+          : Padding(
+              padding: padding,
+              child: _NutritionPhotoFrame(photo: child),
+            ),
+      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final key = photoKey;
+    return key == null
+        ? _preview(context, null)
+        : _StoredPhoto(
+            key: ValueKey(key.path),
+            photoKey: key,
+            builder: _preview,
+          );
+  }
+}
+
+class const _EmptyPhotoPlaceholder({
+  required final VoidCallback? onPressed,
+  required final String label,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: InkWell(
+        onTap: onPressed,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.add_a_photo_outlined,
+                size: 34,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class const _NutritionPhotoFrame({
+  required final Widget photo,
+  final Widget? actions,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 224),
+      child: Card.outlined(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(8, 8, 8, actions == null ? 8 : 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 132,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: photo,
+                ),
+              ),
+              ?actions,
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class const _StoredPhoto({
