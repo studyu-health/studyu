@@ -65,6 +65,11 @@ class const _HistoryFoodCard({
         ? l10n.nutrition_saved_meal_badge
         : l10n.nutrition_food_badge;
     final imageUrl = foodImageUrl(food);
+    final photoKey = nutritionPhotoKey(
+      nutritionPhotoScope(context.watch<AppState?>()),
+      NutritionPhotoKind.item,
+      food.foodId,
+    );
     final selected = selectionStore?.itemFor(canonicalFoodSelectionKey(food));
     final metadata = foodTotalMetadata(
       l10n,
@@ -78,6 +83,7 @@ class const _HistoryFoodCard({
       metadata: metadata,
       icon: _foodIcon(food),
       imageUrl: imageUrl,
+      photoKey: photoKey,
       typeLabel: typeLabel,
       titleStyle:
           ListTileTheme.of(context).titleTextStyle ?? theme.textTheme.bodyLarge,

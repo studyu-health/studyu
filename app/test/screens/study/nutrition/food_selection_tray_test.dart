@@ -12,6 +12,7 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/models/usda_models.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
@@ -979,6 +980,62 @@ void main() {
     expect(template.id, 'library-pear-template');
     expect(template.prototype.amount, 1);
     expect(template.prototype.nutrition.energyKcal, 160);
+  });
+
+  testWidgets('recent custom items pass their photo key to the card', (
+    tester,
+  ) async {
+    await _initializePhotoSupabase(tester);
+    final subject = studyu.StudySubject('subject', 'study', 'user', []);
+    final template = _libraryTemplate(id: 'recent-apple', name: 'Recent Apple');
+    final date = DateTime.utc(2025);
+    subject.progress.add(
+      studyu.SubjectProgress(
+        subjectId: subject.id,
+        interventionId: 'intervention',
+        taskId: 'task',
+        resultType: 'DailyRecall',
+        result: studyu.Result<studyu.DailyRecall>.app(
+          type: 'DailyRecall',
+          periodId: 'period',
+          result: studyu.DailyRecall.withId(
+            date: date,
+            recallMode: studyu.RecallMode.realtimeRecord,
+            meals: [
+              studyu.MealLog.withId(
+                mealType: studyu.MealType.lunch,
+                mealContext: studyu.MealContext.home,
+                timestamp: date,
+                timezone: 'UTC',
+                isSkipped: false,
+                foods: [
+                  template.prototype
+                    ..foodId = template.id
+                    ..templateId = template.id,
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await _pumpSearch(
+      tester,
+      query: null,
+      subject: subject,
+      repository: FakeNutritionFoodRepository([template]),
+    );
+
+    final card = find
+        .ancestor(
+          of: find.text('Recent Apple'),
+          matching: find.byType(FoodItemCard),
+        )
+        .first;
+    expect(
+      tester.widget<FoodItemCard>(card).photoKey?.path,
+      'user/subject/item/recent-apple.jpg',
+    );
   });
 }
 
