@@ -3367,4 +3367,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get remove_from_entry => '일지 항목에서 제거';
+
+  @override
+  String get library_copy_edit_title => '데이터베이스의 식품을 편집할까요?';
+
+  @override
+  String get library_copy_edit_message =>
+      '변경 사항은 이 식품에 적용됩니다. 나중에 다시 사용할 수 있도록 사본을 저장할 수도 있습니다.';
+
+  @override
+  String get library_copy_edit_action => '라이브러리에도 사본 저장';
 }

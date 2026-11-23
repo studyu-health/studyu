@@ -259,30 +259,32 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     );
   }
 
-  Future<NutritionLibraryEditChoice?> _chooseLibraryEdit() {
-    final l10n = AppLocalizations.of(context)!;
-    return showNutritionLibraryEditChoiceDialog(
-      context: context,
-      currentScopeLabel: l10n.library_edit_current_entry,
-      message: l10n.library_edit_message,
-    );
-  }
-
   Future<void> _editFood(
     FoodEntry food, {
     bool editReusableDefinition = false,
   }) async {
     if (_isSaving || !_revalidateHistoricalEligibility()) return;
     final isLibraryBacked = food.templateId?.isNotEmpty == true;
+    final canCreateLibraryCopy = canCopyDatabaseFoodToLibrary(food);
     var updateLibrary = false;
+    var createLibraryCopy = false;
     if (!editReusableDefinition &&
-        widget.historicalTarget == null &&
-        isLibraryBacked) {
-      final choice = await _chooseLibraryEdit();
+        (canCreateLibraryCopy ||
+            (widget.historicalTarget == null && isLibraryBacked))) {
+      final l10n = AppLocalizations.of(context)!;
+      final choice = await showNutritionLibraryEditChoiceDialog(
+        context: context,
+        currentScopeLabel: l10n.library_edit_current_entry,
+        message: l10n.library_edit_message,
+        createLibraryCopy: canCreateLibraryCopy,
+      );
       if (!mounted || choice == null || !_revalidateHistoricalEligibility()) {
         return;
       }
-      updateLibrary = choice == NutritionLibraryEditChoice.currentAndLibrary;
+      if (choice == NutritionLibraryEditChoice.currentAndLibrary) {
+        createLibraryCopy = canCreateLibraryCopy;
+        updateLibrary = isLibraryBacked;
+      }
     }
 
     final editableFood = editReusableDefinition || updateLibrary
@@ -310,7 +312,8 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         editReusableDefinition && await _hasCurrentStudyDayMatches(food.foodId);
     if (!mounted || !_revalidateHistoricalEligibility()) return;
     final FoodEntry? result;
-    final showCurrentMealOnlyNotice = !editReusableDefinition && !updateLibrary;
+    final showCurrentMealOnlyNotice =
+        !editReusableDefinition && !updateLibrary && !createLibraryCopy;
     if (food.entryType == FoodEntryType.meal) {
       result = await Navigator.of(context).push(
         MealCreatorScreen.route(
@@ -332,9 +335,11 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           editReusableDefinition: editReusableDefinition,
           hasCurrentStudyDayMatches: hasCurrentDayMatches,
           showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
+          saveLibraryCopyOnEdit: createLibraryCopy,
           allowPhoto: true,
           savePhotoToLibraryOnEdit: true,
           repository: widget.foodRepository,
+          templateViewModel: widget.templateViewModel,
           canEditRecall: _revalidateHistoricalEligibility,
           onHistoricalDefinitionSaved: (revision) {
             _definitionMutationRevision = revision;

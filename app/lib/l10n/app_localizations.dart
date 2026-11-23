@@ -6132,6 +6132,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove from entry'**
   String get remove_from_entry;
+
+  /// No description provided for @library_copy_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit database food?'**
+  String get library_copy_edit_title;
+
+  /// No description provided for @library_copy_edit_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Your changes apply to this item. You can also save a copy for future use.'**
+  String get library_copy_edit_message;
+
+  /// No description provided for @library_copy_edit_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Also save a copy to Library'**
+  String get library_copy_edit_action;
 }
 
 class _AppLocalizationsDelegate

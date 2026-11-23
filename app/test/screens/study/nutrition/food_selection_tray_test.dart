@@ -426,7 +426,7 @@ void main() {
     expect(find.byType(FoodEntryScreen), findsNothing);
 
     await tester.tap(tuneAction);
-    await tester.pumpAndSettle();
+    await _chooseDatabaseSelectionOnly(tester);
     expect(find.text('Edit food'), findsOneWidget);
     expect(find.text('Save'), findsOneWidget);
     expect(expandedList, findsNothing);
@@ -448,7 +448,7 @@ void main() {
 
       await _addExternalApple(tester);
       await tester.tap(_basketEdit());
-      await tester.pumpAndSettle();
+      await _chooseDatabaseSelectionOnly(tester);
       await tester.enterText(_amountField(), '1.5');
       await tester.pump();
       await tester.tap(find.text('Save'));
@@ -493,7 +493,7 @@ void main() {
 
     await _addExternalApple(tester);
     await tester.tap(_basketEdit());
-    await tester.pumpAndSettle();
+    await _chooseDatabaseSelectionOnly(tester);
     tester.view.viewInsets = const FakeViewPadding(bottom: 300);
     addTearDown(tester.view.resetViewInsets);
     await tester.tap(_amountField());
@@ -511,7 +511,7 @@ void main() {
 
     await _addExternalApple(tester);
     await tester.tap(_basketEdit());
-    await tester.pumpAndSettle();
+    await _chooseDatabaseSelectionOnly(tester);
     await tester.enterText(_weightField(), '120');
     await tester.pump();
     await tester.tap(find.text('Save'));
@@ -523,7 +523,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(_basketEdit());
-    await tester.pumpAndSettle();
+    await _chooseDatabaseSelectionOnly(tester);
     await tester.ensureVisible(_weightField());
     await tester.enterText(_weightField(), '150');
     await tester.tap(find.text('Save'));
@@ -585,7 +585,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tray.evaluate().single, same(trayElement));
     await tester.tap(_basketEdit());
-    await tester.pumpAndSettle();
+    await _chooseDatabaseSelectionOnly(tester);
     await tester.pageBack();
     await tester.pumpAndSettle();
     tester.semantics.tap(header);
@@ -786,7 +786,7 @@ void main() {
     await tester.tap(find.text('Selected items'));
     await tester.pumpAndSettle();
     await tester.tap(_basketEdit());
-    await tester.pumpAndSettle();
+    await _chooseDatabaseSelectionOnly(tester);
     expect(find.byType(FoodEntryScreen), findsOneWidget);
 
     await tester.binding.handlePopRoute();
@@ -878,9 +878,8 @@ void main() {
     final expandedList = find.byKey(const ValueKey('selection-expanded-list'));
 
     await tester.tap(_basketEdit(expandedList));
-    await tester.pumpAndSettle();
+    await _chooseDatabaseSelectionOnly(tester);
 
-    expect(find.text(l10n.library_edit_title), findsNothing);
     expect(find.text(l10n.current_selection_only_banner), findsOneWidget);
     expect(find.text(l10n.nutrition_photo_add), findsNothing);
     final preview = tester.widget<NutritionPhotoPreview>(
@@ -888,6 +887,44 @@ void main() {
     );
     expect(preview.photoKey, isNull);
     expect(preview.imageUrl, 'https://example.com/apple.jpg');
+  });
+
+  testWidgets('database basket edit can save a separate reusable copy', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final repository = FakeNutritionFoodRepository();
+    FoodSearchSelection? selection;
+    await _pumpSearch(
+      tester,
+      repository: repository,
+      onResult: (value) => selection = value,
+    );
+    await _addExternalApple(tester);
+    await tester.tap(_basketEdit());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.library_copy_edit_action));
+    await tester.pumpAndSettle();
+    await tester.enterText(_amountField(), '2');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, l10n.energy_kcal),
+      '90',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Add 1 item to Lunch'));
+    await tester.pumpAndSettle();
+
+    final food = selection!.foods.single;
+    expect(food.amount, 2);
+    expect(food.nutrition.energyKcal, 180);
+    expect(food.templateId, isNull);
+    final copy = (await repository.loadTemplates('anonymous')).single;
+    expect(copy.id, isNot(food.foodId));
+    expect(copy.prototype.amount, 1);
+    expect(copy.prototype.nutrition.energyKcal, 90);
+    expect(copy.prototype.source, studyu.FoodSource.usda);
+    expect(copy.prototype.externalId, food.externalId);
   });
 
   testWidgets('library basket edits can update only the current selection', (
@@ -1037,6 +1074,13 @@ void main() {
       'user/subject/item/recent-apple.jpg',
     );
   });
+}
+
+Future<void> _chooseDatabaseSelectionOnly(WidgetTester tester) async {
+  final l10n = lookupAppLocalizations(const Locale('en'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(l10n.library_edit_current_selection));
+  await tester.pumpAndSettle();
 }
 
 Future<void> _chooseLibraryEditScope(

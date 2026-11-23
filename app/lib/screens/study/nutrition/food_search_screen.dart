@@ -737,17 +737,25 @@ class _FoodSearchScreenContentState()
     _removeTransfer();
     _searchFocusNode.unfocus();
 
-    final templateId = item.baseFood.templateId;
+    final isLibraryBacked = item.baseFood.templateId?.isNotEmpty == true;
+    final canCreateLibraryCopy =
+        !widget.isRecipeIngredient &&
+        canCopyDatabaseFoodToLibrary(item.baseFood);
     var updateLibrary = false;
-    if (templateId?.isNotEmpty == true) {
+    var createLibraryCopy = false;
+    if (isLibraryBacked || canCreateLibraryCopy) {
       final l10n = AppLocalizations.of(context)!;
       final choice = await showNutritionLibraryEditChoiceDialog(
         context: context,
         currentScopeLabel: l10n.library_edit_current_selection,
         message: l10n.library_edit_selection_message,
+        createLibraryCopy: canCreateLibraryCopy,
       );
       if (!mounted || choice == null) return;
-      updateLibrary = choice == NutritionLibraryEditChoice.currentAndLibrary;
+      if (choice == NutritionLibraryEditChoice.currentAndLibrary) {
+        createLibraryCopy = canCreateLibraryCopy;
+        updateLibrary = isLibraryBacked;
+      }
     }
 
     final editorFood = updateLibrary
@@ -768,8 +776,10 @@ class _FoodSearchScreenContentState()
               existingFood: editorFood,
               showSearchAction: false,
               editLoggedAmount: true,
-              showCurrentMealOnlyNotice: !updateLibrary,
+              showCurrentMealOnlyNotice: !updateLibrary && !createLibraryCopy,
               selectionOnlyNotice: true,
+              saveLibraryCopyOnEdit: createLibraryCopy,
+              templateViewModel: context.read<TemplateViewModel>(),
               allowPhoto: true,
               savePhotoToLibraryOnEdit: true,
             ),

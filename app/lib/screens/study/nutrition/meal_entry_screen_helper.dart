@@ -99,18 +99,30 @@ enum NutritionLibraryEditChoice() {
   currentAndLibrary,
 }
 
+bool canCopyDatabaseFoodToLibrary(FoodEntry food) =>
+    food.source != FoodSource.manual &&
+    food.entryType != FoodEntryType.meal &&
+    food.templateId?.isNotEmpty != true;
+
 Future<NutritionLibraryEditChoice?> showNutritionLibraryEditChoiceDialog({
   required BuildContext context,
   required String currentScopeLabel,
   required String message,
+  bool createLibraryCopy = false,
 }) {
   final l10n = AppLocalizations.of(context)!;
   return showDialog<NutritionLibraryEditChoice>(
     context: context,
     builder: (dialogContext) => AlertDialog(
       scrollable: true,
-      title: Text(l10n.library_edit_title),
-      content: Text(message),
+      title: Text(
+        createLibraryCopy
+            ? l10n.library_copy_edit_title
+            : l10n.library_edit_title,
+      ),
+      content: Text(
+        createLibraryCopy ? l10n.library_copy_edit_message : message,
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(),
@@ -126,7 +138,11 @@ Future<NutritionLibraryEditChoice?> showNutritionLibraryEditChoiceDialog({
             dialogContext,
             NutritionLibraryEditChoice.currentAndLibrary,
           ),
-          child: Text(l10n.library_edit_current_entry_and_library),
+          child: Text(
+            createLibraryCopy
+                ? l10n.library_copy_edit_action
+                : l10n.library_edit_current_entry_and_library,
+          ),
         ),
       ],
     ),

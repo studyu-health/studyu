@@ -1330,5 +1330,8 @@
   "meal_neutral_label_inline": "diesem Eintrag",
   "nutrition_add_diary_entry": "Eintrag hinzufügen",
   "nutrition_create_library_item": "Element erstellen",
-  "remove_from_entry": "Aus dem Eintrag entfernen"
+  "remove_from_entry": "Aus dem Eintrag entfernen",
+  "library_copy_edit_title": "Lebensmittel aus der Datenbank bearbeiten?",
+  "library_copy_edit_message": "Deine Änderungen gelten für dieses Lebensmittel. Du kannst auch eine Kopie für später speichern.",
+  "library_copy_edit_action": "Auch Kopie in Bibliothek speichern"
 }

@@ -3485,4 +3485,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get remove_from_entry => 'Aus dem Eintrag entfernen';
+
+  @override
+  String get library_copy_edit_title =>
+      'Lebensmittel aus der Datenbank bearbeiten?';
+
+  @override
+  String get library_copy_edit_message =>
+      'Deine Änderungen gelten für dieses Lebensmittel. Du kannst auch eine Kopie für später speichern.';
+
+  @override
+  String get library_copy_edit_action => 'Auch Kopie in Bibliothek speichern';
 }

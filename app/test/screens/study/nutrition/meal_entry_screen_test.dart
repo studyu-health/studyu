@@ -1414,6 +1414,66 @@ void main() {
     expect(find.byType(MealEntryScreen), findsNothing);
   });
 
+  for (final createLibraryCopy in [false, true]) {
+    testWidgets(
+      'edit logged database food with Library copy $createLibraryCopy',
+      (tester) async {
+        final setup = _historicalEditingSetup();
+        final repository = FakeNutritionFoodRepository();
+        final meal = _mealWithMatchingDefinitions();
+        meal.foods.first
+          ..source = FoodSource.usda
+          ..externalId = '123';
+        MealLog? result;
+        await openMealEntry(
+          tester,
+          meal,
+          historicalTarget: setup.target,
+          foodRepository: repository,
+          appState: setup.appState,
+          onResult: (value) => result = value,
+        );
+
+        await tester.tap(find.byTooltip('More options').first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Edit this entry'));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.text(
+            createLibraryCopy
+                ? 'Also save a copy to Library'
+                : 'Only this logged item',
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.enterText(foodEditorInput('Food Name'), 'Edited apple');
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Save diary entry'));
+        await tester.pumpAndSettle();
+
+        final edited = result!.foods.first;
+        expect(edited.name, 'Edited apple');
+        expect(edited.id, meal.foods.first.id);
+        expect(edited.foodId, meal.foods.first.foodId);
+        expect(edited.amount, 2);
+        expect(result!.foods.last.name, 'Apple');
+
+        final templates = await repository.loadTemplates('subject');
+        if (createLibraryCopy) {
+          final copy = templates.single.prototype;
+          expect(copy.name, edited.name);
+          expect(copy.foodId, isNot(edited.foodId));
+          expect(copy.amount, 1);
+          expect(copy.nutrition.energyKcal, 52);
+          expect(copy.externalId, '123');
+        } else {
+          expect(templates, isEmpty);
+        }
+      },
+    );
+  }
+
   testWidgets('historical entry edit stays local to the selected occurrence', (
     tester,
   ) async {

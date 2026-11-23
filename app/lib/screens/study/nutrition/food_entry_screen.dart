@@ -31,6 +31,7 @@ class const FoodEntryScreen({
   final String? mealLabel,
   final bool editLoggedAmount = false,
   final bool isRecipeIngredient = false,
+  final bool saveLibraryCopyOnEdit = false,
   final bool historicalMode = false,
   final NutritionRecallPersistenceTarget? historicalTarget,
   final bool editReusableDefinition = false,
@@ -50,6 +51,7 @@ class const FoodEntryScreen({
 }) extends StatefulWidget {
   this
     : assert(!editReusableDefinition || historicalTarget != null),
+      assert(!saveLibraryCopyOnEdit || existingFood != null),
       assert(!isExternalLibraryCopy || existingFood != null);
 
   static MaterialPageRoute<FoodEntry> route({
@@ -59,6 +61,7 @@ class const FoodEntryScreen({
     String? mealLabel,
     bool editLoggedAmount = false,
     bool isRecipeIngredient = false,
+    bool saveLibraryCopyOnEdit = false,
     bool historicalMode = false,
     NutritionRecallPersistenceTarget? historicalTarget,
     bool editReusableDefinition = false,
@@ -82,6 +85,7 @@ class const FoodEntryScreen({
       mealLabel: mealLabel,
       editLoggedAmount: editLoggedAmount,
       isRecipeIngredient: isRecipeIngredient,
+      saveLibraryCopyOnEdit: saveLibraryCopyOnEdit,
       historicalMode: historicalMode,
       historicalTarget: historicalTarget,
       editReusableDefinition: editReusableDefinition,
@@ -378,23 +382,36 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
     final saveToLibrary =
         !widget.isRecipeIngredient &&
         (widget.historicalMode ? _saveToMyItems : widget.mealLabel == null);
-    if (widget.existingFood == null && saveToLibrary) {
+    if ((widget.existingFood == null && saveToLibrary) ||
+        widget.saveLibraryCopyOnEdit) {
       if (!mounted) return;
       final userId = appState.activeSubject?.id ?? 'anonymous';
+      final inheritedViewModel =
+          widget.templateViewModel ??
+          Provider.of<TemplateViewModel?>(context, listen: false);
+      final viewModel =
+          inheritedViewModel ??
+          TemplateViewModel(userId: userId, repository: widget.repository);
       try {
-        final viewModel =
-            widget.templateViewModel ??
-            Provider.of<TemplateViewModel?>(context, listen: false) ??
-            TemplateViewModel(userId: userId, repository: widget.repository);
-        final definition = normalizeNutritionFoodDefinition(food);
+        final definition = normalizeNutritionFoodDefinition(
+          widget.saveLibraryCopyOnEdit ? duplicateFoodEntry(food) : food,
+        );
+        if (widget.saveLibraryCopyOnEdit) {
+          definition
+            ..foodId = _newFoodId ??= const Uuid().v4()
+            ..foodVersionId = const Uuid().v4()
+            ..templateId = null;
+        }
         final templateId = await viewModel.saveFoodAsTemplate(
           name: food.name,
           food: definition,
         );
-        food
-          ..templateId = templateId
-          ..foodId = definition.foodId
-          ..foodVersionId = definition.foodVersionId;
+        if (!widget.saveLibraryCopyOnEdit) {
+          food
+            ..templateId = templateId
+            ..foodId = definition.foodId
+            ..foodVersionId = definition.foodVersionId;
+        }
       } catch (error, stackTrace) {
         StudyULogger.error(
           'Failed to save food to My items: $error\n$stackTrace',
@@ -406,6 +423,8 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
           setState(() => _isSaving = false);
         }
         return;
+      } finally {
+        if (inheritedViewModel == null) viewModel.dispose();
       }
     }
 

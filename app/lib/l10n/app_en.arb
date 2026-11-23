@@ -1510,5 +1510,8 @@
   "meal_neutral_label_inline": "entry",
   "nutrition_add_diary_entry": "Add entry",
   "nutrition_create_library_item": "Create item",
-  "remove_from_entry": "Remove from entry"
+  "remove_from_entry": "Remove from entry",
+  "library_copy_edit_title": "Edit database food?",
+  "library_copy_edit_message": "Your changes apply to this item. You can also save a copy for future use.",
+  "library_copy_edit_action": "Also save a copy to Library"
 }

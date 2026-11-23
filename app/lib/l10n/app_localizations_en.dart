@@ -3436,4 +3436,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remove_from_entry => 'Remove from entry';
+
+  @override
+  String get library_copy_edit_title => 'Edit database food?';
+
+  @override
+  String get library_copy_edit_message =>
+      'Your changes apply to this item. You can also save a copy for future use.';
+
+  @override
+  String get library_copy_edit_action => 'Also save a copy to Library';
 }
