@@ -292,7 +292,7 @@ Future<_TrackingNutritionFoodRepository> _openValidNewHistoricalMeal(
   await tester.tap(find.text("I don't remember"));
   await tester.pumpAndSettle();
   await tester.ensureVisible(
-    find.widgetWithText(CheckboxListTile, 'Save to My items for future use'),
+    find.widgetWithText(CheckboxListTile, 'Save items as meal to library'),
   );
   return repository;
 }
@@ -724,7 +724,7 @@ void main() {
 
     final saveToMyItems = find.widgetWithText(
       CheckboxListTile,
-      'Save to My items for future use',
+      'Save items as meal to library',
     );
     expect(tester.widget<CheckboxListTile>(saveToMyItems).value, isTrue);
 
@@ -753,7 +753,7 @@ void main() {
       expect(find.byType(MealEntryScreen), findsOneWidget);
       expect(find.text('Could not save results'), findsOneWidget);
 
-      await tester.tap(find.text('Save to My items for future use'));
+      await tester.tap(find.text('Save items as meal to library'));
       await tester.tap(find.text('Save diary entry'));
       await tester.pumpAndSettle();
 
@@ -771,7 +771,7 @@ void main() {
       onResult: (value) => result = value,
     );
 
-    await tester.tap(find.text('Save to My items for future use'));
+    await tester.tap(find.text('Save items as meal to library'));
     await tester.pump();
     await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
@@ -1338,12 +1338,12 @@ void main() {
     expect(find.text('Apple'), findsOneWidget);
   });
 
-  testWidgets('Save to My items opens the meal builder directly', (
+  testWidgets('Save items as meal to library opens the meal builder directly', (
     tester,
   ) async {
     await openMealEntry(tester, _mealWithCompositeDefinition());
 
-    final saveToMyItems = find.text('Save to My items');
+    final saveToMyItems = find.text('Save items as meal to library');
     await tester.ensureVisible(saveToMyItems);
     await tester.tap(saveToMyItems);
     await tester.pumpAndSettle();
@@ -2367,7 +2367,7 @@ void main() {
 
     expect(find.byType(AlertDialog), findsNothing);
     expect(find.text('Apple'), findsNothing);
-    expect(find.text('Save to My items'), findsNothing);
+    expect(find.text('Save items as meal to library'), findsNothing);
   });
 
   testWidgets('reopened basket updates the same meal item', (tester) async {

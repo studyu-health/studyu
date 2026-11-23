@@ -1131,7 +1131,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                 CheckboxListTile(
                   value: _saveToMyItems,
                   contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.save_to_my_items),
+                  title: Text(l10n.save_to_my_items_action),
                   controlAffinity: ListTileControlAffinity.leading,
                   onChanged: (value) =>
                       setState(() => _saveToMyItems = value ?? false),

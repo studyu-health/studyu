@@ -576,7 +576,8 @@
   "library_edit_current_selection": "Nur diese Auswahl",
   "library_edit_selection_message": "Dieses Element stammt aus Ihrer Bibliothek. Wählen Sie, wo Ihre Änderungen gespeichert werden sollen.",
   "library_edit_current_entry_and_library": "Dieses Element und Bibliothekselement",
-  "save_to_my_items_action": "In Meine Elemente speichern",
+  "save_to_my_items_action": "Elemente als Mahlzeit in der Bibliothek speichern",
+  "save_item_to_library": "Element in der Bibliothek speichern",
   "external_library_copy": "Importieren",
   "external_library_copy_label": "{name} prüfen und zur Bibliothek hinzufügen",
   "@external_library_copy_label": {
@@ -992,7 +993,6 @@
   "food_quantity_add_meal_to_selection": "Mahlzeit zur Auswahl hinzufügen",
   "food_quantity_update_selection": "Änderungen speichern",
   "food_quantity_nutrition_unavailable": "Nährwertangaben nicht verfügbar",
-  "save_to_my_items": "Für später in Meine Elemente speichern",
   "save_and_add_to_meal": "Speichern und zu {meal} hinzufügen",
   "@save_and_add_to_meal": {
     "placeholders": {

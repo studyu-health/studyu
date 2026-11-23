@@ -2201,7 +2201,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This item and reusable library item';
 
   @override
-  String get save_to_my_items_action => 'Save to My items';
+  String get save_to_my_items_action => 'Save items as meal to library';
+
+  @override
+  String get save_item_to_library => 'Save item to library';
 
   @override
   String get external_library_copy => 'Import';
@@ -2562,9 +2565,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get food_quantity_nutrition_unavailable =>
       'Nutrition information unavailable';
-
-  @override
-  String get save_to_my_items => 'Save to My items for future use';
 
   @override
   String save_and_add_to_meal(String meal) {

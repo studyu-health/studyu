@@ -776,7 +776,7 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
             CheckboxListTile(
               value: _saveToMyItems,
               contentPadding: EdgeInsets.zero,
-              title: Text(l10n.save_to_my_items),
+              title: Text(l10n.save_item_to_library),
               controlAffinity: ListTileControlAffinity.leading,
               onChanged: _isSaving
                   ? null

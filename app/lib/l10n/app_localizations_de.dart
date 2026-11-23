@@ -2227,7 +2227,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dieses Element und Bibliothekselement';
 
   @override
-  String get save_to_my_items_action => 'In Meine Elemente speichern';
+  String get save_to_my_items_action =>
+      'Elemente als Mahlzeit in der Bibliothek speichern';
+
+  @override
+  String get save_item_to_library => 'Element in der Bibliothek speichern';
 
   @override
   String get external_library_copy => 'Importieren';
@@ -2591,9 +2595,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get food_quantity_nutrition_unavailable =>
       'Nährwertangaben nicht verfügbar';
-
-  @override
-  String get save_to_my_items => 'Für später in Meine Elemente speichern';
 
   @override
   String save_and_add_to_meal(String meal) {

@@ -833,7 +833,8 @@
   "library_edit_current_selection": "Only this selection",
   "library_edit_selection_message": "This item comes from your library. Choose where to save your changes.",
   "library_edit_current_entry_and_library": "This item and reusable library item",
-  "save_to_my_items_action": "Save to My items",
+  "save_to_my_items_action": "Save items as meal to library",
+  "save_item_to_library": "Save item to library",
   "external_library_copy": "Import",
   "external_library_copy_label": "Review and add {name} to the Library",
   "@external_library_copy_label": {
@@ -1105,7 +1106,6 @@
   "food_quantity_add_meal_to_selection": "Add meal to selection",
   "food_quantity_update_selection": "Save changes",
   "food_quantity_nutrition_unavailable": "Nutrition information unavailable",
-  "save_to_my_items": "Save to My items for future use",
   "save_and_add_to_meal": "Save and add to {meal}",
   "@save_and_add_to_meal": {
     "placeholders": {

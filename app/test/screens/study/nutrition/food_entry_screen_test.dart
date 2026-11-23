@@ -350,7 +350,7 @@ void main() {
       await tester.pumpAndSettle();
       final saveToMyItems = find.widgetWithText(
         CheckboxListTile,
-        'Save to My items for future use',
+        'Save item to library',
       );
       expect(tester.widget<CheckboxListTile>(saveToMyItems).value, isFalse);
       await tester.tap(saveToMyItems);
@@ -392,10 +392,7 @@ void main() {
       expect(
         tester
             .widget<CheckboxListTile>(
-              find.widgetWithText(
-                CheckboxListTile,
-                'Save to My items for future use',
-              ),
+              find.widgetWithText(CheckboxListTile, 'Save item to library'),
             )
             .value,
         isFalse,

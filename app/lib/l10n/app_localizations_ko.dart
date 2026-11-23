@@ -2145,7 +2145,10 @@ class AppLocalizationsKo extends AppLocalizations {
       'This item and reusable library item';
 
   @override
-  String get save_to_my_items_action => 'Save to My items';
+  String get save_to_my_items_action => '항목을 식사로 라이브러리에 저장';
+
+  @override
+  String get save_item_to_library => '항목을 라이브러리에 저장';
 
   @override
   String get external_library_copy => 'Import';
@@ -2171,7 +2174,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get save_as_template => 'Add to My items';
 
   @override
-  String get save_meal => 'Save to library';
+  String get save_meal => '라이브러리에 저장';
 
   @override
   String get done_label => 'Done';
@@ -2503,9 +2506,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get food_quantity_nutrition_unavailable =>
       'Nutrition information unavailable';
-
-  @override
-  String get save_to_my_items => 'Save to My items for future use';
 
   @override
   String save_and_add_to_meal(String meal) {

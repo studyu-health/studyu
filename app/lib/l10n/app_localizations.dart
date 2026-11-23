@@ -4114,8 +4114,14 @@ abstract class AppLocalizations {
   /// No description provided for @save_to_my_items_action.
   ///
   /// In en, this message translates to:
-  /// **'Save to My items'**
+  /// **'Save items as meal to library'**
   String get save_to_my_items_action;
+
+  /// No description provided for @save_item_to_library.
+  ///
+  /// In en, this message translates to:
+  /// **'Save item to library'**
+  String get save_item_to_library;
 
   /// No description provided for @external_library_copy.
   ///
@@ -4656,12 +4662,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nutrition information unavailable'**
   String get food_quantity_nutrition_unavailable;
-
-  /// No description provided for @save_to_my_items.
-  ///
-  /// In en, this message translates to:
-  /// **'Save to My items for future use'**
-  String get save_to_my_items;
 
   /// No description provided for @save_and_add_to_meal.
   ///
