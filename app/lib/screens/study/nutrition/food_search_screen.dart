@@ -715,12 +715,16 @@ class _FoodSearchScreenContentState()
           ? MealCreatorScreen.route(
               existingMeal: food,
               editLoggedAmount: true,
+              allowPhoto: true,
+              savePhotoToLibraryOnEdit: true,
               templateViewModel: context.read<TemplateViewModel>(),
             )
           : FoodEntryScreen.route(
               existingFood: food,
               showSearchAction: false,
               editLoggedAmount: true,
+              allowPhoto: true,
+              savePhotoToLibraryOnEdit: true,
             ),
     );
     if (result == null || !mounted) return;
@@ -815,6 +819,7 @@ class _FoodSearchScreenContentState()
         mealLabel: widget.mealLabel,
         historicalMode: widget.historicalMode,
         isRecipeIngredient: widget.isRecipeIngredient,
+        allowPhoto: !widget.isRecipeIngredient,
         templateViewModel: context.read<TemplateViewModel>(),
         onSavedToSelection: onSavedToSelection,
       ),
@@ -840,6 +845,7 @@ class _FoodSearchScreenContentState()
     Navigator.push<studyu.FoodEntry>(
       context,
       MealCreatorScreen.route(
+        allowPhoto: true,
         templateViewModel: context.read<TemplateViewModel>(),
         onSavedToSelection: onSavedToSelection,
       ),

@@ -41,6 +41,8 @@ class const FoodEntryScreen({
   final NutritionFoodRepository? repository,
   final TemplateViewModel? templateViewModel,
   final bool Function()? canEditRecall,
+  final bool allowPhoto = false,
+  final bool savePhotoToLibraryOnEdit = false,
   final ValueChanged<NutritionPhotoChange?>? onPhotoChanged,
   final void Function(FoodEntry food, Offset? source)? onSavedToSelection,
   super.key,
@@ -67,6 +69,8 @@ class const FoodEntryScreen({
     TemplateViewModel? templateViewModel,
     bool Function()? canEditRecall,
     void Function(FoodEntry food, Offset? source)? onSavedToSelection,
+    bool allowPhoto = false,
+    bool savePhotoToLibraryOnEdit = false,
     ValueChanged<NutritionPhotoChange?>? onPhotoChanged,
   }) => MaterialPageRoute(
     builder: (_) => FoodEntryScreen(
@@ -87,6 +91,8 @@ class const FoodEntryScreen({
       templateViewModel: templateViewModel,
       canEditRecall: canEditRecall,
       onSavedToSelection: onSavedToSelection,
+      allowPhoto: allowPhoto,
+      savePhotoToLibraryOnEdit: savePhotoToLibraryOnEdit,
       onPhotoChanged: onPhotoChanged,
     ),
   );
@@ -402,7 +408,10 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
 
     if (mounted && widget.onPhotoChanged != null) {
       widget.onPhotoChanged!(_photoChange);
-    } else if (mounted && widget.existingFood == null && saveToLibrary) {
+    } else if (mounted &&
+        ((widget.existingFood == null &&
+                (saveToLibrary || widget.allowPhoto)) ||
+            (widget.existingFood != null && widget.savePhotoToLibraryOnEdit))) {
       await saveNutritionPhoto(
         context,
         nutritionPhotoKey(photoScope, NutritionPhotoKind.item, food.foodId),
@@ -636,16 +645,31 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
   bool get _hasUnsavedChanges =>
       _photoChange != null || _snapshot != _initialSnapshot;
 
-  String? get _productImageUrl {
-    final value = widget.existingFood?.originalValues['image_front_small_url'];
-    return value is String && value.trim().isNotEmpty ? value : null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final isEditing = widget.existingFood != null;
+    final existingFood = widget.existingFood;
+    final isEditing = existingFood != null;
+    final photoScope = nutritionPhotoScope(context.watch<AppState?>());
+    final photoKey = widget.isExternalLibraryCopy
+        ? null
+        : nutritionPhotoKey(
+            photoScope,
+            NutritionPhotoKind.item,
+            existingFood?.foodId,
+          );
+    final fromDatabase = _source != FoodSource.manual;
+    final canEditPhoto =
+        !fromDatabase &&
+        photoScope != null &&
+        (widget.onPhotoChanged != null ||
+            widget.allowPhoto ||
+            (existingFood == null &&
+                !widget.isRecipeIngredient &&
+                (widget.historicalMode
+                    ? _saveToMyItems
+                    : widget.mealLabel == null)));
     final useSaveButton =
         !widget.isExternalLibraryCopy &&
         (isEditing || widget.mealLabel == null);
@@ -786,30 +810,30 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
               ),
           ],
 
-          if (nutritionPhotoScope(context.watch<AppState?>()) case final scope?)
-            if (widget.onPhotoChanged != null ||
-                (widget.existingFood == null &&
-                    !widget.isRecipeIngredient &&
-                    (widget.historicalMode
-                        ? _saveToMyItems
-                        : widget.mealLabel == null)))
-              NutritionPhotoEditor(
-                photoKey: widget.isExternalLibraryCopy
-                    ? null
-                    : nutritionPhotoKey(
-                        scope,
-                        NutritionPhotoKind.item,
-                        widget.existingFood?.foodId,
-                      ),
-                change: _photoChange,
-                onChanged: (change) => setState(() => _photoChange = change),
-                enabled: !_isSaving,
+          if (canEditPhoto)
+            NutritionPhotoEditor(
+              photoKey: photoKey,
+              change: _photoChange,
+              onChanged: (change) => setState(() => _photoChange = change),
+              enabled: !_isSaving,
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!canEditPhoto && existingFood != null)
+                NutritionPhotoPreview(
+                  photoKey: fromDatabase ? null : photoKey,
+                  imageUrl: foodImageUrl(existingFood),
+                  semanticLabel: existingFood.name,
+                  padding: const EdgeInsets.only(
+                    bottom: nutritionEditorSpacing,
+                  ),
+                ),
+              _FoodDetailsSection(
+                nameController: _nameController,
+                amountController: _showServings ? _amountController : null,
               ),
-          _FoodDetailsSection(
-            nameController: _nameController,
-            amountController: _showServings ? _amountController : null,
-            imageUrl: _productImageUrl,
-            foodName: widget.existingFood?.name,
+            ],
           ),
           NutritionEditorSection(
             title: l10n.nutrition_information,
@@ -1030,8 +1054,6 @@ class const _AiEstimationBanner({
 class const _FoodDetailsSection({
   required final TextEditingController nameController,
   final TextEditingController? amountController,
-  final String? imageUrl,
-  final String? foodName,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1041,36 +1063,15 @@ class const _FoodDetailsSection({
       icon: Icons.restaurant_outlined,
       subtitle: l10n.nutrition_food_details_subtitle,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (imageUrl case final url?)
-              Image.network(
-                url,
-                height: 128,
-                fit: BoxFit.contain,
-                semanticLabel: foodName,
-                frameBuilder: (_, child, frame, _) => frame == null
-                    ? const SizedBox.shrink()
-                    : Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: nutritionEditorSpacing,
-                        ),
-                        child: child,
-                      ),
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
-              ),
-            TextFormField(
-              controller: nameController,
-              decoration: nutritionFieldDecoration(
-                l10n.food_name,
-                icon: Icons.restaurant_outlined,
-              ),
-              textCapitalization: TextCapitalization.words,
-              validator: (value) =>
-                  value == null || value.isEmpty ? l10n.enter_food_name : null,
-            ),
-          ],
+        TextFormField(
+          controller: nameController,
+          decoration: nutritionFieldDecoration(
+            l10n.food_name,
+            icon: Icons.restaurant_outlined,
+          ),
+          textCapitalization: TextCapitalization.words,
+          validator: (value) =>
+              value == null || value.isEmpty ? l10n.enter_food_name : null,
         ),
         if (amountController != null)
           TextFormField(

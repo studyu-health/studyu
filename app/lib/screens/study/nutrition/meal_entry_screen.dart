@@ -345,6 +345,8 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           existingMeal: editableFood,
           editLoggedAmount: true,
           showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
+          allowPhoto: true,
+          savePhotoToLibraryOnEdit: true,
           templateViewModel: widget.templateViewModel,
         ),
       );
@@ -358,6 +360,8 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           editReusableDefinition: editReusableDefinition,
           hasCurrentStudyDayMatches: hasCurrentDayMatches,
           showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
+          allowPhoto: true,
+          savePhotoToLibraryOnEdit: true,
           repository: widget.foodRepository,
           canEditRecall: _revalidateHistoricalEligibility,
           onHistoricalDefinitionSaved: (revision) {

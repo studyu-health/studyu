@@ -31,6 +31,8 @@ class const MealCreatorScreen({
   final bool showExpansionNotice = false,
   final ValueChanged<bool>? onCurrentDayPropagationChanged,
   final TemplateViewModel? templateViewModel,
+  final bool allowPhoto = false,
+  final bool savePhotoToLibraryOnEdit = false,
   final ValueChanged<NutritionPhotoChange?>? onPhotoChanged,
   final void Function(FoodEntry food, Offset? source)? onSavedToSelection,
   super.key,
@@ -47,6 +49,8 @@ class const MealCreatorScreen({
     ValueChanged<bool>? onCurrentDayPropagationChanged,
     TemplateViewModel? templateViewModel,
     void Function(FoodEntry food, Offset? source)? onSavedToSelection,
+    bool allowPhoto = false,
+    bool savePhotoToLibraryOnEdit = false,
     ValueChanged<NutritionPhotoChange?>? onPhotoChanged,
   }) => MaterialPageRoute(
     builder: (_) => MealCreatorScreen(
@@ -61,6 +65,8 @@ class const MealCreatorScreen({
       onCurrentDayPropagationChanged: onCurrentDayPropagationChanged,
       templateViewModel: templateViewModel,
       onSavedToSelection: onSavedToSelection,
+      allowPhoto: allowPhoto,
+      savePhotoToLibraryOnEdit: savePhotoToLibraryOnEdit,
       onPhotoChanged: onPhotoChanged,
     ),
   );
@@ -530,7 +536,8 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
       }
       if (mounted && widget.onPhotoChanged != null) {
         widget.onPhotoChanged!(_photoChange);
-      } else if (mounted && widget.existingMeal == null) {
+      } else if (mounted &&
+          (widget.existingMeal == null || widget.savePhotoToLibraryOnEdit)) {
         await saveNutritionPhoto(
           context,
           nutritionPhotoKey(photoScope, NutritionPhotoKind.item, meal.foodId),
@@ -689,7 +696,23 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isEditing = widget.existingMeal != null;
+    final existingMeal = widget.existingMeal;
+    final isEditing = existingMeal != null;
+    final photoScope = nutritionPhotoScope(context.watch<AppState?>());
+    final photoKey = nutritionPhotoKey(
+      photoScope,
+      NutritionPhotoKind.item,
+      existingMeal?.foodId,
+    );
+    final fromDatabase =
+        widget.existingMeal?.source != null &&
+        widget.existingMeal!.source != FoodSource.manual;
+    final canEditPhoto =
+        !fromDatabase &&
+        photoScope != null &&
+        (widget.allowPhoto ||
+            (existingMeal == null && widget.onSavedToSelection == null) ||
+            widget.onPhotoChanged != null);
     final nutrition = isEditing && _foods.isNotEmpty
         ? _cachedNutrition ??= _calculateTotalNutrition()
         : null;
@@ -739,26 +762,33 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
                 ),
               ),
             ),
-          if (nutritionPhotoScope(context.watch<AppState?>()) case final scope?)
-            if (widget.onPhotoChanged != null ||
-                (widget.existingMeal == null &&
-                    widget.onSavedToSelection == null))
-              NutritionPhotoEditor(
-                photoKey: nutritionPhotoKey(
-                  scope,
-                  NutritionPhotoKind.item,
-                  widget.existingMeal?.foodId,
+          if (canEditPhoto)
+            NutritionPhotoEditor(
+              photoKey: photoKey,
+              change: _photoChange,
+              onChanged: (change) => setState(() => _photoChange = change),
+              enabled: !_isSaving,
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!canEditPhoto && existingMeal != null)
+                NutritionPhotoPreview(
+                  photoKey: fromDatabase ? null : photoKey,
+                  imageUrl: foodImageUrl(existingMeal),
+                  semanticLabel: existingMeal.name,
+                  padding: const EdgeInsets.only(
+                    bottom: nutritionEditorSpacing,
+                  ),
                 ),
-                change: _photoChange,
-                onChanged: (change) => setState(() => _photoChange = change),
-                enabled: !_isSaving,
+              _MealInfoCard(
+                nameController: _nameController,
+                descriptionController: _descriptionController,
+                servingsController: widget.showServings
+                    ? _servingsController
+                    : null,
               ),
-          _MealInfoCard(
-            nameController: _nameController,
-            descriptionController: _descriptionController,
-            servingsController: widget.showServings
-                ? _servingsController
-                : null,
+            ],
           ),
           if (widget.onCurrentDayPropagationChanged != null)
             Text(

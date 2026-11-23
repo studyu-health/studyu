@@ -12,6 +12,7 @@ import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
+import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_core/core.dart' as studyu;
 
 import 'fake_nutrition_food_repository.dart';
@@ -835,6 +836,53 @@ void main() {
     expect(find.text('Selected items'), findsOneWidget);
     expect(repository.loadCalls, 1);
   });
+
+  testWidgets('database basket items keep their remote photo locked', (
+    tester,
+  ) async {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final databaseFood = studyu.FoodEntry.withId(
+      entryType: studyu.FoodEntryType.brandedProduct,
+      name: 'Database Apple',
+      amount: 1,
+      unit: 'serving',
+      servingSizeGrams: 150,
+      portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
+      portionState: studyu.PortionState.asServed,
+      nutrition: studyu.NutritionProfile(
+        energyKcal: 78,
+        protein: 0,
+        carbs: 20,
+        fat: 0,
+        sugars: 15,
+        fiber: 3,
+        saturatedFat: 0,
+        transFat: 0,
+        cholesterol: 0,
+        sodium: 0,
+        waterContent: 0,
+        micros: const {},
+      ),
+      source: studyu.FoodSource.usda,
+      confidenceScore: 1,
+      originalValues: {'image_url': 'https://example.com/apple.jpg'},
+    );
+    await _pumpSearch(tester, query: null, initialFoods: [databaseFood]);
+    await tester.tap(find.text('Selected items'));
+    await tester.pumpAndSettle();
+    final expandedList = find.byKey(const ValueKey('selection-expanded-list'));
+
+    await tester.tap(_basketEdit(expandedList));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.library_edit_title), findsNothing);
+    expect(find.text(l10n.nutrition_photo_add), findsNothing);
+    final preview = tester.widget<NutritionPhotoPreview>(
+      find.byType(NutritionPhotoPreview),
+    );
+    expect(preview.photoKey, isNull);
+    expect(preview.imageUrl, 'https://example.com/apple.jpg');
+  });
 }
 
 Finder _basketEdit([Finder? basket]) => find.descendant(
@@ -911,6 +959,7 @@ Future<void> _pumpSearch(
   studyu.StudySubject? subject,
   TextScaler? textScaler,
   FakeNutritionFoodRepository? repository,
+  List<studyu.FoodEntry> initialFoods = const [],
   ValueChanged<FoodSearchSelection?>? onResult,
   ValueChanged<String>? onSearchRequest,
   Locale locale = const Locale('en'),
@@ -959,6 +1008,7 @@ Future<void> _pumpSearch(
                 final result = await FoodSearchScreen.show(
                   context,
                   mealLabel: 'Lunch',
+                  initialFoods: initialFoods,
                   usdaFoodSearch: usdaFoodSearch,
                   openFoodFactsSearch: openFoodFactsSearch,
                   repository: repository ?? FakeNutritionFoodRepository(),
