@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +17,7 @@ import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_photo_widgets.dart';
 import 'package:studyu_core/core.dart' as studyu;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'fake_nutrition_food_repository.dart';
 
@@ -206,7 +210,7 @@ void main() {
     expect(cardEnergy(), findsNothing);
 
     await tester.tap(_basketEdit());
-    await tester.pumpAndSettle();
+    await _chooseLibraryEditScope(tester, currentOnly: true);
     await tester.enterText(
       find.widgetWithText(TextFormField, l10n.energy_kcal),
       '153',
@@ -384,7 +388,7 @@ void main() {
     expect(coveredCard!.hitTestable(), findsNothing);
 
     await tester.tap(_basketEdit(expandedList));
-    await tester.pumpAndSettle();
+    await _chooseLibraryEditScope(tester, currentOnly: true);
     expect(find.byType(FoodEntryScreen), findsOneWidget);
     expect(libraryList, findsNothing);
 
@@ -700,7 +704,7 @@ void main() {
     final before = tester.widget<ListView>(listFinder).controller!.offset;
     expect(before, greaterThan(0));
     await tester.tap(_basketEdit(listFinder).hitTestable().first);
-    await tester.pumpAndSettle();
+    await _chooseLibraryEditScope(tester, currentOnly: true);
     expect(find.text('Edit food'), findsOneWidget);
     await tester.enterText(_amountField(), '2');
     await tester.pump();
@@ -876,6 +880,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(l10n.library_edit_title), findsNothing);
+    expect(find.text(l10n.current_selection_only_banner), findsOneWidget);
     expect(find.text(l10n.nutrition_photo_add), findsNothing);
     final preview = tester.widget<NutritionPhotoPreview>(
       find.byType(NutritionPhotoPreview),
@@ -883,7 +888,144 @@ void main() {
     expect(preview.photoKey, isNull);
     expect(preview.imageUrl, 'https://example.com/apple.jpg');
   });
+
+  testWidgets('library basket edits can update only the current selection', (
+    tester,
+  ) async {
+    await _initializePhotoSupabase(tester);
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final subject = studyu.StudySubject('subject', 'study', 'user', []);
+    final repository = FakeNutritionFoodRepository([_libraryTemplate()]);
+    final selected = studyu.FoodEntry.fromJson(
+      _libraryTemplate().prototype.toJson(),
+    )..templateId = 'library-pear-template';
+    FoodSearchSelection? selection;
+    await _pumpSearch(
+      tester,
+      query: null,
+      subject: subject,
+      repository: repository,
+      initialFoods: [selected],
+      onResult: (value) => selection = value,
+    );
+    await tester.tap(find.text('Selected items'));
+    await tester.pumpAndSettle();
+    final expandedList = find.byKey(const ValueKey('selection-expanded-list'));
+
+    await tester.tap(_basketEdit(expandedList));
+    await _chooseLibraryEditScope(tester, currentOnly: true);
+
+    expect(find.text(l10n.current_selection_only_banner), findsOneWidget);
+    expect(find.text(l10n.nutrition_photo_add), findsOneWidget);
+    await tester.enterText(_amountField(), '2');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, l10n.food_selection_update_selection),
+    );
+    await tester.pumpAndSettle();
+
+    final food = selection!.foods.single;
+    expect(food.amount, 2);
+    expect(food.nutrition.energyKcal, 160);
+    final template = (await repository.loadTemplates(subject.id)).single;
+    expect(template.prototype.amount, 1);
+    expect(template.prototype.nutrition.energyKcal, 80);
+  });
+
+  testWidgets('library basket edits can update the reusable item', (
+    tester,
+  ) async {
+    await _initializePhotoSupabase(tester);
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    final subject = studyu.StudySubject('subject', 'study', 'user', []);
+    final repository = FakeNutritionFoodRepository([_libraryTemplate()]);
+    final selected = studyu.FoodEntry.fromJson(
+      _libraryTemplate().prototype.toJson(),
+    )..templateId = 'library-pear-template';
+    FoodSearchSelection? selection;
+    await _pumpSearch(
+      tester,
+      query: null,
+      subject: subject,
+      repository: repository,
+      initialFoods: [selected],
+      onResult: (value) => selection = value,
+    );
+    await tester.tap(find.text('Selected items'));
+    await tester.pumpAndSettle();
+    final expandedList = find.byKey(const ValueKey('selection-expanded-list'));
+
+    await tester.tap(_basketEdit(expandedList));
+    await _chooseLibraryEditScope(tester, currentOnly: false);
+
+    expect(find.text(l10n.current_selection_only_banner), findsNothing);
+    expect(find.text(l10n.nutrition_photo_add), findsOneWidget);
+    await tester.enterText(
+      find.widgetWithText(TextFormField, l10n.energy_kcal),
+      '160',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, l10n.food_selection_update_selection),
+    );
+    await tester.pumpAndSettle();
+
+    final food = selection!.foods.single;
+    expect(food.amount, 1);
+    expect(food.nutrition.energyKcal, 160);
+    final template = (await repository.loadTemplates(subject.id)).single;
+    expect(template.id, 'library-pear-template');
+    expect(template.prototype.amount, 1);
+    expect(template.prototype.nutrition.energyKcal, 160);
+  });
 }
+
+Future<void> _chooseLibraryEditScope(
+  WidgetTester tester, {
+  required bool currentOnly,
+}) async {
+  final l10n = lookupAppLocalizations(const Locale('en'));
+  await tester.pumpAndSettle();
+  expect(find.text(l10n.library_edit_title), findsOneWidget);
+  await tester.tap(
+    find.text(
+      currentOnly
+          ? l10n.library_edit_current_selection
+          : l10n.library_edit_current_entry_and_library,
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<Supabase?> _initializePhotoSupabase(WidgetTester tester) =>
+    tester.runAsync(() async {
+      final supabase = await Supabase.initialize(
+        url: 'http://localhost',
+        publishableKey: 'test-key',
+        httpClient: MockClient(
+          (_) async => http.Response(
+            '{"statusCode":"404","message":"Object not found"}',
+            404,
+            headers: {'content-type': 'application/json'},
+          ),
+        ),
+        authOptions: const FlutterAuthClientOptions(
+          autoRefreshToken: false,
+          detectSessionInUri: false,
+          persistSession: false,
+        ),
+      );
+      await supabase.client.auth.recoverSession(
+        jsonEncode({
+          'access_token': 'participant-token',
+          'token_type': 'bearer',
+          'user': {'id': 'user', 'app_metadata': <String, dynamic>{}},
+        }),
+      );
+      return supabase;
+    });
 
 Finder _basketEdit([Finder? basket]) => find.descendant(
   of: basket ?? find.byKey(const ValueKey('selection-tray')),

@@ -2154,6 +2154,8 @@ void main() {
     expect(repository.loadCalls, 1);
     await tester.tap(find.byTooltip('Edit food').last);
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Only this selection'));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Servings *'),
       '2',
@@ -2435,6 +2437,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(repository.loadCalls, 2);
     await tester.tap(find.byTooltip('Edit food').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Only this selection'));
     await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();

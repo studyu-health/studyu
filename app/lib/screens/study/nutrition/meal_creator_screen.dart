@@ -26,6 +26,7 @@ class const MealCreatorScreen({
   final String? initialName,
   final bool showCurrentDayPropagationOption = false,
   final bool showCurrentMealOnlyNotice = false,
+  final bool selectionOnlyNotice = false,
   final bool showServings = true,
   final bool editLoggedAmount = false,
   final bool showExpansionNotice = false,
@@ -43,6 +44,7 @@ class const MealCreatorScreen({
     String? initialName,
     bool showCurrentDayPropagationOption = false,
     bool showCurrentMealOnlyNotice = false,
+    bool selectionOnlyNotice = false,
     bool showServings = true,
     bool editLoggedAmount = false,
     bool showExpansionNotice = false,
@@ -59,6 +61,7 @@ class const MealCreatorScreen({
       initialName: initialName,
       showCurrentDayPropagationOption: showCurrentDayPropagationOption,
       showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
+      selectionOnlyNotice: selectionOnlyNotice,
       showServings: showServings,
       editLoggedAmount: editLoggedAmount,
       showExpansionNotice: showExpansionNotice,
@@ -746,21 +749,11 @@ class _MealCreatorScreenState() extends State<MealCreatorScreen> {
         bottomClearance: NutritionSaveButton.scrollClearance,
         children: [
           if (widget.showCurrentMealOnlyNotice && widget.existingMeal != null)
-            Card(
-              margin: EdgeInsets.zero,
-              color: theme.colorScheme.secondaryContainer,
-              child: ListTile(
-                leading: Icon(
-                  Icons.info_outline,
-                  color: theme.colorScheme.onSecondaryContainer,
-                ),
-                title: Text(
-                  l10n.current_meal_only_banner,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSecondaryContainer,
-                  ),
-                ),
-              ),
+            NutritionCurrentMealOnlyNotice(
+              message: widget.selectionOnlyNotice
+                  ? l10n.current_selection_only_banner
+                  : l10n.current_meal_only_banner,
+              theme: theme,
             ),
           if (canEditPhoto)
             NutritionPhotoEditor(

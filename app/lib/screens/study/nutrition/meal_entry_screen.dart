@@ -47,11 +47,6 @@ final class const DeletedMealEntryResult() extends MealEntryResult;
 
 final class const DiscardedMealEntryResult() extends MealEntryResult;
 
-enum _LibraryEditChoice() {
-  currentEntry,
-  currentEntryAndLibrary,
-}
-
 typedef _MealTypeSelection = ({MealType type, String? customLabel});
 
 class const _TimeSelection(
@@ -264,33 +259,12 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     );
   }
 
-  Future<_LibraryEditChoice?> _chooseLibraryEdit() {
+  Future<NutritionLibraryEditChoice?> _chooseLibraryEdit() {
     final l10n = AppLocalizations.of(context)!;
-    return showDialog<_LibraryEditChoice>(
+    return showNutritionLibraryEditChoiceDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        scrollable: true,
-        title: Text(l10n.library_edit_title),
-        content: Text(l10n.library_edit_message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l10n.cancel),
-          ),
-          OutlinedButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, _LibraryEditChoice.currentEntry),
-            child: Text(l10n.library_edit_current_entry),
-          ),
-          OutlinedButton(
-            onPressed: () => Navigator.pop(
-              dialogContext,
-              _LibraryEditChoice.currentEntryAndLibrary,
-            ),
-            child: Text(l10n.library_edit_current_entry_and_library),
-          ),
-        ],
-      ),
+      currentScopeLabel: l10n.library_edit_current_entry,
+      message: l10n.library_edit_message,
     );
   }
 
@@ -308,7 +282,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
       if (!mounted || choice == null || !_revalidateHistoricalEligibility()) {
         return;
       }
-      updateLibrary = choice == _LibraryEditChoice.currentEntryAndLibrary;
+      updateLibrary = choice == NutritionLibraryEditChoice.currentAndLibrary;
     }
 
     final editableFood = editReusableDefinition || updateLibrary
@@ -336,9 +310,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         editReusableDefinition && await _hasCurrentStudyDayMatches(food.foodId);
     if (!mounted || !_revalidateHistoricalEligibility()) return;
     final FoodEntry? result;
-    final showCurrentMealOnlyNotice =
-        (editReusableDefinition || widget.historicalTarget != null) ||
-        !isLibraryBacked;
+    final showCurrentMealOnlyNotice = !editReusableDefinition && !updateLibrary;
     if (food.entryType == FoodEntryType.meal) {
       result = await Navigator.of(context).push(
         MealCreatorScreen.route(

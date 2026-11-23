@@ -2193,6 +2193,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get library_edit_current_entry => 'Only this logged item';
 
   @override
+  String get library_edit_current_selection => 'Only this selection';
+
+  @override
+  String get library_edit_selection_message =>
+      'This item comes from your library. Choose where to save your changes.';
+
+  @override
   String get library_edit_current_entry_and_library =>
       'This item and reusable library item';
 
@@ -3076,6 +3083,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get current_meal_only_banner =>
       'Changes apply only to this meal. For permanent changes, use the Library.';
+
+  @override
+  String get current_selection_only_banner =>
+      'Changes apply only to this selection. For permanent changes, use the Library.';
 
   @override
   String grams_per_serving(Object grams) {

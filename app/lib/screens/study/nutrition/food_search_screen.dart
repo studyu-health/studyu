@@ -21,6 +21,7 @@ import 'package:studyu_app/screens/study/nutrition/nutrition_add_button.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_food_repository.dart';
 import 'package:studyu_app/screens/study/nutrition/nutrition_recall_records.dart';
 import 'package:studyu_app/screens/study/nutrition/template_view_model.dart';
+import 'package:studyu_app/util/nutrition_food_snapshots.dart';
 import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_app/widgets/empty_state.dart';
 import 'package:studyu_app/widgets/unsaved_changes_dialog.dart';
@@ -709,35 +710,98 @@ class _FoodSearchScreenContentState()
     final store = _selectionStore!;
     _removeTransfer();
     _searchFocusNode.unfocus();
-    final food = rescaleFoodAmount(item.baseFood, item.amount);
+
+    final templateId = item.baseFood.templateId;
+    var updateLibrary = false;
+    if (templateId?.isNotEmpty == true) {
+      final l10n = AppLocalizations.of(context)!;
+      final choice = await showNutritionLibraryEditChoiceDialog(
+        context: context,
+        currentScopeLabel: l10n.library_edit_current_selection,
+        message: l10n.library_edit_selection_message,
+      );
+      if (!mounted || choice == null) return;
+      updateLibrary = choice == NutritionLibraryEditChoice.currentAndLibrary;
+    }
+
+    final editorFood = updateLibrary
+        ? cloneFoodEntry(item.baseFood)
+        : rescaleFoodAmount(item.baseFood, item.amount);
     final result = await Navigator.of(context).push(
-      food.entryType == studyu.FoodEntryType.meal
+      editorFood.entryType == studyu.FoodEntryType.meal
           ? MealCreatorScreen.route(
-              existingMeal: food,
+              existingMeal: editorFood,
               editLoggedAmount: true,
+              showCurrentMealOnlyNotice: !updateLibrary,
+              selectionOnlyNotice: true,
               allowPhoto: true,
               savePhotoToLibraryOnEdit: true,
               templateViewModel: context.read<TemplateViewModel>(),
             )
           : FoodEntryScreen.route(
-              existingFood: food,
+              existingFood: editorFood,
               showSearchAction: false,
               editLoggedAmount: true,
+              showCurrentMealOnlyNotice: !updateLibrary,
+              selectionOnlyNotice: true,
               allowPhoto: true,
               savePhotoToLibraryOnEdit: true,
             ),
     );
     if (result == null || !mounted) return;
 
+    final replacement = updateLibrary
+        ? await _updatedLibrarySelectionFood(item, result)
+        : result;
+    if (replacement == null) return;
+
+    final selectionFood = updateLibrary
+        ? rescaleFoodAmount(replacement, item.amount)
+        : replacement;
     final weightChanged =
-        (result.servingSizeGrams - item.baseFood.servingSizeGrams).abs() >
+        (selectionFood.servingSizeGrams - item.baseFood.servingSizeGrams)
+            .abs() >
         0.000001;
     store.replaceBase(
       item.key,
-      result,
-      caloriesKnown: result.nutrition.isKnown('energyKcal'),
+      selectionFood,
+      caloriesKnown: selectionFood.nutrition.isKnown('energyKcal'),
       gramsKnown: item.gramsKnown || weightChanged,
     );
+  }
+
+  Future<studyu.FoodEntry?> _updatedLibrarySelectionFood(
+    FoodSelectionItem item,
+    studyu.FoodEntry edited,
+  ) async {
+    try {
+      final definition = edited.entryType == studyu.FoodEntryType.meal
+          ? normalizeCompositeNutritionFoodDefinition(edited)
+          : normalizeNutritionFoodDefinition(edited);
+      final template = await context
+          .read<TemplateViewModel>()
+          .updateFoodTemplatePrototype(
+            item.baseFood.templateId!,
+            definition,
+            expectedVersionId: item.baseFood.foodVersionId,
+          );
+      if (template == null) {
+        throw StateError('Nutrition item is unavailable.');
+      }
+      return cloneFoodEntry(template.prototype)..templateId = template.id;
+    } catch (error, stackTrace) {
+      studyu.StudyULogger.error(
+        'Failed to update reusable nutrition item: $error\n$stackTrace',
+      );
+      if (!mounted) return null;
+      final l10n = AppLocalizations.of(context)!;
+      final message = NutritionFoodRepository.isVersionConflict(error)
+          ? l10n.nutrition_food_definition_conflict
+          : l10n.could_not_save_results;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+      return null;
+    }
   }
 
   Future<void> _decrementSelection(String key) async {

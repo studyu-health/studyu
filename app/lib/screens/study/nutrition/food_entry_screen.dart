@@ -37,6 +37,7 @@ class const FoodEntryScreen({
   final ValueChanged<int>? onHistoricalDefinitionSaved,
   final bool hasCurrentStudyDayMatches = false,
   final bool showCurrentMealOnlyNotice = false,
+  final bool selectionOnlyNotice = false,
   final bool isExternalLibraryCopy = false,
   final NutritionFoodRepository? repository,
   final TemplateViewModel? templateViewModel,
@@ -64,6 +65,7 @@ class const FoodEntryScreen({
     ValueChanged<int>? onHistoricalDefinitionSaved,
     bool hasCurrentStudyDayMatches = false,
     bool showCurrentMealOnlyNotice = false,
+    bool selectionOnlyNotice = false,
     bool isExternalLibraryCopy = false,
     NutritionFoodRepository? repository,
     TemplateViewModel? templateViewModel,
@@ -86,6 +88,7 @@ class const FoodEntryScreen({
       onHistoricalDefinitionSaved: onHistoricalDefinitionSaved,
       hasCurrentStudyDayMatches: hasCurrentStudyDayMatches,
       showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
+      selectionOnlyNotice: selectionOnlyNotice,
       isExternalLibraryCopy: isExternalLibraryCopy,
       repository: repository,
       templateViewModel: templateViewModel,
@@ -760,21 +763,11 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
               widget.existingFood != null &&
               !widget.editReusableDefinition &&
               !widget.isExternalLibraryCopy)
-            Card(
-              margin: EdgeInsets.zero,
-              color: theme.colorScheme.secondaryContainer,
-              child: ListTile(
-                leading: Icon(
-                  Icons.info_outline,
-                  color: theme.colorScheme.onSecondaryContainer,
-                ),
-                title: Text(
-                  l10n.current_meal_only_banner,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSecondaryContainer,
-                  ),
-                ),
-              ),
+            NutritionCurrentMealOnlyNotice(
+              message: widget.selectionOnlyNotice
+                  ? l10n.current_selection_only_banner
+                  : l10n.current_meal_only_banner,
+              theme: theme,
             ),
 
           if (widget.existingFood == null && widget.historicalMode)

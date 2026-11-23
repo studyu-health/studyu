@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+
+import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
 
@@ -86,4 +89,43 @@ FoodEntry rescaleFoodAmount(FoodEntry food, double newAmount) {
     );
   scaled.amount = newAmount;
   return scaled;
+}
+
+enum NutritionLibraryEditChoice() {
+  current,
+  currentAndLibrary,
+}
+
+Future<NutritionLibraryEditChoice?> showNutritionLibraryEditChoiceDialog({
+  required BuildContext context,
+  required String currentScopeLabel,
+  required String message,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  return showDialog<NutritionLibraryEditChoice>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      scrollable: true,
+      title: Text(l10n.library_edit_title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(l10n.cancel),
+        ),
+        OutlinedButton(
+          onPressed: () =>
+              Navigator.pop(dialogContext, NutritionLibraryEditChoice.current),
+          child: Text(currentScopeLabel),
+        ),
+        OutlinedButton(
+          onPressed: () => Navigator.pop(
+            dialogContext,
+            NutritionLibraryEditChoice.currentAndLibrary,
+          ),
+          child: Text(l10n.library_edit_current_entry_and_library),
+        ),
+      ],
+    ),
+  );
 }

@@ -2138,6 +2138,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get library_edit_current_entry => 'Only this logged item';
 
   @override
+  String get library_edit_current_selection => '이 선택 항목만';
+
+  @override
+  String get library_edit_selection_message =>
+      '이 항목은 라이브러리에서 가져왔습니다. 변경 사항을 저장할 위치를 선택하세요.';
+
+  @override
   String get library_edit_current_entry_and_library =>
       'This item and reusable library item';
 
@@ -3016,6 +3023,10 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get current_meal_only_banner =>
       '변경 사항은 이 식사에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요.';
+
+  @override
+  String get current_selection_only_banner =>
+      '변경 사항은 이 선택 항목에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요.';
 
   @override
   String grams_per_serving(Object grams) {

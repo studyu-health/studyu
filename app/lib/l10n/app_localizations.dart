@@ -4099,6 +4099,18 @@ abstract class AppLocalizations {
   /// **'Only this logged item'**
   String get library_edit_current_entry;
 
+  /// No description provided for @library_edit_current_selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this selection'**
+  String get library_edit_current_selection;
+
+  /// No description provided for @library_edit_selection_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This item comes from your library. Choose where to save your changes.'**
+  String get library_edit_selection_message;
+
   /// No description provided for @library_edit_current_entry_and_library.
   ///
   /// In en, this message translates to:
@@ -5514,6 +5526,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Changes apply only to this meal. For permanent changes, use the Library.'**
   String get current_meal_only_banner;
+
+  /// No description provided for @current_selection_only_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply only to this selection. For permanent changes, use the Library.'**
+  String get current_selection_only_banner;
 
   /// No description provided for @grams_per_serving.
   ///
