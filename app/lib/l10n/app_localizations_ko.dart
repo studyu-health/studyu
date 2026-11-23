@@ -1838,7 +1838,7 @@ class AppLocalizationsKo extends AppLocalizations {
       'Discard your changes or continue editing.';
 
   @override
-  String get discard_meal_changes_title => 'Leave this meal?';
+  String get discard_meal_changes_title => '이 항목을 떠날까요?';
 
   @override
   String get discard_meal_changes_message =>
@@ -1854,14 +1854,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get continue_editing => 'Continue editing';
 
   @override
-  String get delete_meal => 'Delete meal';
+  String get delete_meal => '항목 삭제';
 
   @override
-  String get delete_meal_title => 'Delete this meal?';
+  String get delete_meal_title => '이 항목을 삭제할까요?';
 
   @override
-  String get delete_meal_message =>
-      'This meal will be removed from the nutrition log.';
+  String get delete_meal_message => '이 항목은 영양 일지에서 제거됩니다.';
 
   @override
   String get enter_skip_reason => 'Enter a reason before saving.';
@@ -1878,9 +1877,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get meal_details => 'Meal details';
-
-  @override
-  String get edit_meal_title => 'Edit meal';
 
   @override
   String get apply => 'Apply';
@@ -1915,7 +1911,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get add_food => 'Add Food';
+  String get add_food => '음식 추가';
 
   @override
   String get no_food_items_yet => 'No food items yet';
@@ -2132,7 +2128,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get library_edit_message =>
-      'This entry comes from your library. Choose where to save your changes.';
+      '이 항목은 라이브러리에서 가져왔습니다. 변경 사항을 저장할 위치를 선택하세요.';
 
   @override
   String get library_edit_current_entry => 'Only this logged item';
@@ -2181,7 +2177,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get done_label => 'Done';
 
   @override
-  String get log_meal => 'Log meal';
+  String get log_meal => '일지 항목 추가';
 
   @override
   String get add_items => 'Add items';
@@ -2588,7 +2584,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get food_library => '라이브러리';
 
   @override
-  String get add_food_action => 'Create food';
+  String get add_food_action => '음식 만들기';
 
   @override
   String get recent_foods => 'Recently added';
@@ -3022,7 +3018,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get current_meal_only_banner =>
-      '변경 사항은 이 식사에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요.';
+      '변경 사항은 이 일지 항목에만 적용됩니다. 재사용 항목을 수정하려면 라이브러리를 이용하세요.';
 
   @override
   String get current_selection_only_banner =>
@@ -3085,7 +3081,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nutrition_add_food_or_saved_meal => 'Add food or saved meal';
+  String get nutrition_add_food_or_saved_meal => '항목 추가';
 
   @override
   String get nutrition_food_badge => 'Food';
@@ -3113,7 +3109,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String nutrition_add_food_to_meal(Object meal) {
-    return 'Add food to $meal';
+    return '음식을 $meal에 추가';
   }
 
   @override
@@ -3298,7 +3294,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_known_values_hint => '모르는 영양값은 비워 두세요.';
 
   @override
-  String get nutrition_log_again => '다시 기록';
+  String get nutrition_log_again => '일지 항목 다시 기록';
 
   @override
   String get nutrition_choose_recent_meal => '최근 식사 선택';
@@ -3307,7 +3303,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutrition_meal_items => '항목';
 
   @override
-  String get nutrition_save_meal => '식사 저장';
+  String get nutrition_save_meal => '일지 항목 저장';
 
   @override
   String get nutrition_select_time_to_save => '저장하려면 시간을 선택하세요';
@@ -3359,4 +3355,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nutrition_library_remove_filter => '필터 제거';
+
+  @override
+  String get edit_diary_entry_title => '일지 항목 편집';
+
+  @override
+  String get meal_neutral_label_inline => '항목';
+
+  @override
+  String get nutrition_add_diary_entry => '일지 항목 추가';
+
+  @override
+  String get nutrition_create_library_item => '항목 만들기';
+
+  @override
+  String get remove_from_entry => '일지 항목에서 제거';
 }

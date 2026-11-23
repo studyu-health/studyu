@@ -1917,7 +1917,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Verwerfen Sie Ihre Änderungen oder bearbeiten Sie weiter.';
 
   @override
-  String get discard_meal_changes_title => 'Mahlzeit verlassen?';
+  String get discard_meal_changes_title => 'Eintrag verlassen?';
 
   @override
   String get discard_meal_changes_message =>
@@ -1933,14 +1933,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get continue_editing => 'Weiter bearbeiten';
 
   @override
-  String get delete_meal => 'Mahlzeit löschen';
+  String get delete_meal => 'Eintrag löschen';
 
   @override
-  String get delete_meal_title => 'Diese Mahlzeit löschen?';
+  String get delete_meal_title => 'Diesen Eintrag löschen?';
 
   @override
   String get delete_meal_message =>
-      'Diese Mahlzeit wird aus dem Ernährungsprotokoll entfernt.';
+      'Dieser Eintrag wird aus dem Ernährungsprotokoll entfernt.';
 
   @override
   String get enter_skip_reason =>
@@ -1958,9 +1958,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get meal_details => 'Mahlzeitendetails';
-
-  @override
-  String get edit_meal_title => 'Mahlzeit bearbeiten';
 
   @override
   String get apply => 'Übernehmen';
@@ -2213,7 +2210,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get library_edit_message =>
-      'Dieser Eintrag stammt aus Ihrer Bibliothek. Wählen Sie, wo Ihre Änderungen gespeichert werden sollen.';
+      'Dieses Element stammt aus Ihrer Bibliothek. Wählen Sie, wo Ihre Änderungen gespeichert werden sollen.';
 
   @override
   String get library_edit_current_entry => 'Nur dieses protokollierte Element';
@@ -2263,7 +2260,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get done_label => 'Fertig';
 
   @override
-  String get log_meal => 'Mahlzeit erfassen';
+  String get log_meal => 'Eintrag hinzufügen';
 
   @override
   String get add_items => 'Elemente hinzufügen';
@@ -3123,7 +3120,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get current_meal_only_banner =>
-      'Änderungen gelten nur für diese Mahlzeit. Für dauerhafte Änderungen verwenden Sie die Bibliothek.';
+      'Änderungen gelten nur für diesen Tagebucheintrag. Verwenden Sie die Bibliothek, um das wiederverwendbare Element zu aktualisieren.';
 
   @override
   String get current_selection_only_banner =>
@@ -3187,8 +3184,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get nutrition_add_food_or_saved_meal =>
-      'Lebensmittel oder gespeicherte Mahlzeit hinzufügen';
+  String get nutrition_add_food_or_saved_meal => 'Element hinzufügen';
 
   @override
   String get nutrition_food_badge => 'Lebensmittel';
@@ -3412,7 +3408,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Lassen Sie unbekannte Nährwerte frei.';
 
   @override
-  String get nutrition_log_again => 'Erneut erfassen';
+  String get nutrition_log_again => 'Tagebucheintrag wiederholen';
 
   @override
   String get nutrition_choose_recent_meal => 'Eine frühere Mahlzeit auswählen';
@@ -3421,7 +3417,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nutrition_meal_items => 'Einträge';
 
   @override
-  String get nutrition_save_meal => 'Mahlzeit speichern';
+  String get nutrition_save_meal => 'Tagebucheintrag speichern';
 
   @override
   String get nutrition_select_time_to_save =>
@@ -3476,4 +3472,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutrition_library_remove_filter => 'Filter entfernen';
+
+  @override
+  String get edit_diary_entry_title => 'Tagebucheintrag bearbeiten';
+
+  @override
+  String get meal_neutral_label_inline => 'diesem Eintrag';
+
+  @override
+  String get nutrition_add_diary_entry => 'Eintrag hinzufügen';
+
+  @override
+  String get nutrition_create_library_item => 'Element erstellen';
+
+  @override
+  String get remove_from_entry => 'Aus dem Eintrag entfernen';
 }

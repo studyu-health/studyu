@@ -3514,7 +3514,7 @@ abstract class AppLocalizations {
   /// No description provided for @discard_meal_changes_title.
   ///
   /// In en, this message translates to:
-  /// **'Leave this meal?'**
+  /// **'Leave this entry?'**
   String get discard_meal_changes_title;
 
   /// No description provided for @discard_meal_changes_message.
@@ -3544,19 +3544,19 @@ abstract class AppLocalizations {
   /// No description provided for @delete_meal.
   ///
   /// In en, this message translates to:
-  /// **'Delete meal'**
+  /// **'Delete entry'**
   String get delete_meal;
 
   /// No description provided for @delete_meal_title.
   ///
   /// In en, this message translates to:
-  /// **'Delete this meal?'**
+  /// **'Delete this entry?'**
   String get delete_meal_title;
 
   /// No description provided for @delete_meal_message.
   ///
   /// In en, this message translates to:
-  /// **'This meal will be removed from the nutrition log.'**
+  /// **'This entry will be removed from the nutrition log.'**
   String get delete_meal_message;
 
   /// No description provided for @enter_skip_reason.
@@ -3588,12 +3588,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Meal details'**
   String get meal_details;
-
-  /// No description provided for @edit_meal_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit meal'**
-  String get edit_meal_title;
 
   /// No description provided for @apply.
   ///
@@ -3658,7 +3652,7 @@ abstract class AppLocalizations {
   /// No description provided for @add_food.
   ///
   /// In en, this message translates to:
-  /// **'Add Food'**
+  /// **'Add food'**
   String get add_food;
 
   /// No description provided for @no_food_items_yet.
@@ -4090,7 +4084,7 @@ abstract class AppLocalizations {
   /// No description provided for @library_edit_message.
   ///
   /// In en, this message translates to:
-  /// **'This entry comes from your library. Choose where to save your changes.'**
+  /// **'This item comes from your library. Choose where to save your changes.'**
   String get library_edit_message;
 
   /// No description provided for @library_edit_current_entry.
@@ -4180,7 +4174,7 @@ abstract class AppLocalizations {
   /// No description provided for @log_meal.
   ///
   /// In en, this message translates to:
-  /// **'Log meal'**
+  /// **'Add entry'**
   String get log_meal;
 
   /// No description provided for @add_items.
@@ -5524,7 +5518,7 @@ abstract class AppLocalizations {
   /// No description provided for @current_meal_only_banner.
   ///
   /// In en, this message translates to:
-  /// **'Changes apply only to this meal. For permanent changes, use the Library.'**
+  /// **'Changes apply only to this diary entry. To update the reusable item, use the Library.'**
   String get current_meal_only_banner;
 
   /// No description provided for @current_selection_only_banner.
@@ -5614,7 +5608,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_add_food_or_saved_meal.
   ///
   /// In en, this message translates to:
-  /// **'Add food or saved meal'**
+  /// **'Add item'**
   String get nutrition_add_food_or_saved_meal;
 
   /// No description provided for @nutrition_food_badge.
@@ -5998,7 +5992,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_log_again.
   ///
   /// In en, this message translates to:
-  /// **'Log again'**
+  /// **'Repeat diary entry'**
   String get nutrition_log_again;
 
   /// No description provided for @nutrition_choose_recent_meal.
@@ -6016,7 +6010,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_save_meal.
   ///
   /// In en, this message translates to:
-  /// **'Save meal'**
+  /// **'Save diary entry'**
   String get nutrition_save_meal;
 
   /// No description provided for @nutrition_select_time_to_save.
@@ -6114,6 +6108,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove filter'**
   String get nutrition_library_remove_filter;
+
+  /// No description provided for @edit_diary_entry_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit diary entry'**
+  String get edit_diary_entry_title;
+
+  /// No description provided for @meal_neutral_label_inline.
+  ///
+  /// In en, this message translates to:
+  /// **'entry'**
+  String get meal_neutral_label_inline;
+
+  /// No description provided for @nutrition_add_diary_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry'**
+  String get nutrition_add_diary_entry;
+
+  /// No description provided for @nutrition_create_library_item.
+  ///
+  /// In en, this message translates to:
+  /// **'Create item'**
+  String get nutrition_create_library_item;
+
+  /// No description provided for @remove_from_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from entry'**
+  String get remove_from_entry;
 }
 
 class _AppLocalizationsDelegate

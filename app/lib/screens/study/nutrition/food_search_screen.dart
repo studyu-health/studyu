@@ -1015,10 +1015,10 @@ class _FoodSearchScreenContentState()
               ? l10n.food_selection_update_selection
               : widget.allowMeals
               ? l10n.nutrition_add_foods_or_saved_meals_to_meal(
-                  widget.mealLabel!.toLowerCase(),
+                  mealLabelInSentence(l10n, widget.mealLabel!),
                 )
               : l10n.nutrition_add_food_to_meal(
-                  widget.mealLabel!.toLowerCase(),
+                  mealLabelInSentence(l10n, widget.mealLabel!),
                 ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,

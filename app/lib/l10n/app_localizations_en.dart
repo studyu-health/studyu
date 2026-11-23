@@ -1893,7 +1893,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Discard your changes or continue editing.';
 
   @override
-  String get discard_meal_changes_title => 'Leave this meal?';
+  String get discard_meal_changes_title => 'Leave this entry?';
 
   @override
   String get discard_meal_changes_message =>
@@ -1909,14 +1909,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continue_editing => 'Continue editing';
 
   @override
-  String get delete_meal => 'Delete meal';
+  String get delete_meal => 'Delete entry';
 
   @override
-  String get delete_meal_title => 'Delete this meal?';
+  String get delete_meal_title => 'Delete this entry?';
 
   @override
   String get delete_meal_message =>
-      'This meal will be removed from the nutrition log.';
+      'This entry will be removed from the nutrition log.';
 
   @override
   String get enter_skip_reason => 'Enter a reason before saving.';
@@ -1933,9 +1933,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get meal_details => 'Meal details';
-
-  @override
-  String get edit_meal_title => 'Edit meal';
 
   @override
   String get apply => 'Apply';
@@ -1970,7 +1967,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get add_food => 'Add Food';
+  String get add_food => 'Add food';
 
   @override
   String get no_food_items_yet => 'No food items yet';
@@ -2187,7 +2184,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get library_edit_message =>
-      'This entry comes from your library. Choose where to save your changes.';
+      'This item comes from your library. Choose where to save your changes.';
 
   @override
   String get library_edit_current_entry => 'Only this logged item';
@@ -2237,7 +2234,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get done_label => 'Done';
 
   @override
-  String get log_meal => 'Log meal';
+  String get log_meal => 'Add entry';
 
   @override
   String get add_items => 'Add items';
@@ -3082,7 +3079,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get current_meal_only_banner =>
-      'Changes apply only to this meal. For permanent changes, use the Library.';
+      'Changes apply only to this diary entry. To update the reusable item, use the Library.';
 
   @override
   String get current_selection_only_banner =>
@@ -3145,7 +3142,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nutrition_add_food_or_saved_meal => 'Add food or saved meal';
+  String get nutrition_add_food_or_saved_meal => 'Add item';
 
   @override
   String get nutrition_food_badge => 'Food';
@@ -3364,7 +3361,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Leave unknown nutrient values blank.';
 
   @override
-  String get nutrition_log_again => 'Log again';
+  String get nutrition_log_again => 'Repeat diary entry';
 
   @override
   String get nutrition_choose_recent_meal => 'Choose a recent meal';
@@ -3373,7 +3370,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nutrition_meal_items => 'Items';
 
   @override
-  String get nutrition_save_meal => 'Save meal';
+  String get nutrition_save_meal => 'Save diary entry';
 
   @override
   String get nutrition_select_time_to_save => 'Select a time to save';
@@ -3427,4 +3424,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrition_library_remove_filter => 'Remove filter';
+
+  @override
+  String get edit_diary_entry_title => 'Edit diary entry';
+
+  @override
+  String get meal_neutral_label_inline => 'entry';
+
+  @override
+  String get nutrition_add_diary_entry => 'Add entry';
+
+  @override
+  String get nutrition_create_library_item => 'Create item';
+
+  @override
+  String get remove_from_entry => 'Remove from entry';
 }

@@ -6,6 +6,9 @@ import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_core/core.dart';
 import 'package:uuid/uuid.dart';
 
+String mealLabelInSentence(AppLocalizations l10n, String label) =>
+    label == l10n.meal_neutral_label ? l10n.meal_neutral_label_inline : label;
+
 double? parseNutritionAmount(String input) {
   final amount = double.tryParse(input.trim().replaceFirst(',', '.'));
   return amount != null && amount.isFinite && amount >= 0 ? amount : null;

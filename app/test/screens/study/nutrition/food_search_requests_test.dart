@@ -428,7 +428,7 @@ void main() {
         expect(find.text(metadata), findsOneWidget);
 
         await tester.tap(
-          find.widgetWithText(FilledButton, 'Add 1 item to Meal'),
+          find.widgetWithText(FilledButton, 'Add 1 item to entry'),
         );
         await tester.pumpAndSettle();
         expect(foods.single.servingSizeGrams, grams);

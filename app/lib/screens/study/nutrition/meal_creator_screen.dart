@@ -1024,7 +1024,11 @@ class const _FoodsSectionHeader({
           spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            NutritionAddButton(onPressed: onAddFood, label: l10n.add_food),
+            NutritionAddButton(
+              onPressed: onAddFood,
+              label: l10n.add_food,
+              icon: Icons.add,
+            ),
             if (onToggleQuickAdd != null)
               Semantics(
                 expanded: showQuickAdd,

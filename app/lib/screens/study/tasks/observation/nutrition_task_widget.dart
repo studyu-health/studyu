@@ -892,7 +892,8 @@ class _NutritionTaskWidgetState()
               Flexible(
                 child: NutritionAddButton(
                   onPressed: () => _addMeal(context, model),
-                  label: l10n.log_meal,
+                  label: l10n.nutrition_add_diary_entry,
+                  icon: Icons.post_add,
                 ),
               ),
           ],
@@ -900,7 +901,7 @@ class _NutritionTaskWidgetState()
         if (recentMeals.isNotEmpty)
           OutlinedButton.icon(
             onPressed: () => _logAgain(context, model, recentMeals),
-            icon: const Icon(Icons.replay),
+            icon: const Icon(Icons.history),
             label: Text(l10n.nutrition_log_again),
           ),
         const SizedBox(height: 8),

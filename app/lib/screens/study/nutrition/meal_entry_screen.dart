@@ -597,7 +597,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
               () => _editFood(food, editReusableDefinition: true),
             ),
           nutritionActionMenuItem(
-            l10n.remove_from_meal,
+            l10n.remove_from_entry,
             Icons.delete_outline,
             () => _removeFood(food),
             color: Theme.of(context).colorScheme.error,
@@ -658,7 +658,9 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     );
   }
 
-  String get _pageTitle => AppLocalizations.of(context)!.log_meal;
+  String get _pageTitle => widget.existingMeal == null
+      ? AppLocalizations.of(context)!.log_meal
+      : AppLocalizations.of(context)!.edit_diary_entry_title;
 
   void _pop([MealEntryResult? result]) {
     setState(() => _allowPop = true);
@@ -1058,7 +1060,17 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         if (!didPop && !_isSaving) _confirmDiscard();
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(_pageTitle)),
+        appBar: AppBar(
+          title: widget.existingMeal == null
+              ? Row(
+                  spacing: 8,
+                  children: [
+                    const Icon(Icons.menu_book_outlined),
+                    Flexible(child: Text(_pageTitle)),
+                  ],
+                )
+              : Text(_pageTitle),
+        ),
         bottomNavigationBar: Material(
           color: theme.colorScheme.surface,
           child: SafeArea(
@@ -1461,10 +1473,10 @@ class const _FoodListSection({
                 ),
               ),
               NutritionAddButton(
-                label: l10n.add_food,
-                tooltip: allowMeals
+                label: allowMeals
                     ? l10n.nutrition_add_food_or_saved_meal
-                    : null,
+                    : l10n.add_food,
+                icon: Icons.add,
                 onPressed: onAddFood,
               ),
             ],

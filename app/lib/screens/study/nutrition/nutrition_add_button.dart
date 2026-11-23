@@ -24,7 +24,7 @@ class const FoodCreationButton({
     );
     final action = await showMenu<VoidCallback>(
       context: context,
-      semanticLabel: l10n.create,
+      semanticLabel: l10n.nutrition_create_library_item,
       position: RelativeRect.fromSize(
         Rect.fromLTRB(anchor.left, anchor.bottom, anchor.right, anchor.bottom),
         overlay.size,
@@ -61,10 +61,19 @@ class const FoodCreationButton({
     final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsetsDirectional.only(end: 8),
-      child: NutritionAddButton(
-        onPressed: () => _create(context),
-        filled: filled && onCreateMeal != null,
-        label: onCreateMeal == null ? l10n.add_food_action : l10n.create,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width * 0.55,
+        ),
+        child: NutritionAddButton(
+          onPressed: () => _create(context),
+          filled: filled && onCreateMeal != null,
+          icon: onCreateMeal == null ? Icons.add : Icons.library_books_outlined,
+          opensMenu: onCreateMeal != null,
+          label: onCreateMeal == null
+              ? l10n.add_food_action
+              : l10n.nutrition_create_library_item,
+        ),
       ),
     );
   }
@@ -73,27 +82,33 @@ class const FoodCreationButton({
 class const NutritionAddButton({
   required final String label,
   required final VoidCallback onPressed,
-  final String? tooltip,
+  required final IconData icon,
+  final bool opensMenu = false,
   final bool filled = false,
   super.key,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    const icon = Icon(Icons.add);
-    final text = Text(label);
-    final button = filled
-        ? FilledButton.icon(onPressed: onPressed, icon: icon, label: text)
+    final leading = Icon(icon);
+    final labelText = Text(label, maxLines: 2, overflow: TextOverflow.ellipsis);
+    final text = opensMenu
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: labelText),
+              const Icon(Icons.expand_more),
+            ],
+          )
+        : labelText;
+    return filled
+        ? FilledButton.icon(onPressed: onPressed, icon: leading, label: text)
         : TextButton.icon(
             onPressed: onPressed,
-            icon: icon,
+            icon: leading,
             label: text,
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8),
             ),
           );
-    if (tooltip case final message?) {
-      return Tooltip(message: message, child: button);
-    }
-    return button;
   }
 }

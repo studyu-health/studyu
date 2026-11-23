@@ -643,7 +643,9 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                 FoodQuantityAction.addToMeal =>
                   widget.mealLabel == null
                       ? l10n.add_food
-                      : l10n.food_quantity_add_to_meal(widget.mealLabel!),
+                      : l10n.food_quantity_add_to_meal(
+                          mealLabelInSentence(l10n, widget.mealLabel!),
+                        ),
                 FoodQuantityAction.updateSelection =>
                   l10n.food_quantity_update_selection,
               }),

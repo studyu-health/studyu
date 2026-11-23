@@ -733,7 +733,9 @@ class _FoodEntryScreenState() extends State<FoodEntryScreen> {
                         label: Text(
                           widget.isExternalLibraryCopy
                               ? l10n.external_library_save_copy
-                              : l10n.save_and_add_to_meal(widget.mealLabel!),
+                              : l10n.save_and_add_to_meal(
+                                  mealLabelInSentence(l10n, widget.mealLabel!),
+                                ),
                           textAlign: TextAlign.center,
                         ),
                       ),

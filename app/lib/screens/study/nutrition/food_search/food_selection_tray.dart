@@ -176,7 +176,7 @@ class _SelectionPeekTrayState() extends State<_SelectionPeekTray> {
                       ? l10n.food_selection_update_selection
                       : l10n.food_selection_confirm(
                           widget.store.itemCount,
-                          widget.mealLabel,
+                          mealLabelInSentence(l10n, widget.mealLabel),
                         ),
                 ),
               ),

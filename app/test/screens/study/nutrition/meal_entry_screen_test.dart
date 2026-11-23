@@ -281,7 +281,9 @@ Future<_TrackingNutritionFoodRepository> _openValidNewHistoricalMeal(
   await tester.pumpAndSettle();
   expect(
     tester
-        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save meal'))
+        .widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Save diary entry'),
+        )
         .onPressed,
     isNull,
   );
@@ -415,7 +417,10 @@ Future<void> selectMealType(WidgetTester tester, String label) async {
 }
 
 Future<void> openFoodSearchFromMeal(WidgetTester tester) async {
-  final addFood = find.widgetWithText(TextButton, 'Add Food');
+  final addFood = find.ancestor(
+    of: find.textContaining(RegExp(r'^Add item$')),
+    matching: find.byType(TextButton),
+  );
   await tester.ensureVisible(addFood);
   await tester.tap(addFood);
   await tester.pumpAndSettle();
@@ -503,7 +508,7 @@ void main() {
     expect(find.byType(BottomSheet), findsNothing);
     expect(find.byType(TimePickerDialog), findsNothing);
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
     expect(result, isNotNull);
     expect(result!.timePrecision, MealOccurrenceTimePrecision.exact);
@@ -526,7 +531,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save meal'))
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Save diary entry'),
+          )
           .onPressed,
       isNull,
     );
@@ -554,7 +561,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Apply'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
     expect(result, isNotNull);
     expect(result!.mealContext, isNull);
@@ -583,7 +590,7 @@ void main() {
       await tester.tap(find.text('Apply'));
       await tester.pumpAndSettle();
       expect(find.text('Supper'), findsOneWidget);
-      await tester.tap(find.text('Save meal'));
+      await tester.tap(find.text('Save diary entry'));
       await tester.pumpAndSettle();
       expect(result!.mealContext, isNull);
       expect(result!.locationDescription, isNull);
@@ -609,7 +616,7 @@ void main() {
         original,
         onResult: (value) => result = value,
       );
-      final save = find.widgetWithText(FilledButton, 'Save meal');
+      final save = find.widgetWithText(FilledButton, 'Save diary entry');
       expect(tester.widget<FilledButton>(save).onPressed, isNull);
       await tester.tap(find.text('Time'));
       await tester.pumpAndSettle();
@@ -638,7 +645,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text("I don't remember"));
       await tester.pumpAndSettle();
-      final save = find.widgetWithText(FilledButton, 'Save meal');
+      final save = find.widgetWithText(FilledButton, 'Save diary entry');
       expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
       await tester.tap(save);
       await tester.pumpAndSettle();
@@ -667,16 +674,21 @@ void main() {
     expect(find.text('Meal details'), findsOneWidget);
     expect(find.text('Dinner'), findsWidgets);
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text('Add entry'),
+      ),
       findsOneWidget,
     );
-    expect(find.text('Save meal'), findsOneWidget);
-    expect(find.text('Delete meal'), findsNothing);
+    expect(find.text('Save diary entry'), findsOneWidget);
+    expect(find.text('Delete entry'), findsNothing);
     expect(find.text('Select a time'), findsOneWidget);
 
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save meal'))
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Save diary entry'),
+          )
           .onPressed,
       isNull,
     );
@@ -693,7 +705,9 @@ void main() {
     expect(find.text('Time not remembered'), findsOneWidget);
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save meal'))
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Save diary entry'),
+          )
           .onPressed,
       isNull,
     );
@@ -714,7 +728,7 @@ void main() {
     );
     expect(tester.widget<CheckboxListTile>(saveToMyItems).value, isTrue);
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(repository.savedTemplateTypes, [FoodEntryType.meal]);
@@ -731,7 +745,7 @@ void main() {
         onResult: (value) => result = value,
       );
 
-      await tester.tap(find.text('Save meal'));
+      await tester.tap(find.text('Save diary entry'));
       await tester.pumpAndSettle();
 
       expect(repository.savedTemplateTypes, [FoodEntryType.meal]);
@@ -740,7 +754,7 @@ void main() {
       expect(find.text('Could not save results'), findsOneWidget);
 
       await tester.tap(find.text('Save to My items for future use'));
-      await tester.tap(find.text('Save meal'));
+      await tester.tap(find.text('Save diary entry'));
       await tester.pumpAndSettle();
 
       expect(repository.savedTemplateTypes, [FoodEntryType.meal]);
@@ -759,7 +773,7 @@ void main() {
 
     await tester.tap(find.text('Save to My items for future use'));
     await tester.pump();
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(repository.savedTemplateTypes, isEmpty);
@@ -791,7 +805,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -809,7 +823,7 @@ void main() {
     await chooseMealTime(tester, 'Exact time', hour: '9', minute: '15');
     await chooseMealTime(tester, 'Exact time', hour: '10', minute: '30');
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -842,7 +856,7 @@ void main() {
       minute: local.minute.toString(),
       period: local.hour < 12 ? DayPeriod.am : DayPeriod.pm,
     );
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
     expect(result!.timestamp, latestMinute);
     expect(result!.timestamp!.isUtc, isTrue);
@@ -861,7 +875,7 @@ void main() {
     await chooseMealTime(tester, 'Approximate time', hour: '9', minute: '15');
     await chooseMealTime(tester, 'Approximate time', hour: '10', minute: '30');
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -944,7 +958,10 @@ void main() {
     expect(find.text('Supper • Home'), findsOneWidget);
     expect(find.text('Dinner'), findsNothing);
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text('Edit diary entry'),
+      ),
       findsOneWidget,
     );
   });
@@ -964,7 +981,10 @@ void main() {
     await selectMealType(tester, 'Dinner');
 
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text('Edit diary entry'),
+      ),
       findsOneWidget,
     );
     expect(
@@ -975,7 +995,7 @@ void main() {
       findsNothing,
     );
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isA<SavedMealEntryResult>());
@@ -1009,7 +1029,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Evening snack • Home'), findsOneWidget);
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     final meal = (result! as SavedMealEntryResult).meal;
@@ -1052,9 +1072,9 @@ void main() {
     );
 
     await selectMealType(tester, 'No label');
-    expect(find.text('Log meal'), findsOneWidget);
+    expect(find.text('Edit diary entry'), findsOneWidget);
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     final meal = (result! as SavedMealEntryResult).meal;
@@ -1124,7 +1144,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Dinner • Restaurant • Family • None'), findsOneWidget);
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
     final meal = (result! as SavedMealEntryResult).meal;
     expect(meal.mealType, MealType.dinner);
@@ -1173,7 +1193,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     final meal = (result! as SavedMealEntryResult).meal;
@@ -1193,11 +1213,11 @@ void main() {
     expect(reasonField.decoration?.errorText, isNull);
 
     final saveButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Save meal'),
+      find.widgetWithText(FilledButton, 'Save diary entry'),
     );
     expect(saveButton.onPressed, isNotNull);
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pump();
 
     reasonField = tester.widget<TextField>(find.byType(TextField));
@@ -1221,10 +1241,7 @@ void main() {
       );
 
       expect(find.text('No foods added'), findsOneWidget);
-      expect(
-        find.byTooltip('Add food or saved meal').hitTestable(),
-        findsOneWidget,
-      );
+      expect(find.text('Add item').hitTestable(), findsOneWidget);
       expect(find.text('Items'), findsOneWidget);
       expect(find.text('Meal Nutrition'), findsNothing);
       expect(
@@ -1232,11 +1249,11 @@ void main() {
         findsOneWidget,
       );
       final saveButton = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Save meal'),
+        find.widgetWithText(FilledButton, 'Save diary entry'),
       );
       expect(saveButton.onPressed, isNull);
 
-      await tester.tap(find.text('Save meal'));
+      await tester.tap(find.text('Save diary entry'));
       await tester.pump();
 
       expect(result, isNull);
@@ -1304,7 +1321,7 @@ void main() {
     }
   });
 
-  testWidgets('Add Food opens search with the foods already logged', (
+  testWidgets('Adding food opens search with the foods already logged', (
     tester,
   ) async {
     await openMealEntry(tester, editableMeal());
@@ -1349,7 +1366,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    expect(find.text('Leave this meal?'), findsOneWidget);
+    expect(find.text('Leave this entry?'), findsOneWidget);
     expect(
       find.text('Discard your changes or continue editing.'),
       findsOneWidget,
@@ -1385,11 +1402,11 @@ void main() {
       onEntryResult: (value) => result = value,
     );
 
-    await tester.ensureVisible(find.text('Delete meal'));
-    await tester.tap(find.text('Delete meal'));
+    await tester.ensureVisible(find.text('Delete entry'));
+    await tester.tap(find.text('Delete entry'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Delete this meal?'), findsOneWidget);
+    expect(find.text('Delete this entry?'), findsOneWidget);
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
 
@@ -1427,7 +1444,7 @@ void main() {
     expect(find.text('Local apple'), findsOneWidget);
     expect(find.text('Apple'), findsOneWidget);
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -1713,7 +1730,7 @@ void main() {
         expect(repository.submittedSnapshot!.id, 'food');
         expect(repository.submittedSnapshot!.nutrition.energyKcal, 73);
 
-        await tester.tap(find.text('Save meal'));
+        await tester.tap(find.text('Save diary entry'));
         await tester.pumpAndSettle();
         expect(result!.foods.first.amount, 2);
         expect(result!.foods.first.nutrition.energyKcal, 146);
@@ -1771,7 +1788,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.text('Save meal'));
+      await tester.tap(find.text('Save diary entry'));
       await tester.pumpAndSettle();
 
       expect(result, isA<SavedMealEntryResult>());
@@ -1867,7 +1884,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.text('Save meal'));
+      await tester.tap(find.text('Save diary entry'));
       await tester.pumpAndSettle();
 
       final savedMeal = (result! as SavedMealEntryResult).meal;
@@ -2103,7 +2120,7 @@ void main() {
 
     expect(await recipeResult, isNull);
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2170,7 +2187,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2258,7 +2275,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2317,7 +2334,7 @@ void main() {
 
     expect(result, isNull);
     expect(original.foods.single.amount, 1);
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
     expect(result!.foods.single.amount, 2);
     expect(result!.foods.single.nutrition.energyKcal, 104);
@@ -2330,7 +2347,7 @@ void main() {
     expect(find.text('Apple'), findsOneWidget);
 
     final options = find.byTooltip('More options');
-    final remove = find.text('Remove from meal');
+    final remove = find.text('Remove from entry');
     await tester.tap(options);
     await tester.pumpAndSettle();
 
@@ -2395,7 +2412,7 @@ void main() {
     }
 
     expect(find.text('Pear'), findsOneWidget);
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
     expect(result!.foods.single.amount, 2);
     expect(result!.foods.single.nutrition.energyKcal, 104);
@@ -2447,7 +2464,7 @@ void main() {
     await tester.tap(find.text('Discard changes'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2470,7 +2487,7 @@ void main() {
 
     await tester.tap(find.text('Skipped this meal'));
     await tester.pump();
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -2486,7 +2503,7 @@ void main() {
     final original = skippedMeal(reason: 'Not hungry');
     await openMealEntry(tester, original, onResult: (value) => result = value);
 
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);

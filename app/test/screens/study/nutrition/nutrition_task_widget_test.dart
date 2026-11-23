@@ -402,7 +402,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(l10n.nutrition_recall_conflict_title), findsOneWidget);
-    expect(find.text(l10n.log_meal), findsNothing);
+    expect(find.text(l10n.nutrition_add_diary_entry), findsNothing);
     await tester.tap(find.text(l10n.nutrition_recall_discard_draft));
     await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.cancel));
@@ -423,7 +423,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(await manager.scanPendingRecalls(subject.id), isEmpty);
     expect(find.text(l10n.nutrition_recall_conflict_title), findsNothing);
-    expect(find.text(l10n.log_meal), findsOneWidget);
+    expect(find.text(l10n.nutrition_add_diary_entry), findsOneWidget);
   });
 
   testWidgets('timeline identifies missing and partial meal energy', (
@@ -652,7 +652,7 @@ void main() {
     await tester.pumpWidget(nutritionTaskApp(nutritionTask()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Log meal'), findsOneWidget);
+    expect(find.text('Add entry'), findsOneWidget);
     expect(find.text('Water'), findsNothing);
     expect(find.byTooltip('Add a cup of water'), findsNothing);
   });
@@ -768,7 +768,7 @@ void main() {
       expect(find.text('My items'), findsNothing);
       expect(find.byIcon(Icons.history_outlined), findsNothing);
       expect(find.byIcon(Icons.help_outline), findsNothing);
-      expect(find.text('Log meal'), findsNothing);
+      expect(find.text('Add entry'), findsNothing);
       expect(find.byTooltip('More options'), findsNothing);
       expect(find.text('600 mL'), findsOneWidget);
       expect(find.byTooltip('Add a cup of water'), findsNothing);
@@ -805,7 +805,7 @@ void main() {
     expect(find.text('My items'), findsNothing);
     expect(find.byTooltip('History'), findsNothing);
     expect(find.byTooltip('Help'), findsNothing);
-    expect(find.text('Log again'), findsNothing);
+    expect(find.text('Repeat diary entry'), findsNothing);
   });
 
   testWidgets('history opens a previous-day local draft for editing', (
@@ -838,7 +838,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Read-only'), findsNothing);
-    expect(find.text('Log meal'), findsOneWidget);
+    expect(find.text('Add entry'), findsOneWidget);
     expect(find.text('Draft apple'), findsOneWidget);
   });
 
@@ -910,7 +910,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(MealEntryScreen), findsOneWidget);
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
     expect(find.byType(MealEntryScreen), findsNothing);
     final draft = (await manager.scanPendingRecalls(setup.subject.id)).single;
@@ -973,7 +973,7 @@ void main() {
     final navigation = find.byType(NavigationBar);
     final create = find.descendant(
       of: find.byType(AppBar),
-      matching: find.text(l10n.create),
+      matching: find.text(l10n.nutrition_create_library_item),
     );
     expect(create, findsNothing);
     await tester.tap(
@@ -1197,7 +1197,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(statistics, findsNothing);
     expect(find.text('Daily summary'), findsNothing);
-    expect(find.text('Log meal'), findsOneWidget);
+    expect(find.text('Add entry'), findsOneWidget);
 
     await tester.tap(
       find.descendant(of: navigation, matching: find.text('Library')),
@@ -1370,7 +1370,7 @@ void main() {
     );
   });
 
-  testWidgets('Log meal opens search before the new meal editor', (
+  testWidgets('Add entry opens search before the new meal editor', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -1380,10 +1380,10 @@ void main() {
 
     expect(find.text('No meals recorded yet'), findsOneWidget);
     expect(find.text('Breakfast'), findsNothing);
-    expect(find.text('Log meal'), findsOneWidget);
-    expect(find.text('Log again'), findsNothing);
+    expect(find.text('Add entry'), findsOneWidget);
+    expect(find.text('Repeat diary entry'), findsNothing);
 
-    await tester.tap(find.text('Log meal'));
+    await tester.tap(find.text('Add entry'));
     await tester.pumpAndSettle();
     expect(find.byType(FoodSearchScreen), findsOneWidget);
     expect(find.byType(MealEntryScreen, skipOffstage: false), findsNothing);
@@ -1392,7 +1392,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('No meals recorded yet'), findsOneWidget);
 
-    await tester.tap(find.text('Log meal'));
+    await tester.tap(find.text('Add entry'));
     await tester.pumpAndSettle();
     await _selectSavedSoup(tester, settle: false);
     expect(find.byType(MealEntryScreen, skipOffstage: false), findsNothing);
@@ -1401,7 +1401,10 @@ void main() {
     expect(route.transitionDuration, Duration.zero);
 
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.text('Log meal')),
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text('Add entry'),
+      ),
       findsOneWidget,
     );
     expect(find.text('Soup'), findsOneWidget);
@@ -1430,23 +1433,23 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final logMeal = find.text('Log meal');
+      final logMeal = find.text('Add entry');
       await tester.tap(logMeal);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Create'));
+      await tester.tap(find.text('Create item'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create food'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField).first, 'Draft apricot');
-      await tester.tap(find.text('Save and add to Meal'));
+      await tester.tap(find.text('Save and add to entry'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Add 1 item to Meal'));
+      await tester.tap(find.text('Add 1 item to entry'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Select a time'));
       await tester.pumpAndSettle();
       await tester.tap(find.text("I don't remember"));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save meal'));
+      await tester.tap(find.text('Save diary entry'));
       await tester.pumpAndSettle();
 
       final draftFood = find.text('Draft apricot');
@@ -1483,114 +1486,116 @@ void main() {
     },
   );
 
-  testWidgets('Log again saves an editable copy of a prior meal to Today', (
-    tester,
-  ) async {
-    final setup = historicalNavigationSetup('Breakfast apple');
-    setup.task.customMealTypes = ['Usual breakfast'];
-    final priorRecall =
-        setup.subject.progress.single.result.result as DailyRecall;
-    final source = priorRecall.meals.single
-      ..mealType = MealType.other
-      ..customMealLabel = 'Usual breakfast';
-    final sourceFood = source.foods.single..amount = 2;
+  testWidgets(
+    'Repeat diary entry saves an editable copy of a prior meal to Today',
+    (tester) async {
+      final setup = historicalNavigationSetup('Breakfast apple');
+      setup.task.customMealTypes = ['Usual breakfast'];
+      final priorRecall =
+          setup.subject.progress.single.result.result as DailyRecall;
+      final source = priorRecall.meals.single
+        ..mealType = MealType.other
+        ..customMealLabel = 'Usual breakfast';
+      final sourceFood = source.foods.single..amount = 2;
 
-    await tester.pumpWidget(
-      nutritionTaskApp(
-        setup.task,
-        appState: AppState()..activeSubject = setup.subject,
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        nutritionTaskApp(
+          setup.task,
+          appState: AppState()..activeSubject = setup.subject,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    final repeat = find.text('Log again');
-    final model = tester.element(repeat).read<DailyRecallEntryViewModel>();
-    await tester.ensureVisible(repeat);
-    await tester.tap(repeat);
-    await tester.pumpAndSettle();
-    expect(find.text('Choose a recent meal'), findsOneWidget);
-    await tester.tap(find.text('Usual breakfast'));
-    await tester.pumpAndSettle();
+      final repeat = find.text('Repeat diary entry');
+      final model = tester.element(repeat).read<DailyRecallEntryViewModel>();
+      await tester.ensureVisible(repeat);
+      await tester.tap(repeat);
+      await tester.pumpAndSettle();
+      expect(find.text('Choose a recent meal'), findsOneWidget);
+      await tester.tap(find.text('Usual breakfast'));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(FoodSearchScreen), findsNothing);
-    expect(find.text('Usual breakfast'), findsOneWidget);
-    expect(find.text('Select a time'), findsOneWidget);
-    expect(model.recall.meals, isEmpty);
-    final initialFood = tester
-        .widget<MealEntryScreen>(find.byType(MealEntryScreen))
-        .initialFoods
-        .single;
-    expect(initialFood.amount, 2);
+      expect(find.byType(FoodSearchScreen), findsNothing);
+      expect(find.text('Usual breakfast'), findsOneWidget);
+      expect(find.text('Select a time'), findsOneWidget);
+      expect(model.recall.meals, isEmpty);
+      final initialFood = tester
+          .widget<MealEntryScreen>(find.byType(MealEntryScreen))
+          .initialFoods
+          .single;
+      expect(initialFood.amount, 2);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Discard changes'));
-    await tester.pumpAndSettle();
-    expect(model.recall.meals, isEmpty);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Discard changes'));
+      await tester.pumpAndSettle();
+      expect(model.recall.meals, isEmpty);
 
-    await tester.tap(repeat);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Usual breakfast'));
-    await tester.pumpAndSettle();
+      await tester.tap(repeat);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Usual breakfast'));
+      await tester.pumpAndSettle();
 
-    final item = find.text('Breakfast apple');
-    await tester.ensureVisible(item);
-    await tester.tap(item);
-    await tester.pumpAndSettle();
-    final servings = find.widgetWithText(TextFormField, 'Servings *');
-    await tester.ensureVisible(servings);
-    await tester.enterText(servings, '3');
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+      final item = find.text('Breakfast apple');
+      await tester.ensureVisible(item);
+      await tester.tap(item);
+      await tester.pumpAndSettle();
+      final servings = find.widgetWithText(TextFormField, 'Servings *');
+      await tester.ensureVisible(servings);
+      await tester.enterText(servings, '3');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Select a time'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text("I don't remember"));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Save meal'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Select a time'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("I don't remember"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save diary entry'));
+      await tester.pumpAndSettle();
 
-    final saved = model.recall.meals.single;
-    final savedFood = saved.foods.single;
-    expect(saved.id, isNot(source.id));
-    expect(saved.customMealLabel, 'Usual breakfast');
-    expect(saved.mealContext, isNull);
-    expect(saved.timePrecision, MealOccurrenceTimePrecision.unknown);
-    expect(saved.timestamp, isNull);
-    expect(savedFood.id, isNot(sourceFood.id));
-    expect(savedFood.foodId, sourceFood.foodId);
-    expect(savedFood.foodVersionId, sourceFood.foodVersionId);
-    expect(savedFood.amount, 3);
-    expect(priorRecall.meals.single, same(source));
-    expect(priorRecall.meals.single.foods.single.amount, 2);
-  });
+      final saved = model.recall.meals.single;
+      final savedFood = saved.foods.single;
+      expect(saved.id, isNot(source.id));
+      expect(saved.customMealLabel, 'Usual breakfast');
+      expect(saved.mealContext, isNull);
+      expect(saved.timePrecision, MealOccurrenceTimePrecision.unknown);
+      expect(saved.timestamp, isNull);
+      expect(savedFood.id, isNot(sourceFood.id));
+      expect(savedFood.foodId, sourceFood.foodId);
+      expect(savedFood.foodVersionId, sourceFood.foodVersionId);
+      expect(savedFood.amount, 3);
+      expect(priorRecall.meals.single, same(source));
+      expect(priorRecall.meals.single.foods.single.amount, 2);
+    },
+  );
 
-  testWidgets('Log again hides meals that contain a disallowed saved meal', (
-    tester,
-  ) async {
-    final setup = historicalNavigationSetup('Breakfast apple');
-    setup.task.allowMeals = false;
-    final priorRecall =
-        setup.subject.progress.single.result.result as DailyRecall;
-    priorRecall.meals.single.foods.add(
-      food('porridge', 'Saved porridge', 160)..entryType = FoodEntryType.meal,
-    );
-    priorRecall.meals.addAll([
-      meal('empty', MealType.lunch),
-      meal('skipped', MealType.dinner, isSkipped: true),
-    ]);
+  testWidgets(
+    'Repeat diary entry hides meals that contain a disallowed saved meal',
+    (tester) async {
+      final setup = historicalNavigationSetup('Breakfast apple');
+      setup.task.allowMeals = false;
+      final priorRecall =
+          setup.subject.progress.single.result.result as DailyRecall;
+      priorRecall.meals.single.foods.add(
+        food('porridge', 'Saved porridge', 160)..entryType = FoodEntryType.meal,
+      );
+      priorRecall.meals.addAll([
+        meal('empty', MealType.lunch),
+        meal('skipped', MealType.dinner, isSkipped: true),
+      ]);
 
-    await tester.pumpWidget(
-      nutritionTaskApp(
-        setup.task,
-        appState: AppState()..activeSubject = setup.subject,
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        nutritionTaskApp(
+          setup.task,
+          appState: AppState()..activeSubject = setup.subject,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Log meal'), findsOneWidget);
-    expect(find.text('Log again'), findsNothing);
-  });
+      expect(find.text('Add entry'), findsOneWidget);
+      expect(find.text('Repeat diary entry'), findsNothing);
+    },
+  );
 
   testWidgets('expands Photo Recall and logs a new meal from a photo', (
     tester,
@@ -1680,11 +1685,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text("I don't remember"));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Add food or saved meal'));
+    await tester.tap(find.text('Add item'));
     await tester.pumpAndSettle();
     expect(find.byType(FoodSearchScreen), findsOneWidget);
     await _selectSavedSoup(tester);
-    await tester.tap(find.text('Save meal'));
+    await tester.tap(find.text('Save diary entry'));
     await tester.pumpAndSettle();
 
     expect(find.byType(MealEntryScreen), findsNothing);
@@ -1701,10 +1706,10 @@ void main() {
     await tester.pump();
 
     expect(find.text('Mahlzeiten'), findsOneWidget);
-    expect(find.text('Mahlzeit erfassen'), findsOneWidget);
+    expect(find.text('Eintrag hinzufügen'), findsOneWidget);
     expect(find.text('Meals'), findsNothing);
 
-    await tester.tap(find.text('Mahlzeit erfassen'));
+    await tester.tap(find.text('Eintrag hinzufügen'));
     await tester.pumpAndSettle();
 
     final search = tester.widget<FoodSearchScreen>(
@@ -1727,7 +1732,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.tap(find.text('Log meal'));
+    await tester.tap(find.text('Add entry'));
     await tester.pumpAndSettle();
     await _selectSavedSoup(tester);
     await tester.tap(find.text('Meal details'));
@@ -1838,7 +1843,7 @@ void main() {
     await tester.tap(deleteAction);
     await tester.pumpAndSettle();
 
-    expect(find.text('Delete this meal?'), findsOneWidget);
+    expect(find.text('Delete this entry?'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Apple'), findsOneWidget);
@@ -1881,8 +1886,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Delete meal'));
-    await tester.tap(find.text('Delete meal'));
+    await tester.ensureVisible(find.text('Delete entry'));
+    await tester.tap(find.text('Delete entry'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();

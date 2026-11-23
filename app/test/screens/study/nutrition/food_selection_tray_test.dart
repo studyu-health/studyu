@@ -36,7 +36,7 @@ void main() {
     await tester.pumpAndSettle();
     final create = find.descendant(
       of: find.byType(AppBar),
-      matching: find.text('Create'),
+      matching: find.text('Create item'),
     );
 
     final createFood = find.text('Create food');
