@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:studyu_app/screens/study/nutrition/assisted/assisted_nutrition_fixtures.dart';
 import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
 import 'package:studyu_app/util/nutrition_recall_autosave_manager.dart';
 import 'package:studyu_app/util/study_subject_extension.dart';
@@ -12,6 +13,69 @@ import '../../../util/mock_nutrition_draft_storage.dart';
 
 void main() {
   setUp(() => mockNutritionDraftStorage());
+
+  test(
+    'retries an assisted batch for the same diary day without duplicates',
+    () async {
+      var failWrite = true;
+      mockNutritionDraftStorage(
+        beforeCall: (call) {
+          if (failWrite && call.method == 'write') {
+            failWrite = false;
+            throw const FileSystemException('Test write failure');
+          }
+        },
+      );
+      final diaryDay = DateTime.utc(2026, 7, 15);
+      final subject = StudySubject('assisted-yesterday', 'study', 'user', [])
+        ..study = (Study('study', 'user')
+          ..schedule.includeBaseline = true
+          ..schedule.numberOfCycles = 0
+          ..schedule.phaseDuration = 7)
+        ..startedAt = diaryDay;
+      final task = NutritionTask.withId();
+      final manager = NutritionRecallAutoSaveManager();
+      final model = DailyRecallEntryViewModel(
+        subject: subject,
+        task: task,
+        completionPeriod: task.schedule.completionPeriods.single,
+        existingRecall: DailyRecall.withId(
+          date: diaryDay,
+          recallMode: RecallMode.realtimeRecord,
+          studyDaySnapshot: 0,
+          meals: [],
+        ),
+        historicalMode: true,
+        autoSaveManager: manager,
+        clock: () => DateTime.utc(2026, 7, 16, 12),
+      );
+      addTearDown(model.dispose);
+      final meals = assistedNutritionSuggestions(
+        description: '',
+        photoCount: 2,
+        diaryDay: diaryDay,
+        languageCode: 'en',
+      ).map((suggestion) => suggestion.meal).toList();
+
+      await expectLater(
+        model.saveAssistedMeals(meals),
+        throwsA(isA<Exception>()),
+      );
+      expect(model.recall.meals, isEmpty);
+      expect(await model.saveAssistedMeals(meals), isTrue);
+      expect(await model.saveAssistedMeals(meals), isTrue);
+      await model.flushPendingAutoSave();
+
+      final pending = (await manager.scanPendingRecalls(subject.id)).single;
+      expect(pending.recall.date, diaryDay);
+      expect(pending.studyDaySnapshot, 0);
+      expect(
+        pending.recall.meals.map((meal) => meal.id),
+        meals.map((meal) => meal.id),
+      );
+    },
+  );
+
   test('edits a previous-day draft with no server row', () async {
     final yesterday = DateTime.utc(2026, 7, 15, 12);
     var now = yesterday.add(const Duration(days: 1));

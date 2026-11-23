@@ -9,6 +9,72 @@ import 'package:uuid/uuid.dart';
 String mealLabelInSentence(AppLocalizations l10n, String label) =>
     label == l10n.meal_neutral_label ? l10n.meal_neutral_label_inline : label;
 
+List<String> mealContextDetails(
+  AppLocalizations l10n, {
+  required MealContext? mealContext,
+  required String? locationDescription,
+  required CompanyContext? companyContext,
+  required DistractionContext? distractionContext,
+}) {
+  final location = locationDescription?.trim();
+  return [
+    if (mealContext == MealContext.other &&
+        location != null &&
+        location.isNotEmpty)
+      location
+    else if (mealContext != null)
+      mealContextLabel(mealContext, l10n),
+    if (companyContext != null) mealCompanyLabel(companyContext, l10n),
+    if (distractionContext != null)
+      mealDistractionLabel(distractionContext, l10n),
+  ];
+}
+
+String mealContextLabel(MealContext value, AppLocalizations l10n) {
+  switch (value) {
+    case MealContext.home:
+      return l10n.context_home;
+    case MealContext.restaurant:
+      return l10n.context_restaurant;
+    case MealContext.takeout:
+      return l10n.context_takeout;
+    case MealContext.vending:
+      return l10n.context_vending;
+    case MealContext.other:
+      return l10n.context_other;
+  }
+}
+
+String mealCompanyLabel(CompanyContext value, AppLocalizations l10n) {
+  switch (value) {
+    case CompanyContext.alone:
+      return l10n.company_alone;
+    case CompanyContext.family:
+      return l10n.company_family;
+    case CompanyContext.friends:
+      return l10n.company_friends;
+    case CompanyContext.colleagues:
+      return l10n.company_colleagues;
+    case CompanyContext.other:
+      return l10n.company_other;
+  }
+}
+
+String mealDistractionLabel(DistractionContext value, AppLocalizations l10n) {
+  switch (value) {
+    case DistractionContext.none:
+      return l10n.distraction_none;
+    case DistractionContext.tv:
+      return l10n.distraction_tv;
+    case DistractionContext.phone:
+      return l10n.distraction_phone;
+    case DistractionContext.work:
+      return l10n.distraction_work;
+    case DistractionContext.other:
+      return l10n.distraction_other;
+  }
+}
+
 double? parseNutritionAmount(String input) {
   final amount = double.tryParse(input.trim().replaceFirst(',', '.'));
   return amount != null && amount.isFinite && amount >= 0 ? amount : null;

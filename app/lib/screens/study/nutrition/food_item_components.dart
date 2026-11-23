@@ -362,21 +362,28 @@ String formatFoodMetadata(
   required String servingDescription,
   double? calories,
 }) {
-  final quantity = grams != null && grams.isFinite && grams > 0
-      ? '${formatFoodNumber(grams)} g'
-      : servingDescription;
+  final quantity = _formatFoodPortion(grams, servingDescription);
   final energy = calories != null && calories.isFinite && calories >= 0
       ? l10n.kcal_value(calories.round().toString())
       : '— kcal';
   return '$quantity · $energy';
 }
 
-String foodTotalMetadata(
+String _formatFoodPortion(double? grams, String servingDescription) =>
+    grams != null && grams.isFinite && grams > 0
+    ? '${formatFoodNumber(grams)} g'
+    : servingDescription;
+
+double? foodTotalGrams(studyu.FoodEntry food, num quantity) {
+  final grams = food.servingSizeGrams * (food.amount * quantity);
+  return grams.isFinite && grams > 0 ? grams : null;
+}
+
+String foodTotalPortion(
   AppLocalizations l10n,
   studyu.FoodEntry food,
   num quantity, {
   bool gramsKnown = true,
-  bool caloriesKnown = true,
 }) {
   final totalAmount = food.amount * quantity;
   final portionReference = food.portionReference?.trim();
@@ -386,12 +393,30 @@ String foodTotalMetadata(
             ? portionReference
             : '${formatFoodNumber(totalAmount)} × $portionReference'
       : l10n.serving_amount(foodServingAmount(totalAmount));
+  return _formatFoodPortion(
+    gramsKnown ? foodTotalGrams(food, quantity) : null,
+    servingDescription,
+  );
+}
+
+String foodTotalMetadata(
+  AppLocalizations l10n,
+  studyu.FoodEntry food,
+  num quantity, {
+  bool gramsKnown = true,
+  bool caloriesKnown = true,
+}) {
+  final servingDescription = foodTotalPortion(
+    l10n,
+    food,
+    quantity,
+    gramsKnown: gramsKnown,
+  );
   final hasCalories =
       caloriesKnown &&
       !food.nutrition.unavailableNutrients.contains('energyKcal');
   return formatFoodMetadata(
     l10n,
-    grams: gramsKnown ? food.servingSizeGrams * totalAmount : null,
     servingDescription: servingDescription,
     calories: hasCalories ? food.nutrition.energyKcal * quantity : null,
   );

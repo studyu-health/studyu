@@ -1,1 +1,2 @@
 "NSCameraUsageDescription" = "StudyU Health uses the camera to scan study invitation QR codes and take photos for study tasks.";
+"NSMicrophoneUsageDescription" = "StudyU Health uses the microphone to record descriptions of your meals and responses to study questions.";

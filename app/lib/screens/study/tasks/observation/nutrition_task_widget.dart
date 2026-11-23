@@ -1,12 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb, listEquals;
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/models/photo_reference.dart';
+import 'package:studyu_app/screens/study/nutrition/assisted/assisted_nutrition_fixtures.dart';
+import 'package:studyu_app/screens/study/nutrition/assisted/assisted_nutrition_input.dart';
+import 'package:studyu_app/screens/study/nutrition/assisted/assisted_nutrition_review.dart';
 import 'package:studyu_app/screens/study/nutrition/daily_recall_entry_view_model.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
 import 'package:studyu_app/screens/study/nutrition/food_library_screen.dart';
@@ -29,7 +32,6 @@ import 'package:studyu_app/widgets/confirmation_dialog.dart';
 import 'package:studyu_app/widgets/empty_state.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_app/widgets/nutrition_summary_card.dart';
-import 'package:studyu_app/widgets/photo_recall_section.dart';
 import 'package:studyu_app/widgets/save_template_dialog.dart';
 import 'package:studyu_core/core.dart';
 
@@ -621,6 +623,20 @@ class _NutritionTaskWidgetState()
             HtmlText(header, centered: true),
             const SizedBox(height: 16),
           ],
+          if (model.canEdit) ...[
+            Card(
+              margin: EdgeInsets.zero,
+              elevation: 0,
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.auto_awesome_outlined),
+                title: Text(l10n.nutrition_assisted_entry),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _openAssistedNutrition(context, model),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           _buildMealsSection(context, model, recall, theme, l10n),
           if (_trackWaterIntake ||
               (_isHistoricalMode && recall.waterIntakeMl != null)) ...[
@@ -635,32 +651,6 @@ class _NutritionTaskWidgetState()
               onEditCupSize: _cupSizeMl == null || _isSavingCupSize
                   ? null
                   : () => _editCupSize(context, _cupSizeMl!),
-            ),
-          ],
-          if (!_isHistoricalMode && model.canEdit && !kIsWeb) ...[
-            const SizedBox(height: 24),
-            Card(
-              margin: EdgeInsets.zero,
-              elevation: 0,
-              clipBehavior: Clip.antiAlias,
-              child: ExpansionTile(
-                leading: const Icon(Icons.photo_library_outlined),
-                title: Text(l10n.photoRecallTitle),
-                expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
-                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                children: [
-                  Text(
-                    l10n.photoRecallSubtitle,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  PhotoRecallSection(
-                    date: recall.date,
-                    onPhotoTap: (photo) =>
-                        _addMeal(context, model, recallPhoto: photo),
-                  ),
-                ],
-              ),
             ),
           ],
           if (_isHistoricalMode && _showStatistics) ...[
@@ -893,7 +883,7 @@ class _NutritionTaskWidgetState()
                 child: NutritionAddButton(
                   onPressed: () => _addMeal(context, model),
                   label: l10n.nutrition_add_diary_entry,
-                  icon: Icons.post_add,
+                  icon: Icons.add,
                 ),
               ),
           ],
@@ -1119,14 +1109,13 @@ class _NutritionTaskWidgetState()
   Future<void> _addMeal(
     BuildContext context,
     DailyRecallEntryViewModel model, {
-    PhotoReference? recallPhoto,
     MealLog? repeatedMeal,
   }) async {
     final photoScope = nutritionPhotoScope(context.read<AppState?>());
     final result = await _openMealEditor(context, model, (navigator) async {
       var foods = const <FoodEntry>[];
       String? customMealLabel;
-      final opensFoodSearch = repeatedMeal == null && recallPhoto == null;
+      final opensFoodSearch = repeatedMeal == null;
       if (repeatedMeal != null) {
         foods = repeatedMeal.foods.map(duplicateFoodEntry).toList();
         final label = repeatedMeal.customMealLabel?.trim();
@@ -1137,7 +1126,7 @@ class _NutritionTaskWidgetState()
             customMealTypes.any((type) => type.trim() == label)) {
           customMealLabel = label;
         }
-      } else if (opensFoodSearch) {
+      } else {
         final selection = await FoodSearchScreen.show(
           context,
           mealLabel: AppLocalizations.of(context)!.meal_neutral_label,
@@ -1161,7 +1150,6 @@ class _NutritionTaskWidgetState()
           initialMealType: repeatedMeal?.mealType,
           initialCustomMealLabel: customMealLabel,
           initialFoods: foods,
-          recallPhoto: recallPhoto,
           occurrenceDate: _mealOccurrenceDate(model),
           historicalTarget: _isHistoricalMode && model.shouldSaveToDb
               ? model.persistenceTarget
@@ -1185,6 +1173,63 @@ class _NutritionTaskWidgetState()
         nutritionPhotoKey(photoScope, NutritionPhotoKind.meal, meal.id),
         photoChange,
       );
+    }
+  }
+
+  Future<void> _openAssistedNutrition(
+    BuildContext context,
+    DailyRecallEntryViewModel model,
+  ) async {
+    final diaryDay = _mealOccurrenceDate(model);
+    final languageCode = Localizations.localeOf(context).languageCode;
+    AssistedNutritionInput? draft;
+    while (model.revalidateEditingEligibility()) {
+      if (!context.mounted) return;
+      final result = await showAssistedNutritionInput(
+        context,
+        diaryDay: diaryDay,
+        initialInput: draft,
+        onGenerate: (input) async {
+          final suggestions = assistedNutritionSuggestions(
+            description: input.description,
+            photoCount: input.photos.length,
+            diaryDay: diaryDay,
+            languageCode: languageCode,
+          );
+          final photoReferences = <String, PhotoReference>{
+            for (final suggestion in suggestions)
+              if (suggestion.photoIndex case final index?)
+                suggestion.meal.id: ?input.photos[index].galleryReference,
+          };
+          return (
+            input: input,
+            suggestions: suggestions,
+            photos: photoReferences,
+          );
+        },
+      );
+      if (result == null ||
+          !context.mounted ||
+          !model.revalidateEditingEligibility()) {
+        return;
+      }
+      draft = result.input;
+      final saved = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => AssistedNutritionReview(
+            meals: result.suggestions
+                .map((suggestion) => suggestion.meal)
+                .toList(),
+            mealPhotos: result.photos,
+            diaryDay: diaryDay,
+            task: widget.task,
+            foodRepository: widget.foodRepository,
+            templateViewModel: _templateViewModel,
+            onSave: model.saveAssistedMeals,
+          ),
+        ),
+      );
+      if (saved == true) return;
     }
   }
 

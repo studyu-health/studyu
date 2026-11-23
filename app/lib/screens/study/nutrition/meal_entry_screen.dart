@@ -7,6 +7,7 @@ import 'package:studyu_app/models/app_state.dart';
 import 'package:studyu_app/models/photo_reference.dart';
 import 'package:studyu_app/screens/study/nutrition/food_entry_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/food_item_components.dart';
+import 'package:studyu_app/screens/study/nutrition/food_quantity_sheet.dart';
 import 'package:studyu_app/screens/study/nutrition/food_search_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_creator_screen.dart';
 import 'package:studyu_app/screens/study/nutrition/meal_entry_screen_helper.dart';
@@ -64,6 +65,7 @@ class const _MealDetailsSelection({
 
 class const MealEntryScreen({
   final MealLog? existingMeal,
+  final bool draftOnly = false,
   final NutritionTask? task,
   final MealType? initialMealType,
   final String? initialCustomMealLabel,
@@ -83,6 +85,7 @@ class const MealEntryScreen({
   static MaterialPageRoute<MealEntryResult> route({
     bool animateIn = true,
     MealLog? existingMeal,
+    bool draftOnly = false,
     NutritionTask? task,
     MealType? initialMealType,
     String? initialCustomMealLabel,
@@ -99,6 +102,7 @@ class const MealEntryScreen({
     animateIn: animateIn,
     builder: (_) => MealEntryScreen(
       existingMeal: existingMeal,
+      draftOnly: draftOnly,
       task: task,
       initialMealType: initialMealType,
       initialCustomMealLabel: initialCustomMealLabel,
@@ -264,11 +268,23 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     bool editReusableDefinition = false,
   }) async {
     if (_isSaving || !_revalidateHistoricalEligibility()) return;
+    if (widget.draftOnly && food.entryType == FoodEntryType.meal) {
+      final edited = await FoodQuantitySheet.show(
+        context,
+        food: food,
+        action: FoodQuantityAction.updateSelection,
+      );
+      if (!mounted || edited == null) return;
+      final index = _foodIndex(food.id);
+      if (index != -1) setState(() => _meal.foods[index] = edited);
+      return;
+    }
     final isLibraryBacked = food.templateId?.isNotEmpty == true;
     final canCreateLibraryCopy = canCopyDatabaseFoodToLibrary(food);
     var updateLibrary = false;
     var createLibraryCopy = false;
-    if (!editReusableDefinition &&
+    if (!widget.draftOnly &&
+        !editReusableDefinition &&
         (canCreateLibraryCopy ||
             (widget.historicalTarget == null && isLibraryBacked))) {
       final l10n = AppLocalizations.of(context)!;
@@ -295,7 +311,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         !_revalidateHistoricalEligibility()) {
       return;
     }
-    var historicalTarget = widget.historicalTarget;
+    var historicalTarget = widget.draftOnly ? null : widget.historicalTarget;
     final prepare = widget.prepareHistoricalDefinitionEdit;
     if (editReusableDefinition && prepare != null) {
       historicalTarget = await prepare(
@@ -336,8 +352,8 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           hasCurrentStudyDayMatches: hasCurrentDayMatches,
           showCurrentMealOnlyNotice: showCurrentMealOnlyNotice,
           saveLibraryCopyOnEdit: createLibraryCopy,
-          allowPhoto: true,
-          savePhotoToLibraryOnEdit: true,
+          allowPhoto: !widget.draftOnly,
+          savePhotoToLibraryOnEdit: !widget.draftOnly,
           repository: widget.foodRepository,
           templateViewModel: widget.templateViewModel,
           canEditRecall: _revalidateHistoricalEligibility,
@@ -578,7 +594,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
 
   Widget _buildFoodActionMenu(FoodEntry food) {
     final l10n = AppLocalizations.of(context)!;
-    final isHistorical = widget.historicalTarget != null;
+    final isHistorical = !widget.draftOnly && widget.historicalTarget != null;
     final editLabel = isHistorical
         ? l10n.edit_this_entry
         : food.entryType == FoodEntryType.meal
@@ -621,7 +637,11 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
           ? null
           : _customMealLabel?.trim(),
       mealContext: _mealContext,
-      locationDescription: clearDetails || _mealContext != MealContext.other
+      locationDescription: clearDetails
+          ? null
+          : widget.draftOnly && _mealContext == _meal.mealContext
+          ? _locationDescription
+          : _mealContext != MealContext.other
           ? null
           : _locationDescription?.trim(),
       timestamp: _timePrecision == MealOccurrenceTimePrecision.unknown
@@ -678,6 +698,12 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
 
   Future<void> _saveMeal() async {
     if (_isSaving) return;
+    if (widget.draftOnly) {
+      final meal = _buildMeal();
+      meal.foods = meal.foods.map(cloneFoodEntry).toList();
+      _pop(SavedMealEntryResult(meal));
+      return;
+    }
     if (!_isMealValid) {
       setState(() => _hasAttemptedSave = true);
       return;
@@ -868,15 +894,13 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     final details = <String>[
       if (_mealType != MealType.other || _mealTypeSelection.customLabel != null)
         _mealLabel,
-      if (_mealContext == MealContext.other &&
-          _locationDescription?.trim().isNotEmpty == true)
-        _locationDescription!.trim()
-      else if (_mealContext != null)
-        _getMealContextLabel(_mealContext!, l10n),
-      if (_companyContext != null)
-        _getCompanyContextLabel(_companyContext!, l10n),
-      if (_distractionContext != null)
-        _getDistractionContextLabel(_distractionContext!, l10n),
+      ...mealContextDetails(
+        l10n,
+        mealContext: _mealContext,
+        locationDescription: _locationDescription,
+        companyContext: _companyContext,
+        distractionContext: _distractionContext,
+      ),
     ];
     return details.isEmpty ? l10n.optional : details.join(' • ');
   }
@@ -1051,7 +1075,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
     final hasValidTime = _buildMeal().hasValidTimeAnswer(
       hasSelectedTime: _hasSelectedTime,
     );
-    final saveHint = _isSkipped
+    final saveHint = widget.draftOnly || _isSkipped
         ? null
         : _meal.foods.isEmpty
         ? l10n.add_food_before_saving
@@ -1060,13 +1084,21 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
         : null;
 
     return PopScope(
-      canPop: _allowPop || (!_isSaving && !_hasUnsavedChanges),
+      canPop:
+          _allowPop || (!widget.draftOnly && !_isSaving && !_hasUnsavedChanges),
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && !_isSaving) _confirmDiscard();
+        if (didPop || _isSaving) return;
+        if (widget.draftOnly) {
+          _saveMeal();
+        } else {
+          _confirmDiscard();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
-          title: widget.existingMeal == null
+          title: widget.draftOnly
+              ? Text(l10n.assisted_edit_meal)
+              : widget.existingMeal == null
               ? Row(
                   spacing: 8,
                   children: [
@@ -1100,11 +1132,17 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                         const SizedBox(height: 8),
                       ],
                       FilledButton.icon(
-                        onPressed: !_isSaving && (_isSkipped || _isMealValid)
+                        onPressed:
+                            !_isSaving &&
+                                (widget.draftOnly || _isSkipped || _isMealValid)
                             ? _saveMeal
                             : null,
                         icon: const Icon(Icons.check),
-                        label: Text(l10n.nutrition_save_meal),
+                        label: Text(
+                          widget.draftOnly
+                              ? l10n.assisted_confirm_meal_changes
+                              : l10n.nutrition_save_meal,
+                        ),
                       ),
                     ],
                   ),
@@ -1142,28 +1180,31 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                       setState(() => _saveToMyItems = value ?? false),
                 ),
               if (!_isSkipped) ...[
-                if (nutritionPhotoScope(context.watch<AppState?>())
-                    case final scope?)
-                  NutritionPhotoEditor(
-                    photoKey: nutritionPhotoKey(
-                      scope,
-                      NutritionPhotoKind.meal,
-                      _meal.id,
+                if (!widget.draftOnly)
+                  if (nutritionPhotoScope(context.watch<AppState?>())
+                      case final scope?)
+                    NutritionPhotoEditor(
+                      photoKey: nutritionPhotoKey(
+                        scope,
+                        NutritionPhotoKind.meal,
+                        _meal.id,
+                      ),
+                      change: _photoChange,
+                      onChanged: (change) =>
+                          setState(() => _photoChange = change),
+                      enabled: !_isSaving,
                     ),
-                    change: _photoChange,
-                    onChanged: (change) =>
-                        setState(() => _photoChange = change),
-                    enabled: !_isSaving,
-                  ),
                 _FoodListSection(
                   meal: _meal,
                   showValidationError: _hasAttemptedSave && _meal.foods.isEmpty,
                   allowMeals: _allowMeals,
-                  onAddFood: _openFoodSearch,
+                  onAddFood: widget.draftOnly ? null : _openFoodSearch,
                   onFoodTap: _editFood,
                   foodActionMenuBuilder: _buildFoodActionMenu,
                   onSaveToLibrary:
-                      widget.historicalTarget == null && _allowMeals
+                      !widget.draftOnly &&
+                          widget.historicalTarget == null &&
+                          _allowMeals
                       ? _openMealBuilder
                       : null,
                 ),
@@ -1240,7 +1281,7 @@ class _MealEntryScreenState() extends State<MealEntryScreen> {
                   ),
                 ),
               ],
-              if (widget.existingMeal != null) ...[
+              if (widget.existingMeal != null && !widget.draftOnly) ...[
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -1448,7 +1489,7 @@ class const _TimeSelector({
 
 class const _FoodListSection({
   required final MealLog meal,
-  required final VoidCallback onAddFood,
+  required final VoidCallback? onAddFood,
   required final Future<void> Function(FoodEntry) onFoodTap,
   required final Widget Function(FoodEntry) foodActionMenuBuilder,
   required final VoidCallback? onSaveToLibrary,
@@ -1477,13 +1518,14 @@ class const _FoodListSection({
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              NutritionAddButton(
-                label: allowMeals
-                    ? l10n.nutrition_add_food_or_saved_meal
-                    : l10n.add_food,
-                icon: Icons.add,
-                onPressed: onAddFood,
-              ),
+              if (onAddFood != null)
+                NutritionAddButton(
+                  label: allowMeals
+                      ? l10n.nutrition_add_food_or_saved_meal
+                      : l10n.add_food,
+                  icon: Icons.add,
+                  onPressed: onAddFood!,
+                ),
             ],
           ),
         ),
@@ -1705,7 +1747,7 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
                     choices: const [null, ...MealContext.values],
                     choiceLabel: (value) => value == null
                         ? l10n.not_added
-                        : _getMealContextLabel(value, l10n),
+                        : mealContextLabel(value, l10n),
                     choiceIcon: (value) => switch (value) {
                       null => Icons.remove,
                       MealContext.home => Icons.home_outlined,
@@ -1734,7 +1776,7 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
                     choices: const [null, ...CompanyContext.values],
                     choiceLabel: (value) => value == null
                         ? l10n.not_specified
-                        : _getCompanyContextLabel(value, l10n),
+                        : mealCompanyLabel(value, l10n),
                     choiceIcon: (value) => switch (value) {
                       null => Icons.remove,
                       CompanyContext.alone => Icons.person_outline,
@@ -1753,7 +1795,7 @@ class _MealDetailsSheetState() extends State<_MealDetailsSheet> {
                     choices: const [null, ...DistractionContext.values],
                     choiceLabel: (value) => value == null
                         ? l10n.not_specified
-                        : _getDistractionContextLabel(value, l10n),
+                        : mealDistractionLabel(value, l10n),
                     choiceIcon: (value) => switch (value) {
                       null => Icons.remove,
                       DistractionContext.none =>
@@ -1856,54 +1898,6 @@ String _getMealTypeLabel(MealType type, AppLocalizations l10n) {
       return l10n.meal_type_snack;
     case MealType.other:
       return l10n.meal_type_other;
-  }
-}
-
-String _getMealContextLabel(MealContext value, AppLocalizations l10n) {
-  switch (value) {
-    case MealContext.home:
-      return l10n.context_home;
-    case MealContext.restaurant:
-      return l10n.context_restaurant;
-    case MealContext.takeout:
-      return l10n.context_takeout;
-    case MealContext.vending:
-      return l10n.context_vending;
-    case MealContext.other:
-      return l10n.context_other;
-  }
-}
-
-String _getCompanyContextLabel(CompanyContext value, AppLocalizations l10n) {
-  switch (value) {
-    case CompanyContext.alone:
-      return l10n.company_alone;
-    case CompanyContext.family:
-      return l10n.company_family;
-    case CompanyContext.friends:
-      return l10n.company_friends;
-    case CompanyContext.colleagues:
-      return l10n.company_colleagues;
-    case CompanyContext.other:
-      return l10n.company_other;
-  }
-}
-
-String _getDistractionContextLabel(
-  DistractionContext value,
-  AppLocalizations l10n,
-) {
-  switch (value) {
-    case DistractionContext.none:
-      return l10n.distraction_none;
-    case DistractionContext.tv:
-      return l10n.distraction_tv;
-    case DistractionContext.phone:
-      return l10n.distraction_phone;
-    case DistractionContext.work:
-      return l10n.distraction_work;
-    case DistractionContext.other:
-      return l10n.distraction_other;
   }
 }
 

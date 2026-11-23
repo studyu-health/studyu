@@ -500,6 +500,48 @@ class DailyRecallEntryViewModel({
     return true;
   }
 
+  Future<bool> saveAssistedMeals(List<MealLog> meals) async {
+    await _initialization;
+    if (_isDisposed ||
+        !revalidateEditingEligibility() ||
+        meals.isEmpty ||
+        meals.any((meal) => !meal.isValidForSave(hasSelectedTime: true))) {
+      return false;
+    }
+    final hadScheduledSave = _autoSaveTimer != null;
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = null;
+    await _remoteSaveQueue;
+    if (_isDisposed || !revalidateEditingEligibility()) return false;
+
+    final mealsById = {
+      for (final meal in recall.meals) meal.id: meal,
+      for (final meal in meals) meal.id: meal,
+    };
+    final canSaveLocally = _canSaveLocalSnapshot;
+    final updated = _copyWithRecall(
+      meals: mealsById.values.toList(),
+      lastAutoSavedAt: canSaveLocally ? clock().toUtc() : null,
+    );
+    if (canSaveLocally) {
+      // Commit the whole batch before showing it in the diary.
+      final save = _queueLocalSnapshot(updated);
+      try {
+        await save;
+      } catch (_) {
+        if (hadScheduledSave && !_isDisposed) _scheduleRemoteAutoSave();
+        rethrow;
+      }
+      _localSaveFuture = save;
+    }
+    if (_isDisposed) return true;
+    recall = updated;
+    lastSaveTime = updated.lastAutoSavedAt;
+    if (canSaveLocally) _scheduleRemoteAutoSave();
+    notifyListeners();
+    return true;
+  }
+
   bool updateMeal(int index, MealLog meal) {
     if (readOnly || !revalidateEditingEligibility()) return false;
     recall.meals[index] = meal;
@@ -548,6 +590,7 @@ class DailyRecallEntryViewModel({
   }
 
   DailyRecall _copyWithRecall({
+    List<MealLog>? meals,
     bool? isUsualIntakeDay,
     String? specialOccasion,
     bool clearSpecialOccasion = false,
@@ -563,7 +606,7 @@ class DailyRecallEntryViewModel({
     recallMode: recall.recallMode,
     entryStartedAt: recall.entryStartedAt,
     entryCompletedAt: recall.entryCompletedAt,
-    meals: recall.meals,
+    meals: meals ?? recall.meals,
     waterIntakeMl: waterIntakeMl ?? recall.waterIntakeMl,
     studyDaySnapshot: _studyDaySnapshot ?? recall.studyDaySnapshot,
     lastAutoSavedAt: lastAutoSavedAt ?? recall.lastAutoSavedAt,
@@ -616,19 +659,24 @@ class DailyRecallEntryViewModel({
   }
 
   void _scheduleAutoSave([String reason = 'unspecified']) {
-    if (readOnly ||
-        _persistenceSuspended ||
-        subject == null ||
-        _studyDaySnapshot == null ||
-        _periodId == null ||
-        _interventionId == null) {
-      return;
-    }
+    if (!_canSaveLocalSnapshot) return;
     StudyULogger.debug(
       '[DailyRecallVM] Schedule auto-save ($reason) | '
       'studyDay=$_studyDaySnapshot subject=${subject?.id}',
     );
     _persistLocalSnapshot();
+    _scheduleRemoteAutoSave();
+  }
+
+  bool get _canSaveLocalSnapshot =>
+      !readOnly &&
+      !_persistenceSuspended &&
+      subject != null &&
+      _studyDaySnapshot != null &&
+      _periodId != null &&
+      _interventionId != null;
+
+  void _scheduleRemoteAutoSave() {
     _autoSaveTimer?.cancel();
     _autoSaveTimer = Timer(NutritionRecallAutoSaveManager.debounceDuration, () {
       _autoSaveTimer = null;
@@ -637,17 +685,23 @@ class DailyRecallEntryViewModel({
   }
 
   void _persistLocalSnapshot() {
-    if (readOnly ||
-        _persistenceSuspended ||
-        subject == null ||
-        _studyDaySnapshot == null ||
-        !revalidateEditingEligibility()) {
+    if (!_canSaveLocalSnapshot || !revalidateEditingEligibility()) {
       return;
     }
     final savedAt = clock().toUtc();
     recall = _copyWithRecall(lastAutoSavedAt: savedAt);
     lastSaveTime = savedAt;
-    final recallToSave = DailyRecall.fromJson(recall.toJson());
+    final localSave = _queueLocalSnapshot(recall);
+    _localSaveFuture = localSave;
+    localSave.catchError((Object error, StackTrace stackTrace) {
+      StudyULogger.error(
+        '[DailyRecallVM] Local auto-save failed: $error\n$stackTrace',
+      );
+    });
+  }
+
+  Future<void> _queueLocalSnapshot(DailyRecall snapshot) {
+    final recallToSave = DailyRecall.fromJson(snapshot.toJson());
     final target = persistenceTarget;
     Future<void> saveLocal() => _autoSaveManager.saveRecall(
       recall: recallToSave,
@@ -662,16 +716,10 @@ class DailyRecallEntryViewModel({
           ? () => _acknowledgedCreation
           : null,
     );
-    final localSave = _localSaveFuture.then<void>(
+    return _localSaveFuture.then<void>(
       (_) => saveLocal(),
       onError: (_, _) => saveLocal(),
     );
-    _localSaveFuture = localSave;
-    localSave.catchError((Object error, StackTrace stackTrace) {
-      StudyULogger.error(
-        '[DailyRecallVM] Local auto-save failed: $error\n$stackTrace',
-      );
-    });
   }
 
   Future<void> _performAutoSaveAfterLocalSave() async {

@@ -98,6 +98,7 @@ Future<void> openMealEntry(
   WidgetTester tester,
   MealLog? meal, {
   NutritionTask? task,
+  bool draftOnly = false,
   MealType? initialMealType,
   List<FoodEntry> initialFoods = const [],
   DateTime? occurrenceDate,
@@ -124,6 +125,7 @@ Future<void> openMealEntry(
                         MaterialPageRoute(
                           builder: (_) => MealEntryScreen(
                             existingMeal: meal,
+                            draftOnly: draftOnly,
                             task: task,
                             initialMealType: initialMealType,
                             initialFoods: initialFoods,
@@ -149,6 +151,18 @@ Future<void> openMealEntry(
   );
   await tester.tap(find.text('Open meal'));
   await tester.pumpAndSettle();
+}
+
+class _DraftWriteTrackingRepository() extends FakeNutritionFoodRepository {
+  int writes = 0;
+
+  @override
+  Future<void> ensureDefinitions({
+    required String subjectId,
+    required Iterable<FoodEntry> foods,
+  }) async {
+    writes++;
+  }
 }
 
 class _TrackingNutritionFoodRepository({
@@ -458,6 +472,48 @@ Finder findMealDetailsText(String label) =>
 void main() {
   setUp(() => mockNutritionDraftStorage());
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  for (final (precision, back) in [
+    (MealOccurrenceTimePrecision.unknown, false),
+    (MealOccurrenceTimePrecision.approximate, true),
+  ]) {
+    testWidgets('assistedDraftTimeOrder $precision', (tester) async {
+      final meal = editableMeal()
+        ..timestamp = precision == MealOccurrenceTimePrecision.unknown
+            ? null
+            : DateTime(2026, 7, 15, 20)
+        ..timePrecision = precision
+        ..foods.add(testFood()..id = 'second');
+      MealLog? result;
+      final repository = _DraftWriteTrackingRepository();
+      await openMealEntry(
+        tester,
+        meal,
+        draftOnly: true,
+        appState: _historicalEditingSetup().appState,
+        foodRepository: repository,
+        onResult: (value) => result = value,
+      );
+
+      await selectMealType(tester, 'Dinner');
+      if (back) {
+        await tester.pageBack();
+      } else {
+        await tester.tap(find.text('Confirm changes'));
+      }
+      await tester.pumpAndSettle();
+
+      expect(result, isNotNull);
+      expect(repository.writes, 0);
+      expect(result!.mealType, MealType.dinner);
+      expect(meal.mealType, isNot(MealType.dinner));
+      expect(result!.timePrecision, precision);
+      expect(result!.timestamp, meal.timestamp);
+      expect(result!.foods.map((food) => food.id), ['food', 'second']);
+      expect(result!.locationDescription, meal.locationDescription);
+      expect(identical(result!.foods.first, meal.foods.first), isFalse);
+    });
+  }
 
   test('meal clone does not share nested food metadata', () {
     final original = skippedMeal();

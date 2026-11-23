@@ -6118,7 +6118,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_add_diary_entry.
   ///
   /// In en, this message translates to:
-  /// **'Add entry'**
+  /// **'Log meal'**
   String get nutrition_add_diary_entry;
 
   /// No description provided for @nutrition_create_library_item.
@@ -6150,6 +6150,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Also save a copy to Library'**
   String get library_copy_edit_action;
+
+  /// No description provided for @nutrition_assisted_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Assisted meal logging'**
+  String get nutrition_assisted_entry;
+
+  /// No description provided for @nutrition_assisted_add_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos'**
+  String get nutrition_assisted_add_photos;
+
+  /// No description provided for @nutrition_assisted_open_gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Open gallery'**
+  String get nutrition_assisted_open_gallery;
+
+  /// No description provided for @nutrition_assisted_selected_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected photos'**
+  String get nutrition_assisted_selected_photos;
+
+  /// No description provided for @nutrition_assisted_continue_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to description'**
+  String get nutrition_assisted_continue_description;
+
+  /// No description provided for @nutrition_assisted_describe_meals.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your meals'**
+  String get nutrition_assisted_describe_meals;
+
+  /// No description provided for @nutrition_assisted_description_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Say or type what you ate. Include the time, place and who was with you if you remember.'**
+  String get nutrition_assisted_description_help;
+
+  /// No description provided for @nutrition_assisted_description_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, “I had oatmeal with banana for breakfast.”'**
+  String get nutrition_assisted_description_hint;
+
+  /// No description provided for @nutrition_assisted_description_photo_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, “Photo 1 shows the oatmeal I had for breakfast.”'**
+  String get nutrition_assisted_description_photo_hint;
+
+  /// No description provided for @nutrition_assisted_generate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate meal suggestions'**
+  String get nutrition_assisted_generate;
+
+  /// No description provided for @nutrition_assisted_generating.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing meal suggestions…'**
+  String get nutrition_assisted_generating;
+
+  /// No description provided for @nutrition_assisted_generation_help.
+  ///
+  /// In en, this message translates to:
+  /// **'You can check the suggested foods and portions before saving.'**
+  String get nutrition_assisted_generation_help;
+
+  /// No description provided for @nutrition_assisted_generation_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare meal suggestions. Check your description and try again.'**
+  String get nutrition_assisted_generation_error;
+
+  /// No description provided for @nutrition_assisted_photo_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {number}'**
+  String nutrition_assisted_photo_number(Object number);
+
+  /// No description provided for @nutrition_assisted_remove_photo_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo {number}?'**
+  String nutrition_assisted_remove_photo_title(Object number);
+
+  /// No description provided for @nutrition_assisted_remove_photo_help.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the photo from this draft.'**
+  String get nutrition_assisted_remove_photo_help;
+
+  /// No description provided for @nutrition_assisted_keep_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep photo'**
+  String get nutrition_assisted_keep_photo;
+
+  /// No description provided for @nutrition_assisted_removed_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'removed photo'**
+  String get nutrition_assisted_removed_photo;
+
+  /// No description provided for @nutrition_assisted_photo_permission.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow access to show photos from this day.'**
+  String get nutrition_assisted_photo_permission;
+
+  /// No description provided for @nutrition_assisted_gallery_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the photo gallery.'**
+  String get nutrition_assisted_gallery_error;
+
+  /// No description provided for @nutrition_assisted_recording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get nutrition_assisted_recording;
+
+  /// No description provided for @nutrition_assisted_stop_transcribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and transcribe'**
+  String get nutrition_assisted_stop_transcribe;
+
+  /// No description provided for @nutrition_assisted_transcribing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing transcript…'**
+  String get nutrition_assisted_transcribing;
+
+  /// No description provided for @nutrition_assisted_transcript_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare a transcript. Try again or type your description.'**
+  String get nutrition_assisted_transcript_error;
+
+  /// No description provided for @nutrition_assisted_demo_transcript.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample transcript. You can edit it before continuing.'**
+  String get nutrition_assisted_demo_transcript;
+
+  /// No description provided for @nutrition_assisted_correct_voice.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct by voice'**
+  String get nutrition_assisted_correct_voice;
+
+  /// No description provided for @nutrition_assisted_correction_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what to change in the suggested meals.'**
+  String get nutrition_assisted_correction_help;
+
+  /// No description provided for @nutrition_assisted_correction_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, “I had 75 grams of potato salad.”'**
+  String get nutrition_assisted_correction_hint;
+
+  /// No description provided for @nutrition_assisted_apply_correction.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply correction'**
+  String get nutrition_assisted_apply_correction;
+
+  /// No description provided for @nutrition_assisted_correction_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not apply this correction. Check the food and portion.'**
+  String get nutrition_assisted_correction_error;
+
+  /// No description provided for @assisted_review_meals.
+  ///
+  /// In en, this message translates to:
+  /// **'Review meals'**
+  String get assisted_review_meals;
+
+  /// No description provided for @assisted_review_instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'These are demo suggestions. Check foods, portions and times. Drag a food to reorder it or move it to another meal.'**
+  String get assisted_review_instructions;
+
+  /// No description provided for @assisted_estimated_portion.
+  ///
+  /// In en, this message translates to:
+  /// **'{portion} · Estimated'**
+  String assisted_estimated_portion(Object portion);
+
+  /// No description provided for @assisted_food_order_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {food}'**
+  String assisted_food_order_actions(Object food);
+
+  /// No description provided for @assisted_move_food_up.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get assisted_move_food_up;
+
+  /// No description provided for @assisted_move_food_down.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get assisted_move_food_down;
+
+  /// No description provided for @assisted_move_food_to_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to {meal}'**
+  String assisted_move_food_to_meal(Object meal);
+
+  /// No description provided for @assisted_empty_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Move a food here or remove this meal before saving.'**
+  String get assisted_empty_meal;
+
+  /// No description provided for @assisted_remove_empty_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove meal'**
+  String get assisted_remove_empty_meal;
+
+  /// No description provided for @assisted_save_diary_entries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Save 1 diary entry} other{Save {count} diary entries}}'**
+  String assisted_save_diary_entries(num count);
+
+  /// No description provided for @assisted_save_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the diary entries. Try again.'**
+  String get assisted_save_failed;
+
+  /// No description provided for @assisted_edit_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit meal'**
+  String get assisted_edit_meal;
+
+  /// No description provided for @nutrition_assisted_sample_description.
+  ///
+  /// In en, this message translates to:
+  /// **'I had oatmeal with banana for breakfast at about 8:15 am. I had Maultaschen and potato salad for lunch at about 12:30 pm.'**
+  String get nutrition_assisted_sample_description;
+
+  /// No description provided for @nutrition_assisted_sample_one_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo 1 shows the oatmeal with banana I had for breakfast at about 8:15 am. I had Maultaschen and potato salad for lunch at about 12:30 pm.'**
+  String get nutrition_assisted_sample_one_photo;
+
+  /// No description provided for @nutrition_assisted_sample_two_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo 1 shows oatmeal with banana for breakfast at about 8:15 am. Photo 2 shows Maultaschen and potato salad for lunch at about 12:30 pm.'**
+  String get nutrition_assisted_sample_two_photos;
+
+  /// No description provided for @nutrition_assisted_sample_correction.
+  ///
+  /// In en, this message translates to:
+  /// **'The potato salad portion was 75 grams.'**
+  String get nutrition_assisted_sample_correction;
+
+  /// No description provided for @nutrition_assisted_continue_without_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without photos'**
+  String get nutrition_assisted_continue_without_photos;
+
+  /// No description provided for @assisted_confirm_meal_changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm changes'**
+  String get assisted_confirm_meal_changes;
+
+  /// No description provided for @nutrition_assisted_reorder_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder photos'**
+  String get nutrition_assisted_reorder_photos;
+
+  /// No description provided for @nutrition_assisted_reorder_photo_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Touch and hold a photo to drag it.\nTap a photo to use the move buttons below.'**
+  String get nutrition_assisted_reorder_photo_help;
+
+  /// No description provided for @nutrition_assisted_photo_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {number} selected'**
+  String nutrition_assisted_photo_selected(Object number);
+
+  /// No description provided for @nutrition_assisted_move_photo_earlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Move earlier'**
+  String get nutrition_assisted_move_photo_earlier;
+
+  /// No description provided for @nutrition_assisted_move_photo_later.
+  ///
+  /// In en, this message translates to:
+  /// **'Move later'**
+  String get nutrition_assisted_move_photo_later;
 }
 
 class _AppLocalizationsDelegate

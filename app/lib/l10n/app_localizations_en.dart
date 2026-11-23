@@ -3429,7 +3429,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get meal_neutral_label_inline => 'entry';
 
   @override
-  String get nutrition_add_diary_entry => 'Add entry';
+  String get nutrition_add_diary_entry => 'Log meal';
 
   @override
   String get nutrition_create_library_item => 'Create item';
@@ -3446,4 +3446,206 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get library_copy_edit_action => 'Also save a copy to Library';
+
+  @override
+  String get nutrition_assisted_entry => 'Assisted meal logging';
+
+  @override
+  String get nutrition_assisted_add_photos => 'Add photos';
+
+  @override
+  String get nutrition_assisted_open_gallery => 'Open gallery';
+
+  @override
+  String get nutrition_assisted_selected_photos => 'Selected photos';
+
+  @override
+  String get nutrition_assisted_continue_description =>
+      'Continue to description';
+
+  @override
+  String get nutrition_assisted_describe_meals => 'Describe your meals';
+
+  @override
+  String get nutrition_assisted_description_help =>
+      'Say or type what you ate. Include the time, place and who was with you if you remember.';
+
+  @override
+  String get nutrition_assisted_description_hint =>
+      'For example, “I had oatmeal with banana for breakfast.”';
+
+  @override
+  String get nutrition_assisted_description_photo_hint =>
+      'For example, “Photo 1 shows the oatmeal I had for breakfast.”';
+
+  @override
+  String get nutrition_assisted_generate => 'Generate meal suggestions';
+
+  @override
+  String get nutrition_assisted_generating => 'Preparing meal suggestions…';
+
+  @override
+  String get nutrition_assisted_generation_help =>
+      'You can check the suggested foods and portions before saving.';
+
+  @override
+  String get nutrition_assisted_generation_error =>
+      'Could not prepare meal suggestions. Check your description and try again.';
+
+  @override
+  String nutrition_assisted_photo_number(Object number) {
+    return 'Photo $number';
+  }
+
+  @override
+  String nutrition_assisted_remove_photo_title(Object number) {
+    return 'Remove photo $number?';
+  }
+
+  @override
+  String get nutrition_assisted_remove_photo_help =>
+      'This removes the photo from this draft.';
+
+  @override
+  String get nutrition_assisted_keep_photo => 'Keep photo';
+
+  @override
+  String get nutrition_assisted_removed_photo => 'removed photo';
+
+  @override
+  String get nutrition_assisted_photo_permission =>
+      'Allow access to show photos from this day.';
+
+  @override
+  String get nutrition_assisted_gallery_error =>
+      'Could not open the photo gallery.';
+
+  @override
+  String get nutrition_assisted_recording => 'Recording…';
+
+  @override
+  String get nutrition_assisted_stop_transcribe => 'Stop and transcribe';
+
+  @override
+  String get nutrition_assisted_transcribing => 'Preparing transcript…';
+
+  @override
+  String get nutrition_assisted_transcript_error =>
+      'Could not prepare a transcript. Try again or type your description.';
+
+  @override
+  String get nutrition_assisted_demo_transcript =>
+      'Sample transcript. You can edit it before continuing.';
+
+  @override
+  String get nutrition_assisted_correct_voice => 'Correct by voice';
+
+  @override
+  String get nutrition_assisted_correction_help =>
+      'Say what to change in the suggested meals.';
+
+  @override
+  String get nutrition_assisted_correction_hint =>
+      'For example, “I had 75 grams of potato salad.”';
+
+  @override
+  String get nutrition_assisted_apply_correction => 'Apply correction';
+
+  @override
+  String get nutrition_assisted_correction_error =>
+      'Could not apply this correction. Check the food and portion.';
+
+  @override
+  String get assisted_review_meals => 'Review meals';
+
+  @override
+  String get assisted_review_instructions =>
+      'These are demo suggestions. Check foods, portions and times. Drag a food to reorder it or move it to another meal.';
+
+  @override
+  String assisted_estimated_portion(Object portion) {
+    return '$portion · Estimated';
+  }
+
+  @override
+  String assisted_food_order_actions(Object food) {
+    return 'Move $food';
+  }
+
+  @override
+  String get assisted_move_food_up => 'Move up';
+
+  @override
+  String get assisted_move_food_down => 'Move down';
+
+  @override
+  String assisted_move_food_to_meal(Object meal) {
+    return 'Move to $meal';
+  }
+
+  @override
+  String get assisted_empty_meal =>
+      'Move a food here or remove this meal before saving.';
+
+  @override
+  String get assisted_remove_empty_meal => 'Remove meal';
+
+  @override
+  String assisted_save_diary_entries(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Save $count diary entries',
+      one: 'Save 1 diary entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assisted_save_failed =>
+      'Could not save the diary entries. Try again.';
+
+  @override
+  String get assisted_edit_meal => 'Edit meal';
+
+  @override
+  String get nutrition_assisted_sample_description =>
+      'I had oatmeal with banana for breakfast at about 8:15 am. I had Maultaschen and potato salad for lunch at about 12:30 pm.';
+
+  @override
+  String get nutrition_assisted_sample_one_photo =>
+      'Photo 1 shows the oatmeal with banana I had for breakfast at about 8:15 am. I had Maultaschen and potato salad for lunch at about 12:30 pm.';
+
+  @override
+  String get nutrition_assisted_sample_two_photos =>
+      'Photo 1 shows oatmeal with banana for breakfast at about 8:15 am. Photo 2 shows Maultaschen and potato salad for lunch at about 12:30 pm.';
+
+  @override
+  String get nutrition_assisted_sample_correction =>
+      'The potato salad portion was 75 grams.';
+
+  @override
+  String get nutrition_assisted_continue_without_photos =>
+      'Continue without photos';
+
+  @override
+  String get assisted_confirm_meal_changes => 'Confirm changes';
+
+  @override
+  String get nutrition_assisted_reorder_photos => 'Reorder photos';
+
+  @override
+  String get nutrition_assisted_reorder_photo_help =>
+      'Touch and hold a photo to drag it.\nTap a photo to use the move buttons below.';
+
+  @override
+  String nutrition_assisted_photo_selected(Object number) {
+    return 'Photo $number selected';
+  }
+
+  @override
+  String get nutrition_assisted_move_photo_earlier => 'Move earlier';
+
+  @override
+  String get nutrition_assisted_move_photo_later => 'Move later';
 }

@@ -3360,7 +3360,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get meal_neutral_label_inline => '항목';
 
   @override
-  String get nutrition_add_diary_entry => '일지 항목 추가';
+  String get nutrition_add_diary_entry => '식사 기록';
 
   @override
   String get nutrition_create_library_item => '항목 만들기';
@@ -3377,4 +3377,190 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get library_copy_edit_action => '라이브러리에도 사본 저장';
+
+  @override
+  String get nutrition_assisted_entry => '식사 기록 도우미';
+
+  @override
+  String get nutrition_assisted_add_photos => '사진 추가';
+
+  @override
+  String get nutrition_assisted_open_gallery => '갤러리 열기';
+
+  @override
+  String get nutrition_assisted_selected_photos => '선택한 사진';
+
+  @override
+  String get nutrition_assisted_continue_description => '설명으로 계속';
+
+  @override
+  String get nutrition_assisted_describe_meals => '식사 설명';
+
+  @override
+  String get nutrition_assisted_description_help =>
+      '먹은 음식을 말하거나 입력하세요. 기억나는 경우 시간, 장소, 함께 식사한 사람도 적어 주세요.';
+
+  @override
+  String get nutrition_assisted_description_hint =>
+      '예: “아침에 바나나를 넣은 오트밀을 먹었어요.”';
+
+  @override
+  String get nutrition_assisted_description_photo_hint =>
+      '예: “사진 1은 아침에 먹은 오트밀이에요.”';
+
+  @override
+  String get nutrition_assisted_generate => '식사 제안 만들기';
+
+  @override
+  String get nutrition_assisted_generating => '식사 제안을 만드는 중…';
+
+  @override
+  String get nutrition_assisted_generation_help =>
+      '저장하기 전에 추천 음식과 분량을 확인할 수 있어요.';
+
+  @override
+  String get nutrition_assisted_generation_error =>
+      '식사 제안을 만들 수 없어요. 설명을 확인하고 다시 시도하세요.';
+
+  @override
+  String nutrition_assisted_photo_number(Object number) {
+    return '사진 $number';
+  }
+
+  @override
+  String nutrition_assisted_remove_photo_title(Object number) {
+    return '사진 $number을(를) 삭제할까요?';
+  }
+
+  @override
+  String get nutrition_assisted_remove_photo_help => '이 초안에서 사진을 삭제해요.';
+
+  @override
+  String get nutrition_assisted_keep_photo => '사진 유지';
+
+  @override
+  String get nutrition_assisted_removed_photo => '삭제된 사진';
+
+  @override
+  String get nutrition_assisted_photo_permission => '이날의 사진을 보려면 접근을 허용하세요.';
+
+  @override
+  String get nutrition_assisted_gallery_error => '사진 갤러리를 열 수 없어요.';
+
+  @override
+  String get nutrition_assisted_recording => '녹음 중…';
+
+  @override
+  String get nutrition_assisted_stop_transcribe => '녹음 중지 및 텍스트 변환';
+
+  @override
+  String get nutrition_assisted_transcribing => '텍스트 만드는 중…';
+
+  @override
+  String get nutrition_assisted_transcript_error =>
+      '텍스트를 만들 수 없어요. 다시 시도하거나 설명을 입력하세요.';
+
+  @override
+  String get nutrition_assisted_demo_transcript =>
+      '예시 텍스트예요. 계속하기 전에 수정할 수 있어요.';
+
+  @override
+  String get nutrition_assisted_correct_voice => '음성으로 수정';
+
+  @override
+  String get nutrition_assisted_correction_help => '식사 제안에서 바꿀 내용을 말하세요.';
+
+  @override
+  String get nutrition_assisted_correction_hint => '예: “감자 샐러드를 75그램 먹었어요.”';
+
+  @override
+  String get nutrition_assisted_apply_correction => '수정 적용';
+
+  @override
+  String get nutrition_assisted_correction_error =>
+      '수정을 적용할 수 없어요. 음식과 분량을 확인하세요.';
+
+  @override
+  String get assisted_review_meals => '식사 검토';
+
+  @override
+  String get assisted_review_instructions =>
+      '예시 제안이에요. 음식, 분량, 시간을 확인하세요. 음식을 끌어 순서를 바꾸거나 다른 식사로 옮길 수 있어요.';
+
+  @override
+  String assisted_estimated_portion(Object portion) {
+    return '$portion · 추정';
+  }
+
+  @override
+  String assisted_food_order_actions(Object food) {
+    return '$food 이동';
+  }
+
+  @override
+  String get assisted_move_food_up => '위로 이동';
+
+  @override
+  String get assisted_move_food_down => '아래로 이동';
+
+  @override
+  String assisted_move_food_to_meal(Object meal) {
+    return '$meal(으)로 이동';
+  }
+
+  @override
+  String get assisted_empty_meal => '저장하기 전에 음식을 여기로 옮기거나 이 식사를 삭제하세요.';
+
+  @override
+  String get assisted_remove_empty_meal => '식사 삭제';
+
+  @override
+  String assisted_save_diary_entries(num count) {
+    return '일지 항목 $count개 저장';
+  }
+
+  @override
+  String get assisted_save_failed => '일지 항목을 저장할 수 없어요. 다시 시도하세요.';
+
+  @override
+  String get assisted_edit_meal => '식사 수정';
+
+  @override
+  String get nutrition_assisted_sample_description =>
+      '오전 8:15쯤 아침으로 바나나 오트밀을 먹었습니다. 오후 12:30쯤 점심으로 마울타셴과 감자 샐러드를 먹었습니다.';
+
+  @override
+  String get nutrition_assisted_sample_one_photo =>
+      '사진 1은 오전 8:15쯤 아침으로 먹은 바나나 오트밀입니다. 오후 12:30쯤 점심으로 마울타셴과 감자 샐러드를 먹었습니다.';
+
+  @override
+  String get nutrition_assisted_sample_two_photos =>
+      '사진 1은 오전 8:15쯤 아침으로 먹은 바나나 오트밀입니다. 사진 2는 오후 12:30쯤 점심으로 먹은 마울타셴과 감자 샐러드입니다.';
+
+  @override
+  String get nutrition_assisted_sample_correction => '감자 샐러드는 75그램이었습니다.';
+
+  @override
+  String get nutrition_assisted_continue_without_photos => '사진 없이 계속';
+
+  @override
+  String get assisted_confirm_meal_changes => '변경 사항 확인';
+
+  @override
+  String get nutrition_assisted_reorder_photos => '사진 순서 변경';
+
+  @override
+  String get nutrition_assisted_reorder_photo_help =>
+      '사진을 길게 눌러 드래그하세요.\n사진을 누르면 아래 버튼으로 옮길 수 있어요.';
+
+  @override
+  String nutrition_assisted_photo_selected(Object number) {
+    return '사진 $number 선택됨';
+  }
+
+  @override
+  String get nutrition_assisted_move_photo_earlier => '앞으로 이동';
+
+  @override
+  String get nutrition_assisted_move_photo_later => '뒤로 이동';
 }

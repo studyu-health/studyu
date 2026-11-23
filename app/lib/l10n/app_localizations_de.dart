@@ -3478,7 +3478,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get meal_neutral_label_inline => 'diesem Eintrag';
 
   @override
-  String get nutrition_add_diary_entry => 'Eintrag hinzufügen';
+  String get nutrition_add_diary_entry => 'Mahlzeit erfassen';
 
   @override
   String get nutrition_create_library_item => 'Element erstellen';
@@ -3496,4 +3496,207 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get library_copy_edit_action => 'Auch Kopie in Bibliothek speichern';
+
+  @override
+  String get nutrition_assisted_entry => 'Assistierte Mahlzeitenerfassung';
+
+  @override
+  String get nutrition_assisted_add_photos => 'Fotos hinzufügen';
+
+  @override
+  String get nutrition_assisted_open_gallery => 'Galerie öffnen';
+
+  @override
+  String get nutrition_assisted_selected_photos => 'Ausgewählte Fotos';
+
+  @override
+  String get nutrition_assisted_continue_description =>
+      'Weiter zur Beschreibung';
+
+  @override
+  String get nutrition_assisted_describe_meals => 'Mahlzeiten beschreiben';
+
+  @override
+  String get nutrition_assisted_description_help =>
+      'Sagen oder schreiben Sie, was Sie gegessen haben. Ergänzen Sie die Uhrzeit, den Ort und wer dabei war, falls Sie sich erinnern.';
+
+  @override
+  String get nutrition_assisted_description_hint =>
+      'Zum Beispiel: „Zum Frühstück hatte ich Haferbrei mit Banane.“';
+
+  @override
+  String get nutrition_assisted_description_photo_hint =>
+      'Zum Beispiel: „Foto 1 zeigt den Haferbrei, den ich zum Frühstück gegessen habe.“';
+
+  @override
+  String get nutrition_assisted_generate => 'Mahlzeiten vorschlagen';
+
+  @override
+  String get nutrition_assisted_generating =>
+      'Mahlzeitenvorschläge werden erstellt …';
+
+  @override
+  String get nutrition_assisted_generation_help =>
+      'Sie können die vorgeschlagenen Lebensmittel und Portionen vor dem Speichern prüfen.';
+
+  @override
+  String get nutrition_assisted_generation_error =>
+      'Die Mahlzeitenvorschläge konnten nicht erstellt werden. Prüfen Sie Ihre Beschreibung und versuchen Sie es erneut.';
+
+  @override
+  String nutrition_assisted_photo_number(Object number) {
+    return 'Foto $number';
+  }
+
+  @override
+  String nutrition_assisted_remove_photo_title(Object number) {
+    return 'Foto $number entfernen?';
+  }
+
+  @override
+  String get nutrition_assisted_remove_photo_help =>
+      'Das Foto wird aus diesem Entwurf entfernt.';
+
+  @override
+  String get nutrition_assisted_keep_photo => 'Foto behalten';
+
+  @override
+  String get nutrition_assisted_removed_photo => 'entferntes Foto';
+
+  @override
+  String get nutrition_assisted_photo_permission =>
+      'Erlauben Sie den Zugriff, um Fotos von diesem Tag anzuzeigen.';
+
+  @override
+  String get nutrition_assisted_gallery_error =>
+      'Die Fotogalerie konnte nicht geöffnet werden.';
+
+  @override
+  String get nutrition_assisted_recording => 'Aufnahme läuft …';
+
+  @override
+  String get nutrition_assisted_stop_transcribe => 'Stoppen und transkribieren';
+
+  @override
+  String get nutrition_assisted_transcribing => 'Transkript wird erstellt …';
+
+  @override
+  String get nutrition_assisted_transcript_error =>
+      'Das Transkript konnte nicht erstellt werden. Versuchen Sie es erneut oder schreiben Sie Ihre Beschreibung.';
+
+  @override
+  String get nutrition_assisted_demo_transcript =>
+      'Beispieltranskript. Sie können es vor dem Fortfahren bearbeiten.';
+
+  @override
+  String get nutrition_assisted_correct_voice => 'Per Sprache korrigieren';
+
+  @override
+  String get nutrition_assisted_correction_help =>
+      'Sagen Sie, was sich in den vorgeschlagenen Mahlzeiten ändern soll.';
+
+  @override
+  String get nutrition_assisted_correction_hint =>
+      'Zum Beispiel: „Ich hatte 75 Gramm Kartoffelsalat.“';
+
+  @override
+  String get nutrition_assisted_apply_correction => 'Korrektur anwenden';
+
+  @override
+  String get nutrition_assisted_correction_error =>
+      'Die Korrektur konnte nicht angewendet werden. Prüfen Sie das Lebensmittel und die Portion.';
+
+  @override
+  String get assisted_review_meals => 'Mahlzeiten prüfen';
+
+  @override
+  String get assisted_review_instructions =>
+      'Dies sind Beispielvorschläge. Prüfen Sie Lebensmittel, Portionen und Uhrzeiten. Ziehen Sie ein Lebensmittel an die gewünschte Position oder zu einer anderen Mahlzeit.';
+
+  @override
+  String assisted_estimated_portion(Object portion) {
+    return '$portion · Geschätzt';
+  }
+
+  @override
+  String assisted_food_order_actions(Object food) {
+    return '$food verschieben';
+  }
+
+  @override
+  String get assisted_move_food_up => 'Nach oben verschieben';
+
+  @override
+  String get assisted_move_food_down => 'Nach unten verschieben';
+
+  @override
+  String assisted_move_food_to_meal(Object meal) {
+    return 'Verschieben nach $meal';
+  }
+
+  @override
+  String get assisted_empty_meal =>
+      'Verschieben Sie ein Lebensmittel hierher oder entfernen Sie diese Mahlzeit vor dem Speichern.';
+
+  @override
+  String get assisted_remove_empty_meal => 'Mahlzeit entfernen';
+
+  @override
+  String assisted_save_diary_entries(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tagebucheinträge speichern',
+      one: '1 Tagebucheintrag speichern',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assisted_save_failed =>
+      'Die Tagebucheinträge konnten nicht gespeichert werden. Versuchen Sie es erneut.';
+
+  @override
+  String get assisted_edit_meal => 'Mahlzeit bearbeiten';
+
+  @override
+  String get nutrition_assisted_sample_description =>
+      'Zum Frühstück hatte ich gegen 8:15 Uhr Haferbrei mit Banane. Zum Mittagessen hatte ich gegen 12:30 Uhr Maultaschen und Kartoffelsalat.';
+
+  @override
+  String get nutrition_assisted_sample_one_photo =>
+      'Foto 1 zeigt den Haferbrei mit Banane, den ich gegen 8:15 Uhr zum Frühstück hatte. Zum Mittagessen gab es gegen 12:30 Uhr Maultaschen und Kartoffelsalat.';
+
+  @override
+  String get nutrition_assisted_sample_two_photos =>
+      'Foto 1 zeigt Haferbrei mit Banane zum Frühstück gegen 8:15 Uhr. Foto 2 zeigt Maultaschen und Kartoffelsalat zum Mittagessen gegen 12:30 Uhr.';
+
+  @override
+  String get nutrition_assisted_sample_correction =>
+      'Die Portion Kartoffelsalat war 75 Gramm.';
+
+  @override
+  String get nutrition_assisted_continue_without_photos =>
+      'Ohne Fotos fortfahren';
+
+  @override
+  String get assisted_confirm_meal_changes => 'Änderungen bestätigen';
+
+  @override
+  String get nutrition_assisted_reorder_photos => 'Fotos neu anordnen';
+
+  @override
+  String get nutrition_assisted_reorder_photo_help =>
+      'Halten Sie ein Foto gedrückt, um es zu ziehen.\nTippen Sie auf ein Foto, um es mit den Tasten unten zu verschieben.';
+
+  @override
+  String nutrition_assisted_photo_selected(Object number) {
+    return 'Foto $number ausgewählt';
+  }
+
+  @override
+  String get nutrition_assisted_move_photo_earlier => 'Nach vorn';
+
+  @override
+  String get nutrition_assisted_move_photo_later => 'Nach hinten';
 }
