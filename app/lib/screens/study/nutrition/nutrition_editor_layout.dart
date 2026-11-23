@@ -28,9 +28,6 @@ class const NutritionEditorTitle({required final String title})
     title,
     maxLines: 2,
     overflow: TextOverflow.ellipsis,
-    style: MediaQuery.sizeOf(context).width < 480
-        ? Theme.of(context).textTheme.titleMedium
-        : null,
   );
 }
 
