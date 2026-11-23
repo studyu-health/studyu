@@ -313,11 +313,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
   }) {
     final theme = Theme.of(context);
     final energy = _energyUnavailable(nutrition) ? null : nutrition.energyKcal;
-    final value = _withPartial(
-      context,
-      _calories(context, energy),
-      nutrition.isPartial('energyKcal'),
-    );
+    final value = _calories(context, energy);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -464,15 +460,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
               ],
             ),
             const SizedBox(height: 4),
-            Text(
-              l10n.nutrition_average_value(
-                _withPartial(
-                  context,
-                  _calories(context, average),
-                  current.partialNutrients.contains('energyKcal'),
-                ),
-              ),
-            ),
+            Text(l10n.nutrition_average_value(_calories(context, average))),
             const SizedBox(height: 16),
             SizedBox(
               height: 220,
@@ -580,7 +568,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
                       }
                       return BarTooltipItem(
                         '${_tooltipDate(context, day)} · '
-                        '${_withPartial(context, _calories(context, nutrition.energyKcal), nutrition.isPartial('energyKcal'))}',
+                        '${_calories(context, nutrition.energyKcal)}',
                         TextStyle(color: theme.colorScheme.onInverseSurface),
                       );
                     },
@@ -637,15 +625,11 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
           context,
           day,
           day.hasChartData
-              ? _withPartial(
+              ? _calories(
                   context,
-                  _calories(
-                    context,
-                    _energyUnavailable(day.data!.nutrition)
-                        ? null
-                        : day.data!.nutrition.energyKcal,
-                  ),
-                  day.data!.nutrition.isPartial('energyKcal'),
+                  _energyUnavailable(day.data!.nutrition)
+                      ? null
+                      : day.data!.nutrition.energyKcal,
                 )
               : null,
         ),
@@ -738,13 +722,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.nutrition_average_per_recorded_day(
-                _withPartial(
-                  context,
-                  _grams(context, average),
-                  current.partialNutrients.contains(_selectedNutrient.name),
-                ),
-              ),
+              l10n.nutrition_average_per_recorded_day(_grams(context, average)),
             ),
           ],
         ),
@@ -786,7 +764,7 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
                   for (final spot in spots)
                     LineTooltipItem(
                       '${_tooltipDate(context, current.days[spot.x.round()])} · '
-                      '${_withPartial(context, _grams(context, spot.y), current.days[spot.x.round()].data!.nutrition.isPartial(_selectedNutrient.name))}',
+                      '${_grams(context, spot.y)}',
                       TextStyle(color: theme.colorScheme.onInverseSurface),
                     ),
                 ],
@@ -977,7 +955,21 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
       _Nutrient.fat => l10n.fat,
       _Nutrient.fiber => l10n.fibre,
     };
-    return '$nutrient. ${[for (final day in period.days) _accessibleDayLabel(context, day, day.hasChartData && day.data!.nutrition.isKnown(_selectedNutrient.name) ? _withPartial(context, _grams(context, _nutrientValue(_selectedNutrient, day.data!.nutrition)), day.data!.nutrition.isPartial(_selectedNutrient.name)) : null)].join('; ')}';
+    final days = [
+      for (final day in period.days)
+        _accessibleDayLabel(
+          context,
+          day,
+          day.hasChartData &&
+                  day.data!.nutrition.isKnown(_selectedNutrient.name)
+              ? _grams(
+                  context,
+                  _nutrientValue(_selectedNutrient, day.data!.nutrition),
+                )
+              : null,
+        ),
+    ];
+    return '$nutrient. ${days.join('; ')}';
   }
 
   String _accessibleDayLabel(
@@ -1028,11 +1020,6 @@ class _NutritionStatisticsViewState() extends State<NutritionStatisticsView> {
         ? null
         : currentValue - previousValue;
   }
-
-  String _withPartial(BuildContext context, String value, bool partial) =>
-      partial
-      ? '$value (${AppLocalizations.of(context)!.nutrition_partial})'
-      : value;
 
   String _calories(BuildContext context, double? value) => value == null
       ? '—'

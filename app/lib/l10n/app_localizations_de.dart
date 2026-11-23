@@ -3286,9 +3286,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get not_added => 'Nicht hinzugefügt';
 
   @override
-  String get nutrition_partial => 'unvollständig';
-
-  @override
   String get nutrition_statistics_week => 'Woche';
 
   @override

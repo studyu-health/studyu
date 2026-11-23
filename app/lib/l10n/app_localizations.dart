@@ -5779,12 +5779,6 @@ abstract class AppLocalizations {
   /// **'Not added'**
   String get not_added;
 
-  /// No description provided for @nutrition_partial.
-  ///
-  /// In en, this message translates to:
-  /// **'partial'**
-  String get nutrition_partial;
-
   /// No description provided for @nutrition_statistics_week.
   ///
   /// In en, this message translates to:

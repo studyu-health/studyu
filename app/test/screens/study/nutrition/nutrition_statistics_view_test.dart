@@ -292,7 +292,8 @@ void main() {
     await tester.pumpAndSettle();
     await _selectPeriod(tester, 'Week');
 
-    expect(find.text('400 kcal (partial)'), findsWidgets);
+    expect(find.text('400 kcal'), findsWidgets);
+    expect(find.textContaining('(partial)'), findsNothing);
     expect(find.textContaining('kcal/day'), findsNothing);
     expect(find.textContaining('g/day'), findsNothing);
   });

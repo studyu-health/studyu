@@ -426,35 +426,37 @@ void main() {
     expect(find.text(l10n.nutrition_add_diary_entry), findsOneWidget);
   });
 
-  testWidgets('timeline identifies missing and partial meal energy', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({
-      nutritionInstructionsShownKey: true,
-    });
-    final unknown = food('unknown', 'Unlabelled food', 0);
-    unknown.nutrition.unavailableNutrients = {'energyKcal'};
-    await tester.pumpWidget(
-      nutritionTaskApp(
-        nutritionTask(),
-        existingRecall: recall([
-          meal('first', MealType.breakfast, foods: [unknown]),
-          meal(
-            'second',
-            MealType.lunch,
-            foods: [unknown, food('known', 'Rice', 100)],
-          ),
-        ]),
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'timeline shows available energy for a meal with missing values',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        nutritionInstructionsShownKey: true,
+      });
+      final unknown = food('unknown', 'Unlabelled food', 0);
+      unknown.nutrition.unavailableNutrients = {'energyKcal'};
+      await tester.pumpWidget(
+        nutritionTaskApp(
+          nutritionTask(),
+          existingRecall: recall([
+            meal('first', MealType.breakfast, foods: [unknown]),
+            meal(
+              'second',
+              MealType.lunch,
+              foods: [unknown, food('known', 'Rice', 100)],
+            ),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('Nutrition information unavailable'),
-      findsOneWidget,
-    );
-    expect(find.textContaining('100 kcal (partial)'), findsOneWidget);
-  });
+      expect(
+        find.textContaining('Nutrition information unavailable'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('100 kcal'), findsOneWidget);
+      expect(find.textContaining('(partial)'), findsNothing);
+    },
+  );
 
   setUp(() {
     SharedPreferences.setMockInitialValues({

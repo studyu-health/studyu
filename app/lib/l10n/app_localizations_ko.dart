@@ -3178,9 +3178,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get not_added => 'Not added';
 
   @override
-  String get nutrition_partial => 'partial';
-
-  @override
   String get nutrition_statistics_week => '주';
 
   @override

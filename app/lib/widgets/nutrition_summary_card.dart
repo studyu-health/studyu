@@ -205,13 +205,7 @@ class const NutritionSummaryView({
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      hideEnergy
-                          ? '—'
-                          : _withAvailability(
-                              context,
-                              'energyKcal',
-                              '${energyKcal!.round()} kcal',
-                            ),
+                      hideEnergy ? '—' : '${energyKcal!.round()} kcal',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -281,7 +275,7 @@ class const NutritionSummaryView({
         children: [
           Expanded(child: Text(label)),
           Text(
-            _withAvailability(context, keyName, _formatGrams(value, keyName)),
+            _formatGrams(value, keyName),
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -290,11 +284,6 @@ class const NutritionSummaryView({
       ),
     );
   }
-
-  String _withAvailability(BuildContext context, String key, String value) =>
-      !_isUnavailable(key, 0) && partialNutrients.contains(key)
-      ? '$value (${AppLocalizations.of(context)!.nutrition_partial})'
-      : value;
 
   String _formatGrams(double? value, String key) {
     if (_isUnavailable(key, value)) return '—';
@@ -497,12 +486,9 @@ class _NutritionSummaryCardState() extends State<NutritionSummaryCard> {
 
   String _format(double value, String unit, String key) {
     if (widget.nutrition.unavailableNutrients.contains(key)) return '—';
-    final formatted = unit == 'mg'
+    return unit == 'mg'
         ? '${value.round()} mg'
         : '${value.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')} g';
-    return widget.nutrition.isPartial(key)
-        ? '$formatted (${AppLocalizations.of(context)!.nutrition_partial})'
-        : formatted;
   }
 }
 

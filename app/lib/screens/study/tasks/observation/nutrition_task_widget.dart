@@ -1483,8 +1483,6 @@ class const _MealTimelineCard({
     final energy = l10n.kcal_value(nutrition.energyKcal.toStringAsFixed(0));
     final energyLabel = !nutrition.isKnown('energyKcal')
         ? l10n.food_quantity_nutrition_unavailable
-        : nutrition.isPartial('energyKcal')
-        ? '$energy (${l10n.nutrition_partial})'
         : energy;
     final time =
         meal.timestamp == null ||

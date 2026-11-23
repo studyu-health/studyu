@@ -1173,9 +1173,6 @@ class const _FoodCard({
     final energyLabel = food.nutrition.isKnown('energyKcal')
         ? l10n.kcal_value(energy.toStringAsFixed(0))
         : '— kcal';
-    final partialLabel = food.nutrition.isPartial('energyKcal')
-        ? ' (${l10n.nutrition_partial})'
-        : '';
     final quantity = composition.unit == 'serving'
         ? l10n.serving_amount(foodServingAmount(composition.amount))
         : '${composition.amount} ${composition.unit}';
@@ -1185,7 +1182,7 @@ class const _FoodCard({
       icon: icon,
       imageUrl: foodImageUrl(food),
       textMaxLines: 2,
-      metadata: '$quantity · $energyLabel$partialLabel',
+      metadata: '$quantity · $energyLabel',
       actions: [
         IconButton(
           icon: const Icon(Icons.edit_outlined),

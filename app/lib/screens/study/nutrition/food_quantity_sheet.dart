@@ -235,17 +235,8 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
     return null;
   }
 
-  String _nutrientDisplay(
-    AppLocalizations l10n,
-    FoodEntry food,
-    String key,
-    String formatted,
-  ) {
-    if (!food.nutrition.isKnown(key)) return '—';
-    return food.nutrition.isPartial(key)
-        ? '$formatted (${l10n.nutrition_partial})'
-        : formatted;
-  }
+  String _nutrientDisplay(FoodEntry food, String key, String formatted) =>
+      food.nutrition.isKnown(key) ? formatted : '—';
 
   @override
   Widget build(BuildContext context) {
@@ -571,7 +562,6 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                             Text(
                               caloriesKnown
                                   ? _nutrientDisplay(
-                                      l10n,
                                       food,
                                       'energyKcal',
                                       l10n.kcal_value(
@@ -590,7 +580,6 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                             (
                               l10n.food_quantity_protein,
                               _nutrientDisplay(
-                                l10n,
                                 food,
                                 'protein',
                                 '${food.nutrition.protein.toStringAsFixed(1)} g',
@@ -599,7 +588,6 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                             (
                               l10n.food_quantity_carbs,
                               _nutrientDisplay(
-                                l10n,
                                 food,
                                 'carbs',
                                 '${food.nutrition.carbs.toStringAsFixed(1)} g',
@@ -608,7 +596,6 @@ class _FoodQuantitySheetState() extends State<FoodQuantitySheet> {
                             (
                               l10n.food_quantity_fat,
                               _nutrientDisplay(
-                                l10n,
                                 food,
                                 'fat',
                                 '${food.nutrition.fat.toStringAsFixed(1)} g',

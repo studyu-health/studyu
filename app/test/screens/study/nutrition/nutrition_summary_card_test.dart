@@ -40,8 +40,8 @@ void main() {
     await tester.pumpWidget(
       testApp(Scaffold(body: NutritionSummaryCard(nutrition: nutrition))),
     );
-    expect(find.bySemanticsLabel(RegExp('0 kcal.*partial')), findsOneWidget);
-    expect(find.bySemanticsLabel(RegExp('0 g.*partial')), findsOneWidget);
+    expect(find.bySemanticsLabel('0 kcal'), findsOneWidget);
+    expect(find.bySemanticsLabel('0 g'), findsNWidgets(2));
     expect(find.text('—'), findsOneWidget);
     expect(nutrition.protein, 999);
     semantics.dispose();
@@ -70,6 +70,7 @@ void main() {
       waterContent: 0,
       micros: const {},
       unavailableNutrients: const {'sugars'},
+      partialNutrients: const {'fiber'},
       unavailableItemCount: 1,
     );
 
@@ -132,6 +133,7 @@ void main() {
 
     expect(find.byIcon(Icons.expand_less), findsOneWidget);
     expect(find.text('—'), findsOneWidget);
+    expect(find.text('3.5 g'), findsOneWidget);
     expect(find.text('0 g'), findsAtLeastNWidgets(1));
 
     semantics.dispose();
