@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
 import 'package:studyu_app/screens/study/report/report_section_widget.dart';
 import 'package:studyu_app/screens/study/report/util/plot_utilities.dart';
-import 'package:studyu_app/util/data_processing.dart';
+import 'package:studyu_app/screens/study/report/util/report_utilities.dart';
 import 'package:studyu_core/core.dart';
 
 class const AverageSectionWidget(
@@ -447,92 +447,11 @@ class _AverageSectionWidgetState()
     return c;
   }
 
-  /// Returns the day index adjusted for baseline inclusion.
-  int getDayIndex(DateTime key) {
-    final dayOfStudy = widget.subject.getDayOfStudyFor(key);
-    if (widget.subject.study.schedule.includeBaseline) {
-      return dayOfStudy;
-    }
-    final schedule = widget.subject.scheduleFor(widget.subject.startedAt!);
-    // The offset is the index of the first task that is not the baseline.
-    final offset = schedule.indexWhere((task) => task.id != Study.baselineID);
-    return dayOfStudy - offset;
-  }
-
-  /// Groups data by intervention (excluding baseline data)
-  /// and returns a mapping from intervention IDs to a list of values.
-  Map<String, List<num>> getInterventionGroups(List<DiagramDatum> data) {
-    final filteredData = data.where(
-      (datum) => datum.intervention != '__baseline',
-    );
-    // Group data by intervention
-    final interventionGroups = filteredData.fold<Map<String, List<num>>>({}, (
-      map,
-      datum,
-    ) {
-      map.putIfAbsent(datum.intervention, () => []).add(datum.value);
-      return map;
-    });
-
-    return interventionGroups;
-  }
-
   Iterable<DiagramDatum> aggregateDataBy(TemporalAggregation? aggregate) {
     final values = widget.section.resultProperty!.retrieveFromResults(
       widget.subject,
     );
-    final data = values.entries.map(
-      (e) => DiagramDatum(
-        getDayIndex(e.key),
-        e.value,
-        e.key,
-        widget.subject.getInterventionForDate(e.key)!.id,
-      ),
-    );
-    if (aggregate == null) {
-      return data;
-    } else if (aggregate == TemporalAggregation.day) {
-      return data
-          .groupBy((e) => e.x)
-          .aggregateWithKey(
-            (data, day) => DiagramDatum(
-              day,
-              foldAggregateMean()(data.map((e) => e.value)),
-              null,
-              data.first.intervention,
-            ),
-          )
-          .map((e) => e.value);
-    } else if (aggregate == TemporalAggregation.phase) {
-      return data
-          .groupBy(
-            (e) => widget.subject.getInterventionIndexForDate(e.timestamp!),
-          )
-          .aggregateWithKey(
-            (data, phase) => DiagramDatum(
-              phase,
-              foldAggregateMean()(data.map((e) => e.value)),
-              null,
-              data.first.intervention,
-            ),
-          )
-          .map((e) => e.value);
-    } else {
-      final order = getInterventionPositions(
-        widget.subject.selectedInterventions,
-      );
-      return data
-          .groupBy((e) => e.intervention)
-          .aggregateWithKey(
-            (data, intervention) => DiagramDatum(
-              order[intervention]! as num,
-              foldAggregateMean()(data.map((e) => e.value)),
-              null,
-              intervention,
-            ),
-          )
-          .map((e) => e.value);
-    }
+    return ReportUtilities(widget.subject).aggregateDataBy(values, aggregate);
   }
 
   Map<String, String?> getInterventionNames(BuildContext context) {
@@ -562,5 +481,6 @@ class DiagramDatum(
   final num x,
   final num value,
   final DateTime? timestamp,
-  final String intervention,
-);
+  final String intervention, {
+  final int? phaseIndex,
+});

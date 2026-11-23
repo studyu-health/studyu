@@ -719,11 +719,11 @@ final measurementFormViewModelProvider = MeasurementFormViewModelFamily._();
 final class MeasurementFormViewModelProvider
     extends
         $FunctionalProvider<
-          ManagedFormViewModel<dynamic>,
-          ManagedFormViewModel<dynamic>,
-          ManagedFormViewModel<dynamic>
+          ManagedFormViewModel<dynamic>?,
+          ManagedFormViewModel<dynamic>?,
+          ManagedFormViewModel<dynamic>?
         >
-    with $Provider<ManagedFormViewModel<dynamic>> {
+    with $Provider<ManagedFormViewModel<dynamic>?> {
   MeasurementFormViewModelProvider._({
     required MeasurementFormViewModelFamily super.from,
     required MeasurementFormRouteArgs super.argument,
@@ -747,21 +747,21 @@ final class MeasurementFormViewModelProvider
 
   @$internal
   @override
-  $ProviderElement<ManagedFormViewModel<dynamic>> $createElement(
+  $ProviderElement<ManagedFormViewModel<dynamic>?> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  ManagedFormViewModel<dynamic> create(Ref ref) {
+  ManagedFormViewModel<dynamic>? create(Ref ref) {
     final argument = this.argument as MeasurementFormRouteArgs;
     return measurementFormViewModel(ref, argument);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ManagedFormViewModel<dynamic> value) {
+  Override overrideWithValue(ManagedFormViewModel<dynamic>? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<ManagedFormViewModel<dynamic>>(
+      providerOverride: $SyncValueProvider<ManagedFormViewModel<dynamic>?>(
         value,
       ),
     );
@@ -780,12 +780,12 @@ final class MeasurementFormViewModelProvider
 }
 
 String _$measurementFormViewModelHash() =>
-    r'd7f03d3ee393a340e31754453f1c757165c6ca44';
+    r'4da1ac935bba52c6aae66ac4c56f46b4f9617198';
 
 final class MeasurementFormViewModelFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          ManagedFormViewModel<dynamic>,
+          ManagedFormViewModel<dynamic>?,
           MeasurementFormRouteArgs
         > {
   MeasurementFormViewModelFamily._()
@@ -870,7 +870,7 @@ final class SurveyQuestionFormViewModelProvider
 }
 
 String _$surveyQuestionFormViewModelHash() =>
-    r'82e72be80d9cdba26c42e8f33a8aa420207685e3';
+    r'2d7e1af117b189b2e921111f6495a48ac8354076';
 
 final class SurveyQuestionFormViewModelFamily extends $Family
     with

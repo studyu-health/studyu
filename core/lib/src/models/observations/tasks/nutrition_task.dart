@@ -11,12 +11,19 @@ class NutritionTask extends Observation {
   String? instructions;
 
   /// Whether to prompt for meal context (location, company, distractions)
-  @JsonKey(defaultValue: true)
+  @JsonKey(required: true, disallowNullValue: true)
   bool collectMealContext = true;
 
-  /// Whether to prompt for recipe details
-  @JsonKey(defaultValue: true)
-  bool allowRecipes = true;
+  /// Whether participants may create meal entries
+  @JsonKey(required: true, disallowNullValue: true)
+  bool allowMeals = true;
+
+  @JsonKey(required: true, disallowNullValue: true)
+  bool trackWaterIntake = false;
+
+  /// Whether participants can see daily nutrition totals and trends.
+  @JsonKey(defaultValue: false, disallowNullValue: true)
+  bool showStatistics = false;
 
   /// Minimum number of meals required per day (optional)
   int? minimumMealsRequired;
@@ -38,38 +45,57 @@ class NutritionTask extends Observation {
     String property,
     List<SubjectProgress> sourceResults,
   ) {
-    return Map.fromEntries(
-      sourceResults.map((e) {
-        final result = (e.result as Result<DailyRecall>).result;
+    final extracted = <DateTime, T>{};
+    for (final e in sourceResults) {
+      final result = (e.result as Result<DailyRecall>).result;
+      final completionTime = result.entryCompletedAt;
+      if (completionTime == null ||
+          result.studyDaySnapshot == null ||
+          e.result.periodId == null ||
+          e.completedAt == null) {
+        continue;
+      }
 
-        final nutrition = result.totalNutrition;
+      final nutrition = result.totalNutrition;
 
-        // Extract different properties based on what's requested
-        dynamic value;
-        switch (property) {
-          case 'totalCalories':
-            value = nutrition.energyKcal;
-          case 'totalProtein':
-            value = nutrition.protein;
-          case 'totalCarbs':
-            value = nutrition.carbs;
-          case 'totalFat':
-            value = nutrition.fat;
-          case 'mealCount':
-            value = result.meals
-                .where((MealLog meal) => !meal.isSkipped)
-                .length;
-          case 'completionTime':
-            value = result.entryCompletedAt;
-          default:
-            throw ArgumentError(
-              "Nutrition task does not support property '$property'.",
-            );
-        }
+      final nutrientKey = switch (property) {
+        'totalCalories' => 'energyKcal',
+        'totalProtein' => 'protein',
+        'totalCarbs' => 'carbs',
+        'totalFat' => 'fat',
+        _ => null,
+      };
+      // Generic numeric analysis accepts complete measurements only.
+      if (nutrientKey != null &&
+          (!nutrition.isKnown(nutrientKey) ||
+              nutrition.isPartial(nutrientKey))) {
+        continue;
+      }
 
-        return MapEntry(e.completedAt!, value as T);
-      }),
-    );
+      // Extract different properties based on what's requested
+      dynamic value;
+      switch (property) {
+        case 'totalCalories':
+          value = nutrition.energyKcal;
+        case 'totalProtein':
+          value = nutrition.protein;
+        case 'totalCarbs':
+          value = nutrition.carbs;
+        case 'totalFat':
+          value = nutrition.fat;
+        case 'mealCount':
+          value = result.meals.where((MealLog meal) => !meal.isSkipped).length;
+        case 'completionTime':
+          value = completionTime;
+        default:
+          throw ArgumentError(
+            "Nutrition task does not support property '$property'.",
+          );
+      }
+
+      extracted[e.completedAt!] = value as T;
+    }
+    return extracted;
   }
 
   @override

@@ -6,16 +6,33 @@ import 'package:studyu_core/core.dart';
 
 class ReportUtilities(final StudySubject subject) {
   Iterable<DiagramDatum> convertToDiagramData(Map<DateTime, num> values) {
-    final data = values.entries.map((entry) {
+    final nutritionProgress = {
+      for (final progress in subject.progress)
+        if (progress.result.result
+            case DailyRecall(:final entryCompletedAt, :final studyDaySnapshot)
+            when entryCompletedAt != null &&
+                studyDaySnapshot != null &&
+                progress.result.periodId != null &&
+                progress.completedAt != null)
+          progress.completedAt!: (progress, studyDaySnapshot),
+    };
+    return values.entries.map((entry) {
+      if (nutritionProgress[entry.key] case (final progress, final day)) {
+        return DiagramDatum(
+          day,
+          entry.value,
+          subject.nutritionDateForStudyDay(day),
+          progress.interventionId,
+          phaseIndex: day ~/ subject.study.schedule.phaseDuration,
+        );
+      }
       return DiagramDatum(
-        getDayIndex(entry.key), // Determines day index for the key date.
+        getDayIndex(entry.key),
         entry.value,
         entry.key,
         subject.getInterventionForDate(entry.key)!.id,
       );
     });
-
-    return data;
   }
 
   /// Aggregates the provided [values] based on the [aggregate] type.
@@ -47,7 +64,9 @@ class ReportUtilities(final StudySubject subject) {
       case TemporalAggregation.phase:
         return data
             .groupBy(
-              (datum) => subject.getInterventionIndexForDate(datum.timestamp!),
+              (datum) =>
+                  datum.phaseIndex ??
+                  subject.getInterventionIndexForDate(datum.timestamp!),
             )
             .aggregateWithKey((group, key) {
               return DiagramDatum(

@@ -1434,6 +1434,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get datetime_picker_validation_required => '날짜와 시간을 모두 선택해 주세요';
 
   @override
+  String get time_picker_hint => '시간을 선택하세요';
+
+  @override
   String get time_picker_validation_range => '선택 가능한 범위 안에서 시간을 선택해 주세요.';
 
   @override
@@ -1684,32 +1687,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get daily_food_diary => 'Daily Food Diary';
 
   @override
-  String get saving => 'Saving...';
-
-  @override
-  String saved_ago(String time) {
-    return 'Saved $time ago';
-  }
-
-  @override
-  String get just_now => 'just now';
-
-  @override
-  String seconds_ago(int seconds) {
-    return '$seconds seconds ago';
-  }
-
-  @override
-  String minutes_ago(int minutes) {
-    return '$minutes minute(s) ago';
-  }
-
-  @override
-  String hours_ago(int hours) {
-    return '$hours hour(s) ago';
-  }
-
-  @override
   String get instructions => 'Instructions';
 
   @override
@@ -1718,7 +1695,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String min_meals_required(int count) {
-    return 'Please record at least $count meal(s)';
+    return 'Daily meal target: $count meal(s)';
   }
 
   @override
@@ -1754,7 +1731,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get add_meal => 'Add Meal';
+  String get add_meal => 'New meal';
 
   @override
   String get no_meals_recorded => 'No meals recorded yet';
@@ -1784,6 +1761,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get meal_type_other => 'Other';
 
   @override
+  String get meal_category_snacks => 'Snacks';
+
+  @override
+  String get meal_category_other => 'Other meals';
+
+  @override
+  String get no_foods_added => 'No foods added';
+
+  @override
+  String get log_food => 'Log food';
+
+  @override
   String food_items_count(int count) {
     return '$count food items';
   }
@@ -1792,7 +1781,93 @@ class AppLocalizationsKo extends AppLocalizations {
   String get meal_entry_title => 'Meal Entry';
 
   @override
+  String get add_meal_or_snack => 'Add meal or snack';
+
+  @override
+  String get meal_neutral_label => 'Meal';
+
+  @override
+  String get meal_suffix => 'meal';
+
+  @override
+  String get meal_label => 'Meal label';
+
+  @override
+  String get no_meal_label => 'No label';
+
+  @override
+  String get time_not_remembered => 'Time not remembered';
+
+  @override
+  String about_time(String time) {
+    return 'About $time';
+  }
+
+  @override
+  String get time_exact => 'Exact time';
+
+  @override
+  String get time_exact_description => 'I know the exact time';
+
+  @override
+  String get time_approximate => 'Approximate time';
+
+  @override
+  String get time_approximate_description => 'I know roughly when';
+
+  @override
+  String get time_unknown => 'I don\'t remember';
+
+  @override
+  String get set_time => 'Set time';
+
+  @override
   String get save => 'Save';
+
+  @override
+  String get new_item => 'New';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get unsaved_changes_title => 'Discard unsaved changes?';
+
+  @override
+  String get unsaved_changes_message =>
+      'Discard your changes or continue editing.';
+
+  @override
+  String get discard_meal_changes_title => '이 항목을 떠날까요?';
+
+  @override
+  String get discard_meal_changes_message =>
+      'Discard your changes or continue editing.';
+
+  @override
+  String get save_and_leave => 'Save and leave';
+
+  @override
+  String get discard_changes => 'Discard changes';
+
+  @override
+  String get continue_editing => 'Continue editing';
+
+  @override
+  String get delete_meal => '항목 삭제';
+
+  @override
+  String get delete_meal_title => '이 항목을 삭제할까요?';
+
+  @override
+  String get delete_meal_message => '이 항목은 영양 일지에서 제거됩니다.';
+
+  @override
+  String get enter_skip_reason => 'Enter a reason before saving.';
+
+  @override
+  String get add_food_before_saving =>
+      'Add at least one food item before saving.';
 
   @override
   String get meal_information => 'Meal Information';
@@ -1801,7 +1876,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get meal_type_label => 'Meal Type';
 
   @override
-  String get custom_meal_label => 'Custom Meal Label';
+  String get meal_details => 'Meal details';
+
+  @override
+  String get apply => 'Apply';
 
   @override
   String get time => 'Time';
@@ -1833,7 +1911,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get add_food => 'Add Food';
+  String get add_food => '음식 추가';
 
   @override
   String get no_food_items_yet => 'No food items yet';
@@ -1857,34 +1935,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String get context_other => 'Other';
 
   @override
-  String get company_alone => '👤 Alone';
+  String get company_alone => 'Alone';
 
   @override
-  String get company_family => '👨‍👩‍👧‍👦 Family';
+  String get company_family => 'Family';
 
   @override
-  String get company_friends => '👥 Friends';
+  String get company_friends => 'Friends';
 
   @override
-  String get company_colleagues => '💼 Colleagues';
+  String get company_colleagues => 'Colleagues';
 
   @override
-  String get company_other => '🤝 Other';
+  String get company_other => 'Other';
 
   @override
-  String get distraction_none => '🧘 None';
+  String get distraction_none => 'None';
 
   @override
-  String get distraction_tv => '📺 TV';
+  String get distraction_tv => 'TV';
 
   @override
-  String get distraction_phone => '📱 Phone';
+  String get distraction_phone => 'Phone';
 
   @override
-  String get distraction_work => '💻 Work';
+  String get distraction_work => 'Work';
 
   @override
-  String get distraction_other => '📖 Other';
+  String get distraction_other => 'Other';
 
   @override
   String get food_entry_title => 'Food Entry';
@@ -1893,26 +1971,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get food_information => 'Food Information';
 
   @override
-  String get entry_type => 'Entry Type';
+  String get entry_type => '식품 유형';
 
   @override
-  String get food_name => 'Food Name *';
+  String get food_name => 'Food name *';
 
   @override
-  String get brand_name => 'Brand Name';
+  String get nutrition_values_are_for => '영양 정보의 기준 중량';
+
+  @override
+  String get brand_name => '브랜드';
 
   @override
   String get description => 'Description';
 
   @override
-  String get description_hint => 'Optional notes about this food';
+  String get description_hint => '이 식품에 대한 메모 (선택)';
 
   @override
-  String get recipe_info =>
-      'Recipe: Use Recipe Builder for better ingredient management';
+  String get meal_info => 'Meal: Use Meal Creator for combined food management';
 
   @override
-  String get open_recipe_builder => 'Open Recipe Builder';
+  String get open_meal_creator => 'Open Meal Creator';
 
   @override
   String get amount => 'Amount *';
@@ -1924,34 +2004,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String get serving_size => 'Serving Size (grams) *';
 
   @override
-  String get portion_reference => 'Portion Reference';
+  String get portion_reference => '분량 기준';
 
   @override
-  String get portion_reference_hint => 'e.g., 1 cup, 3 oz, medium apple';
+  String get portion_reference_hint => '예: 1컵, 중간 크기 사과 1개';
 
   @override
-  String get portion_estimation_method => 'Portion Estimation Method';
+  String get portion_estimation_method => '분량 추정 방법';
 
   @override
-  String get portion_state => 'Portion State';
+  String get portion_state => '음식 상태';
 
   @override
-  String get yield_factor => 'Yield Factor';
+  String get yield_factor => '수율 계수';
 
   @override
-  String get yield_factor_hint => 'e.g., 0.75';
+  String get yield_factor_hint => '예: 0.75';
 
   @override
-  String get edible_portion => 'Edible Portion';
+  String get edible_portion => '섭취 가능 비율';
 
   @override
-  String get edible_portion_hint => 'e.g., 0.85';
+  String get edible_portion_hint => '예: 0.85';
 
   @override
-  String get nutrition_information => 'Nutrition Information';
+  String get nutrition_information => '영양 정보';
 
   @override
-  String get energy_kcal => 'Energy (kcal) *';
+  String get energy_kcal => '열량';
 
   @override
   String get protein_g => 'Protein (g)';
@@ -1963,16 +2043,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fat_g => 'Fat (g)';
 
   @override
-  String get saturated_fat_g => 'Sat. Fat (g)';
+  String get protein => 'Protein';
 
   @override
-  String get sugars_g => 'Sugars (g)';
+  String get carbohydrate => 'Carbohydrate';
 
   @override
-  String get fiber_g => 'Fiber (g)';
+  String get fat => 'Fat';
 
   @override
-  String get sodium_mg => 'Sodium (mg)';
+  String get optional => '선택 사항';
+
+  @override
+  String get saturated_fat_g => '포화지방 (g)';
+
+  @override
+  String get sugars_g => '당류 (g)';
+
+  @override
+  String get fiber_g => '식이섬유 (g)';
+
+  @override
+  String get sodium_mg => '나트륨 (mg)';
 
   @override
   String get required_error => 'Required';
@@ -1984,58 +2076,135 @@ class AppLocalizationsKo extends AppLocalizations {
   String get enter_serving_size => 'Please enter serving size';
 
   @override
-  String get entry_type_single_ingredient => '🥕 Single Ingredient';
+  String get entry_type_single_ingredient => '단일 재료';
 
   @override
-  String get entry_type_recipe => '📖 Recipe';
+  String get entry_type_meal => 'Meal';
 
   @override
-  String get entry_type_branded_product => '🏷️ Branded Product';
+  String get entry_type_branded_product => '브랜드 제품';
 
   @override
-  String get entry_type_manual_entry => '✏️ Manual Entry';
+  String get entry_type_manual_entry => '직접 입력';
 
   @override
-  String get portion_method_household => 'Household Measure';
+  String get portion_method_household => '가정용 계량 단위';
 
   @override
-  String get portion_method_photograph => 'Photograph';
+  String get portion_method_photograph => '사진';
 
   @override
-  String get portion_method_standard_unit => 'Standard Unit';
+  String get portion_method_standard_unit => '표준 단위';
 
   @override
-  String get portion_method_user_weighted => 'User Weighted';
+  String get portion_method_user_weighted => '직접 계량';
 
   @override
-  String get portion_method_unknown => 'Unknown';
+  String get portion_method_unknown => '알 수 없음';
 
   @override
-  String get portion_state_raw => 'Raw';
+  String get portion_state_raw => '조리 전';
 
   @override
-  String get portion_state_cooked => 'Cooked';
+  String get portion_state_cooked => '조리 후';
 
   @override
-  String get portion_state_as_served => 'As Served';
+  String get portion_state_as_served => '제공된 상태';
 
   @override
-  String get my_templates => 'My Templates';
+  String get my_templates => 'My items';
 
   @override
-  String get save_as_template => 'Save as Template';
+  String get manage_saved_items => 'Manage';
 
   @override
-  String get save_meal_template => 'Save Meal Template';
+  String get adjust_quantity => 'Adjust quantity';
 
   @override
-  String get save_food_template => 'Save Food Template';
+  String get edit_this_entry => 'Edit this entry';
 
   @override
-  String get save_recipe_template => 'Save Recipe Template';
+  String get library_edit_title => 'Update reusable item?';
 
   @override
-  String get template_name => 'Template Name';
+  String get library_edit_message =>
+      '이 항목은 라이브러리에서 가져왔습니다. 변경 사항을 저장할 위치를 선택하세요.';
+
+  @override
+  String get library_edit_current_entry => 'Only this logged item';
+
+  @override
+  String get library_edit_current_selection => '이 선택 항목만';
+
+  @override
+  String get library_edit_selection_message =>
+      '이 항목은 라이브러리에서 가져왔습니다. 변경 사항을 저장할 위치를 선택하세요.';
+
+  @override
+  String get library_edit_current_entry_and_library =>
+      'This item and reusable library item';
+
+  @override
+  String get save_to_my_items_action => '항목을 식사로 라이브러리에 저장';
+
+  @override
+  String get save_item_to_library => '항목을 라이브러리에 저장';
+
+  @override
+  String get external_library_copy => 'Import';
+
+  @override
+  String external_library_copy_label(String name) {
+    return '$name 확인 후 라이브러리에 추가';
+  }
+
+  @override
+  String get external_library_copy_saved => '라이브러리에 추가했습니다';
+
+  @override
+  String get external_library_copy_save_error => '식품을 라이브러리에 추가하지 못했습니다';
+
+  @override
+  String get remove_from_meal => 'Remove from meal';
+
+  @override
+  String get duplicate => 'Duplicate';
+
+  @override
+  String get save_as_template => 'Add to My items';
+
+  @override
+  String get save_meal => '라이브러리에 저장';
+
+  @override
+  String get done_label => 'Done';
+
+  @override
+  String get log_meal => '일지 항목 추가';
+
+  @override
+  String get add_items => 'Add items';
+
+  @override
+  String add_items_to_meal(String meal) {
+    return 'Add items to $meal';
+  }
+
+  @override
+  String get save_as_reusable_meal => 'Save as reusable meal';
+
+  @override
+  String get save_as_reusable_meal_description =>
+      'Add this combination to My items so you can use it again.';
+
+  @override
+  String get save_food => 'Save food';
+
+  @override
+  String get template_name => 'Name';
+
+  @override
+  String get template_name_required => 'Meal name *';
 
   @override
   String get template_tags_optional => 'Tags (optional)';
@@ -2044,57 +2213,172 @@ class AppLocalizationsKo extends AppLocalizations {
   String get template_tags_hint => 'breakfast, quick, healthy';
 
   @override
-  String get template_saved => 'Template saved';
+  String get template_saved => 'Added to My items';
 
   @override
-  String get select_meal_template => 'Select Meal Template';
+  String get select_meal => 'My meals';
 
   @override
-  String get select_food_template => 'Select Food Template';
+  String get select_food => 'My foods';
 
   @override
-  String get search_templates => 'Search templates...';
+  String get food_library_search_hint => '라이브러리 검색';
 
   @override
-  String get no_templates_saved => 'No templates saved yet';
+  String get search_templates => 'Search saved foods and meals…';
 
   @override
   String get save_templates_hint =>
-      'Save your favorite meals and foods as templates for quick access';
+      'Save your favorite meals and foods for quick access';
 
   @override
-  String get from_template => 'From Template';
+  String get from_template => 'From My items';
 
   @override
   String get add_new_food => 'Add New Food';
 
   @override
-  String get delete_template => 'Delete Template';
+  String delete_template(String name) {
+    return '$name을(를) 삭제할까요?';
+  }
 
   @override
-  String get delete_template_confirmation =>
-      'Are you sure you want to delete this template?';
+  String get delete_template_confirmation => '이 항목이 라이브러리에서 삭제됩니다.';
 
   @override
-  String get filter_all => 'All';
+  String get filter_all => '전체';
 
   @override
-  String get filter_meals => 'Meals';
+  String get filter_meals => '식사';
 
   @override
-  String get filter_foods => 'Foods';
-
-  @override
-  String get filter_recipes => 'Recipes';
+  String get filter_foods => '음식';
 
   @override
   String items_count(int count) {
-    return '$count items';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get food_selection_add_to_selection => 'Add to selection';
+
+  @override
+  String get food_selection_update_selection => 'Update selection';
+
+  @override
+  String get food_selection_selected_items => 'Selected items';
+
+  @override
+  String food_selection_view_more(int count) {
+    return 'View all $count items';
+  }
+
+  @override
+  String food_selection_increment(String name) {
+    return 'Increase $name';
+  }
+
+  @override
+  String food_selection_decrement(String name) {
+    return 'Decrease $name';
+  }
+
+  @override
+  String get food_selection_item_removed => 'Item removed';
+
+  @override
+  String get food_selection_undo => 'Undo';
+
+  @override
+  String food_selection_selected(String name, int quantity) {
+    return '$name, selected, quantity $quantity';
+  }
+
+  @override
+  String food_selection_known_calories(String value, int count) {
+    return '$value kcal known · $count unavailable';
+  }
+
+  @override
+  String food_selection_unknown_calories(int count) {
+    return '— kcal · $count unavailable';
+  }
+
+  @override
+  String food_selection_calories_unavailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: 'one item',
+    );
+    return 'Calories unavailable for $_temp0';
+  }
+
+  @override
+  String food_selection_confirm(int count, String meal) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count items to $meal',
+      one: 'Add 1 item to $meal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String serving_amount(num amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      amount,
+      locale: localeName,
+      other: '$amount servings',
+      one: '1 serving',
+    );
+    return '$_temp0';
   }
 
   @override
   String kcal_value(String value) {
     return '$value kcal';
+  }
+
+  @override
+  String kcal_per_serving(String value) {
+    return '$value kcal / serving';
+  }
+
+  @override
+  String servings_value(String value) {
+    return '$value servings';
+  }
+
+  @override
+  String get custom => 'Custom';
+
+  @override
+  String get database => 'Database';
+
+  @override
+  String get no_recent_items => 'No recent items yet';
+
+  @override
+  String get brand => 'Brand';
+
+  @override
+  String get calorie_basis_100g => 'per 100 g';
+
+  @override
+  String calorie_basis_grams(String grams) {
+    return 'per $grams g';
   }
 
   @override
@@ -2104,10 +2388,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get template_type_food => 'Food';
 
   @override
-  String get template_type_recipe => 'Recipe';
-
-  @override
-  String get rename_template => 'Rename Template';
+  String get rename_template => 'Rename item';
 
   @override
   String get new_name => 'New Name';
@@ -2126,31 +2407,163 @@ class AppLocalizationsKo extends AppLocalizations {
       'Tap the button above to add your first meal';
 
   @override
-  String get tap_to_add_food => 'Tap to add food';
-
-  @override
   String get add_food_title => 'Add Food';
 
   @override
-  String get edit_food_title => 'Edit Food';
+  String add_food_to_meal(String meal) {
+    return 'Add food to $meal';
+  }
 
   @override
-  String get add_food_manually => 'Add Food Manually';
+  String get food_quantity_amount => 'Amount';
 
   @override
-  String get basic_information => 'Basic Information';
+  String get food_quantity_weight => 'Weight';
 
   @override
-  String get macronutrients => 'Macronutrients';
+  String get food_quantity_custom_weight => 'Custom';
 
   @override
-  String get detailed_nutrients => 'Detailed Nutrients';
+  String food_quantity_library_serving(String weight) {
+    return 'Library serving: $weight g';
+  }
 
   @override
-  String get daily_nutrition_total => 'Daily Nutrition Total';
+  String food_quantity_default_serving(String weight) {
+    return 'Default serving: $weight g';
+  }
 
   @override
-  String get meal_nutrition => 'Meal Nutrition';
+  String get food_quantity_library_serving_unknown =>
+      'Library serving: weight unavailable';
+
+  @override
+  String get food_quantity_default_serving_unknown =>
+      'Default serving: weight unavailable';
+
+  @override
+  String get food_quantity_override_helper => '변경 사항은 이 식사에서 선택한 항목에만 적용됩니다.';
+
+  @override
+  String food_quantity_use_library_weight(String weight) {
+    return 'Use library weight ($weight g)';
+  }
+
+  @override
+  String food_quantity_use_default_weight(String weight) {
+    return 'Use default weight ($weight g)';
+  }
+
+  @override
+  String get food_quantity_invalid_amount =>
+      'Enter an amount greater than zero';
+
+  @override
+  String get food_quantity_serving => 'Serving';
+
+  @override
+  String food_quantity_serving_unit(num amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      amount,
+      locale: localeName,
+      other: 'servings',
+      one: 'serving',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String food_quantity_serving_value(String value, String unit) {
+    return '$value g per $unit';
+  }
+
+  @override
+  String get food_quantity_energy => 'Energy';
+
+  @override
+  String get food_quantity_protein => 'Protein';
+
+  @override
+  String get food_quantity_carbs => 'Carbs';
+
+  @override
+  String get food_quantity_fat => 'Fat';
+
+  @override
+  String food_quantity_add_to_meal(String meal) {
+    return 'Add to $meal';
+  }
+
+  @override
+  String get food_quantity_add_to_selection => '선택 목록에 추가';
+
+  @override
+  String get food_quantity_add_meal_to_selection => 'Add meal to selection';
+
+  @override
+  String get food_quantity_update_selection => 'Save changes';
+
+  @override
+  String get food_quantity_nutrition_unavailable =>
+      'Nutrition information unavailable';
+
+  @override
+  String save_and_add_to_meal(String meal) {
+    return 'Save and add to $meal';
+  }
+
+  @override
+  String get edit_food_title => 'Edit food';
+
+  @override
+  String get add_food_manually => 'Create food';
+
+  @override
+  String get basic_information => '식품 정보';
+
+  @override
+  String get macronutrients => '다량 영양소';
+
+  @override
+  String get detailed_nutrients => '상세 영양 정보';
+
+  @override
+  String get daily_nutrition_total => 'Nutrition summary';
+
+  @override
+  String get daily_summary => 'Daily summary';
+
+  @override
+  String get energy_by_macronutrient => 'Energy by macronutrient';
+
+  @override
+  String get total_energy => 'Total energy';
+
+  @override
+  String get show => 'Show';
+
+  @override
+  String get hide => 'Hide';
+
+  @override
+  String get carbohydrates => 'Carbohydrates';
+
+  @override
+  String get fibre => 'Fibre';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String some_values_unavailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'Some nutrient values are unavailable for $count $_temp0.';
+  }
 
   @override
   String get nutrition_summary => 'Nutrition Summary';
@@ -2162,25 +2575,71 @@ class AppLocalizationsKo extends AppLocalizations {
   String get more_options => 'More options';
 
   @override
-  String get search_food_hint => 'Search food (e.g., \"apple\", \"chicken\")';
+  String get search_food_hint => 'Search foods, meals or brands';
 
   @override
-  String get my_saved_items => 'My Saved Items';
+  String get my_saved_items => '라이브러리';
 
   @override
-  String get global_database => 'Global Database';
+  String get food_library => '라이브러리';
+
+  @override
+  String get add_food_action => '음식 만들기';
+
+  @override
+  String get recent_foods => 'Recently added';
+
+  @override
+  String get frequently_used_foods => 'Frequently Used';
+
+  @override
+  String get global_database => 'Database';
+
+  @override
+  String get external_library => 'External library';
+
+  @override
+  String get external_library_loading => 'Searching external library…';
+
+  @override
+  String get external_library_error =>
+      'External library is unavailable. Please try again.';
+
+  @override
+  String external_library_results_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count external results found',
+      one: '1 external result found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get review_copied_food => 'Review food';
+
+  @override
+  String get external_library_copy_notice =>
+      '라이브러리에 저장하기 전에 식품 정보를 확인하세요. 수정 사항은 저장한 사본에 적용됩니다.';
+
+  @override
+  String get external_library_save_copy => '라이브러리에 저장';
 
   @override
   String get quick_actions => 'Quick Actions';
 
   @override
-  String get create_recipe => 'Create Recipe';
+  String get create => 'Create';
 
   @override
-  String get create_recipe_subtitle => 'Build from multiple ingredients';
+  String get create_meal => '식사 만들기';
 
   @override
-  String get add_manually => 'Add Manually';
+  String get create_meal_subtitle => 'Combine multiple foods';
+
+  @override
+  String get add_manually => 'Create food manually';
 
   @override
   String get add_manually_subtitle => 'Enter nutrition facts yourself';
@@ -2192,10 +2651,58 @@ class AppLocalizationsKo extends AppLocalizations {
   String get scan_barcode_subtitle => 'Find packaged products quickly';
 
   @override
+  String get barcode_scanner_guidance_initial => 'Point camera at barcode';
+
+  @override
+  String get barcode_scanner_no_barcode =>
+      'No barcode detected — adjust position';
+
+  @override
+  String get barcode_scanner_processing => 'Barcode detected! Processing…';
+
+  @override
+  String get barcode_scanner_invalid =>
+      'Invalid barcode — try a different angle';
+
+  @override
+  String get barcode_scanner_lookup => 'Valid barcode. Looking up…';
+
+  @override
+  String get barcode_scanner_distance_guidance =>
+      'Large barcode? Move back 15–30 cm\\nSmall barcode? Move closer';
+
+  @override
+  String get barcode_scanner_detected => 'DETECTED';
+
+  @override
+  String get barcode_scanner_lookup_progress => 'Looking up product…';
+
+  @override
+  String get barcode_scanner_toggle_flash => 'Toggle flash';
+
+  @override
+  String get barcode_scanner_switch_camera => 'Switch camera';
+
+  @override
+  String get barcode_scanner_not_found_title => 'Product not found';
+
+  @override
+  String barcode_scanner_not_found_message(String barcode) {
+    return 'No product found for barcode: $barcode\\n\\nThis product may not be in the external library yet. You can add it manually or scan another product.';
+  }
+
+  @override
+  String get barcode_scanner_scan_again => 'Scan again';
+
+  @override
+  String get barcode_scanner_error_title => 'Search unavailable';
+
+  @override
   String get search_for_food => 'Search for Food';
 
   @override
-  String get search_food_description => 'Type above to search global databases';
+  String get search_food_description =>
+      'Try “apple”, “oat milk”, or a brand name.';
 
   @override
   String get searching_databases => 'Searching databases...';
@@ -2207,22 +2714,53 @@ class AppLocalizationsKo extends AppLocalizations {
   String get no_results_found => 'No results found. Try different keywords.';
 
   @override
-  String get no_matching_templates => 'No matching templates';
+  String no_results_for_query(String query) {
+    return 'No results for “$query”';
+  }
 
   @override
-  String get detailed_nutrition => 'Detailed Nutrition';
+  String get cant_find_it => 'Can’t find it?';
 
   @override
-  String get detailed_nutrition_subtitle => 'Fiber, Sugar, Sodium';
+  String create_food_from_search(String query) {
+    return 'Create “$query” manually';
+  }
 
   @override
-  String get advanced_options => 'Advanced Options';
+  String get food_search_error =>
+      'Food search is unavailable. Please try again.';
 
   @override
-  String get advanced_options_subtitle => 'Food type, serving size, portions';
+  String food_search_results_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results found',
+      one: '1 result found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get no_matching_templates => 'No matching items';
+
+  @override
+  String get detailed_nutrition => '상세 영양 정보';
+
+  @override
+  String get detailed_nutrition_subtitle => '식이섬유, 당류, 포화지방 및 나트륨';
+
+  @override
+  String get advanced_options => '추가 정보';
+
+  @override
+  String get advanced_options_subtitle => '식품 유형, 브랜드 및 분량 정보';
 
   @override
   String get details => 'Details';
+
+  @override
+  String get meal_context => 'Meal context';
 
   @override
   String get search_food_database => 'Search Food Database';
@@ -2238,7 +2776,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get photoRecallTitle => 'Photo Recall';
 
   @override
-  String get photoRecallSubtitle => 'View photos from around this time';
+  String get photoRecallSubtitle =>
+      'Use photos from this day to remember what you ate.';
 
   @override
   String get photoRecallPermissionNeeded => 'Tap to enable photo access';
@@ -2255,15 +2794,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get photoRecallNoPhotosSubtitle =>
-      'We couldn\'t find any photos taken around this time';
+      'We couldn’t find any photos taken on this day';
 
   @override
   String get photoRecallTapToEnlarge => 'Tap a photo to view it full screen';
-
-  @override
-  String photoRecallTimeInfo(String time) {
-    return 'Showing photos from around $time (±2 hours)';
-  }
 
   @override
   String get grantPermission => 'Grant Permission';
@@ -2312,13 +2846,721 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get min_meals_not_met_title => 'Minimum meals not reached';
+  String get min_meals_not_met_title => 'Daily meal target not reached';
 
   @override
   String min_meals_not_met_message(int count) {
-    return 'This task requires at least $count meal(s). You have recorded fewer than required. Leave anyway?';
+    return 'The daily meal target is $count meal(s). You have recorded fewer meals. Leave anyway?';
   }
 
   @override
   String get leave_anyway => 'Leave anyway';
+
+  @override
+  String get nutrition_tracking => '식사 일지';
+
+  @override
+  String get nutrition_statistics => 'Statistics';
+
+  @override
+  String nutrition_days_recorded(int recorded, int total) {
+    return '$recorded of $total days recorded';
+  }
+
+  @override
+  String nutrition_completed_days(int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      completed,
+      locale: localeName,
+      other: '$completed completed days',
+      one: '$completed completed day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nutrition_daily_average => 'Average across completed days';
+
+  @override
+  String get nutrition_energy_by_study_day => 'Energy by study day';
+
+  @override
+  String nutrition_average_value(String value) {
+    return 'Average $value across completed days';
+  }
+
+  @override
+  String get nutrition_tap_bar_hint =>
+      'Tap a bar to view its value or open that day.';
+
+  @override
+  String get nutrition_nutrient_trend => 'Nutrient trend';
+
+  @override
+  String get nutrition_carbs => 'Carbs';
+
+  @override
+  String nutrition_average_per_recorded_day(String value) {
+    return 'Average $value per completed day';
+  }
+
+  @override
+  String nutrition_compared_previous_days(int count) {
+    return 'Compared with the previous $count days';
+  }
+
+  @override
+  String get nutrition_record_more_comparisons =>
+      'Record more study days to see period comparisons.';
+
+  @override
+  String get nutrition_energy => 'Energy';
+
+  @override
+  String get nutrition_today_so_far => 'Today so far';
+
+  @override
+  String nutrition_chart_day_value(String date, String value) {
+    return '$date, $value';
+  }
+
+  @override
+  String nutrition_chart_day_missing(String date) {
+    return '$date, not recorded';
+  }
+
+  @override
+  String get nutrition_view_day_hint => 'Press Enter to view this day.';
+
+  @override
+  String get nutrition_statistics_help_message =>
+      'Averages include only completed study days. Today appears in charts as ‘Today so far’ and is excluded from averages until the diary is complete. Missing days are left blank.';
+
+  @override
+  String nutrition_kcal_per_day(String value) {
+    return '$value kcal/day';
+  }
+
+  @override
+  String nutrition_grams_per_day(String value) {
+    return '$value g/day';
+  }
+
+  @override
+  String get nutrition_recent_days => 'Recent days';
+
+  @override
+  String get nutrition_history => 'History';
+
+  @override
+  String get nutrition_history_empty => 'No past food diaries yet.';
+
+  @override
+  String get nutrition_history_latest_study_day => 'Latest study day';
+
+  @override
+  String get nutrition_history_latest_study_day_description =>
+      '이전 연구일의 기록을 추가하거나 수정할 수 있습니다.';
+
+  @override
+  String get nutrition_history_previous_study_days => 'Previous study days';
+
+  @override
+  String get nutrition_history_no_foods_logged => 'No foods logged';
+
+  @override
+  String historical_editing_date(String date) {
+    return 'Editing $date';
+  }
+
+  @override
+  String get historical_edit_expired => 'This study day is no longer editable.';
+
+  @override
+  String get edit_food_definition => 'Edit reusable food';
+
+  @override
+  String get food_definition_edit_helper =>
+      'Serving description, weight, conversions, and nutrition update the reusable item and selected historical entry. You can also update matching entries in the current study day when available. Selected entry keeps its serving count.';
+
+  @override
+  String get nutrition_statistics_empty => '이 기간의 영양 데이터가 없습니다.';
+
+  @override
+  String get nutrition_editable => 'Editable';
+
+  @override
+  String get nutrition_read_only => 'Read-only';
+
+  @override
+  String get nutrition_logging_guidance =>
+      'Log each meal and drink as accurately as you can. Include portions and preparation details when you know them.';
+
+  @override
+  String get open_faq => 'Open FAQ';
+
+  @override
+  String get nutrition_calories => 'Calories';
+
+  @override
+  String get historical_edit_mode_heading => 'Editing a previous study day';
+
+  @override
+  String get historical_edit_mode_description =>
+      'On this History screen, you can update the meal log from your previous study day. Foods and meals you create here remain available for future meal logs.';
+
+  @override
+  String get update_current_day_entries =>
+      'Also update matching entries in current study day';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get current_meal_only_banner =>
+      '변경 사항은 이 일지 항목에만 적용됩니다. 재사용 항목을 수정하려면 라이브러리를 이용하세요.';
+
+  @override
+  String get current_selection_only_banner =>
+      '변경 사항은 이 선택 항목에만 적용됩니다. 영구적으로 변경하려면 라이브러리를 이용하세요.';
+
+  @override
+  String grams_per_serving(Object grams) {
+    return '$grams g per serving';
+  }
+
+  @override
+  String get open_food_facts_attribution => '(c) Open Food Facts contributors';
+
+  @override
+  String get open_food_facts_attribution_launch_error =>
+      'Could not open the Open Food Facts terms of use.';
+
+  @override
+  String get food_definition_updated_current_day_opt_out =>
+      'Reusable item updated. Matching entries in the current study day were not updated.';
+
+  @override
+  String get food_definition_updated_current_day_opt_in =>
+      'Reusable item updated. Matching entries in the current study day were also updated.';
+
+  @override
+  String get food_quantity_weight_per_serving => 'Weight per serving';
+
+  @override
+  String food_quantity_total_weight(String weight) {
+    return 'Total weight: $weight g';
+  }
+
+  @override
+  String get food_quantity_decrease_weight => 'Decrease weight per serving';
+
+  @override
+  String get food_quantity_increase_weight => 'Increase weight per serving';
+
+  @override
+  String get food_selection_collapse => 'Collapse selected items';
+
+  @override
+  String get food_quantity_edit_amount => '수량 수정';
+
+  @override
+  String food_quantity_nutrition_for_amount(Object amount, Object unit) {
+    return 'Nutrition for $amount $unit';
+  }
+
+  @override
+  String food_selection_items_count(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nutrition_add_food_or_saved_meal => '항목 추가';
+
+  @override
+  String get nutrition_food_badge => 'Food';
+
+  @override
+  String get nutrition_saved_meal_badge => 'Saved meal';
+
+  @override
+  String nutrition_add_foods_or_saved_meals_to_meal(Object meal) {
+    return '$meal에 추가';
+  }
+
+  @override
+  String get nutrition_search_foods_saved_meals_or_brands => '식품 또는 식사 검색';
+
+  @override
+  String get nutrition_create_saved_meal_from_log => '이 기록에서 식사 만들기';
+
+  @override
+  String get nutrition_edit_saved_meal => 'Edit saved meal';
+
+  @override
+  String get nutrition_invalid_saved_meal =>
+      '이 식사의 일부 음식에 세부 정보가 없습니다. 정보가 완전한 음식을 추가한 후 다시 시도하세요.';
+
+  @override
+  String nutrition_add_food_to_meal(Object meal) {
+    return '음식을 $meal에 추가';
+  }
+
+  @override
+  String get nutrition_search_foods_or_brands => 'Search foods or brands';
+
+  @override
+  String get nutrition_saved_meals_expanded_notice =>
+      '이 식사를 저장하기 전에 저장된 식사의 개별 음식을 확인하세요.';
+
+  @override
+  String get enter_meal_name => 'Please enter a meal name';
+
+  @override
+  String get nutrition_servings_required => 'Servings *';
+
+  @override
+  String get nutrition_preparation_details => 'Preparation details';
+
+  @override
+  String get nutrition_preparation_details_subtitle =>
+      'Raw and cooked weights, preparation method';
+
+  @override
+  String get nutrition_raw_weight_grams => 'Raw weight (g)';
+
+  @override
+  String get nutrition_cooked_weight_grams => 'Cooked weight (g)';
+
+  @override
+  String get nutrition_preparation_method => 'Preparation method';
+
+  @override
+  String get nutrition_preparation_method_hint => 'e.g., baked, fried, steamed';
+
+  @override
+  String get nutrition_add_food_manually => '직접 추가';
+
+  @override
+  String get nutrition_food_name_example => 'e.g., olive oil';
+
+  @override
+  String get nutrition_quantity_short => '수량';
+
+  @override
+  String get nutrition_calories_kcal => '열량';
+
+  @override
+  String get nutrition_no_foods_yet => 'No foods yet';
+
+  @override
+  String get nutrition_search_or_add_food_manually =>
+      'Search or add food manually to start';
+
+  @override
+  String get nutrition_unit_label => 'Unit';
+
+  @override
+  String get nutrition_per_serving => 'Nutrition per serving';
+
+  @override
+  String photoRecallDateInfo(Object date) {
+    return 'Showing photos from $date';
+  }
+
+  @override
+  String get not_added => 'Not added';
+
+  @override
+  String get nutrition_statistics_week => '주';
+
+  @override
+  String get nutrition_statistics_month => '월';
+
+  @override
+  String get nutrition_statistics_previous_period => '이전 기간';
+
+  @override
+  String get nutrition_statistics_next_period => '다음 기간';
+
+  @override
+  String get nutrition_statistics_go_to_today => '오늘로 이동';
+
+  @override
+  String nutrition_energy_change_from_previous_day(Object value) {
+    return '전날 대비 $value';
+  }
+
+  @override
+  String food_selection_remove_title(String name) {
+    return '$name 항목을 제거하시겠습니까?';
+  }
+
+  @override
+  String get food_selection_remove => '제거';
+
+  @override
+  String get nutrition_exit => '나가기';
+
+  @override
+  String get nutrition_water => '물';
+
+  @override
+  String get nutrition_water_unlogged => '기록된 물 없음';
+
+  @override
+  String get nutrition_water_add_cup => '물 한 컵 추가';
+
+  @override
+  String get nutrition_water_remove_cup => '물 한 컵 빼기';
+
+  @override
+  String get nutrition_water_cup_size => '컵 용량';
+
+  @override
+  String get nutrition_water_cup_size_invalid => '1~9999mL를 입력하세요.';
+
+  @override
+  String get nutrition_water_cup_size_save_error => '컵 용량을 저장하지 못했습니다.';
+
+  @override
+  String get nutrition_current_day_ended =>
+      '이 영양 기록일이 끝났습니다. 계속하려면 영양 기록 과제를 다시 여세요.';
+
+  @override
+  String get nutrition_food_definition_conflict =>
+      '이 항목의 새 버전이 있습니다. 현재 버전을 수정하려면 편집기를 다시 여세요.';
+
+  @override
+  String get nutrition_invalid_calories => '칼로리는 0 또는 양수로 입력하세요.';
+
+  @override
+  String get nutrition_recall_conflict_title => '동기화되지 않은 영양 기록 초안';
+
+  @override
+  String get nutrition_recall_conflict_message =>
+      '이 초안이 저장된 버전과 충돌합니다. 초안은 이 기기에 남습니다. 이 날의 기록을 다시 수정하려면 초안을 삭제하세요.';
+
+  @override
+  String get nutrition_recall_discard_draft => '초안 삭제';
+
+  @override
+  String get nutrition_recall_discard_confirmation =>
+      '이 기기에서 동기화되지 않은 변경 사항을 삭제합니다. 저장된 기록은 그대로 유지됩니다.';
+
+  @override
+  String get nutrition_recall_discard_failed => '초안을 삭제할 수 없습니다. 다시 시도하세요.';
+
+  @override
+  String get nutrition_recall_conflict_reopen =>
+      '영양 기록 과제를 다시 여세요. 이전 버전이 계속 표시되면 연구를 다시 불러오세요.';
+
+  @override
+  String get nutrition_recall_view_draft => '초안 보기';
+
+  @override
+  String get nutrition_recall_view_saved => '저장된 버전 보기';
+
+  @override
+  String get nutrition_history_local_draft => '이 기기에 저장된 초안';
+
+  @override
+  String get nutrition_history_expired_draft =>
+      '동기화 기간이 끝났습니다. 이 초안은 이 기기에만 있습니다.';
+
+  @override
+  String get nutrition_history_discard_expired_draft =>
+      '이 기기에서 이 초안을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
+
+  @override
+  String get time_now => '지금';
+
+  @override
+  String get nutrition_review_previous_day => '이전 연구일의 식사 기록 확인';
+
+  @override
+  String get food_library_empty => '표시할 음식이나 식사가 없습니다.';
+
+  @override
+  String get nutrition_known_values_hint => '모르는 영양값은 비워 두세요.';
+
+  @override
+  String get nutrition_log_again => '일지 항목 다시 기록';
+
+  @override
+  String get nutrition_choose_recent_meal => '최근 식사 선택';
+
+  @override
+  String get nutrition_meal_items => '항목';
+
+  @override
+  String get nutrition_save_meal => '일지 항목 저장';
+
+  @override
+  String get nutrition_select_time_to_save => '저장하려면 시간을 선택하세요';
+
+  @override
+  String get nutrition_food_details_subtitle => '귀리 플레이크처럼 구체적인 이름을 입력하세요.';
+
+  @override
+  String get nutrition_diary_tab => '일지';
+
+  @override
+  String nutrition_meal_foods_section(Object count) {
+    return '음식 ($count개)';
+  }
+
+  @override
+  String get nutrition_photo_add => '사진 추가';
+
+  @override
+  String get nutrition_photo_replace => '사진 바꾸기';
+
+  @override
+  String get nutrition_photo_remove => '사진 삭제';
+
+  @override
+  String get nutrition_photo_take => '사진 촬영';
+
+  @override
+  String get nutrition_photo_choose => '사진 선택';
+
+  @override
+  String get nutrition_photo_invalid =>
+      '이 사진을 열 수 없습니다. 다른 이미지를 선택하거나 카메라 접근 권한을 확인하세요.';
+
+  @override
+  String get nutrition_photo_save_failed => '항목을 저장했습니다. 사진 변경 사항은 저장하지 못했습니다.';
+
+  @override
+  String get nutrition_photo_retry => '사진 다시 저장';
+
+  @override
+  String get nutrition_library_available_filters => '사용 가능한 필터';
+
+  @override
+  String get nutrition_library_selected_filters => '선택한 필터';
+
+  @override
+  String get nutrition_library_created_by_me => '내가 만든 항목';
+
+  @override
+  String get nutrition_library_remove_filter => '필터 제거';
+
+  @override
+  String get edit_diary_entry_title => '일지 항목 편집';
+
+  @override
+  String get meal_neutral_label_inline => '항목';
+
+  @override
+  String get nutrition_add_diary_entry => '식사 기록';
+
+  @override
+  String get nutrition_create_library_item => '항목 만들기';
+
+  @override
+  String get remove_from_entry => '일지 항목에서 제거';
+
+  @override
+  String get library_copy_edit_title => '데이터베이스의 식품을 편집할까요?';
+
+  @override
+  String get library_copy_edit_message =>
+      '변경 사항은 이 식품에 적용됩니다. 나중에 다시 사용할 수 있도록 사본을 저장할 수도 있습니다.';
+
+  @override
+  String get library_copy_edit_action => '라이브러리에도 사본 저장';
+
+  @override
+  String get nutrition_assisted_entry => '식사 기록 도우미';
+
+  @override
+  String get nutrition_assisted_add_photos => '사진 추가';
+
+  @override
+  String get nutrition_assisted_open_gallery => '갤러리 열기';
+
+  @override
+  String get nutrition_assisted_selected_photos => '선택한 사진';
+
+  @override
+  String get nutrition_assisted_continue_description => '설명으로 계속';
+
+  @override
+  String get nutrition_assisted_describe_meals => '식사 설명';
+
+  @override
+  String get nutrition_assisted_description_help =>
+      '먹은 음식을 말하거나 입력하세요. 기억나는 경우 시간, 장소, 함께 식사한 사람도 적어 주세요.';
+
+  @override
+  String get nutrition_assisted_description_hint =>
+      '예: “아침에 바나나를 넣은 오트밀을 먹었어요.”';
+
+  @override
+  String get nutrition_assisted_description_photo_hint =>
+      '예: “사진 1은 아침에 먹은 오트밀이에요.”';
+
+  @override
+  String get nutrition_assisted_generate => '식사 제안 만들기';
+
+  @override
+  String get nutrition_assisted_generating => '식사 제안을 만드는 중…';
+
+  @override
+  String get nutrition_assisted_generation_help =>
+      '저장하기 전에 추천 음식과 분량을 확인할 수 있어요.';
+
+  @override
+  String get nutrition_assisted_generation_error =>
+      '식사 제안을 만들 수 없어요. 설명을 확인하고 다시 시도하세요.';
+
+  @override
+  String nutrition_assisted_photo_number(Object number) {
+    return '사진 $number';
+  }
+
+  @override
+  String nutrition_assisted_remove_photo_title(Object number) {
+    return '사진 $number을(를) 삭제할까요?';
+  }
+
+  @override
+  String get nutrition_assisted_remove_photo_help => '이 초안에서 사진을 삭제해요.';
+
+  @override
+  String get nutrition_assisted_keep_photo => '사진 유지';
+
+  @override
+  String get nutrition_assisted_removed_photo => '삭제된 사진';
+
+  @override
+  String get nutrition_assisted_photo_permission => '이날의 사진을 보려면 접근을 허용하세요.';
+
+  @override
+  String get nutrition_assisted_gallery_error => '사진 갤러리를 열 수 없어요.';
+
+  @override
+  String get nutrition_assisted_recording => '녹음 중…';
+
+  @override
+  String get nutrition_assisted_stop_transcribe => '녹음 중지 및 텍스트 변환';
+
+  @override
+  String get nutrition_assisted_transcribing => '텍스트 만드는 중…';
+
+  @override
+  String get nutrition_assisted_transcript_error =>
+      '텍스트를 만들 수 없어요. 다시 시도하거나 설명을 입력하세요.';
+
+  @override
+  String get nutrition_assisted_demo_transcript =>
+      '예시 텍스트예요. 계속하기 전에 수정할 수 있어요.';
+
+  @override
+  String get nutrition_assisted_correct_voice => '음성으로 수정';
+
+  @override
+  String get nutrition_assisted_correction_help => '식사 제안에서 바꿀 내용을 말하세요.';
+
+  @override
+  String get nutrition_assisted_correction_hint => '예: “감자 샐러드를 75그램 먹었어요.”';
+
+  @override
+  String get nutrition_assisted_apply_correction => '수정 적용';
+
+  @override
+  String get nutrition_assisted_correction_error =>
+      '수정을 적용할 수 없어요. 음식과 분량을 확인하세요.';
+
+  @override
+  String get assisted_review_meals => '식사 검토';
+
+  @override
+  String get assisted_review_instructions =>
+      '예시 제안이에요. 음식, 분량, 시간을 확인하세요. 음식을 끌어 순서를 바꾸거나 다른 식사로 옮길 수 있어요.';
+
+  @override
+  String assisted_estimated_portion(Object portion) {
+    return '$portion · 추정';
+  }
+
+  @override
+  String assisted_food_order_actions(Object food) {
+    return '$food 이동';
+  }
+
+  @override
+  String get assisted_move_food_up => '위로 이동';
+
+  @override
+  String get assisted_move_food_down => '아래로 이동';
+
+  @override
+  String assisted_move_food_to_meal(Object meal) {
+    return '$meal(으)로 이동';
+  }
+
+  @override
+  String get assisted_empty_meal => '저장하기 전에 음식을 여기로 옮기거나 이 식사를 삭제하세요.';
+
+  @override
+  String get assisted_remove_empty_meal => '식사 삭제';
+
+  @override
+  String assisted_save_diary_entries(num count) {
+    return '일지 항목 $count개 저장';
+  }
+
+  @override
+  String get assisted_save_failed => '일지 항목을 저장할 수 없어요. 다시 시도하세요.';
+
+  @override
+  String get assisted_edit_meal => '식사 수정';
+
+  @override
+  String get nutrition_assisted_sample_description =>
+      '오전 8:15쯤 아침으로 바나나 오트밀을 먹었습니다. 오후 12:30쯤 점심으로 마울타셴과 감자 샐러드를 먹었습니다.';
+
+  @override
+  String get nutrition_assisted_sample_one_photo =>
+      '사진 1은 오전 8:15쯤 아침으로 먹은 바나나 오트밀입니다. 오후 12:30쯤 점심으로 마울타셴과 감자 샐러드를 먹었습니다.';
+
+  @override
+  String get nutrition_assisted_sample_two_photos =>
+      '사진 1은 오전 8:15쯤 아침으로 먹은 바나나 오트밀입니다. 사진 2는 오후 12:30쯤 점심으로 먹은 마울타셴과 감자 샐러드입니다.';
+
+  @override
+  String get nutrition_assisted_sample_correction => '감자 샐러드는 75그램이었습니다.';
+
+  @override
+  String get nutrition_assisted_continue_without_photos => '사진 없이 계속';
+
+  @override
+  String get assisted_confirm_meal_changes => '변경 사항 확인';
+
+  @override
+  String get nutrition_assisted_reorder_photos => '사진 순서 변경';
+
+  @override
+  String get nutrition_assisted_reorder_photo_help =>
+      '사진을 길게 눌러 드래그하세요.\n사진을 누르면 아래 버튼으로 옮길 수 있어요.';
+
+  @override
+  String nutrition_assisted_photo_selected(Object number) {
+    return '사진 $number 선택됨';
+  }
+
+  @override
+  String get nutrition_assisted_move_photo_earlier => '앞으로 이동';
+
+  @override
+  String get nutrition_assisted_move_photo_later => '뒤로 이동';
 }

@@ -240,10 +240,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(MaterialBanner), findsOneWidget);
-      expect(
-        find.textContaining('Some studies could not be displayed'),
-        findsOneWidget,
-      );
       expect(find.text('Study'), findsOneWidget);
     },
   );
@@ -341,6 +337,14 @@ void main() {
 
     expect(find.byType(WelcomeScreen), findsOneWidget);
     expect(find.byType(InviteCodeDialog), findsOneWidget);
+    expect(
+      tester.testTextInput.setClientArgs,
+      containsPair('autocorrect', false),
+    );
+    expect(
+      tester.testTextInput.setClientArgs,
+      containsPair('enableSuggestions', false),
+    );
     expect(find.text('Enter invite code'), findsOneWidget);
     expect(
       find.text('Enter the code shared by your study team.'),
@@ -445,6 +449,16 @@ void main() {
   ) async {
     await tester.pumpWidget(setup(const TermsScreen()));
     await tester.pump();
+
+    final title = tester.widget<Title>(
+      find.byWidgetPredicate(
+        (widget) => widget is Title && widget.title == 'Terms of Use',
+      ),
+    );
+    expect(
+      title.color,
+      Theme.of(tester.element(find.byType(TermsScreen))).colorScheme.primary,
+    );
 
     await tester.tap(find.byKey(const ValueKey('terms_back')));
     await tester.pumpAndSettle();

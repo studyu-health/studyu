@@ -37,6 +37,10 @@ class UsdaFoodItem({
 
   Map<String, dynamic> toJson() => _$UsdaFoodItemToJson(this);
 
+  bool hasNutrient(int nutrientId) => foodNutrients.any(
+    (nutrient) => nutrient.nutrientId == nutrientId && nutrient.value != null,
+  );
+
   /// Get nutrient value by nutrient ID
   /// Common IDs: 1008 (Energy/Calories), 1003 (Protein), 1005 (Carbs), 1004 (Fat)
   double? getNutrientValue(int nutrientId) {
@@ -48,8 +52,12 @@ class UsdaFoodItem({
   }
 
   /// Get energy in kcal per 100g
-  double get energyKcal100g {
-    return getNutrientValue(1008) ?? 0.0; // Energy (kcal)
+  double? get energyKcal100g {
+    final calculatedEnergy = getNutrientValue(2048) ?? getNutrientValue(2047);
+    final legacyEnergy = getNutrientValue(1008);
+    return dataType == 'Foundation'
+        ? calculatedEnergy ?? legacyEnergy
+        : legacyEnergy ?? calculatedEnergy;
   }
 
   /// Get protein in g per 100g

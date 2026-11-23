@@ -31,7 +31,9 @@ class NutritionFormViewModel({
   );
   final FormControl<String> instructionsControl = FormControl(value: '');
   final FormControl<bool> collectMealContextControl = FormControl(value: true);
-  final FormControl<bool> allowRecipesControl = FormControl(value: true);
+  final FormControl<bool> allowMealsControl = FormControl(value: true);
+  final FormControl<bool> trackWaterIntakeControl = FormControl(value: false);
+  final FormControl<bool> showStatisticsControl = FormControl(value: false);
   final FormControl<int> minimumMealsRequiredControl = FormControl();
   final FormArray<String> customMealTypesControl = FormArray<String>([]);
 
@@ -41,9 +43,51 @@ class NutritionFormViewModel({
   @override
   FormValidationConfigSet get sharedValidationConfig => {
     StudyFormValidationSet.draft: [titleRequired],
-    StudyFormValidationSet.publish: [titleRequired, minimumMealsMin],
-    StudyFormValidationSet.test: [titleRequired, minimumMealsMin],
+    StudyFormValidationSet.publish: [
+      titleRequired,
+      minimumMealsMin,
+      validCompletionWindow,
+    ],
+    StudyFormValidationSet.test: [
+      titleRequired,
+      minimumMealsMin,
+      validCompletionWindow,
+    ],
   };
+
+  FormControlValidation get validCompletionWindow => FormControlValidation(
+    control: form,
+    validators: [
+      Validators.delegate((_) {
+        final unavailableWindows = [
+          for (final period
+              in formData?.additionalCompletionPeriods ??
+                  const <CompletionPeriod>[])
+            if (!period.unlockTime.earlierThan(period.lockTime))
+              period.formatted(),
+        ];
+        if (unavailableWindows.isNotEmpty) {
+          return {'unavailableCompletionWindow': unavailableWindows.join(', ')};
+        }
+        if (!isTimeRestricted) return null;
+        final start =
+            restrictedTimeStartControl.value?.toStudyUTimeOfDay() ??
+            ScheduleX.unrestrictedTime.first;
+        final end =
+            restrictedTimeEndControl.value?.toStudyUTimeOfDay() ??
+            ScheduleX.unrestrictedTime.last;
+        return start.earlierThan(end)
+            ? null
+            : {'unavailableCompletionWindow': true};
+      }),
+    ],
+    validationMessages: {
+      'unavailableCompletionWindow': (error) {
+        final message = tr.form_field_nutrition_completion_window_error;
+        return error is String ? '$message ($error)' : message;
+      },
+    },
+  );
 
   FormControlValidation get titleRequired => FormControlValidation(
     control: titleControl,
@@ -56,7 +100,11 @@ class NutritionFormViewModel({
 
   FormControlValidation get minimumMealsMin => FormControlValidation(
     control: minimumMealsRequiredControl,
-    validators: [Validators.min(1)],
+    validators: [
+      Validators.delegate(
+        (control) => control.value == null ? null : Validators.min(1)(control),
+      ),
+    ],
     validationMessages: {
       ValidationMessage.min: (_) =>
           tr.form_field_nutrition_minimum_meals_min_error,
@@ -69,7 +117,9 @@ class NutritionFormViewModel({
     'title': titleControl,
     'instructions': instructionsControl,
     'collectMealContext': collectMealContextControl,
-    'allowRecipes': allowRecipesControl,
+    'allowMeals': allowMealsControl,
+    'trackWaterIntake': trackWaterIntakeControl,
+    'showStatistics': showStatisticsControl,
     'minimumMealsRequired': minimumMealsRequiredControl,
     'customMealTypes': customMealTypesControl,
     ...scheduleFormControls,
@@ -82,7 +132,9 @@ class NutritionFormViewModel({
     titleControl.value = data.title;
     instructionsControl.value = data.instructions ?? '';
     collectMealContextControl.value = data.collectMealContext;
-    allowRecipesControl.value = data.allowRecipes;
+    allowMealsControl.value = data.allowMeals;
+    trackWaterIntakeControl.value = data.trackWaterIntake;
+    showStatisticsControl.value = data.showStatistics;
     minimumMealsRequiredControl.value = data.minimumMealsRequired;
 
     customMealTypesControl.clear();
@@ -101,7 +153,9 @@ class NutritionFormViewModel({
       title: titleControl.value!, // required
       instructions: instructionsControl.value,
       collectMealContext: collectMealContextControl.value ?? true,
-      allowRecipes: allowRecipesControl.value ?? true,
+      allowMeals: allowMealsControl.value ?? true,
+      trackWaterIntake: trackWaterIntakeControl.value ?? false,
+      showStatistics: showStatisticsControl.value ?? false,
       minimumMealsRequired: minimumMealsRequiredControl.value,
       customMealTypes: () {
         final types = customMealTypesControl.controls
@@ -116,6 +170,7 @@ class NutritionFormViewModel({
       hasReminder: hasReminderControl.value!, // required
       reminderTime: reminderTimeControl.value?.toStudyUTimeOfDay(),
       scheduleRule: formData?.scheduleRule,
+      additionalCompletionPeriods: formData?.additionalCompletionPeriods ?? [],
     );
     return data;
   }

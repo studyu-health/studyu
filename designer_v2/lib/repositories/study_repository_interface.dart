@@ -1,4 +1,5 @@
 import 'package:studyu_core/core.dart';
+import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter.dart';
 import 'package:studyu_designer_v2/features/dashboard/studies_filter/filter_types.dart';
 import 'package:studyu_designer_v2/repositories/model_repository.dart';
@@ -25,6 +26,7 @@ abstract class IStudyRepository() implements ModelRepository<Study> {
   @override
   Future<Study> duplicateAndSave(Study model);
   Future<void> launch(Study study);
+  Future<void> exportResults(StudyID studyId);
   Future<void> deleteParticipants(Study study);
   Future<void> close(Study study);
   // Future<void> deleteProgress(Study study);

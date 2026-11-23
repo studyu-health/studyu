@@ -2773,6 +2773,12 @@ abstract class AppLocalizations {
   /// **'Please select both date and time'**
   String get datetime_picker_validation_required;
 
+  /// No description provided for @time_picker_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a time'**
+  String get time_picker_hint;
+
   /// No description provided for @time_picker_validation_range.
   ///
   /// In en, this message translates to:
@@ -3223,42 +3229,6 @@ abstract class AppLocalizations {
   /// **'Daily Food Diary'**
   String get daily_food_diary;
 
-  /// No description provided for @saving.
-  ///
-  /// In en, this message translates to:
-  /// **'Saving...'**
-  String get saving;
-
-  /// No description provided for @saved_ago.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved {time} ago'**
-  String saved_ago(String time);
-
-  /// No description provided for @just_now.
-  ///
-  /// In en, this message translates to:
-  /// **'just now'**
-  String get just_now;
-
-  /// No description provided for @seconds_ago.
-  ///
-  /// In en, this message translates to:
-  /// **'{seconds} seconds ago'**
-  String seconds_ago(int seconds);
-
-  /// No description provided for @minutes_ago.
-  ///
-  /// In en, this message translates to:
-  /// **'{minutes} minute(s) ago'**
-  String minutes_ago(int minutes);
-
-  /// No description provided for @hours_ago.
-  ///
-  /// In en, this message translates to:
-  /// **'{hours} hour(s) ago'**
-  String hours_ago(int hours);
-
   /// No description provided for @instructions.
   ///
   /// In en, this message translates to:
@@ -3274,7 +3244,7 @@ abstract class AppLocalizations {
   /// No description provided for @min_meals_required.
   ///
   /// In en, this message translates to:
-  /// **'Please record at least {count} meal(s)'**
+  /// **'Daily meal target: {count} meal(s)'**
   String min_meals_required(int count);
 
   /// No description provided for @recall_details.
@@ -3340,7 +3310,7 @@ abstract class AppLocalizations {
   /// No description provided for @add_meal.
   ///
   /// In en, this message translates to:
-  /// **'Add Meal'**
+  /// **'New meal'**
   String get add_meal;
 
   /// No description provided for @no_meals_recorded.
@@ -3397,6 +3367,30 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get meal_type_other;
 
+  /// No description provided for @meal_category_snacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks'**
+  String get meal_category_snacks;
+
+  /// No description provided for @meal_category_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other meals'**
+  String get meal_category_other;
+
+  /// No description provided for @no_foods_added.
+  ///
+  /// In en, this message translates to:
+  /// **'No foods added'**
+  String get no_foods_added;
+
+  /// No description provided for @log_food.
+  ///
+  /// In en, this message translates to:
+  /// **'Log food'**
+  String get log_food;
+
   /// No description provided for @food_items_count.
   ///
   /// In en, this message translates to:
@@ -3409,11 +3403,173 @@ abstract class AppLocalizations {
   /// **'Meal Entry'**
   String get meal_entry_title;
 
+  /// No description provided for @add_meal_or_snack.
+  ///
+  /// In en, this message translates to:
+  /// **'Add meal or snack'**
+  String get add_meal_or_snack;
+
+  /// No description provided for @meal_neutral_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal'**
+  String get meal_neutral_label;
+
+  /// No description provided for @meal_suffix.
+  ///
+  /// In en, this message translates to:
+  /// **'meal'**
+  String get meal_suffix;
+
+  /// No description provided for @meal_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal label'**
+  String get meal_label;
+
+  /// No description provided for @no_meal_label.
+  ///
+  /// In en, this message translates to:
+  /// **'No label'**
+  String get no_meal_label;
+
+  /// No description provided for @time_not_remembered.
+  ///
+  /// In en, this message translates to:
+  /// **'Time not remembered'**
+  String get time_not_remembered;
+
+  /// No description provided for @about_time.
+  ///
+  /// In en, this message translates to:
+  /// **'About {time}'**
+  String about_time(String time);
+
+  /// No description provided for @time_exact.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact time'**
+  String get time_exact;
+
+  /// No description provided for @time_exact_description.
+  ///
+  /// In en, this message translates to:
+  /// **'I know the exact time'**
+  String get time_exact_description;
+
+  /// No description provided for @time_approximate.
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate time'**
+  String get time_approximate;
+
+  /// No description provided for @time_approximate_description.
+  ///
+  /// In en, this message translates to:
+  /// **'I know roughly when'**
+  String get time_approximate_description;
+
+  /// No description provided for @time_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t remember'**
+  String get time_unknown;
+
+  /// No description provided for @set_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Set time'**
+  String get set_time;
+
   /// No description provided for @save.
   ///
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
+
+  /// No description provided for @new_item.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get new_item;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @unsaved_changes_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved changes?'**
+  String get unsaved_changes_title;
+
+  /// No description provided for @unsaved_changes_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your changes or continue editing.'**
+  String get unsaved_changes_message;
+
+  /// No description provided for @discard_meal_changes_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this entry?'**
+  String get discard_meal_changes_title;
+
+  /// No description provided for @discard_meal_changes_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your changes or continue editing.'**
+  String get discard_meal_changes_message;
+
+  /// No description provided for @save_and_leave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and leave'**
+  String get save_and_leave;
+
+  /// No description provided for @discard_changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes'**
+  String get discard_changes;
+
+  /// No description provided for @continue_editing.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue editing'**
+  String get continue_editing;
+
+  /// No description provided for @delete_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry'**
+  String get delete_meal;
+
+  /// No description provided for @delete_meal_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this entry?'**
+  String get delete_meal_title;
+
+  /// No description provided for @delete_meal_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry will be removed from the nutrition log.'**
+  String get delete_meal_message;
+
+  /// No description provided for @enter_skip_reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a reason before saving.'**
+  String get enter_skip_reason;
+
+  /// No description provided for @add_food_before_saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one food item before saving.'**
+  String get add_food_before_saving;
 
   /// No description provided for @meal_information.
   ///
@@ -3427,11 +3583,17 @@ abstract class AppLocalizations {
   /// **'Meal Type'**
   String get meal_type_label;
 
-  /// No description provided for @custom_meal_label.
+  /// No description provided for @meal_details.
   ///
   /// In en, this message translates to:
-  /// **'Custom Meal Label'**
-  String get custom_meal_label;
+  /// **'Meal details'**
+  String get meal_details;
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
 
   /// No description provided for @time.
   ///
@@ -3490,7 +3652,7 @@ abstract class AppLocalizations {
   /// No description provided for @add_food.
   ///
   /// In en, this message translates to:
-  /// **'Add Food'**
+  /// **'Add food'**
   String get add_food;
 
   /// No description provided for @no_food_items_yet.
@@ -3538,61 +3700,61 @@ abstract class AppLocalizations {
   /// No description provided for @company_alone.
   ///
   /// In en, this message translates to:
-  /// **'👤 Alone'**
+  /// **'Alone'**
   String get company_alone;
 
   /// No description provided for @company_family.
   ///
   /// In en, this message translates to:
-  /// **'👨‍👩‍👧‍👦 Family'**
+  /// **'Family'**
   String get company_family;
 
   /// No description provided for @company_friends.
   ///
   /// In en, this message translates to:
-  /// **'👥 Friends'**
+  /// **'Friends'**
   String get company_friends;
 
   /// No description provided for @company_colleagues.
   ///
   /// In en, this message translates to:
-  /// **'💼 Colleagues'**
+  /// **'Colleagues'**
   String get company_colleagues;
 
   /// No description provided for @company_other.
   ///
   /// In en, this message translates to:
-  /// **'🤝 Other'**
+  /// **'Other'**
   String get company_other;
 
   /// No description provided for @distraction_none.
   ///
   /// In en, this message translates to:
-  /// **'🧘 None'**
+  /// **'None'**
   String get distraction_none;
 
   /// No description provided for @distraction_tv.
   ///
   /// In en, this message translates to:
-  /// **'📺 TV'**
+  /// **'TV'**
   String get distraction_tv;
 
   /// No description provided for @distraction_phone.
   ///
   /// In en, this message translates to:
-  /// **'📱 Phone'**
+  /// **'Phone'**
   String get distraction_phone;
 
   /// No description provided for @distraction_work.
   ///
   /// In en, this message translates to:
-  /// **'💻 Work'**
+  /// **'Work'**
   String get distraction_work;
 
   /// No description provided for @distraction_other.
   ///
   /// In en, this message translates to:
-  /// **'📖 Other'**
+  /// **'Other'**
   String get distraction_other;
 
   /// No description provided for @food_entry_title.
@@ -3616,8 +3778,14 @@ abstract class AppLocalizations {
   /// No description provided for @food_name.
   ///
   /// In en, this message translates to:
-  /// **'Food Name *'**
+  /// **'Food name *'**
   String get food_name;
+
+  /// No description provided for @nutrition_values_are_for.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition values are for'**
+  String get nutrition_values_are_for;
 
   /// No description provided for @brand_name.
   ///
@@ -3637,17 +3805,17 @@ abstract class AppLocalizations {
   /// **'Optional notes about this food'**
   String get description_hint;
 
-  /// No description provided for @recipe_info.
+  /// No description provided for @meal_info.
   ///
   /// In en, this message translates to:
-  /// **'Recipe: Use Recipe Builder for better ingredient management'**
-  String get recipe_info;
+  /// **'Meal: Use Meal Creator for combined food management'**
+  String get meal_info;
 
-  /// No description provided for @open_recipe_builder.
+  /// No description provided for @open_meal_creator.
   ///
   /// In en, this message translates to:
-  /// **'Open Recipe Builder'**
-  String get open_recipe_builder;
+  /// **'Open Meal Creator'**
+  String get open_meal_creator;
 
   /// No description provided for @amount.
   ///
@@ -3718,13 +3886,13 @@ abstract class AppLocalizations {
   /// No description provided for @nutrition_information.
   ///
   /// In en, this message translates to:
-  /// **'Nutrition Information'**
+  /// **'Nutrition information'**
   String get nutrition_information;
 
   /// No description provided for @energy_kcal.
   ///
   /// In en, this message translates to:
-  /// **'Energy (kcal) *'**
+  /// **'Energy'**
   String get energy_kcal;
 
   /// No description provided for @protein_g.
@@ -3745,10 +3913,34 @@ abstract class AppLocalizations {
   /// **'Fat (g)'**
   String get fat_g;
 
+  /// No description provided for @protein.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein'**
+  String get protein;
+
+  /// No description provided for @carbohydrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbohydrate'**
+  String get carbohydrate;
+
+  /// No description provided for @fat.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat'**
+  String get fat;
+
+  /// No description provided for @optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get optional;
+
   /// No description provided for @saturated_fat_g.
   ///
   /// In en, this message translates to:
-  /// **'Sat. Fat (g)'**
+  /// **'Saturated fat (g)'**
   String get saturated_fat_g;
 
   /// No description provided for @sugars_g.
@@ -3790,25 +3982,25 @@ abstract class AppLocalizations {
   /// No description provided for @entry_type_single_ingredient.
   ///
   /// In en, this message translates to:
-  /// **'🥕 Single Ingredient'**
+  /// **'Single Ingredient'**
   String get entry_type_single_ingredient;
 
-  /// No description provided for @entry_type_recipe.
+  /// No description provided for @entry_type_meal.
   ///
   /// In en, this message translates to:
-  /// **'📖 Recipe'**
-  String get entry_type_recipe;
+  /// **'Meal'**
+  String get entry_type_meal;
 
   /// No description provided for @entry_type_branded_product.
   ///
   /// In en, this message translates to:
-  /// **'🏷️ Branded Product'**
+  /// **'Branded Product'**
   String get entry_type_branded_product;
 
   /// No description provided for @entry_type_manual_entry.
   ///
   /// In en, this message translates to:
-  /// **'✏️ Manual Entry'**
+  /// **'Manual Entry'**
   String get entry_type_manual_entry;
 
   /// No description provided for @portion_method_household.
@@ -3862,38 +4054,176 @@ abstract class AppLocalizations {
   /// No description provided for @my_templates.
   ///
   /// In en, this message translates to:
-  /// **'My Templates'**
+  /// **'My items'**
   String get my_templates;
+
+  /// No description provided for @manage_saved_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage_saved_items;
+
+  /// No description provided for @adjust_quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust quantity'**
+  String get adjust_quantity;
+
+  /// No description provided for @edit_this_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit this entry'**
+  String get edit_this_entry;
+
+  /// No description provided for @library_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Update reusable item?'**
+  String get library_edit_title;
+
+  /// No description provided for @library_edit_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This item comes from your library. Choose where to save your changes.'**
+  String get library_edit_message;
+
+  /// No description provided for @library_edit_current_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this logged item'**
+  String get library_edit_current_entry;
+
+  /// No description provided for @library_edit_current_selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this selection'**
+  String get library_edit_current_selection;
+
+  /// No description provided for @library_edit_selection_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This item comes from your library. Choose where to save your changes.'**
+  String get library_edit_selection_message;
+
+  /// No description provided for @library_edit_current_entry_and_library.
+  ///
+  /// In en, this message translates to:
+  /// **'This item and reusable library item'**
+  String get library_edit_current_entry_and_library;
+
+  /// No description provided for @save_to_my_items_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Save items as meal to library'**
+  String get save_to_my_items_action;
+
+  /// No description provided for @save_item_to_library.
+  ///
+  /// In en, this message translates to:
+  /// **'Save item to library'**
+  String get save_item_to_library;
+
+  /// No description provided for @external_library_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get external_library_copy;
+
+  /// No description provided for @external_library_copy_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and add {name} to the Library'**
+  String external_library_copy_label(String name);
+
+  /// No description provided for @external_library_copy_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to the Library'**
+  String get external_library_copy_saved;
+
+  /// No description provided for @external_library_copy_save_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add food to the Library'**
+  String get external_library_copy_save_error;
+
+  /// No description provided for @remove_from_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from meal'**
+  String get remove_from_meal;
+
+  /// No description provided for @duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get duplicate;
 
   /// No description provided for @save_as_template.
   ///
   /// In en, this message translates to:
-  /// **'Save as Template'**
+  /// **'Add to My items'**
   String get save_as_template;
 
-  /// No description provided for @save_meal_template.
+  /// No description provided for @save_meal.
   ///
   /// In en, this message translates to:
-  /// **'Save Meal Template'**
-  String get save_meal_template;
+  /// **'Save to library'**
+  String get save_meal;
 
-  /// No description provided for @save_food_template.
+  /// No description provided for @done_label.
   ///
   /// In en, this message translates to:
-  /// **'Save Food Template'**
-  String get save_food_template;
+  /// **'Done'**
+  String get done_label;
 
-  /// No description provided for @save_recipe_template.
+  /// No description provided for @log_meal.
   ///
   /// In en, this message translates to:
-  /// **'Save Recipe Template'**
-  String get save_recipe_template;
+  /// **'Add entry'**
+  String get log_meal;
+
+  /// No description provided for @add_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items'**
+  String get add_items;
+
+  /// No description provided for @add_items_to_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items to {meal}'**
+  String add_items_to_meal(String meal);
+
+  /// No description provided for @save_as_reusable_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as reusable meal'**
+  String get save_as_reusable_meal;
+
+  /// No description provided for @save_as_reusable_meal_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this combination to My items so you can use it again.'**
+  String get save_as_reusable_meal_description;
+
+  /// No description provided for @save_food.
+  ///
+  /// In en, this message translates to:
+  /// **'Save food'**
+  String get save_food;
 
   /// No description provided for @template_name.
   ///
   /// In en, this message translates to:
-  /// **'Template Name'**
+  /// **'Name'**
   String get template_name;
+
+  /// No description provided for @template_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal name *'**
+  String get template_name_required;
 
   /// No description provided for @template_tags_optional.
   ///
@@ -3910,43 +4240,43 @@ abstract class AppLocalizations {
   /// No description provided for @template_saved.
   ///
   /// In en, this message translates to:
-  /// **'Template saved'**
+  /// **'Added to My items'**
   String get template_saved;
 
-  /// No description provided for @select_meal_template.
+  /// No description provided for @select_meal.
   ///
   /// In en, this message translates to:
-  /// **'Select Meal Template'**
-  String get select_meal_template;
+  /// **'My meals'**
+  String get select_meal;
 
-  /// No description provided for @select_food_template.
+  /// No description provided for @select_food.
   ///
   /// In en, this message translates to:
-  /// **'Select Food Template'**
-  String get select_food_template;
+  /// **'My foods'**
+  String get select_food;
+
+  /// No description provided for @food_library_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search library'**
+  String get food_library_search_hint;
 
   /// No description provided for @search_templates.
   ///
   /// In en, this message translates to:
-  /// **'Search templates...'**
+  /// **'Search saved foods and meals…'**
   String get search_templates;
-
-  /// No description provided for @no_templates_saved.
-  ///
-  /// In en, this message translates to:
-  /// **'No templates saved yet'**
-  String get no_templates_saved;
 
   /// No description provided for @save_templates_hint.
   ///
   /// In en, this message translates to:
-  /// **'Save your favorite meals and foods as templates for quick access'**
+  /// **'Save your favorite meals and foods for quick access'**
   String get save_templates_hint;
 
   /// No description provided for @from_template.
   ///
   /// In en, this message translates to:
-  /// **'From Template'**
+  /// **'From My items'**
   String get from_template;
 
   /// No description provided for @add_new_food.
@@ -3955,16 +4285,16 @@ abstract class AppLocalizations {
   /// **'Add New Food'**
   String get add_new_food;
 
-  /// No description provided for @delete_template.
+  /// Title of the confirmation dialog for deleting a saved Library item.
   ///
   /// In en, this message translates to:
-  /// **'Delete Template'**
-  String get delete_template;
+  /// **'Delete {name}?'**
+  String delete_template(String name);
 
   /// No description provided for @delete_template_confirmation.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this template?'**
+  /// **'This item will be removed from the Library.'**
   String get delete_template_confirmation;
 
   /// No description provided for @filter_all.
@@ -3985,23 +4315,155 @@ abstract class AppLocalizations {
   /// **'Foods'**
   String get filter_foods;
 
-  /// No description provided for @filter_recipes.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipes'**
-  String get filter_recipes;
-
   /// No description provided for @items_count.
   ///
   /// In en, this message translates to:
-  /// **'{count} items'**
+  /// **'{count, plural, =1 {1 item} other {{count} items}}'**
   String items_count(int count);
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @food_selection_add_to_selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to selection'**
+  String get food_selection_add_to_selection;
+
+  /// No description provided for @food_selection_update_selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Update selection'**
+  String get food_selection_update_selection;
+
+  /// No description provided for @food_selection_selected_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected items'**
+  String get food_selection_selected_items;
+
+  /// No description provided for @food_selection_view_more.
+  ///
+  /// In en, this message translates to:
+  /// **'View all {count} items'**
+  String food_selection_view_more(int count);
+
+  /// No description provided for @food_selection_increment.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase {name}'**
+  String food_selection_increment(String name);
+
+  /// No description provided for @food_selection_decrement.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease {name}'**
+  String food_selection_decrement(String name);
+
+  /// No description provided for @food_selection_item_removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Item removed'**
+  String get food_selection_item_removed;
+
+  /// No description provided for @food_selection_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get food_selection_undo;
+
+  /// No description provided for @food_selection_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, selected, quantity {quantity}'**
+  String food_selection_selected(String name, int quantity);
+
+  /// No description provided for @food_selection_known_calories.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} kcal known · {count} unavailable'**
+  String food_selection_known_calories(String value, int count);
+
+  /// No description provided for @food_selection_unknown_calories.
+  ///
+  /// In en, this message translates to:
+  /// **'— kcal · {count} unavailable'**
+  String food_selection_unknown_calories(int count);
+
+  /// No description provided for @food_selection_calories_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories unavailable for {count, plural, =1 {one item} other {{count} items}}'**
+  String food_selection_calories_unavailable(int count);
+
+  /// No description provided for @food_selection_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1 {Add 1 item to {meal}} other {Add {count} items to {meal}}}'**
+  String food_selection_confirm(int count, String meal);
+
+  /// No description provided for @serving_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount, plural, =1 {1 serving} other {{amount} servings}}'**
+  String serving_amount(num amount);
 
   /// No description provided for @kcal_value.
   ///
   /// In en, this message translates to:
   /// **'{value} kcal'**
   String kcal_value(String value);
+
+  /// No description provided for @kcal_per_serving.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} kcal / serving'**
+  String kcal_per_serving(String value);
+
+  /// No description provided for @servings_value.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} servings'**
+  String servings_value(String value);
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @database.
+  ///
+  /// In en, this message translates to:
+  /// **'Database'**
+  String get database;
+
+  /// No description provided for @no_recent_items.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent items yet'**
+  String get no_recent_items;
+
+  /// No description provided for @brand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get brand;
+
+  /// No description provided for @calorie_basis_100g.
+  ///
+  /// In en, this message translates to:
+  /// **'per 100 g'**
+  String get calorie_basis_100g;
+
+  /// No description provided for @calorie_basis_grams.
+  ///
+  /// In en, this message translates to:
+  /// **'per {grams} g'**
+  String calorie_basis_grams(String grams);
 
   /// No description provided for @template_type_meal.
   ///
@@ -4015,16 +4477,10 @@ abstract class AppLocalizations {
   /// **'Food'**
   String get template_type_food;
 
-  /// No description provided for @template_type_recipe.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe'**
-  String get template_type_recipe;
-
   /// No description provided for @rename_template.
   ///
   /// In en, this message translates to:
-  /// **'Rename Template'**
+  /// **'Rename item'**
   String get rename_template;
 
   /// No description provided for @new_name.
@@ -4057,34 +4513,178 @@ abstract class AppLocalizations {
   /// **'Tap the button above to add your first meal'**
   String get tap_to_add_first_meal;
 
-  /// No description provided for @tap_to_add_food.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap to add food'**
-  String get tap_to_add_food;
-
   /// No description provided for @add_food_title.
   ///
   /// In en, this message translates to:
   /// **'Add Food'**
   String get add_food_title;
 
+  /// No description provided for @add_food_to_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add food to {meal}'**
+  String add_food_to_meal(String meal);
+
+  /// No description provided for @food_quantity_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get food_quantity_amount;
+
+  /// No description provided for @food_quantity_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get food_quantity_weight;
+
+  /// No description provided for @food_quantity_custom_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get food_quantity_custom_weight;
+
+  /// No description provided for @food_quantity_library_serving.
+  ///
+  /// In en, this message translates to:
+  /// **'Library serving: {weight} g'**
+  String food_quantity_library_serving(String weight);
+
+  /// No description provided for @food_quantity_default_serving.
+  ///
+  /// In en, this message translates to:
+  /// **'Default serving: {weight} g'**
+  String food_quantity_default_serving(String weight);
+
+  /// No description provided for @food_quantity_library_serving_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Library serving: weight unavailable'**
+  String get food_quantity_library_serving_unknown;
+
+  /// No description provided for @food_quantity_default_serving_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Default serving: weight unavailable'**
+  String get food_quantity_default_serving_unknown;
+
+  /// No description provided for @food_quantity_override_helper.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply only to the selected item in this meal.'**
+  String get food_quantity_override_helper;
+
+  /// No description provided for @food_quantity_use_library_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Use library weight ({weight} g)'**
+  String food_quantity_use_library_weight(String weight);
+
+  /// No description provided for @food_quantity_use_default_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Use default weight ({weight} g)'**
+  String food_quantity_use_default_weight(String weight);
+
+  /// No description provided for @food_quantity_invalid_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount greater than zero'**
+  String get food_quantity_invalid_amount;
+
+  /// No description provided for @food_quantity_serving.
+  ///
+  /// In en, this message translates to:
+  /// **'Serving'**
+  String get food_quantity_serving;
+
+  /// No description provided for @food_quantity_serving_unit.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount, plural, =1 {serving} other {servings}}'**
+  String food_quantity_serving_unit(num amount);
+
+  /// No description provided for @food_quantity_serving_value.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} g per {unit}'**
+  String food_quantity_serving_value(String value, String unit);
+
+  /// No description provided for @food_quantity_energy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get food_quantity_energy;
+
+  /// No description provided for @food_quantity_protein.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein'**
+  String get food_quantity_protein;
+
+  /// No description provided for @food_quantity_carbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbs'**
+  String get food_quantity_carbs;
+
+  /// No description provided for @food_quantity_fat.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat'**
+  String get food_quantity_fat;
+
+  /// No description provided for @food_quantity_add_to_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to {meal}'**
+  String food_quantity_add_to_meal(String meal);
+
+  /// No description provided for @food_quantity_add_to_selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to basket'**
+  String get food_quantity_add_to_selection;
+
+  /// No description provided for @food_quantity_add_meal_to_selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add meal to selection'**
+  String get food_quantity_add_meal_to_selection;
+
+  /// No description provided for @food_quantity_update_selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get food_quantity_update_selection;
+
+  /// No description provided for @food_quantity_nutrition_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition information unavailable'**
+  String get food_quantity_nutrition_unavailable;
+
+  /// No description provided for @save_and_add_to_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and add to {meal}'**
+  String save_and_add_to_meal(String meal);
+
   /// No description provided for @edit_food_title.
   ///
   /// In en, this message translates to:
-  /// **'Edit Food'**
+  /// **'Edit food'**
   String get edit_food_title;
 
   /// No description provided for @add_food_manually.
   ///
   /// In en, this message translates to:
-  /// **'Add Food Manually'**
+  /// **'Create food'**
   String get add_food_manually;
 
   /// No description provided for @basic_information.
   ///
   /// In en, this message translates to:
-  /// **'Basic Information'**
+  /// **'Food details'**
   String get basic_information;
 
   /// No description provided for @macronutrients.
@@ -4102,14 +4702,62 @@ abstract class AppLocalizations {
   /// No description provided for @daily_nutrition_total.
   ///
   /// In en, this message translates to:
-  /// **'Daily Nutrition Total'**
+  /// **'Nutrition summary'**
   String get daily_nutrition_total;
 
-  /// No description provided for @meal_nutrition.
+  /// No description provided for @daily_summary.
   ///
   /// In en, this message translates to:
-  /// **'Meal Nutrition'**
-  String get meal_nutrition;
+  /// **'Daily summary'**
+  String get daily_summary;
+
+  /// No description provided for @energy_by_macronutrient.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy by macronutrient'**
+  String get energy_by_macronutrient;
+
+  /// No description provided for @total_energy.
+  ///
+  /// In en, this message translates to:
+  /// **'Total energy'**
+  String get total_energy;
+
+  /// No description provided for @show.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get show;
+
+  /// No description provided for @hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get hide;
+
+  /// No description provided for @carbohydrates.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbohydrates'**
+  String get carbohydrates;
+
+  /// No description provided for @fibre.
+  ///
+  /// In en, this message translates to:
+  /// **'Fibre'**
+  String get fibre;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @some_values_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Some nutrient values are unavailable for {count} {count, plural, =1 {item} other {items}}.'**
+  String some_values_unavailable(int count);
 
   /// No description provided for @nutrition_summary.
   ///
@@ -4132,20 +4780,86 @@ abstract class AppLocalizations {
   /// No description provided for @search_food_hint.
   ///
   /// In en, this message translates to:
-  /// **'Search food (e.g., \"apple\", \"chicken\")'**
+  /// **'Search foods, meals or brands'**
   String get search_food_hint;
 
   /// No description provided for @my_saved_items.
   ///
   /// In en, this message translates to:
-  /// **'My Saved Items'**
+  /// **'Library'**
   String get my_saved_items;
+
+  /// No description provided for @food_library.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get food_library;
+
+  /// No description provided for @add_food_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Create food'**
+  String get add_food_action;
+
+  /// No description provided for @recent_foods.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently added'**
+  String get recent_foods;
+
+  /// No description provided for @frequently_used_foods.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Used'**
+  String get frequently_used_foods;
 
   /// No description provided for @global_database.
   ///
   /// In en, this message translates to:
-  /// **'Global Database'**
+  /// **'Database'**
   String get global_database;
+
+  /// No description provided for @external_library.
+  ///
+  /// In en, this message translates to:
+  /// **'External library'**
+  String get external_library;
+
+  /// No description provided for @external_library_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching external library…'**
+  String get external_library_loading;
+
+  /// No description provided for @external_library_error.
+  ///
+  /// In en, this message translates to:
+  /// **'External library is unavailable. Please try again.'**
+  String get external_library_error;
+
+  /// No description provided for @external_library_results_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1 {1 external result found} other {{count} external results found}}'**
+  String external_library_results_count(int count);
+
+  /// No description provided for @review_copied_food.
+  ///
+  /// In en, this message translates to:
+  /// **'Review food'**
+  String get review_copied_food;
+
+  /// No description provided for @external_library_copy_notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the food details before saving to the Library. Your edits apply to the saved copy.'**
+  String get external_library_copy_notice;
+
+  /// No description provided for @external_library_save_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Library'**
+  String get external_library_save_copy;
 
   /// No description provided for @quick_actions.
   ///
@@ -4153,22 +4867,28 @@ abstract class AppLocalizations {
   /// **'Quick Actions'**
   String get quick_actions;
 
-  /// No description provided for @create_recipe.
+  /// No description provided for @create.
   ///
   /// In en, this message translates to:
-  /// **'Create Recipe'**
-  String get create_recipe;
+  /// **'Create'**
+  String get create;
 
-  /// No description provided for @create_recipe_subtitle.
+  /// No description provided for @create_meal.
   ///
   /// In en, this message translates to:
-  /// **'Build from multiple ingredients'**
-  String get create_recipe_subtitle;
+  /// **'Create meal'**
+  String get create_meal;
+
+  /// No description provided for @create_meal_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine multiple foods'**
+  String get create_meal_subtitle;
 
   /// No description provided for @add_manually.
   ///
   /// In en, this message translates to:
-  /// **'Add Manually'**
+  /// **'Create food manually'**
   String get add_manually;
 
   /// No description provided for @add_manually_subtitle.
@@ -4189,6 +4909,90 @@ abstract class AppLocalizations {
   /// **'Find packaged products quickly'**
   String get scan_barcode_subtitle;
 
+  /// No description provided for @barcode_scanner_guidance_initial.
+  ///
+  /// In en, this message translates to:
+  /// **'Point camera at barcode'**
+  String get barcode_scanner_guidance_initial;
+
+  /// No description provided for @barcode_scanner_no_barcode.
+  ///
+  /// In en, this message translates to:
+  /// **'No barcode detected — adjust position'**
+  String get barcode_scanner_no_barcode;
+
+  /// No description provided for @barcode_scanner_processing.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode detected! Processing…'**
+  String get barcode_scanner_processing;
+
+  /// No description provided for @barcode_scanner_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid barcode — try a different angle'**
+  String get barcode_scanner_invalid;
+
+  /// No description provided for @barcode_scanner_lookup.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid barcode. Looking up…'**
+  String get barcode_scanner_lookup;
+
+  /// No description provided for @barcode_scanner_distance_guidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Large barcode? Move back 15–30 cm\\nSmall barcode? Move closer'**
+  String get barcode_scanner_distance_guidance;
+
+  /// No description provided for @barcode_scanner_detected.
+  ///
+  /// In en, this message translates to:
+  /// **'DETECTED'**
+  String get barcode_scanner_detected;
+
+  /// No description provided for @barcode_scanner_lookup_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking up product…'**
+  String get barcode_scanner_lookup_progress;
+
+  /// No description provided for @barcode_scanner_toggle_flash.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle flash'**
+  String get barcode_scanner_toggle_flash;
+
+  /// No description provided for @barcode_scanner_switch_camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch camera'**
+  String get barcode_scanner_switch_camera;
+
+  /// No description provided for @barcode_scanner_not_found_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Product not found'**
+  String get barcode_scanner_not_found_title;
+
+  /// No description provided for @barcode_scanner_not_found_message.
+  ///
+  /// In en, this message translates to:
+  /// **'No product found for barcode: {barcode}\\n\\nThis product may not be in the external library yet. You can add it manually or scan another product.'**
+  String barcode_scanner_not_found_message(String barcode);
+
+  /// No description provided for @barcode_scanner_scan_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan again'**
+  String get barcode_scanner_scan_again;
+
+  /// No description provided for @barcode_scanner_error_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Search unavailable'**
+  String get barcode_scanner_error_title;
+
   /// No description provided for @search_for_food.
   ///
   /// In en, this message translates to:
@@ -4198,7 +5002,7 @@ abstract class AppLocalizations {
   /// No description provided for @search_food_description.
   ///
   /// In en, this message translates to:
-  /// **'Type above to search global databases'**
+  /// **'Try “apple”, “oat milk”, or a brand name.'**
   String get search_food_description;
 
   /// No description provided for @searching_databases.
@@ -4219,34 +5023,64 @@ abstract class AppLocalizations {
   /// **'No results found. Try different keywords.'**
   String get no_results_found;
 
+  /// No description provided for @no_results_for_query.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for “{query}”'**
+  String no_results_for_query(String query);
+
+  /// No description provided for @cant_find_it.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t find it?'**
+  String get cant_find_it;
+
+  /// No description provided for @create_food_from_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Create “{query}” manually'**
+  String create_food_from_search(String query);
+
+  /// No description provided for @food_search_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Food search is unavailable. Please try again.'**
+  String get food_search_error;
+
+  /// No description provided for @food_search_results_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1 {1 result found} other {{count} results found}}'**
+  String food_search_results_count(int count);
+
   /// No description provided for @no_matching_templates.
   ///
   /// In en, this message translates to:
-  /// **'No matching templates'**
+  /// **'No matching items'**
   String get no_matching_templates;
 
   /// No description provided for @detailed_nutrition.
   ///
   /// In en, this message translates to:
-  /// **'Detailed Nutrition'**
+  /// **'Detailed nutrition'**
   String get detailed_nutrition;
 
   /// No description provided for @detailed_nutrition_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Fiber, Sugar, Sodium'**
+  /// **'Fiber, sugars, saturated fat, and sodium'**
   String get detailed_nutrition_subtitle;
 
   /// No description provided for @advanced_options.
   ///
   /// In en, this message translates to:
-  /// **'Advanced Options'**
+  /// **'Advanced options'**
   String get advanced_options;
 
   /// No description provided for @advanced_options_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Food type, serving size, portions'**
+  /// **'Food type, brand, and portion details'**
   String get advanced_options_subtitle;
 
   /// No description provided for @details.
@@ -4254,6 +5088,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Details'**
   String get details;
+
+  /// No description provided for @meal_context.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal context'**
+  String get meal_context;
 
   /// No description provided for @search_food_database.
   ///
@@ -4282,7 +5122,7 @@ abstract class AppLocalizations {
   /// No description provided for @photoRecallSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'View photos from around this time'**
+  /// **'Use photos from this day to remember what you ate.'**
   String get photoRecallSubtitle;
 
   /// No description provided for @photoRecallPermissionNeeded.
@@ -4312,7 +5152,7 @@ abstract class AppLocalizations {
   /// No description provided for @photoRecallNoPhotosSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'We couldn\'t find any photos taken around this time'**
+  /// **'We couldn’t find any photos taken on this day'**
   String get photoRecallNoPhotosSubtitle;
 
   /// No description provided for @photoRecallTapToEnlarge.
@@ -4320,12 +5160,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap a photo to view it full screen'**
   String get photoRecallTapToEnlarge;
-
-  /// No description provided for @photoRecallTimeInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Showing photos from around {time} (±2 hours)'**
-  String photoRecallTimeInfo(String time);
 
   /// No description provided for @grantPermission.
   ///
@@ -4414,13 +5248,13 @@ abstract class AppLocalizations {
   /// No description provided for @min_meals_not_met_title.
   ///
   /// In en, this message translates to:
-  /// **'Minimum meals not reached'**
+  /// **'Daily meal target not reached'**
   String get min_meals_not_met_title;
 
   /// No description provided for @min_meals_not_met_message.
   ///
   /// In en, this message translates to:
-  /// **'This task requires at least {count} meal(s). You have recorded fewer than required. Leave anyway?'**
+  /// **'The daily meal target is {count} meal(s). You have recorded fewer meals. Leave anyway?'**
   String min_meals_not_met_message(int count);
 
   /// No description provided for @leave_anyway.
@@ -4428,6 +5262,1212 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave anyway'**
   String get leave_anyway;
+
+  /// No description provided for @nutrition_tracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Food diary'**
+  String get nutrition_tracking;
+
+  /// No description provided for @nutrition_statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get nutrition_statistics;
+
+  /// No description provided for @nutrition_days_recorded.
+  ///
+  /// In en, this message translates to:
+  /// **'{recorded} of {total} days recorded'**
+  String nutrition_days_recorded(int recorded, int total);
+
+  /// No description provided for @nutrition_completed_days.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed, plural, =1{{completed} completed day} other{{completed} completed days}}'**
+  String nutrition_completed_days(int completed);
+
+  /// No description provided for @nutrition_daily_average.
+  ///
+  /// In en, this message translates to:
+  /// **'Average across completed days'**
+  String get nutrition_daily_average;
+
+  /// No description provided for @nutrition_energy_by_study_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy by study day'**
+  String get nutrition_energy_by_study_day;
+
+  /// No description provided for @nutrition_average_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Average {value} across completed days'**
+  String nutrition_average_value(String value);
+
+  /// No description provided for @nutrition_tap_bar_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a bar to view its value or open that day.'**
+  String get nutrition_tap_bar_hint;
+
+  /// No description provided for @nutrition_nutrient_trend.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient trend'**
+  String get nutrition_nutrient_trend;
+
+  /// No description provided for @nutrition_carbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbs'**
+  String get nutrition_carbs;
+
+  /// No description provided for @nutrition_average_per_recorded_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Average {value} per completed day'**
+  String nutrition_average_per_recorded_day(String value);
+
+  /// No description provided for @nutrition_compared_previous_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Compared with the previous {count} days'**
+  String nutrition_compared_previous_days(int count);
+
+  /// No description provided for @nutrition_record_more_comparisons.
+  ///
+  /// In en, this message translates to:
+  /// **'Record more study days to see period comparisons.'**
+  String get nutrition_record_more_comparisons;
+
+  /// No description provided for @nutrition_energy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get nutrition_energy;
+
+  /// No description provided for @nutrition_today_so_far.
+  ///
+  /// In en, this message translates to:
+  /// **'Today so far'**
+  String get nutrition_today_so_far;
+
+  /// No description provided for @nutrition_chart_day_value.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}, {value}'**
+  String nutrition_chart_day_value(String date, String value);
+
+  /// No description provided for @nutrition_chart_day_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}, not recorded'**
+  String nutrition_chart_day_missing(String date);
+
+  /// No description provided for @nutrition_view_day_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Enter to view this day.'**
+  String get nutrition_view_day_hint;
+
+  /// No description provided for @nutrition_statistics_help_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Averages include only completed study days. Today appears in charts as ‘Today so far’ and is excluded from averages until the diary is complete. Missing days are left blank.'**
+  String get nutrition_statistics_help_message;
+
+  /// No description provided for @nutrition_kcal_per_day.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} kcal/day'**
+  String nutrition_kcal_per_day(String value);
+
+  /// No description provided for @nutrition_grams_per_day.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} g/day'**
+  String nutrition_grams_per_day(String value);
+
+  /// No description provided for @nutrition_recent_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent days'**
+  String get nutrition_recent_days;
+
+  /// No description provided for @nutrition_history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get nutrition_history;
+
+  /// No description provided for @nutrition_history_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No past food diaries yet.'**
+  String get nutrition_history_empty;
+
+  /// No description provided for @nutrition_history_latest_study_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest study day'**
+  String get nutrition_history_latest_study_day;
+
+  /// No description provided for @nutrition_history_latest_study_day_description.
+  ///
+  /// In en, this message translates to:
+  /// **'You can add or correct entries for the previous study day.'**
+  String get nutrition_history_latest_study_day_description;
+
+  /// No description provided for @nutrition_history_previous_study_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous study days'**
+  String get nutrition_history_previous_study_days;
+
+  /// No description provided for @nutrition_history_no_foods_logged.
+  ///
+  /// In en, this message translates to:
+  /// **'No foods logged'**
+  String get nutrition_history_no_foods_logged;
+
+  /// No description provided for @historical_editing_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing {date}'**
+  String historical_editing_date(String date);
+
+  /// No description provided for @historical_edit_expired.
+  ///
+  /// In en, this message translates to:
+  /// **'This study day is no longer editable.'**
+  String get historical_edit_expired;
+
+  /// No description provided for @edit_food_definition.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit reusable food'**
+  String get edit_food_definition;
+
+  /// No description provided for @food_definition_edit_helper.
+  ///
+  /// In en, this message translates to:
+  /// **'Serving description, weight, conversions, and nutrition update the reusable item and selected historical entry. You can also update matching entries in the current study day when available. Selected entry keeps its serving count.'**
+  String get food_definition_edit_helper;
+
+  /// No description provided for @nutrition_statistics_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No nutrition data for this period.'**
+  String get nutrition_statistics_empty;
+
+  /// No description provided for @nutrition_editable.
+  ///
+  /// In en, this message translates to:
+  /// **'Editable'**
+  String get nutrition_editable;
+
+  /// No description provided for @nutrition_read_only.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only'**
+  String get nutrition_read_only;
+
+  /// No description provided for @nutrition_logging_guidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Log each meal and drink as accurately as you can. Include portions and preparation details when you know them.'**
+  String get nutrition_logging_guidance;
+
+  /// No description provided for @open_faq.
+  ///
+  /// In en, this message translates to:
+  /// **'Open FAQ'**
+  String get open_faq;
+
+  /// No description provided for @nutrition_calories.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get nutrition_calories;
+
+  /// No description provided for @historical_edit_mode_heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing a previous study day'**
+  String get historical_edit_mode_heading;
+
+  /// No description provided for @historical_edit_mode_description.
+  ///
+  /// In en, this message translates to:
+  /// **'On this History screen, you can update the meal log from your previous study day. Foods and meals you create here remain available for future meal logs.'**
+  String get historical_edit_mode_description;
+
+  /// No description provided for @update_current_day_entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Also update matching entries in current study day'**
+  String get update_current_day_entries;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @current_meal_only_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply only to this diary entry. To update the reusable item, use the Library.'**
+  String get current_meal_only_banner;
+
+  /// No description provided for @current_selection_only_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply only to this selection. For permanent changes, use the Library.'**
+  String get current_selection_only_banner;
+
+  /// No description provided for @grams_per_serving.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g per serving'**
+  String grams_per_serving(Object grams);
+
+  /// No description provided for @open_food_facts_attribution.
+  ///
+  /// In en, this message translates to:
+  /// **'(c) Open Food Facts contributors'**
+  String get open_food_facts_attribution;
+
+  /// No description provided for @open_food_facts_attribution_launch_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the Open Food Facts terms of use.'**
+  String get open_food_facts_attribution_launch_error;
+
+  /// No description provided for @food_definition_updated_current_day_opt_out.
+  ///
+  /// In en, this message translates to:
+  /// **'Reusable item updated. Matching entries in the current study day were not updated.'**
+  String get food_definition_updated_current_day_opt_out;
+
+  /// No description provided for @food_definition_updated_current_day_opt_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Reusable item updated. Matching entries in the current study day were also updated.'**
+  String get food_definition_updated_current_day_opt_in;
+
+  /// No description provided for @food_quantity_weight_per_serving.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight per serving'**
+  String get food_quantity_weight_per_serving;
+
+  /// No description provided for @food_quantity_total_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Total weight: {weight} g'**
+  String food_quantity_total_weight(String weight);
+
+  /// No description provided for @food_quantity_decrease_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease weight per serving'**
+  String get food_quantity_decrease_weight;
+
+  /// No description provided for @food_quantity_increase_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase weight per serving'**
+  String get food_quantity_increase_weight;
+
+  /// No description provided for @food_selection_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse selected items'**
+  String get food_selection_collapse;
+
+  /// No description provided for @food_quantity_edit_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit amount'**
+  String get food_quantity_edit_amount;
+
+  /// No description provided for @food_quantity_nutrition_for_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition for {amount} {unit}'**
+  String food_quantity_nutrition_for_amount(Object amount, Object unit);
+
+  /// No description provided for @food_selection_items_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1 {1 item} other {{count} items}}'**
+  String food_selection_items_count(num count);
+
+  /// No description provided for @nutrition_add_food_or_saved_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get nutrition_add_food_or_saved_meal;
+
+  /// No description provided for @nutrition_food_badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get nutrition_food_badge;
+
+  /// No description provided for @nutrition_saved_meal_badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved meal'**
+  String get nutrition_saved_meal_badge;
+
+  /// No description provided for @nutrition_add_foods_or_saved_meals_to_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to {meal}'**
+  String nutrition_add_foods_or_saved_meals_to_meal(Object meal);
+
+  /// No description provided for @nutrition_search_foods_saved_meals_or_brands.
+  ///
+  /// In en, this message translates to:
+  /// **'Search foods or meals'**
+  String get nutrition_search_foods_saved_meals_or_brands;
+
+  /// No description provided for @nutrition_create_saved_meal_from_log.
+  ///
+  /// In en, this message translates to:
+  /// **'Create meal from this log'**
+  String get nutrition_create_saved_meal_from_log;
+
+  /// No description provided for @nutrition_edit_saved_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit saved meal'**
+  String get nutrition_edit_saved_meal;
+
+  /// No description provided for @nutrition_invalid_saved_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Some foods in this meal have incomplete details. Add foods with complete details and try again.'**
+  String get nutrition_invalid_saved_meal;
+
+  /// No description provided for @nutrition_add_food_to_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add food to {meal}'**
+  String nutrition_add_food_to_meal(Object meal);
+
+  /// No description provided for @nutrition_search_foods_or_brands.
+  ///
+  /// In en, this message translates to:
+  /// **'Search foods or brands'**
+  String get nutrition_search_foods_or_brands;
+
+  /// No description provided for @nutrition_saved_meals_expanded_notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the individual foods from the saved meals before saving this meal.'**
+  String get nutrition_saved_meals_expanded_notice;
+
+  /// No description provided for @enter_meal_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a meal name'**
+  String get enter_meal_name;
+
+  /// No description provided for @nutrition_servings_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Servings *'**
+  String get nutrition_servings_required;
+
+  /// No description provided for @nutrition_preparation_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation details'**
+  String get nutrition_preparation_details;
+
+  /// No description provided for @nutrition_preparation_details_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw and cooked weights, preparation method'**
+  String get nutrition_preparation_details_subtitle;
+
+  /// No description provided for @nutrition_raw_weight_grams.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw weight (g)'**
+  String get nutrition_raw_weight_grams;
+
+  /// No description provided for @nutrition_cooked_weight_grams.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooked weight (g)'**
+  String get nutrition_cooked_weight_grams;
+
+  /// No description provided for @nutrition_preparation_method.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation method'**
+  String get nutrition_preparation_method;
+
+  /// No description provided for @nutrition_preparation_method_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., baked, fried, steamed'**
+  String get nutrition_preparation_method_hint;
+
+  /// No description provided for @nutrition_add_food_manually.
+  ///
+  /// In en, this message translates to:
+  /// **'Add manually'**
+  String get nutrition_add_food_manually;
+
+  /// No description provided for @nutrition_food_name_example.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., olive oil'**
+  String get nutrition_food_name_example;
+
+  /// No description provided for @nutrition_quantity_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get nutrition_quantity_short;
+
+  /// No description provided for @nutrition_calories_kcal.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get nutrition_calories_kcal;
+
+  /// No description provided for @nutrition_no_foods_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No foods yet'**
+  String get nutrition_no_foods_yet;
+
+  /// No description provided for @nutrition_search_or_add_food_manually.
+  ///
+  /// In en, this message translates to:
+  /// **'Search or add food manually to start'**
+  String get nutrition_search_or_add_food_manually;
+
+  /// No description provided for @nutrition_unit_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get nutrition_unit_label;
+
+  /// No description provided for @nutrition_per_serving.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition per serving'**
+  String get nutrition_per_serving;
+
+  /// No description provided for @photoRecallDateInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing photos from {date}'**
+  String photoRecallDateInfo(Object date);
+
+  /// No description provided for @not_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Not added'**
+  String get not_added;
+
+  /// No description provided for @nutrition_statistics_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get nutrition_statistics_week;
+
+  /// No description provided for @nutrition_statistics_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get nutrition_statistics_month;
+
+  /// No description provided for @nutrition_statistics_previous_period.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous period'**
+  String get nutrition_statistics_previous_period;
+
+  /// No description provided for @nutrition_statistics_next_period.
+  ///
+  /// In en, this message translates to:
+  /// **'Next period'**
+  String get nutrition_statistics_next_period;
+
+  /// No description provided for @nutrition_statistics_go_to_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to today'**
+  String get nutrition_statistics_go_to_today;
+
+  /// No description provided for @nutrition_energy_change_from_previous_day.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} vs. previous day'**
+  String nutrition_energy_change_from_previous_day(Object value);
+
+  /// No description provided for @food_selection_remove_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String food_selection_remove_title(String name);
+
+  /// No description provided for @food_selection_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get food_selection_remove;
+
+  /// No description provided for @nutrition_exit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get nutrition_exit;
+
+  /// No description provided for @nutrition_water.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get nutrition_water;
+
+  /// No description provided for @nutrition_water_unlogged.
+  ///
+  /// In en, this message translates to:
+  /// **'No water logged'**
+  String get nutrition_water_unlogged;
+
+  /// No description provided for @nutrition_water_add_cup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a cup of water'**
+  String get nutrition_water_add_cup;
+
+  /// No description provided for @nutrition_water_remove_cup.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove a cup of water'**
+  String get nutrition_water_remove_cup;
+
+  /// No description provided for @nutrition_water_cup_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Cup size'**
+  String get nutrition_water_cup_size;
+
+  /// No description provided for @nutrition_water_cup_size_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1 to 9999 mL.'**
+  String get nutrition_water_cup_size_invalid;
+
+  /// No description provided for @nutrition_water_cup_size_save_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the cup size.'**
+  String get nutrition_water_cup_size_save_error;
+
+  /// No description provided for @nutrition_current_day_ended.
+  ///
+  /// In en, this message translates to:
+  /// **'This nutrition day has ended. Open the nutrition task again to continue.'**
+  String get nutrition_current_day_ended;
+
+  /// No description provided for @nutrition_food_definition_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'A newer version of this item is available. Open the editor again to edit the current version.'**
+  String get nutrition_food_definition_conflict;
+
+  /// No description provided for @nutrition_invalid_calories.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter zero or a positive number of calories.'**
+  String get nutrition_invalid_calories;
+
+  /// No description provided for @nutrition_recall_conflict_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsynced nutrition draft'**
+  String get nutrition_recall_conflict_title;
+
+  /// No description provided for @nutrition_recall_conflict_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This draft conflicts with the saved version. It stays on this device. To edit this day again, discard the draft.'**
+  String get nutrition_recall_conflict_message;
+
+  /// No description provided for @nutrition_recall_discard_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard draft'**
+  String get nutrition_recall_discard_draft;
+
+  /// No description provided for @nutrition_recall_discard_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes the unsynced changes on this device. The saved entry remains available.'**
+  String get nutrition_recall_discard_confirmation;
+
+  /// No description provided for @nutrition_recall_discard_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not discard the draft. Try again.'**
+  String get nutrition_recall_discard_failed;
+
+  /// No description provided for @nutrition_recall_conflict_reopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the nutrition task again. If you still see an older version, reload the study.'**
+  String get nutrition_recall_conflict_reopen;
+
+  /// No description provided for @nutrition_recall_view_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'View draft'**
+  String get nutrition_recall_view_draft;
+
+  /// No description provided for @nutrition_recall_view_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'View saved version'**
+  String get nutrition_recall_view_saved;
+
+  /// No description provided for @nutrition_history_local_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved on this device'**
+  String get nutrition_history_local_draft;
+
+  /// No description provided for @nutrition_history_expired_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync window ended. This draft is only on this device.'**
+  String get nutrition_history_expired_draft;
+
+  /// No description provided for @nutrition_history_discard_expired_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this draft from this device? This cannot be undone.'**
+  String get nutrition_history_discard_expired_draft;
+
+  /// No description provided for @time_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get time_now;
+
+  /// No description provided for @nutrition_review_previous_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Review previous day’s nutrition'**
+  String get nutrition_review_previous_day;
+
+  /// No description provided for @food_library_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no foods or meals to show.'**
+  String get food_library_empty;
+
+  /// No description provided for @nutrition_known_values_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave unknown nutrient values blank.'**
+  String get nutrition_known_values_hint;
+
+  /// No description provided for @nutrition_log_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat diary entry'**
+  String get nutrition_log_again;
+
+  /// No description provided for @nutrition_choose_recent_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a recent meal'**
+  String get nutrition_choose_recent_meal;
+
+  /// No description provided for @nutrition_meal_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get nutrition_meal_items;
+
+  /// No description provided for @nutrition_save_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save diary entry'**
+  String get nutrition_save_meal;
+
+  /// No description provided for @nutrition_select_time_to_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a time to save'**
+  String get nutrition_select_time_to_save;
+
+  /// No description provided for @nutrition_food_details_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a specific name, such as rolled oats.'**
+  String get nutrition_food_details_subtitle;
+
+  /// No description provided for @nutrition_diary_tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary'**
+  String get nutrition_diary_tab;
+
+  /// No description provided for @nutrition_meal_foods_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Foods ({count})'**
+  String nutrition_meal_foods_section(Object count);
+
+  /// No description provided for @nutrition_photo_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get nutrition_photo_add;
+
+  /// No description provided for @nutrition_photo_replace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace photo'**
+  String get nutrition_photo_replace;
+
+  /// No description provided for @nutrition_photo_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get nutrition_photo_remove;
+
+  /// No description provided for @nutrition_photo_take.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get nutrition_photo_take;
+
+  /// No description provided for @nutrition_photo_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo'**
+  String get nutrition_photo_choose;
+
+  /// No description provided for @nutrition_photo_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this photo. Try a different image or check camera access.'**
+  String get nutrition_photo_invalid;
+
+  /// No description provided for @nutrition_photo_save_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your entry was saved. The photo change could not be saved.'**
+  String get nutrition_photo_save_failed;
+
+  /// No description provided for @nutrition_photo_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry photo'**
+  String get nutrition_photo_retry;
+
+  /// No description provided for @nutrition_library_available_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Available filters'**
+  String get nutrition_library_available_filters;
+
+  /// No description provided for @nutrition_library_selected_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected filters'**
+  String get nutrition_library_selected_filters;
+
+  /// No description provided for @nutrition_library_created_by_me.
+  ///
+  /// In en, this message translates to:
+  /// **'Created by me'**
+  String get nutrition_library_created_by_me;
+
+  /// No description provided for @nutrition_library_remove_filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove filter'**
+  String get nutrition_library_remove_filter;
+
+  /// No description provided for @edit_diary_entry_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit diary entry'**
+  String get edit_diary_entry_title;
+
+  /// No description provided for @meal_neutral_label_inline.
+  ///
+  /// In en, this message translates to:
+  /// **'entry'**
+  String get meal_neutral_label_inline;
+
+  /// No description provided for @nutrition_add_diary_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Log meal'**
+  String get nutrition_add_diary_entry;
+
+  /// No description provided for @nutrition_create_library_item.
+  ///
+  /// In en, this message translates to:
+  /// **'Create item'**
+  String get nutrition_create_library_item;
+
+  /// No description provided for @remove_from_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from entry'**
+  String get remove_from_entry;
+
+  /// No description provided for @library_copy_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit database food?'**
+  String get library_copy_edit_title;
+
+  /// No description provided for @library_copy_edit_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Your changes apply to this item. You can also save a copy for future use.'**
+  String get library_copy_edit_message;
+
+  /// No description provided for @library_copy_edit_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Also save a copy to Library'**
+  String get library_copy_edit_action;
+
+  /// No description provided for @nutrition_assisted_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Assisted meal logging'**
+  String get nutrition_assisted_entry;
+
+  /// No description provided for @nutrition_assisted_add_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos'**
+  String get nutrition_assisted_add_photos;
+
+  /// No description provided for @nutrition_assisted_open_gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Open gallery'**
+  String get nutrition_assisted_open_gallery;
+
+  /// No description provided for @nutrition_assisted_selected_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected photos'**
+  String get nutrition_assisted_selected_photos;
+
+  /// No description provided for @nutrition_assisted_continue_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to description'**
+  String get nutrition_assisted_continue_description;
+
+  /// No description provided for @nutrition_assisted_describe_meals.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your meals'**
+  String get nutrition_assisted_describe_meals;
+
+  /// No description provided for @nutrition_assisted_description_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Say or type what you ate. Include the time, place and who was with you if you remember.'**
+  String get nutrition_assisted_description_help;
+
+  /// No description provided for @nutrition_assisted_description_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, “I had oatmeal with banana for breakfast.”'**
+  String get nutrition_assisted_description_hint;
+
+  /// No description provided for @nutrition_assisted_description_photo_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, “Photo 1 shows the oatmeal I had for breakfast.”'**
+  String get nutrition_assisted_description_photo_hint;
+
+  /// No description provided for @nutrition_assisted_generate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate meal suggestions'**
+  String get nutrition_assisted_generate;
+
+  /// No description provided for @nutrition_assisted_generating.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing meal suggestions…'**
+  String get nutrition_assisted_generating;
+
+  /// No description provided for @nutrition_assisted_generation_help.
+  ///
+  /// In en, this message translates to:
+  /// **'You can check the suggested foods and portions before saving.'**
+  String get nutrition_assisted_generation_help;
+
+  /// No description provided for @nutrition_assisted_generation_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare meal suggestions. Check your description and try again.'**
+  String get nutrition_assisted_generation_error;
+
+  /// No description provided for @nutrition_assisted_photo_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {number}'**
+  String nutrition_assisted_photo_number(Object number);
+
+  /// No description provided for @nutrition_assisted_remove_photo_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo {number}?'**
+  String nutrition_assisted_remove_photo_title(Object number);
+
+  /// No description provided for @nutrition_assisted_remove_photo_help.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the photo from this draft.'**
+  String get nutrition_assisted_remove_photo_help;
+
+  /// No description provided for @nutrition_assisted_keep_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep photo'**
+  String get nutrition_assisted_keep_photo;
+
+  /// No description provided for @nutrition_assisted_removed_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'removed photo'**
+  String get nutrition_assisted_removed_photo;
+
+  /// No description provided for @nutrition_assisted_photo_permission.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow access to show photos from this day.'**
+  String get nutrition_assisted_photo_permission;
+
+  /// No description provided for @nutrition_assisted_gallery_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the photo gallery.'**
+  String get nutrition_assisted_gallery_error;
+
+  /// No description provided for @nutrition_assisted_recording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get nutrition_assisted_recording;
+
+  /// No description provided for @nutrition_assisted_stop_transcribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and transcribe'**
+  String get nutrition_assisted_stop_transcribe;
+
+  /// No description provided for @nutrition_assisted_transcribing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing transcript…'**
+  String get nutrition_assisted_transcribing;
+
+  /// No description provided for @nutrition_assisted_transcript_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare a transcript. Try again or type your description.'**
+  String get nutrition_assisted_transcript_error;
+
+  /// No description provided for @nutrition_assisted_demo_transcript.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample transcript. You can edit it before continuing.'**
+  String get nutrition_assisted_demo_transcript;
+
+  /// No description provided for @nutrition_assisted_correct_voice.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct by voice'**
+  String get nutrition_assisted_correct_voice;
+
+  /// No description provided for @nutrition_assisted_correction_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what to change in the suggested meals.'**
+  String get nutrition_assisted_correction_help;
+
+  /// No description provided for @nutrition_assisted_correction_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, “I had 75 grams of potato salad.”'**
+  String get nutrition_assisted_correction_hint;
+
+  /// No description provided for @nutrition_assisted_apply_correction.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply correction'**
+  String get nutrition_assisted_apply_correction;
+
+  /// No description provided for @nutrition_assisted_correction_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not apply this correction. Check the food and portion.'**
+  String get nutrition_assisted_correction_error;
+
+  /// No description provided for @assisted_review_meals.
+  ///
+  /// In en, this message translates to:
+  /// **'Review meals'**
+  String get assisted_review_meals;
+
+  /// No description provided for @assisted_review_instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'These are demo suggestions. Check foods, portions and times. Drag a food to reorder it or move it to another meal.'**
+  String get assisted_review_instructions;
+
+  /// No description provided for @assisted_estimated_portion.
+  ///
+  /// In en, this message translates to:
+  /// **'{portion} · Estimated'**
+  String assisted_estimated_portion(Object portion);
+
+  /// No description provided for @assisted_food_order_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {food}'**
+  String assisted_food_order_actions(Object food);
+
+  /// No description provided for @assisted_move_food_up.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get assisted_move_food_up;
+
+  /// No description provided for @assisted_move_food_down.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get assisted_move_food_down;
+
+  /// No description provided for @assisted_move_food_to_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to {meal}'**
+  String assisted_move_food_to_meal(Object meal);
+
+  /// No description provided for @assisted_empty_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Move a food here or remove this meal before saving.'**
+  String get assisted_empty_meal;
+
+  /// No description provided for @assisted_remove_empty_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove meal'**
+  String get assisted_remove_empty_meal;
+
+  /// No description provided for @assisted_save_diary_entries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Save 1 diary entry} other{Save {count} diary entries}}'**
+  String assisted_save_diary_entries(num count);
+
+  /// No description provided for @assisted_save_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the diary entries. Try again.'**
+  String get assisted_save_failed;
+
+  /// No description provided for @assisted_edit_meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit meal'**
+  String get assisted_edit_meal;
+
+  /// No description provided for @nutrition_assisted_sample_description.
+  ///
+  /// In en, this message translates to:
+  /// **'I had oatmeal with banana for breakfast at about 8:15 am. I had Maultaschen and potato salad for lunch at about 12:30 pm.'**
+  String get nutrition_assisted_sample_description;
+
+  /// No description provided for @nutrition_assisted_sample_one_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo 1 shows the oatmeal with banana I had for breakfast at about 8:15 am. I had Maultaschen and potato salad for lunch at about 12:30 pm.'**
+  String get nutrition_assisted_sample_one_photo;
+
+  /// No description provided for @nutrition_assisted_sample_two_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo 1 shows oatmeal with banana for breakfast at about 8:15 am. Photo 2 shows Maultaschen and potato salad for lunch at about 12:30 pm.'**
+  String get nutrition_assisted_sample_two_photos;
+
+  /// No description provided for @nutrition_assisted_sample_correction.
+  ///
+  /// In en, this message translates to:
+  /// **'The potato salad portion was 75 grams.'**
+  String get nutrition_assisted_sample_correction;
+
+  /// No description provided for @nutrition_assisted_continue_without_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without photos'**
+  String get nutrition_assisted_continue_without_photos;
+
+  /// No description provided for @assisted_confirm_meal_changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm changes'**
+  String get assisted_confirm_meal_changes;
+
+  /// No description provided for @nutrition_assisted_reorder_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder photos'**
+  String get nutrition_assisted_reorder_photos;
+
+  /// No description provided for @nutrition_assisted_reorder_photo_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Touch and hold a photo to drag it.\nTap a photo to use the move buttons below.'**
+  String get nutrition_assisted_reorder_photo_help;
+
+  /// No description provided for @nutrition_assisted_photo_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {number} selected'**
+  String nutrition_assisted_photo_selected(Object number);
+
+  /// No description provided for @nutrition_assisted_move_photo_earlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Move earlier'**
+  String get nutrition_assisted_move_photo_earlier;
+
+  /// No description provided for @nutrition_assisted_move_photo_later.
+  ///
+  /// In en, this message translates to:
+  /// **'Move later'**
+  String get nutrition_assisted_move_photo_later;
 }
 
 class _AppLocalizationsDelegate

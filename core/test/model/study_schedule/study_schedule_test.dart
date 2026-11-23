@@ -109,6 +109,31 @@ void main() {
     group('Randomized Phase Sequence', () {
       setUp(() => schedule.sequence = PhaseSequence.randomized);
       includeCommonRequirements();
+
+      test('keeps each participant assignment stable across reads', () {
+        schedule.numberOfCycles = 3;
+        const interventions = ['A', 'B'];
+        const participants = [
+          '00000000-0000-4000-8000-000000000001',
+          '00000000-0000-4000-8000-000000000002',
+        ];
+        for (var read = 0; read < 3; read++) {
+          expect(
+            schedule.generateInterventionIdsInOrder(
+              interventions,
+              participantId: participants[0],
+            ),
+            [Study.baselineID, 'A', 'B', 'A', 'B', 'A', 'B'],
+          );
+          expect(
+            schedule.generateInterventionIdsInOrder(
+              interventions,
+              participantId: participants[1],
+            ),
+            [Study.baselineID, 'A', 'B', 'B', 'A', 'B', 'A'],
+          );
+        }
+      });
     });
   });
 }

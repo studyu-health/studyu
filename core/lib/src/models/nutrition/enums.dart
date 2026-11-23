@@ -8,6 +8,16 @@ enum RecallMode() {
   static RecallMode fromJson(String json) => values.byName(json);
 }
 
+enum MealOccurrenceTimePrecision() {
+  exact,
+  approximate,
+  unknown;
+
+  String toJson() => name;
+  static MealOccurrenceTimePrecision fromJson(String json) =>
+      values.byName(json);
+}
+
 enum MealType() {
   breakfast,
   brunch,
@@ -55,7 +65,7 @@ enum DistractionContext() {
 
 enum FoodEntryType() {
   singleIngredient,
-  recipe,
+  meal,
   brandedProduct,
   manualCustom;
 

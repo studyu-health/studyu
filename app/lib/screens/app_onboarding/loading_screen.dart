@@ -17,6 +17,7 @@ import 'package:studyu_app/services/deep_link_service.dart';
 import 'package:studyu_app/services/deferred_link_service.dart';
 import 'package:studyu_app/services/pending_deep_link_service.dart';
 import 'package:studyu_app/services/restore_account_service.dart';
+import 'package:studyu_app/services/study_withdrawal_cleanup.dart';
 import 'package:studyu_app/util/cache.dart';
 import 'package:studyu_app/util/dashboard_showcase.dart';
 import 'package:studyu_app/util/debug_mode.dart';
@@ -67,6 +68,9 @@ class _LoadingScreenState() extends State<LoadingScreen> {
   bool _previewNavigationInProgress = false;
   String? _pendingPreviewRoute;
   String? _error;
+  bool _withdrawalCleanupFailed = false;
+  bool _webDeepLinkReady = false;
+  Future<bool>? _withdrawalCleanupCheck;
 
   Future<bool> _restoreParticipantSession() async {
     if (isUserLoggedIn()) return false;
@@ -167,9 +171,12 @@ class _LoadingScreenState() extends State<LoadingScreen> {
   }
 
   Future<void> _runStartupFlow() async {
+    if (!await _resumeWithdrawalCleanup() || !mounted) return;
     if (await _restoreParticipantSession()) return;
+    if (!mounted) return;
 
     if (kIsWeb && widget.hasDeepLink) {
+      setState(() => _webDeepLinkReady = true);
       return;
     }
 
@@ -208,6 +215,52 @@ class _LoadingScreenState() extends State<LoadingScreen> {
     await initStudy();
   }
 
+  Future<bool> _resumeWithdrawalCleanup() =>
+      _withdrawalCleanupCheck ??= _checkWithdrawalCleanup().whenComplete(() {
+        _withdrawalCleanupCheck = null;
+      });
+
+  Future<bool> _checkWithdrawalCleanup() async {
+    try {
+      var pending = await StudyWithdrawalCleanup.load();
+      if (pending == null) return true;
+
+      if (!pending.confirmed &&
+          await getActiveSubjectId() != pending.subjectId) {
+        return true;
+      }
+      if (!pending.photosDeleted && await _restoreParticipantSession()) {
+        return false;
+      }
+      if (!pending.confirmed) {
+        final subjectExists = await pending.remoteSubjectExists();
+        if (subjectExists == null) {
+          throw StateError('Could not verify the account for study deletion.');
+        }
+        if (subjectExists) {
+          await pending.finish();
+          return true;
+        }
+        pending = await pending.confirm();
+      }
+
+      if (!mounted) return false;
+      await pending.clearStudyData(context.read<AppState>());
+      return mounted;
+    } catch (_, stackTrace) {
+      StudyULogger.warning(
+        'Could not resume study deletion.',
+        stackTrace: stackTrace,
+      );
+      if (!mounted) return false;
+      setState(() {
+        _withdrawalCleanupFailed = true;
+        _error = AppLocalizations.of(context)!.error;
+      });
+      return false;
+    }
+  }
+
   Future<void> _handleDeferredLink(DeferredLink deferredLink) async {
     await _handleIncomingDeepLink(
       inviteCode: deferredLink.inviteCode,
@@ -217,6 +270,10 @@ class _LoadingScreenState() extends State<LoadingScreen> {
   }
 
   Future<void> _initDeepLink() async {
+    if (!await _resumeWithdrawalCleanup() || !mounted) return;
+    if (_withdrawalCleanupFailed) {
+      setState(() => _withdrawalCleanupFailed = false);
+    }
     await _handleIncomingDeepLink(
       studyId: widget.deepLinkStudyId,
       inviteCode: widget.deepLinkInviteCode,
@@ -529,7 +586,7 @@ class _LoadingScreenState() extends State<LoadingScreen> {
       // Only fall back to cache for network errors (device offline)
       try {
         final cached = await Cache.loadSubject();
-        StudyULogger.info("Loaded subject from cache: $cached");
+        StudyULogger.info('Loaded the cached subject.');
         return cached;
       } catch (e) {
         StudyULogger.warning("No subject found in cache");
@@ -805,7 +862,10 @@ class _LoadingScreenState() extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb && widget.hasDeepLink) {
+    if (kIsWeb &&
+        widget.hasDeepLink &&
+        _webDeepLinkReady &&
+        !_withdrawalCleanupFailed) {
       return DeepLinkWebLandingPage(
         inviteCode: widget.deepLinkInviteCode,
         studyId: widget.deepLinkStudyId,
@@ -826,7 +886,9 @@ class _LoadingScreenState() extends State<LoadingScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  AppLocalizations.of(context)!.error,
+                  _withdrawalCleanupFailed
+                      ? AppLocalizations.of(context)!.delete_data
+                      : AppLocalizations.of(context)!.error,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 8),
@@ -840,8 +902,20 @@ class _LoadingScreenState() extends State<LoadingScreen> {
                 ),
                 const SizedBox(height: 24),
                 OutlinedButton(
-                  onPressed: _acknowledgeDeepLinkError,
-                  child: Text(AppLocalizations.of(context)!.ok),
+                  onPressed: _withdrawalCleanupFailed
+                      ? () {
+                          setState(() {
+                            _withdrawalCleanupFailed = false;
+                            _error = null;
+                          });
+                          _runStartupFlow();
+                        }
+                      : _acknowledgeDeepLinkError,
+                  child: Text(
+                    _withdrawalCleanupFailed
+                        ? AppLocalizations.of(context)!.try_again
+                        : AppLocalizations.of(context)!.ok,
+                  ),
                 ),
               ],
             ),

@@ -5,6 +5,7 @@ import 'package:studyu_designer_v2/common_views/empty_body.dart';
 import 'package:studyu_designer_v2/common_views/form_table_layout.dart';
 import 'package:studyu_designer_v2/common_views/primary_button.dart';
 import 'package:studyu_designer_v2/common_views/standard_table.dart';
+import 'package:studyu_designer_v2/common_views/text_paragraph.dart';
 import 'package:studyu_designer_v2/features/forms/form_array_table.dart';
 
 class const FormListView<T>({
@@ -46,7 +47,7 @@ class const FormListView<T>({
         if (sectionDescription != null && !(hasEmptyWidget && items.isEmpty))
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
-            child: Text(sectionDescription!, style: theme.textTheme.bodyMedium),
+            child: TextParagraph(text: sectionDescription),
           ),
         if (items.isEmpty && hasEmptyWidget)
           EmptyBody(

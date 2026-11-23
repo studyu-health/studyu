@@ -139,6 +139,18 @@ void main() {
       findsOneWidget,
     );
 
+    final title = tester.widget<Title>(
+      find.byWidgetPredicate(
+        (widget) => widget is Title && widget.title == 'Eligibility check',
+      ),
+    );
+    expect(
+      title.color,
+      Theme.of(tester.element(find.byType(EligibilityScreen)))
+          .colorScheme
+          .primary,
+    );
+
     await tester.tap(find.text('yes'));
     await tester.pumpAndSettle();
 

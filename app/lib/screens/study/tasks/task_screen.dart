@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:studyu_app/l10n/app_localizations.dart';
@@ -6,6 +7,7 @@ import 'package:studyu_app/screens/study/tasks/intervention/checkmark_task_widge
 import 'package:studyu_app/screens/study/tasks/observation/nutrition_task_widget.dart';
 import 'package:studyu_app/screens/study/tasks/observation/questionnaire_task_widget.dart';
 import 'package:studyu_app/util/cache.dart';
+import 'package:studyu_app/util/debug_mode.dart';
 import 'package:studyu_app/widgets/html_text.dart';
 import 'package:studyu_core/core.dart';
 
@@ -29,10 +31,12 @@ class _TaskScreenState() extends State<TaskScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     subject = context.watch<AppState>().activeSubject;
-    taskInstance = TaskInstance.fromInstanceId(
-      widget.taskInstance.id,
-      study: subject!.study,
-    );
+    if (!_hasNavigated) {
+      taskInstance = TaskInstance.fromInstanceId(
+        widget.taskInstance.id,
+        study: subject!.study,
+      );
+    }
 
     if (taskInstance.task is NutritionTask && !_hasNavigated) {
       _hasNavigated = true;
@@ -43,11 +47,44 @@ class _TaskScreenState() extends State<TaskScreen> {
   }
 
   Future<void> _navigateToNutritionTask() async {
+    if (!mounted) return;
     final nutritionTask = taskInstance.task as NutritionTask;
+    final completionPeriod = taskInstance.completionPeriod;
+    final state = context.read<AppState>();
+    final now = DateTime.now();
+    final isScheduled =
+        subject
+            ?.scheduleFor(now)
+            .any(
+              (instance) =>
+                  instance.task.id == nutritionTask.id &&
+                  instance.id == completionPeriod.id,
+            ) ??
+        false;
+    if (!isScheduled ||
+        (!state.isPreview &&
+            !isDebugMode &&
+            !completionPeriod.contains(
+              StudyUTimeOfDay(hour: now.hour, minute: now.minute),
+            ))) {
+      Navigator.of(context).pop(false);
+      return;
+    }
     final result = await Navigator.of(context).push(
-      NutritionTaskWidget.route(
-        task: nutritionTask,
-        completionPeriod: taskInstance.completionPeriod,
+      MaterialPageRoute<DailyRecall>(
+        builder: (context) => Consumer<AppState>(
+          builder: (context, state, child) {
+            final updatedTask = state.isPreview
+                ? state.activeSubject?.study.observations
+                      .whereType<NutritionTask>()
+                      .firstWhereOrNull((task) => task.id == nutritionTask.id)
+                : null;
+            return NutritionTaskWidget(
+              task: updatedTask ?? nutritionTask,
+              completionPeriod: completionPeriod,
+            );
+          },
+        ),
       ),
     );
 

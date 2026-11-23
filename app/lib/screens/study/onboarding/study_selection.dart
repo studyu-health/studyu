@@ -340,6 +340,8 @@ class _InviteCodeDialogState() extends State<InviteCodeDialog> {
           TextFormField(
             controller: _controller,
             autofocus: true,
+            autocorrect: false,
+            enableSuggestions: false,
             validator: (_) => _errorMessage,
             autovalidateMode: AutovalidateMode.always,
             textInputAction: TextInputAction.done,

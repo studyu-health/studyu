@@ -192,11 +192,15 @@ class FoodAnalysisService() {
       sugars: (nutritionData['sugars'] as num?)?.toDouble() ?? 0,
       fiber: (nutritionData['fiber'] as num?)?.toDouble() ?? 0,
       saturatedFat: (nutritionData['saturatedFat'] as num?)?.toDouble() ?? 0,
-      transFat: 0,
-      cholesterol: 0,
+      transFat: (nutritionData['transFat'] as num?)?.toDouble() ?? 0,
+      cholesterol: (nutritionData['cholesterol'] as num?)?.toDouble() ?? 0,
       sodium: (nutritionData['sodium'] as num?)?.toDouble() ?? 0,
-      waterContent: 0,
+      waterContent: (nutritionData['waterContent'] as num?)?.toDouble() ?? 0,
       micros: const {},
+      unavailableNutrients: {
+        for (final key in NutritionProfile.nutrientKeys)
+          if (nutritionData[key] == null) key,
+      },
     );
 
     final foodEntry = FoodEntry.withId(

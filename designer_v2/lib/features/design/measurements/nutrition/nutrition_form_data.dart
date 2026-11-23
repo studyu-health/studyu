@@ -3,7 +3,7 @@ import 'package:studyu_designer_v2/domain/schedule.dart';
 import 'package:studyu_designer_v2/domain/study.dart';
 import 'package:studyu_designer_v2/features/design/shared/schedule/schedule_form_data.dart';
 import 'package:studyu_designer_v2/features/forms/form_data.dart';
-
+import 'package:studyu_designer_v2/localization/app_translation.dart';
 import 'package:studyu_designer_v2/utils/extensions.dart';
 import 'package:uuid/uuid.dart';
 
@@ -18,12 +18,15 @@ class NutritionFormData({
   required super.hasReminder,
   super.reminderTime,
   final bool collectMealContext = true,
-  final bool allowRecipes = true,
+  final bool allowMeals = true,
+  final bool trackWaterIntake = false,
+  final bool showStatistics = false,
   final int? minimumMealsRequired,
   final List<String>? customMealTypes,
   final TaskScheduleRule? scheduleRule,
+  final List<CompletionPeriod> additionalCompletionPeriods = const [],
 }) extends IFormDataWithSchedule {
-  static String get kDefaultTitle => 'Nutrition Tracking';
+  static String get kDefaultTitle => tr.form_field_nutrition_default_title;
 
   @override
   FormDataID get id => measurementId;
@@ -40,12 +43,21 @@ class NutritionFormData({
       reminderTime: nutritionTask.schedule.reminderTime,
       instanceId: nutritionTask.schedule.instanceId,
       collectMealContext: nutritionTask.collectMealContext,
-      allowRecipes: nutritionTask.allowRecipes,
+      allowMeals: nutritionTask.allowMeals,
+      trackWaterIntake: nutritionTask.trackWaterIntake,
+      showStatistics: nutritionTask.showStatistics,
       minimumMealsRequired: nutritionTask.minimumMealsRequired,
       customMealTypes: nutritionTask.customMealTypes,
       scheduleRule: nutritionTask.scheduleRule,
+      additionalCompletionPeriods: nutritionTask.schedule.completionPeriods
+          .skip(1)
+          .toList(),
     );
   }
+
+  @override
+  Schedule toSchedule() =>
+      super.toSchedule()..completionPeriods.addAll(additionalCompletionPeriods);
 
   NutritionTask toNutritionTask() {
     final nutritionTask = NutritionTask();
@@ -54,7 +66,9 @@ class NutritionFormData({
     nutritionTask.instructions = instructions;
     nutritionTask.schedule = toSchedule();
     nutritionTask.collectMealContext = collectMealContext;
-    nutritionTask.allowRecipes = allowRecipes;
+    nutritionTask.allowMeals = allowMeals;
+    nutritionTask.trackWaterIntake = trackWaterIntake;
+    nutritionTask.showStatistics = showStatistics;
     nutritionTask.minimumMealsRequired = minimumMealsRequired;
     nutritionTask.customMealTypes = customMealTypes;
     nutritionTask.scheduleRule = scheduleRule;
@@ -74,12 +88,21 @@ class NutritionFormData({
       hasReminder: hasReminder,
       reminderTime: reminderTime,
       collectMealContext: collectMealContext,
-      allowRecipes: allowRecipes,
+      allowMeals: allowMeals,
+      trackWaterIntake: trackWaterIntake,
+      showStatistics: showStatistics,
       minimumMealsRequired: minimumMealsRequired,
       customMealTypes: customMealTypes != null
           ? List.from(customMealTypes!)
           : null,
       scheduleRule: scheduleRule,
+      additionalCompletionPeriods: [
+        for (final period in additionalCompletionPeriods)
+          CompletionPeriod.noId(
+            unlockTime: period.unlockTime,
+            lockTime: period.lockTime,
+          ),
+      ],
     );
   }
 }

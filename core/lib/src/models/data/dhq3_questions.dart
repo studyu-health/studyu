@@ -7,6 +7,10 @@ import 'package:studyu_core/src/models/data/dhq3_choices.dart';
 /// Skip logic: frequency/portion only when item is selected (checklists) or when frequency != NEVER.
 class Dhq3Questions() {
   static const int surveyCount = 14;
+  static const String birthDateQuestionId = 'dhq_dob';
+
+  static bool isBirthDateQuestionId(String id) =>
+      id == birthDateQuestionId || id.startsWith('$birthDateQuestionId-');
 
   /// Ordered list of survey titles (day 1 = index 0, etc.). Balanced cluster sizes (~16–34 questions each).
   static const List<String> surveyTitles = [
@@ -136,7 +140,7 @@ class Dhq3Questions() {
     final q = <Question>[];
 
     final dob = DateQuestion()
-      ..id = 'dhq_dob'
+      ..id = birthDateQuestionId
       ..prompt = 'What is your date of birth?';
     q.add(dob);
 

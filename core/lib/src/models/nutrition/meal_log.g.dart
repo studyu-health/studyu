@@ -6,37 +6,51 @@ part of 'meal_log.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MealLog _$MealLogFromJson(Map<String, dynamic> json) => MealLog(
-  id: json['id'] as String,
-  mealType: $enumDecode(_$MealTypeEnumMap, json['mealType']),
-  customMealLabel: json['customMealLabel'] as String?,
-  mealContext: $enumDecode(_$MealContextEnumMap, json['mealContext']),
-  locationDescription: json['locationDescription'] as String?,
-  timestamp: DateTime.parse(json['timestamp'] as String),
-  timezone: json['timezone'] as String,
-  isSkipped: json['isSkipped'] as bool,
-  skipReason: json['skipReason'] as String?,
-  companyContext: $enumDecodeNullable(
-    _$CompanyContextEnumMap,
-    json['companyContext'],
-  ),
-  distractionContext: $enumDecodeNullable(
-    _$DistractionContextEnumMap,
-    json['distractionContext'],
-  ),
-  templateId: json['templateId'] as String?,
-  foods: (json['foods'] as List<dynamic>)
-      .map((e) => FoodEntry.fromJson(e as Map<String, dynamic>))
-      .toList(),
-);
+MealLog _$MealLogFromJson(Map<String, dynamic> json) {
+  $checkKeys(
+    json,
+    requiredKeys: const ['timePrecision'],
+    disallowNullValues: const ['timePrecision'],
+  );
+  return MealLog(
+    id: json['id'] as String,
+    mealType: $enumDecode(_$MealTypeEnumMap, json['mealType']),
+    customMealLabel: json['customMealLabel'] as String?,
+    mealContext: $enumDecodeNullable(_$MealContextEnumMap, json['mealContext']),
+    locationDescription: json['locationDescription'] as String?,
+    timestamp: json['timestamp'] == null
+        ? null
+        : DateTime.parse(json['timestamp'] as String),
+    timePrecision: $enumDecode(
+      _$MealOccurrenceTimePrecisionEnumMap,
+      json['timePrecision'],
+    ),
+    timezone: json['timezone'] as String,
+    isSkipped: json['isSkipped'] as bool,
+    skipReason: json['skipReason'] as String?,
+    companyContext: $enumDecodeNullable(
+      _$CompanyContextEnumMap,
+      json['companyContext'],
+    ),
+    distractionContext: $enumDecodeNullable(
+      _$DistractionContextEnumMap,
+      json['distractionContext'],
+    ),
+    templateId: json['templateId'] as String?,
+    foods: (json['foods'] as List<dynamic>)
+        .map((e) => FoodEntry.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
+}
 
 Map<String, dynamic> _$MealLogToJson(MealLog instance) => <String, dynamic>{
   'id': instance.id,
   'mealType': instance.mealType.toJson(),
   'customMealLabel': ?instance.customMealLabel,
-  'mealContext': instance.mealContext.toJson(),
+  'mealContext': ?instance.mealContext?.toJson(),
   'locationDescription': ?instance.locationDescription,
-  'timestamp': instance.timestamp.toIso8601String(),
+  'timestamp': ?instance.timestamp?.toIso8601String(),
+  'timePrecision': instance.timePrecision.toJson(),
   'timezone': instance.timezone,
   'isSkipped': instance.isSkipped,
   'skipReason': ?instance.skipReason,
@@ -61,6 +75,12 @@ const _$MealContextEnumMap = {
   MealContext.takeout: 'takeout',
   MealContext.vending: 'vending',
   MealContext.other: 'other',
+};
+
+const _$MealOccurrenceTimePrecisionEnumMap = {
+  MealOccurrenceTimePrecision.exact: 'exact',
+  MealOccurrenceTimePrecision.approximate: 'approximate',
+  MealOccurrenceTimePrecision.unknown: 'unknown',
 };
 
 const _$CompanyContextEnumMap = {

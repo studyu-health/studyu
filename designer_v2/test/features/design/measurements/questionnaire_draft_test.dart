@@ -29,6 +29,8 @@ void main() {
       );
       await Future<void>.delayed(Duration.zero);
 
+      expect(survey.isDirty, isFalse);
+
       final question = survey.questionModels.single;
       question.questionTextControl.value = 'Changed question';
       await question.save();

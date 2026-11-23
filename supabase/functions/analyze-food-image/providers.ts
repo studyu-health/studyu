@@ -1,0 +1,495 @@
+// Types
+interface MealContext {
+  mealType?: string;
+  mealTime?: string;
+}
+
+interface NutritionData {
+  energyKcal?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  sugars?: number;
+  fiber?: number;
+  saturatedFat?: number;
+  sodium?: number;
+}
+
+function normalizeNutrition(nutrition: unknown): NutritionData {
+  if (typeof nutrition !== 'object' || nutrition === null) return {};
+
+  const raw = nutrition as Record<string, unknown>;
+  const normalized: NutritionData = {};
+  const keys = [
+    'energyKcal', 'protein', 'carbs', 'fat', 'sugars',
+    'fiber', 'saturatedFat', 'sodium',
+  ] as const;
+
+  for (const key of keys) {
+    const value = raw[key];
+    if (typeof value === 'number' && Number.isFinite(value) && value >= 0) {
+      normalized[key] = value;
+    }
+  }
+
+  return normalized;
+}
+
+interface AnalyzedFoodItem {
+  name: string;
+  description?: string;
+  amount: number;
+  unit: string;
+  servingSizeGrams: number;
+  nutrition: NutritionData;
+  portionReference?: string;
+  confidenceScore: number;
+}
+
+interface FoodAnalysisResponse {
+  items: AnalyzedFoodItem[];
+  overallConfidence: number;
+  notes?: string;
+}
+
+export type ImageMimeType = 'image/jpeg' | 'image/png';
+
+export interface LLMProvider {
+  analyzeImage(imageBase64: string, mimeType: ImageMimeType, mealContext: MealContext): Promise<FoodAnalysisResponse>;
+}
+
+const providerTimeoutMs = 20_000;
+
+// System prompt for food analysis
+const SYSTEM_PROMPT = `You are an expert Nutritionist and Food Analyst AI. Analyze this food image and identify ALL distinct food items intended for consumption.
+
+## Image Analysis Guidelines
+
+**Distinguish Meal vs. Clutter:** Focus ONLY on the plated food intended for consumption. Ignore background items (e.g., dirty dishes, napkins, random objects) unless they are clearly being used as a dip or topping on the plate.
+
+**Tricky Angles:** If the angle makes volume hard to estimate, assume standard restaurant or home portion sizes rather than extreme amounts.
+
+**Separate Items:** Identify each distinct food separately (e.g., "burger" and "fries" as separate items). If a complete meal, estimate each component individually.
+
+**Visible Drinks:** Include visible drinks as separate items if clearly identifiable.
+
+## Output Format
+
+Return a JSON object with:
+{
+  "items": [
+    {
+      "name": "Descriptive food name",
+      "description": "Brief description including preparation style if visible",
+      "amount": precise_numeric_amount,
+      "unit": "serving|cup|oz|g|piece|slice|tbsp|tsp",
+      "servingSizeGrams": estimated_grams,
+      "nutrition": {
+        "energyKcal": precise_calorie_estimate,
+        "protein": grams,
+        "carbs": grams,
+        "fat": grams,
+        "sugars": grams,
+        "fiber": grams,
+        "saturatedFat": grams,
+        "sodium": milligrams
+      },
+      "portionReference": "visual cue explaining estimate (e.g., 'palm-sized portion', 'standard dinner plate')",
+      "confidenceScore": 0.0_to_1.0
+    }
+  ],
+  "overallConfidence": 0.0_to_1.0,
+  "notes": "Reasoning about portion estimation and any relevant context (e.g., 'appears homemade', 'restaurant-sized portion', 'angle makes bread appear larger than typical slice')"
+}
+
+## Critical Rules
+
+1. **Precise Numbers Only:** Do NOT use ranges (e.g., use 550, not 500-600). Provide single precise estimates.
+
+2. **Confidence Scoring:**
+   - 0.8-1.0: Food clearly visible, standard portions, high certainty
+   - 0.5-0.79: Some ambiguity in identification or portion size
+   - Below 0.5: Image blurry, food hidden/unrecognizable, or angle makes estimation very difficult
+
+3. **Portion Estimation:** Always explain HOW you estimated the portion in the portionReference field. Reference visual cues like plate size, hand comparisons, or standard serving sizes.
+
+4. **Nutritional Accuracy:** Base estimates on USDA food database values when possible. For mixed dishes, estimate component ingredients.
+
+5. **Notes Field:** Always include reasoning about your portion estimation approach and why you assigned the confidence scores you did.`;
+
+// OpenAI Provider Implementation
+class OpenAIProvider implements LLMProvider {
+  private apiKey: string;
+  private model: string;
+
+  constructor(apiKey: string, model = 'gpt-4o-mini') {
+    this.apiKey = apiKey;
+    this.model = model;
+  }
+
+  async analyzeImage(imageBase64: string, mimeType: ImageMimeType, mealContext: MealContext): Promise<FoodAnalysisResponse> {
+    const userContent = this.buildUserContent(mealContext);
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      signal: AbortSignal.timeout(providerTimeoutMs),
+      headers: {
+        'Authorization': `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: this.model,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: userContent },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mimeType};base64,${imageBase64}`,
+                },
+              },
+            ],
+          },
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error('Empty response from OpenAI');
+    }
+
+    return this.parseResponse(content);
+  }
+
+  private buildUserContent(mealContext?: MealContext): string {
+    let content = 'Please analyze this food image and provide detailed nutritional estimates.';
+
+    if (mealContext?.mealType) {
+      content += ` This appears to be a ${mealContext.mealType}.`;
+    }
+
+    if (mealContext?.mealTime) {
+      content += ` The meal time is ${mealContext.mealTime}.`;
+    }
+
+    return content;
+  }
+
+  private parseResponse(content: string): FoodAnalysisResponse {
+    try {
+      const parsed = JSON.parse(content);
+
+      // Validate structure
+      if (!parsed.items || !Array.isArray(parsed.items)) {
+        throw new Error('Invalid response structure: missing items array');
+      }
+
+      // Validate and normalize each item
+      const items: AnalyzedFoodItem[] = parsed.items.map((item: unknown) => this.validateAndNormalizeItem(item));
+
+      return {
+        items,
+        overallConfidence: parsed.overallConfidence ?? 0.5,
+        notes: parsed.notes,
+      };
+    } catch (error) {
+      throw new Error(`Failed to parse LLM response: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private validateAndNormalizeItem(item: unknown): AnalyzedFoodItem {
+    if (typeof item !== 'object' || item === null) {
+      throw new Error('Invalid item: not an object');
+    }
+
+    const raw = item as Record<string, unknown>;
+
+    return {
+      name: String(raw.name ?? 'Unknown Food'),
+      description: raw.description ? String(raw.description) : undefined,
+      amount: Number(raw.amount) || 1,
+      unit: String(raw.unit ?? 'serving'),
+      servingSizeGrams: Number(raw.servingSizeGrams) || 100,
+      nutrition: normalizeNutrition(raw.nutrition),
+      portionReference: raw.portionReference ? String(raw.portionReference) : undefined,
+      confidenceScore: Math.max(0, Math.min(1, Number(raw.confidenceScore) || 0.5)),
+    };
+  }
+}
+
+// Anthropic Provider Implementation
+class AnthropicProvider implements LLMProvider {
+  private apiKey: string;
+  private model: string;
+
+  constructor(apiKey: string, model = 'claude-sonnet-4-6') {
+    this.apiKey = apiKey;
+    this.model = model;
+  }
+
+  async analyzeImage(imageBase64: string, mimeType: ImageMimeType, mealContext: MealContext): Promise<FoodAnalysisResponse> {
+    const userContent = this.buildUserContent(mealContext);
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: AbortSignal.timeout(providerTimeoutMs),
+      headers: {
+        'x-api-key': this.apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: this.model,
+        max_tokens: 2000,
+        system: SYSTEM_PROMPT,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: userContent },
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mimeType,
+                  data: imageBase64,
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Anthropic API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.content?.[0]?.text;
+
+    if (!content) {
+      throw new Error('Empty response from Anthropic');
+    }
+
+    // Extract JSON from the response (Claude might wrap it in markdown)
+    const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```/) ||
+      content.match(/```\n?([\s\S]*?)\n?```/) ||
+      [null, content];
+
+    const jsonContent = jsonMatch[1] || content;
+    return this.parseResponse(jsonContent);
+  }
+
+  private buildUserContent(mealContext?: MealContext): string {
+    let content = 'Please analyze this food image and provide detailed nutritional estimates.';
+
+    if (mealContext?.mealType) {
+      content += ` This appears to be a ${mealContext.mealType}.`;
+    }
+
+    if (mealContext?.mealTime) {
+      content += ` The meal time is ${mealContext.mealTime}.`;
+    }
+
+    return content;
+  }
+
+  private parseResponse(content: string): FoodAnalysisResponse {
+    try {
+      const parsed = JSON.parse(content);
+
+      if (!parsed.items || !Array.isArray(parsed.items)) {
+        throw new Error('Invalid response structure: missing items array');
+      }
+
+      const items: AnalyzedFoodItem[] = parsed.items.map((item: unknown) => this.validateAndNormalizeItem(item));
+
+      return {
+        items,
+        overallConfidence: parsed.overallConfidence ?? 0.5,
+        notes: parsed.notes,
+      };
+    } catch (error) {
+      throw new Error(`Failed to parse LLM response: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private validateAndNormalizeItem(item: unknown): AnalyzedFoodItem {
+    if (typeof item !== 'object' || item === null) {
+      throw new Error('Invalid item: not an object');
+    }
+
+    const raw = item as Record<string, unknown>;
+
+    return {
+      name: String(raw.name ?? 'Unknown Food'),
+      description: raw.description ? String(raw.description) : undefined,
+      amount: Number(raw.amount) || 1,
+      unit: String(raw.unit ?? 'serving'),
+      servingSizeGrams: Number(raw.servingSizeGrams) || 100,
+      nutrition: normalizeNutrition(raw.nutrition),
+      portionReference: raw.portionReference ? String(raw.portionReference) : undefined,
+      confidenceScore: Math.max(0, Math.min(1, Number(raw.confidenceScore) || 0.5)),
+    };
+  }
+}
+
+// Gemini Provider Implementation
+class GeminiProvider implements LLMProvider {
+  private apiKey: string;
+  private model: string;
+
+  constructor(apiKey: string, model = 'gemini-3.6-flash') {
+    this.apiKey = apiKey;
+    this.model = model;
+  }
+
+  async analyzeImage(imageBase64: string, mimeType: ImageMimeType, mealContext: MealContext): Promise<FoodAnalysisResponse> {
+    const userContent = this.buildUserContent(mealContext);
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`,
+      {
+        method: 'POST',
+        signal: AbortSignal.timeout(providerTimeoutMs),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: `${SYSTEM_PROMPT}\n\n${userContent}` },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: imageBase64,
+                  },
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            maxOutputTokens: 2000,
+          },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!content) {
+      throw new Error('Empty response from Gemini');
+    }
+
+    return this.parseResponse(content);
+  }
+
+  private buildUserContent(mealContext?: MealContext): string {
+    let content = 'Please analyze this food image and provide detailed nutritional estimates.';
+
+    if (mealContext?.mealType) {
+      content += ` This appears to be a ${mealContext.mealType}.`;
+    }
+
+    if (mealContext?.mealTime) {
+      content += ` The meal time is ${mealContext.mealTime}.`;
+    }
+
+    return content;
+  }
+
+  private parseResponse(content: string): FoodAnalysisResponse {
+    try {
+      const parsed = JSON.parse(content);
+
+      if (!parsed.items || !Array.isArray(parsed.items)) {
+        throw new Error('Invalid response structure: missing items array');
+      }
+
+      const items: AnalyzedFoodItem[] = parsed.items.map((item: unknown) => this.validateAndNormalizeItem(item));
+
+      return {
+        items,
+        overallConfidence: parsed.overallConfidence ?? 0.5,
+        notes: parsed.notes,
+      };
+    } catch (error) {
+      throw new Error(`Failed to parse LLM response: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private validateAndNormalizeItem(item: unknown): AnalyzedFoodItem {
+    if (typeof item !== 'object' || item === null) {
+      throw new Error('Invalid item: not an object');
+    }
+
+    const raw = item as Record<string, unknown>;
+
+    return {
+      name: String(raw.name ?? 'Unknown Food'),
+      description: raw.description ? String(raw.description) : undefined,
+      amount: Number(raw.amount) || 1,
+      unit: String(raw.unit ?? 'serving'),
+      servingSizeGrams: Number(raw.servingSizeGrams) || 100,
+      nutrition: normalizeNutrition(raw.nutrition),
+      portionReference: raw.portionReference ? String(raw.portionReference) : undefined,
+      confidenceScore: Math.max(0, Math.min(1, Number(raw.confidenceScore) || 0.5)),
+    };
+  }
+}
+
+// Provider factory
+export function createProvider(
+  getEnv: (name: string) => string | undefined = (name) => Deno.env.get(name),
+): LLMProvider {
+  const provider = getEnv('LLM_PROVIDER')?.toLowerCase() || 'openai';
+
+  switch (provider) {
+    case 'openai': {
+      const apiKey = getEnv('OPENAI_API_KEY');
+      if (!apiKey) {
+        throw new Error('OPENAI_API_KEY not configured');
+      }
+      const model = getEnv('OPENAI_MODEL') || 'gpt-4o-mini';
+      return new OpenAIProvider(apiKey, model);
+    }
+    case 'anthropic': {
+      const apiKey = getEnv('ANTHROPIC_API_KEY');
+      if (!apiKey) {
+        throw new Error('ANTHROPIC_API_KEY not configured');
+      }
+      const model = getEnv('ANTHROPIC_MODEL') || 'claude-sonnet-4-6';
+      return new AnthropicProvider(apiKey, model);
+    }
+    case 'gemini': {
+      const apiKey = getEnv('GOOGLE_API_KEY');
+      if (!apiKey) {
+        throw new Error('GOOGLE_API_KEY not configured');
+      }
+      const model = getEnv('GEMINI_MODEL') || 'gemini-3.6-flash';
+      return new GeminiProvider(apiKey, model);
+    }
+    default:
+      throw new Error(`Unknown LLM provider: ${provider}`);
+  }
+}

@@ -38,7 +38,8 @@ class const DataReferenceEditor<T>({
     final items = <DropdownMenuItem<DataReferenceIdentifier>>[];
     for (final task in availableTasks) {
       for (final entry in task.getAvailableProperties().entries) {
-        if (entry.value == T) {
+        if (entry.value == T ||
+            (T == num && (entry.value == int || entry.value == double))) {
           items.add(
             DropdownMenuItem<DataReferenceIdentifier<T>>(
               value: DataReferenceIdentifier(task.id, entry.key),

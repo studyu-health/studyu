@@ -183,3 +183,6 @@ interview/
 
 .vscode/settings.json
 /.qwen/
+# Widget Preview related
+.widget_preview/
+.codex/

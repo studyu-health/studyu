@@ -1159,6 +1159,10 @@ class AppLocalizationsKo extends AppLocalizations {
       '참여자가 과제를 완료해야 하는 시간대를 지정하세요. 지정된 시간대 밖에서는 과제를 완료할 수 없으며, 해당 시간대 안에 완료하지 않은 과제는 데이터 수집 시 누락으로 처리됩니다.';
 
   @override
+  String get form_field_time_restriction_description =>
+      'Tasks are available from 00:00 to 23:59 by default; set a narrower window if needed.';
+
+  @override
   String get form_field_time_restriction_start_hint => '시작 시간';
 
   @override
@@ -2011,7 +2015,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get participant_details_study_days_description =>
-      '참여자의 연구 진행 현황을 한눈에 확인할 수 있습니다. 색상은 날짜별 과제 수행 상태를 나타냅니다. 각 날짜에 마우스 포인터를 올리면 자세한 활동 정보를 볼 수 있습니다.';
+      '색상은 연구일별 과제 상태를 나타냅니다. 예정된 모든 시간대의 기록을 마치면 해당 UTC 기준 연구일의 영양 일지가 완료됩니다. 각 날짜에 마우스 포인터를 올리면 해당 날짜의 과제를 볼 수 있습니다.';
 
   @override
   String get participant_details_color_legend_title => '범례';
@@ -2045,15 +2049,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get participant_details_completed_legend_tooltip =>
-      '해당 날짜의 모든 중재 과제와 설문 과제가 완료되었습니다.';
+      '해당 연구일에 예정된 모든 과제를 완료했습니다.';
 
   @override
   String get participant_details_partially_completed_legend_tooltip =>
-      '해당 날짜의 중재 과제 또는 설문 과제 중 완료하지 않은 과제가 있습니다.';
+      '해당 연구일에 예정된 과제 중 일부를 완료했습니다.';
 
   @override
   String get participant_details_incomplete_legend_tooltip =>
-      '해당 날짜의 중재 과제와 설문 과제가 하나도 완료되지 않았습니다.';
+      '해당 연구일에 예정된 과제를 하나도 완료하지 않았습니다.';
 
   @override
   String get participant_details_progress_empty_title => '아직 연구 진행 데이터가 없습니다';
@@ -2120,7 +2124,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '완료한 중재 과제';
 
   @override
-  String get monitoring_table_column_completed_surveys => '완료한 설문';
+  String get monitoring_table_column_completed_surveys => '완료한 측정';
 
   @override
   String get monitoring_table_row_tooltip_dropout =>
@@ -2135,7 +2139,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get monitoring_table_completed_surveys_header_tooltip =>
-      '해당 날짜의 설문 과제를 모두 완료하면 그날의 설문을 완료한 것으로 처리합니다.';
+      '완료한 설문은 연구일마다 한 번 집계됩니다. 영양 일지에서 기록을 완료한 각 시간대는 배정된 UTC 기준 연구일에 한 번씩 집계됩니다.';
 
   @override
   String get banner_text_study_recruit_draft =>
@@ -2590,28 +2594,213 @@ class AppLocalizationsKo extends AppLocalizations {
       '사용자 지정: 연구의 요구 사항에 맞게 중재 순서를 직접 설정하세요.';
 
   @override
-  String get form_nutrition_tracking_title => 'Nutritional Tracking';
+  String get form_measurement_type_select => 'Add measurements';
 
   @override
-  String get form_nutrition_tracking_enable_hint =>
-      'Enable nutritional tracking for this study';
-
-  @override
-  String get form_measurement_type_select => 'Select Measurement Type';
-
-  @override
-  String get form_measurement_type_survey => 'Survey';
+  String get form_measurement_type_survey => 'Create custom survey';
 
   @override
   String get form_measurement_type_survey_description =>
-      'Collect self-reported data from participants using questions and scales.';
+      'Build a survey using questions and scales.';
 
   @override
-  String get form_measurement_type_nutrition => 'Nutrition Task';
+  String get form_measurement_type_template => 'Measurement library';
+
+  @override
+  String get form_measurement_category_all => 'All';
+
+  @override
+  String get form_measurement_category_all_heading => 'All measurements';
+
+  @override
+  String get form_measurement_category_nutrition => 'Nutrition';
+
+  @override
+  String get form_measurement_category_nutrition_heading =>
+      'Nutrition measurements';
+
+  @override
+  String get form_measurement_search_placeholder => 'Search measurements';
+
+  @override
+  String get form_survey_template_empty =>
+      'No predefined measurements available';
+
+  @override
+  String get form_survey_template_added => 'Added';
+
+  @override
+  String get form_survey_template_added_to_study => 'Added to study';
+
+  @override
+  String get form_survey_template_apply => 'Add';
+
+  @override
+  String form_survey_template_add_selected_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count measurements',
+      one: 'Add 1 measurement',
+      zero: 'Add measurements',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get form_survey_template_adding => 'Adding…';
+
+  @override
+  String form_survey_template_all_days(int count) {
+    return 'All $count days';
+  }
+
+  @override
+  String get form_survey_template_select_every_survey =>
+      'Select every survey in this measurement';
+
+  @override
+  String get form_survey_template_expand_days => 'Show survey days';
+
+  @override
+  String get form_survey_template_collapse_days => 'Hide survey days';
+
+  @override
+  String get form_survey_template_choose_day => 'Choose day';
+
+  @override
+  String get form_survey_template_add_and_edit => 'Add and edit';
+
+  @override
+  String get form_survey_template_single_help => '1 editable survey';
+
+  @override
+  String form_survey_template_multi_day_help(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count surveys · Scheduled daily',
+      one: '1 survey · Scheduled daily',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String form_survey_template_day_label(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get form_survey_schedule_title => 'Occurrence schedule';
+
+  @override
+  String get form_survey_schedule_active => 'One occurrence pattern is active';
+
+  @override
+  String get form_survey_schedule_inactive =>
+      '설문 일정이 꺼져 있으면 연구 기간 동안 매일 설문이 표시됩니다.';
+
+  @override
+  String get form_survey_schedule_separation_help =>
+      'Occurrence controls which study days show the survey.';
+
+  @override
+  String get form_survey_schedule_pattern_help =>
+      'Choose one pattern. Selecting another pattern replaces the current one.';
+
+  @override
+  String get form_survey_schedule_specific_days => 'Specific days';
+
+  @override
+  String get form_survey_schedule_every_n_days => 'Every N days';
+
+  @override
+  String get form_survey_schedule_per_cycle => 'Per cycle';
+
+  @override
+  String get form_survey_schedule_select_days => 'Select study days:';
+
+  @override
+  String form_survey_schedule_day_label(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get form_survey_schedule_every_n_interval_label => 'Every';
+
+  @override
+  String get form_survey_schedule_days_suffix => 'days';
+
+  @override
+  String get form_survey_schedule_every_n_delay_label =>
+      'Delay first occurrence by';
+
+  @override
+  String get form_survey_schedule_every_n_delay_suffix =>
+      'days after the first study day';
+
+  @override
+  String form_survey_schedule_every_n_delay_help(int totalDays) {
+    return 'With no delay, the first occurrence is on the first study day. The study has $totalDays days.';
+  }
+
+  @override
+  String get form_survey_schedule_per_cycle_delay_label =>
+      'Delay each cycle occurrence by';
+
+  @override
+  String get form_survey_schedule_per_cycle_delay_suffix =>
+      'days after the cycle\'s first day';
+
+  @override
+  String form_survey_schedule_per_cycle_help(
+    int cycleLengthDays,
+    int phasesPerCycle,
+    int phaseDuration,
+  ) {
+    return 'Each cycle is $cycleLengthDays days ($phasesPerCycle phases × $phaseDuration days).';
+  }
+
+  @override
+  String get form_survey_schedule_target_cycles =>
+      'Target cycles (leave empty for all):';
+
+  @override
+  String form_survey_schedule_cycle_label(int cycle) {
+    return 'Cycle $cycle';
+  }
+
+  @override
+  String get form_survey_schedule_include_baseline => 'Include baseline phase';
+
+  @override
+  String get form_survey_schedule_summary_title => 'Schedule summary';
+
+  @override
+  String get form_survey_schedule_summary_empty => 'No matching days';
+
+  @override
+  String form_survey_schedule_summary_days(String days) {
+    return 'Appears on: $days';
+  }
+
+  @override
+  String form_survey_schedule_summary_occurrences(int count, int totalDays) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count occurrences across $totalDays study days',
+      one: '$count occurrence across $totalDays study days',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get form_measurement_type_nutrition => 'Nutrition tracking';
 
   @override
   String get form_measurement_type_nutrition_description =>
-      'Track participant food and drink intake using a structured journal or photo capture.';
+      'Track food and drink intake with a structured journal or photos.';
 
   @override
   String get form_field_nutrition_instructions => 'Instructions';
@@ -2622,20 +2811,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get form_field_nutrition_collect_meal_context =>
-      'Collect Meal Context';
+      'Collect meal context';
 
   @override
-  String get form_field_nutrition_allow_recipes => 'Allow Recipes';
+  String get form_field_nutrition_collect_meal_context_help =>
+      'Ask participants where and with whom they ate.';
 
   @override
-  String get form_field_nutrition_minimum_meals_required =>
-      'Minimum Meals Required';
+  String get form_field_nutrition_allow_meals =>
+      'Allow saved meals in meal logs';
+
+  @override
+  String get form_field_nutrition_allow_meals_help =>
+      'Participants can add saved meals alongside individual foods while logging. When creating a new saved meal from a log, existing saved meals are expanded into their food ingredients.';
+
+  @override
+  String get form_field_nutrition_minimum_meals_required => 'Daily meal target';
+
+  @override
+  String get form_field_nutrition_minimum_meals_help =>
+      'Suggested number of non-skipped meals per day. Participants can save their log and leave the task below this target.';
 
   @override
   String get form_field_nutrition_minimum_meals_hint => 'Optional';
 
   @override
-  String get form_field_nutrition_default_title => 'Nutrition Tracking';
+  String get form_field_nutrition_default_title => 'Nutrition tracking';
 
   @override
   String get form_field_nutrition_custom_meal_types => 'Custom Meal Types';
@@ -2940,4 +3141,29 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get form_field_report_data_source_empty => '설정된 척도형 설문 문항이 없습니다';
+
+  @override
+  String get form_field_nutrition_track_water => '물 섭취량 기록';
+
+  @override
+  String get form_field_nutrition_track_water_help =>
+      '참여자가 매일 마신 물의 양을 기록할 수 있습니다.';
+
+  @override
+  String get form_survey_template_days_outside_study =>
+      '일부 날짜가 연구 기간을 벗어납니다. 선택할 수 있는 날짜를 개별적으로 선택하세요.';
+
+  @override
+  String get form_survey_template_day_outside_study => '연구 기간 외';
+
+  @override
+  String get form_field_nutrition_completion_window_error =>
+      '각 영양 기록 시간대의 시작 시간은 종료 시간보다 빠르거나 같아야 합니다.';
+
+  @override
+  String get form_field_nutrition_show_statistics => '영양 통계 표시';
+
+  @override
+  String get form_field_nutrition_show_statistics_help =>
+      '참가자에게 하루 영양 섭취량 합계와 변화 추이를 보여 줍니다. 이 정보는 참가자가 무엇을 먹거나 기록하는지에 영향을 주어 이후 기록에 편향을 일으킬 수 있습니다.';
 }

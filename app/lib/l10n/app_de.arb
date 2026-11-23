@@ -545,6 +545,7 @@
   "date_picker_validation_required": "Bitte wähle ein Datum",
   "time_picker_validation_required": "Bitte wähle eine Zeit",
   "datetime_picker_validation_required": "Bitte wähle Datum und Zeit",
+  "time_picker_hint": "Wähle eine Zeit",
   "time_picker_validation_range": "Bitte wähle eine Zeit innerhalb des erlaubten Bereichs",
   "time_picker_range_hint": "Wähle eine Zeit zwischen {min} und {max}",
   "@time_picker_range_hint": {
@@ -565,6 +566,49 @@
       "max": {}
     }
   },
+  "my_templates": "Meine Elemente",
+  "manage_saved_items": "Verwalten",
+  "adjust_quantity": "Menge anpassen",
+  "edit_this_entry": "Diesen Eintrag bearbeiten",
+  "library_edit_title": "Wiederverwendbares Element aktualisieren?",
+  "library_edit_message": "Dieses Element stammt aus Ihrer Bibliothek. Wählen Sie, wo Ihre Änderungen gespeichert werden sollen.",
+  "library_edit_current_entry": "Nur dieses protokollierte Element",
+  "library_edit_current_selection": "Nur diese Auswahl",
+  "library_edit_selection_message": "Dieses Element stammt aus Ihrer Bibliothek. Wählen Sie, wo Ihre Änderungen gespeichert werden sollen.",
+  "library_edit_current_entry_and_library": "Dieses Element und Bibliothekselement",
+  "save_to_my_items_action": "Elemente als Mahlzeit in der Bibliothek speichern",
+  "save_item_to_library": "Element in der Bibliothek speichern",
+  "external_library_copy": "Importieren",
+  "external_library_copy_label": "{name} prüfen und zur Bibliothek hinzufügen",
+  "@external_library_copy_label": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "external_library_copy_saved": "Zur Bibliothek hinzugefügt",
+  "external_library_copy_save_error": "Das Lebensmittel konnte nicht zur Bibliothek hinzugefügt werden",
+  "remove_from_meal": "Aus Mahlzeit entfernen",
+  "duplicate": "Duplizieren",
+  "save_as_template": "Zu meinen Elementen hinzufügen",
+  "save_meal": "In Bibliothek speichern",
+  "done_label": "Fertig",
+  "log_meal": "Eintrag hinzufügen",
+  "add_items": "Elemente hinzufügen",
+  "add_items_to_meal": "Elemente zu {meal} hinzufügen",
+  "@add_items_to_meal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "save_as_reusable_meal": "Als wiederverwendbare Mahlzeit speichern",
+  "save_as_reusable_meal_description": "Füge diese Kombination zu Meine Elemente hinzu, damit du sie wieder verwenden kannst.",
+  "save_food": "Lebensmittel speichern",
+  "template_name": "Name",
+  "template_name_required": "Mahlzeitname *",
   "please_select_interventions_why": "Warum?",
   "recovery_phrase_description": "Speichere diese 13 Wörter an einem sicheren Ort. Sie sind die einzige Möglichkeit, dein Konto wiederherzustellen, wenn du den Zugriff auf dieses Gerät verlierst.",
   "recovery_phrase_why": "Warum?",
@@ -635,33 +679,113 @@
   "time_format": "Zeitformat",
   "time_format_12_hour": "12-Stunden (2:30 PM)",
   "time_format_24_hour": "24-Stunden (14:30)",
-  "my_templates": "Meine Vorlagen",
-  "save_as_template": "Als Vorlage speichern",
-  "save_meal_template": "Mahlzeit als Vorlage speichern",
-  "save_food_template": "Lebensmittel als Vorlage speichern",
-  "save_recipe_template": "Rezept als Vorlage speichern",
-  "template_name": "Vorlagenname",
   "template_tags_optional": "Tags (optional)",
   "template_tags_hint": "Frühstück, schnell, gesund",
-  "template_saved": "Vorlage gespeichert",
-  "select_meal_template": "Mahlzeit-Vorlage auswählen",
-  "select_food_template": "Lebensmittel-Vorlage auswählen",
-  "search_templates": "Vorlagen suchen...",
-  "no_templates_saved": "Noch keine Vorlagen gespeichert",
-  "save_templates_hint": "Speichern Sie Ihre Lieblingsmahlzeiten und Lebensmittel als Vorlagen für schnellen Zugriff",
-  "from_template": "Aus Vorlage",
+  "template_saved": "Zu meinen Elementen hinzugefügt",
+  "select_meal": "Meine Mahlzeiten",
+  "select_food": "Meine Lebensmittel",
+  "food_library_search_hint": "Bibliothek durchsuchen",
+  "search_templates": "Gespeicherte Lebensmittel und Mahlzeiten durchsuchen…",
+  "save_templates_hint": "Speichern Sie Ihre Lieblingsmahlzeiten und Lebensmittel für schnellen Zugriff",
+  "from_template": "Aus meinen Elementen",
   "add_new_food": "Neues Lebensmittel hinzufügen",
-  "delete_template": "Vorlage löschen",
-  "delete_template_confirmation": "Sind Sie sicher, dass Sie diese Vorlage löschen möchten?",
+  "delete_template": "{name} löschen?",
+  "delete_template_confirmation": "Dieser Eintrag wird aus der Bibliothek entfernt.",
   "filter_all": "Alle",
   "filter_meals": "Mahlzeiten",
   "filter_foods": "Lebensmittel",
-  "filter_recipes": "Rezepte",
-  "items_count": "{count} Elemente",
+  "items_count": "{count, plural, =1 {1 Element} other {{count} Elemente}}",
   "@items_count": {
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "add": "Hinzufügen",
+  "food_selection_add_to_selection": "Zur Auswahl hinzufügen",
+  "food_selection_update_selection": "Auswahl aktualisieren",
+  "food_selection_selected_items": "Ausgewählte Lebensmittel",
+  "food_selection_view_more": "Alle {count} Lebensmittel anzeigen",
+  "@food_selection_view_more": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_increment": "{name} erhöhen",
+  "@food_selection_increment": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "food_selection_decrement": "{name} verringern",
+  "@food_selection_decrement": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "food_selection_item_removed": "Element entfernt",
+  "food_selection_undo": "Rückgängig",
+  "food_selection_selected": "{name}, ausgewählt, Menge {quantity}",
+  "@food_selection_selected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_known_calories": "{value} kcal bekannt · {count} nicht verfügbar",
+  "@food_selection_known_calories": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_unknown_calories": "— kcal · {count} nicht verfügbar",
+  "@food_selection_unknown_calories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_calories_unavailable": "Kalorien für {count, plural, =1 {ein Lebensmittel} other {{count} Lebensmittel}} nicht verfügbar",
+  "@food_selection_calories_unavailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "food_selection_confirm": "{count, plural, =1 {1 Element zu {meal} hinzufügen} other {{count} Elemente zu {meal} hinzufügen}}",
+  "@food_selection_confirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "serving_amount": "{amount, plural, =1 {1 Portion} other {{amount} Portionen}}",
+  "@serving_amount": {
+    "placeholders": {
+      "amount": {
+        "type": "num"
       }
     }
   },
@@ -673,20 +797,47 @@
       }
     }
   },
+  "kcal_per_serving": "{value} kcal / Portion",
+  "@kcal_per_serving": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "servings_value": "{value} Portionen",
+  "@servings_value": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "custom": "Benutzerdefiniert",
+  "database": "Datenbank",
+  "no_recent_items": "Noch keine kürzlich verwendeten Elemente",
+  "brand": "Marke",
+  "calorie_basis_100g": "pro 100 g",
+  "calorie_basis_grams": "pro {grams} g",
+  "@calorie_basis_grams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
   "template_type_meal": "Mahlzeit",
   "template_type_food": "Lebensmittel",
-  "template_type_recipe": "Rezept",
-  "rename_template": "Vorlage umbenennen",
+  "rename_template": "Element umbenennen",
   "new_name": "Neuer Name",
   "photoRecallTitle": "Foto-Erinnerung",
-  "photoRecallSubtitle": "Fotos von dieser Zeit ansehen",
+  "photoRecallSubtitle": "Nutzen Sie Fotos von diesem Tag, um sich daran zu erinnern, was Sie gegessen haben.",
   "photoRecallPermissionNeeded": "Tippen, um Fotozugriff zu aktivieren",
   "photoRecallPermissionTitle": "Fotozugriff aktivieren",
   "photoRecallPermissionDescription": "Der Zugriff auf Ihre Fotos hilft Ihnen, sich an das Gegessene zu erinnern. Fotos werden nur auf Ihrem Gerät angezeigt.",
   "photoRecallNoPhotos": "Keine Fotos gefunden",
-  "photoRecallNoPhotosSubtitle": "Wir konnten keine Fotos von dieser Zeit finden",
+  "photoRecallNoPhotosSubtitle": "Wir konnten keine Fotos von diesem Tag finden",
   "photoRecallTapToEnlarge": "Tippen Sie auf ein Foto, um es Vollbild anzuzeigen",
-  "photoRecallTimeInfo": "Fotos von {time} (±2 Stunden)",
   "grantPermission": "Berechtigung erteilen",
   "analyzePhotoTooltip": "Dieses Foto analysieren",
   "analyzingPhoto": "Foto wird analysiert...",
@@ -701,7 +852,539 @@
   "select_all": "Alle auswählen",
   "deselect_all": "Alle abwählen",
   "confidenceLabel": "Konfidenz: {percentage}%",
-  "min_meals_not_met_title": "Mindestanzahl an Mahlzeiten nicht erreicht",
-  "min_meals_not_met_message": "Diese Aufgabe erfordert mindestens {count} Mahlzeit(en). Du hast weniger als erforderlich aufgezeichnet. Trotzdem verlassen?",
-  "leave_anyway": "Trotzdem verlassen"
+  "min_meals_not_met_title": "Tägliches Mahlzeitenziel nicht erreicht",
+  "min_meals_not_met_message": "Das tägliche Ziel ist {count} Mahlzeit(en). Du hast weniger Mahlzeiten erfasst. Trotzdem verlassen?",
+  "leave_anyway": "Trotzdem verlassen",
+  "add_meal_or_snack": "Mahlzeit oder Snack hinzufügen",
+  "meal_neutral_label": "Mahlzeit",
+  "meal_suffix": "Mahlzeit",
+  "meal_label": "Bezeichnung der Mahlzeit",
+  "no_meal_label": "Keine Bezeichnung",
+  "time_not_remembered": "Zeit nicht erinnert",
+  "about_time": "Ungefähr {time}",
+  "@about_time": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "time_exact": "Genaue Uhrzeit",
+  "time_exact_description": "Ich kenne die genaue Uhrzeit",
+  "time_approximate": "Ungefähre Uhrzeit",
+  "time_approximate_description": "Ich weiß ungefähr, wann",
+  "time_unknown": "Ich erinnere mich nicht",
+  "set_time": "Zeit festlegen",
+  "save": "Speichern",
+  "nutrition_values_are_for": "Nährwerte gelten für",
+  "new_item": "Neu",
+  "discard": "Verwerfen",
+  "unsaved_changes_title": "Nicht gespeicherte Änderungen verwerfen?",
+  "unsaved_changes_message": "Verwerfen Sie Ihre Änderungen oder bearbeiten Sie weiter.",
+  "discard_meal_changes_title": "Eintrag verlassen?",
+  "discard_meal_changes_message": "Verwerfen Sie Ihre Änderungen oder bearbeiten Sie weiter.",
+  "save_and_leave": "Speichern und verlassen",
+  "discard_changes": "Änderungen verwerfen",
+  "continue_editing": "Weiter bearbeiten",
+  "delete_meal": "Eintrag löschen",
+  "delete_meal_title": "Diesen Eintrag löschen?",
+  "delete_meal_message": "Dieser Eintrag wird aus dem Ernährungsprotokoll entfernt.",
+  "enter_skip_reason": "Geben Sie vor dem Speichern einen Grund ein.",
+  "add_food_before_saving": "Fügen Sie vor dem Speichern mindestens ein Lebensmittel hinzu.",
+  "meal_context": "Mahlzeitenkontext",
+  "meal_details": "Mahlzeitendetails",
+  "create_meal": "Mahlzeit erstellen",
+  "edit_food_title": "Lebensmittel bearbeiten",
+  "add_food_manually": "Lebensmittel erstellen",
+  "apply": "Übernehmen",
+  "search_food_hint": "Lebensmittel und Mahlzeiten suchen…",
+  "food_library": "Bibliothek",
+  "add_food_action": "Lebensmittel erstellen",
+  "recent_foods": "Zuletzt verwendet",
+  "frequently_used_foods": "Häufig verwendet",
+  "my_saved_items": "Bibliothek",
+  "global_database": "Datenbank",
+  "external_library": "Externe Bibliothek",
+  "external_library_loading": "Externe Bibliothek wird durchsucht…",
+  "external_library_error": "Externe Bibliothek ist nicht verfügbar. Bitte versuchen Sie es erneut.",
+  "external_library_results_count": "{count, plural, =1 {1 externes Ergebnis gefunden} other {{count} externe Ergebnisse gefunden}}",
+  "@external_library_results_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "review_copied_food": "Lebensmittel prüfen",
+  "external_library_copy_notice": "Prüfen Sie die Angaben vor dem Speichern in der Bibliothek. Änderungen gelten für die gespeicherte Kopie.",
+  "external_library_save_copy": "In der Bibliothek speichern",
+  "add_manually": "Lebensmittel manuell erstellen",
+  "scan_barcode": "Barcode scannen",
+  "barcode_scanner_guidance_initial": "Kamera auf den Barcode richten",
+  "barcode_scanner_no_barcode": "Kein Barcode erkannt – Position ändern",
+  "barcode_scanner_processing": "Barcode erkannt! Wird verarbeitet …",
+  "barcode_scanner_invalid": "Ungültiger Barcode – anderen Winkel versuchen",
+  "barcode_scanner_lookup": "Gültiger Barcode. Wird gesucht …",
+  "barcode_scanner_distance_guidance": "Großer Barcode? 15–30 cm zurückgehen\\nKleiner Barcode? Näher herangehen",
+  "barcode_scanner_detected": "ERKANNT",
+  "barcode_scanner_lookup_progress": "Produkt wird gesucht …",
+  "barcode_scanner_toggle_flash": "Blitz umschalten",
+  "barcode_scanner_switch_camera": "Kamera wechseln",
+  "barcode_scanner_not_found_title": "Produkt nicht gefunden",
+  "barcode_scanner_not_found_message": "Für den Barcode {barcode} wurde kein Produkt gefunden.\\n\\nDieses Produkt ist möglicherweise noch nicht in der externen Bibliothek enthalten. Sie können es manuell hinzufügen oder ein anderes Produkt scannen.",
+  "@barcode_scanner_not_found_message": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "barcode_scanner_scan_again": "Erneut scannen",
+  "barcode_scanner_error_title": "Suche nicht verfügbar",
+  "searching_databases": "Datenbanken werden durchsucht...",
+  "no_results_found": "Keine Ergebnisse gefunden. Versuchen Sie andere Suchbegriffe.",
+  "no_results_for_query": "Keine Ergebnisse für „{query}“",
+  "@no_results_for_query": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "cant_find_it": "Nicht gefunden?",
+  "create": "Erstellen",
+  "create_food_from_search": "„{query}“ manuell erstellen",
+  "@create_food_from_search": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "search_food_description": "Zum Beispiel „Apfel“, „Hafermilch“ oder einen Markennamen.",
+  "food_search_error": "Die Lebensmittelsuche ist nicht verfügbar. Bitte versuchen Sie es erneut.",
+  "food_search_results_count": "{count, plural, =1 {1 Ergebnis gefunden} other {{count} Ergebnisse gefunden}}",
+  "no_matching_templates": "Keine passenden Elemente",
+  "meal_category_snacks": "Snacks",
+  "meal_category_other": "Weitere Mahlzeiten",
+  "no_foods_added": "Keine Lebensmittel hinzugefügt",
+  "log_food": "Lebensmittel eintragen",
+  "add_food_to_meal": "Lebensmittel zu {meal} hinzufügen",
+  "food_quantity_amount": "Menge",
+  "food_quantity_weight": "Gewicht",
+  "food_quantity_custom_weight": "Angepasst",
+  "food_quantity_library_serving": "Portion aus „Meine Elemente“: {weight} g",
+  "food_quantity_default_serving": "Standardportion: {weight} g",
+  "food_quantity_library_serving_unknown": "Portion aus „Meine Elemente“: Gewicht nicht verfügbar",
+  "food_quantity_default_serving_unknown": "Standardportion: Gewicht nicht verfügbar",
+  "food_quantity_override_helper": "Änderungen gelten nur für das ausgewählte Element in dieser Mahlzeit.",
+  "food_quantity_use_library_weight": "Gewicht aus „Meine Elemente“ verwenden ({weight} g)",
+  "food_quantity_use_default_weight": "Standardgewicht verwenden ({weight} g)",
+  "food_quantity_invalid_amount": "Geben Sie eine Menge größer als null ein",
+  "food_quantity_serving": "Portion",
+  "food_quantity_serving_unit": "{amount, plural, =1 {Portion} other {Portionen}}",
+  "food_quantity_serving_value": "{value} g pro {unit}",
+  "food_quantity_energy": "Energie",
+  "food_quantity_protein": "Protein",
+  "food_quantity_carbs": "Kohlenhydrate",
+  "food_quantity_fat": "Fett",
+  "food_quantity_add_to_meal": "Zu {meal} hinzufügen",
+  "food_quantity_add_to_selection": "Zur Auswahl hinzufügen",
+  "food_quantity_add_meal_to_selection": "Mahlzeit zur Auswahl hinzufügen",
+  "food_quantity_update_selection": "Änderungen speichern",
+  "food_quantity_nutrition_unavailable": "Nährwertangaben nicht verfügbar",
+  "save_and_add_to_meal": "Speichern und zu {meal} hinzufügen",
+  "@save_and_add_to_meal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "protein": "Protein",
+  "carbohydrate": "Kohlenhydrate",
+  "fat": "Fett",
+  "optional": "Optional",
+  "meal_type_breakfast": "Frühstück",
+  "meal_type_lunch": "Mittagessen",
+  "meal_type_dinner": "Abendessen",
+  "meal_type_snack": "Snack",
+  "meal_type_brunch": "Brunch",
+  "meal_type_other": "Andere Mahlzeit",
+  "meal_type_label": "Mahlzeitenart",
+  "time": "Uhrzeit",
+  "where_did_you_eat": "Wo haben Sie gegessen?",
+  "location_description": "Ortsbeschreibung",
+  "location_description_hint": "Beschreiben Sie, wo Sie gegessen haben",
+  "who_were_you_with": "Mit wem waren Sie zusammen?",
+  "distractions_during_meal": "Ablenkungen während der Mahlzeit?",
+  "skipped_this_meal": "Diese Mahlzeit übersprungen",
+  "reason_for_skipping": "Grund für das Überspringen",
+  "food_items": "Lebensmittel",
+  "meals": "Mahlzeiten",
+  "no_meals_recorded": "Noch keine Mahlzeiten erfasst",
+  "add_food": "Lebensmittel hinzufügen",
+  "not_specified": "Nicht angegeben",
+  "context_home": "Zu Hause",
+  "context_restaurant": "Restaurant",
+  "context_takeout": "Zum Mitnehmen",
+  "context_vending": "Automat",
+  "context_other": "Andere",
+  "company_alone": "Allein",
+  "company_family": "Familie",
+  "company_friends": "Freunde",
+  "company_colleagues": "Kolleginnen und Kollegen",
+  "company_other": "Andere",
+  "distraction_none": "Keine",
+  "distraction_tv": "Fernsehen",
+  "distraction_phone": "Telefon",
+  "distraction_work": "Arbeit",
+  "distraction_other": "Andere",
+  "instructions": "Anleitung",
+  "min_meals_required": "Tägliches Mahlzeitenziel: {count} Mahlzeit(en)",
+  "required_error": "Erforderlich",
+  "more_options": "Weitere Optionen",
+  "edit": "Bearbeiten",
+  "delete": "Löschen",
+  "daily_nutrition_total": "Ernährungsübersicht",
+  "daily_summary": "Tagesübersicht",
+  "energy_by_macronutrient": "Energie nach Makronährstoffen",
+  "total_energy": "Gesamtenergie",
+  "show": "Anzeigen",
+  "hide": "Ausblenden",
+  "carbohydrates": "Kohlenhydrate",
+  "fibre": "Ballaststoffe",
+  "other": "Sonstige",
+  "some_values_unavailable": "Einige Nährwerte sind für {count} {count, plural, =1 {Eintrag} other {Einträge}} nicht verfügbar.",
+  "@some_values_unavailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "today": "Heute",
+  "nutrition_tracking": "Ernährungstagebuch",
+  "nutrition_statistics": "Statistik",
+  "nutrition_days_recorded": "{recorded} von {total} Tagen erfasst",
+  "@nutrition_days_recorded": {
+    "placeholders": {
+      "recorded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutrition_completed_days": "{completed, plural, =1{{completed} abgeschlossener Tag} other{{completed} abgeschlossene Tage}}",
+  "@nutrition_completed_days": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      }
+    }
+  },
+  "nutrition_daily_average": "Durchschnitt abgeschlossener Tage",
+  "nutrition_energy_by_study_day": "Energie pro Studientag",
+  "nutrition_average_value": "Durchschnitt {value} über abgeschlossene Tage",
+  "@nutrition_average_value": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_tap_bar_hint": "Tippen Sie auf einen Balken, um den Wert anzuzeigen oder den Tag zu öffnen.",
+  "nutrition_nutrient_trend": "Nährstoffverlauf",
+  "nutrition_carbs": "Kohlenhydrate",
+  "nutrition_average_per_recorded_day": "Durchschnitt {value} pro abgeschlossenem Tag",
+  "@nutrition_average_per_recorded_day": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_compared_previous_days": "Verglichen mit den vorherigen {count} Tagen",
+  "@nutrition_compared_previous_days": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutrition_record_more_comparisons": "Erfassen Sie mehr Studientage, um Zeiträume zu vergleichen.",
+  "nutrition_energy": "Energie",
+  "nutrition_today_so_far": "Heute bisher",
+  "nutrition_chart_day_value": "{date}, {value}",
+  "@nutrition_chart_day_value": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_chart_day_missing": "{date}, nicht erfasst",
+  "@nutrition_chart_day_missing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_view_day_hint": "Drücken Sie die Eingabetaste, um diesen Tag zu öffnen.",
+  "nutrition_statistics_help_message": "Durchschnittswerte berücksichtigen nur abgeschlossene Studientage. Der heutige Tag erscheint in Diagrammen als ‚Heute bisher‘ und wird erst nach Abschluss des Tagebuchs in Durchschnittswerte einbezogen. Fehlende Tage bleiben leer.",
+  "nutrition_kcal_per_day": "{value} kcal/Tag",
+  "@nutrition_kcal_per_day": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_grams_per_day": "{value} g/Tag",
+  "@nutrition_grams_per_day": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrition_recent_days": "Letzte Tage",
+  "nutrition_history": "Verlauf",
+  "nutrition_history_empty": "Noch keine vergangenen Ernährungstagebücher.",
+  "nutrition_history_latest_study_day": "Letzter Studientag",
+  "nutrition_history_latest_study_day_description": "Sie können Einträge für den vorherigen Studientag hinzufügen oder korrigieren.",
+  "nutrition_history_previous_study_days": "Frühere Studientage",
+  "nutrition_history_no_foods_logged": "Keine Lebensmittel erfasst",
+  "historical_editing_date": "{date} bearbeiten",
+  "@historical_editing_date": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "historical_edit_expired": "Dieser Studientag kann nicht mehr bearbeitet werden.",
+  "edit_food_definition": "Wiederverwendbares Lebensmittel bearbeiten",
+  "food_definition_edit_helper": "Portionsbeschreibung, Gewicht, Umrechnungen und Nährwerte aktualisieren das wiederverwendbare Element und den ausgewählten historischen Eintrag. Falls passende Einträge im aktuellen Studientag vorhanden sind, können Sie diese bei Bedarf ebenfalls aktualisieren. Die Portionsanzahl des ausgewählten Eintrags bleibt erhalten.",
+  "nutrition_statistics_empty": "Für diesen Zeitraum sind keine Ernährungsdaten verfügbar.",
+  "nutrition_editable": "Bearbeitbar",
+  "nutrition_read_only": "Nur lesen",
+  "nutrition_logging_guidance": "Erfassen Sie jede Mahlzeit und jedes Getränk so genau wie möglich. Geben Sie Portionen und Zubereitungsdetails an, wenn Sie sie kennen.",
+  "open_faq": "FAQ öffnen",
+  "nutrition_calories": "Kalorien",
+  "historical_edit_mode_heading": "Früheren Studientag bearbeiten",
+  "historical_edit_mode_description": "Im Verlauf kannst du das Essensprotokoll des vorherigen Studientags aktualisieren. Lebensmittel und Mahlzeiten, die du hier erstellst, stehen dir für zukünftige Essensprotokolle weiterhin zur Verfügung.",
+  "update_current_day_entries": "Passende Einträge im aktuellen Studientag ebenfalls aktualisieren",
+  "update": "Aktualisieren",
+  "current_meal_only_banner": "Änderungen gelten nur für diesen Tagebucheintrag. Verwenden Sie die Bibliothek, um das wiederverwendbare Element zu aktualisieren.",
+  "current_selection_only_banner": "Änderungen gelten nur für diese Auswahl. Für dauerhafte Änderungen verwenden Sie die Bibliothek.",
+  "grams_per_serving": "{grams} g pro Portion",
+  "details": "Details",
+  "open_food_facts_attribution": "(c) Mitwirkende von Open Food Facts",
+  "open_food_facts_attribution_launch_error": "Die Nutzungsbedingungen von Open Food Facts konnten nicht geöffnet werden.",
+  "food_definition_updated_current_day_opt_out": "Das wiederverwendbare Element wurde aktualisiert. Passende Einträge im aktuellen Studientag wurden nicht aktualisiert.",
+  "food_definition_updated_current_day_opt_in": "Das wiederverwendbare Element wurde aktualisiert. Passende Einträge im aktuellen Studientag wurden ebenfalls aktualisiert.",
+  "food_quantity_weight_per_serving": "Gewicht pro Portion",
+  "food_quantity_total_weight": "Gesamtgewicht: {weight} g",
+  "food_quantity_decrease_weight": "Gewicht pro Portion verringern",
+  "food_quantity_increase_weight": "Gewicht pro Portion erhöhen",
+  "food_selection_collapse": "Ausgewählte Lebensmittel einklappen",
+  "food_quantity_edit_amount": "Menge bearbeiten",
+  "food_quantity_nutrition_for_amount": "Nährwerte für {amount} {unit}",
+  "food_selection_items_count": "{count, plural, =1 {1 Lebensmittel} other {{count} Lebensmittel}}",
+  "nutrition_add_food_or_saved_meal": "Element hinzufügen",
+  "nutrition_food_badge": "Lebensmittel",
+  "nutrition_saved_meal_badge": "Gespeicherte Mahlzeit",
+  "nutrition_add_foods_or_saved_meals_to_meal": "Zu {meal} hinzufügen",
+  "nutrition_search_foods_saved_meals_or_brands": "Lebensmittel oder Mahlzeiten suchen",
+  "nutrition_create_saved_meal_from_log": "Mahlzeit aus diesem Protokoll erstellen",
+  "nutrition_edit_saved_meal": "Gespeicherte Mahlzeit bearbeiten",
+  "nutrition_invalid_saved_meal": "Bei einigen Lebensmitteln in dieser Mahlzeit fehlen Angaben. Fügen Sie Lebensmittel mit vollständigen Angaben hinzu.",
+  "nutrition_add_food_to_meal": "Lebensmittel zu {meal} hinzufügen",
+  "nutrition_search_foods_or_brands": "Lebensmittel oder Marken suchen",
+  "nutrition_saved_meals_expanded_notice": "Prüfen Sie die einzelnen Lebensmittel aus den gespeicherten Mahlzeiten vor dem Speichern.",
+  "enter_meal_name": "Bitte geben Sie einen Mahlzeitnamen ein",
+  "nutrition_servings_required": "Portionen *",
+  "description": "Beschreibung",
+  "food_name": "Lebensmittelname *",
+  "enter_food_name": "Bitte geben Sie einen Lebensmittelnamen ein",
+  "nutrition_preparation_details": "Zubereitungsdetails",
+  "nutrition_preparation_details_subtitle": "Roh- und Kochgewichte, Zubereitungsart",
+  "nutrition_raw_weight_grams": "Rohgewicht (g)",
+  "nutrition_cooked_weight_grams": "Gekochtes Gewicht (g)",
+  "nutrition_preparation_method": "Zubereitungsart",
+  "nutrition_preparation_method_hint": "z. B. gebacken, gebraten, gedämpft",
+  "nutrition_add_food_manually": "Manuell hinzufügen",
+  "nutrition_food_name_example": "z. B. Olivenöl",
+  "nutrition_quantity_short": "Menge",
+  "nutrition_calories_kcal": "Kalorien",
+  "nutrition_no_foods_yet": "Noch keine Lebensmittel",
+  "nutrition_search_or_add_food_manually": "Suchen Sie nach Lebensmitteln oder fügen Sie sie manuell hinzu",
+  "nutrition_unit_label": "Einheit",
+  "nutrition_per_serving": "Nährwerte pro Portion",
+  "photoRecallDateInfo": "Fotos vom {date}",
+  "not_added": "Nicht hinzugefügt",
+  "nutrition_statistics_week": "Woche",
+  "nutrition_statistics_month": "Monat",
+  "nutrition_statistics_previous_period": "Vorheriger Zeitraum",
+  "nutrition_statistics_next_period": "Nächster Zeitraum",
+  "nutrition_statistics_go_to_today": "Zu heute springen",
+  "nutrition_energy_change_from_previous_day": "{value} zum Vortag",
+  "food_selection_remove_title": "{name} entfernen?",
+  "@food_selection_remove_title": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "food_selection_remove": "Entfernen",
+  "nutrition_exit": "Verlassen",
+  "nutrition_water": "Wasser",
+  "nutrition_water_unlogged": "Kein Wasser erfasst",
+  "nutrition_water_add_cup": "Ein Glas Wasser hinzufügen",
+  "nutrition_water_remove_cup": "Ein Glas Wasser abziehen",
+  "nutrition_water_cup_size": "Glasgröße",
+  "nutrition_water_cup_size_invalid": "Gib 1 bis 9999 mL ein.",
+  "nutrition_water_cup_size_save_error": "Die Glasgröße konnte nicht gespeichert werden.",
+  "nutrition_current_day_ended": "Dieser Ernährungstag ist beendet. Öffnen Sie die Ernährungsaufgabe erneut, um fortzufahren.",
+  "nutrition_food_definition_conflict": "Eine neuere Version dieses Lebensmittels ist verfügbar. Öffnen Sie den Eintrag erneut, um die aktuelle Version zu bearbeiten.",
+  "nutrition_invalid_calories": "Geben Sie null oder eine positive Kalorienzahl ein.",
+  "nutrition_recall_conflict_title": "Nicht synchronisierter Ernährungsentwurf",
+  "nutrition_recall_conflict_message": "Dieser Entwurf stimmt nicht mit der gespeicherten Version überein. Er bleibt auf diesem Gerät. Um den Tag weiter zu bearbeiten, verwerfen Sie den Entwurf.",
+  "nutrition_recall_discard_draft": "Entwurf verwerfen",
+  "nutrition_recall_discard_confirmation": "Dadurch werden die nicht synchronisierten Änderungen auf diesem Gerät gelöscht. Der gespeicherte Eintrag bleibt erhalten.",
+  "nutrition_recall_discard_failed": "Der Entwurf konnte nicht verworfen werden. Versuchen Sie es erneut.",
+  "nutrition_recall_conflict_reopen": "Öffnen Sie die Ernährungsaufgabe erneut. Wenn weiterhin eine alte Version angezeigt wird, laden Sie die Studie neu.",
+  "nutrition_recall_view_draft": "Entwurf anzeigen",
+  "nutrition_recall_view_saved": "Gespeicherte Version anzeigen",
+  "nutrition_history_local_draft": "Entwurf auf diesem Gerät gespeichert",
+  "nutrition_history_expired_draft": "Die Frist zum Synchronisieren ist abgelaufen. Dieser Entwurf liegt nur auf diesem Gerät.",
+  "nutrition_history_discard_expired_draft": "Diesen Entwurf von diesem Gerät löschen? Dies kann nicht rückgängig gemacht werden.",
+  "time_now": "Jetzt",
+  "nutrition_review_previous_day": "Ernährung vom Vortag prüfen",
+  "food_library_empty": "In dieser Ansicht gibt es keine Lebensmittel oder Mahlzeiten.",
+  "basic_information": "Lebensmitteldetails",
+  "nutrition_information": "Nährwertangaben",
+  "nutrition_known_values_hint": "Lassen Sie unbekannte Nährwerte frei.",
+  "energy_kcal": "Energie",
+  "advanced_options": "Weitere Angaben",
+  "advanced_options_subtitle": "Lebensmitteltyp, Marke und Portionsangaben",
+  "detailed_nutrition": "Weitere Nährwerte",
+  "detailed_nutrition_subtitle": "Ballaststoffe, Zucker, gesättigte Fettsäuren und Natrium",
+  "saturated_fat_g": "Gesättigte Fettsäuren (g)",
+  "sugars_g": "Zucker (g)",
+  "fiber_g": "Ballaststoffe (g)",
+  "sodium_mg": "Natrium (mg)",
+  "entry_type": "Lebensmitteltyp",
+  "brand_name": "Marke",
+  "description_hint": "Optionale Notizen zu diesem Lebensmittel",
+  "portion_reference": "Portionsbezug",
+  "portion_reference_hint": "z. B. 1 Tasse, 1 mittelgroßer Apfel",
+  "portion_estimation_method": "Methode zur Portionsschätzung",
+  "portion_state": "Zustand der Portion",
+  "yield_factor": "Ausbeutefaktor",
+  "yield_factor_hint": "z. B. 0,75",
+  "edible_portion": "Essbarer Anteil",
+  "edible_portion_hint": "z. B. 0,85",
+  "entry_type_single_ingredient": "Einzelne Zutat",
+  "entry_type_branded_product": "Markenprodukt",
+  "entry_type_manual_entry": "Manueller Eintrag",
+  "portion_method_household": "Haushaltsmaß",
+  "portion_method_photograph": "Foto",
+  "portion_method_standard_unit": "Standardeinheit",
+  "portion_method_user_weighted": "Selbst gewogen",
+  "portion_method_unknown": "Unbekannt",
+  "portion_state_raw": "Roh",
+  "portion_state_cooked": "Gegart",
+  "portion_state_as_served": "Wie serviert",
+  "macronutrients": "Makronährstoffe",
+  "detailed_nutrients": "Weitere Nährwerte",
+  "nutrition_log_again": "Tagebucheintrag wiederholen",
+  "nutrition_choose_recent_meal": "Eine frühere Mahlzeit auswählen",
+  "nutrition_meal_items": "Einträge",
+  "nutrition_save_meal": "Tagebucheintrag speichern",
+  "nutrition_select_time_to_save": "Wählen Sie zum Speichern eine Uhrzeit aus",
+  "nutrition_food_details_subtitle": "Verwenden Sie einen konkreten Namen, z. B. Haferflocken.",
+  "nutrition_diary_tab": "Tagebuch",
+  "nutrition_meal_foods_section": "Lebensmittel ({count})",
+  "nutrition_photo_add": "Foto hinzufügen",
+  "nutrition_photo_replace": "Foto ersetzen",
+  "nutrition_photo_remove": "Foto entfernen",
+  "nutrition_photo_take": "Foto aufnehmen",
+  "nutrition_photo_choose": "Foto auswählen",
+  "nutrition_photo_invalid": "Dieses Foto konnte nicht geöffnet werden. Wähle ein anderes Bild oder prüfe den Kamerazugriff.",
+  "nutrition_photo_save_failed": "Dein Eintrag wurde gespeichert. Die Fotoänderung konnte nicht gespeichert werden.",
+  "nutrition_photo_retry": "Foto erneut speichern",
+  "nutrition_library_available_filters": "Verfügbare Filter",
+  "nutrition_library_selected_filters": "Ausgewählte Filter",
+  "nutrition_library_created_by_me": "Von mir erstellt",
+  "nutrition_library_remove_filter": "Filter entfernen",
+  "edit_diary_entry_title": "Tagebucheintrag bearbeiten",
+  "meal_neutral_label_inline": "diesem Eintrag",
+  "nutrition_add_diary_entry": "Mahlzeit erfassen",
+  "nutrition_create_library_item": "Element erstellen",
+  "remove_from_entry": "Aus dem Eintrag entfernen",
+  "library_copy_edit_title": "Lebensmittel aus der Datenbank bearbeiten?",
+  "library_copy_edit_message": "Deine Änderungen gelten für dieses Lebensmittel. Du kannst auch eine Kopie für später speichern.",
+  "library_copy_edit_action": "Auch Kopie in Bibliothek speichern",
+  "nutrition_assisted_entry": "Assistierte Mahlzeitenerfassung",
+  "nutrition_assisted_add_photos": "Fotos hinzufügen",
+  "nutrition_assisted_open_gallery": "Galerie öffnen",
+  "nutrition_assisted_selected_photos": "Ausgewählte Fotos",
+  "nutrition_assisted_continue_description": "Weiter zur Beschreibung",
+  "nutrition_assisted_describe_meals": "Mahlzeiten beschreiben",
+  "nutrition_assisted_description_help": "Sagen oder schreiben Sie, was Sie gegessen haben. Ergänzen Sie die Uhrzeit, den Ort und wer dabei war, falls Sie sich erinnern.",
+  "nutrition_assisted_description_hint": "Zum Beispiel: „Zum Frühstück hatte ich Haferbrei mit Banane.“",
+  "nutrition_assisted_description_photo_hint": "Zum Beispiel: „Foto 1 zeigt den Haferbrei, den ich zum Frühstück gegessen habe.“",
+  "nutrition_assisted_generate": "Mahlzeiten vorschlagen",
+  "nutrition_assisted_generating": "Mahlzeitenvorschläge werden erstellt …",
+  "nutrition_assisted_generation_help": "Sie können die vorgeschlagenen Lebensmittel und Portionen vor dem Speichern prüfen.",
+  "nutrition_assisted_generation_error": "Die Mahlzeitenvorschläge konnten nicht erstellt werden. Prüfen Sie Ihre Beschreibung und versuchen Sie es erneut.",
+  "nutrition_assisted_photo_number": "Foto {number}",
+  "nutrition_assisted_remove_photo_title": "Foto {number} entfernen?",
+  "nutrition_assisted_remove_photo_help": "Das Foto wird aus diesem Entwurf entfernt.",
+  "nutrition_assisted_keep_photo": "Foto behalten",
+  "nutrition_assisted_removed_photo": "entferntes Foto",
+  "nutrition_assisted_photo_permission": "Erlauben Sie den Zugriff, um Fotos von diesem Tag anzuzeigen.",
+  "nutrition_assisted_gallery_error": "Die Fotogalerie konnte nicht geöffnet werden.",
+  "nutrition_assisted_recording": "Aufnahme läuft …",
+  "nutrition_assisted_stop_transcribe": "Stoppen und transkribieren",
+  "nutrition_assisted_transcribing": "Transkript wird erstellt …",
+  "nutrition_assisted_transcript_error": "Das Transkript konnte nicht erstellt werden. Versuchen Sie es erneut oder schreiben Sie Ihre Beschreibung.",
+  "nutrition_assisted_demo_transcript": "Beispieltranskript. Sie können es vor dem Fortfahren bearbeiten.",
+  "nutrition_assisted_correct_voice": "Per Sprache korrigieren",
+  "nutrition_assisted_correction_help": "Sagen Sie, was sich in den vorgeschlagenen Mahlzeiten ändern soll.",
+  "nutrition_assisted_correction_hint": "Zum Beispiel: „Ich hatte 75 Gramm Kartoffelsalat.“",
+  "nutrition_assisted_apply_correction": "Korrektur anwenden",
+  "nutrition_assisted_correction_error": "Die Korrektur konnte nicht angewendet werden. Prüfen Sie das Lebensmittel und die Portion.",
+  "assisted_review_meals": "Mahlzeiten prüfen",
+  "assisted_review_instructions": "Dies sind Beispielvorschläge. Prüfen Sie Lebensmittel, Portionen und Uhrzeiten. Ziehen Sie ein Lebensmittel an die gewünschte Position oder zu einer anderen Mahlzeit.",
+  "assisted_estimated_portion": "{portion} · Geschätzt",
+  "assisted_food_order_actions": "{food} verschieben",
+  "assisted_move_food_up": "Nach oben verschieben",
+  "assisted_move_food_down": "Nach unten verschieben",
+  "assisted_move_food_to_meal": "Verschieben nach {meal}",
+  "assisted_empty_meal": "Verschieben Sie ein Lebensmittel hierher oder entfernen Sie diese Mahlzeit vor dem Speichern.",
+  "assisted_remove_empty_meal": "Mahlzeit entfernen",
+  "assisted_save_diary_entries": "{count, plural, one{1 Tagebucheintrag speichern} other{{count} Tagebucheinträge speichern}}",
+  "assisted_save_failed": "Die Tagebucheinträge konnten nicht gespeichert werden. Versuchen Sie es erneut.",
+  "assisted_edit_meal": "Mahlzeit bearbeiten",
+  "nutrition_assisted_sample_description": "Zum Frühstück hatte ich gegen 8:15 Uhr Haferbrei mit Banane. Zum Mittagessen hatte ich gegen 12:30 Uhr Maultaschen und Kartoffelsalat.",
+  "nutrition_assisted_sample_one_photo": "Foto 1 zeigt den Haferbrei mit Banane, den ich gegen 8:15 Uhr zum Frühstück hatte. Zum Mittagessen gab es gegen 12:30 Uhr Maultaschen und Kartoffelsalat.",
+  "nutrition_assisted_sample_two_photos": "Foto 1 zeigt Haferbrei mit Banane zum Frühstück gegen 8:15 Uhr. Foto 2 zeigt Maultaschen und Kartoffelsalat zum Mittagessen gegen 12:30 Uhr.",
+  "nutrition_assisted_sample_correction": "Die Portion Kartoffelsalat war 75 Gramm.",
+  "nutrition_assisted_continue_without_photos": "Ohne Fotos fortfahren",
+  "assisted_confirm_meal_changes": "Änderungen bestätigen",
+  "nutrition_assisted_reorder_photos": "Fotos neu anordnen",
+  "nutrition_assisted_reorder_photo_help": "Halten Sie ein Foto gedrückt, um es zu ziehen.\nTippen Sie auf ein Foto, um es mit den Tasten unten zu verschieben.",
+  "nutrition_assisted_photo_selected": "Foto {number} ausgewählt",
+  "nutrition_assisted_move_photo_earlier": "Nach vorn",
+  "nutrition_assisted_move_photo_later": "Nach hinten"
 }

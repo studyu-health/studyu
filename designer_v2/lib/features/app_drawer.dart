@@ -214,6 +214,10 @@ class _AppDrawerState() extends ConsumerState<AppDrawer> {
       child: SizedBox(
         width: widget.width.toDouble(),
         child: NavigationDrawer(
+          footer: Padding(
+            padding: const EdgeInsets.only(bottom: 24.0),
+            child: Column(children: _buildBottomMenuItems(context)),
+          ),
           children: [
             ListTileTheme(
               selectedColor: theme.colorScheme.primary,
@@ -225,10 +229,6 @@ class _AppDrawerState() extends ConsumerState<AppDrawer> {
               ),
             ),
           ],
-          footer: Padding(
-            padding: const EdgeInsets.only(bottom: 24.0),
-            child: Column(children: _buildBottomMenuItems(context)),
-          ),
         ),
       ),
     );

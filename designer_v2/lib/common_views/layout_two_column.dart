@@ -18,6 +18,7 @@ class const TwoColumnLayout({
   final Color? backgroundColorLeft,
   final Color? backgroundColorRight,
   final bool stretchHeight = false,
+  final bool stackOnNarrow = false,
   super.key,
 }) extends StatefulWidget {
   static const VerticalDivider defaultDivider = VerticalDivider(
@@ -61,6 +62,7 @@ class const TwoColumnLayout({
       scrollRight: scrollRight,
       paddingLeft: paddingLeft,
       paddingRight: paddingRight,
+      stackOnNarrow: true,
     );
   }
 }
@@ -109,6 +111,19 @@ class _TwoColumnLayoutState() extends State<TwoColumnLayout> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        if (widget.stackOnNarrow && constraints.maxWidth < 1000) {
+          return SingleChildScrollView(
+            controller: _scrollControllerLeft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (widget.headerWidget != null) widget.headerWidget!,
+                leftWidgetBase,
+                SizedBox(height: constraints.maxHeight, child: rightWidgetBase),
+              ],
+            ),
+          );
+        }
         Widget leftWidget = leftWidgetBase;
         Widget rightWidget = rightWidgetBase;
 

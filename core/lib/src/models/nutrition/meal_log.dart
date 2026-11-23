@@ -10,9 +10,12 @@ class MealLog {
   String id;
   MealType mealType;
   String? customMealLabel;
-  MealContext mealContext;
+
+  MealContext? mealContext;
   String? locationDescription;
-  DateTime timestamp;
+  DateTime? timestamp;
+  @JsonKey(required: true, disallowNullValue: true)
+  MealOccurrenceTimePrecision timePrecision;
   String timezone;
   bool isSkipped;
   String? skipReason;
@@ -25,9 +28,10 @@ class MealLog {
     required this.id,
     required this.mealType,
     this.customMealLabel,
-    required this.mealContext,
+    this.mealContext,
     this.locationDescription,
-    required this.timestamp,
+    this.timestamp,
+    required this.timePrecision,
     required this.timezone,
     required this.isSkipped,
     this.skipReason,
@@ -40,9 +44,10 @@ class MealLog {
   new withId({
     required this.mealType,
     this.customMealLabel,
-    required this.mealContext,
+    this.mealContext,
     this.locationDescription,
-    required this.timestamp,
+    this.timestamp,
+    this.timePrecision = MealOccurrenceTimePrecision.approximate,
     required this.timezone,
     required this.isSkipped,
     this.skipReason,
@@ -51,6 +56,18 @@ class MealLog {
     this.templateId,
     required this.foods,
   }) : id = const Uuid().v4();
+
+  /// The editor must distinguish an unanswered time from an unknown answer.
+  bool hasValidTimeAnswer({required bool hasSelectedTime}) =>
+      hasSelectedTime &&
+      (timePrecision == MealOccurrenceTimePrecision.unknown
+          ? timestamp == null
+          : timestamp != null);
+
+  bool isValidForSave({required bool hasSelectedTime}) => isSkipped
+      ? skipReason?.trim().isNotEmpty == true
+      : foods.isNotEmpty &&
+            hasValidTimeAnswer(hasSelectedTime: hasSelectedTime);
 
   factory fromJson(Map<String, dynamic> json) => _$MealLogFromJson(json);
 

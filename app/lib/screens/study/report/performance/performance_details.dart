@@ -152,6 +152,7 @@ class const PerformanceBar({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final completion = total > 0 ? completed / total : 0.0;
     return Column(
       children: [
         Row(
@@ -165,10 +166,10 @@ class const PerformanceBar({
         Stack(
           alignment: Alignment.center,
           children: [
-            LinearProgressIndicator(minHeight: 20, value: completed / total),
+            LinearProgressIndicator(minHeight: 20, value: completion),
             Center(
               child: Text(
-                '${(completed / total * 100).toStringAsFixed(2).replaceAll('.00', '')} %',
+                '${(completion * 100).toStringAsFixed(2).replaceAll('.00', '')} %',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

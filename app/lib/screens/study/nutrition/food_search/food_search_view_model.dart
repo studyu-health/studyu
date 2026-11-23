@@ -1,0 +1,703 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
+import 'package:studyu_app/models/unified_food_result.dart';
+import 'package:studyu_app/models/usda_models.dart';
+import 'package:studyu_app/screens/study/nutrition/food_search/food_search_requests.dart';
+import 'package:studyu_app/services/usda_api_service.dart';
+import 'package:studyu_core/core.dart' as studyu;
+
+const defaultFoodReferenceGrams = 100.0;
+
+typedef OpenFoodFactsSearch = Future<SearchResult> Function({
+  required String query,
+  required int page,
+  required int pageSize,
+});
+typedef UsdaFoodSearch = Future<UsdaSearchResponse> Function({
+  required String query,
+  required int page,
+  required int pageSize,
+});
+
+final class FoodSearchViewModel({
+  final OpenFoodFactsSearch? _openFoodFactsSearch,
+  final UsdaFoodSearch? _usdaFoodSearch,
+  final bool? _usdaConfigured,
+  String languageCode = 'en',
+}) extends ChangeNotifier {
+  static const _debounceDuration = Duration(milliseconds: 400);
+  static const _pageSize = 20;
+  static final _retryRandom = Random();
+
+  String _languageCode = languageCode;
+  Timer? _debounceTimer;
+  final List<UnifiedFoodResult> _results = [];
+  int _offPage = 1;
+  int _usdaPage = 1;
+  int _searchGeneration = 0;
+  bool _offHasMore = true;
+  bool _usdaHasMore = true;
+  bool _offSearched = false;
+  bool _usdaSearched = false;
+  bool _offFailed = false;
+  bool _usdaFailed = false;
+  bool _isInitialLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasSearched = false;
+  bool _isDisposed = false;
+  String _activeQuery = '';
+
+  List<UnifiedFoodResult> get results =>
+      rankFoodSearchResults(_results, _activeQuery);
+  bool get offHasMore => _offHasMore;
+  bool get usdaHasMore => _usdaHasMore;
+  bool get offSearched => _offSearched;
+  bool get usdaSearched => _usdaSearched;
+  bool get isInitialLoading => _isInitialLoading;
+  bool get isLoadingMore => _isLoadingMore;
+  bool get hasSearched => _hasSearched;
+  bool get hasError => _results.isEmpty && (_offFailed || _usdaFailed);
+  String get activeQuery => _activeQuery;
+
+  bool get _hasUsdaProvider =>
+      _usdaFoodSearch != null ||
+      (_usdaConfigured ?? UsdaApiService.isConfigured);
+
+  void setLanguageCode(String languageCode) {
+    if (_isDisposed || _languageCode == languageCode) return;
+    _languageCode = languageCode;
+    if (_activeQuery.isNotEmpty) search(_activeQuery);
+  }
+
+  void search(String value) {
+    if (_isDisposed) return;
+    _debounceTimer?.cancel();
+    final query = value.trim();
+    final generation = ++_searchGeneration;
+    _reset(query);
+    if (query.isEmpty) return;
+
+    _debounceTimer = Timer(_debounceDuration, () => _search(query, generation));
+  }
+
+  Future<void> retry(String query) async {
+    if (_isDisposed) return;
+    _debounceTimer?.cancel();
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) return;
+    await _search(trimmedQuery, ++_searchGeneration);
+  }
+
+  Future<void> loadMore(String currentQuery) async {
+    if (_isDisposed || _isLoadingMore || _isInitialLoading) return;
+    if (!_offHasMore && !_usdaHasMore) return;
+    if (_activeQuery.isEmpty || _activeQuery != currentQuery.trim()) return;
+
+    final generation = _searchGeneration;
+    final offPage = _offPage;
+    final usdaPage = _usdaPage;
+    _isLoadingMore = true;
+    _notifyListeners();
+
+    final futures = <Future<void>>[];
+    if (_offHasMore) {
+      futures.add(
+        _searchOpenFoodFacts(
+          _activeQuery,
+          page: offPage,
+          generation: generation,
+        ),
+      );
+    }
+    if (_usdaHasMore) {
+      futures.add(
+        _searchUsda(_activeQuery, page: usdaPage, generation: generation),
+      );
+    }
+
+    await Future.wait(futures);
+    if (!_isCurrent(generation)) return;
+    _isLoadingMore = false;
+    _notifyListeners();
+  }
+
+  void _reset(String query) {
+    _results.clear();
+    _offPage = 1;
+    _usdaPage = 1;
+    _offHasMore = true;
+    _usdaHasMore = true;
+    _isInitialLoading = query.isNotEmpty;
+    _isLoadingMore = false;
+    _hasSearched = false;
+    _activeQuery = query;
+    _offSearched = false;
+    _usdaSearched = false;
+    _offFailed = false;
+    _usdaFailed = false;
+    _notifyListeners();
+  }
+
+  Future<void> _search(String query, int generation) async {
+    if (!_isCurrent(generation)) return;
+    _activeQuery = query;
+    _offPage = 1;
+    _usdaPage = 1;
+    _offHasMore = true;
+    _usdaHasMore = true;
+    _offSearched = false;
+    _usdaSearched = false;
+    _offFailed = false;
+    _usdaFailed = false;
+    _isInitialLoading = true;
+    _isLoadingMore = false;
+    _hasSearched = true;
+    _results.clear();
+    _notifyListeners();
+
+    final searches = <Future<void>>[
+      _searchOpenFoodFacts(query, page: 1, generation: generation),
+    ];
+    if (_hasUsdaProvider) {
+      searches.add(_searchUsda(query, page: 1, generation: generation));
+    } else {
+      _usdaSearched = true;
+      _usdaHasMore = false;
+    }
+    await Future.wait(searches);
+
+    if (!_isCurrent(generation)) return;
+    _isInitialLoading = false;
+    _notifyListeners();
+  }
+
+  Future<SearchResult> _fetchOpenFoodFacts({
+    required String query,
+    required int page,
+  }) {
+    final search = _openFoodFactsSearch;
+    if (search != null) {
+      return search(query: query, page: page, pageSize: _pageSize);
+    }
+
+    return OpenFoodAPIClient.searchProducts(
+      null,
+      ProductSearchQueryConfiguration(
+        parametersList: [
+          SearchTerms(terms: [query]),
+          PageNumber(page: page),
+          const PageSize(size: _pageSize),
+        ],
+        languages: openFoodFactsLanguages(_languageCode),
+        fields: openFoodFactsSearchFields,
+        version: ProductQueryVersion.v3_5,
+      ),
+    );
+  }
+
+  Future<UsdaSearchResponse> _fetchUsda({
+    required String query,
+    required int page,
+  }) {
+    final search = _usdaFoodSearch;
+    if (search != null) {
+      return search(query: query, page: page, pageSize: _pageSize);
+    }
+
+    return UsdaApiService.searchFoods(
+      query: query,
+      pageSize: _pageSize,
+      pageNumber: page,
+    );
+  }
+
+  Future<SearchResult?> _fetchOpenFoodFactsWithRetry(
+    String query,
+    int page,
+    int generation,
+  ) async {
+    for (var attempt = 0; _isCurrent(generation); attempt++) {
+      try {
+        return await _fetchOpenFoodFacts(
+          query: query,
+          page: page,
+        ).timeout(foodProviderTimeout);
+      } on HttpStatusException catch (error) {
+        if (attempt == 2 || error.statusCode < 500 || error.statusCode >= 600) {
+          rethrow;
+        }
+        if (!_isCurrent(generation)) return null;
+        await Future<void>.delayed(
+          Duration(milliseconds: (2000 << attempt) + _retryRandom.nextInt(500)),
+        );
+      }
+    }
+    return null;
+  }
+
+  Future<void> _searchOpenFoodFacts(
+    String query, {
+    required int page,
+    required int generation,
+  }) async {
+    try {
+      final searchResult = await _fetchOpenFoodFactsWithRetry(
+        query,
+        page,
+        generation,
+      );
+      if (searchResult == null || !_isCurrent(generation)) return;
+
+      final products = searchResult.products ?? const <Product>[];
+      _results.addAll(
+        products.map((product) {
+          product.productName = openFoodFactsProductName(
+            product,
+            _languageCode,
+          );
+          return openFoodFactsSearchResult(product);
+        }),
+      );
+      _offSearched = true;
+      _offFailed = false;
+      _offPage = page + 1;
+      _offHasMore = products.length >= _pageSize;
+    } catch (error) {
+      if (!_isCurrent(generation)) return;
+      debugPrint('OpenFoodFacts error: $error');
+      _offSearched = true;
+      _offFailed = true;
+      _offHasMore = false;
+    }
+    _notifyListeners();
+  }
+
+  Future<void> _searchUsda(
+    String query, {
+    required int page,
+    required int generation,
+  }) async {
+    try {
+      final searchResult = await _fetchUsda(
+        query: query,
+        page: page,
+      ).timeout(foodProviderTimeout);
+      if (!_isCurrent(generation)) return;
+
+      _results.addAll(searchResult.foods.map(usdaFoodSearchResult));
+      _usdaSearched = true;
+      _usdaFailed = false;
+      _usdaPage = searchResult.currentPage + 1;
+      _usdaHasMore = searchResult.currentPage < searchResult.totalPages;
+    } catch (error) {
+      if (!_isCurrent(generation)) return;
+      debugPrint('USDA error: $error');
+      _usdaSearched = true;
+      _usdaFailed = true;
+      _usdaHasMore = false;
+    }
+    _notifyListeners();
+  }
+
+  bool _isCurrent(int generation) =>
+      !_isDisposed && generation == _searchGeneration;
+
+  void _notifyListeners() {
+    if (!_isDisposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+}
+
+UnifiedFoodResult openFoodFactsSearchResult(Product product) {
+  final (basis, nutrients) = _openFoodFactsNutrition(product);
+
+  return UnifiedFoodResult(
+    id: product.barcode ?? '',
+    name: product.productName ?? 'Unknown',
+    brand: product.brands,
+    imageUrl: product.imageFrontSmallUrl,
+    calories: nutrients['energyKcal'],
+    calorieBasisGrams: basis.grams,
+    servingSizeGrams: basis.portionReference != null ? basis.grams : null,
+    servingVolumeLabel: basis.milliliters != null
+        ? basis.portionReference
+        : null,
+    source: studyu.FoodSource.openfoodfacts,
+    originalData: product,
+  );
+}
+
+UnifiedFoodResult usdaFoodSearchResult(UsdaFoodItem food) {
+  final caloriesPer100g = food.energyKcal100g;
+  final servingSizeGrams = _usdaServingGrams(food);
+  final calorieBasisGrams = servingSizeGrams ?? defaultFoodReferenceGrams;
+
+  return UnifiedFoodResult(
+    id: food.fdcId.toString(),
+    name: food.description ?? 'Unknown',
+    brand: food.brandOwner ?? food.brandName,
+    calories: caloriesPer100g == null
+        ? caloriesPer100g
+        : caloriesPer100g * calorieBasisGrams / 100,
+    calorieBasisGrams: caloriesPer100g == null ? null : calorieBasisGrams,
+    servingSizeGrams: servingSizeGrams,
+    source: studyu.FoodSource.usda,
+    originalData: food,
+  );
+}
+
+double? _usdaServingGrams(UsdaFoodItem food) {
+  final size = food.servingSize;
+  final isGramUnit = switch (food.servingSizeUnit?.trim().toLowerCase()) {
+    'g' || 'gram' || 'grams' => true,
+    _ => false,
+  };
+  return isGramUnit && size != null && size.isFinite && size > 0 ? size : null;
+}
+
+List<UnifiedFoodResult> rankFoodSearchResults(
+  Iterable<UnifiedFoodResult> results,
+  String query,
+) {
+  final normalizedQuery = normalizeFoodSearchText(query);
+  final indexed = results.indexed.toList();
+  if (normalizedQuery.isEmpty) {
+    return indexed.map((entry) => entry.$2).toList(growable: false);
+  }
+
+  indexed.sort((left, right) {
+    final scoreComparison = _foodSearchScore(
+      left.$2,
+      normalizedQuery,
+    ).compareTo(_foodSearchScore(right.$2, normalizedQuery));
+    return scoreComparison != 0 ? scoreComparison : left.$1.compareTo(right.$1);
+  });
+  return indexed.map((entry) => entry.$2).toList(growable: false);
+}
+
+int _foodSearchScore(UnifiedFoodResult result, String normalizedQuery) {
+  final name = normalizeFoodSearchText(result.name);
+  final queryTokens = normalizedQuery.split(' ');
+  final nameTokens = name.split(' ');
+  final isExact = name == normalizedQuery;
+  final isPrefixOrToken =
+      name.startsWith(normalizedQuery) ||
+      queryTokens.every(
+        (queryToken) =>
+            nameTokens.any((nameToken) => nameToken.startsWith(queryToken)),
+      );
+  final matchTier = isExact
+      ? 0
+      : isPrefixOrToken
+      ? 1
+      : 2;
+  final isBranded = result.brand?.trim().isNotEmpty ?? false;
+  return matchTier * 2 + (isBranded ? 1 : 0);
+}
+
+String normalizeFoodSearchText(String value) =>
+    value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+double? _quantityFromMetadata(String? value, String units) {
+  if (value == null) return null;
+  final match = RegExp(
+    r'(?:^|[^0-9.,+-])(\d+(?:[.,]\d+)?)\s*'
+    '(?:$units)'
+    r'\b',
+    caseSensitive: false,
+  ).firstMatch(value);
+  if (match == null) return null;
+  return _positiveQuantity(
+    double.tryParse(match.group(1)!.replaceAll(',', '.')),
+  );
+}
+
+double? _positiveQuantity(Object? value) =>
+    value is num && value.isFinite && value > 0 ? value.toDouble() : null;
+
+studyu.FoodEntry convertFoodResultToFoodEntry(UnifiedFoodResult result) {
+  return switch (result.originalData) {
+    final UsdaFoodItem food => convertUsdaToFoodEntry(food),
+    final Product product => convertOpenFoodFactsToFoodEntry(product),
+    _ => throw ArgumentError(
+      'Unsupported food result source: ${result.source}',
+    ),
+  };
+}
+
+studyu.FoodEntry convertUsdaToFoodEntry(UsdaFoodItem food) {
+  final sourceServingGrams = _usdaServingGrams(food);
+  final servingSizeGrams = sourceServingGrams ?? defaultFoodReferenceGrams;
+  final scale = servingSizeGrams / 100.0;
+  final calories = food.energyKcal100g;
+
+  return studyu.FoodEntry.withId(
+    entryType: studyu.FoodEntryType.brandedProduct,
+    name: food.description ?? 'Unknown Food',
+    brandName: food.brandOwner ?? food.brandName,
+    description: food.ingredients,
+    amount: 1,
+    unit: 'serving',
+    servingSizeGrams: servingSizeGrams,
+    portionReference: sourceServingGrams == null
+        ? null
+        : food.householdServingFullText,
+    portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
+    portionState: studyu.PortionState.asServed,
+    yieldFactor: 1.0,
+    nutrition: studyu.NutritionProfile(
+      energyKcal: (calories ?? 0) * scale,
+      protein: food.protein100g * scale,
+      carbs: food.carbohydrates100g * scale,
+      fat: food.fat100g * scale,
+      sugars: food.sugars100g * scale,
+      fiber: food.fiber100g * scale,
+      saturatedFat: food.saturatedFat100g * scale,
+      transFat: (food.getNutrientValue(1257) ?? 0) * scale,
+      cholesterol: (food.getNutrientValue(1253) ?? 0) * scale,
+      sodium: food.sodium100g * scale,
+      waterContent: (food.getNutrientValue(1051) ?? 0) * scale,
+      micros: {},
+      unavailableNutrients: {
+        if (calories == null) 'energyKcal',
+        if (food.getNutrientValue(1003) == null) 'protein',
+        if (food.getNutrientValue(1005) == null) 'carbs',
+        if (food.getNutrientValue(1004) == null) 'fat',
+        if (food.getNutrientValue(2000) == null) 'sugars',
+        if (food.getNutrientValue(1079) == null) 'fiber',
+        if (food.getNutrientValue(1258) == null) 'saturatedFat',
+        if (food.getNutrientValue(1093) == null) 'sodium',
+        if (food.getNutrientValue(1257) == null) 'transFat',
+        if (food.getNutrientValue(1253) == null) 'cholesterol',
+        if (food.getNutrientValue(1051) == null) 'waterContent',
+      },
+    ),
+    foodCode: food.gtinUpc,
+    externalId: food.fdcId.toString(),
+    source: studyu.FoodSource.usda,
+    confidenceScore: 1.0,
+    originalValues: food.toJson(),
+  );
+}
+
+typedef _FoodBasis = ({
+  double? grams,
+  double? milliliters,
+  String? portionReference,
+});
+
+(_FoodBasis, Map<String, double?>) _openFoodFactsNutrition(Product product) {
+  final nutrition = product.nutrition;
+  final inputSets = nutrition?['input_sets'];
+  final sets = [
+    nutrition?['aggregated_set'],
+    if (inputSets is List) ...inputSets,
+  ];
+
+  final sourceSets =
+      <
+        ({
+          Map<String, dynamic> nutrients,
+          Unit unit,
+          double quantity,
+          bool serving,
+        })
+      >[];
+  for (final set in sets) {
+    if (set case {
+      'preparation': NutritionSetKey.preparationAsSold,
+      'nutrients': final Map<String, dynamic> nutrients,
+      'per': final String per,
+    }) {
+      final (unit, quantity) = switch (per) {
+        '100g' => (Unit.G, defaultFoodReferenceGrams),
+        '100ml' => (Unit.MILLI_L, 100.0),
+        'serving' => _servingSetBasis(set),
+        _ => (null, null),
+      };
+      if (unit != null && quantity != null) {
+        sourceSets.add((
+          nutrients: nutrients,
+          unit: unit,
+          quantity: quantity,
+          serving: per == 'serving',
+        ));
+      }
+    }
+  }
+
+  final metadataGrams = _quantityFromMetadata(
+    product.servingSize,
+    'g(?:rams?)?',
+  );
+  final metadataMl =
+      _quantityFromMetadata(product.servingSize, 'ml|millilit(?:er|re)s?') ??
+      (_quantityFromMetadata(product.servingSize, 'cl') ?? 0) * 10 +
+          (_quantityFromMetadata(product.servingSize, 'dl') ?? 0) * 100 +
+          (_quantityFromMetadata(product.servingSize, 'l|lit(?:er|re)s?') ??
+                  0) *
+              1000;
+  final sourceGramServing = sourceSets
+      .where((set) => set.unit == Unit.G && set.serving)
+      .firstOrNull
+      ?.quantity;
+  final sourceMlServing = sourceSets
+      .where((set) => set.unit == Unit.MILLI_L && set.serving)
+      .firstOrNull
+      ?.quantity;
+  final grams = metadataGrams ?? sourceGramServing;
+  final milliliters = _positiveQuantity(metadataMl) ?? sourceMlServing;
+  final hasGramData = sourceSets.any((set) => set.unit == Unit.G);
+  final hasVolumeData = sourceSets.any((set) => set.unit == Unit.MILLI_L);
+  final hasPairedServing = grams != null && milliliters != null;
+  final useVolume =
+      (hasVolumeData &&
+          (!hasGramData || grams == null && milliliters != null)) ||
+      (!hasGramData && grams == null && milliliters != null);
+  final referenceGrams = hasPairedServing || !useVolume
+      ? grams ?? (hasGramData ? defaultFoodReferenceGrams : null)
+      : null;
+  final referenceMl = hasPairedServing || useVolume
+      ? milliliters ?? 100.0
+      : null;
+  final portionReference = switch ((referenceGrams, referenceMl)) {
+    (final weight?, final volume?) =>
+      metadataGrams != null && metadataMl > 0
+          ? product.servingSize
+          : '${_formatReferenceQuantity(volume)} mL (${_formatReferenceQuantity(weight)} g)',
+    (_, final volume?) =>
+      metadataMl > 0
+          ? product.servingSize
+          : '${_formatReferenceQuantity(volume)} mL',
+    (final weight?, _) when grams != null =>
+      metadataGrams != null
+          ? product.servingSize
+          : '${_formatReferenceQuantity(weight)} g',
+    _ => null,
+  };
+  final basis = (
+    grams: referenceGrams,
+    milliliters: referenceMl,
+    portionReference: portionReference,
+  );
+
+  double? amount(Nutrient nutrient, Unit targetUnit) {
+    for (final set in sourceSets) {
+      final reference = set.unit == Unit.G ? basis.grams : basis.milliliters;
+      if (reference == null) continue;
+      final raw = set.nutrients[nutrient.offTag];
+      if (raw is! Map<String, dynamic>) continue;
+      final value = NutritionValue.fromJson(raw);
+      if (value?.modifier
+          case NutrientModifier.lessThan ||
+              NutrientModifier.greaterThan ||
+              NutrientModifier.maximum ||
+              NutrientModifier.minimum ||
+              NutrientModifier.remove) {
+        return null;
+      }
+      final measured = value?.value ?? value?.valueComputed;
+      if (measured == null || !measured.isFinite || measured < 0) continue;
+      final unit = value?.unit;
+      final unitFactor = switch ((unit, targetUnit)) {
+        (Unit.KJ, Unit.KCAL) => 1 / 4.184,
+        (Unit.G, Unit.MILLI_G) => 1000.0,
+        (Unit.MILLI_G, Unit.G) => 0.001,
+        (Unit.MICRO_G, Unit.MILLI_G) => 0.001,
+        (Unit.MICRO_G, Unit.G) => 0.000001,
+        _ when unit == targetUnit => 1.0,
+        _ => null,
+      };
+      if (unitFactor == null) continue;
+      final scaled = measured * unitFactor * reference / set.quantity;
+      if (scaled.isFinite) return scaled;
+    }
+    return null;
+  }
+
+  return (
+    basis,
+    {
+      'energyKcal':
+          amount(Nutrient.energyKCal, Unit.KCAL) ??
+          amount(Nutrient.energyKJ, Unit.KCAL),
+      'protein': amount(Nutrient.proteins, Unit.G),
+      'carbs': amount(Nutrient.carbohydrates, Unit.G),
+      'fat': amount(Nutrient.fat, Unit.G),
+      'sugars': amount(Nutrient.sugars, Unit.G),
+      'fiber': amount(Nutrient.fiber, Unit.G),
+      'saturatedFat': amount(Nutrient.saturatedFat, Unit.G),
+      'transFat': amount(Nutrient.transFat, Unit.G),
+      'cholesterol': amount(Nutrient.cholesterol, Unit.MILLI_G),
+      'sodium': amount(Nutrient.sodium, Unit.MILLI_G),
+      'waterContent': amount(Nutrient.water, Unit.G),
+    },
+  );
+}
+
+String _formatReferenceQuantity(double quantity) =>
+    quantity == quantity.truncateToDouble()
+    ? quantity.toStringAsFixed(0)
+    : quantity.toString();
+
+(Unit?, double?) _servingSetBasis(Map<Object?, Object?> set) {
+  final quantity = _positiveQuantity(set['per_quantity']);
+  final unitTag = set['per_unit'];
+  final unit = unitTag is String ? UnitHelper.stringToUnit(unitTag) : null;
+  return switch (unit) {
+    Unit.G => (Unit.G, quantity),
+    Unit.MILLI_L => (Unit.MILLI_L, quantity),
+    Unit.L when quantity != null => (Unit.MILLI_L, quantity * 1000),
+    _ => (null, null),
+  };
+}
+
+studyu.FoodEntry convertOpenFoodFactsToFoodEntry(Product product) {
+  final (basis, nutrients) = _openFoodFactsNutrition(product);
+
+  return studyu.FoodEntry.withId(
+    entryType: studyu.FoodEntryType.brandedProduct,
+    name: product.productName ?? 'Unknown Product',
+    brandName: product.brands,
+    description: product.genericName,
+    amount: 1,
+    unit: 'serving',
+    servingSizeGrams: basis.grams ?? 0,
+    portionReference: basis.portionReference,
+    portionEstimationMethod: studyu.PortionEstimationMethod.standardUnit,
+    portionState: studyu.PortionState.asServed,
+    yieldFactor: 1.0,
+    nutrition: studyu.NutritionProfile(
+      energyKcal: nutrients['energyKcal'] ?? 0,
+      protein: nutrients['protein'] ?? 0,
+      carbs: nutrients['carbs'] ?? 0,
+      fat: nutrients['fat'] ?? 0,
+      sugars: nutrients['sugars'] ?? 0,
+      fiber: nutrients['fiber'] ?? 0,
+      saturatedFat: nutrients['saturatedFat'] ?? 0,
+      transFat: nutrients['transFat'] ?? 0,
+      cholesterol: nutrients['cholesterol'] ?? 0,
+      sodium: nutrients['sodium'] ?? 0,
+      waterContent: nutrients['waterContent'] ?? 0,
+      micros: {},
+      unavailableNutrients: {
+        for (final entry in nutrients.entries)
+          if (entry.value == null) entry.key,
+      },
+    ),
+    foodCode: product.barcode,
+    externalId: product.barcode,
+    source: studyu.FoodSource.openfoodfacts,
+    confidenceScore: 1.0,
+    originalValues: product.toJson(),
+  );
+}

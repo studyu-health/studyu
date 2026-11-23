@@ -377,6 +377,7 @@ class const StudyRecruitScreen(super.studyId, {super.key})
     var keepSaveButtonVisible = false;
     return [
       DismissButton(
+        autofocus: formViewModel.formMode != FormMode.create,
         text: formViewModel.formMode == FormMode.edit
             ? tr.dialog_close
             : tr.dialog_cancel,

@@ -27,9 +27,13 @@ class SubjectProgress({
   DateTime? completedAt;
   @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime? startedAt;
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  int nutritionRevision = 0;
 
   factory fromJson(Map<String, dynamic> json) {
     final progress = _$SubjectProgressFromJson(json);
+    progress.nutritionRevision =
+        (json['nutrition_revision'] as num?)?.toInt() ?? 0;
 
     final String? startedAt = json['started_at'] as String?;
     if (startedAt != null) {
@@ -41,6 +45,11 @@ class SubjectProgress({
 
   @override
   Map<String, dynamic> toJson() => _$SubjectProgressToJson(this);
+
+  Map<String, dynamic> toCacheJson() => {
+    ...toJson(),
+    if (resultType == 'DailyRecall') 'nutrition_revision': nutritionRevision,
+  };
 
   SubjectProgress setStartDateBackBy({required int days}) {
     completedAt = completedAt!.subtract(Duration(days: days));
