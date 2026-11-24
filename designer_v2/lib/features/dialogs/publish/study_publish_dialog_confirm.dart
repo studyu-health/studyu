@@ -21,7 +21,6 @@ class const PublishConfirmationDialog(super.studyId, {super.key})
     final formViewModel = ref.watch(
       studySettingsFormViewModelProvider(studyId),
     );
-    formViewModel.setLaunchDefaults();
 
     final theme = Theme.of(context);
 
