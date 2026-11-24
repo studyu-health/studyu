@@ -65,7 +65,7 @@ class MockupStudies() {
       ..contact = mockContact
       //..iconName
       ..status = StudyStatus.running
-      ..registryPublished = true
+      ..registryPublished = false
       //..questionnaire = mockQuestionnaireA
       //..eligibilityCriteria
       //..consent
