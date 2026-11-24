@@ -1,0 +1,59 @@
+BEGIN
+1..15
+21201eb3-2046-4b2d-bfbd-e71c341e4484
+3cdf5f59-becf-4271-af90-74a025caf0fe
+51fd7fc2-5a0e-4224-a004-0043b8d9b4a3
+6ccacfcc-49a0-4d2e-8b72-4077a7f0d2c7
+SELECT 1
+GRANT
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+SELECT 2
+INSERT 0 2
+
+DELETE 0
+ok 1 - Unrelated user cannot see private invite codes
+RESET
+ok 2 - Unrelated user cannot delete the invite code
+
+DELETE 1
+ok 3 - Owner can delete the invite code
+not ok 4 - Both participants survive shared invite deletion
+# Failed test 4: "Both participants survive shared invite deletion"
+#         have: 0
+#         want: 2
+not ok 5 - Deleted code is detached from both participants
+# Failed test 5: "Deleted code is detached from both participants"
+#         have: 0
+#         want: 2
+not ok 6 - Researcher can export both saved answers
+# Failed test 6: "Researcher can export both saved answers"
+#         have: 0
+#         want: 2
+ok 7 - Study remains running
+ok 8 - Deleted code no longer resolves to a study
+
+ok 9 - Deleted code cannot enroll another participant
+
+not ok 10 - First participant retains access only to own participation
+# Failed test 10: "First participant retains access only to own participation"
+#         have: 0
+#         want: 1
+not ok 11 - First participant retains own saved answer
+# Failed test 11: "First participant retains own saved answer"
+#         have: 0
+#         want: 1
+
+not ok 12 - Second participant retains access only to own participation
+# Failed test 12: "Second participant retains access only to own participation"
+#         have: 0
+#         want: 1
+
+ok 13 - Unrelated user cannot read preserved participants
+RESET
+DELETE 1
+ok 14 - Intentional study deletion still removes participants
+ok 15 - Study deletion leaves no orphaned answers
+# Looks like you failed 6 tests of 15
+ROLLBACK
