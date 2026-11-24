@@ -75,12 +75,6 @@ class StudySettingsFormViewModel({
 
   @override
   Map<FormMode, String> get titles => throw UnimplementedError(); // unused
-
-  void setLaunchDefaults() {
-    isPublishedToRegistryControl.value = defaultPublishedToRegistry;
-    isPublishedToRegistryResultsControl.value =
-        defaultPublishedToRegistryResults;
-  }
 }
 
 /// Provides the [FormViewModel] responsible for managing the study settings.
