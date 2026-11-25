@@ -1,0 +1,48 @@
+BEGIN
+1..21
+a683cc20-00ea-4de1-9984-af88a4a9c20a
+92867422-695f-4bad-9aa2-b497da376fbc
+408c5ece-f1f0-4db2-94eb-d05b98268b84
+1e3a62af-0259-4afc-a4df-f38e8f480349
+SELECT 1
+GRANT
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+SELECT 2
+GRANT
+INSERT 0 2
+
+DELETE 0
+ok 1 - Unrelated user cannot see private invite codes
+RESET
+ok 2 - Unrelated user cannot delete the invite code
+
+DELETE 1
+ok 3 - Owner can delete the invite code
+ok 4 - Both participants survive shared invite deletion
+ok 5 - Deleted code is detached from both participants
+ok 6 - Researcher can export both saved answers
+ok 7 - Study remains running
+ok 8 - Deleted code no longer resolves to a study
+
+ok 9 - Deleted code cannot enroll another participant
+
+ok 10 - First participant retains access only to own participation
+ok 11 - First participant retains own saved answer
+ok 12 - Open participant session can submit after code deletion
+ok 13 - Same open session can submit again without reloading
+ok 14 - Both later answers persist alongside the original answer
+ok 15 - Stale saves do not restore the deleted code
+ok 16 - Stale invite handling preserves other subject updates
+
+ok 17 - Second participant retains access only to own participation
+
+ok 18 - Unrelated user cannot read preserved participants
+
+ok 19 - Researcher can export answers submitted without reload
+RESET
+DELETE 1
+ok 20 - Intentional study deletion still removes participants
+ok 21 - Study deletion leaves no orphaned answers
+ROLLBACK
