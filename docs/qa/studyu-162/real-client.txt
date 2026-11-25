@@ -1,0 +1,4 @@
+Invite deleted while the original StudySubject instance remains open.
+Answer true saved with stale invite code; original instance was not reloaded.
+Answer false saved with stale invite code; original instance was not reloaded.
+PASS: Both answers persisted exactly once through the real Supabase client.

@@ -1,15 +1,16 @@
 BEGIN
-1..15
-21201eb3-2046-4b2d-bfbd-e71c341e4484
-3cdf5f59-becf-4271-af90-74a025caf0fe
-51fd7fc2-5a0e-4224-a004-0043b8d9b4a3
-6ccacfcc-49a0-4d2e-8b72-4077a7f0d2c7
+1..21
+43fe02f1-2b81-4aab-bce6-06642f59537f
+1071a76d-f345-47ee-b50a-17c109b22fea
+3d915a4a-e65e-418d-bf2f-00344f31e19e
+aaf00ba8-6461-4894-8ae6-dc5f1cf0a57d
 SELECT 1
 GRANT
 INSERT 0 1
 INSERT 0 1
 INSERT 0 2
 SELECT 2
+GRANT
 INSERT 0 2
 
 DELETE 0
@@ -19,41 +20,69 @@ ok 2 - Unrelated user cannot delete the invite code
 
 DELETE 1
 ok 3 - Owner can delete the invite code
-not ok 4 - Both participants survive shared invite deletion
-# Failed test 4: "Both participants survive shared invite deletion"
-#         have: 0
-#         want: 2
-not ok 5 - Deleted code is detached from both participants
-# Failed test 5: "Deleted code is detached from both participants"
-#         have: 0
-#         want: 2
-not ok 6 - Researcher can export both saved answers
-# Failed test 6: "Researcher can export both saved answers"
-#         have: 0
-#         want: 2
+ok 4 - Both participants survive shared invite deletion
+ok 5 - Deleted code is detached from both participants
+ok 6 - Researcher can export both saved answers
 ok 7 - Study remains running
 ok 8 - Deleted code no longer resolves to a study
 
 ok 9 - Deleted code cannot enroll another participant
 
-not ok 10 - First participant retains access only to own participation
-# Failed test 10: "First participant retains access only to own participation"
-#         have: 0
-#         want: 1
-not ok 11 - First participant retains own saved answer
-# Failed test 11: "First participant retains own saved answer"
-#         have: 0
-#         want: 1
+ok 10 - First participant retains access only to own participation
+ok 11 - First participant retains own saved answer
+not ok 12 - Open participant session can submit after code deletion
+# Failed test 12: "Open participant session can submit after code deletion"
+#     died: 23503: insert or update on table "study_subject" violates foreign key constraint "study_subject_loginCode_fkey"
+#         DETAIL:     Key is not present in table "study_invite".
+#         SCHEMA:     public
+#         TABLE:      study_subject
+#         CONSTRAINT: study_subject_loginCode_fkey
+#         CONTEXT:
+#             SQL statement "
+#                     INSERT INTO public.subject_progress(completed_at,subject_id,intervention_id,task_id,result_type,result)
+#                     SELECT now() + interval '1 second',id,study_id::text,id::text,'bool','{"type":"bool","result":true}'
+#                     FROM fixture_subjects WHERE user_id=auth.uid();
+#                     UPDATE public.study_subject AS subject SET invite_code=cached.invite_code, started_at=cached.started_at + interval '1 hour'
+#                     FROM fixture_subjects AS cached WHERE subject.id=cached.id AND cached.user_id=auth.uid();
+#                 "
+#             PL/pgSQL function lives_ok(text,text) line 14 at EXECUTE
+not ok 13 - Same open session can submit again without reloading
+# Failed test 13: "Same open session can submit again without reloading"
+#     died: 23503: insert or update on table "study_subject" violates foreign key constraint "study_subject_loginCode_fkey"
+#         DETAIL:     Key is not present in table "study_invite".
+#         SCHEMA:     public
+#         TABLE:      study_subject
+#         CONSTRAINT: study_subject_loginCode_fkey
+#         CONTEXT:
+#             SQL statement "
+#                     INSERT INTO public.subject_progress(completed_at,subject_id,intervention_id,task_id,result_type,result)
+#                     SELECT now() + interval '2 seconds',id,study_id::text,id::text,'bool','{"type":"bool","result":false}'
+#                     FROM fixture_subjects WHERE user_id=auth.uid();
+#                     UPDATE public.study_subject AS subject SET invite_code=cached.invite_code, started_at=cached.started_at + interval '2 hours'
+#                     FROM fixture_subjects AS cached WHERE subject.id=cached.id AND cached.user_id=auth.uid();
+#                 "
+#             PL/pgSQL function lives_ok(text,text) line 14 at EXECUTE
+not ok 14 - Both later answers persist alongside the original answer
+# Failed test 14: "Both later answers persist alongside the original answer"
+#         have: 1
+#         want: 3
+ok 15 - Stale saves do not restore the deleted code
+not ok 16 - Stale invite handling preserves other subject updates
+# Failed test 16: "Stale invite handling preserves other subject updates"
+#         have: 2026-11-25 08:22:32.467123+00
+#         want: 2026-11-25 10:22:32.467123+00
 
-not ok 12 - Second participant retains access only to own participation
-# Failed test 12: "Second participant retains access only to own participation"
-#         have: 0
-#         want: 1
+ok 17 - Second participant retains access only to own participation
 
-ok 13 - Unrelated user cannot read preserved participants
+ok 18 - Unrelated user cannot read preserved participants
+
+not ok 19 - Researcher can export answers submitted without reload
+# Failed test 19: "Researcher can export answers submitted without reload"
+#         have: 2
+#         want: 4
 RESET
 DELETE 1
-ok 14 - Intentional study deletion still removes participants
-ok 15 - Study deletion leaves no orphaned answers
-# Looks like you failed 6 tests of 15
+ok 20 - Intentional study deletion still removes participants
+ok 21 - Study deletion leaves no orphaned answers
+# Looks like you failed 5 tests of 21
 ROLLBACK

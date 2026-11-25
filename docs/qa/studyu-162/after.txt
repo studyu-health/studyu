@@ -1,15 +1,16 @@
 BEGIN
-1..15
-03c8d68d-766c-425a-99e5-ed6aaf50a185
-f4a13372-b8fa-49f2-a204-1fb9d2888413
-8b0dfb7b-c68a-4f6e-bd2a-392124ed816d
-71c14eea-e6ca-4aa3-9d00-30010c0c23c6
+1..21
+a683cc20-00ea-4de1-9984-af88a4a9c20a
+92867422-695f-4bad-9aa2-b497da376fbc
+408c5ece-f1f0-4db2-94eb-d05b98268b84
+1e3a62af-0259-4afc-a4df-f38e8f480349
 SELECT 1
 GRANT
 INSERT 0 1
 INSERT 0 1
 INSERT 0 2
 SELECT 2
+GRANT
 INSERT 0 2
 
 DELETE 0
@@ -29,12 +30,19 @@ ok 9 - Deleted code cannot enroll another participant
 
 ok 10 - First participant retains access only to own participation
 ok 11 - First participant retains own saved answer
+ok 12 - Open participant session can submit after code deletion
+ok 13 - Same open session can submit again without reloading
+ok 14 - Both later answers persist alongside the original answer
+ok 15 - Stale saves do not restore the deleted code
+ok 16 - Stale invite handling preserves other subject updates
 
-ok 12 - Second participant retains access only to own participation
+ok 17 - Second participant retains access only to own participation
 
-ok 13 - Unrelated user cannot read preserved participants
+ok 18 - Unrelated user cannot read preserved participants
+
+ok 19 - Researcher can export answers submitted without reload
 RESET
 DELETE 1
-ok 14 - Intentional study deletion still removes participants
-ok 15 - Study deletion leaves no orphaned answers
+ok 20 - Intentional study deletion still removes participants
+ok 21 - Study deletion leaves no orphaned answers
 ROLLBACK
